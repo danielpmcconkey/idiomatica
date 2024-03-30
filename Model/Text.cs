@@ -19,7 +19,7 @@ namespace Model
         #endregion
 
         [Column("TxOrder")] public int Order { get; set; }
-        [Column("TxText")] public string Name { get; set; }
+        [Column("TxText")] public string OriginalText { get; set; }
         [Column("TxReadDate")] public DateTime? ReadDate { get; set; }
 
     }

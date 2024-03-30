@@ -1,0 +1,15 @@
+DROP TABLE languages_old;
+DROP TABLE books_old;
+DROP TABLE words_old;
+DROP TABLE booktags_old;
+DROP TABLE wordtags_old;
+DROP TABLE texts_old;
+DROP TABLE sentences_old;
+DROP TABLE bookstats_old;
+DROP TABLE wordparents_old;
+DROP TABLE settings_old;
+DROP TABLE statuses_old;
+DROP TABLE tags_old;
+DROP TABLE tags2_old;
+DROP TABLE wordflashmessages_old;
+DROP TABLE wordimages_old;

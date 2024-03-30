@@ -15,6 +15,8 @@ namespace Model
 
 
         #region relationships
+        public int UserId { get; set; }
+        public User User { get; set; }
         #endregion
 
 

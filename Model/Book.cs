@@ -17,12 +17,18 @@ namespace Model
         [Column("BkLgID")] public int LanguageId { get; set; }
         public Language Language { get; set; }
         public BookStat BookStat { get; set; }
+        public int UserId { get; set; }
+        public User? User { get; set; }
         #endregion
 
         [Column("BkTitle")] public string BkTitle { get; set; }
         [Column("BkSourceURI")] public string? BkSourceURI { get; set; }
         [Column("BkArchived")] public int BkArchived { get; set; } = 0;
-        [Column("BkCurrentTxID")] public int BkCurrentTxID { get; set; } = 0; 
-        [Column("BkWordCount")] public int BkWordCount { get; set; }
+        [Column("BkCurrentTxID")] public int BkCurrentTxID { get; set; } = 0;
+        [Column("BkWordCount")] public int? BkWordCount { get; set; }
+        [Column("BkAudioFilename")] public string? BkAudioFilename { get; set; }
+        [Column("BkAudioCurrentPos")] public float? BkAudioCurrentPos { get; set; }
+        [Column("BkAudioBookmarks")] public string? BkAudioBookmarks { get; set; }
+
     }
 }

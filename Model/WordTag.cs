@@ -13,9 +13,9 @@ namespace Model
     {
 
         #region relationships
-        #endregion
-
         [Column("WtWoID")] public int WtWoID { get; set; }
         [Column("WtTgID")] public int WtTgID { get; set; }
+        #endregion
+
     }
 }

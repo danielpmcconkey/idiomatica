@@ -1,23 +1,16 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Microsoft.EntityFrameworkCore;
 using Model.DAL;
+using Logic;
+using Model;
+
 using (var context = new IdiomaticaContext())
 {
-    var results = Fetch.Word(context, 111);
-    //foreach (var r in results)
-    //{
-    //    //Console.WriteLine($"{r.BookStat.wordcount}");
+    BookAnalyzer.AnalyzeBooks(context);
 
-    //    foreach (var x in r.ParentWords)
-    //    {
-    //        //Console.WriteLine($"{r.Text}'s child is {x.Text}");
-    //        Console.WriteLine($"{r.Text}'s Parent is {x.Text}");
-    //        //foreach (var y in x.Sentences)
-    //        //{
-    //        //    Console.WriteLine($"{y.SentenceText}");
-    //        //}
-    //    }
-    //}
-    string burp = "h";
+    //var path = @"E:\Idiomatica\Idiomatica\Model\Migrations\dropOldTables_20240330.13.13.44.sql";
+    //Execute.File(context, path);
+
+
 }
 

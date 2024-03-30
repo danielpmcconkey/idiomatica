@@ -9,6 +9,8 @@ namespace Model
         #region relationships
         public List<Book> Books { get; set; }
         public List<Word> Words { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; }
         #endregion
 
         [Column("LgName")] public string LgName { get; set; }

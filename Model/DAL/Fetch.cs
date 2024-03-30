@@ -13,23 +13,33 @@ namespace Model.DAL
         public static List<Language> Languages(IdiomaticaContext context, Func<Language, bool> filter)
         {
             return context.Languages
-                .Where(x => filter(x))
                 .Include(l => l.Books).ThenInclude(b => b.Texts).ThenInclude(t => t.Sentences)
+                .Where(filter)
                 .ToList();
         }
         public static Book Book(IdiomaticaContext context, int id)
         {
-            Func<Language, bool> filter = (x => x.Id == id);
-            return Books(context, id).FirstOrDefault();
+            Func<Book, bool> filter = (x => x.Id == id);
+            return Books(context, filter).FirstOrDefault();
         }
-        public static List<Book> Books(IdiomaticaContext context, int? id = null)
+        public static List<Book> Books(IdiomaticaContext context, Func<Book, bool> filter)
         {
-            return context.Books
-                .Where(x => id == null || x.Id == id)
-                .Include(b => b.BookStat)
-                .Include(b => b.BookTags).ThenInclude(t => t.Tag)
-                .Include(b => b.Texts).ThenInclude(t => t.Sentences)
-                .ToList();
+
+            try
+            {
+                return context.Books
+                        .Include(b => b.BookStat)
+                        .Include(b => b.BookTags).ThenInclude(t => t.Tag)
+                        .Include(b => b.Texts).ThenInclude(t => t.Sentences)
+                        .Include(b => b.Language)
+                        .Where(filter)
+                        .ToList();
+            }
+            catch (Exception)
+            {
+                //var burp = context.ContextId;
+                throw;
+            }
         }
         public static Text Text(IdiomaticaContext context, int id)
         {

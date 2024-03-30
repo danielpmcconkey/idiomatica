@@ -5,6 +5,7 @@ namespace Model.DAL
     public class IdiomaticaContext : DbContext
     {
         #region DBSets
+        public DbSet<User> Users { get; set; }
         public DbSet<Book> Books { get; set; }
         public DbSet<BookStat> BookStats { get; set; }
         public DbSet<BookTag> BookTags { get; set; }
@@ -23,8 +24,12 @@ namespace Model.DAL
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var dbPath = @"E:\Lute\backups\lute_backup_2024-03-22_075709.db.gz_2024-03-22_075827.db";
+            dbPath = "C:\\Users\\Dan\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Local\\Lute3\\Lute3\\lute.db";
             optionsBuilder.UseSqlite($"Data Source={dbPath}");
-        }
+            
+            // only turn on query logging when debugging
+            //optionsBuilder.LogTo(Console.WriteLine);
+    }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Language>(e => {
@@ -42,6 +47,9 @@ namespace Model.DAL
                 e.HasMany(b => b.BookTags)
                     .WithOne(bt => bt.Book)
                     .HasForeignKey(bt => bt.BookId);
+                e.HasOne(b => b.User)
+                    .WithMany(u => u.Books)
+                    .HasForeignKey(b => b.UserId);
             });
 
             modelBuilder.Entity<BookStat>(e => { });
