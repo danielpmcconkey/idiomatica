@@ -20,8 +20,8 @@ namespace Logic
 		}
 		public static (int lastPageRead, int totalPages) GetPageStats(Book book)
 		{
-			var totalPages = (book.Texts is null) ? 0 : book.Texts.Count();
-			var lastPageRead = (book.Texts is null) ? null : book.Texts
+			var totalPages = (book.Pages is null) ? 0 : book.Pages.Count();
+			var lastPageRead = (book.Pages is null) ? null : book.Pages
 				.Where(x => x.ReadDate is not null)
 				.OrderByDescending(x => x.ReadDate)
 				.FirstOrDefault();
@@ -32,10 +32,10 @@ namespace Logic
 		public static bool IsBookComplete(Book book)
 		{
 			// a book is complete if its last page has been read
-			if (book.Texts is null || book.Texts.Count == 0) return false;
+			if (book.Pages is null || book.Pages.Count == 0) return false;
 			else
 			{
-				var lastPage = book.Texts.OrderByDescending(x => x.Order).First();
+				var lastPage = book.Pages.OrderByDescending(x => x.Order).First();
 				if (lastPage.ReadDate is not null) return true;
 			}
 			return false;

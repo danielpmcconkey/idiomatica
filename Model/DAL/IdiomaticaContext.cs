@@ -14,22 +14,22 @@ namespace Model.DAL
         public DbSet<Setting> Settings { get; set; }
         public DbSet<Status> Statuses { get; set; }
         public DbSet<Tag> Tags { get; set; }
-        public DbSet<Text> Texts { get; set; }
+        public DbSet<Page> Pages { get; set; }
         public DbSet<Word> Words { get; set; }
         public DbSet<WordFlashMessage> WordFlashMessages { get; set; }
         public DbSet<WordImage> WordImages { get; set; }
-        public DbSet<WordTag> WordTags { get; set; } 
-        #endregion
+        public DbSet<WordTag> WordTags { get; set; }
+		#endregion
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            var dbPath = @"E:\Lute\backups\lute_backup_2024-03-22_075709.db.gz_2024-03-22_075827.db";
-            dbPath = "C:\\Users\\Dan\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Local\\Lute3\\Lute3\\lute.db";
-            optionsBuilder.UseSqlite($"Data Source={dbPath}");
-            
-            // only turn on query logging when debugging
-            //optionsBuilder.LogTo(Console.WriteLine);
-    }
+		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		{
+			var dbPath = @"E:\Lute\backups\lute_backup_2024-03-22_075709.db.gz_2024-03-22_075827.db";
+			dbPath = "C:\\Users\\Dan\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Local\\Lute3\\Lute3\\lute.db";
+			optionsBuilder.UseSqlite($"Data Source={dbPath}");
+
+			// only turn on query logging when debugging
+			//optionsBuilder.LogTo(Console.WriteLine);
+		}
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Language>(e => {
@@ -53,6 +53,9 @@ namespace Model.DAL
 				e.HasOne(b => b.Language)
 					.WithMany(l => l.Books)
 					.HasForeignKey(b => b.LanguageId);
+				e.HasMany(b => b.Pages)
+					.WithOne(p => p.Book)
+					.HasForeignKey(p => p.BookId);
             });
 
             modelBuilder.Entity<BookStat>(e => { });
@@ -94,14 +97,14 @@ namespace Model.DAL
             modelBuilder.Entity<WordImage>(e => { });
             //modelBuilder.Entity<ParentChildWordRelationship>(e => { });
             modelBuilder.Entity<WordTag>(e => { });
-            modelBuilder.Entity<Text>(e =>
+            modelBuilder.Entity<Page>(e =>
             {
-                e.HasOne(t => t.Book)
-                    .WithMany(b => b.Texts)
-                    .HasForeignKey(t => t.BookId);
-                e.HasMany(t => t.Sentences)
+                e.HasOne(p => p.Book)
+                    .WithMany(b => b.Pages)
+                    .HasForeignKey(p => p.BookId);
+                e.HasMany(p => p.Sentences)
                     .WithOne(s => s.Text)
-                    .HasForeignKey(s => s.SeTxID);
+                    .HasForeignKey(s => s.PageId);
 
             });
 

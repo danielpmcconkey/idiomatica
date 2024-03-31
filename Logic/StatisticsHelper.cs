@@ -25,6 +25,17 @@ namespace Logic
 			}
 			context.SaveChanges();
 		}
+		public static void UpdateLanguageTotalWordsRead(IdiomaticaContext context, Language language)
+		{			
+			var readWords = language.Books
+				.SelectMany(x => x.Pages)
+				.Where(p => p.ReadDate is not null)
+				.Sum(p => PageHelper.GetWordCount(p, language))				
+				;
+			language.TotalWordsRead = readWords;
+			context.SaveChanges();
+				
+		}
 		/// <summary>
 		/// Updates the bookstats table for a single book and saves the database context
 		/// </summary>
@@ -41,7 +52,7 @@ namespace Logic
 			book.LastPageRead = pageStats.lastPageRead;
 
 			// finally get its word stats
-			var parser = LanguageParserFactory.GetLanguageParser(book.Language);
+			
 
 			Dictionary<String, (int status, int count)> wordDict =
 				new Dictionary<string, (int status, int count)>();
@@ -59,9 +70,9 @@ namespace Logic
 
 
 
-			foreach (var t in book.Texts)
+			foreach (var t in book.Pages)
 			{
-				var wordsInText = parser.GetWordsFromText(t);
+				var wordsInText = PageHelper.GetWords(t, book.Language);
 				book.BookStat.totalwordCount += wordsInText.Count();
 				foreach (var word in wordsInText)
 				{

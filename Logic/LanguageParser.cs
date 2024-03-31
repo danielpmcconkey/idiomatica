@@ -11,7 +11,7 @@ namespace Logic
     public interface LanguageParser
     {
         public string StripAllButWordCharacters(string input);
-        public string[] GetWordsFromText(Text text);
+        public string[] GetWordsFromPage(Page page);
     }
     public class SpaceDelimitedLanguageParser : LanguageParser
     {
@@ -22,12 +22,12 @@ namespace Logic
         {  
             _language = language; 
         }
-        public string[] GetWordsFromText(Text text)
+        public string[] GetWordsFromPage(Page page)
         {
             // reduce all double spaces, line breaks, tabs, etc. to just a single space
             // then split into a words array
             // then replace punctuation with empty strings
-            string whiteSpaceCleanup = Regex.Replace(text.OriginalText, @"[\s]{1,}", " ");
+            string whiteSpaceCleanup = Regex.Replace(page.OriginalText, @"[\s]{1,}", " ");
             string[] words = whiteSpaceCleanup.Split(' ');
             for (int i = 0; i < words.Length; i++) words[i] = StripAllButWordCharacters(words[i]).ToLower();
             return words;

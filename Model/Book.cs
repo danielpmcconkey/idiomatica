@@ -12,7 +12,7 @@ namespace Model
         [Column("BkID")] public int Id { get; set; }
 
         #region relationships
-        public List<Text> Texts { get; set; } 
+        public List<Page> Pages { get; set; } 
         public List<BookTag> BookTags { get; set; }
         [Column("BkLgID")] public int LanguageId { get; set; }
         public Language Language { get; set; }

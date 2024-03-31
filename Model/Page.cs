@@ -8,7 +8,8 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Model
 {
-    public class Text
+	[Table("texts")]
+    public class Page
     {
         [Column("TxID")] public int Id { get; set; }
 

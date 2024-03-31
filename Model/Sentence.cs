@@ -13,8 +13,8 @@ namespace Model
         [Column("SeID")] public int Id { get; set; }
 
         #region relationships
-        [Column("SeTxID")] public int SeTxID { get; set; }
-        public Text Text { get; set; }
+        [Column("SeTxID")] public int PageId { get; set; }
+        public Page Text { get; set; }
         #endregion
 
         [Column("SeOrder")] public int SeOrder { get; set; }
