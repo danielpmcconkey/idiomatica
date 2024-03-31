@@ -21,7 +21,7 @@ namespace Model
         public User? User { get; set; }
         #endregion
 
-        [Column("BkTitle")] public string BkTitle { get; set; }
+        [Column("BkTitle")] public string Title { get; set; }
         [Column("BkSourceURI")] public string? BkSourceURI { get; set; }
         [Column("BkArchived")] public int BkArchived { get; set; } = 0;
         [Column("BkCurrentTxID")] public int BkCurrentTxID { get; set; } = 0;

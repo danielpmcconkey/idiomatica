@@ -66,14 +66,14 @@ namespace Logic
 				book.BookStat.BookId = book.Id;
 				book.BookStat.Book = book;
 			}
-			book.BookStat.totalwordCount = 0; // set this from null to 0 so you can increment it
+			book.BookStat.TotalWordCount = 0; // set this from null to 0 so you can increment it
 
 
 
 			foreach (var t in book.Pages)
 			{
 				var wordsInText = PageHelper.GetWords(t, book.Language);
-				book.BookStat.totalwordCount += wordsInText.Count();
+				book.BookStat.TotalWordCount += wordsInText.Count();
 				foreach (var word in wordsInText)
 				{
 					var foundWord = wordsInLanguage
@@ -106,7 +106,7 @@ namespace Logic
                 (98, 'Ign', 'Ignored');
              * */
 
-			book.BookStat.distinctwordCount = wordDict.Count;
+			book.BookStat.DistinctWordCount = wordDict.Count;
 
 			var status0Stat = GetStatsByStatus(0, wordDict);
 			book.BookStat.totalunknownCount = status0Stat.total;
@@ -141,25 +141,25 @@ namespace Logic
 			book.BookStat.distinctignoredCount = status98Stat.distinct;
 
 
-			book.BookStat.totalknownPercent = GetKnownPercent(
+			book.BookStat.TotalKnownPercent = GetKnownPercent(
 				book.BookStat.totallearnedCount,
 				book.BookStat.totalwellknownCount,
 				book.BookStat.totalignoredCount,
-				book.BookStat.totalwordCount);
-			book.BookStat.distinctknownPercent = GetKnownPercent(
+				book.BookStat.TotalWordCount);
+			book.BookStat.DistinctKnownPercent = GetKnownPercent(
 				book.BookStat.distinctlearnedCount,
 				book.BookStat.distinctwellknownCount,
 				book.BookStat.distinctignoredCount,
-				book.BookStat.distinctwordCount);
+				book.BookStat.DistinctWordCount);
 
 			// set the old stats to what I want them to be
-			book.BookStat.wordcount = book.BookStat.totalwordCount;
-			book.BookStat.unknownpercent = book.BookStat.totalknownPercent;
-			book.BookStat.distinctterms = book.BookStat.distinctwordCount;
-			book.BookStat.unknownpercent = 100 - book.BookStat.totalknownPercent;
+			book.BookStat.wordcount = book.BookStat.TotalWordCount;
+			book.BookStat.unknownpercent = book.BookStat.TotalKnownPercent;
+			book.BookStat.distinctterms = book.BookStat.DistinctWordCount;
+			book.BookStat.unknownpercent = 100 - book.BookStat.TotalKnownPercent;
 			book.BkWordCount = book.BookStat.wordcount;
 
-			Console.WriteLine($"{book.BkTitle}: {book.BookStat.totalknownPercent} | {book.BookStat.distinctknownPercent}");
+			Console.WriteLine($"{book.Title}: {book.BookStat.TotalKnownPercent} | {book.BookStat.DistinctKnownPercent}");
 
 			context.SaveChanges();			
 		}

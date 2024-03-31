@@ -13,7 +13,7 @@ namespace Model
         public User User { get; set; }
         #endregion
 
-        [Column("LgName")] public string LgName { get; set; }
+        [Column("LgName")] public string Name { get; set; }
         [Column("LgDict1URI")] public string LgDict1URI { get; set; }
         [Column("LgDict2URI")] public string? LgDict2URI { get; set; }
         [Column("LgGoogleTranslateURI")] public string? LgGoogleTranslateURI { get; set; }

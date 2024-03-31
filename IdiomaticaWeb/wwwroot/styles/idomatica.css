@@ -1,13 +1,12 @@
 ﻿
 
-.bookList {
-    
-    font-family:'Times New Roman', Times, serif;
-}
-
-
-.bookList .completedMarker {
+.completedMarker {
     color:#008800;
     text-align: right;
     padding-right: 1em;
+}
+.sortLink {
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
 }

@@ -1,60 +1,146 @@
 ﻿@using Model
 @using Logic
 @using Model.DAL
-<h3>Your books</h3>
-@if (_books is not null)
+@page "/books-list"
+@rendermode InteractiveServer
+
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<style>
+	.sort-th {
+		cursor: pointer;
+	}
+
+	.fa {
+		float: right;
+	}
+</style>
+
+<div class="form-group">
+	<input class="form-control" type="text" placeholder="Filter..."
+		   @bind="_filter"
+		   @bind:event="oninput">
+</div>
+@if (_books is null)
 {
-	<table class="table bookList">
-		<thead>
+	<p><em>Loading...</em></p>
+}
+else if(!_books.Any())
+{
+	<p><em>No books exist.  Please add some.</em></p>
+	@* todo: add an "add books" button *@
+}
+else
+{
+	<table class="table table-striped table-bordered table-hover">
+		<thead class="thead-light">
 			<tr>
-				<th scope="col">#</th>
-				<th scope="col">Language</th>
-				<th scope="col">Complete?</th>
-				<th scope="col">Title</th>
-				<th scope="col">Progress</th>
-				<th scope="col">Total words</th>
-				<th scope="col">% Known</th>
-				<th scope="col">Distinct words</th>
-				<th scope="col">% Known</th>
+				<th scope="col" class="sort-th" @onclick="@(() => SortTable("Id"))">
+					#
+					<span class="fa @(SetSortIcon("Id"))"></span>
+				</th>
+				<th scope="col" class="sort-th" @onclick="@(() => SortTable("Language"))">
+					Language
+					<span class="fa @(SetSortIcon("Language"))"></span>
+				</th>
+				<th scope="col" class="sort-th" @onclick="@(() => SortTable("IsComplete"))">
+					Completed
+					<span class="fa @(SetSortIcon("IsComplete"))"></span>
+				</th>
+				<th scope="col" class="sort-th" @onclick="@(() => SortTable("Title"))">
+					Title
+					<span class="fa @(SetSortIcon("Title"))"></span>
+				</th>
+				<th scope="col" class="sort-th" @onclick="@(() => SortTable("Progress"))">
+					Progress
+					<span class="fa @(SetSortIcon("Progress"))"></span>
+				</th>
+				<th scope="col" class="sort-th" @onclick="@(() => SortTable("TotalWordCount"))">
+					Total Word Count
+					<span class="fa @(SetSortIcon("TotalWordCount"))"></span>
+				</th>
+				<th scope="col" class="sort-th" @onclick="@(() => SortTable("TotalKnownPercent"))">
+					Total Known Percent
+					<span class="fa @(SetSortIcon("TotalKnownPercent"))"></span>
+				</th>
+				<th scope="col" class="sort-th" @onclick="@(() => SortTable("DistinctWordCount"))">
+					Distinct Word Count
+					<span class="fa @(SetSortIcon("DistinctWordCount"))"></span>
+				</th>
+				<th scope="col" class="sort-th" @onclick="@(() => SortTable("DistinctKnownPercent"))">
+					Distinct Known Percent
+					<span class="fa @(SetSortIcon("DistinctKnownPercent"))"></span>
+				</th>
+				
+				
+				
+				
+				
+				
 			</tr>
 		</thead>
 		<tbody>
-	@foreach(var book in _books)
-	{
-			<tr>
-				<td scope="row">@book.Id</td>
-				<td scope="row">@book.Language.LgName</td>
-				<td scope="row">
+			@foreach(var book in _books)
+			{
+				if (!IsVisibleInList(book))
+					continue;
+				<tr>
+					<td scope="row">@book.Id</td>
+					<td scope="row">@book.Language.Name</td>
+					<td scope="row">
 					
-				@if (book.IsComplete)
-				{
-					<p class="completedMarker">&#x2713;</p>
-				}
-				</td>
-				<td scope="row">
-					<p class="bookTitle">
-						<a href="@GetBookLink(book)">@FormatTitle(book)</a>
+					@if (book.IsComplete)
+					{
+						<span class="completedMarker">&#x2713;</span>
+					}
+					</td>
+					<td scope="row">
+						<span class="bookTitle">
+							<a href="@GetBookLink(book)">@FormatTitle(book)</a>
 
-					</p>
-				</td>
-				<td scope="row">
-					<p>
-						@book.LastPageRead / @book.TotalPages
+						</span>
+					</td>
+					<td scope="row">
+						<span>
+							@book.LastPageRead / @book.TotalPages
 
-					</p>
-				</td>
-				<td scope="row">@book.BookStat.totalwordCount</td>
-				<td scope="row">@book.BookStat.totalknownPercent</td>
-				<td scope="row">@book.BookStat.distinctwordCount</td>
-				<td scope="row">@book.BookStat.distinctknownPercent</td>
-			</tr>
-	}
+						</span>
+					</td>
+					<td scope="row">@book.BookStat.TotalWordCount</td>
+					<td scope="row">@book.BookStat.TotalKnownPercent</td>
+					<td scope="row">@book.BookStat.DistinctWordCount</td>
+					<td scope="row">@book.BookStat.DistinctKnownPercent</td>
+				</tr>
+			}
 		</tbody>
 	</table>
 }
 
 @code {
-	private List<Book>? _books { get { return GetBooksForLoggedInUser(); } set { } }
+
+	private string _filter;
+	private bool _isSortedAscending;
+	private string _activeSortColumn;
+	private List<Book>? _books;
+	Dictionary<string, Func<Book, object>> orderByFunctions =
+		new Dictionary<string, Func<Book, object>>();
+
+
+
+
+	protected override void OnInitialized()
+	{
+		orderByFunctions.Add("Language", (x => x.Language.Name));
+		orderByFunctions.Add("Id", (x => x.Id));
+		orderByFunctions.Add("IsComplete", (x => x.IsComplete));
+		orderByFunctions.Add("Title", (x => x.Title));
+		orderByFunctions.Add("Progress", (x => GetBookProgressPercent(x)));
+		orderByFunctions.Add("TotalWordCount", (x => x.BookStat.TotalWordCount));
+		orderByFunctions.Add("TotalKnownPercent", (x => x.BookStat.TotalKnownPercent));
+		orderByFunctions.Add("DistinctWordCount", (x => x.BookStat.DistinctWordCount));
+		orderByFunctions.Add("DistinctKnownPercent", (x => x.BookStat.DistinctKnownPercent));
+
+		_books = GetBooksForLoggedInUser();
+	}
 
 	private List<Book> GetBooksForLoggedInUser()
 	{
@@ -66,7 +152,7 @@
 	private string FormatTitle(Book book)
 	{
 		int maxCharsInBookListTitle = 60;
-		string title = book.BkTitle;
+		string title = book.Title;
 		if(title.Length > maxCharsInBookListTitle)
 		{
 			title = title.Substring(0, maxCharsInBookListTitle) + "...";
@@ -77,5 +163,59 @@
 	{
 		return $"http://localhost:9876/read/{book.Id}";
 	}
+	private float GetBookProgressPercent(Book book)
+	{
+		if (book.TotalPages == 0) return 0f;
+		return book.LastPageRead / (float)book.TotalPages;
+	}
+	private bool IsVisibleInList(Book book)
+	{
+		if (string.IsNullOrEmpty(_filter))
+			return true;
+		if (book.Language.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+			return true;
+		if (book.Title.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+			return true;
+		return false;
+	}
+	private void SortTable(string columnName)
+	{
+		if (!orderByFunctions.ContainsKey(columnName)) return;
 
+		if (columnName != _activeSortColumn)
+		{
+			_books = _books.OrderBy(orderByFunctions[columnName]).ToList();
+			_isSortedAscending = true;
+			_activeSortColumn = columnName;
+
+		}
+		else
+		{
+			if (_isSortedAscending)
+			{
+				_books = _books.OrderByDescending(orderByFunctions[columnName]).ToList();
+			}
+			else
+			{
+				_books = _books.OrderBy(orderByFunctions[columnName]).ToList();
+			}
+
+			_isSortedAscending = !_isSortedAscending;
+		}
+	}
+	private string SetSortIcon(string columnName)
+	{
+		if (_activeSortColumn != columnName)
+		{
+			return string.Empty;
+		}
+		if (_isSortedAscending)
+		{
+			return "fa-sort-up";
+		}
+		else
+		{
+			return "fa-sort-down";
+		}
+	}
 }
