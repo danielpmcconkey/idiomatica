@@ -1,6 +1,8 @@
 ﻿@using Model
 @using Logic
 @using Model.DAL
+@using System.Globalization
+
 @page "/books-list"
 @rendermode InteractiveServer
 
@@ -12,13 +14,13 @@
 
 	.fa {
 		float: right;
-	}
+	}	
 </style>
 
-<div class="form-group">
+<div class="form-group mb-2">
 	<input class="form-control" type="text" placeholder="Filter..."
 		   @bind="_filter"
-		   @bind:event="oninput">
+		   @bind:event="oninput" />
 </div>
 @if (_books is null)
 {
@@ -42,7 +44,7 @@ else
 					Language
 					<span class="fa @(SetSortIcon("Language"))"></span>
 				</th>
-				<th scope="col" class="sort-th" @onclick="@(() => SortTable("IsComplete"))">
+				<th scope="col" class="sort-th text-center" @onclick="@(() => SortTable("IsComplete"))">
 					Completed
 					<span class="fa @(SetSortIcon("IsComplete"))"></span>
 				</th>
@@ -50,32 +52,26 @@ else
 					Title
 					<span class="fa @(SetSortIcon("Title"))"></span>
 				</th>
-				<th scope="col" class="sort-th" @onclick="@(() => SortTable("Progress"))">
+				<th scope="col" class="sort-th text-center" @onclick="@(() => SortTable("Progress"))">
 					Progress
 					<span class="fa @(SetSortIcon("Progress"))"></span>
 				</th>
-				<th scope="col" class="sort-th" @onclick="@(() => SortTable("TotalWordCount"))">
+				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TotalWordCount"))">
 					Total Word Count
 					<span class="fa @(SetSortIcon("TotalWordCount"))"></span>
 				</th>
-				<th scope="col" class="sort-th" @onclick="@(() => SortTable("TotalKnownPercent"))">
+				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TotalKnownPercent"))">
 					Total Known Percent
 					<span class="fa @(SetSortIcon("TotalKnownPercent"))"></span>
 				</th>
-				<th scope="col" class="sort-th" @onclick="@(() => SortTable("DistinctWordCount"))">
+				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("DistinctWordCount"))">
 					Distinct Word Count
 					<span class="fa @(SetSortIcon("DistinctWordCount"))"></span>
 				</th>
-				<th scope="col" class="sort-th" @onclick="@(() => SortTable("DistinctKnownPercent"))">
+				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("DistinctKnownPercent"))">
 					Distinct Known Percent
 					<span class="fa @(SetSortIcon("DistinctKnownPercent"))"></span>
 				</th>
-				
-				
-				
-				
-				
-				
 			</tr>
 		</thead>
 		<tbody>
@@ -86,29 +82,18 @@ else
 				<tr>
 					<td scope="row">@book.Id</td>
 					<td scope="row">@book.Language.Name</td>
-					<td scope="row">
-					
+					<td scope="row" class="text-center">
 					@if (book.IsComplete)
 					{
 						<span class="completedMarker">&#x2713;</span>
 					}
 					</td>
-					<td scope="row">
-						<span class="bookTitle">
-							<a href="@GetBookLink(book)">@FormatTitle(book)</a>
-
-						</span>
-					</td>
-					<td scope="row">
-						<span>
-							@book.LastPageRead / @book.TotalPages
-
-						</span>
-					</td>
-					<td scope="row">@book.BookStat.TotalWordCount</td>
-					<td scope="row">@book.BookStat.TotalKnownPercent</td>
-					<td scope="row">@book.BookStat.DistinctWordCount</td>
-					<td scope="row">@book.BookStat.DistinctKnownPercent</td>
+					<td scope="row"><a href="@GetBookLink(book)">@FormatTitle(book)</a></td>
+					<td scope="row" class="text-center">@book.LastPageRead / @book.TotalPages</td>
+					<td scope="row" class="text-end">@FormatCount((int)book.BookStat.TotalWordCount)</td>
+					<td scope="row" class="text-end">@FormatCount((int)book.BookStat.TotalKnownPercent)</td>
+					<td scope="row" class="text-end">@FormatCount((int)book.BookStat.DistinctWordCount)</td>
+					<td scope="row" class="text-end">@FormatCount((int)book.BookStat.DistinctKnownPercent)</td>
 				</tr>
 			}
 		</tbody>
@@ -123,8 +108,6 @@ else
 	private List<Book>? _books;
 	Dictionary<string, Func<Book, object>> orderByFunctions =
 		new Dictionary<string, Func<Book, object>>();
-
-
 
 
 	protected override void OnInitialized()
@@ -217,5 +200,9 @@ else
 		{
 			return "fa-sort-down";
 		}
+	}
+	private string FormatCount(int value)
+	{
+		return value.ToString("N0");
 	}
 }
