@@ -26,5 +26,6 @@ namespace Model
         [Column("LgRightToLeft")] public int LgRightToLeft { get; set; }
         [Column("LgShowRomanization")] public int LgShowRomanization { get; set; } = 0;
         [Column("LgParserType")] public string LgParserType { get; set; } = "spacedel";
-    }
+		[Column("TotalWordsRead")] public int TotalWordsRead { get; set; } = 0;
+	}
 }

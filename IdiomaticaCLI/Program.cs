@@ -6,10 +6,10 @@ using Model;
 
 using (var context = new IdiomaticaContext())
 {
-    BookAnalyzer.AnalyzeBooks(context);
+	StatisticsHelper.UpdateAllBookStatsForUserId(context, 1);
 
-    //var path = @"E:\Idiomatica\Idiomatica\Model\Migrations\dropOldTables_20240330.13.13.44.sql";
-    //Execute.File(context, path);
+	//var path = @"E:\Idiomatica\Idiomatica\Model\Migrations\20240331.08.21_AddHelperColumns.sql";
+	//Execute.File(context, path);
 
 
 }

@@ -28,15 +28,19 @@ namespace Model.DAL
                         Console.WriteLine($"Error in query: {query}");
                         throw;
                     }
-                }                
+                }
                 transaction.Commit();
                 return rowsAffected;
             }
-            catch 
-            { 
+            catch
+            {
                 transaction.Rollback();
                 throw;
             }
+        }
+        public static int NonQuery(IdiomaticaContext context, string query)
+        {
+            return context.Database.ExecuteSqlRaw(query);
         }
     }
 }

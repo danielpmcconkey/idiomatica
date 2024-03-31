@@ -50,6 +50,9 @@ namespace Model.DAL
                 e.HasOne(b => b.User)
                     .WithMany(u => u.Books)
                     .HasForeignKey(b => b.UserId);
+				e.HasOne(b => b.Language)
+					.WithMany(l => l.Books)
+					.HasForeignKey(b => b.LanguageId);
             });
 
             modelBuilder.Entity<BookStat>(e => { });

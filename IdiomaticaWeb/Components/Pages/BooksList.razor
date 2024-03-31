@@ -1,0 +1,88 @@
+﻿@using Model
+@using Logic
+@using Model.DAL
+<h3>Your books</h3>
+@if (_books is not null)
+{
+	<table class="table bookList">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">Language</th>
+				<th scope="col">Complete?</th>
+				<th scope="col">Title</th>
+				<th scope="col">Progress</th>
+				<th scope="col">Total words</th>
+				<th scope="col">% Known</th>
+				<th scope="col">Distinct words</th>
+				<th scope="col">% Known</th>
+				@* 
+				<th scope="col">Title</th>
+				<th scope="col">Title</th>
+				<th scope="col">Title</th>
+				<th scope="col">Title</th>
+				<th scope="col">Title</th>
+				<th scope="col">Title</th> *@
+			</tr>
+		</thead>
+		<tbody>
+	@foreach(var book in _books)
+	{
+			<tr>
+				<td scope="row">@book.Id</td>
+				<td scope="row">@book.Language.LgName</td>
+				<td scope="row">
+					
+				@if (book.IsComplete)
+				{
+					<p class="completedMarker">&#x2713;</p>
+				}
+				</td>
+				<td scope="row">
+					<p class="bookTitle">
+						<a href="@GetBookLink(book)">@FormatTitle(book)</a>
+
+					</p>
+				</td>
+				<td scope="row">
+					<p>
+						@book.LastPageRead / @book.TotalPages
+
+					</p>
+				</td>
+				<td scope="row">@book.BookStat.totalwordCount</td>
+				<td scope="row">@book.BookStat.totalknownPercent</td>
+				<td scope="row">@book.BookStat.distinctwordCount</td>
+				<td scope="row">@book.BookStat.distinctknownPercent</td>
+			</tr>
+	}
+		</tbody>
+	</table>
+}
+
+@code {
+	private List<Book>? _books { get { return GetBooksForLoggedInUser(); } set { } }
+
+	private List<Book> GetBooksForLoggedInUser()
+	{
+		using (var context = new IdiomaticaContext())
+		{
+			return BookHelper.GetBooksForUserId(context, 1);
+		}
+	}
+	private string FormatTitle(Book book)
+	{
+		int maxCharsInBookListTitle = 60;
+		string title = book.BkTitle;
+		if(title.Length > maxCharsInBookListTitle)
+		{
+			title = title.Substring(0, maxCharsInBookListTitle) + "...";
+		}
+		return title;
+	}
+	private string GetBookLink(Book book)
+	{
+		return $"http://localhost:9876/read/{book.Id}";
+	}
+
+}

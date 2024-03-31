@@ -29,6 +29,24 @@ namespace Model
         [Column("BkAudioFilename")] public string? BkAudioFilename { get; set; }
         [Column("BkAudioCurrentPos")] public float? BkAudioCurrentPos { get; set; }
         [Column("BkAudioBookmarks")] public string? BkAudioBookmarks { get; set; }
+		[Column("IsComplete")] public Int16 _IsComplete { get; set; } = 0; // sqlite can't hold a bool
+		[NotMapped] public bool IsComplete { 
+			get { return CheckIsComplete(); } 
+			set { UpdateIsComplete(value); } 
+		}
+		[Column("TotalPages")] public int TotalPages { get; set; } = 0;
+		[Column("LastPageRead")] public int LastPageRead { get; set; } = 0;
 
-    }
+		private bool CheckIsComplete()
+		{
+			if (_IsComplete == 1) return true; 
+			return false;
+		}
+		private void UpdateIsComplete(bool isComplete)
+		{
+			if(isComplete) _IsComplete = 1;
+			else _IsComplete = 0;
+		}
+	}
+	
 }
