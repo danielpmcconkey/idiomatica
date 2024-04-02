@@ -17,15 +17,21 @@ namespace Logic
 	/// </summary>
 	public static class StatisticsHelper
     {
-		#region public interface
-		/// <summary>
-		/// Updates the bookstats table for all books for a given user and saves the database context
-		/// </summary>
-		/// <param name="context">the database context</param>
-		/// <param name="userId">the ID of the user whose books are to be updated</param>
-		public static void UpdateAllBookStatsForUserId(IdiomaticaContext context, int userId)
+        #region public interface
+        public static string? GetBookStat(Book book, string key)
+        {
+            var existingStat = book.BookStats.Where(x => x.Key == key).FirstOrDefault();
+            if (existingStat == null) return null;
+            return existingStat.Value;
+        }
+        /// <summary>
+        /// Updates the bookstats table for all books for a given user and saves the database context
+        /// </summary>
+        /// <param name="context">the database context</param>
+        /// <param name="userId">the ID of the user whose books are to be updated</param>
+        public static void UpdateAllBookStatsForUserId(IdiomaticaContext context, int userId)
 		{
-			Func<Book, bool> allBooksFilter = (x => x.UserId == userId);
+			Func<Book, bool> allBooksFilter = (x => x.LanguageUser.UserId == userId);
 			var books = Fetch.Books(context, allBooksFilter);
 			foreach (var book in books)
 			{
@@ -33,14 +39,14 @@ namespace Logic
 			}
 			context.SaveChanges();
 		}
-		public static void UpdateLanguageTotalWordsRead(IdiomaticaContext context, Language language)
+		public static void UpdateLanguageTotalWordsRead(IdiomaticaContext context, LanguageUser languageUser)
 		{			
-			var readWords = language.Books
+			var readWords = languageUser.Books
 				.SelectMany(x => x.Pages)
 				.Where(p => p.ReadDate is not null)
-				.Sum(p => PageHelper.GetWordCount(p, language))				
+				.Sum(p => PageHelper.GetWordCount(p, languageUser.Language))				
 				;
-			language.TotalWordsRead = readWords;
+            languageUser.TotalWordsRead = readWords;
 			context.SaveChanges();
 				
 		}
@@ -65,23 +71,19 @@ namespace Logic
 			Dictionary<String, (int status, int count)> wordDict =
 				new Dictionary<string, (int status, int count)>();
 
-			Func<Word, bool> filter = (x => x.LanguageId == book.LanguageId);
+			Func<Word, bool> filter = (x => x.LanguageUser.LanguageId == book.LanguageUser.LanguageId);
 			var wordsInLanguage = Fetch.Words(context, filter);
 
-			if (book.BookStat == null)
-			{
-				book.BookStat = new BookStat();
-				book.BookStat.BookId = book.Id;
-				book.BookStat.Book = book;
-			}
-			book.BookStat.TotalWordCount = 0; // set this from null to 0 so you can increment it
+			if (book.BookStats == null) book.BookStats = new List<BookStat>();
+			
+			int totalWordCount = 0; // set this from null to 0 so you can increment it
 
 
 
 			foreach (var t in book.Pages)
 			{
-				var wordsInText = PageHelper.GetWords(t, book.Language);
-				book.BookStat.TotalWordCount += wordsInText.Count();
+				var wordsInText = PageHelper.GetWords(t, book.LanguageUser.Language);
+                totalWordCount += wordsInText.Count();
 				foreach (var word in wordsInText)
 				{
 					var foundWord = wordsInLanguage
@@ -101,6 +103,7 @@ namespace Logic
 					}
 				}
 			}
+            AddStatToBookStats(book, book.BookStats, "TotalWordCount", totalWordCount.ToString());
 
 			/*
              *
@@ -114,60 +117,82 @@ namespace Logic
                 (98, 'Ign', 'Ignored');
              * */
 
-			book.BookStat.DistinctWordCount = wordDict.Count;
+			AddStatToBookStats(book, book.BookStats, "DistinctWordCount", wordDict.Count.ToString());
 
-			var status0Stat = GetStatsByStatus(0, wordDict);
-			book.BookStat.totalunknownCount = status0Stat.total;
-			book.BookStat.distinctunknownCount = status0Stat.distinct;
-
-			var status1Stat = GetStatsByStatus(1, wordDict);
-			book.BookStat.totalnew1Count = status1Stat.total;
-			book.BookStat.distinctnew1Count = status1Stat.distinct;
-
-			var status2Stat = GetStatsByStatus(2, wordDict);
-			book.BookStat.totalnew2Count = status2Stat.total;
-			book.BookStat.distinctnew2Count = status2Stat.distinct;
-
-			var status3Stat = GetStatsByStatus(3, wordDict);
-			book.BookStat.totallearning3Count = status3Stat.total;
-			book.BookStat.distinctlearning3Count = status3Stat.distinct;
-
-			var status4Stat = GetStatsByStatus(4, wordDict);
-			book.BookStat.totallearning4Count = status4Stat.total;
-			book.BookStat.distinctlearning4Count = status4Stat.distinct;
-
-			var status5Stat = GetStatsByStatus(5, wordDict);
-			book.BookStat.totallearnedCount = status5Stat.total;
-			book.BookStat.distinctlearnedCount = status5Stat.distinct;
-
-			var status99Stat = GetStatsByStatus(99, wordDict);
-			book.BookStat.totalwellknownCount = status99Stat.total;
-			book.BookStat.distinctwellknownCount = status99Stat.distinct;
-
+            var status0Stat = GetStatsByStatus(0, wordDict);
+            var status1Stat = GetStatsByStatus(1, wordDict);
+            var status2Stat = GetStatsByStatus(2, wordDict);
+            var status3Stat = GetStatsByStatus(3, wordDict);
+            var status4Stat = GetStatsByStatus(4, wordDict);
+            var status5Stat = GetStatsByStatus(5, wordDict);
+            var status99Stat = GetStatsByStatus(99, wordDict);
 			var status98Stat = GetStatsByStatus(98, wordDict);
-			book.BookStat.totalignoredCount = status98Stat.total;
-			book.BookStat.distinctignoredCount = status98Stat.distinct;
+
+			AddStatToBookStats(book, book.BookStats, "TotalUnknownCount", status0Stat.total.ToString());
+            AddStatToBookStats(book, book.BookStats, "DistinctUnknownCount", status0Stat.distinct.ToString());
+			AddStatToBookStats(book, book.BookStats, "totalnew1Count", status1Stat.total.ToString());
+            AddStatToBookStats(book, book.BookStats, "distinctnew1Count", status1Stat.distinct.ToString());
+            AddStatToBookStats(book, book.BookStats, "totalnew2Count", status2Stat.total.ToString());
+            AddStatToBookStats(book, book.BookStats, "distinctnew2Count", status2Stat.distinct.ToString());
+			AddStatToBookStats(book, book.BookStats, "totallearning3Count", status3Stat.total.ToString());
+            AddStatToBookStats(book, book.BookStats, "distinctlearning3Count", status3Stat.distinct.ToString());
+			AddStatToBookStats(book, book.BookStats, "totallearning4Count", status4Stat.total.ToString());
+            AddStatToBookStats(book, book.BookStats, "distinctlearning4Count", status4Stat.distinct.ToString());
+			AddStatToBookStats(book, book.BookStats, "totallearnedCount", status5Stat.total.ToString()); 
+            AddStatToBookStats(book, book.BookStats, "distinctlearnedCount", status5Stat.distinct.ToString());
+            AddStatToBookStats(book, book.BookStats, "totalwellknownCount", status99Stat.total.ToString());
+            AddStatToBookStats(book, book.BookStats, "distinctwellknownCount", status99Stat.distinct.ToString());
+			AddStatToBookStats(book, book.BookStats, "totalignoredCount", status98Stat.total.ToString());
+            AddStatToBookStats(book, book.BookStats, "distinctignoredCount", status98Stat.distinct.ToString());
 
 
-			book.BookStat.TotalKnownPercent = GetKnownPercent(
-				book.BookStat.totallearnedCount,
-				book.BookStat.totalwellknownCount,
-				book.BookStat.totalignoredCount,
-				book.BookStat.TotalWordCount);
-			book.BookStat.DistinctKnownPercent = GetKnownPercent(
-				book.BookStat.distinctlearnedCount,
-				book.BookStat.distinctwellknownCount,
-				book.BookStat.distinctignoredCount,
-				book.BookStat.DistinctWordCount);
 
-			// set the old stats to what I want them to be
-			book.BookStat.wordcount = book.BookStat.TotalWordCount;
-			book.BookStat.unknownpercent = book.BookStat.TotalKnownPercent;
-			book.BookStat.distinctterms = book.BookStat.DistinctWordCount;
-			book.BookStat.unknownpercent = 100 - book.BookStat.TotalKnownPercent;
-			book.BkWordCount = book.BookStat.wordcount;
 
-			Console.WriteLine($"{book.Title}: {book.BookStat.TotalKnownPercent} | {book.BookStat.DistinctKnownPercent}");
+
+            string? totallearnedCount = GetBookStat(book, "totallearnedCount");
+            int totallearnedCount_int = 0;
+            int.TryParse(totallearnedCount, out totallearnedCount_int);
+
+            string? totalwellknownCount = GetBookStat(book, "totalwellknownCount");
+            int totalwellknownCount_int = 0;
+            int.TryParse(totalwellknownCount, out totalwellknownCount_int);
+
+            string? totalignoredCount = GetBookStat(book, "totalignoredCount");
+            int totalignoredCount_int = 0;
+            int.TryParse(totalignoredCount, out totalignoredCount_int);
+
+            string? TotalWordCount = GetBookStat(book, "TotalWordCount");
+            int TotalWordCount_int = 0;
+            int.TryParse(TotalWordCount, out TotalWordCount_int);
+
+            string? distinctlearnedCount = GetBookStat(book, "distinctlearnedCount");
+            int distinctlearnedCount_int = 0;
+            int.TryParse(distinctlearnedCount, out distinctlearnedCount_int);
+
+            string? distinctwellknownCount = GetBookStat(book, "distinctwellknownCount");
+            int distinctwellknownCount_int = 0;
+            int.TryParse(distinctwellknownCount, out distinctwellknownCount_int);
+
+            string? distinctignoredCount = GetBookStat(book, "distinctignoredCount");
+            int distinctignoredCount_int = 0;
+            int.TryParse(distinctignoredCount, out distinctignoredCount_int);
+
+            string? DistinctWordCount = GetBookStat(book, "DistinctWordCount");
+            int DistinctWordCount_int = 0;
+            int.TryParse(DistinctWordCount, out TotalWordCount_int);
+
+
+            AddStatToBookStats(book, book.BookStats, "TotalKnownPercent", 
+                GetKnownPercent(totallearnedCount_int, totalwellknownCount_int,
+                totalignoredCount_int, TotalWordCount_int).ToString());
+
+            AddStatToBookStats(book, book.BookStats, "DistinctKnownPercent",
+                GetKnownPercent(distinctlearnedCount_int, distinctwellknownCount_int,
+                distinctignoredCount_int, DistinctWordCount_int).ToString());
+           
+
+
+			Console.WriteLine($"{book.Title}: {GetBookStat(book, "TotalKnownPercent")} | {GetBookStat(book, "DistinctKnownPercent")}");
 
 			context.SaveChanges();			
 		}
@@ -196,6 +221,20 @@ namespace Logic
 							.Count();
 			return (total, distinct);
 		}
+        private static List<BookStat> AddStatToBookStats(Book book, List<BookStat> stats, string key, string value)
+        {
+            var existingStat = stats.Where(x => x.Key == key).FirstOrDefault();
+            if (existingStat == null) 
+            {
+                stats.Add(new BookStat() { Book = book, BookId = book.Id, Key = key, Value = value });
+            }
+            else
+            {
+                existingStat.Value = value;
+            }
+            return stats;
+        }
+        
 		
 		#endregion
 	}

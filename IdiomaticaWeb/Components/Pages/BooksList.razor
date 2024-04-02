@@ -88,7 +88,7 @@ else
 				
 				<tr>
 					<td scope="row">@book.Id</td>
-					<td scope="row">@book.Language.Name</td>
+					<td scope="row">@book.LanguageUsers.Name</td>
 					<td scope="row" class="text-center">
 					@if (book.IsComplete)
 					{
@@ -120,7 +120,7 @@ else
 
 	protected override void OnInitialized()
 	{
-		orderByFunctions.Add("Language", (x => x.Language.Name));
+		orderByFunctions.Add("Language", (x => x.LanguageUsers.Name));
 		orderByFunctions.Add("Id", (x => x.Id));
 		orderByFunctions.Add("IsComplete", (x => x.IsComplete));
 		orderByFunctions.Add("Title", (x => x.Title));
@@ -152,7 +152,7 @@ else
 	}
 	private string GetBookLink(Book book)
 	{
-		return $"http://localhost:9876/read/{book.Id}";
+		return $"/read/{book.Id}";
 	}
 	private float GetBookProgressPercent(Book book)
 	{
@@ -163,7 +163,7 @@ else
 	{
 		if (string.IsNullOrEmpty(_filter))
 			return true;
-		if (book.Language.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+		if (book.LanguageUsers.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase))
 			return true;
 		if (book.Title.Contains(_filter, StringComparison.OrdinalIgnoreCase))
 			return true;

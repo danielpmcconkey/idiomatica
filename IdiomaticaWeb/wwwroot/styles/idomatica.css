@@ -1,6 +1,4 @@
-﻿
-
-.completedMarker {
+﻿.completedMarker {
     color:#008800;
     text-align: right;
     padding-right: 1em;
@@ -9,4 +7,8 @@
     cursor: pointer;
     color: blue;
     text-decoration: underline;
+}
+.readParagraph {
+    text-indent: 2em;
+    margin-bottom: 1en;
 }

@@ -9,44 +9,28 @@ namespace Model
 {
     public class Book
     {
-        [Column("BkID")] public int Id { get; set; }
+        public int Id { get; set; }
 
         #region relationships
+
+        public int LanguageUserId { get; set; }
+        public LanguageUser LanguageUser { get; set; }
         public List<Page> Pages { get; set; } 
-        public List<BookTag> BookTags { get; set; }
-        [Column("BkLgID")] public int LanguageId { get; set; }
-        public Language Language { get; set; }
-        public BookStat BookStat { get; set; }
-        public int UserId { get; set; }
-        public User? User { get; set; }
+        public List<BookStat> BookStats { get; set; }
+        
         #endregion
 
-        [Column("BkTitle")] public string Title { get; set; }
-        [Column("BkSourceURI")] public string? BkSourceURI { get; set; }
-        [Column("BkArchived")] public int BkArchived { get; set; } = 0;
-        [Column("BkCurrentTxID")] public int BkCurrentTxID { get; set; } = 0;
-        [Column("BkWordCount")] public int? BkWordCount { get; set; }
-        [Column("BkAudioFilename")] public string? BkAudioFilename { get; set; }
-        [Column("BkAudioCurrentPos")] public float? BkAudioCurrentPos { get; set; }
-        [Column("BkAudioBookmarks")] public string? BkAudioBookmarks { get; set; }
-		[Column("IsComplete")] public Int16 _IsComplete { get; set; } = 0; // sqlite can't hold a bool
-		[NotMapped] public bool IsComplete { 
-			get { return CheckIsComplete(); } 
-			set { UpdateIsComplete(value); } 
-		}
-		[Column("TotalPages")] public int TotalPages { get; set; } = 0;
-		[Column("LastPageRead")] public int LastPageRead { get; set; } = 0;
-
-		private bool CheckIsComplete()
-		{
-			if (_IsComplete == 1) return true; 
-			return false;
-		}
-		private void UpdateIsComplete(bool isComplete)
-		{
-			if(isComplete) _IsComplete = 1;
-			else _IsComplete = 0;
-		}
+        public string Title { get; set; }
+        public string? SourceURI { get; set; }
+        public bool IsArchived { get; set; } = false;
+        public int CurrentPageID { get; set; } = 0;
+        public int WordCount { get; set; } // todo: get rid of Book.WordCount
+        public string? AudioFilename { get; set; }
+        public float AudioCurrentPos { get; set; }
+        public string? AudioBookmarks { get; set; }
+		public bool IsComplete { get; set; } = false; // todo: get rid of Book.IsComplete
+		public int TotalPages { get; set; } = 0;  // todo: get rid of Book.TotalPages
+		public int LastPageRead { get; set; } = 0; // todo: get rid of Book.LastPageRead		
 	}
 	
 }

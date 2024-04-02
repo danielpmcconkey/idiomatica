@@ -1,31 +1,34 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Model
 {
-    public class Language
-    {
-        [Column("LgID")] public int Id { get; set; }
+	public class Language
+	{
+		public int Id { get; set; }
 
         #region relationships
-        public List<Book> Books { get; set; }
-        public List<Word> Words { get; set; }
-        public int UserId { get; set; }
-        public User User { get; set; }
+        public List<LanguageUser> LanguageUsers { get; set; }
+        
         #endregion
 
-        [Column("LgName")] public string Name { get; set; }
-        [Column("LgDict1URI")] public string LgDict1URI { get; set; }
-        [Column("LgDict2URI")] public string? LgDict2URI { get; set; }
-        [Column("LgGoogleTranslateURI")] public string? LgGoogleTranslateURI { get; set; }
-        [Column("LgCharacterSubstitutions")] public string LgCharacterSubstitutions { get; set; }
-        [Column("LgRegexpSplitSentences")] public string LgRegexpSplitSentences { get; set; }
-        [Column("LgExceptionsSplitSentences")] public string LgExceptionsSplitSentences { get; set; }
-        [Column("LgRegexpWordCharacters")] public string LgRegexpWordCharacters { get; set; }
-        [Column("LgRemoveSpaces")] public int LgRemoveSpaces { get; set; }
-        [Column("LgSplitEachChar")] public int LgSplitEachChar { get; set; }
-        [Column("LgRightToLeft")] public int LgRightToLeft { get; set; }
-        [Column("LgShowRomanization")] public int LgShowRomanization { get; set; } = 0;
-        [Column("LgParserType")] public string LgParserType { get; set; } = "spacedel";
-		[Column("TotalWordsRead")] public int TotalWordsRead { get; set; } = 0;
-	}
+        public string Name { get; set; }
+        public string Dict1URI { get; set; }
+        public string? Dict2URI { get; set; }
+        public string? GoogleTranslateURI { get; set; }
+        public string CharacterSubstitutions { get; set; }
+        public string RegexpSplitSentences { get; set; }
+        public string ExceptionsSplitSentences { get; set; }
+        public string RegexpWordCharacters { get; set; }
+        public int RemoveSpaces { get; set; }
+        public int SplitEachChar { get; set; }
+        public int RightToLeft { get; set; }
+        public int ShowRomanization { get; set; } = 0;
+        public string ParserType { get; set; } = "spacedel";
+        public int TotalWordsRead { get; set; } = 0;
+    }
 }

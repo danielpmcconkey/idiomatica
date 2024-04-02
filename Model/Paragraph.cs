@@ -4,20 +4,20 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Model
 {
-    public class Sentence
-    {
+	[NotMapped]
+	public class Paragraph
+	{
         public int Id { get; set; }
 
         #region relationships
-        public int ParagraphId { get; set; }
-        public Paragraph Paragraph { get; set; }
+        public List<Sentence> Sentences { get; set; }
+        public int PageId { get; set; }
+        public Page Page { get; set; } 
         #endregion
-
+        
         public int Order { get; set; }
-        public string? Text { get; set; }
-    }
+	}
 }

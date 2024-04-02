@@ -5,12 +5,12 @@ namespace Model.DAL
     public static class Fetch
     {
 
-        public static Language Language(IdiomaticaContext context, int id)
+        public static LanguageUser Language(IdiomaticaContext context, int id)
         {
-            Func<Language, bool> filter = (x => x.Id == id);
+            Func<LanguageUser, bool> filter = (x => x.Id == id);
             return Languages(context, filter).FirstOrDefault();
         }
-        public static List<Language> Languages(IdiomaticaContext context, Func<Language, bool> filter)
+        public static List<LanguageUser> Languages(IdiomaticaContext context, Func<LanguageUser, bool> filter)
         {
             return context.Languages
                 .Include(l => l.Books).ThenInclude(b => b.Pages).ThenInclude(p => p.Sentences)
@@ -44,7 +44,7 @@ namespace Model.DAL
         }
         public static Page Page(IdiomaticaContext context, int id)
         {
-            Func<Language, bool> filter = (x => x.Id == id);
+            Func<LanguageUser, bool> filter = (x => x.Id == id);
             return Pages(context, id).FirstOrDefault();
         }
         public static List<Page> Pages(IdiomaticaContext context, int? id = null)

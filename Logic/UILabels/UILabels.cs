@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Logic.UILabels
 {
-	public abstract class UILabels
+	public abstract class UILabels // todo: learn the right way to do UI translation
 	{
 		protected Dictionary<string, string> _labels;
 

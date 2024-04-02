@@ -7,8 +7,31 @@
 @page "/read/{id}"
 @* @rendermode InteractiveServer *@
 
-<PageTitle>Test</PageTitle>
-<h1>@Book.Title</h1>
+@if(Book is null)
+{
+	<PageTitle>@uILabels.GetLabel("loading")</PageTitle>
+	<h1>@uILabels.GetLabel("loading")</h1>
+}
+else
+{
+	<PageTitle>Test</PageTitle>
+	<h1>@Book.Title</h1>
+}
+@if(_currentPage is null)
+{
+	<p>
+		@uILabels.GetLabel("loading")
+	</p>
+}
+else
+{
+	@foreach(var paragraph in _paragraphs)
+	{
+		<p class="readParagraph">
+			@paragraph.ParagraphText
+		</p>
+	}
+}
 
 @code {
 	[Parameter]
@@ -19,6 +42,13 @@
 	private string _errorMessage = "";
 	private UILabels uILabels = UILabelFactory.GetUILabels(UILanguage.ENG_US); // todo: create a shared UILabels
 	private Page? _currentPage { get { return GetCurrentPage(); } set { } }
+	private List<Paragraph> _paragraphs;
+
+	protected override void OnInitialized()
+	{
+		_currentPage = GetCurrentPage();
+		_paragraphs = PageHelper.GetParagraphs(_currentPage, Book.LanguageUsers);
+	}
 
 	private Book? GetBook()
 	{
@@ -35,14 +65,15 @@
 				_errorMessage = $"{uILabels.GetLabel("readErrorRetrievingData")} {uILabels.GetLabel("noDataReturned")}";
 				return null;
 			}
+			_book = book;
 			return (Book)book;
 		}
 	}
 	private Page? GetCurrentPage()
 	{
-		if (_book is null) return null;
-		if (_book.Pages is null) return null;
-		if (_book.Pages.Count == 0) return null;
-		return _book.Pages.Where(p => p.Id == _book.BkCurrentTxID).FirstOrDefault();
+		if (Book is null) return null;
+		if (Book.Pages is null) return null;
+		if (Book.Pages.Count == 0) return null;
+		return Book.Pages.Where(p => p.Id == Book.BkCurrentTxID).FirstOrDefault();
 	}
 }

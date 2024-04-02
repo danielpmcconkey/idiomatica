@@ -8,14 +8,19 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [PrimaryKey(nameof(WtWoID), nameof(WtTgID))]
-    public class WordTag
+    [PrimaryKey(nameof(Key), nameof(UserId))]
+    public class UserSetting
     {
+        public string Key { get; set; }
+
 
         #region relationships
-        [Column("WtWoID")] public int WtWoID { get; set; }
-        [Column("WtTgID")] public int WtTgID { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; }
         #endregion
 
+
+        public string KeyType { get; set; }
+        public string Value { get; set; }
     }
 }

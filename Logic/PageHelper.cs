@@ -26,5 +26,31 @@ namespace Logic
 			var parser = LanguageParserFactory.GetLanguageParser(language);
 			return parser.GetWordsFromPage(page);
 		}
+		public static List<Paragraph> GetParagraphs(Page page, Language language)
+		{
+			List<Paragraph> paragraphs = new List<Paragraph>();
+
+			var parser = LanguageParserFactory.GetLanguageParser(language);
+			var paragraphSplits = parser.SplitTextIntoParagraphs(page.OriginalText);
+
+			int paragraphOrder = 0;
+			foreach (var pText in paragraphSplits)
+			{
+				if (pText == string.Empty) continue;
+				Paragraph paragraph = new Paragraph();
+				paragraph.Order = paragraphOrder;
+				paragraphOrder++;
+                paragraph.Sentences = new List<Sentence>();
+				var sentenceSplits = parser.SplitTextIntoSentences(pText);
+                for (int i = 0; i < sentenceSplits.Length; i++)
+                {
+                    var sentenceSplit = sentenceSplits[i];
+                    paragraph.Sentences.Add(new Sentence() 
+                        { Paragraph = paragraph, Text = sentenceSplit, Order = i});
+                }
+				paragraphs.Add(paragraph);
+			}
+			return paragraphs;
+		}
 	}
 }

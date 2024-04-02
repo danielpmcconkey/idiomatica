@@ -5,109 +5,152 @@ namespace Model.DAL
     public class IdiomaticaContext : DbContext
     {
         #region DBSets
+
         public DbSet<User> Users { get; set; }
-        public DbSet<Book> Books { get; set; }
-        public DbSet<BookStat> BookStats { get; set; }
-        public DbSet<BookTag> BookTags { get; set; }
+        public DbSet<LanguageUser> LanguageUser { get; set; }
         public DbSet<Language> Languages { get; set; }
-        public DbSet<Sentence> Sentences { get; set; }
-        public DbSet<Setting> Settings { get; set; }
-        public DbSet<Status> Statuses { get; set; }
-        public DbSet<Tag> Tags { get; set; }
+        public DbSet<Book> Books { get; set; }
         public DbSet<Page> Pages { get; set; }
+        public DbSet<Paragraph> Paragraphs { get; set; }
+        public DbSet<Sentence> Sentences { get; set; }
         public DbSet<Word> Words { get; set; }
-        public DbSet<WordFlashMessage> WordFlashMessages { get; set; }
-        public DbSet<WordImage> WordImages { get; set; }
-        public DbSet<WordTag> WordTags { get; set; }
-		#endregion
+        public DbSet<BookStat> BookStats { get; set; }
+        public DbSet<Status> Statuses { get; set; }
 
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-		{
-			var dbPath = @"E:\Lute\backups\lute_backup_2024-03-22_075709.db.gz_2024-03-22_075827.db";
-			dbPath = "C:\\Users\\Dan\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Local\\Lute3\\Lute3\\lute.db";
-			optionsBuilder.UseSqlite($"Data Source={dbPath}");
 
-			// only turn on query logging when debugging
-			//optionsBuilder.LogTo(Console.WriteLine);
-		}
+
+
+
+
+
+        
+        public DbSet<UserSetting> Settings { get; set; }
+        
+        #endregion
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            var dbPath = @"E:\Lute\backups\lute_backup_2024-03-22_075709.db.gz_2024-03-22_075827.db";
+            dbPath = "C:\\Users\\Dan\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Local\\Lute3\\Lute3\\lute.db";
+            optionsBuilder.UseSqlite($"Data Source={dbPath}");
+
+            // only turn on query logging when debugging
+            //optionsBuilder.LogTo(Console.WriteLine);
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Language>(e => {
+            modelBuilder.Entity<User>(e => {
+                e.HasKey(u => u.Id);
+                e.HasMany(u => u.LanguageUsers)
+                    .WithOne(lu => lu.User)
+                    .HasForeignKey(u => u.UserId);
+                e.HasMany(u => u.UserSettings)
+                    .WithOne(us => us.User)
+                    .HasForeignKey(us => us.UserId);
+            });
+            modelBuilder.Entity<LanguageUser>(e =>
+            {
+                e.HasKey(lu => lu.Id);
+                e.HasOne(lu => lu.User)
+                    .WithMany(u => u.LanguageUsers)
+                    .HasForeignKey(lu => lu.UserId);
+                e.HasOne(lu => lu.Language)
+                    .WithMany(l => l.LanguageUsers)
+                    .HasForeignKey(lu => lu.LanguageId);                    
                 e.HasMany(l => l.Books)
-                    .WithOne(b => b.Language)
-                    .HasForeignKey(b => b.LanguageId);
+                    .WithOne(b => b.LanguageUser)
+                    .HasForeignKey(b => b.LanguageUserId);
                 e.HasMany(l => l.Words)
-                    .WithOne(w => w.Language)
-                    .HasForeignKey(w => w.LanguageId);
+                    .WithOne(w => w.LanguageUser)
+                    .HasForeignKey(w => w.LanguageUserId);
             });
-            modelBuilder.Entity<Book>(e => {
-                e.HasOne(b => b.BookStat)
+            modelBuilder.Entity<Language>(e =>
+            {
+                e.HasKey(l => l.Id);
+                e.HasMany(l => l.LanguageUsers)
+                    .WithOne(lu => lu.Language)
+                    .HasForeignKey(lu => lu.LanguageId);
+            });
+            modelBuilder.Entity<Book>(e =>
+            {
+                e.HasKey(b => b.Id);
+                e.HasOne(b => b.LanguageUser)
+                    .WithMany(lu => lu.Books)
+                    .HasForeignKey(b => b.LanguageUserId);                
+                e.HasMany(b => b.BookStats)
                     .WithOne(bs => bs.Book)
-                    .HasForeignKey<BookStat>(bs => bs.BookId);
-                e.HasMany(b => b.BookTags)
-                    .WithOne(bt => bt.Book)
-                    .HasForeignKey(bt => bt.BookId);
-                e.HasOne(b => b.User)
-                    .WithMany(u => u.Books)
-                    .HasForeignKey(b => b.UserId);
-				e.HasOne(b => b.Language)
-					.WithMany(l => l.Books)
-					.HasForeignKey(b => b.LanguageId);
-				e.HasMany(b => b.Pages)
-					.WithOne(p => p.Book)
-					.HasForeignKey(p => p.BookId);
+                    .HasForeignKey(bs => bs.BookId);
+                e.HasMany(b => b.Pages)
+                    .WithOne(p => p.Book)
+                    .HasForeignKey(p => p.BookId);
             });
-
-            modelBuilder.Entity<BookStat>(e => { });
-            modelBuilder.Entity<BookTag>(e => {
-                e.HasOne(b => b.Book)
-                    .WithMany(b => b.BookTags)
-                    .HasForeignKey(x => x.BookId);
-                e.HasOne(t => t.Tag)
-                    .WithMany(t => t.BookTags)
-                    .HasForeignKey(x => x.TagId);
+            modelBuilder.Entity<Page>(e =>
+            {
+                e.HasKey(p => p.Id);
+                e.HasOne(p => p.Book)
+                    .WithMany(b => b.Pages)
+                    .HasForeignKey(p => p.BookId);
+                e.HasMany(p => p.Paragraphs)
+                    .WithOne(pp => pp.Page)
+                    .HasForeignKey(pp => pp.PageId);
             });
-            modelBuilder.Entity<Sentence>(e => { });
-            modelBuilder.Entity<Setting>(e => { });
-            modelBuilder.Entity<Status>(e => { });
-            modelBuilder.Entity<Tag>(e => { });
-            modelBuilder.Entity<Word>(e => {
+            modelBuilder.Entity<Paragraph>(e => {
+                e.HasKey(pp => pp.Id);
+                e.HasOne(pp => pp.Page)
+                    .WithMany(p => p.Paragraphs)
+                    .HasForeignKey(pp => pp.PageId);
+                e.HasMany(pp => pp.Sentences)
+                    .WithOne(s => s.Paragraph)
+                    .HasForeignKey(s => s.ParagraphId);
+            });
+            modelBuilder.Entity<Sentence>(e => {
+                e.HasKey(s => s.Id);
+                e.HasOne(s => s.Paragraph)
+                    .WithMany(pp => pp.Sentences)
+                    .HasForeignKey(s => s.ParagraphId);
+                
+            });
+            modelBuilder.Entity<Word>(e =>
+            {
                 e.HasMany(w => w.ParentWords)
                     .WithMany(w => w.ChildWords)
                     .UsingEntity(
-                        "wordparents",
-                        l => l.HasOne(typeof(Word)).WithMany().HasForeignKey("WpParentWoID").HasPrincipalKey(nameof(Word.Id)),
-                        r => r.HasOne(typeof(Word)).WithMany().HasForeignKey("WpWoID").HasPrincipalKey(nameof(Word.Id)),
-                        j => j.HasKey("WpParentWoID", "WpWoID"));
+                        "WordParent",
+                        l => l.HasOne(typeof(Word)).WithMany().HasForeignKey("ParentWordId").HasPrincipalKey(nameof(Word.Id)),
+                        r => r.HasOne(typeof(Word)).WithMany().HasForeignKey("Id").HasPrincipalKey(nameof(Word.Id)),
+                        j => j.HasKey("ParentWordId", "Id"));
                 e.HasMany(w => w.ChildWords)
                     .WithMany(w => w.ParentWords)
                     .UsingEntity(
-                        "wordparents",
-                        l => l.HasOne(typeof(Word)).WithMany().HasForeignKey("WpWoID").HasPrincipalKey(nameof(Word.Id)),
-                        r => r.HasOne(typeof(Word)).WithMany().HasForeignKey("WpParentWoID").HasPrincipalKey(nameof(Word.Id)),
-                        j => j.HasKey("WpWoID", "WpParentWoID"));
-                e.HasOne(w => w.Language)
-                    .WithMany(l => l.Words)
-                    .HasForeignKey(x => x.LanguageId);
+                        "WordParent",
+                        l => l.HasOne(typeof(Word)).WithMany().HasForeignKey("Id").HasPrincipalKey(nameof(Word.Id)),
+                        r => r.HasOne(typeof(Word)).WithMany().HasForeignKey("ParentWordId").HasPrincipalKey(nameof(Word.Id)),
+                        j => j.HasKey("Id", "ParentWordId"));
+                e.HasOne(w => w.LanguageUser)
+                    .WithMany(lu => lu.Words)
+                    .HasForeignKey(w => w.LanguageUserId);
                 e.HasOne(w => w.Status)
                     .WithMany(s => s.Words)
                     .HasForeignKey(x => x.StatusId);
             });
-            modelBuilder.Entity<WordFlashMessage>(e => { });
-            modelBuilder.Entity<WordImage>(e => { });
-            //modelBuilder.Entity<ParentChildWordRelationship>(e => { });
-            modelBuilder.Entity<WordTag>(e => { });
-            modelBuilder.Entity<Page>(e =>
-            {
-                e.HasOne(p => p.Book)
-                    .WithMany(b => b.Pages)
-                    .HasForeignKey(p => p.BookId);
-                e.HasMany(p => p.Sentences)
-                    .WithOne(s => s.Text)
-                    .HasForeignKey(s => s.PageId);
-
+            modelBuilder.Entity<BookStat>(e => {
+                e.HasKey(bs => bs.BookId);
+                e.HasOne(bs => bs.Book)
+                    .WithMany(b => b.BookStats)
+                    .HasForeignKey(bs => bs.BookId);
             });
-
+            modelBuilder.Entity<Status>(e => {
+                e.HasKey(st => st.Id);
+                e.HasMany(st => st.Words)
+                    .WithOne(w => w.Status)
+                    .HasForeignKey(w => w.StatusId);
+            });
+            modelBuilder.Entity<UserSetting>(e => {
+                e.HasKey(us => new { us.UserId, us.Key });
+                e.HasOne(us => us.User)
+                    .WithMany(u => u.UserSettings)
+                    .HasForeignKey(us => us.UserId);
+            });
         }
     }
 }

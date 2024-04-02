@@ -11,8 +11,11 @@ namespace Logic
     public interface LanguageParser
     {
         public string StripAllButWordCharacters(string input);
-        public string[] GetWordsFromPage(Page page);
-    }
+		public string[] GetWordsFromPage(Page page);
+		public string[] GetWordsFromText(string text);
+		public string[] SplitTextIntoSentences(string text);
+		public string[] SplitTextIntoParagraphs(string text);
+	}
     public class SpaceDelimitedLanguageParser : LanguageParser
     {
         private Language _language;
@@ -23,18 +26,39 @@ namespace Logic
             _language = language; 
         }
         public string[] GetWordsFromPage(Page page)
-        {
+		{
+			return GetWordsFromText(page.OriginalText);
+		}
+		public string[] GetWordsFromText(string text)
+		{
             // reduce all double spaces, line breaks, tabs, etc. to just a single space
             // then split into a words array
             // then replace punctuation with empty strings
-            string whiteSpaceCleanup = Regex.Replace(page.OriginalText, @"[\s]{1,}", " ");
+            string whiteSpaceCleanup = Regex.Replace(text, @"[\s]{1,}", " ");
             string[] words = whiteSpaceCleanup.Split(' ');
             for (int i = 0; i < words.Length; i++) words[i] = StripAllButWordCharacters(words[i]).ToLower();
             return words;
         }
-        public string StripAllButWordCharacters(string input)
+		public string[] SplitTextIntoSentences(string text)
+		{
+			Regex regex = new Regex(_language.RegexpSplitSentences);
+			string[] sentences = regex.Split(text);
+			return sentences;
+		}
+		public string[] SplitTextIntoParagraphs(string text)
+		{
+			// normalize all line breaks
+			var lbSearch = "[\\r\\n]{1,}";
+			string normalized = Regex.Replace(text, "[\\r\\n]{1,}", "\\n");
+			// now split
+			Regex regex = new Regex("\\n");
+			string[] paragraphs = regex.Split(text);
+			return paragraphs;
+		}
+
+		public string StripAllButWordCharacters(string input)
         {
-            string pattern = $"[^{_language.LgRegexpWordCharacters}]+";
+            string pattern = $"[^{_language.RegexpWordCharacters}]+";
             string replacement = "";
             return Regex.Replace(input, pattern, replacement);
         }
@@ -51,7 +75,7 @@ namespace Logic
     {
         internal static LanguageParser GetLanguageParser(Language language)
         {
-            if (language.LgParserType == "spacedel")
+            if (language.ParserType == "spacedel")
             {
                 return new SpaceDelimitedLanguageParser(language);
             }

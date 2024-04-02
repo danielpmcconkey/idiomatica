@@ -9,9 +9,13 @@ namespace Model
     public class User
     {
         public int Id { get; set; }
+
         #region relationships
-        public List<Book> Books { get; set; }
+		public List<LanguageUser> LanguageUsers { get; set; }
+        public List<UserSetting> UserSettings { get; set; }
+
         #endregion
+
         public string Name { get; set; }
     }
 }

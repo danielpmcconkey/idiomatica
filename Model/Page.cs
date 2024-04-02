@@ -11,17 +11,17 @@ namespace Model
 	[Table("texts")]
     public class Page
     {
-        [Column("TxID")] public int Id { get; set; }
+        public int Id { get; set; }
 
         #region relationships
-        [Column("TxBkID")] public int BookId { get; set; }
+        public int BookId { get; set; }
         public Book Book { get; set; }
-        public List<Sentence> Sentences { get; set; } = new List<Sentence>(); 
+        public List<Paragraph> Paragraphs { get; set; } = new List<Paragraph>(); 
         #endregion
 
-        [Column("TxOrder")] public int Order { get; set; }
-        [Column("TxText")] public string OriginalText { get; set; }
-        [Column("TxReadDate")] public DateTime? ReadDate { get; set; }
+        public int Order { get; set; }
+        public string OriginalText { get; set; }
+        public DateTime? ReadDate { get; set; }
 
     }
 }

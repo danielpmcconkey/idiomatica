@@ -9,14 +9,14 @@ namespace Model
 {
     public class Status
     {
-        [Column("StID")] public int Id { get; set; }
+        public int Id { get; set; }
 
         #region relationships
         public List<Word> Words { get; set; } = new List<Word>();
         #endregion
 
 
-        [Column("StText")] public string Text { get; set; }
-        [Column("StAbbreviation")] public string Abbreviation { get; set; }
+        public string Text { get; set; }
+        public string Abbreviation { get; set; }
     }
 }
