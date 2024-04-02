@@ -8,11 +8,24 @@ using Model.DAL;
 
 namespace Logic
 {
+	/*
+	 * WARNING
+	 * due to the way blazor hosts multiple app sessions
+	 * in the same process (https://learn.microsoft.com/en-us/aspnet/core/blazor/security/?view=aspnetcore-8.0)
+	 * this static class should never persist anything
+	 * all functions should have zero side-effects
+	 * */
+
 	/// <summary>
 	/// BookHelper is a static class containing useful functions, commonly used to interact with book objects
 	/// </summary>
 	public static class BookHelper
 	{
+		public static Book? GetBooksById(IdiomaticaContext context, int bookId)
+		{
+			Func<Book, bool> allBooksFilter = (x => x.Id == bookId);
+			return Fetch.Books(context, allBooksFilter).FirstOrDefault();
+		}
 		public static List<Book> GetBooksForUserId(IdiomaticaContext context, int userId)
 		{
 			Func<Book, bool> allBooksFilter = (x => x.UserId == userId);

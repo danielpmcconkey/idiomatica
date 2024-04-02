@@ -39,7 +39,15 @@ namespace Logic
             return Regex.Replace(input, pattern, replacement);
         }
     }
-    internal static class LanguageParserFactory
+	
+	/*
+	 * WARNING
+	 * due to the way blazor hosts multiple app sessions
+	 * in the same process (https://learn.microsoft.com/en-us/aspnet/core/blazor/security/?view=aspnetcore-8.0)
+	 * this static class should never persist anything
+	 * all functions should have zero side-effects
+	 * */
+	internal static class LanguageParserFactory
     {
         internal static LanguageParser GetLanguageParser(Language language)
         {

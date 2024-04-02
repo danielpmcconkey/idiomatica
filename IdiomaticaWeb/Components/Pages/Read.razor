@@ -1,0 +1,48 @@
+﻿@using Model
+@using Logic
+@using Model.DAL
+@using System.Globalization
+@using Logic.UILabels
+
+@page "/read/{id}"
+@* @rendermode InteractiveServer *@
+
+<PageTitle>Test</PageTitle>
+<h1>@Book.Title</h1>
+
+@code {
+	[Parameter]
+	public string Id { get; set; }
+	public Book? Book { get { return GetBook(); } set { } }
+	private Book? _book;
+	private bool _isError = false;
+	private string _errorMessage = "";
+	private UILabels uILabels = UILabelFactory.GetUILabels(UILanguage.ENG_US); // todo: create a shared UILabels
+	private Page? _currentPage { get { return GetCurrentPage(); } set { } }
+
+	private Book? GetBook()
+	{
+		if (_book is not null) return _book;
+		if (_isError) return null;
+
+		using (var context = new IdiomaticaContext())
+		{
+			// todo: wrap some try catch around database pulls
+			var book = BookHelper.GetBooksById(context, int.Parse(Id)); // todo wrap some try catch around the int.parse
+			if(book is null)
+			{
+				_isError = true;
+				_errorMessage = $"{uILabels.GetLabel("readErrorRetrievingData")} {uILabels.GetLabel("noDataReturned")}";
+				return null;
+			}
+			return (Book)book;
+		}
+	}
+	private Page? GetCurrentPage()
+	{
+		if (_book is null) return null;
+		if (_book.Pages is null) return null;
+		if (_book.Pages.Count == 0) return null;
+		return _book.Pages.Where(p => p.Id == _book.BkCurrentTxID).FirstOrDefault();
+	}
+}

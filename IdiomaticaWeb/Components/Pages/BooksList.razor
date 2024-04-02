@@ -1,6 +1,7 @@
 ﻿@using Model
 @using Logic
 @using Model.DAL
+@using Logic.UILabels
 @using System.Globalization
 
 @page "/books-list"
@@ -18,17 +19,21 @@
 </style>
 
 <div class="form-group mb-2">
-	<input class="form-control" type="text" placeholder="Filter..."
+	<input class="form-control" type="text" placeholder="@uILabels.GetLabel("bookListFormFilter")"
 		   @bind="_filter"
 		   @bind:event="oninput" />
 </div>
 @if (_books is null)
 {
-	<p><em>Loading...</em></p>
+	<p>
+		@uILabels.GetLabel("loading")red
+	</p>
 }
 else if(!_books.Any())
 {
-	<p><em>No books exist.  Please add some.</em></p>
+	<p>
+		@uILabels.GetLabel("bookListNoBookNotice")
+	</p>
 	@* todo: add an "add books" button *@
 }
 else
@@ -41,35 +46,35 @@ else
 					<span class="fa @(SetSortIcon("Id"))"></span>
 				</th>
 				<th scope="col" class="sort-th" @onclick="@(() => SortTable("Language"))">
-					Language
+					@uILabels.GetLabel("bookListLanguageColumnHead")
 					<span class="fa @(SetSortIcon("Language"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-center" @onclick="@(() => SortTable("IsComplete"))">
-					Completed
+					@uILabels.GetLabel("bookListCompletedColumnHead")
 					<span class="fa @(SetSortIcon("IsComplete"))"></span>
 				</th>
 				<th scope="col" class="sort-th" @onclick="@(() => SortTable("Title"))">
-					Title
+					@uILabels.GetLabel("bookListTitleColumnHead")
 					<span class="fa @(SetSortIcon("Title"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-center" @onclick="@(() => SortTable("Progress"))">
-					Progress
+					@uILabels.GetLabel("bookListProgressColumnHead")
 					<span class="fa @(SetSortIcon("Progress"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TotalWordCount"))">
-					Total Word Count
+					@uILabels.GetLabel("bookListTotalWordCountColumnHead")
 					<span class="fa @(SetSortIcon("TotalWordCount"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TotalKnownPercent"))">
-					Total Known Percent
+					@uILabels.GetLabel("bookListTotalKnownPercentColumnHead")
 					<span class="fa @(SetSortIcon("TotalKnownPercent"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("DistinctWordCount"))">
-					Distinct Word Count
+					@uILabels.GetLabel("bookListDistinctWordCountColumnHead")
 					<span class="fa @(SetSortIcon("DistinctWordCount"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("DistinctKnownPercent"))">
-					Distinct Known Percent
+					@uILabels.GetLabel("bookListDistinctKnownPercentColumnHead")
 					<span class="fa @(SetSortIcon("DistinctKnownPercent"))"></span>
 				</th>
 			</tr>
@@ -79,6 +84,8 @@ else
 			{
 				if (!IsVisibleInList(book))
 					continue;
+
+				
 				<tr>
 					<td scope="row">@book.Id</td>
 					<td scope="row">@book.Language.Name</td>
@@ -89,11 +96,11 @@ else
 					}
 					</td>
 					<td scope="row"><a href="@GetBookLink(book)">@FormatTitle(book)</a></td>
-					<td scope="row" class="text-center">@book.LastPageRead / @book.TotalPages</td>
-					<td scope="row" class="text-end">@FormatCount((int)book.BookStat.TotalWordCount)</td>
-					<td scope="row" class="text-end">@FormatCount((int)book.BookStat.TotalKnownPercent)</td>
-					<td scope="row" class="text-end">@FormatCount((int)book.BookStat.DistinctWordCount)</td>
-					<td scope="row" class="text-end">@FormatCount((int)book.BookStat.DistinctKnownPercent)</td>
+					<td scope="row" class="text-center">@FormatProgress(book)</td>
+					<td scope="row" class="text-end">@FormatCount(book, "TotalWordCount")</td>
+					<td scope="row" class="text-end">@FormatCount(book, "TotalKnownPercent")</td>
+					<td scope="row" class="text-end">@FormatCount(book, "DistinctWordCount")</td>
+					<td scope="row" class="text-end">@FormatCount(book, "DistinctKnownPercent")</td>
 				</tr>
 			}
 		</tbody>
@@ -108,6 +115,7 @@ else
 	private List<Book>? _books;
 	Dictionary<string, Func<Book, object>> orderByFunctions =
 		new Dictionary<string, Func<Book, object>>();
+	private UILabels uILabels = UILabelFactory.GetUILabels(UILanguage.ENG_US);
 
 
 	protected override void OnInitialized()
@@ -201,8 +209,19 @@ else
 			return "fa-sort-down";
 		}
 	}
-	private string FormatCount(int value)
+	private string FormatCount(Book book, string field)
 	{
-		return value.ToString("N0");
+		if (book.BookStat is null) return uILabels.GetLabel("unknown");
+		System.Reflection.PropertyInfo pi = book.BookStat.GetType().GetProperty(field);
+		int? value = (int?)(pi.GetValue(book.BookStat, null));
+		if (value is null) return uILabels.GetLabel("unknown");
+
+		return ((int)(value)).ToString("N0");
 	}
+	private string FormatProgress(Book book)
+	{
+		if (book.TotalPages == 0) return "0";
+		return $"{book.LastPageRead} / {book.TotalPages}";
+	}
+
 }
