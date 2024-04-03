@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Model
 {
+    [Table("BookStat")]
     [PrimaryKey(nameof(BookId), nameof(Key))]
     public class BookStat
     {

@@ -30,7 +30,7 @@ namespace Model.DAL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var connectionString = "Server=localhost;Database=master;Trusted_Connection=True;";
+            var connectionString = "Server=localhost;Database=Idiomatica;Trusted_Connection=True;TrustServerCertificate=true;";
             //var dbPath = @"E:\Lute\backups\lute_backup_2024-03-22_075709.db.gz_2024-03-22_075827.db";
             //dbPath = "C:\\Users\\Dan\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Local\\Lute3\\Lute3\\lute.db";
             optionsBuilder.UseSqlServer(connectionString);

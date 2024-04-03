@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Model
 {
+    [Table("LanguageUser")]
     public class LanguageUser
     {
         public int Id { get; set; }

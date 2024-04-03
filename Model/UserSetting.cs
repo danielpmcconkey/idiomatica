@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Model
 {
+    [Table("UserSetting")]
     [PrimaryKey(nameof(Key), nameof(UserId))]
     public class UserSetting
     {

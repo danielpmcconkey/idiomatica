@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-	[NotMapped]
-	public class Paragraph
+    [Table("Paragraph")]
+    public class Paragraph
 	{
         public int Id { get; set; }
 
