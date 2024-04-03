@@ -32,7 +32,7 @@ namespace Model.DAL
                 return context.Books
                         .Include(b => b.BookStats)
                         .Include(b => b.Pages).ThenInclude(p => p.Paragraphs).ThenInclude(t => t.Sentences)
-                        .Include(b => b.LanguageUser).ThenInclude(lu => lu.User)
+                        .Include(b => b.LanguageUser).ThenInclude(lu => lu.Language)
                         .Where(filter)
                         .ToList();
             }
@@ -53,6 +53,10 @@ namespace Model.DAL
                 .Include(p => p.Paragraphs).ThenInclude(s => s.Sentences)
                 .Include(t => t.Book).ThenInclude(b => b.BookStats)
                 .ToList();
+        }
+        public static List<Status> Statuses(IdiomaticaContext context)
+        {
+            return context.Statuses.ToList();
         }
         public static Word Word(IdiomaticaContext context, int id)
         {

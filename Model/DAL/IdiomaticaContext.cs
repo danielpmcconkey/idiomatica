@@ -36,7 +36,7 @@ namespace Model.DAL
             optionsBuilder.UseSqlServer(connectionString);
 
             // only turn on query logging when debugging
-            //optionsBuilder.LogTo(Console.WriteLine);
+            // optionsBuilder.LogTo(Console.WriteLine);
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

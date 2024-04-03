@@ -51,33 +51,37 @@ else
     {
         _currentPage = GetCurrentPage();
         if (_currentPage is null) return;
-        _paragraphs = PageHelper.GetParagraphs(_currentPage, Book.LanguageUser.Language);
-	}
+        _paragraphs = (_currentPage.Paragraphs is null) ?
+            PageHelper.GetParagraphs(_currentPage, Book.LanguageUser.Language) :
+            _currentPage.Paragraphs;
+    }
 
-	private Book? GetBook()
-	{
-		if (_book is not null) return _book;
-		if (_isError) return null;
+    private Book? GetBook()
+    {
+        if (_book is not null) return _book;
+        if (_isError) return null;
 
-		using (var context = new IdiomaticaContext())
-		{
-			// todo: wrap some try catch around database pulls
-			var book = BookHelper.GetBooksById(context, int.Parse(Id)); // todo wrap some try catch around the int.parse
-			if(book is null)
-			{
-				_isError = true;
-				_errorMessage = $"{uILabels.GetLabel("readErrorRetrievingData")} {uILabels.GetLabel("noDataReturned")}";
-				return null;
-			}
-			_book = book;
-			return (Book)book;
-		}
-	}
-	private Page? GetCurrentPage()
-	{
-		if (Book is null) return null;
-		if (Book.Pages is null) return null;
-		if (Book.Pages.Count == 0) return null;
-        return Book.Pages.Where(p => p.Id == Book.CurrentPageID).FirstOrDefault();
-	}
+        using (var context = new IdiomaticaContext())
+        {
+            // todo: wrap some try catch around database pulls
+            var book = BookHelper.GetBooksById(context, int.Parse(Id)); // todo wrap some try catch around the int.parse
+            if(book is null)
+            {
+                _isError = true;
+                _errorMessage = $"{uILabels.GetLabel("readErrorRetrievingData")} {uILabels.GetLabel("noDataReturned")}";
+                return null;
+            }
+            _book = book;
+            return (Book)book;
+        }
+    }
+    private Page? GetCurrentPage()
+    {
+        if (Book is null) return null;
+        if (Book.Pages is null) return null;
+        if (Book.Pages.Count == 0) return null;
+        var currentPageFromDB = Book.Pages.Where(p => p.Id == Book.CurrentPageID).FirstOrDefault();
+        if (currentPageFromDB is null) return Book.Pages.OrderBy(x => x.Order).First();
+        return currentPageFromDB;
+    }
 }

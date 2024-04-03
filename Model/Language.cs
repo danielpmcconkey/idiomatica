@@ -25,10 +25,10 @@ namespace Model
         public string RegexpSplitSentences { get; set; }
         public string ExceptionsSplitSentences { get; set; }
         public string RegexpWordCharacters { get; set; }
-        public int RemoveSpaces { get; set; }
-        public int SplitEachChar { get; set; }
-        public int RightToLeft { get; set; }
-        public int ShowRomanization { get; set; } = 0;
+        public bool RemoveSpaces { get; set; }
+        public bool SplitEachChar { get; set; }
+        public bool RightToLeft { get; set; }
+        public bool ShowRomanization { get; set; } = false;
         public string ParserType { get; set; } = "spacedel";
         public int TotalWordsRead { get; set; } = 0;
     }

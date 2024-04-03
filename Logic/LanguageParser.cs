@@ -41,9 +41,8 @@ namespace Logic
         }
 		public string[] SplitTextIntoSentences(string text)
 		{
-			Regex regex = new Regex(_language.RegexpSplitSentences);
-			string[] sentences = regex.Split(text);
-			return sentences;
+            Regex regex = new Regex(_language.RegexpSplitSentences);
+            return regex.Split(text);
 		}
 		public string[] SplitTextIntoParagraphs(string text)
 		{

@@ -26,12 +26,16 @@ namespace Logic
 			var parser = LanguageParserFactory.GetLanguageParser(language);
 			return parser.GetWordsFromPage(page);
 		}
-		public static List<Paragraph> GetParagraphs(Page page, Language language)
-		{
+        public static List<Paragraph> GetParagraphs(Page page, Language language)
+        {
+            return GetParagraphs(page.OriginalText, language);
+        }
+        public static List<Paragraph> GetParagraphs(string originalText, Language language)
+        {
 			List<Paragraph> paragraphs = new List<Paragraph>();
 
 			var parser = LanguageParserFactory.GetLanguageParser(language);
-			var paragraphSplits = parser.SplitTextIntoParagraphs(page.OriginalText);
+			var paragraphSplits = parser.SplitTextIntoParagraphs(originalText);
 
 			int paragraphOrder = 0;
 			foreach (var pText in paragraphSplits)
