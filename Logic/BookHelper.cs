@@ -28,8 +28,8 @@ namespace Logic
 		}
 		public static List<Book> GetBooksForUserId(IdiomaticaContext context, int userId)
 		{
-			Func<Book, bool> allBooksFilter = (x => x.UserId == userId);
-			return Fetch.Books(context, allBooksFilter);
+			Func<Book, bool> filter = (x => x.LanguageUser.UserId == userId);
+			return Fetch.Books(context, filter);
 		}
 		public static (int lastPageRead, int totalPages) GetPageStats(Book book)
 		{

@@ -5,16 +5,18 @@ namespace Model.DAL
     public static class Fetch
     {
 
-        public static LanguageUser Language(IdiomaticaContext context, int id)
+        public static LanguageUser LanguageUser(IdiomaticaContext context, int id)
         {
             Func<LanguageUser, bool> filter = (x => x.Id == id);
-            return Languages(context, filter).FirstOrDefault();
+            return LanguageUsers(context, filter).FirstOrDefault();
         }
-        public static List<LanguageUser> Languages(IdiomaticaContext context, Func<LanguageUser, bool> filter)
+        public static List<LanguageUser> LanguageUsers(IdiomaticaContext context, Func<LanguageUser, bool> filter)
         {
-            return context.Languages
-                .Include(l => l.Books).ThenInclude(b => b.Pages).ThenInclude(p => p.Sentences)
-				.Include(l => l.Books).ThenInclude(b => b.BookStat)
+            return context.LanguageUsers
+                .Include(l => l.Books).ThenInclude(b => b.Pages).ThenInclude(p => p.Paragraphs).ThenInclude(s => s.Sentences)
+				.Include(l => l.Books).ThenInclude(b => b.BookStats)
+                .Include(l => l.Language)
+                .Include(l => l.User).ThenInclude(u => u.UserSettings)
                 .Where(filter)
                 .ToList();
         }
@@ -25,20 +27,17 @@ namespace Model.DAL
         }
         public static List<Book> Books(IdiomaticaContext context, Func<Book, bool> filter)
         {
-
             try
             {
                 return context.Books
-                        .Include(b => b.BookStat)
-                        .Include(b => b.BookTags).ThenInclude(t => t.Tag)
-                        .Include(b => b.Pages).ThenInclude(t => t.Sentences)
-                        .Include(b => b.Language)
+                        .Include(b => b.BookStats)
+                        .Include(b => b.Pages).ThenInclude(p => p.Paragraphs).ThenInclude(t => t.Sentences)
+                        .Include(b => b.LanguageUser).ThenInclude(lu => lu.User)
                         .Where(filter)
                         .ToList();
             }
             catch (Exception)
             {
-                //var burp = context.ContextId;
                 throw;
             }
         }
@@ -51,8 +50,8 @@ namespace Model.DAL
         {
             return context.Pages
                 .Where(x => id == null || x.Id == id)
-                .Include(t => t.Sentences)
-                .Include(t => t.Book).ThenInclude(b => b.BookStat)
+                .Include(p => p.Paragraphs).ThenInclude(s => s.Sentences)
+                .Include(t => t.Book).ThenInclude(b => b.BookStats)
                 .ToList();
         }
         public static Word Word(IdiomaticaContext context, int id)
@@ -60,13 +59,18 @@ namespace Model.DAL
             Func<Word, bool> filter = (x => x.Id == id);
             return Words(context, filter).FirstOrDefault();
         }
+        public static List<Word> WordsByLanguageUser(IdiomaticaContext context, LanguageUser languageUser)
+        {
+            Func<Word, bool> filter = (x => x.LanguageUserId == languageUser.Id);
+            return Words(context, filter);            
+        }
         public static List<Word> Words(IdiomaticaContext context, Func<Word, bool> filter)
         {
             return context.Words
                 .Include(w => w.ParentWords)
                 .Include(w => w.ChildWords)
                 .Include(w => w.Status)
-                .Include(w => w.Language)
+                .Include(w => w.LanguageUser)
                 .Where(filter)
                 .ToList();
         }

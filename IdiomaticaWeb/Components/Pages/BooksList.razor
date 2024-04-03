@@ -88,7 +88,7 @@ else
 				
 				<tr>
 					<td scope="row">@book.Id</td>
-					<td scope="row">@book.LanguageUsers.Name</td>
+					<td scope="row">@book.LanguageUser.Language.Name</td>
 					<td scope="row" class="text-center">
 					@if (book.IsComplete)
 					{
@@ -109,114 +109,110 @@ else
 
 @code {
 
-	private string _filter;
-	private bool _isSortedAscending;
-	private string _activeSortColumn;
-	private List<Book>? _books;
-	Dictionary<string, Func<Book, object>> orderByFunctions =
-		new Dictionary<string, Func<Book, object>>();
-	private UILabels uILabels = UILabelFactory.GetUILabels(UILanguage.ENG_US);
+    private string _filter;
+    private bool _isSortedAscending;
+    private string _activeSortColumn;
+    private List<Book>? _books;
+    Dictionary<string, Func<Book, object>> orderByFunctions =
+        new Dictionary<string, Func<Book, object>>();
+    private UILabels uILabels = UILabelFactory.GetUILabels(UILanguage.ENG_US);
 
 
-	protected override void OnInitialized()
-	{
-		orderByFunctions.Add("Language", (x => x.LanguageUsers.Name));
-		orderByFunctions.Add("Id", (x => x.Id));
-		orderByFunctions.Add("IsComplete", (x => x.IsComplete));
-		orderByFunctions.Add("Title", (x => x.Title));
-		orderByFunctions.Add("Progress", (x => GetBookProgressPercent(x)));
-		orderByFunctions.Add("TotalWordCount", (x => x.BookStat.TotalWordCount));
-		orderByFunctions.Add("TotalKnownPercent", (x => x.BookStat.TotalKnownPercent));
-		orderByFunctions.Add("DistinctWordCount", (x => x.BookStat.DistinctWordCount));
-		orderByFunctions.Add("DistinctKnownPercent", (x => x.BookStat.DistinctKnownPercent));
+    protected override void OnInitialized()
+    {
+        orderByFunctions.Add("Language", (x => x.LanguageUser.Language.Name));
+        orderByFunctions.Add("Id", (x => x.Id));
+        orderByFunctions.Add("IsComplete", (x => x.IsComplete));
+        orderByFunctions.Add("Title", (x => x.Title));
+        orderByFunctions.Add("Progress", (x => GetBookProgressPercent(x)));
+        orderByFunctions.Add("TotalWordCount", (x => Logic.StatisticsHelper.GetBookStat_int(x, "TotalWordCount")));
+        orderByFunctions.Add("TotalKnownPercent", (x => Logic.StatisticsHelper.GetBookStat_int(x, "TotalKnownPercent")));
+        orderByFunctions.Add("DistinctWordCount", (x => Logic.StatisticsHelper.GetBookStat_int(x, "DistinctWordCount")));
+        orderByFunctions.Add("DistinctKnownPercent", (x => Logic.StatisticsHelper.GetBookStat_int(x, "DistinctKnownPercent")));
 
-		_books = GetBooksForLoggedInUser();
-	}
+        _books = GetBooksForLoggedInUser();
+    }
 
-	private List<Book> GetBooksForLoggedInUser()
-	{
-		using (var context = new IdiomaticaContext())
-		{
-			return BookHelper.GetBooksForUserId(context, 1);
-		}
-	}
-	private string FormatTitle(Book book)
-	{
-		int maxCharsInBookListTitle = 60;
-		string title = book.Title;
-		if(title.Length > maxCharsInBookListTitle)
-		{
-			title = title.Substring(0, maxCharsInBookListTitle) + "...";
-		}
-		return title;
-	}
-	private string GetBookLink(Book book)
-	{
-		return $"/read/{book.Id}";
-	}
-	private float GetBookProgressPercent(Book book)
-	{
-		if (book.TotalPages == 0) return 0f;
-		return book.LastPageRead / (float)book.TotalPages;
-	}
-	private bool IsVisibleInList(Book book)
-	{
-		if (string.IsNullOrEmpty(_filter))
-			return true;
-		if (book.LanguageUsers.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase))
-			return true;
-		if (book.Title.Contains(_filter, StringComparison.OrdinalIgnoreCase))
-			return true;
-		return false;
-	}
-	private void SortTable(string columnName)
-	{
-		if (!orderByFunctions.ContainsKey(columnName)) return;
+    private List<Book> GetBooksForLoggedInUser()
+    {
+        using (var context = new IdiomaticaContext())
+        {
+            return BookHelper.GetBooksForUserId(context, 1);
+        }
+    }
+    private string FormatTitle(Book book)
+    {
+        int maxCharsInBookListTitle = 60;
+        string title = book.Title;
+        if(title.Length > maxCharsInBookListTitle)
+        {
+            title = title.Substring(0, maxCharsInBookListTitle) + "...";
+        }
+        return title;
+    }
+    private string GetBookLink(Book book)
+    {
+        return $"/read/{book.Id}";
+    }
+    private float GetBookProgressPercent(Book book)
+    {
+        if (book.TotalPages == 0) return 0f;
+        return book.LastPageRead / (float)book.TotalPages;
+    }
+    private bool IsVisibleInList(Book book)
+    {
+        if (string.IsNullOrEmpty(_filter))
+            return true;
+        if (book.LanguageUser.Language.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (book.Title.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+    private void SortTable(string columnName)
+    {
+        if (!orderByFunctions.ContainsKey(columnName)) return;
 
-		if (columnName != _activeSortColumn)
-		{
-			_books = _books.OrderBy(orderByFunctions[columnName]).ToList();
-			_isSortedAscending = true;
-			_activeSortColumn = columnName;
+        if (columnName != _activeSortColumn)
+        {
+            _books = _books.OrderBy(orderByFunctions[columnName]).ToList();
+            _isSortedAscending = true;
+            _activeSortColumn = columnName;
 
-		}
-		else
-		{
-			if (_isSortedAscending)
-			{
-				_books = _books.OrderByDescending(orderByFunctions[columnName]).ToList();
-			}
-			else
-			{
-				_books = _books.OrderBy(orderByFunctions[columnName]).ToList();
-			}
+        }
+        else
+        {
+            if (_isSortedAscending)
+            {
+                _books = _books.OrderByDescending(orderByFunctions[columnName]).ToList();
+            }
+            else
+            {
+                _books = _books.OrderBy(orderByFunctions[columnName]).ToList();
+            }
 
-			_isSortedAscending = !_isSortedAscending;
-		}
-	}
-	private string SetSortIcon(string columnName)
-	{
-		if (_activeSortColumn != columnName)
-		{
-			return string.Empty;
-		}
-		if (_isSortedAscending)
-		{
-			return "fa-sort-up";
-		}
-		else
-		{
-			return "fa-sort-down";
-		}
-	}
-	private string FormatCount(Book book, string field)
-	{
-		if (book.BookStat is null) return uILabels.GetLabel("unknown");
-		System.Reflection.PropertyInfo pi = book.BookStat.GetType().GetProperty(field);
-		int? value = (int?)(pi.GetValue(book.BookStat, null));
-		if (value is null) return uILabels.GetLabel("unknown");
-
-		return ((int)(value)).ToString("N0");
+            _isSortedAscending = !_isSortedAscending;
+        }
+    }
+    private string SetSortIcon(string columnName)
+    {
+        if (_activeSortColumn != columnName)
+        {
+            return string.Empty;
+        }
+        if (_isSortedAscending)
+        {
+            return "fa-sort-up";
+        }
+        else
+        {
+            return "fa-sort-down";
+        }
+    }
+    private string FormatCount(Book book, string field)
+    {
+        var existingStat = StatisticsHelper.GetBookStat_int(book, field);        
+        return existingStat.ToString("N0");		
 	}
 	private string FormatProgress(Book book)
 	{

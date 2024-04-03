@@ -7,7 +7,7 @@ namespace Model.DAL
         #region DBSets
 
         public DbSet<User> Users { get; set; }
-        public DbSet<LanguageUser> LanguageUser { get; set; }
+        public DbSet<LanguageUser> LanguageUsers { get; set; }
         public DbSet<Language> Languages { get; set; }
         public DbSet<Book> Books { get; set; }
         public DbSet<Page> Pages { get; set; }
@@ -30,9 +30,10 @@ namespace Model.DAL
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var dbPath = @"E:\Lute\backups\lute_backup_2024-03-22_075709.db.gz_2024-03-22_075827.db";
-            dbPath = "C:\\Users\\Dan\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Local\\Lute3\\Lute3\\lute.db";
-            optionsBuilder.UseSqlite($"Data Source={dbPath}");
+            var connectionString = "Server=localhost;Database=master;Trusted_Connection=True;";
+            //var dbPath = @"E:\Lute\backups\lute_backup_2024-03-22_075709.db.gz_2024-03-22_075827.db";
+            //dbPath = "C:\\Users\\Dan\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Local\\Lute3\\Lute3\\lute.db";
+            optionsBuilder.UseSqlServer(connectionString);
 
             // only turn on query logging when debugging
             //optionsBuilder.LogTo(Console.WriteLine);

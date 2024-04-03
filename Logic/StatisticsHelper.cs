@@ -20,9 +20,17 @@ namespace Logic
         #region public interface
         public static string? GetBookStat(Book book, string key)
         {
+            if(book.BookStats == null)  return null; 
             var existingStat = book.BookStats.Where(x => x.Key == key).FirstOrDefault();
             if (existingStat == null) return null;
             return existingStat.Value;
+        }
+        public static int GetBookStat_int(Book book, string key)
+        {
+            var existingStat = GetBookStat(book, key);
+            int parsedStat = 0;
+            int.TryParse(existingStat, out parsedStat);
+            return parsedStat;
         }
         /// <summary>
         /// Updates the bookstats table for all books for a given user and saves the database context
@@ -145,42 +153,14 @@ namespace Logic
 			AddStatToBookStats(book, book.BookStats, "totalignoredCount", status98Stat.total.ToString());
             AddStatToBookStats(book, book.BookStats, "distinctignoredCount", status98Stat.distinct.ToString());
 
-
-
-
-
-            string? totallearnedCount = GetBookStat(book, "totallearnedCount");
-            int totallearnedCount_int = 0;
-            int.TryParse(totallearnedCount, out totallearnedCount_int);
-
-            string? totalwellknownCount = GetBookStat(book, "totalwellknownCount");
-            int totalwellknownCount_int = 0;
-            int.TryParse(totalwellknownCount, out totalwellknownCount_int);
-
-            string? totalignoredCount = GetBookStat(book, "totalignoredCount");
-            int totalignoredCount_int = 0;
-            int.TryParse(totalignoredCount, out totalignoredCount_int);
-
-            string? TotalWordCount = GetBookStat(book, "TotalWordCount");
-            int TotalWordCount_int = 0;
-            int.TryParse(TotalWordCount, out TotalWordCount_int);
-
-            string? distinctlearnedCount = GetBookStat(book, "distinctlearnedCount");
-            int distinctlearnedCount_int = 0;
-            int.TryParse(distinctlearnedCount, out distinctlearnedCount_int);
-
-            string? distinctwellknownCount = GetBookStat(book, "distinctwellknownCount");
-            int distinctwellknownCount_int = 0;
-            int.TryParse(distinctwellknownCount, out distinctwellknownCount_int);
-
-            string? distinctignoredCount = GetBookStat(book, "distinctignoredCount");
-            int distinctignoredCount_int = 0;
-            int.TryParse(distinctignoredCount, out distinctignoredCount_int);
-
-            string? DistinctWordCount = GetBookStat(book, "DistinctWordCount");
-            int DistinctWordCount_int = 0;
-            int.TryParse(DistinctWordCount, out TotalWordCount_int);
-
+            int totallearnedCount_int = GetBookStat_int(book, "totallearnedCount");
+            int totalwellknownCount_int = GetBookStat_int(book, "totalwellknownCount");
+            int totalignoredCount_int = GetBookStat_int(book, "totalignoredCount");
+            int TotalWordCount_int = GetBookStat_int(book, "TotalWordCount");
+            int distinctlearnedCount_int = GetBookStat_int(book, "distinctlearnedCount");
+            int distinctwellknownCount_int = GetBookStat_int(book, "distinctwellknownCount");
+            int distinctignoredCount_int = GetBookStat_int(book, "distinctignoredCount");
+            int DistinctWordCount_int = GetBookStat_int(book, "DistinctWordCount");
 
             AddStatToBookStats(book, book.BookStats, "TotalKnownPercent", 
                 GetKnownPercent(totallearnedCount_int, totalwellknownCount_int,
@@ -189,8 +169,6 @@ namespace Logic
             AddStatToBookStats(book, book.BookStats, "DistinctKnownPercent",
                 GetKnownPercent(distinctlearnedCount_int, distinctwellknownCount_int,
                 distinctignoredCount_int, DistinctWordCount_int).ToString());
-           
-
 
 			Console.WriteLine($"{book.Title}: {GetBookStat(book, "TotalKnownPercent")} | {GetBookStat(book, "DistinctKnownPercent")}");
 

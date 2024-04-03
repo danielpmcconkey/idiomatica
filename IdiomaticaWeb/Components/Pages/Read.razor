@@ -28,8 +28,11 @@ else
 	@foreach(var paragraph in _paragraphs)
 	{
 		<p class="readParagraph">
-			@paragraph.ParagraphText
-		</p>
+			@foreach(var sentence in paragraph.Sentences)
+            {
+                <span class="readSentence">@sentence.Text</span>
+            }
+        </p>
 	}
 }
 
@@ -47,7 +50,7 @@ else
 	protected override void OnInitialized()
 	{
 		_currentPage = GetCurrentPage();
-		_paragraphs = PageHelper.GetParagraphs(_currentPage, Book.LanguageUsers);
+		_paragraphs = PageHelper.GetParagraphs(_currentPage, Book.LanguageUser.Language);
 	}
 
 	private Book? GetBook()
@@ -74,6 +77,6 @@ else
 		if (Book is null) return null;
 		if (Book.Pages is null) return null;
 		if (Book.Pages.Count == 0) return null;
-		return Book.Pages.Where(p => p.Id == Book.BkCurrentTxID).FirstOrDefault();
+        return Book.Pages.Where(p => p.Id == Book.CurrentPageID).FirstOrDefault();
 	}
 }
