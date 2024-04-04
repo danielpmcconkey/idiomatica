@@ -135,7 +135,7 @@ namespace Model.DAL
                     .HasForeignKey(x => x.StatusId);
             });
             modelBuilder.Entity<BookStat>(e => {
-                e.HasKey(bs => bs.BookId);
+                e.HasKey(bs => new { bs.BookId, bs.Key });
                 e.HasOne(bs => bs.Book)
                     .WithMany(b => b.BookStats)
                     .HasForeignKey(bs => bs.BookId);

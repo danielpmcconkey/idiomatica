@@ -61,21 +61,21 @@ else
 					@uILabels.GetLabel("bookListProgressColumnHead")
 					<span class="fa @(SetSortIcon("Progress"))"></span>
 				</th>
-				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TotalWordCount"))">
+				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TOTALWORDCOUNT"))">
 					@uILabels.GetLabel("bookListTotalWordCountColumnHead")
-					<span class="fa @(SetSortIcon("TotalWordCount"))"></span>
+					<span class="fa @(SetSortIcon("TOTALWORDCOUNT"))"></span>
 				</th>
-				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TotalKnownPercent"))">
+				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TOTALKNOWNPERCENT"))">
 					@uILabels.GetLabel("bookListTotalKnownPercentColumnHead")
-					<span class="fa @(SetSortIcon("TotalKnownPercent"))"></span>
+					<span class="fa @(SetSortIcon("TOTALKNOWNPERCENT"))"></span>
 				</th>
-				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("DistinctWordCount"))">
+				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("DISTINCTWORDCOUNT"))">
 					@uILabels.GetLabel("bookListDistinctWordCountColumnHead")
-					<span class="fa @(SetSortIcon("DistinctWordCount"))"></span>
+					<span class="fa @(SetSortIcon("DISTINCTWORDCOUNT"))"></span>
 				</th>
-				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("DistinctKnownPercent"))">
+				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("DISTINCTKNOWNPERCENT"))">
 					@uILabels.GetLabel("bookListDistinctKnownPercentColumnHead")
-					<span class="fa @(SetSortIcon("DistinctKnownPercent"))"></span>
+					<span class="fa @(SetSortIcon("DISTINCTKNOWNPERCENT"))"></span>
 				</th>
 			</tr>
 		</thead>
@@ -97,10 +97,10 @@ else
 					</td>
 					<td scope="row"><a href="@GetBookLink(book)">@FormatTitle(book)</a></td>
 					<td scope="row" class="text-center">@FormatProgress(book)</td>
-					<td scope="row" class="text-end">@FormatCount(book, "TotalWordCount")</td>
-					<td scope="row" class="text-end">@FormatCount(book, "TotalKnownPercent")</td>
-					<td scope="row" class="text-end">@FormatCount(book, "DistinctWordCount")</td>
-					<td scope="row" class="text-end">@FormatCount(book, "DistinctKnownPercent")</td>
+					<td scope="row" class="text-end">@FormatCount(book, "TOTALWORDCOUNT")</td>
+					<td scope="row" class="text-end">@FormatCount(book, "TOTALKNOWNPERCENT")</td>
+					<td scope="row" class="text-end">@FormatCount(book, "DISTINCTWORDCOUNT")</td>
+					<td scope="row" class="text-end">@FormatCount(book, "DISTINCTKNOWNPERCENT")</td>
 				</tr>
 			}
 		</tbody>
@@ -125,10 +125,10 @@ else
         orderByFunctions.Add("IsComplete", (x => x.IsComplete));
         orderByFunctions.Add("Title", (x => x.Title));
         orderByFunctions.Add("Progress", (x => GetBookProgressPercent(x)));
-        orderByFunctions.Add("TotalWordCount", (x => Logic.StatisticsHelper.GetBookStat_int(x, "TotalWordCount")));
-        orderByFunctions.Add("TotalKnownPercent", (x => Logic.StatisticsHelper.GetBookStat_int(x, "TotalKnownPercent")));
-        orderByFunctions.Add("DistinctWordCount", (x => Logic.StatisticsHelper.GetBookStat_int(x, "DistinctWordCount")));
-        orderByFunctions.Add("DistinctKnownPercent", (x => Logic.StatisticsHelper.GetBookStat_int(x, "DistinctKnownPercent")));
+        orderByFunctions.Add("TOTALWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, "TOTALWORDCOUNT")));
+        orderByFunctions.Add("TOTALKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, "TOTALKNOWNPERCENT")));
+        orderByFunctions.Add("DISTINCTWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, "DISTINCTWORDCOUNT")));
+        orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, "DISTINCTKNOWNPERCENT")));
 
         _books = GetBooksForLoggedInUser();
     }
