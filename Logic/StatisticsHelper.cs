@@ -51,7 +51,7 @@ namespace Logic
         public static void UpdateAllBookStatsForUserId(IdiomaticaContext context, int userId)
         {
             Func<Book, bool> allBooksFilter = (x => x.LanguageUser.UserId == userId);
-            var books = Fetch.Books(context, allBooksFilter);
+            var books = BookHelper.GetBooks(context, allBooksFilter);
             foreach (var book in books)
             {
                 UpdateSingleBookStats(context, book);
@@ -63,7 +63,7 @@ namespace Logic
             var readWords = languageUser.Books
                 .SelectMany(x => x.Pages)
                 .Where(p => p.ReadDate is not null)
-                .Sum(p => PageHelper.GetWordCount(p, languageUser.Language))
+                .Sum(p => PageHelper.GetWordCountOfPage(p, languageUser.Language))
                 ;
             languageUser.TotalWordsRead = readWords;
             context.SaveChanges();
@@ -91,7 +91,7 @@ namespace Logic
                 new Dictionary<string, (int status, int count)>();
 
             Func<Word, bool> filter = (x => x.LanguageUser.LanguageId == book.LanguageUser.LanguageId);
-            var wordsInLanguage = Fetch.Words(context, filter);
+            var wordsInLanguage = WordHelper.GetWords(context, filter);
 
             if (book.BookStats != null)
             {
@@ -110,7 +110,7 @@ namespace Logic
 
             foreach (var t in book.Pages)
             {
-                var wordsInText = PageHelper.GetWords(t, book.LanguageUser.Language);
+                var wordsInText = PageHelper.GetWordsOfPage(t, book.LanguageUser.Language);
                 totalWordCount += wordsInText.Count();
                 foreach (var word in wordsInText)
                 {

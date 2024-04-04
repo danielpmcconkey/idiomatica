@@ -1,4 +1,5 @@
-﻿using Model;
+﻿using Logic.UILabels;
+using Model;
 using Model.DAL;
 using System;
 using System.Collections.Generic;
@@ -24,8 +25,21 @@ namespace Logic
                 var cleanWord = parser.StripAllButWordCharacters(wordSplit).ToLower();
                 if(!wordsDict.ContainsKey(cleanWord))
                 {
-                    // todo: come up with error codes and put the human readable into the language packs
-                    throw new InvalidDataException($"Words dictionary does not contain the word: \"{cleanWord}\"");
+                    if(cleanWord == string.Empty)
+                    {
+                        // todo: figure out how to handle numbers in languageParser
+                        var emptyWord = CreateEmptyWord(context, languageUser);
+                        context.Words.Add(emptyWord);
+                        // you have to save it to teh DB so that the token gets saved with the right ID
+                        context.SaveChanges();
+                        
+                        wordsDict.Add(string.Empty, emptyWord);
+                    }
+                    else
+                    {
+                        // todo: come up with error codes and put the human readable into the language packs
+                        throw new InvalidDataException($"Words dictionary does not contain the word: \"{cleanWord}\"");
+                    }
                 }
                 var wordObject = wordsDict[cleanWord];
                 Token token = new Token() 
@@ -43,6 +57,31 @@ namespace Logic
             sentence.Tokens = tokens;
             context.SaveChanges();
             return tokens;
+        }
+
+        public static Word CreateEmptyWord(IdiomaticaContext context, LanguageUser languageUser)
+        {
+            var ignoredStatus = StatusHelper
+                    .GetStatuses(context, (x => x.Id == (int)AvailableStatus.IGNORED))
+                    .FirstOrDefault();
+
+            // todo: move the empty word population somewhere else
+
+            Word emptyWord = new Word()
+            {
+                LanguageUserId = languageUser.Id,
+                //LanguageUser = languageUser,
+                Romanization = string.Empty,
+                ChildWords = new List<Word>(),
+                ParentWords = new List<Word>(),
+                Text = string.Empty,
+                TextLowerCase = string.Empty,
+                StatusId = ignoredStatus.Id,
+                //Status = ignoredStatus,
+                Translation = string.Empty
+            };
+            return emptyWord;
+
         }
     }
 }

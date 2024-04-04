@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.DAL;
 
@@ -21,14 +22,39 @@ namespace Logic
 	/// </summary>
 	public static class BookHelper
 	{
-		public static Book? GetBookById(IdiomaticaContext context, int bookId)
-		{
-			return Fetch.BookById(context, bookId);
-		}
+        /// <summary>
+        /// includes book stats an languageuser, but not pages or content
+        /// because including them would make the result set too large
+        /// and the query would take too long
+        /// </summary>
+        public static Book? GetBookById(IdiomaticaContext context, int id)
+        {
+            Func<Book, bool> filter = (x => x.Id == id);
+            return context.Books
+                .Include(b => b.BookStats)
+                .Include(l => l.LanguageUser).ThenInclude(lu => lu.Language)
+                .Where(filter)
+                .FirstOrDefault();
+        }
+        /// <summary>
+        /// doesn't include the pages, paragraphs, etc
+        /// </summary>
+        public static List<Book> GetBooks(IdiomaticaContext context, Func<Book, bool> filter)
+        {
+            return context.Books
+                .Include(b => b.BookStats)
+                .Include(b => b.LanguageUser).ThenInclude(lu => lu.Language)
+                .Where(filter)
+                .ToList();
+            
+        }
+        /// <summary>
+        /// includes book stats an languageuser, but not pages or content
+        /// </summary>
 		public static List<Book> GetBooksForUserId(IdiomaticaContext context, int userId)
 		{
 			Func<Book, bool> filter = (x => x.LanguageUser.UserId == userId);
-			return Fetch.Books(context, filter);
+			return GetBooks(context, filter);
 		}
 		public static (int lastPageRead, int totalPages) GetPageStats(Book book)
 		{

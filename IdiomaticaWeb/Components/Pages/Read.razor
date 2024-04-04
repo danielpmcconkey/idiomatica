@@ -92,30 +92,23 @@ else
 }
 else
 {
-    <div class="container-md">
-        <div class="row">
-            <div class="col-6">
-                @* todo: split out paragraph and sentence into their own razor elements *@
-                @foreach (var paragraph in _paragraphs.OrderBy(x => x.Order))
+    
+    @* todo: split out paragraph and sentence into their own razor elements *@
+    @foreach (var paragraph in _paragraphs.OrderBy(x => x.Order))
+    {
+		<p class="readParagraph">
+			@foreach(var sentence in paragraph.Sentences.OrderBy(x => x.Order))
+            {
+                foreach (var token in GetSentenceTokens(sentence).OrderBy(x => x.Ordinal))
                 {
-		            <p class="readParagraph">
-			            @foreach(var sentence in paragraph.Sentences.OrderBy(x => x.Order))
-                        {
-                            foreach (var token in GetSentenceTokens(sentence).OrderBy(x => x.Ordinal))
-                            {
-                                <span class="readToken @GetTokenClass(token)">@token.Display</span>
-                            }
-                            
-                
-                        }
-                    </p>
+                    <span class="readToken @GetTokenClass(token)">@token.Display</span>
                 }
-            </div>
-            <div class="col">
-                <p>Stuff in here</p>
-            </div>
-        </div>
-    </div>
+            }
+        </p>
+    }
+    <button @onclick="NextPage">>></button>
+
+
 }
 
 @code {
@@ -131,16 +124,19 @@ else
 
     protected override void OnInitialized()
     {
+        // todo: don't load the entire book in at the beginning. Just the current page
         _book = GetBook();
         if (_book is null) return;
 
         _currentPage = GetCurrentPage();
         if (_currentPage is null) return;
-        _paragraphs = (_currentPage.Paragraphs is null) ?
-            PageHelper.GetParagraphs(_currentPage, _book.LanguageUser.Language) :
-            _currentPage.Paragraphs;
+        _paragraphs = GetParagraphsForCurrentPage();
 
         _allWordsInLanguage = WordHelper.GetWordDictForLanguageUser(_book.LanguageUser);
+
+        // numbers reduce to empty when you're parsing them. 
+        // create a new word object and add it to the dict to keep them from
+        // throwing up exceptions
 
     }
 
@@ -163,11 +159,13 @@ else
     private Page? GetCurrentPage()
     {
         if (_book is null) return null;
-        if (_book.Pages is null) return null;
-        if (_book.Pages.Count == 0) return null;
-        var currentPageFromDB = _book.Pages.Where(p => p.Id == _book.CurrentPageID).FirstOrDefault();
-        if (currentPageFromDB is null) return _book.Pages.OrderBy(x => x.Order).First();
-        return currentPageFromDB;
+
+        using(IdiomaticaContext context = new IdiomaticaContext())
+        {
+            var currentPageFromDB = PageHelper.GetPageById(context, _book.CurrentPageID);
+            if (currentPageFromDB is null) return PageHelper.GetPageByBookOrdinal(context, _book.Id, 0);
+            return currentPageFromDB;            
+        }
     }
     private List<Token> GetSentenceTokens(Sentence sentence)
     {
@@ -192,5 +190,38 @@ else
         if (token.Word.Status.Id == (int)AvailableStatus.IGNORED) return "statusIGNORED";
         return "statusUNKNOWN";
     }
-    
+    private void NextPage()
+    {
+        var currentPageNum = _currentPage.Order;
+        var targetPageNum = currentPageNum + 1;
+        var pageInBook = _book.Pages.Where(x => x.Order == targetPageNum).FirstOrDefault();
+        if (pageInBook is not null) 
+        {
+            _currentPage = pageInBook;
+            _paragraphs = GetParagraphsForCurrentPage();
+            return;
+        }
+        if(_book.TotalPages >= targetPageNum) // page numbers are 1-indexed
+        {
+            // it's in the DB but we haven't pulled it yet
+            using (var context = new IdiomaticaContext())
+            {
+                var dbResult = PageHelper.GetPageByBookOrdinal(context, _book.Id, targetPageNum);
+                if (dbResult is null) return;
+                _book.Pages.Add(dbResult);
+                _currentPage = dbResult;
+                _paragraphs = GetParagraphsForCurrentPage();
+            }
+        }
+    }
+    private List<Paragraph> GetParagraphsForCurrentPage()
+    {
+        if (_currentPage.Paragraphs is null)
+        {
+            var dbResult = PageHelper.GetPageParagraphs(_currentPage, _book.LanguageUser.Language);
+            _currentPage.Paragraphs = dbResult;
+        }
+        return _currentPage.Paragraphs;
+    }
+
 }

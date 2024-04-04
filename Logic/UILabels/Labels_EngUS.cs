@@ -30,10 +30,11 @@ namespace Logic.UILabels
 			#endregion
 			#region read
 			_labels.Add("readErrorRetrievingData", "There was an error retrieving this book from the database.");
-			#endregion
-			//_labels.Add("", "");
-			//_labels.Add("", "");
-		}
+            _labels.Add("untranslatable", "untranslatable");
+            #endregion
+            //_labels.Add("", "");
+            //_labels.Add("", "");
+        }
 		public override string GetLabel(string name)
 		{
 			if(_labels.ContainsKey(name)) return _labels[name];

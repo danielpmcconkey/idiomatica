@@ -99,7 +99,7 @@ namespace IdiomaticaCLI
         private void AddBooks(IdiomaticaContext context)
         {
             Func<LanguageUser, bool> filter = (x => true);
-            var languageUsers = Fetch.LanguageUsers(context, filter);
+            var languageUsers = LanguageHelper.GetLanguageUser(context, filter);
             foreach (var languageUser in languageUsers)
             {
                 // note, this isn't reusable as it's just luck that my user and language IDs match
@@ -115,7 +115,7 @@ namespace IdiomaticaCLI
                     // get pages first so you can add them to the book at create time
                     foreach(var text_in in PullTextsForBook(oldBookId))
                     {
-                        List<Paragraph> paragraphs = PageHelper.GetParagraphs(text_in.TxText, languageUser.Language);
+                        List<Paragraph> paragraphs = PageHelper.GetPageParagraphs(text_in.TxText, languageUser.Language);
                         Page page = new Page() 
                         {
                             Paragraphs = paragraphs, Order = text_in.TxOrder, OriginalText = text_in.TxText, 
@@ -178,7 +178,7 @@ namespace IdiomaticaCLI
         }
         private void AddStatuses(IdiomaticaContext context)
         {
-            var statuses = Fetch.Statuses(context);
+            var statuses = StatusHelper.GetStatuses(context, (x => true));
             context.Statuses.Add(new Status() { Text = "New (1)", Abbreviation = "1" });
             context.Statuses.Add(new Status() { Text = "New (2)", Abbreviation = "2" });
             context.Statuses.Add(new Status() { Text = "Learning (3)", Abbreviation = "3" });
