@@ -134,14 +134,14 @@ namespace Logic
             AddStatToBookStats(book, tempStats, "TOTALWORDCOUNT", totalWordCount.ToString());
             AddStatToBookStats(book, tempStats, "DISTINCTWORDCOUNT", wordDict.Count.ToString());
 
-            var status0Stat = GetStatsByStatus((int)AvailableStatuses.UNKNOWN, wordDict);
-            var status1Stat = GetStatsByStatus((int)AvailableStatuses.NEW1, wordDict);
-            var status2Stat = GetStatsByStatus((int)AvailableStatuses.NEW2, wordDict);
-            var status3Stat = GetStatsByStatus((int)AvailableStatuses.LEARNING3, wordDict);
-            var status4Stat = GetStatsByStatus((int)AvailableStatuses.LEARNING4, wordDict);
-            var status5Stat = GetStatsByStatus((int)AvailableStatuses.LEARNED, wordDict);
-            var status99Stat = GetStatsByStatus((int)AvailableStatuses.WELLKNOWN, wordDict);
-            var status98Stat = GetStatsByStatus((int)AvailableStatuses.IGNORED, wordDict);
+            var status0Stat = GetStatsByStatus((int)AvailableStatus.UNKNOWN, wordDict);
+            var status1Stat = GetStatsByStatus((int)AvailableStatus.NEW1, wordDict);
+            var status2Stat = GetStatsByStatus((int)AvailableStatus.NEW2, wordDict);
+            var status3Stat = GetStatsByStatus((int)AvailableStatus.LEARNING3, wordDict);
+            var status4Stat = GetStatsByStatus((int)AvailableStatus.LEARNING4, wordDict);
+            var status5Stat = GetStatsByStatus((int)AvailableStatus.LEARNED, wordDict);
+            var status99Stat = GetStatsByStatus((int)AvailableStatus.WELLKNOWN, wordDict);
+            var status98Stat = GetStatsByStatus((int)AvailableStatus.IGNORED, wordDict);
 
             tempStats = AddStatToBookStats(book, tempStats, "TOTALUNKNOWNCOUNT", status0Stat.total.ToString());
             tempStats = AddStatToBookStats(book, tempStats, "DISTINCTUNKNOWNCOUNT", status0Stat.distinct.ToString());

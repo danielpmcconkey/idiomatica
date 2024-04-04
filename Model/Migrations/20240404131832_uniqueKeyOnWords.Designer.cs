@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Model.DAL;
 
@@ -11,9 +12,11 @@ using Model.DAL;
 namespace Model.Migrations
 {
     [DbContext(typeof(IdiomaticaContext))]
-    partial class IdiomaticaContextModelSnapshot : ModelSnapshot
+    [Migration("20240404131832_uniqueKeyOnWords")]
+    partial class uniqueKeyOnWords
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -273,36 +276,6 @@ namespace Model.Migrations
                     b.ToTable("Status");
                 });
 
-            modelBuilder.Entity("Model.Token", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Display")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Ordinal")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SentenceId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("WordId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SentenceId");
-
-                    b.HasIndex("WordId");
-
-                    b.ToTable("Token");
-                });
-
             modelBuilder.Entity("Model.User", b =>
                 {
                     b.Property<int>("Id")
@@ -477,25 +450,6 @@ namespace Model.Migrations
                     b.Navigation("Paragraph");
                 });
 
-            modelBuilder.Entity("Model.Token", b =>
-                {
-                    b.HasOne("Model.Sentence", "Sentence")
-                        .WithMany("Tokens")
-                        .HasForeignKey("SentenceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Model.Word", "Word")
-                        .WithMany("Tokens")
-                        .HasForeignKey("WordId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Sentence");
-
-                    b.Navigation("Word");
-                });
-
             modelBuilder.Entity("Model.UserSetting", b =>
                 {
                     b.HasOne("Model.User", "User")
@@ -570,11 +524,6 @@ namespace Model.Migrations
                     b.Navigation("Sentences");
                 });
 
-            modelBuilder.Entity("Model.Sentence", b =>
-                {
-                    b.Navigation("Tokens");
-                });
-
             modelBuilder.Entity("Model.Status", b =>
                 {
                     b.Navigation("Words");
@@ -585,11 +534,6 @@ namespace Model.Migrations
                     b.Navigation("LanguageUsers");
 
                     b.Navigation("UserSettings");
-                });
-
-            modelBuilder.Entity("Model.Word", b =>
-                {
-                    b.Navigation("Tokens");
                 });
 #pragma warning restore 612, 618
         }

@@ -214,28 +214,28 @@ namespace IdiomaticaCLI
                 switch (word_in.WoStatus)
                 {
                     case 0:
-                        statusId = (int)AvailableStatuses.UNKNOWN;
+                        statusId = (int)AvailableStatus.UNKNOWN;
                         break;
                     case 1:
-                        statusId = (int)AvailableStatuses.NEW1;
+                        statusId = (int)AvailableStatus.NEW1;
                         break;
                     case 2:
-                        statusId = (int)AvailableStatuses.NEW2;
+                        statusId = (int)AvailableStatus.NEW2;
                         break;
                     case 3:
-                        statusId = (int)AvailableStatuses.LEARNING3;
+                        statusId = (int)AvailableStatus.LEARNING3;
                         break;
                     case 4:
-                        statusId = (int)AvailableStatuses.LEARNING4;
+                        statusId = (int)AvailableStatus.LEARNING4;
                         break;
                     case 5:
-                        statusId = (int)AvailableStatuses.LEARNED;
+                        statusId = (int)AvailableStatus.LEARNED;
                         break;
                     case 98:
-                        statusId = (int)AvailableStatuses.IGNORED;
+                        statusId = (int)AvailableStatus.IGNORED;
                         break;
                     case 99:
-                        statusId = (int)AvailableStatuses.WELLKNOWN;
+                        statusId = (int)AvailableStatus.WELLKNOWN;
                         break;
                 }
                             

@@ -16,8 +16,8 @@ namespace Model
 
         public int LanguageUserId { get; set; }
         public LanguageUser LanguageUser { get; set; }
-        public List<Page> Pages { get; set; } 
-        public List<BookStat> BookStats { get; set; }
+        public List<Page> Pages { get; set; } = new List<Page>();
+        public List<BookStat> BookStats { get; set; } = new List<BookStat>();
         
         #endregion
 

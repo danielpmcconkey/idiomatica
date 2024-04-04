@@ -16,6 +16,7 @@ namespace Model
         #region relationships
         public int ParagraphId { get; set; }
         public Paragraph Paragraph { get; set; }
+        public List<Token> Tokens { get; set; } = new List<Token>();
         #endregion
 
         public int Order { get; set; }

@@ -12,6 +12,7 @@ namespace Logic.LanguageParser
         public string StripAllButWordCharacters(string input);
         public string[] GetWordsFromPage(Page page);
         public string[] GetWordsFromText(string text);
+        public string[] GetWordsFromText(string text, bool keepPunctuation);
         public string[] SplitTextIntoSentences(string text);
         public string[] SplitTextIntoParagraphs(string text);
     }

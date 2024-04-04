@@ -14,6 +14,7 @@ namespace Logic.UILabels
 			_labels.Add("loading", "Loading...");
 			_labels.Add("noDataReturned", "No data returned.");
 			_labels.Add("unknown", "unknown");
+            _labels.Add("error", "Error");
 
 			#region book list
 			_labels.Add("bookListFormFilter", "Filter...");

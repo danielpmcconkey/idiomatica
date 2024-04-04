@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("Word")]
+    [Index(nameof(LanguageUserId), nameof(TextLowerCase), IsUnique = true)]
     public class Word
     {
         public int Id { get; set; }
@@ -21,6 +23,7 @@ namespace Model
         public List<Word> ChildWords { get; set; } = new List<Word>();
         public int StatusId { get; set; }
         public Status Status { get; set; }
+        public List<Token> Tokens { get; set; } = new List<Token>();
         
         #endregion
 

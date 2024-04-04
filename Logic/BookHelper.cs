@@ -21,10 +21,9 @@ namespace Logic
 	/// </summary>
 	public static class BookHelper
 	{
-		public static Book? GetBooksById(IdiomaticaContext context, int bookId)
+		public static Book? GetBookById(IdiomaticaContext context, int bookId)
 		{
-			Func<Book, bool> allBooksFilter = (x => x.Id == bookId);
-			return Fetch.Books(context, allBooksFilter).FirstOrDefault();
+			return Fetch.BookById(context, bookId);
 		}
 		public static List<Book> GetBooksForUserId(IdiomaticaContext context, int userId)
 		{

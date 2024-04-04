@@ -23,12 +23,18 @@ namespace Logic.LanguageParser
         }
         public string[] GetWordsFromText(string text)
         {
+            return GetWordsFromText(text, false);
+        }
+        public string[] GetWordsFromText(string text, bool keepPunctuation = false)
+        {
             // reduce all double spaces, line breaks, tabs, etc. to just a single space
             // then split into a words array
             // then replace punctuation with empty strings
             string whiteSpaceCleanup = Regex.Replace(text, @"[\s]{1,}", " ");
             string[] words = whiteSpaceCleanup.Split(' ');
-            for (int i = 0; i < words.Length; i++) words[i] = StripAllButWordCharacters(words[i]).ToLower();
+            if(!keepPunctuation) 
+                for (int i = 0; i < words.Length; i++) 
+                    words[i] = StripAllButWordCharacters(words[i]).ToLower();
             return words;
         }
         public string[] SplitTextIntoSentences(string text)

@@ -13,7 +13,7 @@ namespace Model
         public int Id { get; set; }
 
         #region relationships
-        public List<Sentence> Sentences { get; set; }
+        public List<Sentence> Sentences { get; set; } = new List<Sentence>();
         public int PageId { get; set; }
         public Page Page { get; set; } 
         #endregion

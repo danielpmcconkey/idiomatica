@@ -5,9 +5,76 @@
 @using Logic.UILabels
 
 @page "/read/{id}"
-@* @rendermode InteractiveServer *@
+@rendermode InteractiveServer
+<style>
+    span.statusUNKNOWN {
+        background-color: #ed6297ff;
+        color: #ffffff;
+        font-weight:bold;
+    }
 
-@if(Book is null)
+    span.statusNEW1 {
+        background-color: #ed6297ff;
+        color: #ffffff;
+        font-weight: bold;
+    }
+
+    span.statusNEW2 {
+        background-color: #3a8b89;
+        color: #032120;
+        font-weight: bold;
+    }
+
+    span.statusLEARNING3 {
+        background-color: #6ba8a7;
+        color: #032120;
+        font-weight: bold;
+    }
+
+    span.statusLEARNING4 {
+        background-color: #9dc5c4;
+        color: #032120;
+        font-weight: bold;
+    }
+
+    span.statusLEARNED {
+        background-color: #cee2e2;
+        color: #032120;
+        text-decoration: dotted;
+    }
+
+    span.statusWELLKNOWN {
+        background-color: white;
+        color: black;
+    }
+
+    span.statusIGNORED {
+        background-color: white;
+        color: black;
+    }
+
+    .readToken {
+        margin-right: .25em;
+        margin-left: .25em;
+        padding: .25em;
+        display: inline;
+    }
+    .readParagraph {
+        text-indent: 2em;
+        margin-top: 1em;
+    }
+
+    .dissappear { display:none; }
+    
+    
+</style>
+
+@if(_isError)
+{
+    <PageTitle>@uILabels.GetLabel("error")</PageTitle>
+    <h1>@uILabels.GetLabel("error"):  @_errorMessage</h1>
+}
+else if(_book is null)
 {
 	<PageTitle>@uILabels.GetLabel("loading")</PageTitle>
 	<h1>@uILabels.GetLabel("loading")</h1>
@@ -15,7 +82,7 @@
 else
 {
 	<PageTitle>Test</PageTitle>
-	<h1>@Book.Title</h1>
+    <h1>@_book.Title</h1>
 }
 @if(_currentPage is null)
 {
@@ -25,46 +92,64 @@ else
 }
 else
 {
-	@foreach(var paragraph in _paragraphs)
-	{
-		<p class="readParagraph">
-			@foreach(var sentence in paragraph.Sentences)
-            {
-                <span class="readSentence">@sentence.Text</span>
-            }
-        </p>
-	}
+    <div class="container-md">
+        <div class="row">
+            <div class="col-6">
+                @* todo: split out paragraph and sentence into their own razor elements *@
+                @foreach (var paragraph in _paragraphs.OrderBy(x => x.Order))
+                {
+		            <p class="readParagraph">
+			            @foreach(var sentence in paragraph.Sentences.OrderBy(x => x.Order))
+                        {
+                            foreach (var token in GetSentenceTokens(sentence).OrderBy(x => x.Ordinal))
+                            {
+                                <span class="readToken @GetTokenClass(token)">@token.Display</span>
+                            }
+                            
+                
+                        }
+                    </p>
+                }
+            </div>
+            <div class="col">
+                <p>Stuff in here</p>
+            </div>
+        </div>
+    </div>
 }
 
 @code {
     [Parameter]
     public string Id { get; set; }
-    public Book? Book { get { return GetBook(); } set { } }
-    private Book? _book;
     private bool _isError = false;
+    private Book? _book;
     private string _errorMessage = "";
     private UILabels uILabels = UILabelFactory.GetUILabels(UILanguage.ENG_US); // todo: create a shared UILabels
-    private Page? _currentPage { get { return GetCurrentPage(); } set { } }
+    private Page? _currentPage;
     private List<Paragraph> _paragraphs;
+    private Dictionary<string, Word> _allWordsInLanguage;
 
     protected override void OnInitialized()
     {
+        _book = GetBook();
+        if (_book is null) return;
+
         _currentPage = GetCurrentPage();
         if (_currentPage is null) return;
         _paragraphs = (_currentPage.Paragraphs is null) ?
-            PageHelper.GetParagraphs(_currentPage, Book.LanguageUser.Language) :
+            PageHelper.GetParagraphs(_currentPage, _book.LanguageUser.Language) :
             _currentPage.Paragraphs;
+
+        _allWordsInLanguage = WordHelper.GetWordDictForLanguageUser(_book.LanguageUser);
+
     }
 
     private Book? GetBook()
     {
-        if (_book is not null) return _book;
-        if (_isError) return null;
-
         using (var context = new IdiomaticaContext())
         {
             // todo: wrap some try catch around database pulls
-            var book = BookHelper.GetBooksById(context, int.Parse(Id)); // todo wrap some try catch around the int.parse
+            var book = BookHelper.GetBookById(context, int.Parse(Id)); // todo wrap some try catch around the int.parse
             if(book is null)
             {
                 _isError = true;
@@ -77,11 +162,35 @@ else
     }
     private Page? GetCurrentPage()
     {
-        if (Book is null) return null;
-        if (Book.Pages is null) return null;
-        if (Book.Pages.Count == 0) return null;
-        var currentPageFromDB = Book.Pages.Where(p => p.Id == Book.CurrentPageID).FirstOrDefault();
-        if (currentPageFromDB is null) return Book.Pages.OrderBy(x => x.Order).First();
+        if (_book is null) return null;
+        if (_book.Pages is null) return null;
+        if (_book.Pages.Count == 0) return null;
+        var currentPageFromDB = _book.Pages.Where(p => p.Id == _book.CurrentPageID).FirstOrDefault();
+        if (currentPageFromDB is null) return _book.Pages.OrderBy(x => x.Order).First();
         return currentPageFromDB;
     }
+    private List<Token> GetSentenceTokens(Sentence sentence)
+    {
+        if (sentence.Tokens is not null && sentence.Tokens.Count > 0) return sentence.Tokens;
+        using (var context = new IdiomaticaContext())
+        {
+            var x = SentenceHelper.TokenizeSentence(context, sentence, _book.LanguageUser, _allWordsInLanguage);
+            return x;
+        }
+    }
+    private string GetTokenClass(Token token)
+    {
+        if (token.Word is null) return "statusUNKNOWN";
+        if (token.Word.Status is null) return "statusUNKNOWN";
+        if (token.Word.Status.Id == (int)AvailableStatus.UNKNOWN) return "statusUNKNOWN";
+        if (token.Word.Status.Id == (int)AvailableStatus.NEW1) return "statusNEW1";
+        if (token.Word.Status.Id == (int)AvailableStatus.NEW2) return "statusNEW2";
+        if (token.Word.Status.Id == (int)AvailableStatus.LEARNING3) return "statusLEARNING3";
+        if (token.Word.Status.Id == (int)AvailableStatus.LEARNING4) return "statusLEARNING4";
+        if (token.Word.Status.Id == (int)AvailableStatus.LEARNED) return "statusLEARNED";
+        if (token.Word.Status.Id == (int)AvailableStatus.WELLKNOWN) return "statusWELLKNOWN";
+        if (token.Word.Status.Id == (int)AvailableStatus.IGNORED) return "statusIGNORED";
+        return "statusUNKNOWN";
+    }
+    
 }

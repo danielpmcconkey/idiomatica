@@ -20,15 +20,4 @@ namespace Model
         public string Text { get; set; }
         public string Abbreviation { get; set; }
     }
-    public enum AvailableStatuses
-    {
-        NEW1 = 1,
-        NEW2 = 2,
-        LEARNING3 = 3,
-        LEARNING4 = 4,
-        LEARNED = 5,
-        IGNORED = 6,
-        WELLKNOWN = 7,
-        UNKNOWN = 8
-    }
 }

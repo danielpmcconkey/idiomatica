@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Model.DAL;
 
@@ -11,9 +12,11 @@ using Model.DAL;
 namespace Model.Migrations
 {
     [DbContext(typeof(IdiomaticaContext))]
-    partial class IdiomaticaContextModelSnapshot : ModelSnapshot
+    [Migration("20240404142922_addTokens")]
+    partial class addTokens
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -300,7 +303,7 @@ namespace Model.Migrations
 
                     b.HasIndex("WordId");
 
-                    b.ToTable("Token");
+                    b.ToTable("Tokens");
                 });
 
             modelBuilder.Entity("Model.User", b =>

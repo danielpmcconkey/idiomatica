@@ -20,19 +20,30 @@ namespace Model.DAL
                 .Where(filter)
                 .ToList();
         }
-        public static Book Book(IdiomaticaContext context, int id)
+        public static Book? BookById(IdiomaticaContext context, int id)
         {
             Func<Book, bool> filter = (x => x.Id == id);
-            return Books(context, filter).FirstOrDefault();
+            return context.Books
+                        .Include(b => b.BookStats)
+                        .Include(b => b.Pages).ThenInclude(p => p.Paragraphs)
+                            .ThenInclude(t => t.Sentences).ThenInclude(s => s.Tokens)
+                            .ThenInclude(t => t.Word).ThenInclude(w => w.Status)
+                        .Include(b => b.LanguageUser).ThenInclude(lu => lu.Language)
+                        .Where(filter)
+                        .FirstOrDefault();
         }
+        /// <summary>
+        /// doesn't include the pages, paragraphs, etc
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="filter"></param>
+        /// <returns></returns>
         public static List<Book> Books(IdiomaticaContext context, Func<Book, bool> filter)
         {
             try
             {
                 return context.Books
-                        .Include(b => b.BookStats)
-                        .Include(b => b.Pages).ThenInclude(p => p.Paragraphs).ThenInclude(t => t.Sentences)
-                        .Include(b => b.LanguageUser).ThenInclude(lu => lu.Language)
+                        .Include(b => b.BookStats).Include(b => b.LanguageUser).ThenInclude(lu => lu.Language)
                         .Where(filter)
                         .ToList();
             }

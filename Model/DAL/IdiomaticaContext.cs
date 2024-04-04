@@ -16,15 +16,8 @@ namespace Model.DAL
         public DbSet<Word> Words { get; set; }
         public DbSet<BookStat> BookStats { get; set; }
         public DbSet<Status> Statuses { get; set; }
-
-
-
-
-
-
-
-        
         public DbSet<UserSetting> Settings { get; set; }
+        public DbSet<Token> Tokens { get; set; }
         
         #endregion
 
@@ -49,8 +42,7 @@ namespace Model.DAL
                     .WithOne(us => us.User)
                     .HasForeignKey(us => us.UserId);
             });
-            modelBuilder.Entity<LanguageUser>(e =>
-            {
+            modelBuilder.Entity<LanguageUser>(e => {
                 e.HasKey(lu => lu.Id);
                 e.HasOne(lu => lu.User)
                     .WithMany(u => u.LanguageUsers)
@@ -65,19 +57,17 @@ namespace Model.DAL
                     .WithOne(w => w.LanguageUser)
                     .HasForeignKey(w => w.LanguageUserId);
             });
-            modelBuilder.Entity<Language>(e =>
-            {
+            modelBuilder.Entity<Language>(e => {
                 e.HasKey(l => l.Id);
                 e.HasMany(l => l.LanguageUsers)
                     .WithOne(lu => lu.Language)
                     .HasForeignKey(lu => lu.LanguageId);
             });
-            modelBuilder.Entity<Book>(e =>
-            {
+            modelBuilder.Entity<Book>(e => {
                 e.HasKey(b => b.Id);
                 e.HasOne(b => b.LanguageUser)
                     .WithMany(lu => lu.Books)
-                    .HasForeignKey(b => b.LanguageUserId);                
+                    .HasForeignKey(b => b.LanguageUserId);
                 e.HasMany(b => b.BookStats)
                     .WithOne(bs => bs.Book)
                     .HasForeignKey(bs => bs.BookId);
@@ -85,8 +75,7 @@ namespace Model.DAL
                     .WithOne(p => p.Book)
                     .HasForeignKey(p => p.BookId);
             });
-            modelBuilder.Entity<Page>(e =>
-            {
+            modelBuilder.Entity<Page>(e => {
                 e.HasKey(p => p.Id);
                 e.HasOne(p => p.Book)
                     .WithMany(b => b.Pages)
@@ -109,10 +98,11 @@ namespace Model.DAL
                 e.HasOne(s => s.Paragraph)
                     .WithMany(pp => pp.Sentences)
                     .HasForeignKey(s => s.ParagraphId);
-                
+                e.HasMany(s => s.Tokens)
+                .WithOne(t => t.Sentence)
+                .HasForeignKey(t => t.SentenceId);
             });
-            modelBuilder.Entity<Word>(e =>
-            {
+            modelBuilder.Entity<Word>(e => {
                 e.HasMany(w => w.ParentWords)
                     .WithMany(w => w.ChildWords)
                     .UsingEntity(
@@ -133,6 +123,10 @@ namespace Model.DAL
                 e.HasOne(w => w.Status)
                     .WithMany(s => s.Words)
                     .HasForeignKey(x => x.StatusId);
+                e.HasMany(w => w.Tokens)
+                    .WithOne(t => t.Word)
+                    .HasForeignKey(t => t.WordId)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
             modelBuilder.Entity<BookStat>(e => {
                 e.HasKey(bs => new { bs.BookId, bs.Key });
@@ -151,6 +145,16 @@ namespace Model.DAL
                 e.HasOne(us => us.User)
                     .WithMany(u => u.UserSettings)
                     .HasForeignKey(us => us.UserId);
+            });
+            modelBuilder.Entity<Token>(e => {
+                e.HasKey(t => t.Id);
+                e.HasOne(t => t.Sentence)
+                    .WithMany(t => t.Tokens)
+                    .HasForeignKey(t => t.SentenceId);
+                e.HasOne(t => t.Word)
+                    .WithMany(w => w.Tokens)
+                    .HasForeignKey(t => t.WordId);
+                
             });
         }
     }
