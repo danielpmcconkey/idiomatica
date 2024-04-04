@@ -23,7 +23,7 @@ namespace Logic
 		}
 		public static string[] GetWords(Page page, Language language)
 		{
-			var parser = LanguageParserFactory.GetLanguageParser(language);
+			var parser = LanguageParser.Factory.GetLanguageParser(language);
 			return parser.GetWordsFromPage(page);
 		}
         public static List<Paragraph> GetParagraphs(Page page, Language language)
@@ -34,7 +34,7 @@ namespace Logic
         {
 			List<Paragraph> paragraphs = new List<Paragraph>();
 
-			var parser = LanguageParserFactory.GetLanguageParser(language);
+			var parser = LanguageParser.Factory.GetLanguageParser(language);
 			var paragraphSplits = parser.SplitTextIntoParagraphs(originalText);
 
 			int paragraphOrder = 0;

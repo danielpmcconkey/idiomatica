@@ -87,25 +87,14 @@ namespace IdiomaticaCLI
         {
             _wordMap = new Dictionary<int, int>();
 
-            //AddStatuses(context); 
-            //AddUsers(context);
-            //AddLanguages(context);
-            //AddBooks(context);
-            //AddWords(context);
-            //AddWordParents(context);
+            AddStatuses(context);
+            AddUsers(context);
+            AddLanguages(context);
+            AddBooks(context);
+            AddWords(context);
+            AddWordParents(context);
 
-            /*
-             * SQLite tables
-             
-                
-                
-                ('bookstats',)
-                
-                ('settings',)
-                
-                
-             * 
-             * */
+
         }
         private void AddBooks(IdiomaticaContext context)
         {
