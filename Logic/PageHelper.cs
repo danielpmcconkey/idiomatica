@@ -14,70 +14,99 @@ namespace Logic
 
 	public static class PageHelper
 	{
-		public static int GetWordCountOfPage(Page page, Language language)
+		public static int GetWordCountOfPage(Page page, LanguageUser languageUser)
 		{
-			return GetWordsOfPage(page, language).Length;
+			return GetWordsOfPage(page, languageUser).Length;
 		}
-		public static string[] GetWordsOfPage(Page page, Language language)
+		public static string[] GetWordsOfPage(Page page, LanguageUser languageUser)
 		{
-			var parser = LanguageParser.Factory.GetLanguageParser(language);
+			var parser = LanguageParser.Factory.GetLanguageParser(languageUser);
 			return parser.GetWordsFromPage(page);
 		}
-        public static List<Paragraph> GetPageParagraphs(Page page, Language language)
+        
+        /// <summary>
+        ///  parses the text through the language parser and returns paragraphs, 
+        ///  sentences, and tokens. it saves everything in the DB
+        /// </summary>
+        public static List<Paragraph> CreateParagraphsFromPageAndSave(
+            Page page, LanguageUser languageUser)
         {
-            return GetPageParagraphs(page.OriginalText, language);
-        }
-        public static List<Paragraph> GetPageParagraphs(string originalText, Language language)
-        {
+            if(page.Id == 0)
+            {
+                throw new InvalidDataException("Page must have a DB ID before adding children");
+            }
+
 			List<Paragraph> paragraphs = new List<Paragraph>();
 
-			var parser = LanguageParser.Factory.GetLanguageParser(language);
-			var paragraphSplits = parser.SplitTextIntoParagraphs(originalText);
+            var wordDict = WordHelper.FetchWordDictForLanguageUser(languageUser);
+
+            var parser = LanguageParser.Factory.GetLanguageParser(languageUser);
+			var paragraphSplits = parser.SplitTextIntoParagraphs(page.OriginalText);
 
 			int paragraphOrder = 0;
 			foreach (var pText in paragraphSplits)
 			{
 				if (pText == string.Empty) continue;
-				Paragraph paragraph = new Paragraph();
-				paragraph.Order = paragraphOrder;
+                Paragraph paragraph = new Paragraph()
+                {
+                    Ordinal = paragraphOrder,
+                    PageId = (int)page.Id
+                };
+                Save.Paragraph(paragraph);
+                paragraph.Page = page;
+
 				paragraphOrder++;
                 paragraph.Sentences = new List<Sentence>();
 				var sentenceSplits = parser.SplitTextIntoSentences(pText);
                 for (int i = 0; i < sentenceSplits.Length; i++)
                 {
                     var sentenceSplit = sentenceSplits[i];
-                    paragraph.Sentences.Add(new Sentence() 
-                        { Paragraph = paragraph, Text = sentenceSplit, Order = i});
+                    
+                    var newSentence = new Sentence()
+                    {
+                        ParagraphId = (int)paragraph.Id,
+                        Text = sentenceSplit,
+                        Ordinal = i,
+                    };
+                    Save.Sentence(newSentence);
+                    newSentence.Paragraph = paragraph;
+                        
+                    
+                    newSentence.Tokens = SentenceHelper.CreateTokensFromSentenceAndSave(
+                        newSentence, languageUser, wordDict);
+                    paragraph.Sentences.Add(newSentence);
                 }
 				paragraphs.Add(paragraph);
 			}
 			return paragraphs;
 		}
 
-        public static Page? GetPageById(IdiomaticaContext context, int id)
+        
+        
+
+        public static void RepairPage(Page page, LanguageUser languageUser)
         {
-            Func<Page, bool> filter = (x => x.Id == id);
-            return GetPages(context, filter).FirstOrDefault();
+            // delete any existing paragraphs
+            DeleteParagraphsFromPage(page);
+
+            // build them back
+            page.Paragraphs = CreateParagraphsFromPageAndSave(page, languageUser);
         }
-        public static Page? GetPageByBookOrdinal(IdiomaticaContext context, int bookId, int ordinal)
+        public static void DeleteParagraphsFromPage(Page page)
         {
-            Func<Page, bool> filter = (x => x.BookId == bookId && x.Order == ordinal);
-            return GetPages(context, filter).FirstOrDefault();
-        }
-        /// <summary>
-        /// provides all page content but minimal book information
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static List<Page> GetPages(IdiomaticaContext context, Func<Page, bool> filter)
-        {
-            return context.Pages
-                .Include(p => p.Paragraphs).ThenInclude(s => s.Sentences).ThenInclude(s => s.Tokens)
-                            .ThenInclude(t => t.Word).ThenInclude(w => w.Status)
-                .Include(p => p.Book)
-                .Where(filter)
-                .ToList();
+            var existingParagraphs = Fetch.Paragraphs((p => p.PageId == page.Id));
+            if (existingParagraphs != null)
+            {
+                using (var context = new IdiomaticaContext())
+                {
+                    foreach (var paragraph in existingParagraphs)
+                    {
+                        context.Paragraphs.Remove(paragraph);
+                    }
+                    context.SaveChanges();
+                }
+            }
+            
         }
     }
 }

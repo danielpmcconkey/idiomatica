@@ -11,7 +11,7 @@ namespace Model
     [Table("Sentence")]
     public class Sentence
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         #region relationships
         public int ParagraphId { get; set; }
@@ -19,7 +19,7 @@ namespace Model
         public List<Token> Tokens { get; set; } = new List<Token>();
         #endregion
 
-        public int Order { get; set; }
+        public int Ordinal { get; set; }
         public string? Text { get; set; }
     }
 }

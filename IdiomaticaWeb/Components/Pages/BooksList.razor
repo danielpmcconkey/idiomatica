@@ -3,6 +3,7 @@
 @using Model.DAL
 @using Logic.UILabels
 @using System.Globalization
+@using System.Linq.Expressions;
 
 @page "/books-list"
 @rendermode InteractiveServer
@@ -19,20 +20,20 @@
 </style>
 
 <div class="form-group mb-2">
-	<input class="form-control" type="text" placeholder="@uILabels.GetLabel("bookListFormFilter")"
+	<input class="form-control" type="text" placeholder="@_uiLabels.GetLabel("bookListFormFilter")"
 		   @bind="_filter"
 		   @bind:event="oninput" />
 </div>
 @if (_books is null)
 {
 	<p>
-		@uILabels.GetLabel("loading")red
+		@_uiLabels.GetLabel("loading")red
 	</p>
 }
 else if(!_books.Any())
 {
 	<p>
-		@uILabels.GetLabel("bookListNoBookNotice")
+		@_uiLabels.GetLabel("bookListNoBookNotice")
 	</p>
 	@* todo: add an "add books" button *@
 }
@@ -46,35 +47,35 @@ else
 					<span class="fa @(SetSortIcon("Id"))"></span>
 				</th>
 				<th scope="col" class="sort-th" @onclick="@(() => SortTable("Language"))">
-					@uILabels.GetLabel("bookListLanguageColumnHead")
+					@_uiLabels.GetLabel("bookListLanguageColumnHead")
 					<span class="fa @(SetSortIcon("Language"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-center" @onclick="@(() => SortTable("IsComplete"))">
-					@uILabels.GetLabel("bookListCompletedColumnHead")
+					@_uiLabels.GetLabel("bookListCompletedColumnHead")
 					<span class="fa @(SetSortIcon("IsComplete"))"></span>
 				</th>
 				<th scope="col" class="sort-th" @onclick="@(() => SortTable("Title"))">
-					@uILabels.GetLabel("bookListTitleColumnHead")
+					@_uiLabels.GetLabel("bookListTitleColumnHead")
 					<span class="fa @(SetSortIcon("Title"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-center" @onclick="@(() => SortTable("Progress"))">
-					@uILabels.GetLabel("bookListProgressColumnHead")
+					@_uiLabels.GetLabel("bookListProgressColumnHead")
 					<span class="fa @(SetSortIcon("Progress"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TOTALWORDCOUNT"))">
-					@uILabels.GetLabel("bookListTotalWordCountColumnHead")
+					@_uiLabels.GetLabel("bookListTotalWordCountColumnHead")
 					<span class="fa @(SetSortIcon("TOTALWORDCOUNT"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TOTALKNOWNPERCENT"))">
-					@uILabels.GetLabel("bookListTotalKnownPercentColumnHead")
+					@_uiLabels.GetLabel("bookListTotalKnownPercentColumnHead")
 					<span class="fa @(SetSortIcon("TOTALKNOWNPERCENT"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("DISTINCTWORDCOUNT"))">
-					@uILabels.GetLabel("bookListDistinctWordCountColumnHead")
+					@_uiLabels.GetLabel("bookListDistinctWordCountColumnHead")
 					<span class="fa @(SetSortIcon("DISTINCTWORDCOUNT"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("DISTINCTKNOWNPERCENT"))">
-					@uILabels.GetLabel("bookListDistinctKnownPercentColumnHead")
+					@_uiLabels.GetLabel("bookListDistinctKnownPercentColumnHead")
 					<span class="fa @(SetSortIcon("DISTINCTKNOWNPERCENT"))"></span>
 				</th>
 			</tr>
@@ -115,7 +116,7 @@ else
     private List<Book>? _books;
     Dictionary<string, Func<Book, object>> orderByFunctions =
         new Dictionary<string, Func<Book, object>>();
-    private UILabels uILabels = UILabelFactory.GetUILabels(UILanguage.ENG_US);
+    private UILabels _uiLabels = UILabelFactory.GetUILabels(UILanguage.ENG_US);
 
 
     protected override void OnInitialized()
@@ -130,16 +131,11 @@ else
         orderByFunctions.Add("DISTINCTWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, "DISTINCTWORDCOUNT")));
         orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, "DISTINCTKNOWNPERCENT")));
 
-        _books = GetBooksForLoggedInUser();
+        Expression<Func<Book, bool>> filter = (x => x.LanguageUser.UserId == 1); // todo: replace this filter with an actual logged in user
+        _books = Fetch.BooksAndBookStatsAndLanguage(filter);
     }
 
-    private List<Book> GetBooksForLoggedInUser()
-    {
-        using (var context = new IdiomaticaContext())
-        {
-            return BookHelper.GetBooksForUserId(context, 1);
-        }
-    }
+    
     private string FormatTitle(Book book)
     {
         int maxCharsInBookListTitle = 60;

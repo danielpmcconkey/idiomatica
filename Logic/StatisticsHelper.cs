@@ -63,7 +63,7 @@ namespace Logic
             var readWords = languageUser.Books
                 .SelectMany(x => x.Pages)
                 .Where(p => p.ReadDate is not null)
-                .Sum(p => PageHelper.GetWordCountOfPage(p, languageUser.Language))
+                .Sum(p => PageHelper.GetWordCountOfPage(p, languageUser))
                 ;
             languageUser.TotalWordsRead = readWords;
             context.SaveChanges();
@@ -87,11 +87,11 @@ namespace Logic
             // finally get its word stats
 
 
-            Dictionary<String, (int status, int count)> wordDict =
-                new Dictionary<string, (int status, int count)>();
+            Dictionary<String, (AvailableStatus status, int count)> wordDict =
+                new Dictionary<string, (AvailableStatus status, int count)>();
 
             Func<Word, bool> filter = (x => x.LanguageUser.LanguageId == book.LanguageUser.LanguageId);
-            var wordsInLanguage = WordHelper.GetWords(context, filter);
+            var wordsInLanguage = WordHelper.FetchWordDictForLanguageUser(book.LanguageUser);
 
             if (book.BookStats != null)
             {
@@ -106,27 +106,22 @@ namespace Logic
 
             int totalWordCount = 0; // set this from null to 0 so you can increment it
 
-
-
             foreach (var t in book.Pages)
             {
-                var wordsInText = PageHelper.GetWordsOfPage(t, book.LanguageUser.Language);
+                var wordsInText = PageHelper.GetWordsOfPage(t, book.LanguageUser);
                 totalWordCount += wordsInText.Count();
                 foreach (var word in wordsInText)
                 {
-                    var foundWord = wordsInLanguage
-                        .Where(x => x.Text.ToLower() == word)
-                        .FirstOrDefault();
-
-                    if (foundWord != null)
+                    if (wordsInLanguage.ContainsKey(word))
                     {
+                        Word foundWord = wordsInLanguage[word];
                         if (wordDict.ContainsKey(word))
                         {
-                            wordDict[word] = (foundWord.Status.Id, wordDict[word].count + 1);
+                            wordDict[word] = (foundWord.Status, wordDict[word].count + 1);
                         }
                         else
                         {
-                            wordDict.Add(word, (foundWord.Status.Id, 1));
+                            wordDict.Add(word, (foundWord.Status, 1));
                         }
                     }
                 }
@@ -134,14 +129,14 @@ namespace Logic
             AddStatToBookStats(book, tempStats, "TOTALWORDCOUNT", totalWordCount.ToString());
             AddStatToBookStats(book, tempStats, "DISTINCTWORDCOUNT", wordDict.Count.ToString());
 
-            var status0Stat = GetStatsByStatus((int)AvailableStatus.UNKNOWN, wordDict);
-            var status1Stat = GetStatsByStatus((int)AvailableStatus.NEW1, wordDict);
-            var status2Stat = GetStatsByStatus((int)AvailableStatus.NEW2, wordDict);
-            var status3Stat = GetStatsByStatus((int)AvailableStatus.LEARNING3, wordDict);
-            var status4Stat = GetStatsByStatus((int)AvailableStatus.LEARNING4, wordDict);
-            var status5Stat = GetStatsByStatus((int)AvailableStatus.LEARNED, wordDict);
-            var status99Stat = GetStatsByStatus((int)AvailableStatus.WELLKNOWN, wordDict);
-            var status98Stat = GetStatsByStatus((int)AvailableStatus.IGNORED, wordDict);
+            var status0Stat = GetStatsByStatus(AvailableStatus.UNKNOWN, wordDict);
+            var status1Stat = GetStatsByStatus(AvailableStatus.NEW1, wordDict);
+            var status2Stat = GetStatsByStatus(AvailableStatus.NEW2, wordDict);
+            var status3Stat = GetStatsByStatus(AvailableStatus.LEARNING3, wordDict);
+            var status4Stat = GetStatsByStatus(AvailableStatus.LEARNING4, wordDict);
+            var status5Stat = GetStatsByStatus(AvailableStatus.LEARNED, wordDict);
+            var status99Stat = GetStatsByStatus(AvailableStatus.WELLKNOWN, wordDict);
+            var status98Stat = GetStatsByStatus(AvailableStatus.IGNORED, wordDict);
 
             tempStats = AddStatToBookStats(book, tempStats, "TOTALUNKNOWNCOUNT", status0Stat.total.ToString());
             tempStats = AddStatToBookStats(book, tempStats, "DISTINCTUNKNOWNCOUNT", status0Stat.distinct.ToString());
@@ -210,7 +205,7 @@ namespace Logic
 
         }
         private static (int total, int distinct) GetStatsByStatus
-            (int status, Dictionary<String, (int status, int count)> wordDict)
+            (AvailableStatus status, Dictionary<String, (AvailableStatus status, int count)> wordDict)
         {
             int total = wordDict
                             .Where(x => x.Value.status == status)

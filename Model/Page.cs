@@ -11,7 +11,7 @@ namespace Model
 	[Table("Page")]
     public class Page
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         #region relationships
         public int BookId { get; set; }
@@ -19,7 +19,7 @@ namespace Model
         public List<Paragraph> Paragraphs { get; set; } = new List<Paragraph>(); 
         #endregion
 
-        public int Order { get; set; }
+        public int Ordinal { get; set; }
         public string OriginalText { get; set; }
         public DateTime? ReadDate { get; set; }
 

@@ -3,6 +3,7 @@
 @using Model.DAL
 @using System.Globalization
 @using Logic.UILabels
+@using System.Linq.Expressions;
 
 @page "/read/{id}"
 @rendermode InteractiveServer
@@ -71,33 +72,40 @@
 
 @if(_isError)
 {
-    <PageTitle>@uILabels.GetLabel("error")</PageTitle>
-    <h1>@uILabels.GetLabel("error"):  @_errorMessage</h1>
+    <PageTitle>@_uiLabels.GetLabel("error")</PageTitle>
+    <h1>@_uiLabels.GetLabel("error"):  @_errorMessage</h1>
 }
 else if(_book is null)
 {
-	<PageTitle>@uILabels.GetLabel("loading")</PageTitle>
-	<h1>@uILabels.GetLabel("loading")</h1>
+	<PageTitle>@_uiLabels.GetLabel("loading")</PageTitle>
+	<h1>@_uiLabels.GetLabel("loading")</h1>
 }
 else
 {
-	<PageTitle>Test</PageTitle>
+    <PageTitle>@_book.Title</PageTitle>
     <h1>@_book.Title</h1>
 }
 @if(_currentPage is null)
 {
 	<p>
-		@uILabels.GetLabel("loading")
+		@_uiLabels.GetLabel("loading")
 	</p>
 }
 else
 {
-    
+    <p>Page @_currentPage.Ordinal</p>
+    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPage.Ordinal - 1))">
+        @_uiLabels.GetLabel("btnPreviousPage")
+    </button>
+    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPage.Ordinal + 1))">
+        @_uiLabels.GetLabel("btnNextPage")
+    </button>
+
     @* todo: split out paragraph and sentence into their own razor elements *@
-    @foreach (var paragraph in _paragraphs.OrderBy(x => x.Order))
+    @foreach (var paragraph in _paragraphs.OrderBy(x => x.Ordinal))
     {
 		<p class="readParagraph">
-			@foreach(var sentence in paragraph.Sentences.OrderBy(x => x.Order))
+			@foreach(var sentence in paragraph.Sentences.OrderBy(x => x.Ordinal))
             {
                 foreach (var token in GetSentenceTokens(sentence).OrderBy(x => x.Ordinal))
                 {
@@ -106,7 +114,13 @@ else
             }
         </p>
     }
-    <button @onclick="NextPage">>></button>
+    <p>Page @_currentPage.Ordinal</p>
+    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPage.Ordinal - 1))">
+        @_uiLabels.GetLabel("btnPreviousPage")
+    </button>
+    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPage.Ordinal + 1))">
+        @_uiLabels.GetLabel("btnNextPage")
+    </button>
 
 
 }
@@ -115,113 +129,120 @@ else
     [Parameter]
     public string Id { get; set; }
     private bool _isError = false;
-    private Book? _book;
     private string _errorMessage = "";
-    private UILabels uILabels = UILabelFactory.GetUILabels(UILanguage.ENG_US); // todo: create a shared UILabels
+    private UILabels _uiLabels = UILabelFactory.GetUILabels(UILanguage.ENG_US); // todo: create a shared UILabels
+
+    private Book? _book;
     private Page? _currentPage;
+    private Language? _language;
     private List<Paragraph> _paragraphs;
     private Dictionary<string, Word> _allWordsInLanguage;
 
     protected override void OnInitialized()
     {
         // todo: don't load the entire book in at the beginning. Just the current page
-        _book = GetBook();
+        _book = FetchBook();
         if (_book is null) return;
+        _language = _book.LanguageUser.Language;
 
-        _currentPage = GetCurrentPage();
+        _currentPage = FetchPageById(_book.CurrentPageID);
         if (_currentPage is null) return;
-        _paragraphs = GetParagraphsForCurrentPage();
+        _paragraphs = _currentPage.Paragraphs;
 
-        _allWordsInLanguage = WordHelper.GetWordDictForLanguageUser(_book.LanguageUser);
-
-        // numbers reduce to empty when you're parsing them. 
-        // create a new word object and add it to the dict to keep them from
-        // throwing up exceptions
+        _allWordsInLanguage = WordHelper.FetchWordDictForLanguageUser(_book.LanguageUser);
 
     }
 
-    private Book? GetBook()
+    private Book? FetchBook()
     {
-        using (var context = new IdiomaticaContext())
+        int parsedId = 0;
+        if(!int.TryParse(Id, out parsedId)) 
         {
-            // todo: wrap some try catch around database pulls
-            var book = BookHelper.GetBookById(context, int.Parse(Id)); // todo wrap some try catch around the int.parse
-            if(book is null)
-            {
-                _isError = true;
-                _errorMessage = $"{uILabels.GetLabel("readErrorRetrievingData")} {uILabels.GetLabel("noDataReturned")}";
-                return null;
-            }
-            _book = book;
-            return (Book)book;
+            _isError = true;
+            _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
+            return null;
         }
+
+        // todo: secure DB fetches so only the logged in user's data is requested
+        Expression<Func<Book, bool>> filter = 
+            (x => x.LanguageUser.UserId == 1 && x.Id == parsedId); // todo: replace this filter with an actual logged in user
+        Book? bookFromDb = Fetch.BookAndBookStatsAndLanguage(filter);
+        // todo: wrap some try catch around UI elements
+        if (bookFromDb is null)
+        {
+            _isError = true;
+            _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
+            return null;
+        }
+        return bookFromDb;
     }
-    private Page? GetCurrentPage()
+    private Page? FetchPageById(int pageId)
     {
         if (_book is null) return null;
 
-        using(IdiomaticaContext context = new IdiomaticaContext())
-        {
-            var currentPageFromDB = PageHelper.GetPageById(context, _book.CurrentPageID);
-            if (currentPageFromDB is null) return PageHelper.GetPageByBookOrdinal(context, _book.Id, 0);
-            return currentPageFromDB;            
-        }
+        Expression<Func<Page, bool>> filter = (x => x.Id == pageId);
+        var pageFromDb = Fetch.PageAndParagraphsAndSentencesAndTokensAndWords(filter);
+
+        if (pageFromDb is not null) return pageFromDb;
+        return FetchPageByOrderWithinBook((int)_book.Id, 0);
+    }
+    private Page? FetchPageByOrderWithinBook(int bookId, int pageOrdinal)
+    {
+        if (_book is null) return null;
+
+        Expression<Func<Page, bool>> filter = (x => x.BookId == bookId && x.Ordinal == pageOrdinal);
+        var pageFromDb = Fetch.PageAndParagraphsAndSentencesAndTokensAndWords(filter);
+
+        if (pageFromDb is not null) return pageFromDb;
+
+        _isError = true;
+        _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
+        return null;
     }
     private List<Token> GetSentenceTokens(Sentence sentence)
     {
         if (sentence.Tokens is not null && sentence.Tokens.Count > 0) return sentence.Tokens;
-        using (var context = new IdiomaticaContext())
-        {
-            var x = SentenceHelper.TokenizeSentence(context, sentence, _book.LanguageUser, _allWordsInLanguage);
-            return x;
-        }
+
+        // not in the DB. Gotta create
+        return SentenceHelper.CreateTokensFromSentenceAndSave(
+            sentence, _book.LanguageUser, _allWordsInLanguage);
     }
     private string GetTokenClass(Token token)
     {
         if (token.Word is null) return "statusUNKNOWN";
-        if (token.Word.Status is null) return "statusUNKNOWN";
-        if (token.Word.Status.Id == (int)AvailableStatus.UNKNOWN) return "statusUNKNOWN";
-        if (token.Word.Status.Id == (int)AvailableStatus.NEW1) return "statusNEW1";
-        if (token.Word.Status.Id == (int)AvailableStatus.NEW2) return "statusNEW2";
-        if (token.Word.Status.Id == (int)AvailableStatus.LEARNING3) return "statusLEARNING3";
-        if (token.Word.Status.Id == (int)AvailableStatus.LEARNING4) return "statusLEARNING4";
-        if (token.Word.Status.Id == (int)AvailableStatus.LEARNED) return "statusLEARNED";
-        if (token.Word.Status.Id == (int)AvailableStatus.WELLKNOWN) return "statusWELLKNOWN";
-        if (token.Word.Status.Id == (int)AvailableStatus.IGNORED) return "statusIGNORED";
+        if (token.Word.Status == AvailableStatus.UNKNOWN) return "statusUNKNOWN";
+        if (token.Word.Status == AvailableStatus.NEW1) return "statusNEW1";
+        if (token.Word.Status == AvailableStatus.NEW2) return "statusNEW2";
+        if (token.Word.Status == AvailableStatus.LEARNING3) return "statusLEARNING3";
+        if (token.Word.Status == AvailableStatus.LEARNING4) return "statusLEARNING4";
+        if (token.Word.Status == AvailableStatus.LEARNED) return "statusLEARNED";
+        if (token.Word.Status == AvailableStatus.WELLKNOWN) return "statusWELLKNOWN";
+        if (token.Word.Status == AvailableStatus.IGNORED) return "statusIGNORED";
         return "statusUNKNOWN";
     }
-    private void NextPage()
+    private void MovePage(int targetPageNum)
     {
-        var currentPageNum = _currentPage.Order;
-        var targetPageNum = currentPageNum + 1;
-        var pageInBook = _book.Pages.Where(x => x.Order == targetPageNum).FirstOrDefault();
-        if (pageInBook is not null) 
+        if (targetPageNum < 1) return;
+        if (targetPageNum > _book.TotalPages) return;
+
+        var pageInBook = _book.Pages.Where(x => x.Ordinal == targetPageNum).FirstOrDefault();
+        if (pageInBook is not null)
         {
             _currentPage = pageInBook;
-            _paragraphs = GetParagraphsForCurrentPage();
+            _paragraphs = pageInBook.Paragraphs;
             return;
         }
-        if(_book.TotalPages >= targetPageNum) // page numbers are 1-indexed
-        {
-            // it's in the DB but we haven't pulled it yet
-            using (var context = new IdiomaticaContext())
-            {
-                var dbResult = PageHelper.GetPageByBookOrdinal(context, _book.Id, targetPageNum);
-                if (dbResult is null) return;
-                _book.Pages.Add(dbResult);
-                _currentPage = dbResult;
-                _paragraphs = GetParagraphsForCurrentPage();
-            }
-        }
-    }
-    private List<Paragraph> GetParagraphsForCurrentPage()
-    {
-        if (_currentPage.Paragraphs is null)
-        {
-            var dbResult = PageHelper.GetPageParagraphs(_currentPage, _book.LanguageUser.Language);
-            _currentPage.Paragraphs = dbResult;
-        }
-        return _currentPage.Paragraphs;
-    }
 
+        // it should be in the DB but we haven't pulled it yet
+        var pageFromDb = FetchPageByOrderWithinBook((int)_book.Id, targetPageNum);
+        if(pageFromDb is not null)
+        {
+            _currentPage = pageFromDb;
+            _paragraphs = _currentPage.Paragraphs;
+            _book.Pages.Add(pageFromDb);
+        }
+        // todo: make distinct error messages for teh diff types of errors on the read page
+        _isError = true;
+        _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
+    }
 }

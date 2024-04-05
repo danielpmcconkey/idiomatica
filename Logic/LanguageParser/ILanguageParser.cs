@@ -7,6 +7,7 @@ using Model;
 
 namespace Logic.LanguageParser
 {
+    // todo: remove any language parsing elements from the DB
     public interface ILanguageParser
     {
         public string StripAllButWordCharacters(string input);

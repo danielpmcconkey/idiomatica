@@ -1,4 +1,5 @@
-﻿using Logic.UILabels;
+﻿using Azure;
+using Logic.UILabels;
 using Model;
 using Model.DAL;
 using System;
@@ -12,75 +13,100 @@ namespace Logic
 {
     public static class SentenceHelper
     {
-        public static List<Token> TokenizeSentence(IdiomaticaContext context,
+        /// <summary>
+        /// this assumes the caller has already checked that the tokens aren't in the DB
+        /// todo: is it possible to enforce this?
+        /// </summary>
+
+        public static List<Token> CreateTokensFromSentenceAndSave(
             Sentence sentence, LanguageUser languageUser, Dictionary<string, Word> wordsDict)
         {
+            if (sentence.Id == 0)
+            {
+                throw new InvalidDataException("Sentence must have a DB ID before adding children");
+            }
+
             List<Token> tokens = new List<Token>();
 
-            var parser = LanguageParser.Factory.GetLanguageParser(languageUser.Language);
+            var parser = LanguageParser.Factory.GetLanguageParser(languageUser);
             var wordsSplits = parser.GetWordsFromText(sentence.Text, true);
+
+
             for (int i = 0; i < wordsSplits.Length; i++)
             {
                 var wordSplit = wordsSplits[i];
                 var cleanWord = parser.StripAllButWordCharacters(wordSplit).ToLower();
-                if(!wordsDict.ContainsKey(cleanWord))
+                if (!wordsDict.ContainsKey(cleanWord))
                 {
-                    if(cleanWord == string.Empty)
+                    if (cleanWord == string.Empty)
                     {
                         // todo: figure out how to handle numbers in languageParser
-                        var emptyWord = CreateEmptyWord(context, languageUser);
-                        context.Words.Add(emptyWord);
-                        // you have to save it to teh DB so that the token gets saved with the right ID
-                        context.SaveChanges();
-                        
+                        var emptyWord = CreateEmptyWord(languageUser);
+                        Save.Word(emptyWord);
+                        emptyWord.LanguageUser = languageUser;
                         wordsDict.Add(string.Empty, emptyWord);
                     }
                     else
                     {
-                        // todo: come up with error codes and put the human readable into the language packs
-                        throw new InvalidDataException($"Words dictionary does not contain the word: \"{cleanWord}\"");
+                        // this is a newly encountered word. create it and add to the dict
+                        // todo: add actual romanization lookup here
+                        var unknownWord = CreateUnknownWord(languageUser, cleanWord, cleanWord);
+                        Save.Word(unknownWord);
+                        unknownWord.LanguageUser = languageUser;
+                        wordsDict.Add(cleanWord, unknownWord);
                     }
                 }
                 var wordObject = wordsDict[cleanWord];
-                Token token = new Token() 
+                Token token = new Token()
                 {
                     Display = $"{wordSplit} ", // add the space that you previously took out
-                    SentenceId = sentence.Id, 
-                    Ordinal = i, 
-                    WordId = wordObject.Id, 
-                    //Word = wordObject, 
-                    //Sentence = sentence
+                    SentenceId = (int)sentence.Id,
+                    Ordinal = i,
+                    WordId = (int)wordObject.Id
                 };
+                Save.Token(token);
+                token.Sentence = sentence;
+                token.Word = wordObject;
                 tokens.Add(token);
-                context.Tokens.Add(token);
             }
-            sentence.Tokens = tokens;
-            context.SaveChanges();
             return tokens;
         }
 
-        public static Word CreateEmptyWord(IdiomaticaContext context, LanguageUser languageUser)
+        public static Word CreateEmptyWord(LanguageUser languageUser)
         {
-            var ignoredStatus = StatusHelper
-                    .GetStatuses(context, (x => x.Id == (int)AvailableStatus.IGNORED))
-                    .FirstOrDefault();
-
             // todo: move the empty word population somewhere else
 
             Word emptyWord = new Word()
             {
-                LanguageUserId = languageUser.Id,
-                //LanguageUser = languageUser,
+                LanguageUserId = (int)languageUser.Id,
                 Romanization = string.Empty,
                 ChildWords = new List<Word>(),
                 ParentWords = new List<Word>(),
                 Text = string.Empty,
                 TextLowerCase = string.Empty,
-                StatusId = ignoredStatus.Id,
-                //Status = ignoredStatus,
+                Status = AvailableStatus.IGNORED,
                 Translation = string.Empty
             };
             return emptyWord;
+
+        }
+        public static Word CreateUnknownWord( 
+            LanguageUser languageUser, string text, string romanization)
+        {
+            // todo: move the new word population somewhere else
+
+            Word newWord = new Word()
+            {
+                LanguageUserId = (int)languageUser.Id,
+                Romanization = romanization,
+                ChildWords = new List<Word>(),
+                ParentWords = new List<Word>(),
+                Text = text.ToLower(),
+                TextLowerCase = text.ToLower(),
+                Status = AvailableStatus.UNKNOWN,
+                Translation = string.Empty
+            };
+            return newWord;
 
         }
     }

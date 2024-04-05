@@ -63,7 +63,7 @@ namespace Logic
 				.Where(x => x.ReadDate is not null)
 				.OrderByDescending(x => x.ReadDate)
 				.FirstOrDefault();
-			var currentPageNumber = (lastPageRead is null) ? 0 : lastPageRead.Order;
+			var currentPageNumber = (lastPageRead is null) ? 0 : lastPageRead.Ordinal;
 
 			return(currentPageNumber, totalPages);
 		}
@@ -73,7 +73,7 @@ namespace Logic
 			if (book.Pages is null || book.Pages.Count == 0) return false;
 			else
 			{
-				var lastPage = book.Pages.OrderByDescending(x => x.Order).First();
+				var lastPage = book.Pages.OrderByDescending(x => x.Ordinal).First();
 				if (lastPage.ReadDate is not null) return true;
 			}
 			return false;

@@ -12,7 +12,7 @@ namespace Model
     [PrimaryKey(nameof(BookId), nameof(Key))]
     public class BookStat
     {
-        public int BookId { get; set; }
+        public int? BookId { get; set; }
 		public string Key { get; set; }
 
         #region relationships

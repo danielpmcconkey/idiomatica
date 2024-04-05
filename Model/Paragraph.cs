@@ -10,7 +10,7 @@ namespace Model
     [Table("Paragraph")]
     public class Paragraph
 	{
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         #region relationships
         public List<Sentence> Sentences { get; set; } = new List<Sentence>();
@@ -18,6 +18,6 @@ namespace Model
         public Page Page { get; set; } 
         #endregion
         
-        public int Order { get; set; }
+        public int Ordinal { get; set; }
 	}
 }

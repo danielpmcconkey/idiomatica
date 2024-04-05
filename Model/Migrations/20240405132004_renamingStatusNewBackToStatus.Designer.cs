@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Model.DAL;
 
@@ -11,9 +12,11 @@ using Model.DAL;
 namespace Model.Migrations
 {
     [DbContext(typeof(IdiomaticaContext))]
-    partial class IdiomaticaContextModelSnapshot : ModelSnapshot
+    [Migration("20240405132004_renamingStatusNewBackToStatus")]
+    partial class renamingStatusNewBackToStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,7 +74,7 @@ namespace Model.Migrations
 
                     b.HasIndex("LanguageUserId");
 
-                    b.ToTable("Book", (string)null);
+                    b.ToTable("Book");
                 });
 
             modelBuilder.Entity("Model.BookStat", b =>
@@ -88,7 +91,7 @@ namespace Model.Migrations
 
                     b.HasKey("BookId", "Key");
 
-                    b.ToTable("BookStat", (string)null);
+                    b.ToTable("BookStat");
                 });
 
             modelBuilder.Entity("Model.Language", b =>
@@ -150,7 +153,7 @@ namespace Model.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Language", (string)null);
+                    b.ToTable("Language");
                 });
 
             modelBuilder.Entity("Model.LanguageUser", b =>
@@ -176,7 +179,7 @@ namespace Model.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LanguageUser", (string)null);
+                    b.ToTable("LanguageUser");
                 });
 
             modelBuilder.Entity("Model.Page", b =>
@@ -204,7 +207,7 @@ namespace Model.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("Page", (string)null);
+                    b.ToTable("Page");
                 });
 
             modelBuilder.Entity("Model.Paragraph", b =>
@@ -225,7 +228,7 @@ namespace Model.Migrations
 
                     b.HasIndex("PageId");
 
-                    b.ToTable("Paragraph", (string)null);
+                    b.ToTable("Paragraph");
                 });
 
             modelBuilder.Entity("Model.Sentence", b =>
@@ -249,7 +252,7 @@ namespace Model.Migrations
 
                     b.HasIndex("ParagraphId");
 
-                    b.ToTable("Sentence", (string)null);
+                    b.ToTable("Sentence");
                 });
 
             modelBuilder.Entity("Model.Token", b =>
@@ -279,7 +282,7 @@ namespace Model.Migrations
 
                     b.HasIndex("WordId");
 
-                    b.ToTable("Token", (string)null);
+                    b.ToTable("Token");
                 });
 
             modelBuilder.Entity("Model.User", b =>
@@ -296,7 +299,7 @@ namespace Model.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User", (string)null);
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("Model.UserSetting", b =>
@@ -317,7 +320,7 @@ namespace Model.Migrations
 
                     b.HasKey("UserId", "Key");
 
-                    b.ToTable("UserSetting", (string)null);
+                    b.ToTable("UserSetting");
                 });
 
             modelBuilder.Entity("Model.Word", b =>
@@ -362,7 +365,7 @@ namespace Model.Migrations
                     b.HasIndex("LanguageUserId", "TextLowerCase")
                         .IsUnique();
 
-                    b.ToTable("Word", (string)null);
+                    b.ToTable("Word");
                 });
 
             modelBuilder.Entity("WordParent", b =>
@@ -377,7 +380,7 @@ namespace Model.Migrations
 
                     b.HasIndex("ParentWordId");
 
-                    b.ToTable("WordParent", (string)null);
+                    b.ToTable("WordParent");
                 });
 
             modelBuilder.Entity("Model.Book", b =>

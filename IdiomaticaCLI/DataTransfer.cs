@@ -87,7 +87,6 @@ namespace IdiomaticaCLI
         {
             _wordMap = new Dictionary<int, int>();
 
-            AddStatuses(context);
             AddUsers(context);
             AddLanguages(context);
             AddBooks(context);
@@ -98,49 +97,50 @@ namespace IdiomaticaCLI
         }
         private void AddBooks(IdiomaticaContext context)
         {
-            Func<LanguageUser, bool> filter = (x => true);
-            var languageUsers = LanguageHelper.GetLanguageUser(context, filter);
-            foreach (var languageUser in languageUsers)
-            {
-                // note, this isn't reusable as it's just luck that my user and language IDs match
-                foreach (var book_in in PullBooksForLanguageUser(languageUser.LanguageId, _danId))
-                {
-                    int oldBookId = book_in.BkID;
-                    bool archived = (book_in.BkArchived == 1) ? true : false;
-                    bool completed = (book_in.IsComplete == 1) ? true : false;
-                    int lastPageRead_in = book_in.LastPageRead;
-                    int lastPageRead_out = 0;
-                    List<Page> pages = new List<Page>();
+            //Func<LanguageUser, bool> filter = (x => true);
+            //var languageUsers = LanguageHelper.GetLanguageUser(context, filter);
+            //foreach (var languageUser in languageUsers)
+            //{
+            //    // note, this isn't reusable as it's just luck that my user and language IDs match
+            //    foreach (var book_in in PullBooksForLanguageUser(languageUser.LanguageId, _danId))
+            //    {
+            //        int oldBookId = book_in.BkID;
+            //        bool archived = (book_in.BkArchived == 1) ? true : false;
+            //        bool completed = (book_in.IsComplete == 1) ? true : false;
+            //        int lastPageRead_in = book_in.LastPageRead;
+            //        int lastPageRead_out = 0;
+            //        List<Page> pages = new List<Page>();
 
-                    // get pages first so you can add them to the book at create time
-                    foreach(var text_in in PullTextsForBook(oldBookId))
-                    {
-                        List<Paragraph> paragraphs = PageHelper.GetPageParagraphs(text_in.TxText, languageUser.Language);
-                        Page page = new Page() 
-                        {
-                            Paragraphs = paragraphs, Order = text_in.TxOrder, OriginalText = text_in.TxText, 
-                            ReadDate = text_in.TxReadDate
-                        };
-                        pages.Add(page);
+            //        // get pages first so you can add them to the book at create time
+            //        foreach(var text_in in PullTextsForBook(oldBookId))
+            //        {
+            //            List<Paragraph> paragraphs = PageHelper.CreateParagraphsFromPageAndSave(
+            //                text_in.TxText, languageUser);
+            //            Page page = new Page() 
+            //            {
+            //                Paragraphs = paragraphs, Ordinal = text_in.TxOrder, OriginalText = text_in.TxText, 
+            //                ReadDate = text_in.TxReadDate
+            //            };
+            //            pages.Add(page);
                         
 
-                        //if(text_in.TxID == lastPageRead_in)
-                        //{
-                        //    lastPageRead_out = page.Id;
-                        //}
-                    }
-                    Book book = new Book()
-                    {
-                        CurrentPageID = book_in.BkCurrentTxID, IsArchived = archived,
-                        IsComplete = completed, LanguageUserId = languageUser.LanguageId,
-                        LastPageRead = lastPageRead_out, Pages = pages, BookStats = new List<BookStat>(), 
-                        SourceURI = book_in.BkSourceURI, Title = book_in.BkTitle, TotalPages = book_in.TotalPages, 
-                        WordCount = book_in.BkWordCount
-                    };
-                    context.Books.Add(book);
-                    context.SaveChanges();
-                }
-            }
+            //            //if(text_in.TxID == lastPageRead_in)
+            //            //{
+            //            //    lastPageRead_out = page.Id;
+            //            //}
+            //        }
+            //        Book book = new Book()
+            //        {
+            //            CurrentPageID = book_in.BkCurrentTxID, IsArchived = archived,
+            //            IsComplete = completed, LanguageUserId = languageUser.LanguageId,
+            //            LastPageRead = lastPageRead_out, Pages = pages, BookStats = new List<BookStat>(), 
+            //            SourceURI = book_in.BkSourceURI, Title = book_in.BkTitle, TotalPages = book_in.TotalPages, 
+            //            WordCount = book_in.BkWordCount
+            //        };
+            //        context.Books.Add(book);
+            //        context.SaveChanges();
+            //    }
+            //}
         }
         private void AddLanguages(IdiomaticaContext context)
         {
@@ -167,7 +167,7 @@ namespace IdiomaticaCLI
 
                 LanguageUser languageUser = new LanguageUser()
                 {
-                    LanguageId = language.Id,
+                    LanguageId = (int)language.Id,
                     UserId = _danId
                 };
                 context.LanguageUsers.Add(languageUser);
@@ -176,25 +176,12 @@ namespace IdiomaticaCLI
                 
             }
         }
-        private void AddStatuses(IdiomaticaContext context)
-        {
-            var statuses = StatusHelper.GetStatuses(context, (x => true));
-            context.Statuses.Add(new Status() { Text = "New (1)", Abbreviation = "1" });
-            context.Statuses.Add(new Status() { Text = "New (2)", Abbreviation = "2" });
-            context.Statuses.Add(new Status() { Text = "Learning (3)", Abbreviation = "3" });
-            context.Statuses.Add(new Status() { Text = "Learning (4)", Abbreviation = "4" });
-            context.Statuses.Add(new Status() { Text = "Learned", Abbreviation = "5" });
-            context.Statuses.Add(new Status() { Text = "Ignored", Abbreviation = "Ign" });
-            context.Statuses.Add(new Status() { Text = "Well Known", Abbreviation = "WKn" });
-            context.Statuses.Add(new Status() { Text = "Unknown", Abbreviation = "?" });
-            context.SaveChanges();
-        }
         private void AddUsers(IdiomaticaContext context)
         {
             User dan = new User() { Name = "Dan McConkey" };
             context.Users.Add(dan);
             context.SaveChanges();
-            _danId = dan.Id;
+            _danId = (int)dan.Id;
         }
         private void AddWords(IdiomaticaContext context)
         {
@@ -210,39 +197,39 @@ namespace IdiomaticaCLI
             var words_in = PullWordsForLanguage(languageUser.LanguageId);
             foreach (var word_in in words_in)
             {
-                int statusId = 0;
+                var statusId = AvailableStatus.UNKNOWN;
                 switch (word_in.WoStatus)
                 {
                     case 0:
-                        statusId = (int)AvailableStatus.UNKNOWN;
+                        statusId = AvailableStatus.UNKNOWN;
                         break;
                     case 1:
-                        statusId = (int)AvailableStatus.NEW1;
+                        statusId = AvailableStatus.NEW1;
                         break;
                     case 2:
-                        statusId = (int)AvailableStatus.NEW2;
+                        statusId = AvailableStatus.NEW2;
                         break;
                     case 3:
-                        statusId = (int)AvailableStatus.LEARNING3;
+                        statusId = AvailableStatus.LEARNING3;
                         break;
                     case 4:
-                        statusId = (int)AvailableStatus.LEARNING4;
+                        statusId = AvailableStatus.LEARNING4;
                         break;
                     case 5:
-                        statusId = (int)AvailableStatus.LEARNED;
+                        statusId = AvailableStatus.LEARNED;
                         break;
                     case 98:
-                        statusId = (int)AvailableStatus.IGNORED;
+                        statusId = AvailableStatus.IGNORED;
                         break;
                     case 99:
-                        statusId = (int)AvailableStatus.WELLKNOWN;
+                        statusId = AvailableStatus.WELLKNOWN;
                         break;
                 }
                             
                 Word word_out = new Word() 
                 {
-                    LanguageUserId = languageUser.Id,
-                    StatusId = statusId,
+                    LanguageUserId = (int)languageUser.Id,
+                    Status = statusId,
                     Text = word_in.WoText,
                     TextLowerCase = word_in.WoTextLC,
                     Translation = word_in.WoTranslation,
@@ -258,7 +245,7 @@ namespace IdiomaticaCLI
             // now go back and create a map between new word IDs and old word IDs
             foreach(var c in combinedList)
             {
-                _wordMap.Add(c.word_in.WoID, c.word_out.Id);
+                _wordMap.Add(c.word_in.WoID, (int)c.word_out.Id);
             }
         }
         private void AddWordParents(IdiomaticaContext context)

@@ -10,7 +10,7 @@ namespace Model
     [Table("LanguageUser")]
     public class LanguageUser
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         #region relationships
         public int LanguageId { get; set; }

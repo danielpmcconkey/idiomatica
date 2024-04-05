@@ -11,7 +11,9 @@ namespace Logic.UILabels
 		
 		protected override void FillLabelsDict()
 		{
-			_labels.Add("loading", "Loading...");
+            // todo: come up with error codes and put the human readable into the language packs
+
+            _labels.Add("loading", "Loading...");
 			_labels.Add("noDataReturned", "No data returned.");
 			_labels.Add("unknown", "unknown");
             _labels.Add("error", "Error");
@@ -31,11 +33,13 @@ namespace Logic.UILabels
 			#region read
 			_labels.Add("readErrorRetrievingData", "There was an error retrieving this book from the database.");
             _labels.Add("untranslatable", "untranslatable");
+            _labels.Add("btnNextPage", "next page");
+            _labels.Add("btnPreviousPage", "previous page");
             #endregion
             //_labels.Add("", "");
             //_labels.Add("", "");
         }
-		public override string GetLabel(string name)
+        public override string GetLabel(string name)
 		{
 			if(_labels.ContainsKey(name)) return _labels[name];
 			return "unknown";

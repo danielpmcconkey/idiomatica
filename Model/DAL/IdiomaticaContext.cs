@@ -14,8 +14,7 @@ namespace Model.DAL
         public DbSet<Paragraph> Paragraphs { get; set; }
         public DbSet<Sentence> Sentences { get; set; }
         public DbSet<Word> Words { get; set; }
-        public DbSet<BookStat> BookStats { get; set; }
-        public DbSet<Status> Statuses { get; set; }
+        public DbSet<BookStat> BookStats { get; set; }        
         public DbSet<UserSetting> Settings { get; set; }
         public DbSet<Token> Tokens { get; set; }
         
@@ -29,7 +28,7 @@ namespace Model.DAL
             optionsBuilder.UseSqlServer(connectionString);
 
             // only turn on query logging when debugging
-            // optionsBuilder.LogTo(Console.WriteLine);
+            optionsBuilder.LogTo(Console.WriteLine);
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -120,25 +119,17 @@ namespace Model.DAL
                 e.HasOne(w => w.LanguageUser)
                     .WithMany(lu => lu.Words)
                     .HasForeignKey(w => w.LanguageUserId);
-                e.HasOne(w => w.Status)
-                    .WithMany(s => s.Words)
-                    .HasForeignKey(x => x.StatusId);
                 e.HasMany(w => w.Tokens)
                     .WithOne(t => t.Word)
                     .HasForeignKey(t => t.WordId)
                     .OnDelete(DeleteBehavior.NoAction);
+                e.Property(w => w.Status).HasConversion<int>();
             });
             modelBuilder.Entity<BookStat>(e => {
                 e.HasKey(bs => new { bs.BookId, bs.Key });
                 e.HasOne(bs => bs.Book)
                     .WithMany(b => b.BookStats)
                     .HasForeignKey(bs => bs.BookId);
-            });
-            modelBuilder.Entity<Status>(e => {
-                e.HasKey(st => st.Id);
-                e.HasMany(st => st.Words)
-                    .WithOne(w => w.Status)
-                    .HasForeignKey(w => w.StatusId);
             });
             modelBuilder.Entity<UserSetting>(e => {
                 e.HasKey(us => new { us.UserId, us.Key });

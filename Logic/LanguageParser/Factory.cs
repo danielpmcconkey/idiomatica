@@ -7,21 +7,13 @@ using System.Threading.Tasks;
 
 namespace Logic.LanguageParser
 {
-
-    /*
-	 * WARNING
-	 * due to the way blazor hosts multiple app sessions
-	 * in the same process (https://learn.microsoft.com/en-us/aspnet/core/blazor/security/?view=aspnetcore-8.0)
-	 * this static class should never persist anything
-	 * all functions should have zero side-effects
-	 * */
     internal static class Factory
     {
-        internal static ILanguageParser GetLanguageParser(Language language)
+        internal static ILanguageParser GetLanguageParser(LanguageUser languageUser)
         {
-            if (language.ParserType == "spacedel")
+            if (languageUser.Language.ParserType == "spacedel")
             {
-                return new SpaceDelimited(language);
+                return new SpaceDelimited(languageUser.Language);
             }
             else throw new NotImplementedException("other parser types not built yet");
 

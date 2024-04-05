@@ -12,7 +12,7 @@ namespace Model
     [Index(nameof(LanguageUserId), nameof(TextLowerCase), IsUnique = true)]
     public class Word
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
 
         #region relationships
@@ -21,8 +21,7 @@ namespace Model
         public LanguageUser LanguageUser { get; set; }
         public List<Word> ParentWords { get; set; } = new List<Word>();
         public List<Word> ChildWords { get; set; } = new List<Word>();
-        public int StatusId { get; set; }
-        public Status Status { get; set; }
+        public AvailableStatus Status { get; set; }
         public List<Token> Tokens { get; set; } = new List<Token>();
         
         #endregion
@@ -33,7 +32,7 @@ namespace Model
         public string TextLowerCase { get; set; }
         public string? Translation { get; set; }
         public string? Romanization { get; set; }
-        public int TokenCount { get; set; } = 0; // todo: understand token vs word
+        public int TokenCount { get; set; } = 0; // todo: understand token vs word in original lute and make a multi-word learning phrase in idiomatica
         public DateTime Created { get; set; } = DateTime.Now;
         public DateTime StatusChanged { get; set; } = DateTime.Now;
     }

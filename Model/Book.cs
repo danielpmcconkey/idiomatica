@@ -10,7 +10,7 @@ namespace Model
     [Table("Book")]
     public class Book
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         #region relationships
 
