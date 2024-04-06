@@ -20,6 +20,7 @@ namespace Model
         #endregion
 
         public int Ordinal { get; set; }
+        [Column(TypeName ="TEXT")]
         public string OriginalText { get; set; }
         public DateTime? ReadDate { get; set; }
 

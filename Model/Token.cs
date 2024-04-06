@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -27,6 +28,7 @@ namespace Model
         /// <summary>
         /// the text only component, regardless of status, includes any punctuation
         /// </summary>
+        [StringLength(250)]
         public string Display {  get; set; }
         
         

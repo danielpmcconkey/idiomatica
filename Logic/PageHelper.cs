@@ -52,7 +52,7 @@ namespace Logic
                     Ordinal = paragraphOrder,
                     PageId = (int)page.Id
                 };
-                Save.Paragraph(paragraph);
+                Insert.Paragraph(paragraph);
                 paragraph.Page = page;
 
 				paragraphOrder++;
@@ -68,7 +68,7 @@ namespace Logic
                         Text = sentenceSplit,
                         Ordinal = i,
                     };
-                    Save.Sentence(newSentence);
+                    Insert.Sentence(newSentence);
                     newSentence.Paragraph = paragraph;
                         
                     

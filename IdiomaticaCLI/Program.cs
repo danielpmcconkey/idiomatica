@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Model.DAL;
 using Logic;
 using Model;
-using IdiomaticaCLI;
 using System.Linq.Expressions;
 
 //using (var context = new IdiomaticaContext())
@@ -32,15 +31,17 @@ using System.Linq.Expressions;
 
 if (false)
 {
-    // delete a page's contents and start over. does not delete the page
+    // delete a book's contents and start over. does not delete the pages
     Expression<Func<Book, bool>> filter =
-                (x => x.LanguageUser.UserId == 1 && x.Id == 14);
-    Book? bookFromDb = Fetch.BookAndBookStatsAndLanguage(filter);
-
-    var pages = Fetch.Pages((x => x.BookId == bookFromDb.Id));
-    foreach (var page in pages)
+                (x => x.Id != 14);
+    var booksFromDb = Fetch.BooksAndBookStatsAndLanguage(filter);
+    foreach (var bookFromDb in booksFromDb)
     {
-        PageHelper.RepairPage(page, bookFromDb.LanguageUser);
+        var pages = Fetch.Pages((x => x.BookId == bookFromDb.Id));
+        foreach (var page in pages)
+        {
+            PageHelper.RepairPage(page, bookFromDb.LanguageUser);
+        }
     }
 }
 

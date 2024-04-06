@@ -1,0 +1,513 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "E:\\Idiomatica\\idiomatica\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{DC9B0871-B922-4DD5-9625-1D4FFE5E7E61}|IdiomaticaCLI\\IdiomaticaCLI.csproj|e:\\idiomatica\\idiomatica\\idiomaticacli\\idiomaticacli.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{DC9B0871-B922-4DD5-9625-1D4FFE5E7E61}|IdiomaticaCLI\\IdiomaticaCLI.csproj|solutionrelative:idiomaticacli\\idiomaticacli.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B8457729-75BE-4564-BE1C-876FB8E4D74F}|IdiomaticaWeb\\IdiomaticaWeb.csproj|e:\\idiomatica\\idiomatica\\idiomaticaweb\\components\\pages\\bookslist.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B8457729-75BE-4564-BE1C-876FB8E4D74F}|IdiomaticaWeb\\IdiomaticaWeb.csproj|solutionrelative:idiomaticaweb\\components\\pages\\bookslist.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|e:\\idiomatica\\idiomatica\\logic\\statisticshelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|solutionrelative:logic\\statisticshelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\availablebookstat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\availablebookstat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\availablestatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\availablestatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\bookstat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\bookstat.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DC9B0871-B922-4DD5-9625-1D4FFE5E7E61}|IdiomaticaCLI\\IdiomaticaCLI.csproj|e:\\idiomatica\\idiomatica\\idiomaticacli\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DC9B0871-B922-4DD5-9625-1D4FFE5E7E61}|IdiomaticaCLI\\IdiomaticaCLI.csproj|solutionrelative:idiomaticacli\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|e:\\idiomatica\\idiomatica\\logic\\sentencehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|solutionrelative:logic\\sentencehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\dal\\idiomaticacontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\dal\\idiomaticacontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\dal\\insert.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\dal\\insert.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|e:\\idiomatica\\idiomatica\\logic\\pagehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|solutionrelative:logic\\pagehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B8457729-75BE-4564-BE1C-876FB8E4D74F}|IdiomaticaWeb\\IdiomaticaWeb.csproj|e:\\idiomatica\\idiomatica\\idiomaticaweb\\components\\pages\\read.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B8457729-75BE-4564-BE1C-876FB8E4D74F}|IdiomaticaWeb\\IdiomaticaWeb.csproj|solutionrelative:idiomaticaweb\\components\\pages\\read.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\word.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\word.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\token.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\token.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\sentence.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\sentence.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\paragraph.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\paragraph.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\page.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\page.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\languageuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\languageuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\language.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\language.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\book.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\book.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|e:\\idiomatica\\idiomatica\\logic\\paragraphhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|solutionrelative:logic\\paragraphhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|e:\\idiomatica\\idiomatica\\model\\dal\\fetch.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D15970B-655F-47DF-9BC5-B82B50ABA53A}|Model\\Model.csproj|solutionrelative:model\\dal\\fetch.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|e:\\idiomatica\\idiomatica\\logic\\wordhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|solutionrelative:logic\\wordhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|e:\\idiomatica\\idiomatica\\logic\\bookhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|solutionrelative:logic\\bookhelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|e:\\idiomatica\\idiomatica\\logic\\uilabels\\labels_engus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|solutionrelative:logic\\uilabels\\labels_engus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|e:\\idiomatica\\idiomatica\\logic\\languagehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|solutionrelative:logic\\languagehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|e:\\idiomatica\\idiomatica\\logic\\languageparser\\spaceddelimited.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}|Logic\\Logic.csproj|solutionrelative:logic\\languageparser\\spaceddelimited.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B8457729-75BE-4564-BE1C-876FB8E4D74F}|IdiomaticaWeb\\IdiomaticaWeb.csproj|e:\\idiomatica\\idiomatica\\idiomaticaweb\\wwwroot\\styles\\idomatica.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{B8457729-75BE-4564-BE1C-876FB8E4D74F}|IdiomaticaWeb\\IdiomaticaWeb.csproj|solutionrelative:idiomaticaweb\\wwwroot\\styles\\idomatica.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "IdiomaticaCLI",
+              "DocumentMoniker": "E:\\Idiomatica\\Idiomatica\\IdiomaticaCLI\\IdiomaticaCLI.csproj",
+              "RelativeDocumentMoniker": "IdiomaticaCLI\\IdiomaticaCLI.csproj",
+              "ToolTip": "E:\\Idiomatica\\Idiomatica\\IdiomaticaCLI\\IdiomaticaCLI.csproj",
+              "RelativeToolTip": "IdiomaticaCLI\\IdiomaticaCLI.csproj",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-04-06T11:51:13.676Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "BooksList.razor",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\IdiomaticaWeb\\Components\\Pages\\BooksList.razor",
+              "RelativeDocumentMoniker": "IdiomaticaWeb\\Components\\Pages\\BooksList.razor",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\IdiomaticaWeb\\Components\\Pages\\BooksList.razor",
+              "RelativeToolTip": "IdiomaticaWeb\\Components\\Pages\\BooksList.razor",
+              "ViewState": "AQIAAE8AAAAAAAAAAAAnwGcAAABuAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2024-04-06T11:45:29.476Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AvailableBookStat.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\AvailableBookStat.cs",
+              "RelativeDocumentMoniker": "Model\\AvailableBookStat.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\AvailableBookStat.cs",
+              "RelativeToolTip": "Model\\AvailableBookStat.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAB0AAAAcAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-06T11:39:42.476Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "SentenceHelper.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Logic\\SentenceHelper.cs",
+              "RelativeDocumentMoniker": "Logic\\SentenceHelper.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Logic\\SentenceHelper.cs",
+              "RelativeToolTip": "Logic\\SentenceHelper.cs",
+              "ViewState": "AQIAABEAAAAAAAAAAAAmwCIAAAAcAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-05T18:50:31.547Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Program.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\IdiomaticaCLI\\Program.cs",
+              "RelativeDocumentMoniker": "IdiomaticaCLI\\Program.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\IdiomaticaCLI\\Program.cs",
+              "RelativeToolTip": "IdiomaticaCLI\\Program.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAAMAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-05T15:27:59.836Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Insert.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\DAL\\Insert.cs",
+              "RelativeDocumentMoniker": "Model\\DAL\\Insert.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\DAL\\Insert.cs",
+              "RelativeToolTip": "Model\\DAL\\Insert.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABEAAAAWAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-05T19:12:04.922Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "LanguageUser.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\LanguageUser.cs",
+              "RelativeDocumentMoniker": "Model\\LanguageUser.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\LanguageUser.cs",
+              "RelativeToolTip": "Model\\LanguageUser.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAASAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-05T20:48:10.996Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AvailableStatus.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\AvailableStatus.cs",
+              "RelativeDocumentMoniker": "Model\\AvailableStatus.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\AvailableStatus.cs",
+              "RelativeToolTip": "Model\\AvailableStatus.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAqwBIAAAAFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-05T12:51:57.963Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "BookStat.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\BookStat.cs",
+              "RelativeDocumentMoniker": "Model\\BookStat.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\BookStat.cs",
+              "RelativeToolTip": "Model\\BookStat.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAAeAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-05T20:47:54.36Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "StatisticsHelper.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Logic\\StatisticsHelper.cs",
+              "RelativeDocumentMoniker": "Logic\\StatisticsHelper.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Logic\\StatisticsHelper.cs",
+              "RelativeToolTip": "Logic\\StatisticsHelper.cs",
+              "ViewState": "AQIAAHsAAAAAAAAAAAAAACYBAAAQAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-05T18:08:53.397Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Read.razor",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\IdiomaticaWeb\\Components\\Pages\\Read.razor",
+              "RelativeDocumentMoniker": "IdiomaticaWeb\\Components\\Pages\\Read.razor",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\IdiomaticaWeb\\Components\\Pages\\Read.razor",
+              "RelativeToolTip": "IdiomaticaWeb\\Components\\Pages\\Read.razor",
+              "ViewState": "AQIAAMsAAAAAAAAAAAAjwOwAAAA5AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2024-04-03T11:12:44.643Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Word.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\Word.cs",
+              "RelativeDocumentMoniker": "Model\\Word.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\Word.cs",
+              "RelativeToolTip": "Model\\Word.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-04T13:13:23.168Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Token.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\Token.cs",
+              "RelativeDocumentMoniker": "Model\\Token.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\Token.cs",
+              "RelativeToolTip": "Model\\Token.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAIBJwBMAAAASAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-04T13:25:48.149Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Page.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\Page.cs",
+              "RelativeDocumentMoniker": "Model\\Page.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\Page.cs",
+              "RelativeToolTip": "Model\\Page.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABAAAAASAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-05T13:13:48.111Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "PageHelper.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Logic\\PageHelper.cs",
+              "RelativeDocumentMoniker": "Logic\\PageHelper.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Logic\\PageHelper.cs",
+              "RelativeToolTip": "Logic\\PageHelper.cs",
+              "ViewState": "AQIAAEMAAAAAAAAAAAAiwFkAAAAMAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-04T22:43:58.133Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "IdiomaticaContext.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\DAL\\IdiomaticaContext.cs",
+              "RelativeDocumentMoniker": "Model\\DAL\\IdiomaticaContext.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\DAL\\IdiomaticaContext.cs",
+              "RelativeToolTip": "Model\\DAL\\IdiomaticaContext.cs",
+              "ViewState": "AQIAAAsAAAAAAAAAAAA9wB4AAAAOAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-05T15:27:45.724Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "Language.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\Language.cs",
+              "RelativeDocumentMoniker": "Model\\Language.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\Language.cs",
+              "RelativeToolTip": "Model\\Language.cs",
+              "ViewState": "AQIAABkAAAAAAAAAAAAzwCAAAAASAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-05T20:48:03.052Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "User.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\User.cs",
+              "RelativeDocumentMoniker": "Model\\User.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\User.cs",
+              "RelativeToolTip": "Model\\User.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-05T20:48:56.072Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "ParagraphHelper.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Logic\\ParagraphHelper.cs",
+              "RelativeDocumentMoniker": "Logic\\ParagraphHelper.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Logic\\ParagraphHelper.cs",
+              "RelativeToolTip": "Logic\\ParagraphHelper.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-04T22:47:33.081Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "Fetch.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\DAL\\Fetch.cs",
+              "RelativeDocumentMoniker": "Model\\DAL\\Fetch.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\DAL\\Fetch.cs",
+              "RelativeToolTip": "Model\\DAL\\Fetch.cs",
+              "ViewState": "AQIAAAMAAAAAAAAAAAAqwCYAAABLAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-05T15:11:05.909Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Paragraph.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\Paragraph.cs",
+              "RelativeDocumentMoniker": "Model\\Paragraph.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\Paragraph.cs",
+              "RelativeToolTip": "Model\\Paragraph.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAwAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-04T13:49:34.297Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Sentence.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\Sentence.cs",
+              "RelativeDocumentMoniker": "Model\\Sentence.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\Sentence.cs",
+              "RelativeToolTip": "Model\\Sentence.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABAAAAASAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-04T13:32:22.335Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "Book.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Model\\Book.cs",
+              "RelativeDocumentMoniker": "Model\\Book.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Model\\Book.cs",
+              "RelativeToolTip": "Model\\Book.cs",
+              "ViewState": "AQIAAAYAAAAAAAAAAIBJwAwAAAATAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-04T12:58:43.435Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "WordHelper.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Logic\\WordHelper.cs",
+              "RelativeDocumentMoniker": "Logic\\WordHelper.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Logic\\WordHelper.cs",
+              "RelativeToolTip": "Logic\\WordHelper.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAIBJwA4AAABmAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-04T13:06:22.949Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "BookHelper.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Logic\\BookHelper.cs",
+              "RelativeDocumentMoniker": "Logic\\BookHelper.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Logic\\BookHelper.cs",
+              "RelativeToolTip": "Logic\\BookHelper.cs",
+              "ViewState": "AQIAAAcAAAAAAAAAAAAkwCQAAAAiAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-04T15:50:29.937Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "Labels_EngUS.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Logic\\UILabels\\Labels_EngUS.cs",
+              "RelativeDocumentMoniker": "Logic\\UILabels\\Labels_EngUS.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Logic\\UILabels\\Labels_EngUS.cs",
+              "RelativeToolTip": "Logic\\UILabels\\Labels_EngUS.cs",
+              "ViewState": "AQIAAAgAAAAAAAAAAAAxwA4AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-04T15:48:48.191Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "LanguageHelper.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Logic\\LanguageHelper.cs",
+              "RelativeDocumentMoniker": "Logic\\LanguageHelper.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Logic\\LanguageHelper.cs",
+              "RelativeToolTip": "Logic\\LanguageHelper.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-04T22:53:03.843Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "SpacedDelimited.cs",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\Logic\\LanguageParser\\SpacedDelimited.cs",
+              "RelativeDocumentMoniker": "Logic\\LanguageParser\\SpacedDelimited.cs",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\Logic\\LanguageParser\\SpacedDelimited.cs",
+              "RelativeToolTip": "Logic\\LanguageParser\\SpacedDelimited.cs",
+              "ViewState": "AQIAACUAAAAAAAAAAAAYwDcAAAAWAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-04T14:53:06.752Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "idomatica.css",
+              "DocumentMoniker": "E:\\Idiomatica\\idiomatica\\IdiomaticaWeb\\wwwroot\\styles\\idomatica.css",
+              "RelativeDocumentMoniker": "IdiomaticaWeb\\wwwroot\\styles\\idomatica.css",
+              "ToolTip": "E:\\Idiomatica\\idiomatica\\IdiomaticaWeb\\wwwroot\\styles\\idomatica.css",
+              "RelativeToolTip": "IdiomaticaWeb\\wwwroot\\styles\\idomatica.css",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2024-04-04T16:51:15.547Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

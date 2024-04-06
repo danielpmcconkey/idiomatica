@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Model.DAL;
 
@@ -11,9 +12,11 @@ using Model.DAL;
 namespace Model.Migrations
 {
     [DbContext(typeof(IdiomaticaContext))]
-    partial class IdiomaticaContextModelSnapshot : ModelSnapshot
+    [Migration("20240406120008_changingBookStat")]
+    partial class changingBookStat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,14 +34,13 @@ namespace Model.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("Id"));
 
                     b.Property<string>("AudioBookmarks")
-                        .HasColumnType("nvarchar(MAX)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<float>("AudioCurrentPos")
                         .HasColumnType("real");
 
                     b.Property<string>("AudioFilename")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CurrentPageID")
                         .HasColumnType("int");
@@ -56,13 +58,11 @@ namespace Model.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("SourceURI")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("TotalPages")
                         .HasColumnType("int");
@@ -74,7 +74,7 @@ namespace Model.Migrations
 
                     b.HasIndex("LanguageUserId");
 
-                    b.ToTable("Book", (string)null);
+                    b.ToTable("Book");
                 });
 
             modelBuilder.Entity("Model.BookStat", b =>
@@ -87,12 +87,11 @@ namespace Model.Migrations
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("BookId", "Key");
+                    b.HasKey("BookId");
 
-                    b.ToTable("BookStat", (string)null);
+                    b.ToTable("BookStat");
                 });
 
             modelBuilder.Entity("Model.Language", b =>
@@ -105,46 +104,37 @@ namespace Model.Migrations
 
                     b.Property<string>("CharacterSubstitutions")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Dict1URI")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Dict2URI")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ExceptionsSplitSentences")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("GoogleTranslateURI")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ParserType")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RegexpSplitSentences")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RegexpWordCharacters")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("RemoveSpaces")
                         .HasColumnType("bit");
@@ -163,7 +153,7 @@ namespace Model.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Language", (string)null);
+                    b.ToTable("Language");
                 });
 
             modelBuilder.Entity("Model.LanguageUser", b =>
@@ -189,7 +179,7 @@ namespace Model.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("LanguageUser", (string)null);
+                    b.ToTable("LanguageUser");
                 });
 
             modelBuilder.Entity("Model.Page", b =>
@@ -208,7 +198,7 @@ namespace Model.Migrations
 
                     b.Property<string>("OriginalText")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("ReadDate")
                         .HasColumnType("datetime2");
@@ -217,7 +207,7 @@ namespace Model.Migrations
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("Page", (string)null);
+                    b.ToTable("Page");
                 });
 
             modelBuilder.Entity("Model.Paragraph", b =>
@@ -238,7 +228,7 @@ namespace Model.Migrations
 
                     b.HasIndex("PageId");
 
-                    b.ToTable("Paragraph", (string)null);
+                    b.ToTable("Paragraph");
                 });
 
             modelBuilder.Entity("Model.Sentence", b =>
@@ -256,13 +246,13 @@ namespace Model.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Text")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ParagraphId");
 
-                    b.ToTable("Sentence", (string)null);
+                    b.ToTable("Sentence");
                 });
 
             modelBuilder.Entity("Model.Token", b =>
@@ -275,8 +265,7 @@ namespace Model.Migrations
 
                     b.Property<string>("Display")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Ordinal")
                         .HasColumnType("int");
@@ -293,7 +282,7 @@ namespace Model.Migrations
 
                     b.HasIndex("WordId");
 
-                    b.ToTable("Token", (string)null);
+                    b.ToTable("Token");
                 });
 
             modelBuilder.Entity("Model.User", b =>
@@ -306,12 +295,11 @@ namespace Model.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("User", (string)null);
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("Model.UserSetting", b =>
@@ -319,17 +307,20 @@ namespace Model.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("Key")
-                        .HasColumnType("int");
+                    b.Property<string>("Key")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("KeyType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId", "Key");
 
-                    b.ToTable("UserSetting", (string)null);
+                    b.ToTable("UserSetting");
                 });
 
             modelBuilder.Entity("Model.Word", b =>
@@ -347,8 +338,7 @@ namespace Model.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Romanization")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -358,27 +348,24 @@ namespace Model.Migrations
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TextLowerCase")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("TokenCount")
                         .HasColumnType("int");
 
                     b.Property<string>("Translation")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LanguageUserId", "TextLowerCase")
                         .IsUnique();
 
-                    b.ToTable("Word", (string)null);
+                    b.ToTable("Word");
                 });
 
             modelBuilder.Entity("WordParent", b =>
@@ -393,7 +380,7 @@ namespace Model.Migrations
 
                     b.HasIndex("ParentWordId");
 
-                    b.ToTable("WordParent", (string)null);
+                    b.ToTable("WordParent");
                 });
 
             modelBuilder.Entity("Model.Book", b =>

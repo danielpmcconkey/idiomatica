@@ -28,10 +28,11 @@ namespace Logic.UILabels
 			_labels.Add("bookListTotalKnownPercentColumnHead", "Total Known Percent");
 			_labels.Add("bookListDistinctWordCountColumnHead", "Distinct Word Count");
 			_labels.Add("bookListDistinctKnownPercentColumnHead", "Distinct Known Percent");
-			_labels.Add("bookListNoBookNotice", "No books exist. Please add some.");
-			#endregion
-			#region read
-			_labels.Add("readErrorRetrievingData", "There was an error retrieving this book from the database.");
+            _labels.Add("bookListNoBookNotice", "No books exist. Please add some.");
+            _labels.Add("btnUpdateBookListStats", "Update booklist statistics");
+            #endregion
+            #region read
+            _labels.Add("readErrorRetrievingData", "There was an error retrieving this book from the database.");
             _labels.Add("untranslatable", "untranslatable");
             _labels.Add("btnNextPage", "next page");
             _labels.Add("btnPreviousPage", "previous page");

@@ -28,7 +28,7 @@ namespace Model.DAL
             optionsBuilder.UseSqlServer(connectionString);
 
             // only turn on query logging when debugging
-            optionsBuilder.LogTo(Console.WriteLine);
+            //optionsBuilder.LogTo(Console.WriteLine);
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -130,6 +130,7 @@ namespace Model.DAL
                 e.HasOne(bs => bs.Book)
                     .WithMany(b => b.BookStats)
                     .HasForeignKey(bs => bs.BookId);
+                e.Property(bs => bs.Key).HasConversion<int>();
             });
             modelBuilder.Entity<UserSetting>(e => {
                 e.HasKey(us => new { us.UserId, us.Key });

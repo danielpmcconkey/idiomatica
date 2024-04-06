@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Model.DAL
 {
-    public static class Save
+    public static class Insert
     {
         public static void Page(Page page)
         {

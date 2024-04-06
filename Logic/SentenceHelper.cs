@@ -42,7 +42,7 @@ namespace Logic
                     {
                         // todo: figure out how to handle numbers in languageParser
                         var emptyWord = CreateEmptyWord(languageUser);
-                        Save.Word(emptyWord);
+                        Insert.Word(emptyWord);
                         emptyWord.LanguageUser = languageUser;
                         wordsDict.Add(string.Empty, emptyWord);
                     }
@@ -51,7 +51,7 @@ namespace Logic
                         // this is a newly encountered word. create it and add to the dict
                         // todo: add actual romanization lookup here
                         var unknownWord = CreateUnknownWord(languageUser, cleanWord, cleanWord);
-                        Save.Word(unknownWord);
+                        Insert.Word(unknownWord);
                         unknownWord.LanguageUser = languageUser;
                         wordsDict.Add(cleanWord, unknownWord);
                     }
@@ -64,7 +64,7 @@ namespace Logic
                     Ordinal = i,
                     WordId = (int)wordObject.Id
                 };
-                Save.Token(token);
+                Insert.Token(token);
                 token.Sentence = sentence;
                 token.Word = wordObject;
                 tokens.Add(token);

@@ -18,6 +18,11 @@
 		float: right;
 	}	
 </style>
+<div class="d-flex flex-row-reverse mb-2">
+    <button type="button" class="btn btn-primary" @onclick="@(e => _books = UpdateBookStats())">
+        @_uiLabels.GetLabel("btnUpdateBookListStats")
+    </button>
+</div>
 
 <div class="form-group mb-2">
 	<input class="form-control" type="text" placeholder="@_uiLabels.GetLabel("bookListFormFilter")"
@@ -39,6 +44,9 @@ else if(!_books.Any())
 }
 else
 {
+
+    
+
 	<table class="table table-striped table-bordered table-hover">
 		<thead class="thead-light">
 			<tr>
@@ -98,10 +106,10 @@ else
 					</td>
 					<td scope="row"><a href="@GetBookLink(book)">@FormatTitle(book)</a></td>
 					<td scope="row" class="text-center">@FormatProgress(book)</td>
-					<td scope="row" class="text-end">@FormatCount(book, "TOTALWORDCOUNT")</td>
-					<td scope="row" class="text-end">@FormatCount(book, "TOTALKNOWNPERCENT")</td>
-					<td scope="row" class="text-end">@FormatCount(book, "DISTINCTWORDCOUNT")</td>
-					<td scope="row" class="text-end">@FormatCount(book, "DISTINCTKNOWNPERCENT")</td>
+                    <td scope="row" class="text-end">@FormatCount(book, AvailableBookStat.TOTALWORDCOUNT)</td>
+                    <td scope="row" class="text-end">@FormatCount(book, AvailableBookStat.TOTALKNOWNPERCENT)</td>
+                    <td scope="row" class="text-end">@FormatCount(book, AvailableBookStat.DISTINCTWORDCOUNT)</td>
+                    <td scope="row" class="text-end">@FormatCount(book, AvailableBookStat.DISTINCTKNOWNPERCENT)</td>
 				</tr>
 			}
 		</tbody>
@@ -109,7 +117,8 @@ else
 }
 
 @code {
-
+    private int _loggedInUserId = 1;  // todo: replace this filter with an actual logged in user
+    private List<LanguageUser> _languageUsers;
     private string _filter;
     private bool _isSortedAscending;
     private string _activeSortColumn;
@@ -126,16 +135,32 @@ else
         orderByFunctions.Add("IsComplete", (x => x.IsComplete));
         orderByFunctions.Add("Title", (x => x.Title));
         orderByFunctions.Add("Progress", (x => GetBookProgressPercent(x)));
-        orderByFunctions.Add("TOTALWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, "TOTALWORDCOUNT")));
-        orderByFunctions.Add("TOTALKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, "TOTALKNOWNPERCENT")));
-        orderByFunctions.Add("DISTINCTWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, "DISTINCTWORDCOUNT")));
-        orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, "DISTINCTKNOWNPERCENT")));
+        orderByFunctions.Add("TOTALWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.TOTALWORDCOUNT)));
+        orderByFunctions.Add("TOTALKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.TOTALKNOWNPERCENT)));
+        orderByFunctions.Add("DISTINCTWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.DISTINCTWORDCOUNT)));
+        orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.DISTINCTKNOWNPERCENT)));
 
-        Expression<Func<Book, bool>> filter = (x => x.LanguageUser.UserId == 1); // todo: replace this filter with an actual logged in user
-        _books = Fetch.BooksAndBookStatsAndLanguage(filter);
+        _languageUsers = Fetch.LanguageUsersAndBooksAndBookStatsAndLanguageAndUserAndUserStats(
+            (x => x.UserId == _loggedInUserId));
+        _books = FetchBooks();
+    }
+    private List<Book> FetchBooks(bool refreshFromDb = false)
+    {
+        var books = new List<Book>();
+        foreach (var languageUser in _languageUsers) 
+        {
+            if (refreshFromDb)
+            {
+                var dbResult = Fetch.BooksAndBookStatsAndLanguage(
+                    x => x.LanguageUserId == languageUser.Id);
+                    languageUser.Books = dbResult;
+                books.AddRange(dbResult);
+            }
+            else books.AddRange(languageUser.Books);
+        }
+        return books;
     }
 
-    
     private string FormatTitle(Book book)
     {
         int maxCharsInBookListTitle = 60;
@@ -205,15 +230,21 @@ else
             return "fa-sort-down";
         }
     }
-    private string FormatCount(Book book, string field)
+    private string FormatCount(Book book, AvailableBookStat key)
     {
-        var existingStat = StatisticsHelper.GetBookStat_int(book, field);        
+        var existingStat = StatisticsHelper.GetBookStat_int(book, key);        
         return existingStat.ToString("N0");		
-	}
-	private string FormatProgress(Book book)
-	{
-		if (book.TotalPages == 0) return "0";
-		return $"{book.LastPageRead} / {book.TotalPages}";
-	}
+    }
+    private string FormatProgress(Book book)
+    {
+        if (book.TotalPages == 0) return "0";
+        return $"{book.LastPageRead} / {book.TotalPages}";
+    }
+    private List<Book> UpdateBookStats()
+    {
+        StatisticsHelper.UpdateAllBookStatsForUserId(_loggedInUserId);
+        var newBooks = FetchBooks(true);
+        return newBooks;
+    }
 
 }

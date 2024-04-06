@@ -35,6 +35,49 @@ namespace Model.DAL
         }
         #endregion
 
+        #region Bookstats
+        public static List<BookStat> BookStats(Expression<Func<BookStat, bool>> filter)
+        {
+            using (var context = new IdiomaticaContext())
+            {
+                return context.BookStats
+                .Where(filter)
+                .ToList();
+            }
+        }
+        #endregion
+
+        #region LanguageUser
+
+        public static LanguageUser LanguageUserAndBooksAndBookStatsAndLanguageAndUserAndUserStats(
+            Expression<Func<LanguageUser, bool>> filter)
+        {
+            using (var context = new IdiomaticaContext())
+            {
+                return context.LanguageUsers
+                .Where(filter)
+                .Include(lu => lu.Books).ThenInclude(b => b.BookStats)
+                .Include(lu => lu.Language)
+                .Include(lu => lu.User).ThenInclude(u => u.UserSettings)
+                .FirstOrDefault();
+            }
+        }
+        public static List<LanguageUser> LanguageUsersAndBooksAndBookStatsAndLanguageAndUserAndUserStats(
+            Expression<Func<LanguageUser, bool>> filter)
+        {
+            using (var context = new IdiomaticaContext())
+            {
+                return context.LanguageUsers
+                .Where(filter)
+                .Include(lu => lu.Books).ThenInclude(b => b.BookStats)
+                .Include(lu => lu.Language)
+                .Include(lu => lu.User).ThenInclude(u => u.UserSettings)
+                .ToList();
+            }
+        }
+
+        #endregion
+
         #region Pages
         public static List<Page> Pages(Expression<Func<Page, bool>> filter)
         {
