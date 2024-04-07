@@ -20,7 +20,7 @@ if (builder.Environment.IsDevelopment())
 }
 else
 {
-    connection = Environment.GetEnvironmentVariable("AZURE_SQL_CONNECTIONSTRING_PROD");
+    connection = Environment.GetEnvironmentVariable("SQLAZURECONNSTR_AZURE_SQL_CONNECTIONSTRING_PROD");
 }
 
 builder.Services.AddDbContextFactory<IdiomaticaContext>(options =>
