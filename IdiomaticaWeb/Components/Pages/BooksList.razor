@@ -20,6 +20,10 @@
 		float: right;
 	}	
 </style>
+@if(_isError)
+{
+    <div><h3>Error</h3><p>@_errorMessage</p></div>
+}
 <div class="d-flex flex-row-reverse mb-2">
     <button type="button" class="btn btn-primary" @onclick="@(e => _books = UpdateBookStats())">
         @_uiLabels.GetLabel("btnUpdateBookListStats")
@@ -125,26 +129,35 @@ else
     Dictionary<string, Func<Book, object>> orderByFunctions =
         new Dictionary<string, Func<Book, object>>();
     private UILabels _uiLabels = UILabelFactory.GetUILabels(UILanguage.ENG_US);
-
+    private bool _isError = false;
+    private string _errorMessage = "";
 
     protected override void OnInitialized()
     {
-        orderByFunctions.Add("Language", (x => x.LanguageUser.Language.Name));
-        orderByFunctions.Add("Id", (x => x.Id));
-        orderByFunctions.Add("IsComplete", (x => x.IsComplete));
-        orderByFunctions.Add("Title", (x => x.Title));
-        orderByFunctions.Add("Progress", (x => GetBookProgressPercent(x)));
-        orderByFunctions.Add("TOTALWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.TOTALWORDCOUNT)));
-        orderByFunctions.Add("TOTALKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.TOTALKNOWNPERCENT)));
-        orderByFunctions.Add("DISTINCTWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.DISTINCTWORDCOUNT)));
-        orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.DISTINCTKNOWNPERCENT)));
-
-        using (var context = DbFactory.CreateDbContext())
+        try
         {
-            _languageUsers = Fetch.LanguageUsersAndBooksAndBookStatsAndLanguageAndUserAndUserStats(
-                context, (x => x.UserId == _loggedInUserId));
+            orderByFunctions.Add("Language", (x => x.LanguageUser.Language.Name));
+            orderByFunctions.Add("Id", (x => x.Id));
+            orderByFunctions.Add("IsComplete", (x => x.IsComplete));
+            orderByFunctions.Add("Title", (x => x.Title));
+            orderByFunctions.Add("Progress", (x => GetBookProgressPercent(x)));
+            orderByFunctions.Add("TOTALWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.TOTALWORDCOUNT)));
+            orderByFunctions.Add("TOTALKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.TOTALKNOWNPERCENT)));
+            orderByFunctions.Add("DISTINCTWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.DISTINCTWORDCOUNT)));
+            orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.DISTINCTKNOWNPERCENT)));
+
+            using (var context = DbFactory.CreateDbContext())
+            {
+                _languageUsers = Fetch.LanguageUsersAndBooksAndBookStatsAndLanguageAndUserAndUserStats(
+                    context, (x => x.UserId == _loggedInUserId));
+            }
+            _books = FetchBooks();
         }
-        _books = FetchBooks();
+        catch(Exception ex)
+        {
+            _isError = true;
+            _errorMessage = ex.Message;
+        }
     }
     private List<Book> FetchBooks(bool refreshFromDb = false)
     {
@@ -247,11 +260,20 @@ else
     }
     private List<Book> UpdateBookStats()
     {
-        using (var context = DbFactory.CreateDbContext())
+        try
         {
-            StatisticsHelper.UpdateAllBookStatsForUserId(context, _loggedInUserId);
-            var newBooks = FetchBooks(true);
-            return newBooks;
+            using (var context = DbFactory.CreateDbContext())
+            {
+                StatisticsHelper.UpdateAllBookStatsForUserId(context, _loggedInUserId);
+                var newBooks = FetchBooks(true);
+                return newBooks;
+            }
+        }
+        catch (Exception ex)
+        {
+            _isError = true;
+            _errorMessage = ex.Message;
+            return new List<Book>();
         }
     }
 
