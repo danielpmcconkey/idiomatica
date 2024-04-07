@@ -17,19 +17,24 @@ namespace Model.DAL
         public DbSet<BookStat> BookStats { get; set; }        
         public DbSet<UserSetting> Settings { get; set; }
         public DbSet<Token> Tokens { get; set; }
-        
+
         #endregion
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public IdiomaticaContext(DbContextOptions<IdiomaticaContext> options)
+        : base(options)
         {
-            var connectionString = "Server=localhost;Database=Idiomatica;Trusted_Connection=True;TrustServerCertificate=true;";
-            //var dbPath = @"E:\Lute\backups\lute_backup_2024-03-22_075709.db.gz_2024-03-22_075827.db";
-            //dbPath = "C:\\Users\\Dan\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Local\\Lute3\\Lute3\\lute.db";
-            optionsBuilder.UseSqlServer(connectionString);
-
-            // only turn on query logging when debugging
-            //optionsBuilder.LogTo(Console.WriteLine);
         }
+        
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    var connectionString = "Server=localhost;Database=Idiomatica;Trusted_Connection=True;TrustServerCertificate=true;";
+        //    //var dbPath = @"E:\Lute\backups\lute_backup_2024-03-22_075709.db.gz_2024-03-22_075827.db";
+        //    //dbPath = "C:\\Users\\Dan\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Local\\Lute3\\Lute3\\lute.db";
+        //    optionsBuilder.UseSqlServer(connectionString);
+
+        //    // only turn on query logging when debugging
+        //    //optionsBuilder.LogTo(Console.WriteLine);
+        //}
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>(e => {

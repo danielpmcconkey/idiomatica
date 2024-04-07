@@ -29,7 +29,7 @@ namespace Logic
         ///  sentences, and tokens. it saves everything in the DB
         /// </summary>
         public static List<Paragraph> CreateParagraphsFromPageAndSave(
-            Page page, LanguageUser languageUser)
+            IdiomaticaContext context, Page page, LanguageUser languageUser)
         {
             if(page.Id == 0)
             {
@@ -38,7 +38,7 @@ namespace Logic
 
 			List<Paragraph> paragraphs = new List<Paragraph>();
 
-            var wordDict = WordHelper.FetchWordDictForLanguageUser(languageUser);
+            var wordDict = WordHelper.FetchWordDictForLanguageUser(context, languageUser);
 
             var parser = LanguageParser.Factory.GetLanguageParser(languageUser);
 			var paragraphSplits = parser.SplitTextIntoParagraphs(page.OriginalText);
@@ -52,7 +52,7 @@ namespace Logic
                     Ordinal = paragraphOrder,
                     PageId = (int)page.Id
                 };
-                Insert.Paragraph(paragraph);
+                Insert.Paragraph(context, paragraph);
                 paragraph.Page = page;
 
 				paragraphOrder++;
@@ -68,12 +68,12 @@ namespace Logic
                         Text = sentenceSplit,
                         Ordinal = i,
                     };
-                    Insert.Sentence(newSentence);
+                    Insert.Sentence(context, newSentence);
                     newSentence.Paragraph = paragraph;
                         
                     
                     newSentence.Tokens = SentenceHelper.CreateTokensFromSentenceAndSave(
-                        newSentence, languageUser, wordDict);
+                        context, newSentence, languageUser, wordDict);
                     paragraph.Sentences.Add(newSentence);
                 }
 				paragraphs.Add(paragraph);
@@ -84,27 +84,25 @@ namespace Logic
         
         
 
-        public static void RepairPage(Page page, LanguageUser languageUser)
+        public static void RepairPage(IdiomaticaContext context, 
+            Page page, LanguageUser languageUser)
         {
             // delete any existing paragraphs
-            DeleteParagraphsFromPage(page);
+            DeleteParagraphsFromPage(context, page);
 
             // build them back
-            page.Paragraphs = CreateParagraphsFromPageAndSave(page, languageUser);
+            page.Paragraphs = CreateParagraphsFromPageAndSave(context, page, languageUser);
         }
-        public static void DeleteParagraphsFromPage(Page page)
+        public static void DeleteParagraphsFromPage(IdiomaticaContext context, Page page)
         {
-            var existingParagraphs = Fetch.Paragraphs((p => p.PageId == page.Id));
+            var existingParagraphs = Fetch.Paragraphs(context, (p => p.PageId == page.Id));
             if (existingParagraphs != null)
             {
-                using (var context = new IdiomaticaContext())
+                foreach (var paragraph in existingParagraphs)
                 {
-                    foreach (var paragraph in existingParagraphs)
-                    {
-                        context.Paragraphs.Remove(paragraph);
-                    }
-                    context.SaveChanges();
+                    context.Paragraphs.Remove(paragraph);
                 }
+                context.SaveChanges();
             }
             
         }

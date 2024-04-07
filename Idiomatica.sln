@@ -5,11 +5,9 @@ VisualStudioVersion = 17.2.32519.379
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Model", "Model\Model.csproj", "{9D15970B-655F-47DF-9BC5-B82B50ABA53A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdiomaticaCLI", "IdiomaticaCLI\IdiomaticaCLI.csproj", "{DC9B0871-B922-4DD5-9625-1D4FFE5E7E61}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logic", "Logic\Logic.csproj", "{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdiomaticaWeb", "IdiomaticaWeb\IdiomaticaWeb.csproj", "{B8457729-75BE-4564-BE1C-876FB8E4D74F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdiomaticaWeb", "IdiomaticaWeb\IdiomaticaWeb.csproj", "{B8457729-75BE-4564-BE1C-876FB8E4D74F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,10 +19,6 @@ Global
 		{9D15970B-655F-47DF-9BC5-B82B50ABA53A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D15970B-655F-47DF-9BC5-B82B50ABA53A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D15970B-655F-47DF-9BC5-B82B50ABA53A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DC9B0871-B922-4DD5-9625-1D4FFE5E7E61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DC9B0871-B922-4DD5-9625-1D4FFE5E7E61}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DC9B0871-B922-4DD5-9625-1D4FFE5E7E61}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DC9B0871-B922-4DD5-9625-1D4FFE5E7E61}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DAA1BDD-806B-45B2-8941-64BFFABB1AE4}.Release|Any CPU.ActiveCfg = Release|Any CPU

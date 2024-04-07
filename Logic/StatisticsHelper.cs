@@ -47,40 +47,39 @@ namespace Logic
         /// <summary>
         /// Updates the bookstats table for all books for a given user and saves the database
         /// </summary>
-        public static void UpdateAllBookStatsForUserId(int userId)
+        public static void UpdateAllBookStatsForUserId(IdiomaticaContext context, int userId)
         {
             List<BookStat> newStatsTotal = new List<BookStat>();
             List<BookStat> newStatsDistinct = new List<BookStat>();
             List<Book> books = new List<Book>();
-            using (var context = new IdiomaticaContext())
-            {
-                newStatsTotal = context.BookStats.FromSqlRaw(FormAllTotalCountsQuery(userId)).ToList();
-                newStatsDistinct = context.BookStats.FromSqlRaw(FormAllDistinctCountsQuery(userId)).ToList();
-                books = Fetch.BooksAndBookStatsAndLanguage((x => x.LanguageUser.UserId == userId)).ToList();
-            }
+            newStatsTotal = context.BookStats.FromSqlRaw(FormAllTotalCountsQuery(userId)).ToList();
+            newStatsDistinct = context.BookStats.FromSqlRaw(FormAllDistinctCountsQuery(userId)).ToList();
+            books = Fetch.BooksAndBookStatsAndLanguage(
+                context, (x => x.LanguageUser.UserId == userId)).ToList();
+            
             foreach (var book in books)
             {
                 book.BookStats = new List<BookStat>();
                 List<BookStat> newStatsThisBookTotal = newStatsTotal.Where(x => x.BookId == book.Id).ToList();
                 List<BookStat> newStatsThisBookDistinct = newStatsDistinct.Where(x => x.BookId == book.Id).ToList();
                 
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookTotal, AvailableBookStat.TOTALNEW1COUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookTotal, AvailableBookStat.TOTALNEW2COUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookTotal, AvailableBookStat.TOTALLEARNING3COUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookTotal, AvailableBookStat.TOTALLEARNING4COUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookTotal, AvailableBookStat.TOTALLEARNEDCOUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookTotal, AvailableBookStat.TOTALIGNOREDCOUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookTotal, AvailableBookStat.TOTALWELLKNOWNCOUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookTotal, AvailableBookStat.TOTALUNKNOWNCOUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookTotal, AvailableBookStat.TOTALNEW1COUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookTotal, AvailableBookStat.TOTALNEW2COUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookTotal, AvailableBookStat.TOTALLEARNING3COUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookTotal, AvailableBookStat.TOTALLEARNING4COUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookTotal, AvailableBookStat.TOTALLEARNEDCOUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookTotal, AvailableBookStat.TOTALIGNOREDCOUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookTotal, AvailableBookStat.TOTALWELLKNOWNCOUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookTotal, AvailableBookStat.TOTALUNKNOWNCOUNT));
                 
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTNEW1COUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTNEW2COUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTLEARNING3COUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTLEARNING4COUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTLEARNEDCOUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTIGNOREDCOUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTWELLKNOWNCOUNT));
-                book.BookStats.Add(UpdateOrCreateDefaultStat(book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTUNKNOWNCOUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTNEW1COUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTNEW2COUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTLEARNING3COUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTLEARNING4COUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTLEARNEDCOUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTIGNOREDCOUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTWELLKNOWNCOUNT));
+                book.BookStats.Add(UpdateOrCreateDefaultStat(context, book, newStatsThisBookDistinct, AvailableBookStat.DISTINCTUNKNOWNCOUNT));
 
                 // calculated stats
                 int totalWordCount = newStatsThisBookTotal.Sum(x =>
@@ -89,7 +88,7 @@ namespace Logic
                     int.TryParse(x.Value, out parsedInt);
                     return parsedInt;
                 });
-                book.BookStats.Add(Upsert.BookStat(new BookStat()
+                book.BookStats.Add(Upsert.BookStat(context, new BookStat()
                 {
                     BookId = book.Id,
                     Key = AvailableBookStat.TOTALWORDCOUNT,
@@ -102,7 +101,7 @@ namespace Logic
                     int.TryParse(x.Value, out parsedInt);
                     return parsedInt;
                 });
-                book.BookStats.Add(Upsert.BookStat(new BookStat()
+                book.BookStats.Add(Upsert.BookStat(context, new BookStat()
                 {
                     BookId = book.Id,
                     Key = AvailableBookStat.DISTINCTWORDCOUNT,
@@ -115,7 +114,7 @@ namespace Logic
                     GetBookStat_int(book.BookStats, AvailableBookStat.TOTALIGNOREDCOUNT),
                     totalWordCount
                     );
-                book.BookStats.Add(Upsert.BookStat(new BookStat()
+                book.BookStats.Add(Upsert.BookStat(context, new BookStat()
                 {
                     BookId = book.Id,
                     Key = AvailableBookStat.TOTALKNOWNPERCENT,
@@ -128,7 +127,7 @@ namespace Logic
                     GetBookStat_int(book.BookStats, AvailableBookStat.DISTINCTIGNOREDCOUNT),
                     distinctWordCount
                     );
-                book.BookStats.Add(Upsert.BookStat(new BookStat()
+                book.BookStats.Add(Upsert.BookStat(context, new BookStat()
                 {
                     BookId = book.Id,
                     Key = AvailableBookStat.DISTINCTKNOWNPERCENT,
@@ -256,18 +255,18 @@ $"""
             return (int)Math.Round(percentKnown * 100M, 0);
 
         }
-        private static BookStat UpdateOrCreateDefaultStat(Book book, List<BookStat> newStats,
-            AvailableBookStat key, string defaultValue = "0")
+        private static BookStat UpdateOrCreateDefaultStat(IdiomaticaContext context, 
+            Book book, List<BookStat> newStats, AvailableBookStat key, string defaultValue = "0")
         {
             // if it's in the new stats, upsert it
             // if it's not in the new stats, set default value then upsert it
             var bs = newStats.Where(x => x.Key == key).FirstOrDefault();
             if (bs != null)
             {
-                return Upsert.BookStat(bs);
+                return Upsert.BookStat(context, bs);
             }
 
-            return Upsert.BookStat(new BookStat()
+            return Upsert.BookStat(context, new BookStat()
             {
                 BookId = book.Id,
                 Key = key,

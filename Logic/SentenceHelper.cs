@@ -18,7 +18,7 @@ namespace Logic
         /// todo: is it possible to enforce this?
         /// </summary>
 
-        public static List<Token> CreateTokensFromSentenceAndSave(
+        public static List<Token> CreateTokensFromSentenceAndSave(IdiomaticaContext context,
             Sentence sentence, LanguageUser languageUser, Dictionary<string, Word> wordsDict)
         {
             if (sentence.Id == 0)
@@ -42,7 +42,7 @@ namespace Logic
                     {
                         // todo: figure out how to handle numbers in languageParser
                         var emptyWord = CreateEmptyWord(languageUser);
-                        Insert.Word(emptyWord);
+                        Insert.Word(context, emptyWord);
                         emptyWord.LanguageUser = languageUser;
                         wordsDict.Add(string.Empty, emptyWord);
                     }
@@ -51,7 +51,7 @@ namespace Logic
                         // this is a newly encountered word. create it and add to the dict
                         // todo: add actual romanization lookup here
                         var unknownWord = CreateUnknownWord(languageUser, cleanWord, cleanWord);
-                        Insert.Word(unknownWord);
+                        Insert.Word(context, unknownWord);
                         unknownWord.LanguageUser = languageUser;
                         wordsDict.Add(cleanWord, unknownWord);
                     }
@@ -64,7 +64,7 @@ namespace Logic
                     Ordinal = i,
                     WordId = (int)wordObject.Id
                 };
-                Insert.Token(token);
+                Insert.Token(context, token);
                 token.Sentence = sentence;
                 token.Word = wordObject;
                 tokens.Add(token);

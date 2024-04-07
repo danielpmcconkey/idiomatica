@@ -4,9 +4,12 @@
 @using System.Globalization
 @using Logic.UILabels
 @using System.Linq.Expressions;
+@using Microsoft.EntityFrameworkCore;
 
 @page "/read/{id}"
 @rendermode InteractiveServer
+@inject IDbContextFactory<IdiomaticaContext> DbFactory
+
 <style>
     span.statusUNKNOWN {
         background-color: #ed6297ff;
@@ -109,7 +112,7 @@ else
             {
                 foreach (var token in GetSentenceTokens(sentence).OrderBy(x => x.Ordinal))
                 {
-                    <span class="readToken @GetTokenClass(token)">@token.Display</span>
+                    <span class="readToken @GetTokenClass(token)" data-toggle="tooltip" data-placement="top" title="Tooltip on top">@token.Display</span>
                 }
             }
         </p>
@@ -122,6 +125,7 @@ else
         @_uiLabels.GetLabel("btnNextPage")
     </button>
 
+    
 
 }
 
@@ -148,9 +152,11 @@ else
         _currentPage = FetchPageById(_book.CurrentPageID);
         if (_currentPage is null) return;
         _paragraphs = _currentPage.Paragraphs;
-
-        _allWordsInLanguage = WordHelper.FetchWordDictForLanguageUser(_book.LanguageUser);
-
+        using (var context = DbFactory.CreateDbContext())
+        {
+            _allWordsInLanguage = WordHelper.FetchWordDictForLanguageUser(
+                context, _book.LanguageUser);
+        }
     }
 
     private Book? FetchBook()
@@ -162,50 +168,62 @@ else
             _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
             return null;
         }
-
-        // todo: secure DB fetches so only the logged in user's data is requested
-        Expression<Func<Book, bool>> filter = 
-            (x => x.LanguageUser.UserId == 1 && x.Id == parsedId); // todo: replace this filter with an actual logged in user
-        Book? bookFromDb = Fetch.BookAndBookStatsAndLanguage(filter);
-        // todo: wrap some try catch around UI elements
-        if (bookFromDb is null)
+        using (var context = DbFactory.CreateDbContext())
         {
-            _isError = true;
-            _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
-            return null;
+            // todo: secure DB fetches so only the logged in user's data is requested
+            Expression<Func<Book, bool>> filter =
+                (x => x.LanguageUser.UserId == 1 && x.Id == parsedId); // todo: replace this filter with an actual logged in user
+            Book? bookFromDb = Fetch.BookAndBookStatsAndLanguage(context, filter);
+            // todo: wrap some try catch around UI elements
+            if (bookFromDb is null)
+            {
+                _isError = true;
+                _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
+                return null;
+            }
+            return bookFromDb;
         }
-        return bookFromDb;
+
     }
     private Page? FetchPageById(int pageId)
     {
         if (_book is null) return null;
+        using (var context = DbFactory.CreateDbContext())
+        {
+            Expression<Func<Page, bool>> filter = (x => x.Id == pageId);
+            var pageFromDb = Fetch.PageAndParagraphsAndSentencesAndTokensAndWords(
+                context, filter);
 
-        Expression<Func<Page, bool>> filter = (x => x.Id == pageId);
-        var pageFromDb = Fetch.PageAndParagraphsAndSentencesAndTokensAndWords(filter);
-
-        if (pageFromDb is not null) return pageFromDb;
-        return FetchPageByOrderWithinBook((int)_book.Id, 0);
+            if (pageFromDb is not null) return pageFromDb;
+            return FetchPageByOrderWithinBook((int)_book.Id, 0);
+        }
     }
     private Page? FetchPageByOrderWithinBook(int bookId, int pageOrdinal)
     {
         if (_book is null) return null;
+        using (var context = DbFactory.CreateDbContext())
+        {
+            Expression<Func<Page, bool>> filter = (x => x.BookId == bookId && x.Ordinal == pageOrdinal);
+            var pageFromDb = Fetch.PageAndParagraphsAndSentencesAndTokensAndWords(
+                context, filter);
 
-        Expression<Func<Page, bool>> filter = (x => x.BookId == bookId && x.Ordinal == pageOrdinal);
-        var pageFromDb = Fetch.PageAndParagraphsAndSentencesAndTokensAndWords(filter);
+            if (pageFromDb is not null) return pageFromDb;
 
-        if (pageFromDb is not null) return pageFromDb;
-
-        _isError = true;
-        _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
-        return null;
+            _isError = true;
+            _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
+            return null;
+        }
     }
     private List<Token> GetSentenceTokens(Sentence sentence)
     {
         if (sentence.Tokens is not null && sentence.Tokens.Count > 0) return sentence.Tokens;
 
         // not in the DB. Gotta create
-        return SentenceHelper.CreateTokensFromSentenceAndSave(
-            sentence, _book.LanguageUser, _allWordsInLanguage);
+        using (var context = DbFactory.CreateDbContext())
+        {
+            return SentenceHelper.CreateTokensFromSentenceAndSave(
+                context, sentence, _book.LanguageUser, _allWordsInLanguage);
+        }
     }
     private string GetTokenClass(Token token)
     {

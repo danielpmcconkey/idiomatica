@@ -4,9 +4,11 @@
 @using Logic.UILabels
 @using System.Globalization
 @using System.Linq.Expressions;
+@using Microsoft.EntityFrameworkCore;
 
 @page "/books-list"
 @rendermode InteractiveServer
+@inject IDbContextFactory<IdiomaticaContext> DbFactory
 
 <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <style>
@@ -44,9 +46,6 @@ else if(!_books.Any())
 }
 else
 {
-
-    
-
 	<table class="table table-striped table-bordered table-hover">
 		<thead class="thead-light">
 			<tr>
@@ -140,8 +139,11 @@ else
         orderByFunctions.Add("DISTINCTWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.DISTINCTWORDCOUNT)));
         orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.DISTINCTKNOWNPERCENT)));
 
-        _languageUsers = Fetch.LanguageUsersAndBooksAndBookStatsAndLanguageAndUserAndUserStats(
-            (x => x.UserId == _loggedInUserId));
+        using (var context = DbFactory.CreateDbContext())
+        {
+            _languageUsers = Fetch.LanguageUsersAndBooksAndBookStatsAndLanguageAndUserAndUserStats(
+                context, (x => x.UserId == _loggedInUserId));
+        }
         _books = FetchBooks();
     }
     private List<Book> FetchBooks(bool refreshFromDb = false)
@@ -151,10 +153,13 @@ else
         {
             if (refreshFromDb)
             {
-                var dbResult = Fetch.BooksAndBookStatsAndLanguage(
-                    x => x.LanguageUserId == languageUser.Id);
+                using (var context = DbFactory.CreateDbContext())
+                {
+                    var dbResult = Fetch.BooksAndBookStatsAndLanguage(context,
+                        x => x.LanguageUserId == languageUser.Id);
                     languageUser.Books = dbResult;
-                books.AddRange(dbResult);
+                    books.AddRange(dbResult);
+                }
             }
             else books.AddRange(languageUser.Books);
         }
@@ -242,9 +247,12 @@ else
     }
     private List<Book> UpdateBookStats()
     {
-        StatisticsHelper.UpdateAllBookStatsForUserId(_loggedInUserId);
-        var newBooks = FetchBooks(true);
-        return newBooks;
+        using (var context = DbFactory.CreateDbContext())
+        {
+            StatisticsHelper.UpdateAllBookStatsForUserId(context, _loggedInUserId);
+            var newBooks = FetchBooks(true);
+            return newBooks;
+        }
     }
 
 }

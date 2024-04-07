@@ -11,133 +11,108 @@ namespace Model.DAL
     public static class Fetch
     {
         #region Books
-        public static List<Book> BooksAndBookStatsAndLanguage(Expression<Func<Book, bool>> filter)
+        public static List<Book> BooksAndBookStatsAndLanguage(IdiomaticaContext context, 
+            Expression<Func<Book, bool>> filter)
         {
-            using (var context = new IdiomaticaContext())
-            {
-                return context.Books
+            return context.Books
                 .Where(filter)
                 .Include(b => b.BookStats)
                 .Include(l => l.LanguageUser).ThenInclude(lu => lu.Language)
                 .ToList();
-            }
         }
-        public static Book? BookAndBookStatsAndLanguage(Expression<Func<Book, bool>> filter)
+        public static Book? BookAndBookStatsAndLanguage(IdiomaticaContext context, Expression<Func<Book, bool>> filter)
         {
-            using (var context = new IdiomaticaContext())
-            {
-                return context.Books
+            return context.Books
                 .Where(filter)
                 .Include(b => b.BookStats)
                 .Include(l => l.LanguageUser).ThenInclude(lu => lu.Language)
                 .FirstOrDefault();
-            }
         }
         #endregion
 
         #region Bookstats
-        public static List<BookStat> BookStats(Expression<Func<BookStat, bool>> filter)
+        public static List<BookStat> BookStats(IdiomaticaContext context, 
+            Expression<Func<BookStat, bool>> filter)
         {
-            using (var context = new IdiomaticaContext())
-            {
-                return context.BookStats
+            return context.BookStats
                 .Where(filter)
                 .ToList();
-            }
         }
         #endregion
 
         #region LanguageUser
 
         public static LanguageUser LanguageUserAndBooksAndBookStatsAndLanguageAndUserAndUserStats(
-            Expression<Func<LanguageUser, bool>> filter)
+            IdiomaticaContext context, Expression<Func<LanguageUser, bool>> filter)
         {
-            using (var context = new IdiomaticaContext())
-            {
-                return context.LanguageUsers
+            return context.LanguageUsers
                 .Where(filter)
                 .Include(lu => lu.Books).ThenInclude(b => b.BookStats)
                 .Include(lu => lu.Language)
                 .Include(lu => lu.User).ThenInclude(u => u.UserSettings)
                 .FirstOrDefault();
-            }
         }
         public static List<LanguageUser> LanguageUsersAndBooksAndBookStatsAndLanguageAndUserAndUserStats(
-            Expression<Func<LanguageUser, bool>> filter)
+            IdiomaticaContext context, Expression<Func<LanguageUser, bool>> filter)
         {
-            using (var context = new IdiomaticaContext())
-            {
-                return context.LanguageUsers
+            return context.LanguageUsers
                 .Where(filter)
                 .Include(lu => lu.Books).ThenInclude(b => b.BookStats)
                 .Include(lu => lu.Language)
                 .Include(lu => lu.User).ThenInclude(u => u.UserSettings)
                 .ToList();
-            }
         }
 
         #endregion
 
         #region Pages
-        public static List<Page> Pages(Expression<Func<Page, bool>> filter)
+        public static List<Page> Pages(IdiomaticaContext context, Expression<Func<Page, bool>> filter)
         {
-            using (var context = new IdiomaticaContext())
-            {
-                return context.Pages
+            return context.Pages
                 .Where(filter)
                 .ToList();
-            }
         }
-        public static Page? PageAndParagraphsAndSentencesAndTokensAndWords(Expression<Func<Page, bool>> filter)
+        public static Page? PageAndParagraphsAndSentencesAndTokensAndWords(
+            IdiomaticaContext context, Expression<Func<Page, bool>> filter)
         {
-            using (var context = new IdiomaticaContext())
-            {
-                return context.Pages
+            return context.Pages
                 .Where(filter)
                 .Include(p => p.Paragraphs)
                     .ThenInclude(s => s.Sentences)
                     .ThenInclude(s => s.Tokens)
                     .ThenInclude(t => t.Word)
                 .FirstOrDefault();
-            }
         }
         #endregion
 
         #region Paragraphs
-        public static List<Paragraph> Paragraphs(Expression<Func<Paragraph, bool>> filter)
+        public static List<Paragraph> Paragraphs(IdiomaticaContext context, Expression<Func<Paragraph, bool>> filter)
         {
-            using (var context = new IdiomaticaContext())
-            {
-                return context.Paragraphs
+            return context.Paragraphs
                 .Where(filter)
                 .ToList();
-            }
         }
-        public static List<Paragraph> ParagraphsAndSentencesAndTokensAndWords(Expression<Func<Paragraph, bool>> filter)
+        public static List<Paragraph> ParagraphsAndSentencesAndTokensAndWords(
+            IdiomaticaContext context, Expression<Func<Paragraph, bool>> filter)
         {
-            using (var context = new IdiomaticaContext())
-            {
-                return context.Paragraphs
+            return context.Paragraphs
                 .Where(filter)
                 .Include(s => s.Sentences)
                     .ThenInclude(s => s.Tokens)
                         .ThenInclude(t => t.Word)
                 .ToList();
-            }
         }
         #endregion
 
         #region Words
-        public static List<Word> WordsAndChildrenAndParents(Expression<Func<Word, bool>> filter)
+        public static List<Word> WordsAndChildrenAndParents(
+            IdiomaticaContext context, Expression<Func<Word, bool>> filter)
         {
-            using (var context = new IdiomaticaContext())
-            {
-                return context.Words
+            return context.Words
                 .Where(filter)
                 .Include(w => w.ParentWords)
                 .Include(w => w.ChildWords)
                 .ToList();
-            }
         }
 
         #endregion

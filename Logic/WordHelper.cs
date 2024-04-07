@@ -12,7 +12,8 @@ namespace Logic
 {
     public static class WordHelper
     {
-        public static Dictionary<string, Word> FetchWordDictForLanguageUser(LanguageUser languageUser)
+        public static Dictionary<string, Word> FetchWordDictForLanguageUser(
+            IdiomaticaContext context, LanguageUser languageUser)
         {
             Dictionary<string, Word> wordDict = new Dictionary<string, Word>();
 
@@ -20,7 +21,7 @@ namespace Logic
 
             Expression<Func<Word, bool>> filter =
                 (x => x.LanguageUser.LanguageId == languageUser.LanguageId);
-            var allWordsInLanguage = Fetch.WordsAndChildrenAndParents(filter);
+            var allWordsInLanguage = Fetch.WordsAndChildrenAndParents(context, filter);
 
             foreach (var word in allWordsInLanguage)
             {

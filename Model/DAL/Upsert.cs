@@ -8,25 +8,22 @@ namespace Model.DAL
 {
     public static class Upsert
     {
-        public static BookStat BookStat(BookStat bookStat)
+        public static BookStat BookStat(IdiomaticaContext context, BookStat bookStat)
         {
-            using (var context = new IdiomaticaContext())
+            var dbResult = context.BookStats
+                .Where(x => x.BookId == bookStat.BookId
+                    && x.Key == bookStat.Key)
+                .FirstOrDefault();
+            if(dbResult != null)
             {
-                var dbResult = context.BookStats
-                    .Where(x => x.BookId == bookStat.BookId
-                        && x.Key == bookStat.Key)
-                    .FirstOrDefault();
-                if(dbResult != null)
-                {
-                    dbResult.Value = bookStat.Value;
-                    context.SaveChanges();
-                    return dbResult;
-                }
-
-                context.BookStats.Add(bookStat);
+                dbResult.Value = bookStat.Value;
                 context.SaveChanges();
-                return bookStat;
+                return dbResult;
             }
+
+            context.BookStats.Add(bookStat);
+            context.SaveChanges();
+            return bookStat;
         }
     }
 }

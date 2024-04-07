@@ -9,60 +9,45 @@ namespace Model.DAL
 {
     public static class Insert
     {
-        public static void Page(Page page)
+        public static void Page(IdiomaticaContext context, Page page)
         {
-            using var context = new IdiomaticaContext();
+            if (page.Id == null)
             {
-                if (page.Id == null)
-                {
-                    context.Pages.Add(page);
-                }
-                context.SaveChanges();
+                context.Pages.Add(page);
             }
+            context.SaveChanges();
         }
-        public static void Paragraph(Paragraph paragraph)
+        public static void Paragraph(IdiomaticaContext context, Paragraph paragraph)
         {
-            using var context = new IdiomaticaContext();
+            if (paragraph.Id == null)
             {
-                if (paragraph.Id == null)
-                {
-                    context.Paragraphs.Add(paragraph);
-                }
-                context.SaveChanges();
+                context.Paragraphs.Add(paragraph);
             }
+            context.SaveChanges();
         }
-        public static void Sentence(Sentence sentence)
+        public static void Sentence(IdiomaticaContext context, Sentence sentence)
         {
-            using var context = new IdiomaticaContext();
+            if (sentence.Id == null)
             {
-                if (sentence.Id == null)
-                {
-                    context.Sentences.Add(sentence);
-                }
-                context.SaveChanges();
+                context.Sentences.Add(sentence);
             }
+            context.SaveChanges();
         }
-        public static void Token(Token token)
+        public static void Token(IdiomaticaContext context, Token token)
         {
-            using var context = new IdiomaticaContext();
+            if (token.Id == null)
             {
-                if (token.Id == null)
-                {
-                    context.Tokens.Add(token);
-                }
-                context.SaveChanges();
+                context.Tokens.Add(token);
             }
+            context.SaveChanges();
         }
-        public static void Word(Word word)
+        public static void Word(IdiomaticaContext context, Word word)
         {
-            using var context = new IdiomaticaContext();
+            if (word.Id == null)
             {
-                if (word.Id == null)
-                {
-                    context.Words.Add(word);
-                }
-                context.SaveChanges();
+                context.Words.Add(word);
             }
+            context.SaveChanges();
         }
     }
 }
