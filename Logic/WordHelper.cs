@@ -12,6 +12,40 @@ namespace Logic
 {
     public static class WordHelper
     {
+        public static Word CreateEmptyWord(LanguageUser languageUser)
+        {
+            Word emptyWord = new Word()
+            {
+                LanguageUserId = (int)languageUser.Id,
+                Romanization = string.Empty,
+                ChildWords = new List<Word>(),
+                ParentWords = new List<Word>(),
+                Text = string.Empty,
+                TextLowerCase = string.Empty,
+                Status = AvailableStatus.IGNORED,
+                Translation = string.Empty
+            };
+            return emptyWord;
+
+        }
+        public static Word CreateUnknownWord(
+            LanguageUser languageUser, string text, string romanization)
+        {
+            Word newWord = new Word()
+            {
+                LanguageUserId = (int)languageUser.Id,
+                Romanization = romanization,
+                ChildWords = new List<Word>(),
+                ParentWords = new List<Word>(),
+                Text = text.ToLower(),
+                TextLowerCase = text.ToLower(),
+                Status = AvailableStatus.UNKNOWN,
+                Translation = string.Empty
+            };
+            return newWord;
+
+        }
+
         public static Dictionary<string, Word> FetchWordDictForLanguageUser(
             IdiomaticaContext context, LanguageUser languageUser)
         {

@@ -41,7 +41,7 @@ namespace Logic
                     if (cleanWord == string.Empty)
                     {
                         // todo: figure out how to handle numbers in languageParser
-                        var emptyWord = CreateEmptyWord(languageUser);
+                        var emptyWord = WordHelper.CreateEmptyWord(languageUser);
                         Insert.Word(context, emptyWord);
                         emptyWord.LanguageUser = languageUser;
                         wordsDict.Add(string.Empty, emptyWord);
@@ -50,7 +50,7 @@ namespace Logic
                     {
                         // this is a newly encountered word. create it and add to the dict
                         // todo: add actual romanization lookup here
-                        var unknownWord = CreateUnknownWord(languageUser, cleanWord, cleanWord);
+                        var unknownWord = WordHelper.CreateUnknownWord(languageUser, cleanWord, cleanWord);
                         Insert.Word(context, unknownWord);
                         unknownWord.LanguageUser = languageUser;
                         wordsDict.Add(cleanWord, unknownWord);
@@ -70,44 +70,6 @@ namespace Logic
                 tokens.Add(token);
             }
             return tokens;
-        }
-
-        public static Word CreateEmptyWord(LanguageUser languageUser)
-        {
-            // todo: move the empty word population somewhere else
-
-            Word emptyWord = new Word()
-            {
-                LanguageUserId = (int)languageUser.Id,
-                Romanization = string.Empty,
-                ChildWords = new List<Word>(),
-                ParentWords = new List<Word>(),
-                Text = string.Empty,
-                TextLowerCase = string.Empty,
-                Status = AvailableStatus.IGNORED,
-                Translation = string.Empty
-            };
-            return emptyWord;
-
-        }
-        public static Word CreateUnknownWord( 
-            LanguageUser languageUser, string text, string romanization)
-        {
-            // todo: move the new word population somewhere else
-
-            Word newWord = new Word()
-            {
-                LanguageUserId = (int)languageUser.Id,
-                Romanization = romanization,
-                ChildWords = new List<Word>(),
-                ParentWords = new List<Word>(),
-                Text = text.ToLower(),
-                TextLowerCase = text.ToLower(),
-                Status = AvailableStatus.UNKNOWN,
-                Translation = string.Empty
-            };
-            return newWord;
-
         }
     }
 }

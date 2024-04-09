@@ -134,7 +134,7 @@ else
     public string Id { get; set; }
     private bool _isError = false;
     private string _errorMessage = "";
-    private UILabels _uiLabels = UILabelFactory.GetUILabels(UILanguage.ENG_US); // todo: create a shared UILabels
+    private UILabels _uiLabels = Factory.GetUILabels(UILanguage.ENG_US); // todo: create a shared UILabels
 
     private Book? _book;
     private Page? _currentPage;

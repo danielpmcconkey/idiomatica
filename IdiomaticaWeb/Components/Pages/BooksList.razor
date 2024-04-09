@@ -128,7 +128,7 @@ else
     private List<Book>? _books;
     Dictionary<string, Func<Book, object>> orderByFunctions =
         new Dictionary<string, Func<Book, object>>();
-    private UILabels _uiLabels = UILabelFactory.GetUILabels(UILanguage.ENG_US);
+    private UILabels _uiLabels = Factory.GetUILabels(UILanguage.ENG_US);
     private bool _isError = false;
     private string _errorMessage = "";
 

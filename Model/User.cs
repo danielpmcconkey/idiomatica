@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [Table("User")]
+    [Table("User", Schema = "DBO")]
     public class User
     {
         public int? Id { get; set; }

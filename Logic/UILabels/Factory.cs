@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Logic.UILabels
 {
 	public enum UILanguage { ENG_US , ENG_GB }
-	public static class UILabelFactory
+	public static class Factory
 	{
 		public static UILabels GetUILabels(UILanguage language)
 		{
