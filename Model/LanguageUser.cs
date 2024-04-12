@@ -24,4 +24,21 @@ namespace Model
 
         public int TotalWordsRead { get; set; } = 0;
     }
+    [Table("LanguageUserNew")]
+    public class LanguageUserNew
+    {
+        public int? Id { get; set; }
+
+        #region relationships
+        public int LanguageId { get; set; }
+        public Language Language { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; }
+        public List<Book> Books { get; set; }
+        public List<Word> Words { get; set; }
+
+        #endregion
+
+        public int TotalWordsRead { get; set; } = 0;
+    }
 }

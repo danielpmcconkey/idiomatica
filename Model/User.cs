@@ -21,4 +21,17 @@ namespace Model
         [StringLength(250)]
         public string Name { get; set; }
     }
+    [Table("UserNew", Schema = "DBO")]
+    public class UserNew
+    {
+        public int? Id { get; set; }
+
+        #region relationships
+        public List<LanguageUser> LanguageUsers { get; set; }
+        public List<UserSetting> UserSettings { get; set; }
+
+        #endregion
+        [StringLength(250)]
+        public string Name { get; set; }
+    }
 }

@@ -20,4 +20,17 @@ namespace Model
         
         public int Ordinal { get; set; }
 	}
+    [Table("ParagraphNew")]
+    public class ParagraphNew
+    {
+        public int? Id { get; set; }
+
+        #region relationships
+        public List<Sentence> Sentences { get; set; } = new List<Sentence>();
+        public int PageId { get; set; }
+        public Page Page { get; set; }
+        #endregion
+
+        public int Ordinal { get; set; }
+    }
 }

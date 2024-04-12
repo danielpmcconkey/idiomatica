@@ -25,4 +25,21 @@ namespace Model
         public DateTime? ReadDate { get; set; }
 
     }
+    [Table("PageNew")]
+    public class PageNew
+    {
+        public int? Id { get; set; }
+
+        #region relationships
+        public int BookId { get; set; }
+        public Book Book { get; set; }
+        public List<Paragraph> Paragraphs { get; set; } = new List<Paragraph>();
+        #endregion
+
+        public int Ordinal { get; set; }
+        [Column(TypeName = "TEXT")]
+        public string OriginalText { get; set; }
+        public DateTime? ReadDate { get; set; }
+
+    }
 }
