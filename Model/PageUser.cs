@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [Table("Page", Schema = "Idioma")]
+    [Table("PageUser", Schema = "Idioma")]
     public class PageUser
     {
         public int? Id { get; set; }

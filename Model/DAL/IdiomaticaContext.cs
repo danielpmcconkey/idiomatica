@@ -50,7 +50,9 @@ namespace Model.DAL
                     .HasForeignKey(bu => bu.LanguageUserId);
                 e.HasMany(bu => bu.BookUserStats).WithOne(bus => bus.BookUser)
                     .HasForeignKey(bus => bus.BookUserId);
-                e.HasMany(bu => bu.PageUsers).WithOne(pu => pu.BookUser).HasForeignKey(pu => pu.BookUserId);
+                e.HasMany(bu => bu.PageUsers).WithOne(pu => pu.BookUser)
+                    .HasForeignKey(pu => pu.BookUserId)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
             modelBuilder.Entity<BookUserStat>(e => {
                 e.HasKey(bus => new { bus.BookUserId, bus.Key });
@@ -71,7 +73,8 @@ namespace Model.DAL
                 e.HasOne(lu => lu.Language).WithMany(l => l.LanguageUsers)
                     .HasForeignKey(lu => lu.LanguageId);
                 e.HasMany(l => l.BookUsers).WithOne(bu => bu.LanguageUser)
-                    .HasForeignKey(bu => bu.LanguageUserId);
+                    .HasForeignKey(bu => bu.LanguageUserId)
+                    .OnDelete(DeleteBehavior.NoAction);
                 e.HasMany(l => l.WordUsers).WithOne(w => w.LanguageUser)
                     .HasForeignKey(w => w.LanguageUserId);
             });
@@ -121,7 +124,7 @@ namespace Model.DAL
                 e.HasKey(wu => wu.Id);
                 e.HasOne(wu => wu.LanguageUser).WithMany(lu => lu.WordUsers).HasForeignKey(w => w.LanguageUserId);
                 e.HasOne(wu => wu.Word).WithMany(w => w.WordUsers).HasForeignKey(wu => wu.WordId)
-                    .OnDelete(DeleteBehavior.NoAction); ;
+                    .OnDelete(DeleteBehavior.NoAction);
                 e.Property(wu => wu.Status).HasConversion<int>();
             });
         }
