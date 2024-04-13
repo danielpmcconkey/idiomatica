@@ -8,23 +8,9 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Model
 {
-    [Table("Sentence")]
+    
+    [Table("Sentence", Schema = "Idioma")]
     public class Sentence
-    {
-        public int? Id { get; set; }
-
-        #region relationships
-        public int ParagraphId { get; set; }
-        public Paragraph Paragraph { get; set; }
-        public List<Token> Tokens { get; set; } = new List<Token>();
-        #endregion
-
-        public int Ordinal { get; set; }
-        [Column(TypeName = "TEXT")]
-        public string? Text { get; set; }
-    }
-    [Table("SentenceNew")]
-    public class SentenceNew
     {
         public int? Id { get; set; }
 

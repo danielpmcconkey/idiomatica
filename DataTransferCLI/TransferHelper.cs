@@ -40,23 +40,7 @@ namespace DataTransferCLI
                     //TransferTable<Token>(contextDev, contextProd);
                     //TransferTable<UserSetting>(contextDev, contextProd);
 
-                    // WordParent doesn't get copied over this way
-                    var wordsIn = contextDev.Words
-                        .Where(x => x.ParentWords.Count > 0)
-                        .Include(x => x.ParentWords);
-                    foreach (var wordIn in wordsIn)
-                    {
-                        var wordOut = contextProd.Words.Where(x => x.Id == wordIn.Id).FirstOrDefault();
-                        if (wordOut == null)
-                        {
-                            throw new Exception();
-                        }
-                        wordOut.ParentWords = new List<Word>();
-                        foreach(var parentWord in wordIn.ParentWords)
-                        {
-                            wordOut.ParentWords.Add(parentWord);
-                        }
-                    }
+                   
                     contextProd.SaveChanges();
                 }
             }

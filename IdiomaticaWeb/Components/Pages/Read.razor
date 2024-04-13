@@ -6,7 +6,7 @@
 @using System.Linq.Expressions;
 @using Microsoft.EntityFrameworkCore;
 
-@page "/read/{id}"
+@page "/read/{bookid:int}"
 @rendermode InteractiveServer
 @inject IDbContextFactory<IdiomaticaContext> DbFactory
 
@@ -78,17 +78,17 @@
     <PageTitle>@_uiLabels.GetLabel("error")</PageTitle>
     <h1>@_uiLabels.GetLabel("error"):  @_errorMessage</h1>
 }
-else if(_book is null)
+else if(_bookUser is null)
 {
 	<PageTitle>@_uiLabels.GetLabel("loading")</PageTitle>
 	<h1>@_uiLabels.GetLabel("loading")</h1>
 }
 else
 {
-    <PageTitle>@_book.Title</PageTitle>
-    <h1>@_book.Title</h1>
+    <PageTitle>@_bookUser.Book.Title</PageTitle>
+    <h1>@_bookUser.Book.Title</h1>
 }
-@if(_currentPage is null)
+@if (_currentPageUser is null)
 {
 	<p>
 		@_uiLabels.GetLabel("loading")
@@ -96,11 +96,11 @@ else
 }
 else
 {
-    <p>Page @_currentPage.Ordinal</p>
-    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPage.Ordinal - 1))">
+    <p>Page @_currentPageUser.Page.Ordinal</p>
+    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPageUser.Page.Ordinal - 1))">
         @_uiLabels.GetLabel("btnPreviousPage")
     </button>
-    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPage.Ordinal + 1))">
+    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPageUser.Page.Ordinal + 1))">
         @_uiLabels.GetLabel("btnNextPage")
     </button>
 
@@ -117,11 +117,11 @@ else
             }
         </p>
     }
-    <p>Page @_currentPage.Ordinal</p>
-    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPage.Ordinal - 1))">
+    <p>Page @_currentPageUser.Page.Ordinal</p>
+    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPageUser.Page.Ordinal - 1))">
         @_uiLabels.GetLabel("btnPreviousPage")
     </button>
-    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPage.Ordinal + 1))">
+    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPageUser.Page.Ordinal + 1))">
         @_uiLabels.GetLabel("btnNextPage")
     </button>
 
@@ -131,133 +131,160 @@ else
 
 @code {
     [Parameter]
-    public string Id { get; set; }
+    public int BookId { get; set; }
+
+    private int _loggedInUserId = 1;  // todo: replace this with an actual logged in user
     private bool _isError = false;
     private string _errorMessage = "";
     private UILabels _uiLabels = Factory.GetUILabels(UILanguage.ENG_US); // todo: create a shared UILabels
 
-    private Book? _book;
-    private Page? _currentPage;
-    private Language? _language;
+    private BookUser? _bookUser;
+    private PageUser? _currentPageUser;
+    private LanguageUser? _languageUser;
     private List<Paragraph> _paragraphs;
-    private Dictionary<string, Word> _allWordsInLanguage;
+    private Dictionary<string, WordUser> _allWordUsersInLanguage;
+    private Dictionary<string, Word> _commonWordsInLanguage;
 
     protected override void OnInitialized()
     {
         // todo: don't load the entire book in at the beginning. Just the current page
-        _book = FetchBook();
-        if (_book is null) return;
-        _language = _book.LanguageUser.Language;
+        _bookUser = FetchBookUser();
+        if (_bookUser is null) return;
+        _languageUser = _bookUser.LanguageUser;
 
-        _currentPage = FetchPageById(_book.CurrentPageID);
-        if (_currentPage is null) return;
-        _paragraphs = _currentPage.Paragraphs;
+        _currentPageUser = FetchPageUserById(_bookUser.CurrentPageID);
+        if (_currentPageUser is null) return;
+        _paragraphs = _currentPageUser.Page.Paragraphs;
         using (var context = DbFactory.CreateDbContext())
         {
-            _allWordsInLanguage = WordHelper.FetchWordDictForLanguageUser(
-                context, _book.LanguageUser);
+            _allWordUsersInLanguage = WordHelper.FetchWordUserDictForLanguageUser(
+                context, _bookUser.LanguageUser);
+
+            // pull a list of common words from the database and put it
+            // in a dictionary so that we don't always have to go back to the
+            // database just to get the word ID for every single word
+            Dictionary<string, Word> _commonWordsInLanguage =
+                WordHelper.FetchCommonWordDictForLanguage(context, _bookUser.LanguageUser.Language);
         }
     }
 
-    private Book? FetchBook()
+    private BookUser? FetchBookUser()
     {
-        int parsedId = 0;
-        if(!int.TryParse(Id, out parsedId)) 
-        {
-            _isError = true;
-            _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
-            return null;
-        }
         using (var context = DbFactory.CreateDbContext())
         {
-            // todo: secure DB fetches so only the logged in user's data is requested
-            Expression<Func<Book, bool>> filter =
-                (x => x.LanguageUser.UserId == 1 && x.Id == parsedId); // todo: replace this filter with an actual logged in user
-            Book? bookFromDb = Fetch.BookAndBookStatsAndLanguage(context, filter);
+            var BookUserFromDb = context.BookUsers
+                .Where(bu => bu.LanguageUser.UserId == _loggedInUserId && bu.BookId == BookId)
+                .Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language)
+                .Include(bu => bu.Book).ThenInclude(b => b.BookStats)
+                .Include(bu => bu.BookUserStats)
+                .FirstOrDefault()
+                ;
             // todo: wrap some try catch around UI elements
-            if (bookFromDb is null)
+            if (BookUserFromDb is null)
             {
                 _isError = true;
                 _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
                 return null;
             }
-            return bookFromDb;
-        }
-
-    }
-    private Page? FetchPageById(int pageId)
-    {
-        if (_book is null) return null;
-        using (var context = DbFactory.CreateDbContext())
-        {
-            Expression<Func<Page, bool>> filter = (x => x.Id == pageId);
-            var pageFromDb = Fetch.PageAndParagraphsAndSentencesAndTokensAndWords(
-                context, filter);
-
-            if (pageFromDb is not null) return pageFromDb;
-            return FetchPageByOrderWithinBook((int)_book.Id, 0);
+            return BookUserFromDb;
         }
     }
-    private Page? FetchPageByOrderWithinBook(int bookId, int pageOrdinal)
+    private PageUser FetchPageUserById(int pageUserId)
     {
-        if (_book is null) return null;
+        if (_bookUser is null) return null;
         using (var context = DbFactory.CreateDbContext())
         {
-            Expression<Func<Page, bool>> filter = (x => x.BookId == bookId && x.Ordinal == pageOrdinal);
-            var pageFromDb = Fetch.PageAndParagraphsAndSentencesAndTokensAndWords(
-                context, filter);
+            // note this doesn't fetch the word_user becasue that will come 
+            // from the _allWordUsersInLanguage dictionary
+            var pageUserFromDb = context.PageUsers
+                .Where(pu => pu.BookUser.LanguageUserId == _loggedInUserId
+                    && pu.Id == pageUserId)
+                .Include(pu => pu.Page)
+                    .ThenInclude(p => p.Paragraphs)
+                    .ThenInclude(pp => pp.Sentences)
+                    .ThenInclude(s => s.Tokens)
+                    .ThenInclude(s => s.Word)
+                .FirstOrDefault();
 
-            if (pageFromDb is not null) return pageFromDb;
+            if (pageUserFromDb is not null) return pageUserFromDb;
+            return FetchPageUserByOrderWithinBook(0);
+        }
+    }
+    private PageUser FetchPageUserByOrderWithinBook(int pageOrdinal)
+    {
+        if (_bookUser is null) return null;
+        using (var context = DbFactory.CreateDbContext())
+        {
+            // note this doesn't fetch the word_user becasue that will come
+            // from the _allWordUsersInLanguage dictionary
+            var pageUserFromDb = context.PageUsers
+                .Where(pu => pu.BookUser.LanguageUserId == _loggedInUserId
+                    && pu.Page.Ordinal == pageOrdinal)
+                .Include(pu => pu.Page)
+                    .ThenInclude(p => p.Paragraphs)
+                    .ThenInclude(pp => pp.Sentences)
+                    .ThenInclude(s => s.Tokens)
+                    .ThenInclude(s => s.Word)
+                .FirstOrDefault();
 
-            _isError = true;
-            _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
-            return null;
+            if (pageUserFromDb is not null) return pageUserFromDb;
+
+            // pageUser is not created yet. Is the page created?
+            var existingPage = context.Pages
+                .Where(p => p.BookId == _bookUser.BookId && p.Ordinal == pageOrdinal)
+                .FirstOrDefault();
+            if (existingPage == null)
+                throw new InvalidDataException("Underlying Page does not exist when trying to retrieve PageUser.");
+
+        return PageHelper.CreatePageUserAndSave(context, existingPage, _bookUser,
+            _commonWordsInLanguage, _allWordUsersInLanguage);
         }
     }
     private List<Token> GetSentenceTokens(Sentence sentence)
     {
         if (sentence.Tokens is not null && sentence.Tokens.Count > 0) return sentence.Tokens;
-
-        // not in the DB. Gotta create
-        using (var context = DbFactory.CreateDbContext())
-        {
-            return SentenceHelper.CreateTokensFromSentenceAndSave(
-                context, sentence, _book.LanguageUser, _allWordsInLanguage);
-        }
+        // todo: log error. there should not be a sentence w/out tokens at this point
+        return new List<Token>();
     }
     private string GetTokenClass(Token token)
     {
         if (token.Word is null) return "statusUNKNOWN";
-        if (token.Word.Status == AvailableStatus.UNKNOWN) return "statusUNKNOWN";
-        if (token.Word.Status == AvailableStatus.NEW1) return "statusNEW1";
-        if (token.Word.Status == AvailableStatus.NEW2) return "statusNEW2";
-        if (token.Word.Status == AvailableStatus.LEARNING3) return "statusLEARNING3";
-        if (token.Word.Status == AvailableStatus.LEARNING4) return "statusLEARNING4";
-        if (token.Word.Status == AvailableStatus.LEARNED) return "statusLEARNED";
-        if (token.Word.Status == AvailableStatus.WELLKNOWN) return "statusWELLKNOWN";
-        if (token.Word.Status == AvailableStatus.IGNORED) return "statusIGNORED";
+        if (!_allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
+        var wordUser = _allWordUsersInLanguage[token.Word.TextLowerCase];
+        if (wordUser.Status == AvailableWordUserStatus.UNKNOWN) return "statusUNKNOWN";
+        if (wordUser.Status == AvailableWordUserStatus.NEW1) return "statusNEW1";
+        if (wordUser.Status == AvailableWordUserStatus.NEW2) return "statusNEW2";
+        if (wordUser.Status == AvailableWordUserStatus.LEARNING3) return "statusLEARNING3";
+        if (wordUser.Status == AvailableWordUserStatus.LEARNING4) return "statusLEARNING4";
+        if (wordUser.Status == AvailableWordUserStatus.LEARNED) return "statusLEARNED";
+        if (wordUser.Status == AvailableWordUserStatus.WELLKNOWN) return "statusWELLKNOWN";
+        if (wordUser.Status == AvailableWordUserStatus.IGNORED) return "statusIGNORED";
         return "statusUNKNOWN";
     }
     private void MovePage(int targetPageNum)
     {
         if (targetPageNum < 1) return;
-        if (targetPageNum > _book.TotalPages) return;
+        if (targetPageNum > StatisticsHelper.GetBookStat_int(_bookUser.Book, AvailableBookStat.TOTALPAGES)) 
+            return;
 
-        var pageInBook = _book.Pages.Where(x => x.Ordinal == targetPageNum).FirstOrDefault();
-        if (pageInBook is not null)
+        var pageUserInBook = _bookUser.PageUsers
+            .Where(x => x.Page.Ordinal == targetPageNum)
+            .FirstOrDefault();
+
+        if (pageUserInBook is not null)
         {
-            _currentPage = pageInBook;
-            _paragraphs = pageInBook.Paragraphs;
+            _currentPageUser = pageUserInBook;
+            _paragraphs = pageUserInBook.Page.Paragraphs;
             return;
         }
 
         // it should be in the DB but we haven't pulled it yet
-        var pageFromDb = FetchPageByOrderWithinBook((int)_book.Id, targetPageNum);
-        if(pageFromDb is not null)
+        var pageUserFromDb = FetchPageUserByOrderWithinBook(targetPageNum);
+        if (pageUserFromDb is not null)
         {
-            _currentPage = pageFromDb;
-            _paragraphs = _currentPage.Paragraphs;
-            _book.Pages.Add(pageFromDb);
+            _currentPageUser = pageUserFromDb;
+            _paragraphs = _currentPageUser.Page.Paragraphs;
+            _bookUser.PageUsers.Add(pageUserFromDb);
         }
         // todo: make distinct error messages for teh diff types of errors on the read page
         _isError = true;

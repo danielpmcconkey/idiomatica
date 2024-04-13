@@ -24,7 +24,7 @@ else
 }
 
 builder.Services.AddDbContextFactory<IdiomaticaContext>(options =>
-    options.UseSqlServer(connection));
+    options.UseSqlServer(connection, b => b.MigrationsAssembly("IdiomaticaWeb")));
 
 var app = builder.Build();
 

@@ -8,27 +8,16 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [Table("User", Schema = "DBO")]
+    
+    [Table("User", Schema = "Idioma")]
     public class User
     {
         public int? Id { get; set; }
 
         #region relationships
-		public List<LanguageUser> LanguageUsers { get; set; }
-        public List<UserSetting> UserSettings { get; set; }
-
-        #endregion
-        [StringLength(250)]
-        public string Name { get; set; }
-    }
-    [Table("UserNew", Schema = "DBO")]
-    public class UserNew
-    {
-        public int? Id { get; set; }
-
-        #region relationships
-        public List<LanguageUser> LanguageUsers { get; set; }
-        public List<UserSetting> UserSettings { get; set; }
+        public List<LanguageUser> LanguageUsers { get; set; } = new List<LanguageUser>();
+        public List<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
+        
 
         #endregion
         [StringLength(250)]

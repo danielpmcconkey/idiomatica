@@ -17,6 +17,16 @@ namespace Model.DAL
             }
             context.SaveChanges();
         }
+
+        public static void PageUser(IdiomaticaContext context, PageUser pageUser)
+        {
+            if (pageUser.Id == null)
+            {
+                context.PageUsers.Add(pageUser);
+            }
+            context.SaveChanges();
+        }
+
         public static void Paragraph(IdiomaticaContext context, Paragraph paragraph)
         {
             if (paragraph.Id == null)
@@ -46,6 +56,14 @@ namespace Model.DAL
             if (word.Id == null)
             {
                 context.Words.Add(word);
+            }
+            context.SaveChanges();
+        }
+        public static void WordUser(IdiomaticaContext context, WordUser wordUser)
+        {
+            if (wordUser.Id == null)
+            {
+                context.WordUsers.Add(wordUser);
             }
             context.SaveChanges();
         }

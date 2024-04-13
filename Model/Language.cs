@@ -8,15 +8,19 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [Table("Language")]
+    
+    [Table("Language", Schema = "Idioma")]
     public class Language
     {
         public int? Id { get; set; }
 
         #region relationships
+        public List<Book> Books { get; set; }
+        public List<Word> Words { get; set; }
         public List<LanguageUser> LanguageUsers { get; set; }
 
         #endregion
+
         [StringLength(250)]
         public string Name { get; set; }
         [StringLength(1000)]
@@ -39,39 +43,5 @@ namespace Model
         public bool ShowRomanization { get; set; } = false;
         [StringLength(250)]
         public string ParserType { get; set; } = "spacedel";
-        public int TotalWordsRead { get; set; } = 0;
-    }
-    [Table("LanguageNew")]
-    public class LanguageNew
-    {
-        public int? Id { get; set; }
-
-        #region relationships
-        public List<LanguageUser> LanguageUsers { get; set; }
-
-        #endregion
-        [StringLength(250)]
-        public string Name { get; set; }
-        [StringLength(1000)]
-        public string Dict1URI { get; set; }
-        [StringLength(1000)]
-        public string? Dict2URI { get; set; }
-        [StringLength(1000)]
-        public string? GoogleTranslateURI { get; set; }
-        [StringLength(250)]
-        public string CharacterSubstitutions { get; set; }
-        [StringLength(250)]
-        public string RegexpSplitSentences { get; set; }
-        [StringLength(250)]
-        public string ExceptionsSplitSentences { get; set; }
-        [StringLength(250)]
-        public string RegexpWordCharacters { get; set; }
-        public bool RemoveSpaces { get; set; }
-        public bool SplitEachChar { get; set; }
-        public bool RightToLeft { get; set; }
-        public bool ShowRomanization { get; set; } = false;
-        [StringLength(250)]
-        public string ParserType { get; set; } = "spacedel";
-        public int TotalWordsRead { get; set; } = 0;
     }
 }

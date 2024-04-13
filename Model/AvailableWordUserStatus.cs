@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    public enum AvailableStatus
+    public enum AvailableWordUserStatus
     {
         NEW1 = 1,
         NEW2 = 2,

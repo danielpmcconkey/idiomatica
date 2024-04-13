@@ -9,27 +9,11 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [Table("UserSetting")]
+    
+    
+    [Table("UserSetting", Schema = "Idioma")]
     [PrimaryKey(nameof(Key), nameof(UserId))]
     public class UserSetting
-    {
-
-        public int Key { get; set; }
-
-
-        #region relationships
-        public int UserId { get; set; }
-        public User User { get; set; }
-        #endregion
-
-
-        
-        [StringLength(1000)]
-        public string Value { get; set; }
-    }
-    [Table("UserSettingNew")]
-    [PrimaryKey(nameof(Key), nameof(UserId))]
-    public class UserSettingNew
     {
 
         public int Key { get; set; }

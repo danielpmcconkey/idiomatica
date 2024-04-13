@@ -11,12 +11,15 @@ namespace Logic.LanguageParser
     {
         internal static ILanguageParser GetLanguageParser(LanguageUser languageUser)
         {
-            if (languageUser.Language.ParserType == "spacedel")
+            return GetLanguageParser(languageUser.Language);
+        }
+        internal static ILanguageParser GetLanguageParser(Language language)
+        {
+            if (language.ParserType == "spacedel")
             {
-                return new SpaceDelimited(languageUser.Language);
+                return new SpanishParser();
             }
             else throw new NotImplementedException("other parser types not built yet");
-
         }
     }
 }

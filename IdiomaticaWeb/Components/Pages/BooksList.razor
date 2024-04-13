@@ -25,7 +25,7 @@
     <div><h3>Error</h3><p>@_errorMessage</p></div>
 }
 <div class="d-flex flex-row-reverse mb-2">
-    <button type="button" class="btn btn-primary" @onclick="@(e => _books = UpdateBookStats())">
+    <button type="button" class="btn btn-primary" @onclick="@(e => _bookUsers = UpdateBookUserStats())">
         @_uiLabels.GetLabel("btnUpdateBookListStats")
     </button>
 </div>
@@ -35,13 +35,13 @@
 		   @bind="_filter"
 		   @bind:event="oninput" />
 </div>
-@if (_books is null)
+@if (_bookUsers is null)
 {
 	<p>
 		@_uiLabels.GetLabel("loading")red
 	</p>
 }
-else if(!_books.Any())
+else if (!_bookUsers.Any())
 {
 	<p>
 		@_uiLabels.GetLabel("bookListNoBookNotice")
@@ -61,17 +61,17 @@ else
 					@_uiLabels.GetLabel("bookListLanguageColumnHead")
 					<span class="fa @(SetSortIcon("Language"))"></span>
 				</th>
-				<th scope="col" class="sort-th text-center" @onclick="@(() => SortTable("IsComplete"))">
+                <th scope="col" class="sort-th text-center" @onclick="@(() => SortTable("ISCOMPLETE"))">
 					@_uiLabels.GetLabel("bookListCompletedColumnHead")
-					<span class="fa @(SetSortIcon("IsComplete"))"></span>
+                    <span class="fa @(SetSortIcon("ISCOMPLETE"))"></span>
 				</th>
 				<th scope="col" class="sort-th" @onclick="@(() => SortTable("Title"))">
 					@_uiLabels.GetLabel("bookListTitleColumnHead")
 					<span class="fa @(SetSortIcon("Title"))"></span>
 				</th>
-				<th scope="col" class="sort-th text-center" @onclick="@(() => SortTable("Progress"))">
+                <th scope="col" class="sort-th text-center" @onclick="@(() => SortTable("PROGRESSPERCENT"))">
 					@_uiLabels.GetLabel("bookListProgressColumnHead")
-					<span class="fa @(SetSortIcon("Progress"))"></span>
+                    <span class="fa @(SetSortIcon("PROGRESSPERCENT"))"></span>
 				</th>
 				<th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TOTALWORDCOUNT"))">
 					@_uiLabels.GetLabel("bookListTotalWordCountColumnHead")
@@ -92,27 +92,27 @@ else
 			</tr>
 		</thead>
 		<tbody>
-			@foreach(var book in _books)
+			@foreach(var bookUser in _bookUsers)
 			{
-				if (!IsVisibleInList(book))
+                if (!IsVisibleInList(bookUser))
 					continue;
 
 				
 				<tr>
-					<td scope="row">@book.Id</td>
-					<td scope="row">@book.LanguageUser.Language.Name</td>
+                    <td scope="row">@bookUser.Book.Id</td>
+					<td scope="row">@bookUser.LanguageUser.Language.Name</td>
 					<td scope="row" class="text-center">
-					@if (book.IsComplete)
+                    @if (StatisticsHelper.GetBookUserStat_bool(bookUser, AvailableBookUserStat.ISCOMPLETE))
 					{
 						<span class="completedMarker">&#x2713;</span>
 					}
 					</td>
-					<td scope="row"><a href="@GetBookLink(book)">@FormatTitle(book)</a></td>
-					<td scope="row" class="text-center">@FormatProgress(book)</td>
-                    <td scope="row" class="text-end">@FormatCount(book, AvailableBookStat.TOTALWORDCOUNT)</td>
-                    <td scope="row" class="text-end">@FormatCount(book, AvailableBookStat.TOTALKNOWNPERCENT)</td>
-                    <td scope="row" class="text-end">@FormatCount(book, AvailableBookStat.DISTINCTWORDCOUNT)</td>
-                    <td scope="row" class="text-end">@FormatCount(book, AvailableBookStat.DISTINCTKNOWNPERCENT)</td>
+                    <td scope="row"><a href="@GetBookLink(bookUser.Book)">@FormatTitle(bookUser.Book)</a></td>
+                    <td scope="row" class="text-center">@FormatProgress(bookUser)</td>
+                    <td scope="row" class="text-end">@FormatCount(bookUser, AvailableBookUserStat.TOTALWORDCOUNT)</td>
+                    <td scope="row" class="text-end">@FormatCount(bookUser, AvailableBookUserStat.TOTALKNOWNPERCENT)</td>
+                    <td scope="row" class="text-end">@FormatCount(bookUser, AvailableBookUserStat.DISTINCTWORDCOUNT)</td>
+                    <td scope="row" class="text-end">@FormatCount(bookUser, AvailableBookUserStat.DISTINCTKNOWNPERCENT)</td>
 				</tr>
 			}
 		</tbody>
@@ -120,15 +120,19 @@ else
 }
 
 @code {
-    private int _loggedInUserId = 1;  // todo: replace this filter with an actual logged in user
-    private List<LanguageUser> _languageUsers;
+    private int _loggedInUserId = 1;  // todo: replace this with an actual logged in user
+    private IQueryable<BookUser>? _bookUsers;
+
+    #region sorting and filtering
     private string _filter;
     private bool _isSortedAscending;
     private string _activeSortColumn;
-    private List<Book>? _books;
-    Dictionary<string, Func<Book, object>> orderByFunctions =
-        new Dictionary<string, Func<Book, object>>();
+    Dictionary<string, Func<BookUser, object>> orderByFunctions =
+        new Dictionary<string, Func<BookUser, object>>();
+    #endregion
+
     private UILabels _uiLabels = Factory.GetUILabels(UILanguage.ENG_US);
+
     private bool _isError = false;
     private string _errorMessage = "";
 
@@ -138,20 +142,15 @@ else
         {
             orderByFunctions.Add("Language", (x => x.LanguageUser.Language.Name));
             orderByFunctions.Add("Id", (x => x.Id));
-            orderByFunctions.Add("IsComplete", (x => x.IsComplete));
-            orderByFunctions.Add("Title", (x => x.Title));
-            orderByFunctions.Add("Progress", (x => GetBookProgressPercent(x)));
-            orderByFunctions.Add("TOTALWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.TOTALWORDCOUNT)));
-            orderByFunctions.Add("TOTALKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.TOTALKNOWNPERCENT)));
-            orderByFunctions.Add("DISTINCTWORDCOUNT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.DISTINCTWORDCOUNT)));
-            orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookStat_int(x, AvailableBookStat.DISTINCTKNOWNPERCENT)));
+            orderByFunctions.Add("Title", (x => x.Book.Title));
+            orderByFunctions.Add("PROGRESSPERCENT", (x => Logic.StatisticsHelper.GetBookUserStat_int(x, AvailableBookUserStat.PROGRESSPERCENT)));
+            orderByFunctions.Add("ISCOMPLETE", (x => Logic.StatisticsHelper.GetBookUserStat_bool(x, AvailableBookUserStat.ISCOMPLETE)));
+            orderByFunctions.Add("TOTALWORDCOUNT", (x => Logic.StatisticsHelper.GetBookUserStat_int(x, AvailableBookUserStat.TOTALWORDCOUNT)));
+            orderByFunctions.Add("TOTALKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookUserStat_int(x, AvailableBookUserStat.TOTALKNOWNPERCENT)));
+            orderByFunctions.Add("DISTINCTWORDCOUNT", (x => Logic.StatisticsHelper.GetBookUserStat_int(x, AvailableBookUserStat.DISTINCTWORDCOUNT)));
+            orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookUserStat_int(x, AvailableBookUserStat.DISTINCTKNOWNPERCENT)));
 
-            using (var context = DbFactory.CreateDbContext())
-            {
-                _languageUsers = Fetch.LanguageUsersAndBooksAndBookStatsAndLanguageAndUserAndUserStats(
-                    context, (x => x.UserId == _loggedInUserId));
-            }
-            _books = FetchBooks();
+            _bookUsers = FetchBookUsers();
         }
         catch(Exception ex)
         {
@@ -159,24 +158,18 @@ else
             _errorMessage = ex.Message;
         }
     }
-    private List<Book> FetchBooks(bool refreshFromDb = false)
+    private IQueryable<BookUser> FetchBookUsers()
     {
-        var books = new List<Book>();
-        foreach (var languageUser in _languageUsers) 
+        using (var context = DbFactory.CreateDbContext())
         {
-            if (refreshFromDb)
-            {
-                using (var context = DbFactory.CreateDbContext())
-                {
-                    var dbResult = Fetch.BooksAndBookStatsAndLanguage(context,
-                        x => x.LanguageUserId == languageUser.Id);
-                    languageUser.Books = dbResult;
-                    books.AddRange(dbResult);
-                }
-            }
-            else books.AddRange(languageUser.Books);
+            Expression<Func<BookUser, bool>> filter = (x => x.LanguageUser.UserId == _loggedInUserId);
+            return context.BookUsers
+                .Where(filter)
+                .Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language)
+                .Include(bu => bu.Book).ThenInclude(b => b.BookStats)
+                .Include(bu => bu.BookUserStats)
+                ;
         }
-        return books;
     }
 
     private string FormatTitle(Book book)
@@ -193,28 +186,24 @@ else
     {
         return $"/read/{book.Id}";
     }
-    private float GetBookProgressPercent(Book book)
-    {
-        if (book.TotalPages == 0) return 0f;
-        return book.LastPageRead / (float)book.TotalPages;
-    }
-    private bool IsVisibleInList(Book book)
+    private bool IsVisibleInList(BookUser bookUser)
     {
         if (string.IsNullOrEmpty(_filter))
             return true;
-        if (book.LanguageUser.Language.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+        if (bookUser.LanguageUser.Language.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (book.Title.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+        if (bookUser.Book.Title.Contains(_filter, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
     }
     private void SortTable(string columnName)
     {
+        if (_bookUsers is null) return;
         if (!orderByFunctions.ContainsKey(columnName)) return;
 
         if (columnName != _activeSortColumn)
         {
-            _books = _books.OrderBy(orderByFunctions[columnName]).ToList();
+            _bookUsers = _bookUsers.OrderBy(orderByFunctions[columnName]).AsQueryable();
             _isSortedAscending = true;
             _activeSortColumn = columnName;
 
@@ -223,11 +212,11 @@ else
         {
             if (_isSortedAscending)
             {
-                _books = _books.OrderByDescending(orderByFunctions[columnName]).ToList();
+                _bookUsers = _bookUsers.OrderByDescending(orderByFunctions[columnName]).AsQueryable();
             }
             else
             {
-                _books = _books.OrderBy(orderByFunctions[columnName]).ToList();
+                _bookUsers = _bookUsers.OrderBy(orderByFunctions[columnName]).AsQueryable();
             }
 
             _isSortedAscending = !_isSortedAscending;
@@ -248,32 +237,33 @@ else
             return "fa-sort-down";
         }
     }
-    private string FormatCount(Book book, AvailableBookStat key)
+    private string FormatCount(BookUser bookUser, AvailableBookUserStat key)
     {
-        var existingStat = StatisticsHelper.GetBookStat_int(book, key);        
+        var existingStat = StatisticsHelper.GetBookUserStat_int(bookUser, key);
         return existingStat.ToString("N0");		
     }
-    private string FormatProgress(Book book)
+    private string FormatProgress(BookUser bookUser)
     {
-        if (book.TotalPages == 0) return "0";
-        return $"{book.LastPageRead} / {book.TotalPages}";
+        var totalPages = StatisticsHelper.GetBookStat_int(bookUser.Book, AvailableBookStat.TOTALPAGES);
+        var lastPageRead = StatisticsHelper.GetBookUserStat_int(bookUser, AvailableBookUserStat.LASTPAGEREAD);
+        return $"{lastPageRead} / {totalPages}";
     }
-    private List<Book> UpdateBookStats()
+    private IQueryable<BookUser> UpdateBookUserStats()
     {
         try
         {
+            throw new NotImplementedException("need to redo the book stats query");
             using (var context = DbFactory.CreateDbContext())
             {
-                StatisticsHelper.UpdateAllBookStatsForUserId(context, _loggedInUserId);
-                var newBooks = FetchBooks(true);
-                return newBooks;
+                //StatisticsHelper.UpdateAllBookStatsForUserId(context, _loggedInUserId);
+                return FetchBookUsers();
             }
         }
         catch (Exception ex)
         {
             _isError = true;
             _errorMessage = ex.Message;
-            return new List<Book>();
+            return null;
         }
     }
 
