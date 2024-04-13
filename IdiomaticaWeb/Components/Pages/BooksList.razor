@@ -160,16 +160,16 @@ else
     }
     private IQueryable<BookUser> FetchBookUsers()
     {
-        using (var context = DbFactory.CreateDbContext())
-        {
-            Expression<Func<BookUser, bool>> filter = (x => x.LanguageUser.UserId == _loggedInUserId);
-            return context.BookUsers
-                .Where(filter)
-                .Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language)
-                .Include(bu => bu.Book).ThenInclude(b => b.BookStats)
-                .Include(bu => bu.BookUserStats)
-                ;
-        }
+        var context = DbFactory.CreateDbContext();
+
+        Expression<Func<BookUser, bool>> filter = (x => x.LanguageUser.UserId == _loggedInUserId);
+        return context.BookUsers
+            .Where(filter)
+            .Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language)
+            .Include(bu => bu.Book).ThenInclude(b => b.BookStats)
+            .Include(bu => bu.BookUserStats)
+            ;
+
     }
 
     private string FormatTitle(Book book)
@@ -253,11 +253,11 @@ else
         try
         {
             throw new NotImplementedException("need to redo the book stats query");
-            using (var context = DbFactory.CreateDbContext())
-            {
-                //StatisticsHelper.UpdateAllBookStatsForUserId(context, _loggedInUserId);
-                return FetchBookUsers();
-            }
+            
+
+            //StatisticsHelper.UpdateAllBookStatsForUserId(context, _loggedInUserId);
+            return FetchBookUsers();
+            
         }
         catch (Exception ex)
         {

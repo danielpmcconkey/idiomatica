@@ -85,31 +85,23 @@ namespace Logic
 
             var topWordsInLanguage = context.Words.FromSql($"""
                 SELECT TOP (1000) 
-                        w.Id
-                    , w.LanguageUserId
-                    , w.Status
-                    , w.Text
-                    , w.TextLowerCase
-                    , w.Translation
-                    , w.Romanization
-                    , w.TokenCount
-                    , w.Created
-                    , w.StatusChanged
-                    --, count(t.Id) as numberOfUsages
-                FROM Word w
-                join Token t on w.Id = t.WordId
-                where w.LanguageUserId = {language.Id}
+                	    w.Id
+                      , LanguageId
+                      , Text
+                      , TextLowerCase
+                      , Romanization
+                      , TokenCount
+                	  , count(t.Id) as numberOfUsages
+                from Idiomatica.Idioma.Word w
+                join Idiomatica.Idioma.Token t on w.Id = t.WordId
+                where w.LanguageId = {language.Id}
                 group by 
-                      w.Id
-                    , w.LanguageUserId
-                    , w.Status
-                    , w.Text
-                    , w.TextLowerCase
-                    , w.Translation
-                    , w.Romanization
-                    , w.TokenCount
-                    , w.Created
-                    , w.StatusChanged
+                	    w.Id
+                      , LanguageId
+                      , Text
+                      , TextLowerCase
+                      , Romanization
+                      , TokenCount
                 order by count(t.Id) desc
                 """);
 
@@ -120,7 +112,6 @@ namespace Logic
                 // so no need to check if it already exists before adding
                 wordDict.Add(word.TextLowerCase, word);
             }
-            throw new NotImplementedException("above query needs to change based on new data model");
             return wordDict;
         }
     }
