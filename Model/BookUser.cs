@@ -18,6 +18,7 @@ namespace Model
         public Book Book { get; set; }
         public int LanguageUserId { get; set; }
         public LanguageUser LanguageUser { get; set; }
+        // do not pull BookUserStats directly as there's no link in the context
         public List<BookUserStat> BookUserStats { get; set; } = new List<BookUserStat>();
         public List<PageUser> PageUsers { get; set; } = new List<PageUser>();
 

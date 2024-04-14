@@ -8,29 +8,32 @@ namespace Model
 {
     public enum AvailableBookUserStat
     {
-        DISTINCTIGNOREDCOUNT = 1,
-        DISTINCTKNOWNPERCENT = 2,
-        DISTINCTLEARNEDCOUNT = 3,
-        DISTINCTLEARNING3COUNT = 4,
-        DISTINCTLEARNING4COUNT = 5,
-        DISTINCTNEW1COUNT = 6,
-        DISTINCTNEW2COUNT = 7,
-        DISTINCTUNKNOWNCOUNT = 8,
-        DISTINCTWELLKNOWNCOUNT = 9,
-        DISTINCTWORDCOUNT = 10,
-        TOTALIGNOREDCOUNT = 11,
-        TOTALKNOWNPERCENT = 12,
-        TOTALLEARNEDCOUNT = 13,
-        TOTALLEARNING3COUNT = 14,
-        TOTALLEARNING4COUNT = 15,
-        TOTALNEW1COUNT = 16,
-        TOTALNEW2COUNT = 17,
-        TOTALUNKNOWNCOUNT = 18,
-        TOTALWELLKNOWNCOUNT = 19,
-        TOTALWORDCOUNT = 20, // delete this one
-        ISCOMPLETE = 21,
-        LASTPAGEREAD = 22,
-        PROGRESS = 23,
-        PROGRESSPERCENT = 24,
+        ISCOMPLETE = 1,
+        LASTPAGEREAD = 2,
+        PROGRESS = 3,
+        PROGRESSPERCENT = 4,
+        DISTINCTKNOWNPERCENT = 5,
+        TOTALKNOWNPERCENT = 6,
+        DISTINCTWORDCOUNT = 7,
+        TOTALWORDCOUNT = 8,
     }
 }
+
+/*
+ * 
+with params as (
+	select 
+	  AvailableWordUserStatusUNKNOWN = 8
+, AvailableWordUserStatusLEARNED = 5
+, AvailableWordUserStatusIGNORED = 6
+, AvailableWordUserStatusWELLKNOWN = 7
+, AvailableBookUserStatISCOMPLETE = 1
+, AvailableBookUserStatLASTPAGEREAD = 2
+, AvailableBookUserStatPROGRESS = 3
+, AvailableBookUserStatPROGRESSPERCENT = 4
+, AvailableBookUserStatDISTINCTKNOWNPERCENT = 5
+, AvailableBookUserStatTOTALKNOWNPERCENT = 6
+, AvailableBookUserStatDISTINCTWORDCOUNT = 7
+, AvailableBookUserStatTOTALWORDCOUNT = 8
+
+ * */

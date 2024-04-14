@@ -9,6 +9,7 @@ namespace Model
     public enum AvailableBookStat
     {
         TOTALPAGES = 1,
-        WORDCOUNT = 2,
+        TOTALWORDCOUNT = 2,
+        DISTINCTWORDCOUNT = 3,
     }
 }

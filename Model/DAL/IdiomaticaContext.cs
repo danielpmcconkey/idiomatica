@@ -48,16 +48,14 @@ namespace Model.DAL
                 e.HasOne(bu => bu.Book).WithMany(b => b.BookUsers).HasForeignKey(bu => bu.BookId);
                 e.HasOne(bu => bu.LanguageUser).WithMany(lu => lu.BookUsers)
                     .HasForeignKey(bu => bu.LanguageUserId);
-                e.HasMany(bu => bu.BookUserStats).WithOne(bus => bus.BookUser)
-                    .HasForeignKey(bus => bus.BookUserId);
                 e.HasMany(bu => bu.PageUsers).WithOne(pu => pu.BookUser)
                     .HasForeignKey(pu => pu.BookUserId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
             modelBuilder.Entity<BookUserStat>(e => {
-                e.HasKey(bus => new { bus.BookUserId, bus.Key });
-                e.HasOne(bus => bus.BookUser).WithMany(bu => bu.BookUserStats)
-                    .HasForeignKey(bus => bus.BookUserId);
+                e.HasKey(bus => new { bus.LanguageUserId, bus.BookId, bus.Key });
+                e.HasOne(bus => bus.Book).WithMany(b => b.BookUserStats)
+                    .HasForeignKey(bus => bus.BookId);
                 e.Property(bus => bus.Key).HasConversion<int>();
             });
             modelBuilder.Entity<Language>(e => {

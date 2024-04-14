@@ -176,7 +176,6 @@ else
                 .Where(bu => bu.LanguageUser.UserId == _loggedInUserId && bu.BookId == BookId)
                 .Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language)
                 .Include(bu => bu.Book).ThenInclude(b => b.BookStats)
-                .Include(bu => bu.BookUserStats)
                 .FirstOrDefault()
                 ;
             // todo: wrap some try catch around UI elements
@@ -186,6 +185,11 @@ else
                 _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
                 return null;
             }
+            var bookUserStats = context.BookUserStats
+                .Where(x => x.LanguageUserId == BookUserFromDb.LanguageUserId 
+                    && x.BookId == BookUserFromDb.BookId);
+            if (bookUserStats is null) BookUserFromDb.BookUserStats = new List<BookUserStat>();
+            else BookUserFromDb.BookUserStats = bookUserStats.ToList();
             return BookUserFromDb;
         }
     }
