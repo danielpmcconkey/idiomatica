@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [Table("BookStat")]
+    [Table("BookStat", Schema = "Idioma")]
     [PrimaryKey(nameof(BookId), nameof(Key))]
     public class BookStat
     {
-        public int? BookId { get; set; }
-		public AvailableBookStat Key { get; set; }
+        public int BookId { get; set; }
+        public AvailableBookStat Key { get; set; }
 
         #region relationships
         public Book Book { get; set; }

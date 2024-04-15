@@ -9,7 +9,9 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [Table("UserSetting")]
+    
+    
+    [Table("UserSetting", Schema = "Idioma")]
     [PrimaryKey(nameof(Key), nameof(UserId))]
     public class UserSetting
     {
@@ -23,7 +25,7 @@ namespace Model
         #endregion
 
 
-        
+
         [StringLength(1000)]
         public string Value { get; set; }
     }

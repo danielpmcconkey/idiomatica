@@ -8,15 +8,19 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [Table("Language")]
+    
+    [Table("Language", Schema = "Idioma")]
     public class Language
-	{
-		public int? Id { get; set; }
+    {
+        public int? Id { get; set; }
 
         #region relationships
+        public List<Book> Books { get; set; }
+        public List<Word> Words { get; set; }
         public List<LanguageUser> LanguageUsers { get; set; }
 
         #endregion
+
         [StringLength(250)]
         public string Name { get; set; }
         [StringLength(1000)]
@@ -39,6 +43,5 @@ namespace Model
         public bool ShowRomanization { get; set; } = false;
         [StringLength(250)]
         public string ParserType { get; set; } = "spacedel";
-        public int TotalWordsRead { get; set; } = 0;
     }
 }

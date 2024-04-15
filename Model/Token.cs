@@ -8,11 +8,12 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [Table("Token")]
+    
+    [Table("Token", Schema = "Idioma")]
     /// <summary>
     /// This is used to assist UI in writing sentences on the screen easier
     /// </summary>
-     public class Token
+    public class Token
     {
         public int? Id { get; set; }
 
@@ -29,9 +30,9 @@ namespace Model
         /// the text only component, regardless of status, includes any punctuation
         /// </summary>
         [StringLength(250)]
-        public string Display {  get; set; }
-        
-        
+        public string Display { get; set; }
+
+
         /// <summary>
         /// the order it appears within its sentence
         /// </summary>

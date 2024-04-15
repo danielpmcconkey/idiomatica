@@ -7,17 +7,18 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [Table("Paragraph")]
+    
+    [Table("Paragraph", Schema = "Idioma")]
     public class Paragraph
-	{
+    {
         public int? Id { get; set; }
 
         #region relationships
         public List<Sentence> Sentences { get; set; } = new List<Sentence>();
         public int PageId { get; set; }
-        public Page Page { get; set; } 
+        public Page Page { get; set; }
         #endregion
-        
+
         public int Ordinal { get; set; }
-	}
+    }
 }

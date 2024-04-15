@@ -8,7 +8,8 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Model
 {
-	[Table("Page")]
+	
+    [Table("Page", Schema = "Idioma")]
     public class Page
     {
         public int? Id { get; set; }
@@ -16,13 +17,13 @@ namespace Model
         #region relationships
         public int BookId { get; set; }
         public Book Book { get; set; }
-        public List<Paragraph> Paragraphs { get; set; } = new List<Paragraph>(); 
+        public List<Paragraph> Paragraphs { get; set; } = new List<Paragraph>();
+        public List<PageUser> PageUsers { get; set; } = new List<PageUser>();
         #endregion
 
         public int Ordinal { get; set; }
-        [Column(TypeName ="TEXT")]
+        [Column(TypeName = "TEXT")]
         public string OriginalText { get; set; }
-        public DateTime? ReadDate { get; set; }
 
     }
 }
