@@ -95,7 +95,7 @@ else
                     <td scope="row">@bookUser.Book.Id</td>
                     <td scope="row">@bookUser.LanguageUser.Language.Name</td>
                     <td scope="row" class="text-center">
-                    @if (StatisticsHelper.GetBookUserStat_bool(bookUser, AvailableBookUserStat.ISCOMPLETE))
+                    @if (GetBookUserStat_bool(bookUser, AvailableBookUserStat.ISCOMPLETE))
                     {
                         <span class="completedMarker">&#x2713;</span>
                     }
@@ -138,15 +138,15 @@ else
             orderByFunctions.Add("Language", (x => x.LanguageUser.Language.Name));
             orderByFunctions.Add("Id", (x => x.Id));
             orderByFunctions.Add("Title", (x => x.Book.Title));
-            orderByFunctions.Add("PROGRESSPERCENT", (x => Logic.StatisticsHelper.GetBookUserStat_int(x, AvailableBookUserStat.PROGRESSPERCENT)));
-            orderByFunctions.Add("ISCOMPLETE", (x => Logic.StatisticsHelper.GetBookUserStat_bool(x, AvailableBookUserStat.ISCOMPLETE)));
-            orderByFunctions.Add("TOTALWORDCOUNT", (x => Logic.StatisticsHelper.GetBookUserStat_int(x, AvailableBookUserStat.TOTALWORDCOUNT)));
-            orderByFunctions.Add("TOTALKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookUserStat_int(x, AvailableBookUserStat.TOTALKNOWNPERCENT)));
-            orderByFunctions.Add("DISTINCTWORDCOUNT", (x => Logic.StatisticsHelper.GetBookUserStat_int(x, AvailableBookUserStat.DISTINCTWORDCOUNT)));
-            orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => Logic.StatisticsHelper.GetBookUserStat_int(x, AvailableBookUserStat.DISTINCTKNOWNPERCENT)));
+            orderByFunctions.Add("PROGRESSPERCENT", (x => GetBookUserStat_int(x, AvailableBookUserStat.PROGRESSPERCENT)));
+            orderByFunctions.Add("ISCOMPLETE", (x => GetBookUserStat_bool(x, AvailableBookUserStat.ISCOMPLETE)));
+            orderByFunctions.Add("TOTALWORDCOUNT", (x => GetBookUserStat_int(x, AvailableBookUserStat.TOTALWORDCOUNT)));
+            orderByFunctions.Add("TOTALKNOWNPERCENT", (x => GetBookUserStat_int(x, AvailableBookUserStat.TOTALKNOWNPERCENT)));
+            orderByFunctions.Add("DISTINCTWORDCOUNT", (x => GetBookUserStat_int(x, AvailableBookUserStat.DISTINCTWORDCOUNT)));
+            orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => GetBookUserStat_int(x, AvailableBookUserStat.DISTINCTKNOWNPERCENT)));
 
-            _bookUsers = bookService.FetchBookUsersWithoutStats(_loggedInUserId);
-            _bookUserStats = bookService.FetchBookUserStats(_loggedInUserId);
+            _bookUsers = bookService.FetchBookUsersWithoutStats(_loggedInUserId).ToList();
+            _bookUserStats = bookService.FetchBookUserStats(_loggedInUserId).ToList();
         }
         catch(Exception ex)
         {
@@ -185,7 +185,7 @@ else
 
         if (columnName != _activeSortColumn)
         {
-            _bookUsers = _bookUsers.OrderBy(orderByFunctions[columnName]).AsQueryable();
+            _bookUsers = _bookUsers.OrderBy(orderByFunctions[columnName]).ToList();
             _isSortedAscending = true;
             _activeSortColumn = columnName;
         }
@@ -193,11 +193,11 @@ else
         {
             if (_isSortedAscending)
             {
-                _bookUsers = _bookUsers.OrderByDescending(orderByFunctions[columnName]).AsQueryable();
+                _bookUsers = _bookUsers.OrderByDescending(orderByFunctions[columnName]).ToList();
             }
             else
             {
-                _bookUsers = _bookUsers.OrderBy(orderByFunctions[columnName]).AsQueryable();
+                _bookUsers = _bookUsers.OrderBy(orderByFunctions[columnName]).ToList();
             }
             _isSortedAscending = !_isSortedAscending;
         }
@@ -234,5 +234,23 @@ else
         if (dbStat is null) return "0 / 0";
 
         return dbStat.Value;
+    }
+    private int GetBookUserStat_int(BookUser bookUser, AvailableBookUserStat stat)
+    {
+        var dbStat = _bookUserStats.Where(x => x.BookId == bookUser.BookId && x.Key == stat)
+            .FirstOrDefault();
+        if (dbStat is null) return 0;
+        int outVal = 0;
+        if (int.TryParse(dbStat.Value, out outVal) == false) return 0;
+        return outVal;
+    }
+    private bool GetBookUserStat_bool(BookUser bookUser, AvailableBookUserStat stat)
+    {
+        var dbStat = _bookUserStats.Where(x => x.BookId == bookUser.BookId && x.Key == stat)
+            .FirstOrDefault();
+        if (dbStat is null) return false;
+        bool outVal = false;
+        if (bool.TryParse(dbStat.Value, out outVal) == false) return false;
+        return outVal;
     }
 }

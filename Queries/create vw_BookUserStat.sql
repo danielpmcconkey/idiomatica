@@ -1,4 +1,4 @@
-create view vw_BookUserStat as 
+create view Idioma.vw_BookUserStat as 
 
 with params as (
 	select 

@@ -20,7 +20,7 @@ namespace Model
         public Language Language { get; set; }
         public List<Page> Pages { get; set; } = new List<Page>();
         public List<BookStat> BookStats { get; set; } = new List<BookStat>();
-        public List<BookUserStat> BookUserStats { get; set; }
+        //public List<BookUserStat> BookUserStats { get; set; }
         public List<BookUser> BookUsers { get; set; } = new List<BookUser>();
 
         #endregion

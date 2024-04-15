@@ -52,12 +52,14 @@ namespace Model.DAL
                     .HasForeignKey(pu => pu.BookUserId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
-            modelBuilder.Entity<BookUserStat>(e => {
-                e.HasKey(bus => new { bus.LanguageUserId, bus.BookId, bus.Key });
-                e.HasOne(bus => bus.Book).WithMany(b => b.BookUserStats)
-                    .HasForeignKey(bus => bus.BookId);
-                e.Property(bus => bus.Key).HasConversion<int>();
-            });
+            //modelBuilder.Entity<BookUserStat>(e => {
+            //    e.HasKey(bus => new { bus.LanguageUserId, bus.BookId, bus.Key });
+            //    e.HasOne(bus => bus.LanguageUser).WithMany(lu => lu.BookUsersStats)
+            //        .HasForeignKey(bus => bus.LanguageUserId);
+            //    //e.HasOne(bus => bus.Book).WithMany(b => b.BookUserStats)
+            //    //    .HasForeignKey(bus => bus.BookId);
+            //    e.Property(bus => bus.Key).HasConversion<int>();
+            //});
             modelBuilder.Entity<Language>(e => {
                 e.HasKey(l => l.Id);
                 e.HasMany(l => l.LanguageUsers).WithOne(lu => lu.Language)

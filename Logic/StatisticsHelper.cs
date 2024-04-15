@@ -46,16 +46,16 @@ namespace Logic
             if (existingStat == null) return null;
             return existingStat.Value;
         }
-        public static string? GetBookUserStat(BookUser bookUser, AvailableBookUserStat key)
-        {
-            if (bookUser.BookUserStats == null) return null;
-            return GetBookUserStat(bookUser.BookUserStats, key);
-        }
-        public static int GetBookUserStat_int(BookUser bookUser, AvailableBookUserStat key)
-        {
-            if (bookUser.BookUserStats == null) return 0;
-            return GetBookUserStat_int(bookUser.BookUserStats, key);
-        }
+        //public static string? GetBookUserStat(BookUser bookUser, AvailableBookUserStat key)
+        //{
+        //    if (bookUser.BookUserStats == null) return null;
+        //    return GetBookUserStat(bookUser.BookUserStats, key);
+        //}
+        //public static int GetBookUserStat_int(BookUser bookUser, AvailableBookUserStat key)
+        //{
+        //    if (bookUser.BookUserStats == null) return 0;
+        //    return GetBookUserStat_int(bookUser.BookUserStats, key);
+        //}
         public static int GetBookUserStat_int(List<BookUserStat> bookUserStats, AvailableBookUserStat key)
         {
             if (bookUserStats == null) return 0;
@@ -64,11 +64,11 @@ namespace Logic
             int.TryParse(existingStat, out parsedStat);
             return parsedStat;
         }
-        public static bool GetBookUserStat_bool(BookUser bookUser, AvailableBookUserStat key)
-        {
-            if (bookUser.BookUserStats == null) return false;
-            return GetBookUserStat_bool(bookUser.BookUserStats, key);
-        }
+        //public static bool GetBookUserStat_bool(BookUser bookUser, AvailableBookUserStat key)
+        //{
+        //    if (bookUser.BookUserStats == null) return false;
+        //    return GetBookUserStat_bool(bookUser.BookUserStats, key);
+        //}
         public static bool GetBookUserStat_bool(List<BookUserStat> bookUserStats, AvailableBookUserStat key)
         {
             if (bookUserStats == null) return false;

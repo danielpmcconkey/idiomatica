@@ -1,4 +1,5 @@
-﻿@using Model
+﻿@using IdiomaticaWeb.Services
+@using Model
 @using Logic
 @using Model.DAL
 @using System.Globalization
@@ -8,7 +9,7 @@
 
 @page "/read/{bookid:int}"
 @rendermode InteractiveServer
-@inject IDbContextFactory<IdiomaticaContext> DbFactory
+@inject BookService bookService;
 
 <style>
     span.statusUNKNOWN {
@@ -139,6 +140,7 @@ else
     private UILabels _uiLabels = Factory.GetUILabels(UILanguage.ENG_US); // todo: create a shared UILabels
 
     private BookUser? _bookUser;
+    private IQueryable<BookUserStat>? _bookUserStats;
     private PageUser? _currentPageUser;
     private LanguageUser? _languageUser;
     private List<Paragraph> _paragraphs;
@@ -151,98 +153,74 @@ else
         _bookUser = FetchBookUser();
         if (_bookUser is null) return;
         _languageUser = _bookUser.LanguageUser;
+        _bookUserStats = FetchBookUserStats();
 
-        _currentPageUser = FetchPageUserById(_bookUser.CurrentPageID);
+        _currentPageUser = FetchPageUserOnBookOpen();
         if (_currentPageUser is null) return;
         _paragraphs = _currentPageUser.Page.Paragraphs;
-        using (var context = DbFactory.CreateDbContext())
-        {
-            _allWordUsersInLanguage = WordHelper.FetchWordUserDictForLanguageUser(
-                context, _bookUser.LanguageUser);
+        _allWordUsersInLanguage = bookService.FetchWordUserDictForLanguageUser(
+                _bookUser.LanguageUser);
 
-            // pull a list of common words from the database and put it
-            // in a dictionary so that we don't always have to go back to the
-            // database just to get the word ID for every single word
-            Dictionary<string, Word> _commonWordsInLanguage =
-                WordHelper.FetchCommonWordDictForLanguage(context, _bookUser.LanguageUser.Language);
-        }
+        // pull a list of common words from the database and put it
+        // in a dictionary so that we don't always have to go back to the
+        // database just to get the word ID for every single word
+        _commonWordsInLanguage =
+             bookService.FetchCommonWordDictForLanguage(_bookUser.LanguageUser.Language);
+
     }
 
     private BookUser? FetchBookUser()
     {
-        using (var context = DbFactory.CreateDbContext())
+
+        var bookUserFromDb = bookService.FetchBookUser(_loggedInUserId, BookId);
+        // todo: wrap some try catch around UI elements
+        if (bookUserFromDb is null)
         {
-            var BookUserFromDb = context.BookUsers
-                .Where(bu => bu.LanguageUser.UserId == _loggedInUserId && bu.BookId == BookId)
-                .Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language)
-                .Include(bu => bu.Book).ThenInclude(b => b.BookStats)
-                .FirstOrDefault()
-                ;
-            // todo: wrap some try catch around UI elements
-            if (BookUserFromDb is null)
-            {
-                _isError = true;
-                _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
-                return null;
-            }
-            var bookUserStats = context.BookUserStats
-                .Where(x => x.LanguageUserId == BookUserFromDb.LanguageUserId 
-                    && x.BookId == BookUserFromDb.BookId);
-            if (bookUserStats is null) BookUserFromDb.BookUserStats = new List<BookUserStat>();
-            else BookUserFromDb.BookUserStats = bookUserStats.ToList();
-            return BookUserFromDb;
+            _isError = true;
+            _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
         }
+        return bookUserFromDb;
     }
-    private PageUser FetchPageUserById(int pageUserId)
+    private IQueryable<BookUserStat> FetchBookUserStats()
     {
         if (_bookUser is null) return null;
-        using (var context = DbFactory.CreateDbContext())
-        {
-            // note this doesn't fetch the word_user becasue that will come 
-            // from the _allWordUsersInLanguage dictionary
-            var pageUserFromDb = context.PageUsers
-                .Where(pu => pu.BookUser.LanguageUserId == _loggedInUserId
-                    && pu.Id == pageUserId)
-                .Include(pu => pu.Page)
-                    .ThenInclude(p => p.Paragraphs)
-                    .ThenInclude(pp => pp.Sentences)
-                    .ThenInclude(s => s.Tokens)
-                    .ThenInclude(s => s.Word)
-                .FirstOrDefault();
 
-            if (pageUserFromDb is not null) return pageUserFromDb;
-            return FetchPageUserByOrderWithinBook(0);
+        var bookUserStatsFromDb = bookService.FetchBookUserStats(_loggedInUserId, _bookUser.BookId);
+        if (bookUserStatsFromDb is null)
+        {
+            _isError = true;
+            _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
         }
+        return bookUserStatsFromDb;
     }
-    private PageUser FetchPageUserByOrderWithinBook(int pageOrdinal)
+    private PageUser? FetchPageUserOnBookOpen()
     {
+        // note this doesn't fetch the word_user becasue that will come
+        // from the _allWordUsersInLanguage dictionary
+
         if (_bookUser is null) return null;
-        using (var context = DbFactory.CreateDbContext())
-        {
-            // note this doesn't fetch the word_user becasue that will come
-            // from the _allWordUsersInLanguage dictionary
-            var pageUserFromDb = context.PageUsers
-                .Where(pu => pu.BookUser.LanguageUserId == _loggedInUserId
-                    && pu.Page.Ordinal == pageOrdinal)
-                .Include(pu => pu.Page)
-                    .ThenInclude(p => p.Paragraphs)
-                    .ThenInclude(pp => pp.Sentences)
-                    .ThenInclude(s => s.Tokens)
-                    .ThenInclude(s => s.Word)
-                .FirstOrDefault();
+        var dbPageUser = bookService.FetchPageUserById(_bookUser.CurrentPageID, _loggedInUserId);
+        if (dbPageUser is not null) return dbPageUser;
+        return FetchPageUserByOrderWithinBook(0);
+    }
+    private PageUser? FetchPageUserByOrderWithinBook(int pageOrdinal)
+    {
+        // note this doesn't fetch the word_user becasue that will come
+        // from the _allWordUsersInLanguage dictionary
+        if (_bookUser is null) return null;
 
-            if (pageUserFromDb is not null) return pageUserFromDb;
+        var pageUserFromDb = bookService.FetchPageUserByOrdinalWithinBook(
+            pageOrdinal, _bookUser.BookId, _loggedInUserId);
 
-            // pageUser is not created yet. Is the page created?
-            var existingPage = context.Pages
-                .Where(p => p.BookId == _bookUser.BookId && p.Ordinal == pageOrdinal)
-                .FirstOrDefault();
-            if (existingPage == null)
-                throw new InvalidDataException("Underlying Page does not exist when trying to retrieve PageUser.");
+        if (pageUserFromDb is not null) return pageUserFromDb;
 
-        return PageHelper.CreatePageUserAndSave(context, existingPage, _bookUser,
+        // pageUser is not created yet. Is the page created?
+        var existingPage = bookService.FetchPageByOrdinalWithinBook(pageOrdinal, _bookUser.BookId);
+        if (existingPage == null)
+            throw new InvalidDataException("Underlying Page does not exist when trying to retrieve PageUser.");
+
+        return bookService.CreatePageUserAndSave(existingPage, _bookUser,
             _commonWordsInLanguage, _allWordUsersInLanguage);
-        }
     }
     private List<Token> GetSentenceTokens(Sentence sentence)
     {
@@ -267,6 +245,7 @@ else
     }
     private void MovePage(int targetPageNum)
     {
+        // todo: DEFECT moving between pages makes the page title turn to an error
         if (targetPageNum < 1) return;
         if (targetPageNum > StatisticsHelper.GetBookStat_int(_bookUser.Book, AvailableBookStat.TOTALPAGES)) 
             return;

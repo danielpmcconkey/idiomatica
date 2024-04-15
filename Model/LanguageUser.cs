@@ -18,8 +18,9 @@ namespace Model
         public Language Language { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }
-        public List<BookUser> BookUsers { get; set; }
-        public List<WordUser> WordUsers { get; set; }
+        public List<BookUser> BookUsers { get; set; } = new List<BookUser>();
+        public List<WordUser> WordUsers { get; set; } = new List<WordUser>();
+        public List<BookUserStat> BookUsersStats { get; set; } = new List<BookUserStat>();
 
         #endregion
 

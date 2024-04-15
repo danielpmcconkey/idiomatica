@@ -18,7 +18,7 @@ namespace Model
         public AvailableBookUserStat Key { get; set; }
 
         #region relationships
-        public Book Book { get; set; }
+        //public Book Book { get; set; }
         public LanguageUser LanguageUser { get; set; }
         #endregion
         [StringLength(250)]
