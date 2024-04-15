@@ -171,7 +171,6 @@ else
 
     private BookUser? FetchBookUser()
     {
-
         var bookUserFromDb = bookService.FetchBookUser(_loggedInUserId, BookId);
         // todo: wrap some try catch around UI elements
         if (bookUserFromDb is null)
@@ -269,7 +268,7 @@ else
             _paragraphs = _currentPageUser.Page.Paragraphs;
             _bookUser.PageUsers.Add(pageUserFromDb);
         }
-        // todo: make distinct error messages for teh diff types of errors on the read page
+        // todo: make distinct error messages for the diff types of errors on the read page
         _isError = true;
         _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
     }
