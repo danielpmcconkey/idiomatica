@@ -97,6 +97,7 @@ namespace Logic
                 // and add to the dict
                 allWordUsersInLanguage[kvp.Key] = newWordUser;
             }
+            context.SaveChanges();
             return pageUser;
         }
         
