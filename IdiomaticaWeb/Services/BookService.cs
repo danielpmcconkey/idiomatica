@@ -114,5 +114,15 @@ namespace IdiomaticaWeb.Services
             var context = _dbContextFactory.CreateDbContext();
             return WordHelper.FetchCommonWordDictForLanguage(context, language);
         }
+        public void UpdatePageBookmark(int bookUserId, int currentPageId)
+        {
+            if (bookUserId == 0) throw new ArgumentException("bookUserId cannot be 0 when saving current page.");
+            if (currentPageId == 0) throw new ArgumentException("currentPageId cannot be 0 when saving current page.");
+            var context = _dbContextFactory.CreateDbContext();
+            var bookUser = context.BookUsers.FirstOrDefault(x => x.Id == bookUserId);
+            if (bookUser == null) throw new ArgumentException($"no BookUser found with Id {bookUserId}. Cannot update bookmark");
+            bookUser.CurrentPageID = currentPageId;
+            context.SaveChanges();
+        }
     }
 }

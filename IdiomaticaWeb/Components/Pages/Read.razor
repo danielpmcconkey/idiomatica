@@ -256,6 +256,7 @@ else
         {
             _currentPageUser = pageUserInBook;
             _paragraphs = pageUserInBook.Page.Paragraphs;
+            bookService.UpdatePageBookmark(_bookUser.Id, (int)_currentPageUser.Page.Id);
             return;
         }
 
@@ -266,6 +267,7 @@ else
             _currentPageUser = pageUserFromDb;
             _paragraphs = _currentPageUser.Page.Paragraphs;
             _bookUser.PageUsers.Add(pageUserFromDb);
+            bookService.UpdatePageBookmark(_bookUser.Id, (int)_currentPageUser.Page.Id);
             return;
         }
         // todo: make distinct error messages for the diff types of errors on the read page
