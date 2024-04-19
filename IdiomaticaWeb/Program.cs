@@ -11,14 +11,14 @@ builder.Services.AddRazorComponents()
 builder.Services.AddTransient<BookService>();
 
 var connection = String.Empty;
-
 if (builder.Environment.IsDevelopment())
 {
+
     builder.Configuration.AddEnvironmentVariables().AddJsonFile("appsettings.Development.json");
     connection = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING_DEV");
-    // use the below connection to run migrations from the VS PM Console
-    // todo: figure out how to actually run migrations in Azure
-    // connection = "Server=tcp:idiomatica.database.windows.net,1433;Initial Catalog=idiomatica_prod;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default;";
+
+    // use the below connection to run against prod DB,  with error messages enabled
+    // connection = "Server=tcp:idiomatica.database.windows.net,1433;Initial Catalog=idiomatica;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default;";
 }
 else
 {
