@@ -1,6 +1,4 @@
-﻿
-
-@page "/read/{bookid:int}"
+﻿@page "/read/{bookid:int}"
 @rendermode InteractiveServer
 @inject BookService bookService;
 
@@ -56,6 +54,7 @@
         margin-left: .25em;
         padding: .25em;
         display: inline;
+        cursor: pointer;
     }
     .readParagraph {
         text-indent: 2em;
@@ -63,7 +62,14 @@
     }
 
     .dissappear { display:none; }
-    
+
+    .unselectedWordStatus {
+        border: solid 1px #cccccc;
+    }
+
+    .selectedWordStatus {
+        border: solid 5px #0000ff;
+    }
     
 </style>
 
@@ -91,40 +97,60 @@ else
 }
 else
 {
-
-    <Modal @ref="modal" Title="@_modalTitle">
+    <Modal @ref="modal" Title="@_modalTitle" Size="ModalSize.Large">
         <BodyTemplate>
-            <form>
-                <div>
-                    <label for="inputTranslation" class="form-label">Translation</label>
-                    <textarea rows="4" cols="150" class="form-control" id="inputTranslation">@_modalTranslation</textarea>
-                </div>
-                <div >
-                    <select class="form-select" aria-label="Default select example">
-                        <option value="@_modalSelectedStatusValue" selected>@_modalSelectedStatus</option>
-                        <option value="8">@_uiLabels.GetLabel($"statusLabel{8}")</option>
-                        <option value="1">@_uiLabels.GetLabel($"statusLabel{1}")</option>
-                        <option value="2">@_uiLabels.GetLabel($"statusLabel{2}")</option>
-                        <option value="3">@_uiLabels.GetLabel($"statusLabel{3}")</option>
-                        <option value="4">@_uiLabels.GetLabel($"statusLabel{4}")</option>
-                        <option value="5">@_uiLabels.GetLabel($"statusLabel{5}")</option>
-                        <option value="6">@_uiLabels.GetLabel($"statusLabel{6}")</option>
-                        <option value="7">@_uiLabels.GetLabel($"statusLabel{7}")</option>
-                    </select>
-                </div>
-                
-            </form>
-            
+            <div>
+                <label for="inputTranslation" class="form-label">Translation</label>
+                <textarea rows="4"
+                          cols="150"
+                          class="form-control"
+                          id="inputTranslation"
+                          @bind="_modalWordUser.Translation"
+                          @bind:event="oninput">
+                        </textarea>
+            </div>
+            <div>
+                <label class="form-label">Word status</label><br />
+                <span class="readToken @GetTokenClass(AvailableWordUserStatus.UNKNOWN) @GetTokenClassSelected(8)"
+                      @onclick="@(e => UpdateWordStatusSelected(8))">
+                    @_uiLabels.GetLabel($"statusLabel{8}")
+                </span>
+                <span class="readToken @GetTokenClass(AvailableWordUserStatus.NEW1) @GetTokenClassSelected(1)"
+                      @onclick="@(e => UpdateWordStatusSelected(1))">
+                    @_uiLabels.GetLabel($"statusLabel{1}")
+                </span>
+                <span class="readToken @GetTokenClass(AvailableWordUserStatus.NEW2) @GetTokenClassSelected(2)"
+                      @onclick="@(e => UpdateWordStatusSelected(2))">
+                    @_uiLabels.GetLabel($"statusLabel{2}")
+                </span>
+                <span class="readToken @GetTokenClass(AvailableWordUserStatus.LEARNING3) @GetTokenClassSelected(3)"
+                      @onclick="@(e => UpdateWordStatusSelected(3))">
+                    @_uiLabels.GetLabel($"statusLabel{3}")
+                </span>
+                <span class="readToken @GetTokenClass(AvailableWordUserStatus.LEARNING4) @GetTokenClassSelected(4)"
+                      @onclick="@(e => UpdateWordStatusSelected(4))">
+                    @_uiLabels.GetLabel($"statusLabel{4}")
+                </span>
+                <span class="readToken @GetTokenClass(AvailableWordUserStatus.LEARNED) @GetTokenClassSelected(5)"
+                      @onclick="@(e => UpdateWordStatusSelected(5))">
+                    @_uiLabels.GetLabel($"statusLabel{5}")
+                </span>
+                <span class="readToken @GetTokenClass(AvailableWordUserStatus.IGNORED) @GetTokenClassSelected(6)"
+                      @onclick="@(e => UpdateWordStatusSelected(6))">
+                    @_uiLabels.GetLabel($"statusLabel{6}")
+                </span>
+                <span class="readToken @GetTokenClass(AvailableWordUserStatus.WELLKNOWN) @GetTokenClassSelected(7)"
+                      @onclick="@(e => UpdateWordStatusSelected(7))">
+                    @_uiLabels.GetLabel($"statusLabel{7}")
+                </span>
+            </div>
+           
         </BodyTemplate>
         <FooterTemplate>
             <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
-            <Button Color="ButtonColor.Primary">Save changes</Button>
+            <Button Color="ButtonColor.Primary" @onclick="OnSaveModal">Save changes</Button>
         </FooterTemplate>
     </Modal>
-
-    
-
-
 
     <p>Page @_currentPageUser.Page.Ordinal</p>
     <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPageUser.Page.Ordinal - 1))">
@@ -138,6 +164,7 @@ else
 
 
     @* todo: split out paragraph and sentence into their own razor elements *@
+    @* todo: pretify the hover-over for tokens *@
     @foreach (var paragraph in _paragraphs.OrderBy(x => x.Ordinal))
     {
 		<p class="readParagraph">
@@ -149,7 +176,7 @@ else
                         class="readToken @GetTokenClass(token)" 
                         data-toggle="tooltip" 
                         data-placement="top"
-                        title="Tooltip on top"
+                        title="@GetTokenTranslation(token)"
                         @onclick="@(e => OnShowModalClick(@token))">
                         @token.Display
                     </span>
@@ -239,7 +266,7 @@ else
             return (int)_modalWordUser.Status;
         }
     }
-    
+
 
     private async Task OnShowModalClick(Token thisToken)
     {
@@ -251,7 +278,17 @@ else
     {
         await modal.HideAsync();
     }
-
+    private async Task OnSaveModal()
+    {
+        bookService.UpdateWordUser(
+            _modalWordUser.Id, _modalWordUser.Status, _modalWordUser.Translation);
+        await modal.HideAsync();
+    }
+    private void UpdateWordStatusSelected(int newStatusInt)
+    {
+        if (_modalWordUser is null) return;
+        _modalWordUser.Status = (AvailableWordUserStatus) newStatusInt;
+    }
 
     protected override void OnInitialized()
     {
@@ -333,20 +370,37 @@ else
         // todo: log error. there should not be a sentence w/out tokens at this point
         return new List<Token>();
     }
+    private string GetTokenTranslation(Token token)
+    {
+        if (token.Word is null) return "";
+        if (!_allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase)) return "";
+        var wordUser = _allWordUsersInLanguage[token.Word.TextLowerCase];
+        return wordUser.Translation;
+    }
     private string GetTokenClass(Token token)
     {
         if (token.Word is null) return "statusUNKNOWN";
         if (!_allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
         var wordUser = _allWordUsersInLanguage[token.Word.TextLowerCase];
-        if (wordUser.Status == AvailableWordUserStatus.UNKNOWN) return "statusUNKNOWN";
-        if (wordUser.Status == AvailableWordUserStatus.NEW1) return "statusNEW1";
-        if (wordUser.Status == AvailableWordUserStatus.NEW2) return "statusNEW2";
-        if (wordUser.Status == AvailableWordUserStatus.LEARNING3) return "statusLEARNING3";
-        if (wordUser.Status == AvailableWordUserStatus.LEARNING4) return "statusLEARNING4";
-        if (wordUser.Status == AvailableWordUserStatus.LEARNED) return "statusLEARNED";
-        if (wordUser.Status == AvailableWordUserStatus.WELLKNOWN) return "statusWELLKNOWN";
-        if (wordUser.Status == AvailableWordUserStatus.IGNORED) return "statusIGNORED";
+        return GetTokenClass(wordUser.Status);
+    }
+    private string GetTokenClass(AvailableWordUserStatus status)
+    {
+        if (status == AvailableWordUserStatus.UNKNOWN) return "statusUNKNOWN";
+        if (status == AvailableWordUserStatus.NEW1) return "statusNEW1";
+        if (status == AvailableWordUserStatus.NEW2) return "statusNEW2";
+        if (status == AvailableWordUserStatus.LEARNING3) return "statusLEARNING3";
+        if (status == AvailableWordUserStatus.LEARNING4) return "statusLEARNING4";
+        if (status == AvailableWordUserStatus.LEARNED) return "statusLEARNED";
+        if (status == AvailableWordUserStatus.WELLKNOWN) return "statusWELLKNOWN";
+        if (status == AvailableWordUserStatus.IGNORED) return "statusIGNORED";
         return "statusUNKNOWN";
+    }
+    private string GetTokenClassSelected(int statusToCheck)
+    {
+        if (_modalWordUser is null) return "unselectedWordStatus";
+        if ((int)_modalWordUser.Status == statusToCheck) return "selectedWordStatus";
+        return "unselectedWordStatus";
     }
     private void MovePage(int targetPageNum)
     {

@@ -124,5 +124,21 @@ namespace IdiomaticaWeb.Services
             bookUser.CurrentPageID = currentPageId;
             context.SaveChanges();
         }
+        public void UpdateWordUser(int id, AvailableWordUserStatus newStatus, string translation)
+        {
+            if (id == 0) throw new ArgumentException("id cannot be 0 when saving word user.");
+            // first pull the existing one from the database
+            var context = _dbContextFactory.CreateDbContext();
+            var dbWordUser = context.WordUsers.Where(x => x.Id == id).FirstOrDefault();
+            if (dbWordUser == null) throw new InvalidDataException("provided ID doesn't match a word user in the database");
+            // check if status has changed
+            if(dbWordUser.Status != (AvailableWordUserStatus)newStatus)
+            {
+                dbWordUser.Status = (AvailableWordUserStatus)newStatus;
+                dbWordUser.StatusChanged = DateTime.Now;
+            }
+            dbWordUser.Translation = translation;
+            context.SaveChanges();
+        }
     }
 }
