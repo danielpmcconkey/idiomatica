@@ -1,7 +1,39 @@
 ﻿@page "/"
 
-<PageTitle>Books List</PageTitle>
+<PageTitle>Blazor Bootstrap - WebAssembly Standalone App (.NET 8) - Starter Template</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new Blazor Bootstrap - Web App (.NET 8). 
+<br /> 
+<br />
+Interactive render mode: Server 
+<br />
+Interactive location: Global
 
 
+<Modal @ref="modal" Title="Modal title">
+    <BodyTemplate>
+        Modal body text goes here.
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
+        <Button Color="ButtonColor.Primary">Save changes</Button>
+    </FooterTemplate>
+</Modal>
 
-<BooksList />
+<Button Color="ButtonColor.Primary" @onclick="OnShowModalClick">Show Modal</Button>
+
+@code {
+    private Modal modal;
+
+    private async Task OnShowModalClick()
+    {
+        await modal?.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal?.HideAsync();
+    }
+}
