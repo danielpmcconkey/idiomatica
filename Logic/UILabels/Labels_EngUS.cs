@@ -36,6 +36,15 @@ namespace Logic.UILabels
             _labels.Add("untranslatable", "untranslatable");
             _labels.Add("btnNextPage", "next page");
             _labels.Add("btnPreviousPage", "previous page");
+            _labels.Add("statusLabel8", "unknown 0");
+            _labels.Add("statusLabel1", "new 1");
+            _labels.Add("statusLabel2", "new 2");
+            _labels.Add("statusLabel3", "learning 3");
+            _labels.Add("statusLabel4", "learning 4");
+            _labels.Add("statusLabel5", "learned 5");
+            _labels.Add("statusLabel6", "ignored 6");
+            _labels.Add("statusLabel7", "well known 7");
+
             #endregion
             //_labels.Add("", "");
             //_labels.Add("", "");

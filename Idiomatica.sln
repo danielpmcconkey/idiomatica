@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logic", "Logic\Logic.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdiomaticaWeb", "IdiomaticaWeb\IdiomaticaWeb.csproj", "{B8457729-75BE-4564-BE1C-876FB8E4D74F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataTransferCLI", "DataTransferCLI\DataTransferCLI.csproj", "{3EC4FB43-79F5-41D0-8129-6F0960E20623}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTransferCLI", "DataTransferCLI\DataTransferCLI.csproj", "{3EC4FB43-79F5-41D0-8129-6F0960E20623}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
