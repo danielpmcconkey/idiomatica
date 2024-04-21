@@ -74,6 +74,7 @@
     
 </style>
 
+
 @if(_isError)
 {
     <PageTitle>@_uiLabels.GetLabel("error")</PageTitle>
@@ -97,6 +98,21 @@ else
 }
 else
 {
+    @* <WordSaveModal WordUser=@_wordSaveModalWordUser IsVisible=@_wordSaveIsVisible /> *@
+    <Modal @ref="modal" Title="Modal title">
+        <BodyTemplate>
+            Modal body text goes here.
+        </BodyTemplate>
+        <FooterTemplate>
+            <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
+            <Button Color="ButtonColor.Primary">Save changes</Button>
+        </FooterTemplate>
+    </Modal>
+
+    <Button Color="ButtonColor.Primary" @onclick="OnShowModalClick">Show Modal</Button>
+
+
+
     <p>Page @_currentPageUser.Page.Ordinal</p>
     <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPageUser.Page.Ordinal - 1))">
         @_uiLabels.GetLabel("btnPreviousPage")
@@ -104,6 +120,12 @@ else
     <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPageUser.Page.Ordinal + 1))">
         @_uiLabels.GetLabel("btnNextPage")
     </button>
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Launch demo modal
+    </button>
+
+
 
     @* todo: split out paragraph and sentence into their own razor elements *@
     @foreach (var paragraph in _paragraphs.OrderBy(x => x.Ordinal))
@@ -122,7 +144,7 @@ else
     <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPageUser.Page.Ordinal - 1))">
         @_uiLabels.GetLabel("btnPreviousPage")
     </button>
-    <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(_currentPageUser.Page.Ordinal + 1))">
+    <button type="button" class="btn btn-primary" @onclick="@(e => OnWordClicked("ocurrió"))">
         @_uiLabels.GetLabel("btnNextPage")
     </button>
 
@@ -147,6 +169,23 @@ else
     private Dictionary<string, WordUser> _allWordUsersInLanguage;
     private Dictionary<string, Word> _commonWordsInLanguage;
 
+    private WordUser _wordSaveModalWordUser;
+    private bool _wordSaveIsVisible;
+
+
+    private Modal modal = default!;
+
+    private async Task OnShowModalClick()
+    {
+        await modal.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+
+
     protected override void OnInitialized()
     {
         // todo: don't load the entire book in at the beginning. Just the current page
@@ -166,6 +205,10 @@ else
         // database just to get the word ID for every single word
         _commonWordsInLanguage =
              bookService.FetchCommonWordDictForLanguage(_bookUser.LanguageUser.Language);
+
+        _wordSaveModalWordUser = null;
+        _wordSaveIsVisible = false;
+
 
     }
 
@@ -273,5 +316,9 @@ else
         // todo: make distinct error messages for the diff types of errors on the read page
         _isError = true;
         _errorMessage = $"{_uiLabels.GetLabel("readErrorRetrievingData")} {_uiLabels.GetLabel("noDataReturned")}";
+    }
+    private void OnWordClicked(string word)
+    {
+        _wordSaveIsVisible = true;
     }
 }
