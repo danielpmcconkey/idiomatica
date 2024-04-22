@@ -1,12 +1,14 @@
-﻿using Logic;
-using Logic.UILabels;
-using Microsoft.EntityFrameworkCore;
-using Model;
+﻿using Microsoft.EntityFrameworkCore;
 using Model.DAL;
+using Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
-using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace IdiomaticaWeb.Services
+namespace Logic.Services
 {
     public class BookService
     {
@@ -28,14 +30,14 @@ namespace IdiomaticaWeb.Services
         public IQueryable<BookUser> FetchBookUsersWithoutStats(int loggedInUserId)
         {
             var context = _dbContextFactory.CreateDbContext();
-            
+
             Expression<Func<BookUser, bool>> filter = (x => x.LanguageUser.UserId == loggedInUserId);
             return context.BookUsers
                 .Where(filter)
                 .Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language)
                 .Include(bu => bu.Book).ThenInclude(b => b.BookStats);
         }
-        public BookUser? FetchBookUser(int loggedInUserId, int bookId) 
+        public BookUser? FetchBookUser(int loggedInUserId, int bookId)
         {
             var context = _dbContextFactory.CreateDbContext();
             return context.BookUsers
@@ -65,7 +67,7 @@ namespace IdiomaticaWeb.Services
         public PageUser? FetchPageUserById(int pageUserId, int loggedInUserId)
         {
             // note this doesn't fetch the word_user
-            
+
             var context = _dbContextFactory.CreateDbContext();
             return context.PageUsers
                 .Where(pu => pu.BookUser.LanguageUserId == loggedInUserId
@@ -132,7 +134,7 @@ namespace IdiomaticaWeb.Services
             var dbWordUser = context.WordUsers.Where(x => x.Id == id).FirstOrDefault();
             if (dbWordUser == null) throw new InvalidDataException("provided ID doesn't match a word user in the database");
             // check if status has changed
-            if(dbWordUser.Status != (AvailableWordUserStatus)newStatus)
+            if (dbWordUser.Status != (AvailableWordUserStatus)newStatus)
             {
                 dbWordUser.Status = (AvailableWordUserStatus)newStatus;
                 dbWordUser.StatusChanged = DateTime.Now;

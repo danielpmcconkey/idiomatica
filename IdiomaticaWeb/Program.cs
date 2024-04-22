@@ -1,5 +1,5 @@
 using IdiomaticaWeb.Components;
-using IdiomaticaWeb.Services;
+using Logic.Services;
 using Microsoft.EntityFrameworkCore;
 using Model.DAL;
 
