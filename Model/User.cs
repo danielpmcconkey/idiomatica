@@ -17,6 +17,9 @@ namespace Model
         #region relationships
         public List<LanguageUser> LanguageUsers { get; set; } = new List<LanguageUser>();
         public List<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
+        // not a strict EF Core relationship
+        public string ApplicationUserId { get; set; }
+
         
 
         #endregion

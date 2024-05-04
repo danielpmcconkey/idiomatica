@@ -1,6 +1,8 @@
 ﻿@page "/books-list"
 @rendermode InteractiveServer
-@inject BookService bookService;
+@inject BookService BookService;
+@inject UserService UserService;
+@using System.Security.Claims
 
 <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <style>
@@ -35,6 +37,7 @@ else if (!_bookUsers.Any())
 }
 else
 {
+    
     <table class="table table-striped table-bordered table-hover">
         <thead class="thead-light">
             <tr>
@@ -102,11 +105,23 @@ else
         </tbody>
     </table>
 }
+<AuthorizeView>
+    <Authorized>
+        <p>Hello, @context.User.Identity?.Name!</p>
+        <p>Go away, @_loggedInUser.Name</p>
+    </Authorized>
+    <NotAuthorized>
+        <p>You're not authorized.</p>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-    private int _loggedInUserId = 1;  // todo: replace this with an actual logged in user
+
+
     private List<BookUser>? _bookUsers;
     private List<BookUserStat>? _bookUserStats;
+
+    private User _loggedInUser { get { return UserService.LoggedInUser; } }
 
     #region sorting and filtering
     private string _filter;
@@ -122,6 +137,20 @@ else
     private string _errorMessage = "";
 
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            UserService.GetLoggedInUserAsync();
+            _bookUsers = BookService.FetchBookUsersWithoutStats((int)_loggedInUser.Id).ToList();
+            _bookUserStats = BookService.FetchBookUserStats((int)_loggedInUser.Id).ToList();
+        }
+        catch (Exception ex)
+        {
+            _isError = true;
+            _errorMessage = ex.Message;
+        }
+    }
     protected override void OnInitialized()
     {
         try
@@ -135,11 +164,8 @@ else
             orderByFunctions.Add("TOTALKNOWNPERCENT", (x => GetBookUserStat_int(x, AvailableBookUserStat.TOTALKNOWNPERCENT)));
             orderByFunctions.Add("DISTINCTWORDCOUNT", (x => GetBookUserStat_int(x, AvailableBookUserStat.DISTINCTWORDCOUNT)));
             orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => GetBookUserStat_int(x, AvailableBookUserStat.DISTINCTKNOWNPERCENT)));
-
-            _bookUsers = bookService.FetchBookUsersWithoutStats(_loggedInUserId).ToList();
-            _bookUserStats = bookService.FetchBookUserStats(_loggedInUserId).ToList();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _isError = true;
             _errorMessage = ex.Message;

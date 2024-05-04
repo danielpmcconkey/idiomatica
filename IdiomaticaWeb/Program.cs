@@ -1,6 +1,11 @@
+using IdiomaticaWeb;
 using IdiomaticaWeb.Components;
-using IdiomaticaWeb.Services;
+using IdiomaticaWeb.Components.Account;
+using Logic.Services;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Model;
 using Model.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +16,21 @@ builder.Services.AddBlazorBootstrap();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<IdentityUserAccessor>();
+builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+})
+    .AddIdentityCookies();
+
 builder.Services.AddTransient<BookService>();
+builder.Services.AddTransient<UserService>();
 
 var connection = String.Empty;
 if (builder.Environment.IsDevelopment())
@@ -31,6 +50,13 @@ else
 builder.Services.AddDbContextFactory<IdiomaticaContext>(options =>
     options.UseSqlServer(connection, b => b.MigrationsAssembly("IdiomaticaWeb")));
 
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<IdiomaticaContext>()
+                .AddSignInManager()
+                .AddDefaultTokenProviders();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -48,5 +74,8 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// Add additional endpoints required by the Identity /Account Razor components.
+app.MapAdditionalIdentityEndpoints();
 
 app.Run();
