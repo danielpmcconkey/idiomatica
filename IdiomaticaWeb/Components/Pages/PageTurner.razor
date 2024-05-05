@@ -1,0 +1,33 @@
+﻿@page "/PageTurner"
+@rendermode InteractiveServer
+@inject BookService BookService;
+@inject UserService UserService;
+@inject UIService UIService;
+
+
+<div class="row  g-2">
+    <div class="col-2">
+        <p>Page @currentPageUser.Page.Ordinal</p>
+    </div>
+    <div class="col-2">
+        <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(currentPageUser.Page.Ordinal - 1))">
+            @UIService.GetLabel("btnPreviousPage")
+        </button>
+    </div>
+    <div class="col-2">
+        <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(currentPageUser.Page.Ordinal + 1))">
+            @UIService.GetLabel("btnNextPage")
+        </button>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public PageUser? currentPageUser { get; set; }
+    [Parameter]
+    public EventCallback<int> OnMovePage { get; set; }
+
+    private void MovePage(int targetPageNum)
+    {
+        OnMovePage.InvokeAsync(targetPageNum);
+    }
+}

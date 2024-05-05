@@ -52,6 +52,8 @@ namespace Logic.UILabels
             _labels.Add("statusLabel5", "learned 5");
             _labels.Add("statusLabel6", "ignored 6");
             _labels.Add("statusLabel7", "well known 7");
+            _labels.Add("closeButton", "Close");
+            _labels.Add("saveButton", "Save Changes");
 
             #endregion
             //_labels.Add("", "");

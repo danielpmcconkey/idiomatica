@@ -1,0 +1,86 @@
+﻿@page "/ParagraphView"
+@rendermode InteractiveServer
+@inject BookService BookService;
+@inject UserService UserService;
+@inject UIService UIService;
+
+
+<div class="row  g-2">
+    <div class="col-1">
+        <div class="">
+            <Button class="btn-sm" Color="ButtonColor.Primary"
+                    Outline="true" TooltipTitle="Translate paragraph"
+                    @onclick="@(e => OnPpTranslateClick())">
+                &#182;
+            </Button>
+        </div>
+    </div>
+    <div class="col-10">
+        <div>
+            <p class="readParagraph">
+                @foreach (var sentence in paragraph.Sentences.OrderBy(x => x.Ordinal))
+                {
+                    foreach (var token in GetSentenceTokens(sentence).OrderBy(x => x.Ordinal))
+                    {
+                        <span class="readToken @GetTokenClass(token)"
+                              data-toggle="tooltip"
+                              data-placement="top"
+                              title="@GetTokenTranslation(token)"
+                              @onclick="@(e => OnTokenClick(@token))">
+                            @token.Display
+                        </span>
+                    }
+                }
+            </p>
+        </div>
+    </div>
+    <div class="col-1">
+        <div class="">
+            <Button class="btn-sm" Color="ButtonColor.Primary"
+                    Outline="true" TooltipTitle="Translate paragraph"
+                    @onclick="@(e => OnPpTranslateClick())">
+                &#182;
+            </Button>
+        </div>
+    </div>
+</div>
+@code {
+
+    [Parameter]
+    public Paragraph paragraph { get; set; }
+    [Parameter]
+    public Dictionary<string, WordUser> allWordUsersInLanguage { get; set; }
+    [Parameter]
+    public EventCallback<Token> OnShowWordModal { get; set; }
+    [Parameter]
+    public EventCallback<Paragraph> OnShowPpModal { get; set; }
+
+    private void OnTokenClick(Token token)
+    {
+        OnShowWordModal.InvokeAsync(token);
+    }
+    private void OnPpTranslateClick()
+    {
+        OnShowPpModal.InvokeAsync(paragraph);
+    }
+    public string GetTokenClass(Token token)
+    {
+        if (token.Word is null) return "statusUNKNOWN";
+        if (!allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
+        var wordUser = allWordUsersInLanguage[token.Word.TextLowerCase];
+        return UIService.GetTokenClass(wordUser.Status);
+    }
+    private string GetTokenTranslation(Token token)
+    {
+        if (token.Word is null) return "";
+        if (!allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase)) return "";
+        var wordUser = allWordUsersInLanguage[token.Word.TextLowerCase];
+        return wordUser.Translation;
+    }
+    private List<Token> GetSentenceTokens(Sentence sentence)
+    {
+        if (sentence.Tokens is not null && sentence.Tokens.Count > 0) return sentence.Tokens;
+        // todo: log error. there should not be a sentence w/out tokens at this point
+        return new List<Token>();
+    }
+}

@@ -1,0 +1,39 @@
+﻿@page "/ModalParagraph"
+@rendermode InteractiveServer
+@inject BookService BookService;
+@inject UserService UserService;
+@inject UIService UIService;
+
+@* Modal for paragraph translation *@
+<Modal @ref="ppModal" title="@_ppModalTitle" IsVerticallyCentered="true" Size="ModalSize.Large">
+    <BodyTemplate>
+        <p>@_ppModalTranslateFrom</p>
+        <hr />
+        <p>@_ppModalTranslateTo</p>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHidePpModalClick">
+            @UIService.GetLabel("closeButton")
+        </Button>
+    </FooterTemplate>
+</Modal>
+
+@code {
+
+    
+    private Modal ppModal = default!;
+    private string? _ppModalTitle;
+    private string? _ppModalTranslateFrom;
+    private string? _ppModalTranslateTo;
+
+    public async Task OnShowPpModalClick(Paragraph pp)
+    {
+        _ppModalTranslateFrom = "from";
+        _ppModalTranslateTo = "desde";
+        await ppModal.ShowAsync();
+    }
+    private async Task OnHidePpModalClick()
+    {
+        await ppModal.HideAsync();
+    }
+}

@@ -31,6 +31,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddTransient<BookService>();
 builder.Services.AddTransient<UserService>();
+builder.Services.AddTransient<UIService>();
 
 var connection = String.Empty;
 if (builder.Environment.IsDevelopment())
