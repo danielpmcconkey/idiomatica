@@ -1,11 +1,14 @@
 ﻿@inherits LayoutComponentBase
+@inject UserService UserService;
+@inject NavigationManager NavigationManager
+@implements IDisposable
 
-<div class="bb-page">
-
-    <Sidebar @ref="sidebar"
-             IconName="IconName.BootstrapFill"
-             Title="Idiomatica"
-             DataProvider="SidebarDataProvider" />
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+    
+    
 
     <main>
         <div class="bb-top-row px-4 d-flex justify-content-end">
@@ -19,9 +22,18 @@
 
 </div>
 
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
 @code {
     Sidebar sidebar;
     IEnumerable<NavItem> navItems;
+    IEnumerable<NavItem> navItemsLoggedIn;
+    private User _loggedInUser { get { return UserService.LoggedInUser; } }
+    private string? currentUrl;
 
     private async Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)
     {
@@ -30,25 +42,50 @@
 
         return await Task.FromResult(request.ApplyTo(navItems));
     }
-
-    private IEnumerable<NavItem> GetNavItems()
+    private async Task<SidebarDataProviderResult> SidebarDataProviderLoggedIn(SidebarDataProviderRequest request)
     {
-        navItems = new List<NavItem>
-                   {
-                       new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Home", Match=NavLinkMatch.All},
-                       new NavItem { Id = "2", Href = "/test", IconName = IconName.PlusSquareFill, Text = "Test"},
-                       new NavItem { Id = "3", Href = "/books-list", IconName = IconName.Bookshelf, Text = "Your Books"},
-                       new NavItem { Id = "4", Href = "Account/Register", IconName = IconName.PersonAdd, Text = "Register"},
-                       new NavItem { Id = "5", Href = "Account/Login", IconName = IconName.FilePersonFill, Text = "Login"},
-                   };
+        if (navItemsLoggedIn is null)
+            navItemsLoggedIn = GetNavItems(true);
 
-        return navItems;
+        return await Task.FromResult(request.ApplyTo(navItemsLoggedIn));
+    }
+
+    private IEnumerable<NavItem> GetNavItems(bool isLoggedIn = false)
+    {
+        var currentList = new List<NavItem>();
+
+        var home = new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Home", Match = NavLinkMatch.All };
+        var register = new NavItem { Id = "2", Href = "Account/Register", IconName = IconName.PersonAdd, Text = "Register" };
+        var login = new NavItem { Id = "3", Href = "Account/Login", IconName = IconName.PersonBadge, Text = "Login" };
+
+        var manageAppUser = new NavItem { Id = "4", Href = "Account/Manage", IconName = IconName.PersonFill, Text = _loggedInUser?.Name };
+        var booksList = new NavItem { Id = "5", Href = "/books-list", IconName = IconName.Bookshelf, Text = "Your Books" };
+
+        currentList.Add(home);
+        if (!isLoggedIn) currentList.Add(register);
+        if (!isLoggedIn) currentList.Add(login);
+        if (isLoggedIn) currentList.Add(manageAppUser);
+        if (isLoggedIn) currentList.Add(booksList);
+
+
+
+
+        return currentList;
+    }
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
-
-
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>

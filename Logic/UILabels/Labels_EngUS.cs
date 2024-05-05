@@ -18,8 +18,16 @@ namespace Logic.UILabels
 			_labels.Add("unknown", "unknown");
             _labels.Add("error", "Error");
 
-			#region book list
-			_labels.Add("bookListFormFilter", "Filter...");
+            #region nav
+            _labels.Add("navHome", "Home");
+            _labels.Add("navLogOut", "Log Out");
+            _labels.Add("navYourBookshelf", "Your Bookshelf");
+            _labels.Add("navRegister", "Register");
+            _labels.Add("navLogIn", "Log In");
+            #endregion
+
+            #region book list
+            _labels.Add("bookListFormFilter", "Filter...");
 			_labels.Add("bookListLanguageColumnHead", "Language");
 			_labels.Add("bookListCompletedColumnHead", "");
 			_labels.Add("bookListTitleColumnHead", "Title");
