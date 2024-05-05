@@ -3,6 +3,7 @@
 @inject BookService BookService;
 @inject UserService UserService;
 @inject UIService UIService;
+@using System.Text;
 
 @* Modal for paragraph translation *@
 <Modal @ref="ppModal" title="@_ppModalTitle" IsVerticallyCentered="true" Size="ModalSize.Large">
@@ -18,18 +19,31 @@
     </FooterTemplate>
 </Modal>
 
+<p>Lookie: @_ppModalTranslateFrom</p>
+<p>Here: @_ppModalTranslateTo</p>
+
 @code {
 
-    
+
     private Modal ppModal = default!;
     private string? _ppModalTitle;
     private string? _ppModalTranslateFrom;
     private string? _ppModalTranslateTo;
+    private DeepLService _deepLService;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _deepLService = new DeepLService();
+    }
 
     public async Task OnShowPpModalClick(Paragraph pp)
     {
-        _ppModalTranslateFrom = "from";
-        _ppModalTranslateTo = "desde";
+        var sentences = pp.Sentences.OrderBy(x => x.Ordinal).Select(s => s.Text);
+        var input = String.Join(" ", sentences);
+
+        _ppModalTranslateFrom = input;
+        _ppModalTranslateTo = _deepLService.Translate(input, "ES", "EN-US");
+
         await ppModal.ShowAsync();
     }
     private async Task OnHidePpModalClick()

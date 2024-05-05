@@ -43,5 +43,7 @@ namespace Model
         public bool ShowRomanization { get; set; } = false;
         [StringLength(250)]
         public string ParserType { get; set; } = "spacedel";
+        [StringLength(25)]
+        public string DeepLCode { get; set; }
     }
 }
