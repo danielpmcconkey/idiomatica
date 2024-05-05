@@ -72,58 +72,65 @@
     
 </style>
 
-
-@if(_isError)
-{
-    <PageTitle>@UIService.GetLabel("error")</PageTitle>
-    <h1>@UIService.GetLabel("error"):  @_errorMessage</h1>
-}
-else if(_bookUser is null)
-{
-	<PageTitle>@UIService.GetLabel("loading")</PageTitle>
-	<h1>@UIService.GetLabel("loading")</h1>
-}
-else
-{
-    <PageTitle>@_bookUser.Book.Title</PageTitle>
-    <h1>@_bookUser.Book.Title</h1>
-}
-@if (_currentPageUser is null)
-{
-	<p>
-		@UIService.GetLabel("loading")
-	</p>
-}
-else
-{
-    
-    <ModalWord @ref="_wModal"
-               allWordUsersInLanguage="_allWordUsersInLanguage" />
-
-    <ModalParagraph @ref="_ppModal" />
-
-
-
-
-
-    <div class="container px-4">
-
-        <PageTurner currentPageUser="_currentPageUser"
-                    OnMovePage="MovePage" />
-
-        @foreach (var paragraph in _paragraphs.OrderBy(x => x.Ordinal))
+<AuthorizeView>
+    <Authorized>
+        @if (_isError)
         {
-            <hr />
-            <ParagraphView paragraph="paragraph"
-                           allWordUsersInLanguage="_allWordUsersInLanguage"
-                           OnShowWordModal="ShowWordModal"
-                           OnShowPpModal="ShowPpModal" />
+            <PageTitle>@UIService.GetLabel("error")</PageTitle>
+            <h1>@UIService.GetLabel("error"):  @_errorMessage</h1>
         }
-         <hr />
-        <PageTurner currentPageUser="_currentPageUser"
-                    OnMovePage="MovePage" />
-    </div>
-}
+        else if (_bookUser is null)
+        {
+            <PageTitle>@UIService.GetLabel("loading")</PageTitle>
+            <h1>@UIService.GetLabel("loading")</h1>
+        }
+        else
+        {
+            <PageTitle>@_bookUser.Book.Title</PageTitle>
+            <h1>@_bookUser.Book.Title</h1>
+        }
+        @if (_currentPageUser is null)
+        {
+            <p>
+                @UIService.GetLabel("loading")
+            </p>
+        }
+        else
+        {
+
+            <ModalWord @ref="_wModal"
+                       allWordUsersInLanguage="_allWordUsersInLanguage" />
+
+            <ModalParagraph @ref="_ppModal" />
+
+
+
+
+
+            <div class="container px-4">
+
+                <PageTurner currentPageUser="_currentPageUser"
+                            OnMovePage="MovePage" />
+
+                @foreach (var paragraph in _paragraphs.OrderBy(x => x.Ordinal))
+                {
+                    <hr />
+                    <ParagraphView paragraph="paragraph"
+                                   allWordUsersInLanguage="_allWordUsersInLanguage"
+                                   OnShowWordModal="ShowWordModal"
+                                   OnShowPpModal="ShowPpModal" />
+                }
+                <hr />
+                <PageTurner currentPageUser="_currentPageUser"
+                            OnMovePage="MovePage" />
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <p>@UIService.GetLabel("notLoggedIn")</p>
+    </NotAuthorized>
+</AuthorizeView>
+
 
 @code {
 

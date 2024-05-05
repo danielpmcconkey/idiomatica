@@ -17,6 +17,7 @@ namespace Logic.UILabels
 			_labels.Add("noDataReturned", "No data returned.");
 			_labels.Add("unknown", "unknown");
             _labels.Add("error", "Error");
+            _labels.Add("notLoggedIn", "You must be logged in to view this content.");
 
             #region nav
             _labels.Add("navHome", "Home");
