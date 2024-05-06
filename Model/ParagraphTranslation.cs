@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Model
 {
+    [Table("ParagraphTranslation", Schema = "Idioma")]
     [PrimaryKey(nameof(Id))]
     public class ParagraphTranslation
     {

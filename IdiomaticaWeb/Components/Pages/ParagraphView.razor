@@ -54,6 +54,11 @@
     public EventCallback<Token> OnShowWordModal { get; set; }
     [Parameter]
     public EventCallback<Paragraph> OnShowPpModal { get; set; }
+    /// <summary>
+    /// The language the book was written in
+    /// </summary>
+    [Parameter]
+    public Language Language { get; set; }
 
     private void OnTokenClick(Token token)
     {

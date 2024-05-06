@@ -24,6 +24,11 @@
 
 @code {
 
+    /// <summary>
+    /// The language the book was written in
+    /// </summary>
+    [Parameter]
+    public Language Language { get; set; }
 
     private Modal ppModal = default!;
     private string? _ppModalTitle;
@@ -40,9 +45,41 @@
     {
         var sentences = pp.Sentences.OrderBy(x => x.Ordinal).Select(s => s.Text);
         var input = String.Join(" ", sentences);
-
         _ppModalTranslateFrom = input;
-        _ppModalTranslateTo = _deepLService.Translate(input, "ES", "EN-US");
+        var toLang = UserService.GetLoggedInUser()?.LanguageCode;
+        var fromLang = Language?.LanguageCode;
+        _ppModalTitle = $"Translation from {fromLang?.LanguageName} to {toLang?.LanguageName}";
+
+        // see if the translation already exists
+        if (pp.ParagraphTranslations == null) 
+        {
+            pp.ParagraphTranslations = BookService.FetchParagraphTranslationsByParagraph(pp);
+        }
+        var currentTranslation = pp.ParagraphTranslations
+            .Where(x => x.LanguageCode.Code == toLang.Code)
+            .FirstOrDefault();
+        if(currentTranslation is not null)
+        {
+            _ppModalTranslateTo = currentTranslation.TranslationText;
+        }
+        else
+        {
+            var deeplResult = _deepLService.Translate(input, fromLang.Code, toLang.Code);
+            if(deeplResult is not null)
+            {
+                _ppModalTranslateTo = deeplResult;
+                // add to the DB
+                // need to move this to the book service
+                ParagraphTranslation ppt = new ParagraphTranslation()
+                {
+                    ParagraphId = (int)pp.Id,
+                    Code = toLang.Code, 
+                    TranslationText = deeplResult
+                };
+                ppt = BookService.InsertParagraphTranslationIntoDb(ppt);
+                pp.ParagraphTranslations.Add(ppt);
+            }
+        }        
 
         await ppModal.ShowAsync();
     }

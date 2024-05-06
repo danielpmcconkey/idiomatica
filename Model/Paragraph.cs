@@ -17,7 +17,11 @@ namespace Model
         public List<Sentence> Sentences { get; set; } = new List<Sentence>();
         public int PageId { get; set; }
         public Page Page { get; set; }
-        public List<ParagraphTranslation> ParagraphTranslations { get; set; }
+
+        // warning, do not auto create the ParagraphTranslations list or you'll
+        // break the translation function's ability to look-up if we've already
+        // pulled it
+        public List<ParagraphTranslation> ParagraphTranslations { get; set; } 
         #endregion
 
         public int Ordinal { get; set; }

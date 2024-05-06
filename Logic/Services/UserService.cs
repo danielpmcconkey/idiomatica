@@ -33,7 +33,9 @@ namespace Logic.Services
             if (appUserId == null) return null;
             //Console.WriteLine($"appUserId = {appUserId}");
             var context = _dbContextFactory.CreateDbContext();
-            var matchingUsers = context.Users.Where(x => x.ApplicationUserId == appUserId).ToList();
+            var matchingUsers = context.Users.Where(x => x.ApplicationUserId == appUserId)
+                .Include(u => u.LanguageCode)
+                .ToList();
             if(matchingUsers.Count() > 0) return matchingUsers[0];
             return null;
         }

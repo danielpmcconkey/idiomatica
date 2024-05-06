@@ -101,7 +101,7 @@
             <ModalWord @ref="_wModal"
                        allWordUsersInLanguage="_allWordUsersInLanguage" />
 
-            <ModalParagraph @ref="_ppModal" />
+            <ModalParagraph @ref="_ppModal" Language="_bookUser?.LanguageUser?.Language" />
 
 
 
@@ -118,7 +118,8 @@
                     <ParagraphView paragraph="paragraph"
                                    allWordUsersInLanguage="_allWordUsersInLanguage"
                                    OnShowWordModal="ShowWordModal"
-                                   OnShowPpModal="ShowPpModal" />
+                                   OnShowPpModal="ShowPpModal"
+                                   Language="_bookUser?.LanguageUser?.Language" />
                 }
                 <hr />
                 <PageTurner currentPageUser="_currentPageUser"
