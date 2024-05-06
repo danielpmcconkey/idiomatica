@@ -1,6 +1,7 @@
 ﻿@implements IDisposable
 @inject UserService UserService;
 @inject NavigationManager NavigationManager
+@inject UIService UIService;
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -14,7 +15,7 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> @_uiLabels.GetLabel("navHome")
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> @UIService.GetLabel("navHome")
             </NavLink>
         </div>
 
@@ -32,27 +33,27 @@
                 <div class="nav-item px-3">
                     <form action="Account/Logout" method="post">
                         <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <input type="hidden" name="ReturnUrl" value="" />
                         <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> @_uiLabels.GetLabel("navLogOut")
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> @UIService.GetLabel("navLogOut")
                         </button>
                     </form>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="/books-list">
-                        <span class="bi bi-bookshelf-nav-menu" aria-hidden="true"></span> @_uiLabels.GetLabel("navYourBookshelf")
+                        <span class="bi bi-bookshelf-nav-menu" aria-hidden="true"></span> @UIService.GetLabel("navYourBookshelf")
                     </NavLink>
                 </div>
             </Authorized>
             <NotAuthorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> @_uiLabels.GetLabel("navRegister")
+                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> @UIService.GetLabel("navRegister")
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> @_uiLabels.GetLabel("navLogIn")
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> @UIService.GetLabel("navLogIn")
                     </NavLink>
                 </div>
             </NotAuthorized>
@@ -66,14 +67,11 @@
     {
         get
         {
-            var t = Task.Run(() => UserService.GetLoggedInUserAsync());
-            //var user = Task.Run(() => UserService.GetLoggedInUserAsync()).GetAwaiter().GetResult();
-            t.Wait();
-            return UserService.LoggedInUser.Name;
+            var user = UserService.GetLoggedInUser();
+            if (user == null) return null;
+            return user.Name;
         }
     }
-    private UILabels _uiLabels = Factory.GetUILabels(UILanguage.ENG_US);
-
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);

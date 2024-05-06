@@ -1,0 +1,161 @@
+﻿@page "/ModalWord"
+@rendermode InteractiveServer
+@inject BookService BookService;
+@inject UserService UserService;
+@inject UIService UIService;
+
+@* Modal for word management *@
+<Modal @ref="modal" Title="@_modalTitle" Size="ModalSize.Large">
+    <BodyTemplate>
+        <div>
+            <label for="inputTranslation" class="form-label">Translation</label>
+            <textarea rows="4"
+                      cols="150"
+                      class="form-control"
+                      id="inputTranslation"
+                      @bind="_modalWordUser.Translation"
+                      @bind:event="oninput">
+                        </textarea>
+        </div>
+        <div>
+            <label class="form-label">Word status</label><br />
+            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.UNKNOWN) @GetTokenClassSelected(8)"
+                  @onclick="@(e => UpdateWordStatusSelected(8))">
+                @UIService.GetLabel($"statusLabel{8}")
+            </span>
+            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.NEW1) @GetTokenClassSelected(1)"
+                  @onclick="@(e => UpdateWordStatusSelected(1))">
+                @UIService.GetLabel($"statusLabel{1}")
+            </span>
+            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.NEW2) @GetTokenClassSelected(2)"
+                  @onclick="@(e => UpdateWordStatusSelected(2))">
+                @UIService.GetLabel($"statusLabel{2}")
+            </span>
+            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.LEARNING3) @GetTokenClassSelected(3)"
+                  @onclick="@(e => UpdateWordStatusSelected(3))">
+                @UIService.GetLabel($"statusLabel{3}")
+            </span>
+            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.LEARNING4) @GetTokenClassSelected(4)"
+                  @onclick="@(e => UpdateWordStatusSelected(4))">
+                @UIService.GetLabel($"statusLabel{4}")
+            </span>
+            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.LEARNED) @GetTokenClassSelected(5)"
+                  @onclick="@(e => UpdateWordStatusSelected(5))">
+                @UIService.GetLabel($"statusLabel{5}")
+            </span>
+            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.IGNORED) @GetTokenClassSelected(6)"
+                  @onclick="@(e => UpdateWordStatusSelected(6))">
+                @UIService.GetLabel($"statusLabel{6}")
+            </span>
+            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.WELLKNOWN) @GetTokenClassSelected(7)"
+                  @onclick="@(e => UpdateWordStatusSelected(7))">
+                @UIService.GetLabel($"statusLabel{7}")
+            </span>
+        </div>
+
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">
+            @UIService.GetLabel("closeButton")
+        </Button>
+        <Button Color="ButtonColor.Primary" @onclick="OnSaveModal">
+            @UIService.GetLabel("saveButton")
+        </Button>
+    </FooterTemplate>
+</Modal>
+
+@code {
+    [Parameter]
+    public Dictionary<string, WordUser> allWordUsersInLanguage { get; set; }
+    private Modal modal = default!;
+    private Token _modalToken = new Token()
+        {
+            Display = "",
+            Id = 0,
+            SentenceId = 0,
+            WordId = 0,
+            Word = new Word()
+            {
+                Id = 0,
+                LanguageId = 0,
+                Language = null,
+                Romanization = "",
+                Text = "",
+                TextLowerCase = ""
+            }
+        };
+    private WordUser _modalWordUser
+    {
+        get
+        {
+            if (!allWordUsersInLanguage.ContainsKey(_modalToken.Word.TextLowerCase))
+            {
+                return null;
+            }
+            return allWordUsersInLanguage[_modalToken.Word.TextLowerCase];
+        }
+    }
+    private string? _modalTitle
+    {
+        get
+        {
+            return _modalToken.Word.TextLowerCase;
+        }
+    }
+    private string? _modalTranslation
+    {
+        get
+        {
+            return _modalWordUser.Translation;
+        }
+    }
+    private string? _modalSelectedStatus
+    {
+        get
+        {
+            var statusString = UIService.GetLabel($"statusLabel{(int)_modalWordUser.Status}");
+            return statusString;
+        }
+    }
+    private int _modalSelectedStatusValue
+    {
+        get
+        {
+            return (int)_modalWordUser.Status;
+        }
+    }
+    // [Parameter]
+    // public EventCallback<Token> GetTokenClassCallBack { get; set; }
+    // private async string GetTokenClassAsync(Token token)
+    // {
+    //     GetTokenClassCallBack.InvokeAsync(token);
+    // }
+    public async Task OnShowModalClick(Token thisToken)
+    {
+        _modalToken = thisToken;
+        await modal.ShowAsync();
+    }
+    private string GetTokenClassSelected(int statusToCheck)
+    {
+        if (_modalWordUser is null) return "unselectedWordStatus";
+        if ((int)_modalWordUser.Status == statusToCheck) return "selectedWordStatus";
+        return "unselectedWordStatus";
+    }
+    private async Task OnHideModalClick()
+    {
+        await modal.HideAsync();
+    }
+
+    private async Task OnSaveModal()
+    {
+        BookService.UpdateWordUser(
+            _modalWordUser.Id, _modalWordUser.Status, _modalWordUser.Translation);
+        await modal.HideAsync();
+    }
+    private void UpdateWordStatusSelected(int newStatusInt)
+    {
+        if (_modalWordUser is null) return;
+        _modalWordUser.Status = (AvailableWordUserStatus)newStatusInt;
+    }
+
+}

@@ -18,6 +18,10 @@ namespace Model
         public List<Book> Books { get; set; }
         public List<Word> Words { get; set; }
         public List<LanguageUser> LanguageUsers { get; set; }
+        [StringLength(25)]
+        [Column("LanguageCode")]
+        public string Code { get; set; }
+        public LanguageCode LanguageCode { get; set; }
 
         #endregion
 
@@ -43,5 +47,6 @@ namespace Model
         public bool ShowRomanization { get; set; } = false;
         [StringLength(250)]
         public string ParserType { get; set; } = "spacedel";
+        
     }
 }

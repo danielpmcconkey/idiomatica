@@ -17,6 +17,7 @@ namespace Logic.UILabels
 			_labels.Add("noDataReturned", "No data returned.");
 			_labels.Add("unknown", "unknown");
             _labels.Add("error", "Error");
+            _labels.Add("notLoggedIn", "You must be logged in to view this content.");
 
             #region nav
             _labels.Add("navHome", "Home");
@@ -52,6 +53,8 @@ namespace Logic.UILabels
             _labels.Add("statusLabel5", "learned 5");
             _labels.Add("statusLabel6", "ignored 6");
             _labels.Add("statusLabel7", "well known 7");
+            _labels.Add("closeButton", "Close");
+            _labels.Add("saveButton", "Save Changes");
 
             #endregion
             //_labels.Add("", "");

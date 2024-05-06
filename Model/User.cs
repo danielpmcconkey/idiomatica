@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    
+
     [Table("User", Schema = "Idioma")]
     public class User
     {
@@ -20,6 +20,15 @@ namespace Model
         // not a strict EF Core relationship
         public string ApplicationUserId { get; set; }
 
+        /// <summary>
+        /// the DB link to the primary language of the user; used for UI rendering and for translations
+        /// </summary>
+        [Column("LanguageCode")]
+        public string Code { get; set; } = "EN-US";
+        /// <summary>
+        /// the primary language of the user; used for UI rendering and for translations
+        /// </summary>
+        public LanguageCode? LanguageCode { get; set; }
         
 
         #endregion

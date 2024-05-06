@@ -42,7 +42,7 @@ namespace Logic.Services
             var context = _dbContextFactory.CreateDbContext();
             return context.BookUsers
                 .Where(bu => bu.LanguageUser.UserId == loggedInUserId && bu.BookId == bookId)
-                .Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language)
+                .Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language).ThenInclude(l => l.LanguageCode)
                 .Include(bu => bu.Book).ThenInclude(b => b.BookStats)
                 .FirstOrDefault()
                 ;
@@ -106,6 +106,14 @@ namespace Logic.Services
                     .ThenInclude(s => s.Word)
                 .FirstOrDefault();
         }
+        public List<ParagraphTranslation> FetchParagraphTranslationsByParagraph(Paragraph pp)
+        {
+            if (pp == null || pp.Id < 1) return null;
+            var context = _dbContextFactory.CreateDbContext();
+            return context.ParagraphTranslations.Where(ppt => ppt.ParagraphId == pp.Id)
+                .Include(ppt => ppt.LanguageCode)
+                .ToList();
+        }
         public Dictionary<string, WordUser> FetchWordUserDictForLanguageUser(LanguageUser languageUser)
         {
             var context = _dbContextFactory.CreateDbContext();
@@ -115,6 +123,13 @@ namespace Logic.Services
         {
             var context = _dbContextFactory.CreateDbContext();
             return WordHelper.FetchCommonWordDictForLanguage(context, language);
+        }
+        public ParagraphTranslation InsertParagraphTranslationIntoDb (ParagraphTranslation ppt)
+        {
+            var context = _dbContextFactory.CreateDbContext();
+            context.ParagraphTranslations.Add(ppt);
+            context.SaveChanges();
+            return ppt;
         }
         public void UpdatePageBookmark(int bookUserId, int currentPageId)
         {
