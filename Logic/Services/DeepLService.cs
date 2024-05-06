@@ -7,7 +7,7 @@ namespace Logic.Services
         public DeepLService() { }
         public async Task<string> TranslateAsync (string input, string sourceLanguageCode, string targetLanguageCode) 
         {
-            var authKey = ; // Replace with your key
+            var authKey = Environment.GetEnvironmentVariable("DeepLApiKey");
             var translator = new Translator(authKey);
 
             var translatedText = await translator.TranslateTextAsync(

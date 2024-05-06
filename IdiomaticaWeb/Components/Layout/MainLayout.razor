@@ -1,7 +1,5 @@
 ﻿@inherits LayoutComponentBase
 @inject UserService UserService;
-@inject NavigationManager NavigationManager
-@implements IDisposable
 
 <div class="page">
     <div class="sidebar">
@@ -29,63 +27,6 @@
 </div>
 
 @code {
-    Sidebar sidebar;
-    IEnumerable<NavItem> navItems;
-    IEnumerable<NavItem> navItemsLoggedIn;
-    private User _loggedInUser { get { return UserService.GetLoggedInUser(); } }
-    private string? currentUrl;
 
-    private async Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)
-    {
-        if (navItems is null)
-            navItems = GetNavItems();
-
-        return await Task.FromResult(request.ApplyTo(navItems));
-    }
-    private async Task<SidebarDataProviderResult> SidebarDataProviderLoggedIn(SidebarDataProviderRequest request)
-    {
-        if (navItemsLoggedIn is null)
-            navItemsLoggedIn = GetNavItems(true);
-
-        return await Task.FromResult(request.ApplyTo(navItemsLoggedIn));
-    }
-
-    private IEnumerable<NavItem> GetNavItems(bool isLoggedIn = false)
-    {
-        var currentList = new List<NavItem>();
-
-        var home = new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Home", Match = NavLinkMatch.All };
-        var register = new NavItem { Id = "2", Href = "Account/Register", IconName = IconName.PersonAdd, Text = "Register" };
-        var login = new NavItem { Id = "3", Href = "Account/Login", IconName = IconName.PersonBadge, Text = "Login" };
-
-        var manageAppUser = new NavItem { Id = "4", Href = "Account/Manage", IconName = IconName.PersonFill, Text = _loggedInUser?.Name };
-        var booksList = new NavItem { Id = "5", Href = "/books-list", IconName = IconName.Bookshelf, Text = "Your Books" };
-
-        currentList.Add(home);
-        if (!isLoggedIn) currentList.Add(register);
-        if (!isLoggedIn) currentList.Add(login);
-        if (isLoggedIn) currentList.Add(manageAppUser);
-        if (isLoggedIn) currentList.Add(booksList);
-
-
-
-
-        return currentList;
-    }
-    protected override void OnInitialized()
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
-    }
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-        StateHasChanged();
-    }
-
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-    }
+    
 }
