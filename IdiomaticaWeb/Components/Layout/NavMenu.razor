@@ -67,10 +67,9 @@
     {
         get
         {
-            var t = Task.Run(() => UserService.GetLoggedInUserAsync());
-            //var user = Task.Run(() => UserService.GetLoggedInUserAsync()).GetAwaiter().GetResult();
-            t.Wait();
-            return UserService.LoggedInUser.Name;
+            var user = UserService.GetLoggedInUser();
+            if (user == null) return null;
+            return user.Name;
         }
     }
     protected override void OnInitialized()

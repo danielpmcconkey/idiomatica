@@ -17,6 +17,7 @@ namespace Model
         public List<Sentence> Sentences { get; set; } = new List<Sentence>();
         public int PageId { get; set; }
         public Page Page { get; set; }
+        public List<ParagraphTranslation> ParagraphTranslations { get; set; }
         #endregion
 
         public int Ordinal { get; set; }

@@ -120,7 +120,7 @@
     private List<BookUser>? _bookUsers;
     private List<BookUserStat>? _bookUserStats;
 
-    private User _loggedInUser { get { return UserService.LoggedInUser; } }
+    private User _loggedInUser { get { return UserService.GetLoggedInUser(); } }
 
     #region sorting and filtering
     private string _filter;
@@ -140,7 +140,6 @@
     {
         try
         {
-            UserService.GetLoggedInUserAsync();
             _bookUsers = BookService.FetchBookUsersWithoutStats((int)_loggedInUser.Id).ToList();
             _bookUserStats = BookService.FetchBookUserStats((int)_loggedInUser.Id).ToList();
         }

@@ -32,7 +32,7 @@
     Sidebar sidebar;
     IEnumerable<NavItem> navItems;
     IEnumerable<NavItem> navItemsLoggedIn;
-    private User _loggedInUser { get { return UserService.LoggedInUser; } }
+    private User _loggedInUser { get { return UserService.GetLoggedInUser(); } }
     private string? currentUrl;
 
     private async Task<SidebarDataProviderResult> SidebarDataProvider(SidebarDataProviderRequest request)

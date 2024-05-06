@@ -12,10 +12,12 @@ namespace Model.DAL
         public DbSet<BookUser> BookUsers { get; set; }
         public DbSet<BookUserStat> BookUserStats { get; set; }
         public DbSet<Language> Languages { get; set; }
+        public DbSet<LanguageCode> LanguageCodes { get; set; }
         public DbSet<LanguageUser> LanguageUsers { get; set; }
         public DbSet<Page> Pages { get; set; }
         public DbSet<PageUser> PageUsers { get; set; }
         public DbSet<Paragraph> Paragraphs { get; set; }
+        public DbSet<ParagraphTranslation> ParagraphTranslations { get; set; }
         public DbSet<Sentence> Sentences { get; set; }
         public DbSet<Token> Tokens { get; set; }
         public DbSet<User> Users { get; set; }
@@ -29,7 +31,6 @@ namespace Model.DAL
         public DbSet<IdentityUserLogin<string>> IdentityUserLogins { get; set; }
         public DbSet<IdentityUserRole<string>> IdentityUserRoles { get; set; }
         public DbSet<IdentityUserToken<string>> IdentityUserTokens { get; set; }
-        
 
         #endregion
 
@@ -77,6 +78,13 @@ namespace Model.DAL
                     .HasForeignKey(lu => lu.LanguageId);
                 e.HasMany(l => l.Books).WithOne(b => b.Language).HasForeignKey(b => b.LanguageId);
                 e.HasMany(l => l.Words).WithOne(w => w.Language).HasForeignKey(w => w.LanguageId);
+                e.HasOne(l => l.LanguageCode).WithOne(lc => lc.Language).HasForeignKey<Language>(l => l.Code);
+            });
+            modelBuilder.Entity<LanguageCode>(e => {
+                e.HasKey(lc => lc.Code);
+                e.HasMany(lc => lc.ParagraphTranslations)
+                    .WithOne(ppt => ppt.LanguageCode).HasForeignKey(ppt => ppt.Code);
+                e.HasMany(lc => lc.Users).WithOne(u => u.LanguageCode).HasForeignKey(u => u.Code);
             });
             modelBuilder.Entity<LanguageUser>(e => {
                 e.HasKey(lu => lu.Id);
@@ -104,6 +112,19 @@ namespace Model.DAL
                 e.HasKey(pp => pp.Id);
                 e.HasOne(pp => pp.Page).WithMany(p => p.Paragraphs).HasForeignKey(pp => pp.PageId);
                 e.HasMany(pp => pp.Sentences).WithOne(s => s.Paragraph).HasForeignKey(s => s.ParagraphId);
+                e.HasMany(pp => pp.ParagraphTranslations)
+                    .WithOne(ppt => ppt.Paragraph)
+                    .HasForeignKey(ppt => ppt.ParagraphId);
+            });
+            modelBuilder.Entity<ParagraphTranslation>(e =>
+            {
+                e.HasKey(ppt => ppt.Id);
+                e.HasOne(ppt => ppt.LanguageCode)
+                    .WithMany(s => s.ParagraphTranslations)
+                    .HasForeignKey(ppt => ppt.Code);
+                e.HasOne(ppt => ppt.Paragraph)
+                    .WithMany(pp => pp.ParagraphTranslations)
+                    .HasForeignKey(ppt => ppt.ParagraphId);
             });
             modelBuilder.Entity<Sentence>(e => {
                 e.HasKey(s => s.Id);

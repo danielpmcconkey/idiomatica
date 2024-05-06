@@ -13,7 +13,6 @@ namespace Logic.Services
 {
     public class UserService
     {
-        public User LoggedInUser;
         private IDbContextFactory<IdiomaticaContext> _dbContextFactory;
         private AuthenticationStateProvider _authenticationStateProvider;
         public UserService(IDbContextFactory<IdiomaticaContext> dbContextFactory, AuthenticationStateProvider AuthenticationStateProvider)
@@ -21,23 +20,28 @@ namespace Logic.Services
             _dbContextFactory = dbContextFactory;
             _authenticationStateProvider = AuthenticationStateProvider;
         }
-
-        public async Task GetLoggedInUserAsync()
+        public User? GetLoggedInUser()
+        {
+            var t = Task.Run(() => GetAppUserClaimsPrincipalAsync());
+            t.Wait();
+            var appUser = t.Result;
+            if (appUser == null) return null;
+            if (appUser.Identity is null) return null;
+            if (!appUser.Identity.IsAuthenticated) return null;
+            
+            var appUserId = appUser.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (appUserId == null) return null;
+            //Console.WriteLine($"appUserId = {appUserId}");
+            var context = _dbContextFactory.CreateDbContext();
+            var matchingUsers = context.Users.Where(x => x.ApplicationUserId == appUserId).ToList();
+            if(matchingUsers.Count() > 0) return matchingUsers[0];
+            return null;
+        }
+        private async Task<ClaimsPrincipal?> GetAppUserClaimsPrincipalAsync()
         {
             var authState = await _authenticationStateProvider
                .GetAuthenticationStateAsync();
-            var appUser = authState.User;
-
-            if (appUser.Identity is not null && appUser.Identity.IsAuthenticated)
-            {
-                string appUserId = appUser.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-                var context = _dbContextFactory.CreateDbContext();
-                LoggedInUser = context.Users.Where(x => x.ApplicationUserId == appUserId).FirstOrDefault();
-            }
-            else
-            {
-                LoggedInUser = null;
-            }
+            return authState.User;
         }
     }
 }

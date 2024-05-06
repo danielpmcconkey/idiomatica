@@ -142,7 +142,7 @@
     private IQueryable<BookUserStat>? _bookUserStats;
 
     #region shared with multiple children
-    private User _loggedInUser { get { return UserService.LoggedInUser; } }
+    private User _loggedInUser { get { return UserService.GetLoggedInUser(); } }
     private LanguageUser? _languageUser;
     private Dictionary<string, WordUser> _allWordUsersInLanguage;
     private PageUser? _currentPageUser;
@@ -214,7 +214,6 @@
     {
         try
         {
-            UserService.GetLoggedInUserAsync();
             // todo: don't load the entire book in at the beginning. Just the current page
             _bookUser = FetchBookUser();
             if (_bookUser is null) return;
