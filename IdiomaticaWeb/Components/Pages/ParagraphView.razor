@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
-@inject UIService UIService;
 
 
 <div class="row  g-2">
@@ -73,7 +72,7 @@
         if (token.Word is null) return "statusUNKNOWN";
         if (!allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
         var wordUser = allWordUsersInLanguage[token.Word.TextLowerCase];
-        return UIService.GetTokenClass(wordUser.Status);
+        return $"status{wordUser.Status}";
     }
     private string GetTokenTranslation(Token token)
     {

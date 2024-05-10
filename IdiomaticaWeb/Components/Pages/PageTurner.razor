@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
-@inject UIService UIService;
 
 
 <div class="row  g-2">
@@ -11,12 +10,12 @@
     </div>
     <div class="col-2">
         <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(currentPageUser.Page.Ordinal - 1))">
-            @UIService.GetLabel("btnPreviousPage")
+            @UserService.GetUILabel("btnPreviousPage")
         </button>
     </div>
     <div class="col-2">
         <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(currentPageUser.Page.Ordinal + 1))">
-            @UIService.GetLabel("btnNextPage")
+            @UserService.GetUILabel("btnNextPage")
         </button>
     </div>
 </div>

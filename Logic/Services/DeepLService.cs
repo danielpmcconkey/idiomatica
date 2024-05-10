@@ -20,7 +20,6 @@ namespace Logic.Services
         public string Translate(string input, string sourceLanguageCode, string targetLanguageCode)
         {
             var t = Task.Run(() => TranslateAsync(input, sourceLanguageCode, targetLanguageCode));
-            //var user = Task.Run(() => UserService.GetLoggedInUserAsync()).GetAwaiter().GetResult();
             t.Wait();
             return t.Result;
         }

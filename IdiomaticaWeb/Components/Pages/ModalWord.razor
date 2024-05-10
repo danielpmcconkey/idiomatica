@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
-@inject UIService UIService;
 
 @* Modal for word management *@
 <Modal @ref="modal" Title="@_modalTitle" Size="ModalSize.Large">
@@ -19,47 +18,47 @@
         </div>
         <div>
             <label class="form-label">Word status</label><br />
-            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.UNKNOWN) @GetTokenClassSelected(8)"
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.UNKNOWN) @GetTokenClassSelected(8)"
                   @onclick="@(e => UpdateWordStatusSelected(8))">
-                @UIService.GetLabel($"statusLabel{8}")
+                @UserService.GetUILabel($"statusLabel{8}")
             </span>
-            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.NEW1) @GetTokenClassSelected(1)"
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.NEW1) @GetTokenClassSelected(1)"
                   @onclick="@(e => UpdateWordStatusSelected(1))">
-                @UIService.GetLabel($"statusLabel{1}")
+                @UserService.GetUILabel($"statusLabel{1}")
             </span>
-            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.NEW2) @GetTokenClassSelected(2)"
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.NEW2) @GetTokenClassSelected(2)"
                   @onclick="@(e => UpdateWordStatusSelected(2))">
-                @UIService.GetLabel($"statusLabel{2}")
+                @UserService.GetUILabel($"statusLabel{2}")
             </span>
-            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.LEARNING3) @GetTokenClassSelected(3)"
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.LEARNING3) @GetTokenClassSelected(3)"
                   @onclick="@(e => UpdateWordStatusSelected(3))">
-                @UIService.GetLabel($"statusLabel{3}")
+                @UserService.GetUILabel($"statusLabel{3}")
             </span>
-            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.LEARNING4) @GetTokenClassSelected(4)"
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.LEARNING4) @GetTokenClassSelected(4)"
                   @onclick="@(e => UpdateWordStatusSelected(4))">
-                @UIService.GetLabel($"statusLabel{4}")
+                @UserService.GetUILabel($"statusLabel{4}")
             </span>
-            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.LEARNED) @GetTokenClassSelected(5)"
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.LEARNED) @GetTokenClassSelected(5)"
                   @onclick="@(e => UpdateWordStatusSelected(5))">
-                @UIService.GetLabel($"statusLabel{5}")
+                @UserService.GetUILabel($"statusLabel{5}")
             </span>
-            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.IGNORED) @GetTokenClassSelected(6)"
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.IGNORED) @GetTokenClassSelected(6)"
                   @onclick="@(e => UpdateWordStatusSelected(6))">
-                @UIService.GetLabel($"statusLabel{6}")
+                @UserService.GetUILabel($"statusLabel{6}")
             </span>
-            <span class="readToken @UIService.GetTokenClass(AvailableWordUserStatus.WELLKNOWN) @GetTokenClassSelected(7)"
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.WELLKNOWN) @GetTokenClassSelected(7)"
                   @onclick="@(e => UpdateWordStatusSelected(7))">
-                @UIService.GetLabel($"statusLabel{7}")
+                @UserService.GetUILabel($"statusLabel{7}")
             </span>
         </div>
 
     </BodyTemplate>
     <FooterTemplate>
         <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">
-            @UIService.GetLabel("closeButton")
+            @UserService.GetUILabel("closeButton")
         </Button>
         <Button Color="ButtonColor.Primary" @onclick="OnSaveModal">
-            @UIService.GetLabel("saveButton")
+            @UserService.GetUILabel("saveButton")
         </Button>
     </FooterTemplate>
 </Modal>
@@ -113,7 +112,7 @@
     {
         get
         {
-            var statusString = UIService.GetLabel($"statusLabel{(int)_modalWordUser.Status}");
+            var statusString = UserService.GetUILabel($"statusLabel{(int)_modalWordUser.Status}");
             return statusString;
         }
     }
@@ -156,6 +155,18 @@
     {
         if (_modalWordUser is null) return;
         _modalWordUser.Status = (AvailableWordUserStatus)newStatusInt;
+    }
+    private string GetTokenClass(AvailableWordUserStatus status)
+    {
+        if (status == AvailableWordUserStatus.UNKNOWN) return "statusUNKNOWN";
+        if (status == AvailableWordUserStatus.NEW1) return "statusNEW1";
+        if (status == AvailableWordUserStatus.NEW2) return "statusNEW2";
+        if (status == AvailableWordUserStatus.LEARNING3) return "statusLEARNING3";
+        if (status == AvailableWordUserStatus.LEARNING4) return "statusLEARNING4";
+        if (status == AvailableWordUserStatus.LEARNED) return "statusLEARNED";
+        if (status == AvailableWordUserStatus.WELLKNOWN) return "statusWELLKNOWN";
+        if (status == AvailableWordUserStatus.IGNORED) return "statusIGNORED";
+        return "statusUNKNOWN";
     }
 
 }

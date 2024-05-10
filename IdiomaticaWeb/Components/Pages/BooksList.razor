@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
-@inject UIService UIService;
 
 <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <style>
@@ -21,20 +20,20 @@
             <div><h3>Error</h3><p>@_errorMessage</p></div>
         }
         <div class="form-group mb-2">
-            <input class="form-control" type="text" placeholder="@UIService.GetLabel("bookListFormFilter")"
+            <input class="form-control" type="text" placeholder="@UserService.GetUILabel("bookListFormFilter")"
                    @bind="_filter"
                    @bind:event="oninput" />
         </div>
         @if (_bookUsers is null)
         {
             <p>
-                @UIService.GetLabel("loading")red
+                @UserService.GetUILabel("loading")red
             </p>
         }
         else if (!_bookUsers.Any())
         {
             <p>
-                @UIService.GetLabel("bookListNoBookNotice")
+                @UserService.GetUILabel("bookListNoBookNotice")
             </p>
             @* todo: add an "add books" button *@
         }
@@ -49,35 +48,35 @@
                             <span class="fa @(SetSortIcon("Id"))"></span>
                         </th>
                         <th scope="col" class="sort-th" @onclick="@(() => SortTable("Language"))">
-                            @UIService.GetLabel("bookListLanguageColumnHead")
+                            @UserService.GetUILabel("bookListLanguageColumnHead")
                             <span class="fa @(SetSortIcon("Language"))"></span>
                         </th>
                         <th scope="col" class="sort-th text-center" @onclick="@(() => SortTable("ISCOMPLETE"))">
-                            @UIService.GetLabel("bookListCompletedColumnHead")
+                            @UserService.GetUILabel("bookListCompletedColumnHead")
                             <span class="fa @(SetSortIcon("ISCOMPLETE"))"></span>
                         </th>
                         <th scope="col" class="sort-th" @onclick="@(() => SortTable("Title"))">
-                            @UIService.GetLabel("bookListTitleColumnHead")
+                            @UserService.GetUILabel("bookListTitleColumnHead")
                             <span class="fa @(SetSortIcon("Title"))"></span>
                         </th>
                         <th scope="col" class="sort-th text-center" @onclick="@(() => SortTable("PROGRESSPERCENT"))">
-                            @UIService.GetLabel("bookListProgressColumnHead")
+                            @UserService.GetUILabel("bookListProgressColumnHead")
                             <span class="fa @(SetSortIcon("PROGRESSPERCENT"))"></span>
                         </th>
                         <th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TOTALWORDCOUNT"))">
-                            @UIService.GetLabel("bookListTotalWordCountColumnHead")
+                            @UserService.GetUILabel("bookListTotalWordCountColumnHead")
                             <span class="fa @(SetSortIcon("TOTALWORDCOUNT"))"></span>
                         </th>
                         <th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("TOTALKNOWNPERCENT"))">
-                            @UIService.GetLabel("bookListTotalKnownPercentColumnHead")
+                            @UserService.GetUILabel("bookListTotalKnownPercentColumnHead")
                             <span class="fa @(SetSortIcon("TOTALKNOWNPERCENT"))"></span>
                         </th>
                         <th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("DISTINCTWORDCOUNT"))">
-                            @UIService.GetLabel("bookListDistinctWordCountColumnHead")
+                            @UserService.GetUILabel("bookListDistinctWordCountColumnHead")
                             <span class="fa @(SetSortIcon("DISTINCTWORDCOUNT"))"></span>
                         </th>
                         <th scope="col" class="sort-th text-end" @onclick="@(() => SortTable("DISTINCTKNOWNPERCENT"))">
-                            @UIService.GetLabel("bookListDistinctKnownPercentColumnHead")
+                            @UserService.GetUILabel("bookListDistinctKnownPercentColumnHead")
                             <span class="fa @(SetSortIcon("DISTINCTKNOWNPERCENT"))"></span>
                         </th>
                     </tr>
@@ -110,7 +109,7 @@
         }
     </Authorized>
     <NotAuthorized>
-        <p>@UIService.GetLabel("notLoggedIn")</p>
+        <p>@UserService.GetUILabel("notLoggedIn")</p>
     </NotAuthorized>
 </AuthorizeView>
 

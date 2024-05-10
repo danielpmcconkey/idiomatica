@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
-@inject UIService UIService;
 
 <style>
     span.statusUNKNOWN {
@@ -76,13 +75,13 @@
     <Authorized>
         @if (_isError)
         {
-            <PageTitle>@UIService.GetLabel("error")</PageTitle>
-            <h1>@UIService.GetLabel("error"):  @_errorMessage</h1>
+            <PageTitle>@UserService.GetUILabel("error")</PageTitle>
+            <h1>@UserService.GetUILabel("error"):  @_errorMessage</h1>
         }
         else if (_bookUser is null)
         {
-            <PageTitle>@UIService.GetLabel("loading")</PageTitle>
-            <h1>@UIService.GetLabel("loading")</h1>
+            <PageTitle>@UserService.GetUILabel("loading")</PageTitle>
+            <h1>@UserService.GetUILabel("loading")</h1>
         }
         else
         {
@@ -92,7 +91,7 @@
         @if (_currentPageUser is null)
         {
             <p>
-                @UIService.GetLabel("loading")
+                @UserService.GetUILabel("loading")
             </p>
         }
         else
@@ -128,7 +127,7 @@
         }
     </Authorized>
     <NotAuthorized>
-        <p>@UIService.GetLabel("notLoggedIn")</p>
+        <p>@UserService.GetUILabel("notLoggedIn")</p>
     </NotAuthorized>
 </AuthorizeView>
 
@@ -195,7 +194,7 @@
         }
         // todo: make distinct error messages for the diff types of errors on the read page
         _isError = true;
-        _errorMessage = $"{UIService.GetLabel("readErrorRetrievingData")} {UIService.GetLabel("noDataReturned")}";
+        _errorMessage = $"{UserService.GetUILabel("readErrorRetrievingData")} {UserService.GetUILabel("noDataReturned")}";
     }
     #endregion
 
@@ -253,7 +252,7 @@
         if (bookUserFromDb is null)
         {
             _isError = true;
-            _errorMessage = $"{UIService.GetLabel("readErrorRetrievingData")} {UIService.GetLabel("noDataReturned")}";
+            _errorMessage = $"{UserService.GetUILabel("readErrorRetrievingData")} {UserService.GetUILabel("noDataReturned")}";
         }
         return bookUserFromDb;
     }
@@ -265,7 +264,7 @@
         if (bookUserStatsFromDb is null)
         {
             _isError = true;
-            _errorMessage = $"{UIService.GetLabel("readErrorRetrievingData")} {UIService.GetLabel("noDataReturned")}";
+            _errorMessage = $"{UserService.GetUILabel("readErrorRetrievingData")} {UserService.GetUILabel("noDataReturned")}";
         }
         return bookUserStatsFromDb;
     }

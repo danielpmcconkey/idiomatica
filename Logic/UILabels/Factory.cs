@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,13 +7,12 @@ using System.Threading.Tasks;
 
 namespace Logic.UILabels
 {
-	public enum UILanguage { ENG_US , ENG_GB }
+	
 	public static class Factory
 	{
-		public static UILabels GetUILabels(UILanguage language)
+		public static UILabels GetUILabels(LanguageCodeEnum languageCodeEnum)
 		{
-			if(language == UILanguage.ENG_US) return new Labels_EngUS();
-			if (language == UILanguage.ENG_GB) return new Labels_EngUS();
+			if(languageCodeEnum == LanguageCodeEnum.ENG_US) return new Labels_EngUS();
 			return new Labels_EngUS();
 		}
 	}

@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
-@inject UIService UIService;
 @using System.Text;
 
 @* Modal for paragraph translation *@
@@ -14,7 +13,7 @@
     </BodyTemplate>
     <FooterTemplate>
         <Button Color="ButtonColor.Secondary" @onclick="OnHidePpModalClick">
-            @UIService.GetLabel("closeButton")
+            @UserService.GetUILabel("closeButton")
         </Button>
     </FooterTemplate>
 </Modal>
@@ -48,7 +47,7 @@
         _ppModalTranslateFrom = input;
         var toLang = UserService.GetLoggedInUser()?.LanguageCode;
         var fromLang = Language?.LanguageCode;
-        _ppModalTitle = $"Translation from {fromLang?.LanguageName} to {toLang?.LanguageName}";
+        _ppModalTitle = $"{UserService.GetUILabel("TranslationFrom")}: {fromLang?.LanguageName}. {UserService.GetUILabel("TranslationFrom")}: {toLang?.LanguageName}";
 
         // see if the translation already exists
         if (pp.ParagraphTranslations == null) 

@@ -24,7 +24,7 @@ namespace Model
         /// the DB link to the primary language of the user; used for UI rendering and for translations
         /// </summary>
         [Column("LanguageCode")]
-        public string Code { get; set; } = "EN-US";
+        public string Code { get; set; } = "ENG-US";
         /// <summary>
         /// the primary language of the user; used for UI rendering and for translations
         /// </summary>
