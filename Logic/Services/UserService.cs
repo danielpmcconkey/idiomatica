@@ -63,6 +63,10 @@ namespace Logic.Services
         {
             return _uiLabels.GetLabel(name);
         }
+        public string GetUILabelF(string name, object?[] args)
+        {
+            return _uiLabels.GetLabelF(name, args);
+        }
         private async Task<ClaimsPrincipal?> GetAppUserClaimsPrincipalAsync()
         {
             var authState = await _authenticationStateProvider

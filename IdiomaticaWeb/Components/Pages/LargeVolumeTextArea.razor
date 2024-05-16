@@ -1,0 +1,176 @@
+﻿@page "/LargeVolumeTextArea"
+@using System.Text
+@rendermode InteractiveServer
+@inject BookService BookService;
+@inject UserService UserService;
+@inject IJSRuntime JS
+
+<style>
+    .hiddenTextControl {
+        /* display:none; */
+    }
+
+    .textAreaError {
+        color:#ff0000;
+        font-weight:bold;
+    }
+</style>
+
+
+<textarea @ref="largeTextArea" id="@_entryElementId"
+          onchange="splitLargeVolumeTextArea('@_entryElementId', @maxLengthPerChildInput);"
+          class="@_textInputCss"></textarea>
+<input @ref="_ppSplitResults"
+    id="_ppSplitResults@_entryElementId" 
+    class="hiddenTextControl"></input>
+@if(_isError)
+{
+    <p class="textAreaError">@_errorMessage</p>
+}
+<textarea @ref="_ita0" id="_ita0@_entryElementId" class="hiddenTextControl"></textarea>
+<textarea @ref="_ita1" id="_ita1@_entryElementId" class="hiddenTextControl"></textarea>
+<textarea @ref="_ita2" id="_ita2@_entryElementId" class="hiddenTextControl"></textarea>
+<textarea @ref="_ita3" id="_ita3@_entryElementId" class="hiddenTextControl"></textarea>
+<textarea @ref="_ita4" id="_ita4@_entryElementId" class="hiddenTextControl"></textarea>
+<textarea @ref="_ita5" id="_ita5@_entryElementId" class="hiddenTextControl"></textarea>
+<textarea @ref="_ita6" id="_ita6@_entryElementId" class="hiddenTextControl"></textarea>
+<textarea @ref="_ita7" id="_ita7@_entryElementId" class="hiddenTextControl"></textarea>
+<textarea @ref="_ita8" id="_ita8@_entryElementId" class="hiddenTextControl"></textarea>
+<textarea @ref="_ita9" id="_ita9@_entryElementId" class="hiddenTextControl"></textarea>
+
+@code {
+    [Parameter]
+    public bool IsRequired { get; set; } = false;
+    private bool _isRendered = false;
+    
+
+    private bool _isError = false;
+    private string _errorMessage = "";
+
+    const int maxLengthPerChildInput = 14000; // this is my trial-and-error testing value.
+    private ElementReference largeTextArea;
+    private string _entryElementId;
+
+    private ElementReference _ppSplitResults;
+    private ElementReference _ita0;
+    private ElementReference _ita1;
+    private ElementReference _ita2;
+    private ElementReference _ita3;
+    private ElementReference _ita4;
+    private ElementReference _ita5;
+    private ElementReference _ita6;
+    private ElementReference _ita7;
+    private ElementReference _ita8;
+    private ElementReference _ita9;
+    private string _textInputCss = "form-control is-valid";
+    // {
+    //     get
+    //     {
+    //         if (string.IsNullOrEmpty(TextValue) && IsRequired) return "form-control is-invalid";
+    //         if (_isError) return "form-control is-invalid";
+    //         return "form-control is-valid";
+    //     }
+    // }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        _isRendered = true;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _entryElementId = Guid.NewGuid().ToString();
+        }
+        catch (Exception ex)
+        {
+            _isError = true;
+            _errorMessage = ex.Message;
+        }
+    }
+    public async Task<string> GetTextValue()
+    {
+        var splitResult = await GetTextAsync(_ppSplitResults);
+        if (string.IsNullOrEmpty(splitResult)) return "";
+        if (splitResult == "textValue is empty") return "";
+        if (splitResult == "textValue is too large")
+        {
+            _isError = true;
+            _errorMessage = UserService.GetUILabelF("bcTextAreaTooLarge", [10 * maxLengthPerChildInput]);
+            throw new InvalidDataException(_errorMessage);
+        }
+        if (splitResult == "error parsing regex")
+        {
+            _isError = true;
+            _errorMessage = UserService.GetUILabel("unknownError");
+            throw new Exception(splitResult + "while parsing large textarea");
+        }
+        if (splitResult == "success")
+        {
+            var _ita0_text = await GetTextAsync(_ita0);
+            var _ita1_text = await GetTextAsync(_ita1);
+            var _ita2_text = await GetTextAsync(_ita2);
+            var _ita3_text = await GetTextAsync(_ita3);
+            var _ita4_text = await GetTextAsync(_ita4);
+            var _ita5_text = await GetTextAsync(_ita5);
+            var _ita6_text = await GetTextAsync(_ita6);
+            var _ita7_text = await GetTextAsync(_ita7);
+            var _ita8_text = await GetTextAsync(_ita8);
+            var _ita9_text = await GetTextAsync(_ita9);
+            return _ita0_text
+                          + _ita1_text
+                          + _ita2_text
+                          + _ita3_text
+                          + _ita4_text
+                          + _ita5_text
+                          + _ita6_text
+                          + _ita7_text
+                          + _ita8_text
+                          + _ita9_text
+                          ;
+        }
+        return "";
+    }
+    // public async Task<string> SplitTextAsync()
+    // {
+    //     try
+    //     {
+    //         var splitResult =
+    //             await JS.InvokeAsync<string>("splitLargeVolumeTextArea", largeTextArea, maxLengthPerChildInput);
+            
+    //         return splitResult;
+    //     }
+    //     catch (JSException jsException)
+    //     {
+    //         _isError = true;
+    //         _errorMessage = UserService.GetUILabel("unknownError");
+    //         return _errorMessage;
+    //     }
+    // }
+    public async Task<string> GetTextAsync(ElementReference element)
+    {
+        try
+        {
+            var streamRef =
+                await JS.InvokeAsync<IJSStreamReference>("getText", element);
+            var stream = await streamRef.OpenReadStreamAsync(maxAllowedSize: 500_000);
+            var streamReader = new StreamReader(stream);
+
+            return await streamReader.ReadToEndAsync();
+        }
+        catch (JSException jsException)
+        {
+            if (jsException.InnerException is
+                    ArgumentOutOfRangeException outOfRangeException &&
+                outOfRangeException.ActualValue is not null &&
+                outOfRangeException.ActualValue is long actualLength &&
+                actualLength == 0)
+            {
+                return string.Empty;
+            }
+
+            _isError = true;
+            _errorMessage = UserService.GetUILabel("unknownError");
+            return _errorMessage;
+        }
+    }
+}

@@ -115,7 +115,7 @@
                                     </Button>
                                     <Button Color="ButtonColor.Warning"
                                             Size="Size.Small"
-                                            onclick="OnClickRemove(bookUser.Book)">
+                                            @onclick="((args) => OnClickRemove(args, bookUser.Book))">
                                         Remove
                                     </Button>
                                     
@@ -164,8 +164,8 @@
     {
         try
         {
-            _bookUsers = BookService.FetchBookUsersWithoutStats((int)_loggedInUser.Id).ToList();
-            _bookUserStats = BookService.FetchBookUserStats((int)_loggedInUser.Id).ToList();
+            _bookUsers = BookService.BookUsersFetchWithoutStats((int)_loggedInUser.Id).ToList();
+            _bookUserStats = BookService.BookUserStatsFetch((int)_loggedInUser.Id).ToList();
         }
         catch (Exception ex)
         {
@@ -211,7 +211,7 @@
     {
         return $"/Book/{book.Id}/Update";
     }
-    private void OnClickRemove(Book book)
+    private void OnClickRemove(EventArgs args, Book book)
     {
         Console.WriteLine($"message: {book.SourceURI}");
     }

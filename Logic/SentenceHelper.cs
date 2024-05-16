@@ -16,7 +16,7 @@ namespace Logic
         /// <summary>
         /// this will delete any existing DB tokens
         /// </summary>
-        public static List<Token> CreateTokensFromSentenceAndSave(IdiomaticaContext context,
+        public static void CreateTokensFromSentenceAndSave(IdiomaticaContext context,
             Sentence sentence, Language language, Dictionary<string, Word> commonWordDict)
         {
             if (sentence == null)
@@ -90,7 +90,7 @@ namespace Logic
                         // todo: add actual romanization lookup here
                         var newWord = WordHelper.CreateAndSaveNewWord(context,
                             language, cleanWord, cleanWord);
-                        newWord.Language = language;
+                        //newWord.Language = language;
                         commonWordDict.Add(cleanWord, newWord);
                         existingWord = newWord;
                     }
@@ -103,11 +103,11 @@ namespace Logic
                     WordId = (int)existingWord.Id
                 };
                 Insert.Token(context, token);
-                token.Sentence = sentence;
-                token.Word = existingWord;
-                tokens.Add(token);
+                //token.Sentence = sentence;
+                //token.Word = existingWord;
+                //tokens.Add(token);
             }
-            return tokens;
+            return;// tokens;
         }
     }
 }

@@ -61,7 +61,7 @@ namespace Model.DAL
         }
         public static void WordUser(IdiomaticaContext context, WordUser wordUser)
         {
-            if (wordUser.Id == null)
+            if (wordUser.Id == null || wordUser.Id == 0)
             {
                 context.WordUsers.Add(wordUser);
             }

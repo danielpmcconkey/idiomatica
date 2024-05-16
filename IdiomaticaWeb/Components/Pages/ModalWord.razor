@@ -66,6 +66,8 @@
 @code {
     [Parameter]
     public Dictionary<string, WordUser> allWordUsersInLanguage { get; set; }
+    [Parameter]
+    public Read? Parent { get; set; }
     private Modal modal = default!;
     private Token _modalToken = new Token()
         {
@@ -89,7 +91,13 @@
         {
             if (!allWordUsersInLanguage.ContainsKey(_modalToken.Word.TextLowerCase))
             {
-                return null;
+                // this logic should have been done in the paragraphview so this is probably not needed
+                // first create
+                BookService.WordUserCreateAndSave(_languageUser, _modalToken.Word);
+                // pull from the DB fresh
+                var newWordUser = BookService.WordUserFetch(_languageUser, _modalToken.Word);
+                // and add to the dict
+                allWordUsersInLanguage[_modalToken.Word.TextLowerCase] = newWordUser;
             }
             return allWordUsersInLanguage[_modalToken.Word.TextLowerCase];
         }
@@ -123,15 +131,23 @@
             return (int)_modalWordUser.Status;
         }
     }
-    // [Parameter]
-    // public EventCallback<Token> GetTokenClassCallBack { get; set; }
-    // private async string GetTokenClassAsync(Token token)
-    // {
-    //     GetTokenClassCallBack.InvokeAsync(token);
-    // }
+    private User _loggedInUser
+    {
+        get // todo: move _loggedInUser population to an initializer
+        {
+            return UserService.GetLoggedInUser();
+        }
+    }
+    private LanguageUser _languageUser
+    {
+        get // todo: move _languageUser population to an initializer
+        {
+            return BookService.LanguageUserFetch((int)_loggedInUser.Id, _modalToken.Word.LanguageId);
+        }
+    }
     public async Task OnShowModalClick(Token thisToken)
     {
-        _modalToken = thisToken;
+        _modalToken = thisToken;        
         await modal.ShowAsync();
     }
     private string GetTokenClassSelected(int statusToCheck)
@@ -147,8 +163,9 @@
 
     private async Task OnSaveModal()
     {
-        BookService.UpdateWordUser(
+        BookService.WordUserUpdateStatusAndTranslation(
             _modalWordUser.Id, _modalWordUser.Status, _modalWordUser.Translation);
+        Parent.RefreshState();
         await modal.HideAsync();
     }
     private void UpdateWordStatusSelected(int newStatusInt)

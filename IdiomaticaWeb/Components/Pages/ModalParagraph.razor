@@ -52,7 +52,7 @@
         // see if the translation already exists
         if (pp.ParagraphTranslations == null) 
         {
-            pp.ParagraphTranslations = BookService.FetchParagraphTranslationsByParagraph(pp);
+            pp.ParagraphTranslations = BookService.ParagraphTranslationsFetchByParagraph(pp);
         }
         var currentTranslation = pp.ParagraphTranslations
             .Where(x => x.LanguageCode.Code == toLang.Code)
@@ -75,7 +75,7 @@
                     Code = toLang.Code, 
                     TranslationText = deeplResult
                 };
-                ppt = BookService.InsertParagraphTranslationIntoDb(ppt);
+                ppt = BookService.ParagraphTranslationSave(ppt);
                 pp.ParagraphTranslations.Add(ppt);
             }
         }        

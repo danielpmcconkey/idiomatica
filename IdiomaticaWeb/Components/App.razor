@@ -24,6 +24,59 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="_content/Blazor.Bootstrap/blazor.bootstrap.js"></script>
+    <script type="text/javascript">
+
+        // this is used for the LargeVolumeTextArea control only
+        
+        function splitLargeVolumeTextArea(elementId, chunkSize)  {
+            /* 
+                WARNING do not edit return strings here without also editing
+                them in the LargeVolumeTextArea.razor file
+            */
+            const textValue = document.getElementById(elementId).value;
+            const ppSplitResults = document.getElementById("_ppSplitResults" + elementId);
+            if (textValue.length == 0) ppSplitResults.value = "textValue is empty";
+            if (textValue.length > chunkSize * 10) ppSplitResults.value = "textValue is too large";
+            const _ita0 = document.getElementById("_ita0" + elementId);
+            const _ita1 = document.getElementById("_ita1" + elementId);
+            const _ita2 = document.getElementById("_ita2" + elementId);
+            const _ita3 = document.getElementById("_ita3" + elementId);
+            const _ita4 = document.getElementById("_ita4" + elementId);
+            const _ita5 = document.getElementById("_ita5" + elementId);
+            const _ita6 = document.getElementById("_ita6" + elementId);
+            const _ita7 = document.getElementById("_ita7" + elementId);
+            const _ita8 = document.getElementById("_ita8" + elementId);
+            const _ita9 = document.getElementById("_ita9" + elementId);
+
+            const pattern = "([.\\s\\S]{1," + chunkSize + "})";
+            var re = new RegExp(pattern, 'g');
+            
+            const chunks = textValue.match(re);
+            if (chunks == null) ppSplitResults.value = "error parsing regex";
+            var numChunks = chunks.length;
+            
+            _ita0.value = chunks[0];
+            _ita1.value = (numChunks >= 2) ? chunks[1] : "";
+            _ita2.value = (numChunks >= 3) ? chunks[2] : "";
+            _ita3.value = (numChunks >= 4) ? chunks[3] : "";
+            _ita4.value = (numChunks >= 5) ? chunks[4] : "";
+            _ita5.value = (numChunks >= 6) ? chunks[5] : "";
+            _ita6.value = (numChunks >= 7) ? chunks[6] : "";
+            _ita7.value = (numChunks >= 8) ? chunks[7] : "";
+            _ita8.value = (numChunks >= 9) ? chunks[8] : "";
+            _ita9.value = (numChunks == 10) ? chunks[9] : "";
+            
+            if (numChunks > 10) ppSplitResults.value = "textValue is too large";
+            ppSplitResults.value = "success";
+        }
+        // this is used for the LargeVolumeTextArea control only
+        window.getText = (elem) => {
+            const textValue = elem.value;
+            const utf8Encoder = new TextEncoder();
+            const encodedTextValue = utf8Encoder.encode(textValue);
+            return encodedTextValue;
+        };
+    </script>
 </body>
 
 </html>

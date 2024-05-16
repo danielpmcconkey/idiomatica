@@ -17,6 +17,7 @@ namespace Logic.UILabels
 			_labels.Add("noDataReturned", "No data returned.");
 			_labels.Add("unknown", "unknown");
             _labels.Add("error", "Error");
+            _labels.Add("unknownError", "There was an unknown error.");
             _labels.Add("notLoggedIn", "You must be logged in to view this content.");
 
             #region nav
@@ -25,6 +26,7 @@ namespace Logic.UILabels
             _labels.Add("navYourBookshelf", "Your Bookshelf");
             _labels.Add("navRegister", "Register");
             _labels.Add("navLogIn", "Log In");
+            _labels.Add("navNewBook", "Upload Book");
             #endregion
 
             #region book list
@@ -58,13 +60,30 @@ namespace Logic.UILabels
             _labels.Add("TranslationFrom", "Translation from");
             _labels.Add("TranslationTo", "Translation to");
             #endregion
+            #region book create
+            _labels.Add("bcTitle", "Title");
+            _labels.Add("bcLanguage", "What language is it written in?");
+            _labels.Add("bcText", "Text");
+            _labels.Add("sourceURI", "Source URL (if applicable)");
+            _labels.Add("bcSubmit", "Save");
+            _labels.Add("NewBook", "New Book");
+            _labels.Add("bcSaving", "Saving...");
+            _labels.Add("bcSelectLanguage", "Please select language");
+            _labels.Add("bcTextAreaTooLarge", "Maximum length ({0} characters) exceeded in Text field. Please split this into multiple books.");
+            _labels.Add("bcFileUploadError", "There was an error updloading that file.");
+            #endregion
             //_labels.Add("", "");
             //_labels.Add("", "");
         }
         public override string GetLabel(string name)
-		{
-			if(_labels.ContainsKey(name)) return _labels[name];
-			return "unknown";
-		}
-	}
+        {
+            if (_labels.ContainsKey(name)) return _labels[name];
+            return "unknown";
+        }
+        public override string GetLabelF(string name, object?[] args)
+        {
+            if (_labels.ContainsKey(name)) return String.Format(_labels[name], args);
+            return "unknown";
+        }
+    }
 }

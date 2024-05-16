@@ -47,8 +47,10 @@ else
     connection = Environment.GetEnvironmentVariable("SQLAZURECONNSTR_AZURE_SQL_CONNECTIONSTRING_PROD");
 }
 
-builder.Services.AddDbContextFactory<IdiomaticaContext>(options =>
-    options.UseSqlServer(connection, b => b.MigrationsAssembly("IdiomaticaWeb")));
+builder.Services.AddDbContextFactory<IdiomaticaContext>(options => {
+    options.UseSqlServer(connection, b => b.MigrationsAssembly("IdiomaticaWeb"));
+    options.EnableSensitiveDataLogging();
+});
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
