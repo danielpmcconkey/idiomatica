@@ -6,65 +6,82 @@
 <h3>@UserService.GetUILabel("NewBook")</h3>
 <AuthorizeView>
     <Authorized>
-        <form method="post" @onsubmit="OnSaveClick" @formname="CreateBookForm">
-            <AntiforgeryToken />
-            <div class="mb-3">
-                <label class="form-label" 
-                       for="TitleInput">
-                    @UserService.GetUILabel("bcTitle")
-                </label>
-                <InputText id="TitleInput" 
-                           class="@_titleInputCss"
-                           @bind-Value="_titleInput"
-                           />
-            </div>
-            <div class="mb-3">
-                <label class="form-label"
-                       for="LanguageInput">
-                    @UserService.GetUILabel("bcLanguage")
-                </label>
-                <InputSelect id="LanguageInput"
-                             class="@_languageCodeInputCss"
-                             @bind-Value="_languageCodeInput">
-                    <option selected disabled>@UserService.GetUILabel("bcSelectLanguage")</option>
-                    @foreach (var (key, value) in _languageOptions)
-                    {
-                        <option value="@key">@value</option>
-                    }
-                </InputSelect>
-            </div>
-            <div class="mb-3">
-                <label class="form-label"
-                       for="UrlInput">
-                    @UserService.GetUILabel("sourceURI")
-                </label>
-                <InputText id="UrlInput"
-                           class="form-control is-valid"
-                           @bind-Value="_sourceURIInput" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label" >
-                    @UserService.GetUILabel("bcText")
-                </label>
-                <LargeVolumeTextArea @ref="_largeVolumeTextArea" IsRequired="true" />
-            </div>
+        @if(_isSaveSuccess)
+        {
             <div>
-                @if(_isSaving)
-                {
-                    <Button Color="ButtonColor.Primary" 
-                            Loading="true" 
-                            LoadingText="@UserService.GetUILabel("bcSaving")"
-                            />
-                }
-                else
-                {
-                    <button type="submit" disabled="@_isFormInValid"
-                            class="btn btn-primary">
-                        @UserService.GetUILabel("bcSubmit")
-                    </button>
-                }
+                <Alert @ref="successAlert" Color="AlertColor.Primary" Dismissable="true">
+                    <Icon Name="IconName.InfoCircleFill" class="me-2"></Icon>
+                    <p>@UserService.GetUILabel("bcSuccess")</p>
+                    <Button Type="ButtonType.Link" Color="ButtonColor.Success" To="@_newBookUrl">
+                        @UserService.GetUILabel("bcStartReading")
+                    </Button>
+                    <Button Color="ButtonColor.Primary" @onclick="CloseAlert">
+                        @UserService.GetUILabel("closeButton")</Button>
+                </Alert>
             </div>
-        </form>
+        }
+        else
+        {
+            <form method="post" @onsubmit="OnSaveClick" @formname="CreateBookForm">
+                <AntiforgeryToken />
+                <div class="mb-3">
+                    <label class="form-label" 
+                           for="TitleInput">
+                        @UserService.GetUILabel("bcTitle")
+                    </label>
+                    <InputText id="TitleInput" 
+                               class="@_titleInputCss"
+                               @bind-Value="_titleInput"
+                               />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label"
+                           for="LanguageInput">
+                        @UserService.GetUILabel("bcLanguage")
+                    </label>
+                    <InputSelect id="LanguageInput"
+                                 class="@_languageCodeInputCss"
+                                 @bind-Value="_languageCodeInput">
+                        <option selected disabled>@UserService.GetUILabel("bcSelectLanguage")</option>
+                        @foreach (var (key, value) in _languageOptions)
+                        {
+                            <option value="@key">@value</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label"
+                           for="UrlInput">
+                        @UserService.GetUILabel("sourceURI")
+                    </label>
+                    <InputText id="UrlInput"
+                               class="form-control is-valid"
+                               @bind-Value="_sourceURIInput" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" >
+                        @UserService.GetUILabel("bcText")
+                    </label>
+                    <LargeVolumeTextArea @ref="_largeVolumeTextArea" IsRequired="true" />
+                </div>
+                <div>
+                    @if(_isSaving)
+                    {
+                        <Button Color="ButtonColor.Primary" 
+                                Loading="true" 
+                                LoadingText="@UserService.GetUILabel("bcSaving")"
+                                />
+                    }
+                    else
+                    {
+                        <button type="submit" disabled="@_isFormInValid"
+                                class="btn btn-primary">
+                            @UserService.GetUILabel("bcSubmit")
+                        </button>
+                    }
+                </div>
+            </form>
+        }
     </Authorized>
     <NotAuthorized>
         <p>@UserService.GetUILabel("notLoggedIn")</p>
@@ -83,7 +100,12 @@
     }
     private bool _isError = false;
     private string _errorMessage = "";
-
+    private bool _isSaveSuccess = false;
+    private int _newBookId = 0;
+    private string _newBookUrl
+    {
+        get { return $"/Book/{_newBookId}/Read/"; }
+    }
 
     private Button _saveButton;
     private bool _isSaving = false;
@@ -93,6 +115,7 @@
     private string? _sourceURIInput;
     //private string _textInput { get { return _largeVolumeTextArea.TextValue; } }
     private string _languageCodeInput;
+    private Alert successAlert;
 
     private string _titleInputCss { get
         {
@@ -135,6 +158,7 @@
             _errorMessage = ex.Message;
         }
     }
+    private async Task CloseAlert() => await successAlert?.CloseAsync();
     private async Task OnSaveClick()
     {
         _isSaving = true;
@@ -144,9 +168,13 @@
             await Task.Run(() =>
             {
                 int bookId = BookService.BookCreateAndSave(_titleInput, _languageCodeInput, _sourceURIInput, textInput);
+                // add the book stats
+                BookService.BookStatCreateAndSave(bookId);
                 // now create the book user for teh logged in user
                 BookService.BookUserCreateAndSave(bookId, (int)_loggedInUser.Id);
                 // throw up a success message
+                _isSaveSuccess = true;
+                _newBookId = bookId;
             });
         }
         catch (Exception ex)

@@ -71,6 +71,8 @@ namespace Logic.UILabels
             _labels.Add("bcSelectLanguage", "Please select language");
             _labels.Add("bcTextAreaTooLarge", "Maximum length ({0} characters) exceeded in Text field. Please split this into multiple books.");
             _labels.Add("bcFileUploadError", "There was an error updloading that file.");
+            _labels.Add("bcSuccess", "Book successfully saved");
+            _labels.Add("bcStartReading", "Start reading it");
             #endregion
             //_labels.Add("", "");
             //_labels.Add("", "");
