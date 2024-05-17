@@ -26,7 +26,7 @@ namespace Logic.Services
         {
             _dbContextFactory = dbContextFactory;
             _authenticationStateProvider = AuthenticationStateProvider;
-            _uiLabels = UILabels.Factory.GetUILabels(LanguageCodeEnum.ENG_US);
+            _uiLabels = UILabels.Factory.GetUILabels(LanguageCodeEnum.EN_US);
         }
         public User? GetLoggedInUser()
         {

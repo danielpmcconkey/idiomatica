@@ -22,8 +22,8 @@ namespace Model
         DA,             // Danish
         DE,             // German
         EL,             // Greek
-        ENG_GB,         // English (British)
-        ENG_US,         // English (American)
+        EN_GB,          // English (British)
+        EN_US,          // English (American)
         ES,             // Spanish
         ET,             // Estonian
         FI,             // Finish
@@ -68,7 +68,7 @@ namespace Model
             get
             {
                 string enumName = Code.Replace('-', '_');
-                LanguageCodeEnum outVal = LanguageCodeEnum.ENG_US;
+                LanguageCodeEnum outVal = LanguageCodeEnum.EN_US;
                 Enum.TryParse<LanguageCodeEnum>(enumName, out outVal);
                 return outVal;
             }
