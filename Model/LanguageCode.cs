@@ -22,8 +22,8 @@ namespace Model
         DA,             // Danish
         DE,             // German
         EL,             // Greek
-        ENG_GB,         // English (British)
-        ENG_US,         // English (American)
+        EN_GB,          // English (British)
+        EN_US,          // English (American)
         ES,             // Spanish
         ET,             // Estonian
         FI,             // Finish
@@ -63,17 +63,23 @@ namespace Model
         /// enumerations
         /// </summary>
         [NotMapped]
-        public LanguageCodeEnum LanguageCodeEnum { get {
+        public LanguageCodeEnum LanguageCodeEnum
+        {
+            get
+            {
                 string enumName = Code.Replace('-', '_');
-                LanguageCodeEnum outVal = LanguageCodeEnum.ENG_US;
+                LanguageCodeEnum outVal = LanguageCodeEnum.EN_US;
                 Enum.TryParse<LanguageCodeEnum>(enumName, out outVal);
                 return outVal;
-            } 
+            }
         }
         [StringLength(250)]
         public string LanguageName { get; set; }
         public List<ParagraphTranslation> ParagraphTranslations { get; set; }
         public List<User> Users { get; set; }
         public Language Language { get; set; }
+        public bool IsImplementedForLearning { get; set; }
+        public bool IsImplementedForUI { get; set; }
+        public bool IsImplementedForTranslation { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace Logic.UILabels
 	{
 		public static UILabels GetUILabels(LanguageCodeEnum languageCodeEnum)
 		{
-			if(languageCodeEnum == LanguageCodeEnum.ENG_US) return new Labels_EngUS();
+			if(languageCodeEnum == LanguageCodeEnum.EN_US) return new Labels_EngUS();
 			return new Labels_EngUS();
 		}
 	}

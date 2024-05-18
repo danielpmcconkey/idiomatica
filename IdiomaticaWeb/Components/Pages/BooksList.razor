@@ -1,4 +1,4 @@
-﻿@page "/books-list"
+﻿@page "/Books"
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
@@ -10,7 +10,7 @@
     }
     .fa {
         float: right;
-    }
+    }    
 </style>
 
 <AuthorizeView>
@@ -96,7 +96,32 @@
                                     <span class="completedMarker">&#x2713;</span>
                                 }
                             </td>
-                            <td scope="row"><a href="@GetBookLink(bookUser.Book)">@FormatTitle(bookUser.Book)</a></td>
+                            <td scope="row">
+                                <p>
+                                    @FormatTitle(bookUser.Book)
+                                </p>
+                                <p>
+                                    <Button Color="ButtonColor.Primary"
+                                            Type="ButtonType.Link"
+                                            Size="Size.Small"
+                                            To="@GetBookLinkRead(bookUser.Book)">
+                                        Read
+                                    </Button>
+                                    <Button Color="ButtonColor.Secondary"
+                                            Type="ButtonType.Link"
+                                            Size="Size.Small"
+                                            To="@GetBookLinkUpdate(bookUser.Book)">
+                                        Update
+                                    </Button>
+                                    <Button Color="ButtonColor.Warning"
+                                            Size="Size.Small"
+                                            @onclick="((args) => OnClickRemove(args, bookUser.Book))">
+                                        Remove
+                                    </Button>
+                                    
+                                    
+                                </p>
+                            </td>
                             <td scope="row" class="text-center">@FormatProgress(bookUser.BookId)</td>
                             <td scope="row" class="text-end">@FormatCount(bookUser.BookId, AvailableBookUserStat.TOTALWORDCOUNT)</td>
                             <td scope="row" class="text-end">@FormatCount(bookUser.BookId, AvailableBookUserStat.TOTALKNOWNPERCENT)</td>
@@ -139,8 +164,8 @@
     {
         try
         {
-            _bookUsers = BookService.FetchBookUsersWithoutStats((int)_loggedInUser.Id).ToList();
-            _bookUserStats = BookService.FetchBookUserStats((int)_loggedInUser.Id).ToList();
+            _bookUsers = BookService.BookUsersFetchWithoutStats((int)_loggedInUser.Id).ToList();
+            _bookUserStats = BookService.BookUserStatsFetch((int)_loggedInUser.Id).ToList();
         }
         catch (Exception ex)
         {
@@ -178,9 +203,17 @@
         }
         return title;
     }
-    private string GetBookLink(Book book)
+    private string GetBookLinkRead(Book book)
     {
-        return $"/read/{book.Id}";
+        return $"/Book/{book.Id}/Read";
+    }
+    private string GetBookLinkUpdate(Book book)
+    {
+        return $"/Book/{book.Id}/Update";
+    }
+    private void OnClickRemove(EventArgs args, Book book)
+    {
+        Console.WriteLine($"message: {book.SourceURI}");
     }
     private bool IsVisibleInList(BookUser bookUser)
     {

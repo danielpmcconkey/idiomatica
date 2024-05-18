@@ -19,9 +19,17 @@ namespace Logic.Services
 
         public string Translate(string input, string sourceLanguageCode, string targetLanguageCode)
         {
-            var t = Task.Run(() => TranslateAsync(input, sourceLanguageCode, targetLanguageCode));
-            t.Wait();
-            return t.Result;
+            try
+            {
+                var t = Task.Run(() => TranslateAsync(input, sourceLanguageCode, targetLanguageCode));
+                t.Wait();
+                return t.Result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
 
     }

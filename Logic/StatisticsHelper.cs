@@ -27,6 +27,7 @@ namespace Logic
         }
         public static int GetBookStat_int(Book book, AvailableBookStat key)
         {
+            if (book == null) return 0;
             if (book.BookStats == null) return 0;
             return GetBookStat_int(book.BookStats, key);
         }

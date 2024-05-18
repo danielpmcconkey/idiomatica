@@ -1,0 +1,18 @@
+﻿@page "/Book/{bookid:int}/Update"
+@rendermode InteractiveServer
+@inject BookService BookService;
+@inject UserService UserService;
+<h3>BookUpdate</h3>
+
+<AuthorizeView>
+    <Authorized>
+    </Authorized>
+    <NotAuthorized>
+        <p>@UserService.GetUILabel("notLoggedIn")</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public int BookId { get; set; }
+}

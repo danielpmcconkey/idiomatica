@@ -1,4 +1,4 @@
-﻿@page "/read/{bookid:int}"
+﻿@page "/Book/{bookid:int}/Read"
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
@@ -97,7 +97,7 @@
         else
         {
 
-            <ModalWord @ref="_wModal"
+            <ModalWord @ref="_wModal" Parent="this"
                        allWordUsersInLanguage="_allWordUsersInLanguage" />
 
             <ModalParagraph @ref="_ppModal" Language="_bookUser?.LanguageUser?.Language" />
@@ -167,7 +167,7 @@
     private void MovePage(int targetPageNum)
     {
         if (targetPageNum < 1) return;
-        if (targetPageNum > StatisticsHelper.GetBookStat_int(_bookUser.Book, AvailableBookStat.TOTALPAGES))
+        if (targetPageNum > StatisticsHelper.GetBookStat_int(_bookUser?.Book, AvailableBookStat.TOTALPAGES))
             return;
 
         var pageUserInBook = _bookUser.PageUsers
@@ -178,7 +178,7 @@
         {
             _currentPageUser = pageUserInBook;
             _paragraphs = pageUserInBook.Page.Paragraphs;
-            BookService.UpdatePageBookmark(_bookUser.Id, (int)_currentPageUser.Page.Id);
+            BookService.PageUpdateBookmark(_bookUser.Id, (int)_currentPageUser.Page.Id);
             return;
         }
 
@@ -189,7 +189,7 @@
             _currentPageUser = pageUserFromDb;
             _paragraphs = _currentPageUser.Page.Paragraphs;
             _bookUser.PageUsers.Add(pageUserFromDb);
-            BookService.UpdatePageBookmark(_bookUser.Id, (int)_currentPageUser.Page.Id);
+            BookService.PageUpdateBookmark(_bookUser.Id, (int)_currentPageUser.Page.Id);
             return;
         }
         // todo: make distinct error messages for the diff types of errors on the read page
@@ -202,13 +202,12 @@
     private List<Paragraph> _paragraphs;
     private Dictionary<string, Word> _commonWordsInLanguage;
 
-    
 
 
-    
-    
 
-    
+
+
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -217,20 +216,23 @@
             // todo: don't load the entire book in at the beginning. Just the current page
             _bookUser = FetchBookUser();
             if (_bookUser is null) return;
+            if (_bookUser.LanguageUser is null) return;
+            if (_bookUser.Book is null) return;
             _languageUser = _bookUser.LanguageUser;
             _bookUserStats = FetchBookUserStats();
 
-            _currentPageUser = FetchPageUserOnBookOpen();
-            if (_currentPageUser is null) return;
-            _paragraphs = _currentPageUser.Page.Paragraphs;
-            _allWordUsersInLanguage = BookService.FetchWordUserDictForLanguageUser(
+            _allWordUsersInLanguage = BookService.WordUserFetchDictForLanguageUser(
                     _bookUser.LanguageUser);
 
             // pull a list of common words from the database and put it
             // in a dictionary so that we don't always have to go back to the
             // database just to get the word ID for every single word
             _commonWordsInLanguage =
-                 BookService.FetchCommonWordDictForLanguage(_bookUser.LanguageUser.Language);
+                 BookService.WordFetchCommonDictForLanguage(_bookUser.LanguageUser.Language);
+
+            _currentPageUser = FetchPageUserOnBookOpen();
+            if (_currentPageUser is null) return;
+            _paragraphs = _currentPageUser.Page.Paragraphs;
 
         }
         catch (Exception ex)
@@ -243,16 +245,48 @@
     {
 
     }
-    
+    public void RefreshState() { StateHasChanged(); }
+    private void UpdateWordDictForNewPage()
+    {
+        foreach(var pp in _currentPageUser.Page.Paragraphs)
+        {
+            foreach(var s in pp.Sentences)
+            {
+                foreach (var token in s.Tokens)
+                {
+                    if (!_allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase))
+                    {
+                        AddTokenToWordDict(token);
+                    }
+                }
+            }
+        }
+    }
+
+    private void AddTokenToWordDict(Token token)
+    {
+        BookService.WordUserCreateAndSave(_languageUser, token.Word);
+        // pull from the DB fresh
+        var newWordUser = BookService.WordUserFetch(_languageUser, token.Word);
+        // and add to the dict
+        _allWordUsersInLanguage[token.Word.TextLowerCase] = newWordUser;
+    }
 
     private BookUser? FetchBookUser()
     {
-        var bookUserFromDb = BookService.FetchBookUser((int)_loggedInUser.Id, BookId);
+        var bookUserFromDb = BookService.BookUserFetch((int)_loggedInUser.Id, BookId);
         // todo: wrap some try catch around UI elements
         if (bookUserFromDb is null)
         {
-            _isError = true;
-            _errorMessage = $"{UserService.GetUILabel("readErrorRetrievingData")} {UserService.GetUILabel("noDataReturned")}";
+            // try to create it
+            var bookUserId = BookService.BookUserCreateAndSave(BookId, (int)_loggedInUser.Id);
+            if(bookUserId == 0)
+            {
+                _isError = true;
+                _errorMessage = $"{UserService.GetUILabel("readErrorRetrievingData")} {UserService.GetUILabel("noDataReturned")}";
+                return null;
+            }
+            bookUserFromDb = BookService.BookUserFetch((int)_loggedInUser.Id, BookId);
         }
         return bookUserFromDb;
     }
@@ -260,7 +294,7 @@
     {
         if (_bookUser is null) return null;
 
-        var bookUserStatsFromDb = BookService.FetchBookUserStats((int)_loggedInUser.Id, _bookUser.BookId);
+        var bookUserStatsFromDb = BookService.BookUserStatsFetch((int)_loggedInUser.Id, _bookUser.BookId);
         if (bookUserStatsFromDb is null)
         {
             _isError = true;
@@ -274,9 +308,9 @@
         // from the _allWordUsersInLanguage dictionary
 
         if (_bookUser is null) return null;
-        var dbPageUser = BookService.FetchPageUserById(_bookUser.CurrentPageID, (int)_loggedInUser.Id);
+        var dbPageUser = BookService.PageUserFetchById(_bookUser.CurrentPageID, _bookUser.LanguageUserId);
         if (dbPageUser is not null) return dbPageUser;
-        return FetchPageUserByOrderWithinBook(0);
+        return FetchPageUserByOrderWithinBook(1);
     }
     private PageUser? FetchPageUserByOrderWithinBook(int pageOrdinal)
     {
@@ -284,17 +318,21 @@
         // from the _allWordUsersInLanguage dictionary
         if (_bookUser is null) return null;
 
-        var pageUserFromDb = BookService.FetchPageUserByOrdinalWithinBook(
+        var pageUserFromDb = BookService.PageUserFetchByOrdinalWithinBook(
             pageOrdinal, _bookUser.BookId, (int)_loggedInUser.Id);
 
         if (pageUserFromDb is not null) return pageUserFromDb;
 
         // pageUser is not created yet. Is the page created?
-        var existingPage = BookService.FetchPageByOrdinalWithinBook(pageOrdinal, _bookUser.BookId);
+        var existingPage = BookService.PageFetchByOrdinalWithinBook(pageOrdinal, _bookUser.BookId);
         if (existingPage == null)
             throw new InvalidDataException("Underlying Page does not exist when trying to retrieve PageUser.");
 
-        return BookService.CreatePageUserAndSave(existingPage, _bookUser,
+        BookService.PageUserCreateAndSave(existingPage, _bookUser,
             _commonWordsInLanguage, _allWordUsersInLanguage);
+
+        // re-fetch the page user to get all the related objects
+        return BookService.PageUserFetchByOrdinalWithinBook(
+            pageOrdinal, _bookUser.BookId, (int)_loggedInUser.Id);
     }
 }

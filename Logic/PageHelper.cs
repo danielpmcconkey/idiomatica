@@ -12,7 +12,7 @@ namespace Logic
         /// parses the text through the language parser and returns paragraphs, 
         /// sentences, and tokens. it saves everything in the DB
         /// </summary>
-        public static List<Paragraph> ParseParagraphsFromPageAndSave(
+        public static void ParseParagraphsFromPageAndSave(
             IdiomaticaContext context, Page page, Language language, Dictionary<string, Word> commonWordDict)
         {
 
@@ -21,24 +21,23 @@ namespace Logic
             {
                 throw new InvalidDataException("Page must have a DB ID before adding children");
             }
-            List<Paragraph> paragraphs = new List<Paragraph>();
+            
             var parser = LanguageParser.Factory.GetLanguageParser(language);
             var paragraphSplits = parser.SegmentTextByParagraphs(page.OriginalText);
 
             int paragraphOrder = 0;
             foreach (var pText in paragraphSplits)
             {
-                if (pText == string.Empty) continue;
+                if (pText.Trim() == string.Empty) continue;
                 Paragraph paragraph = new Paragraph()
                 {
                     Ordinal = paragraphOrder,
                     PageId = (int)page.Id
                 };
                 Insert.Paragraph(context, paragraph);
-                paragraph.Page = page;
 
                 paragraphOrder++;
-                paragraph.Sentences = new List<Sentence>();
+
                 var sentenceSplits = parser.SegmentTextBySentences(pText);
                 for (int i = 0; i < sentenceSplits.Length; i++)
                 {
@@ -51,18 +50,14 @@ namespace Logic
                         Ordinal = i,
                     };
                     Insert.Sentence(context, newSentence);
-                    newSentence.Paragraph = paragraph;
 
 
-                    newSentence.Tokens = SentenceHelper.CreateTokensFromSentenceAndSave(
+                    SentenceHelper.CreateTokensFromSentenceAndSave(
                         context, newSentence, language, commonWordDict);
-                    paragraph.Sentences.Add(newSentence);
                 }
-                paragraphs.Add(paragraph);
             }
-            return paragraphs;
         }
-        public static PageUser CreatePageUserAndSave(IdiomaticaContext context,
+        public static int CreatePageUserAndSave(IdiomaticaContext context,
             Page page, BookUser bookUser, Dictionary<string, Word> commonWordDict,
             Dictionary<string, WordUser> allWordUsersInLanguage)
         {
@@ -76,18 +71,18 @@ namespace Logic
             // has the page ever been parsed?
             if (page.Paragraphs == null)
             {
-                page.Paragraphs = ParseParagraphsFromPageAndSave(
+                //page.Paragraphs = 
+                ParseParagraphsFromPageAndSave(
                     context, page, bookUser.LanguageUser.Language, commonWordDict);
             }
-            var pageUser = new PageUser() { BookUser = bookUser,
+            var pageUser = new PageUser() { 
                 BookUserId = bookUser.Id,
-                Page = page,
                 PageId = (int)page.Id
             };
             Insert.PageUser(context, pageUser);
-
+            
             // now we need to add wordusers as needed
-            foreach(var kvp in commonWordDict)
+            foreach (var kvp in commonWordDict)
             {
                 if (allWordUsersInLanguage.ContainsKey(kvp.Key)) continue;
 
@@ -98,7 +93,7 @@ namespace Logic
                 allWordUsersInLanguage[kvp.Key] = newWordUser;
             }
             context.SaveChanges();
-            return pageUser;
+            return (int)pageUser.Id;
         }
         
         

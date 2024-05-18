@@ -44,7 +44,6 @@ namespace Logic
             {
                 LanguageUserId = (int)languageUser.Id,
                 WordId = (int)word.Id,
-                Word = word,
                 Status = AvailableWordUserStatus.UNKNOWN,
                 Translation = string.Empty
             };

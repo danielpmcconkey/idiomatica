@@ -21,6 +21,7 @@
                 {
                     foreach (var token in GetSentenceTokens(sentence).OrderBy(x => x.Ordinal))
                     {
+                        
                         <span class="readToken @GetTokenClass(token)"
                               data-toggle="tooltip"
                               data-placement="top"
@@ -58,7 +59,20 @@
     /// </summary>
     [Parameter]
     public Language Language { get; set; }
-
+    private User _loggedInUser
+    {
+        get // todo: move _loggedInUser population to an initializer
+        {
+            return UserService.GetLoggedInUser();
+        }
+    }
+    private LanguageUser _languageUser
+    {
+        get // todo: move _languageUser population to an initializer
+        {
+            return BookService.LanguageUserFetch((int)_loggedInUser.Id, (int)Language.Id);
+        }
+    }
     private void OnTokenClick(Token token)
     {
         OnShowWordModal.InvokeAsync(token);
@@ -83,8 +97,30 @@
     }
     private List<Token> GetSentenceTokens(Sentence sentence)
     {
-        if (sentence.Tokens is not null && sentence.Tokens.Count > 0) return sentence.Tokens;
+        if (sentence.Tokens is not null && sentence.Tokens.Count > 0) 
+        {
+            // make sure each token has a word user and is in the dictionary
+            // doing it here allows there to be continuity between the same word
+            // in different paragraphs, so that, when you edit one, it updates
+            // the other.
+            foreach (var token in sentence.Tokens)
+            {
+                if (!allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase))
+                {
+                    AddTokenToWordDict(token);
+                }
+            }
+            return sentence.Tokens;
+        }
         // todo: log error. there should not be a sentence w/out tokens at this point
         return new List<Token>();
+    }
+    private void AddTokenToWordDict(Token token)
+    {
+        BookService.WordUserCreateAndSave(_languageUser, token.Word);
+        // pull from the DB fresh
+        var newWordUser = BookService.WordUserFetch(_languageUser, token.Word);
+        // and add to the dict
+        allWordUsersInLanguage[token.Word.TextLowerCase] = newWordUser;
     }
 }

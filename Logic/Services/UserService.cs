@@ -26,7 +26,7 @@ namespace Logic.Services
         {
             _dbContextFactory = dbContextFactory;
             _authenticationStateProvider = AuthenticationStateProvider;
-            _uiLabels = UILabels.Factory.GetUILabels(LanguageCodeEnum.ENG_US);
+            _uiLabels = UILabels.Factory.GetUILabels(LanguageCodeEnum.EN_US);
         }
         public User? GetLoggedInUser()
         {
@@ -62,6 +62,10 @@ namespace Logic.Services
         public string GetUILabel(string name)
         {
             return _uiLabels.GetLabel(name);
+        }
+        public string GetUILabelF(string name, object?[] args)
+        {
+            return _uiLabels.GetLabelF(name, args);
         }
         private async Task<ClaimsPrincipal?> GetAppUserClaimsPrincipalAsync()
         {
