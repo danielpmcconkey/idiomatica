@@ -308,7 +308,7 @@
         // from the _allWordUsersInLanguage dictionary
 
         if (_bookUser is null) return null;
-        var dbPageUser = BookService.PageUserFetchById(_bookUser.CurrentPageID, (int)_loggedInUser.Id);
+        var dbPageUser = BookService.PageUserFetchById(_bookUser.CurrentPageID, _bookUser.LanguageUserId);
         if (dbPageUser is not null) return dbPageUser;
         return FetchPageUserByOrderWithinBook(1);
     }

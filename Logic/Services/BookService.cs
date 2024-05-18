@@ -27,10 +27,10 @@ namespace Logic.Services
         {
             const int _targetCharCountPerPage = 1378;// this was arrived at by DB query after conversion
             // sanitize and validate input
-            var titleT = title.Trim();
-            var languageCodeT = languageCode.Trim();
-            var urlT = url.Trim();
-            var textT = text.Trim().Replace('\u00A0', ' ');
+            var titleT = (title == null) ? "" : title.Trim();
+            var languageCodeT = (languageCode == null) ? "" : languageCode.Trim();
+            var urlT = (url == null) ? "" : url.Trim();
+            var textT = (text == null) ? "" : text.Trim().Replace('\u00A0', ' ');
             if (string.IsNullOrEmpty(titleT))
             {
                 throw new ArgumentNullException("Title may not be null when creating a new book.");
@@ -91,7 +91,8 @@ namespace Logic.Services
             // loop through the paragraphs and add a page for the closest character count
             for (int i = 0; i < paragraphSplits.Length; i++)
             {
-                string paragraph = paragraphSplits[i];
+                string paragraph = paragraphSplits[i].Trim();
+                if (string.IsNullOrEmpty(paragraph)) continue;
                 int thisCharCount = paragraph.Length;
                 if (currentCharCount + thisCharCount > _targetCharCountPerPage)
                 {
@@ -171,15 +172,15 @@ namespace Logic.Services
             	from allWords
             	group by bookId, wordText
             ), totalPageCount as (
-            	select bookId as BookId, {AvailableBookStat.TOTALPAGES} as [Key], count(*) as [Value]
+            	select bookId as BookId, {(int)AvailableBookStat.TOTALPAGES} as [Key], count(*) as [Value]
             	from allPages
             	group by bookId
             ), totalWordCount as (
-            	select bookId as BookId, {AvailableBookStat.TOTALWORDCOUNT} as [Key], sum(numInstances) as [Value]
+            	select bookId as BookId, {(int)AvailableBookStat.TOTALWORDCOUNT} as [Key], sum(numInstances) as [Value]
             	from distinctWords
             	group by bookId
             ), distinctWordCount as (
-            	select bookId as BookId, {AvailableBookStat.DISTINCTWORDCOUNT} as [Key], count(wordText) as [Value]
+            	select bookId as BookId, {(int)AvailableBookStat.DISTINCTWORDCOUNT} as [Key], count(wordText) as [Value]
             	from distinctWords
             	group by bookId
             ), bookStatQueries as (
@@ -193,8 +194,9 @@ namespace Logic.Services
             select * from bookStatQueries
             where BookId = {bookId}
             """;
-            context.BookStats.FromSqlRaw(q);
-            context.SaveChanges();
+            int numRows = context.Database.ExecuteSqlRaw(q);
+            if (numRows < 1) throw new InvalidDataException("Bookstats insert query updated no rows");
+            //context.SaveChanges();
         }
         #endregion
 
@@ -376,14 +378,14 @@ namespace Logic.Services
                 throw;
             }
         }
-        public PageUser? PageUserFetchById(int pageUserId, int loggedInUserId)
+        public PageUser? PageUserFetchById(int pageId, int languageUserId)
         {
             // note this doesn't fetch the word_user
 
             var context = _dbContextFactory.CreateDbContext();
             return context.PageUsers
-                .Where(pu => pu.BookUser.LanguageUserId == loggedInUserId
-                    && pu.Id == pageUserId)
+                .Where(pu => pu.BookUser.LanguageUserId == languageUserId
+                    && pu.PageId == pageId)
                 .Include(pu => pu.Page)
                     .ThenInclude(p => p.Paragraphs)
                     .ThenInclude(pp => pp.Sentences)

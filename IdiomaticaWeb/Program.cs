@@ -49,7 +49,7 @@ else
 
 builder.Services.AddDbContextFactory<IdiomaticaContext>(options => {
     options.UseSqlServer(connection, b => b.MigrationsAssembly("IdiomaticaWeb"));
-    options.EnableSensitiveDataLogging();
+    //options.EnableSensitiveDataLogging();
 });
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();

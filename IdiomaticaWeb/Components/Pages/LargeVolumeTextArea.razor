@@ -7,7 +7,7 @@
 
 <style>
     .hiddenTextControl {
-        /* display:none; */
+        display:none;
     }
 
     .textAreaError {
@@ -19,6 +19,7 @@
 
 <textarea @ref="largeTextArea" id="@_entryElementId"
           onchange="splitLargeVolumeTextArea('@_entryElementId', @maxLengthPerChildInput);"
+          onblur="splitLargeVolumeTextArea('@_entryElementId', @maxLengthPerChildInput);"
           class="@_textInputCss"></textarea>
 <input @ref="_ppSplitResults"
     id="_ppSplitResults@_entryElementId" 
@@ -42,7 +43,7 @@
     [Parameter]
     public bool IsRequired { get; set; } = false;
     private bool _isRendered = false;
-    
+
 
     private bool _isError = false;
     private string _errorMessage = "";
@@ -87,6 +88,21 @@
             _errorMessage = ex.Message;
         }
     }
+    public async Task ClearInput()
+    {
+        await JS.InvokeAsync<bool>("clearElement", _ppSplitResults);
+        await JS.InvokeAsync<bool>("clearElement", _ita0);
+        await JS.InvokeAsync<bool>("clearElement", _ita1);
+        await JS.InvokeAsync<bool>("clearElement", _ita2);
+        await JS.InvokeAsync<bool>("clearElement", _ita3);
+        await JS.InvokeAsync<bool>("clearElement", _ita4);
+        await JS.InvokeAsync<bool>("clearElement", _ita5);
+        await JS.InvokeAsync<bool>("clearElement", _ita6);
+        await JS.InvokeAsync<bool>("clearElement", _ita7);
+        await JS.InvokeAsync<bool>("clearElement", _ita8);
+        await JS.InvokeAsync<bool>("clearElement", _ita9);
+        await JS.InvokeAsync<bool>("clearElement", largeTextArea);
+    }
     public async Task<string> GetTextValue()
     {
         var splitResult = await GetTextAsync(_ppSplitResults);
@@ -130,22 +146,7 @@
         }
         return "";
     }
-    // public async Task<string> SplitTextAsync()
-    // {
-    //     try
-    //     {
-    //         var splitResult =
-    //             await JS.InvokeAsync<string>("splitLargeVolumeTextArea", largeTextArea, maxLengthPerChildInput);
-            
-    //         return splitResult;
-    //     }
-    //     catch (JSException jsException)
-    //     {
-    //         _isError = true;
-    //         _errorMessage = UserService.GetUILabel("unknownError");
-    //         return _errorMessage;
-    //     }
-    // }
+    
     public async Task<string> GetTextAsync(ElementReference element)
     {
         try

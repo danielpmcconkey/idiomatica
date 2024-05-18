@@ -12,11 +12,26 @@
                 <Alert @ref="successAlert" Color="AlertColor.Primary" Dismissable="true">
                     <Icon Name="IconName.InfoCircleFill" class="me-2"></Icon>
                     <p>@UserService.GetUILabel("bcSuccess")</p>
-                    <Button Type="ButtonType.Link" Color="ButtonColor.Success" To="@_newBookUrl">
-                        @UserService.GetUILabel("bcStartReading")
-                    </Button>
-                    <Button Color="ButtonColor.Primary" @onclick="CloseAlert">
-                        @UserService.GetUILabel("closeButton")</Button>
+                    <div >
+                        <Button Type="ButtonType.Link" 
+                                Size="Size.Small" 
+                                Color="ButtonColor.Success" 
+                                To="@_newBookUrl">
+                            @UserService.GetUILabel("bcStartReading")
+                        </Button>
+                        <Button Type="ButtonType.Link" 
+                                Size="Size.Small" 
+                                Color="ButtonColor.Primary" 
+                                To="/Books">
+                            @UserService.GetUILabel("navYourBookshelf")
+                        </Button>
+                        <Button Type="ButtonType.Link" 
+                                Size="Size.Small" 
+                                Color="ButtonColor.Secondary" 
+                                To="/Book/Create">
+                            @UserService.GetUILabel("navNewBook")
+                        </Button>
+                    </div>
                 </Alert>
             </div>
         }
@@ -158,7 +173,6 @@
             _errorMessage = ex.Message;
         }
     }
-    private async Task CloseAlert() => await successAlert?.CloseAsync();
     private async Task OnSaveClick()
     {
         _isSaving = true;

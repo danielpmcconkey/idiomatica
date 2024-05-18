@@ -28,7 +28,7 @@ namespace Logic
             int paragraphOrder = 0;
             foreach (var pText in paragraphSplits)
             {
-                if (pText == string.Empty) continue;
+                if (pText.Trim() == string.Empty) continue;
                 Paragraph paragraph = new Paragraph()
                 {
                     Ordinal = paragraphOrder,
