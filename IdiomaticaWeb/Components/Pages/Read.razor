@@ -71,14 +71,11 @@
     
 </style>
 
+<ErrorAlert ErrorState="errorState"></ErrorAlert>
 <AuthorizeView>
     <Authorized>
-        @if (_isError)
-        {
-            <PageTitle>@UserService.GetUILabel("error")</PageTitle>
-            <h1>@UserService.GetUILabel("error"):  @_errorMessage</h1>
-        }
-        else if (_bookUser is null)
+        
+        @if (_bookUser is null)
         {
             <PageTitle>@UserService.GetUILabel("loading")</PageTitle>
             <h1>@UserService.GetUILabel("loading")</h1>
@@ -109,22 +106,22 @@
             <div class="container px-4">
 
                 <PageTurner currentPageUser="_currentPageUser"
-                            OnMovePage="MovePage"
-                            OnClearPage="ClearPage" />
+                            OnMovePage="OnMovePage"
+                            OnClearPage="OnClearPageAsync" />
 
                 @foreach (var paragraph in _paragraphs.OrderBy(x => x.Ordinal))
                 {
                     <hr />
                     <ParagraphView paragraph="paragraph"
                                    allWordUsersInLanguage="_allWordUsersInLanguage"
-                                   OnShowWordModal="ShowWordModal"
+                                   OnShowWordModal="OnShowWordModal"
                                    OnShowPpModal="ShowPpModal"
                                    Language="_bookUser?.LanguageUser?.Language" />
                 }
                 <hr />
                 <PageTurner currentPageUser="_currentPageUser"
-                            OnMovePage="MovePage"
-                            OnClearPage="ClearPage" />
+                            OnMovePage="OnMovePage"
+                            OnClearPage="OnClearPageAsync" />
             </div>
         }
     </Authorized>
@@ -138,13 +135,29 @@
 
     [Parameter]
     public int BookId { get; set; }
-    private bool _isError = false;
-    private string _errorMessage = "";
+    public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
+
     private BookUser? _bookUser;
     private IQueryable<BookUserStat>? _bookUserStats;
 
     #region shared with multiple children
-    private User _loggedInUser { get { return UserService.GetLoggedInUser(); } }
+    private User _loggedInUser
+    {
+        get
+        {
+            try
+            {
+                return UserService.GetLoggedInUser();
+            }
+            catch (Exception ex)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = UserService.GetUILabel("getLoggedInUserError");
+                StateHasChanged();
+                return null;
+            }
+        }
+    }
     private LanguageUser? _languageUser;
     private Dictionary<string, WordUser> _allWordUsersInLanguage;
     private PageUser? _currentPageUser;
@@ -152,9 +165,19 @@
 
     #region wmodal
     private ModalWord _wModal = default!;
-    public async Task ShowWordModal(Token thisToken)
+    public async Task OnShowWordModal(Token thisToken)
     {
-        await _wModal.OnShowModalClick(thisToken);
+        try
+        {
+            await _wModal.OnShowModalClick(thisToken);
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("showWordModalError");
+            StateHasChanged();
+            return;
+        }
     }
     #endregion
 
@@ -162,60 +185,80 @@
     private ModalParagraph _ppModal = default!;
     private async Task ShowPpModal(Paragraph pp)
     {
-        await _ppModal.OnShowPpModalClick(pp);
+        try
+        {
+            await _ppModal.OnShowPpModalClick(pp);
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("showPpModalError");
+            StateHasChanged();
+            return;
+        }
     }
     #endregion
     #region pageturner
-    private void ClearPage(int targetPageNum)
+    private async Task OnClearPageAsync(int targetPageNum)
     {
-        BookService.PageUserClearPage(_currentPageUser, _languageUser);
-        _allWordUsersInLanguage = BookService.WordUserFetchDictForLanguageUser(_languageUser);
-        MovePage(targetPageNum);
+        try
+        {
+            BookService.PageUserClearPage(_currentPageUser, _languageUser);
+            _allWordUsersInLanguage = BookService.WordUserFetchDictForLanguageUser(_languageUser);
+            OnMovePage(targetPageNum);
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("clearPageUserError");
+            StateHasChanged();
+            return;
+        }
     }
-    private void MovePage(int targetPageNum)
+    private void OnMovePage(int targetPageNum)
     {
-        if (targetPageNum < 1) return;
-        if (targetPageNum > StatisticsHelper.GetBookStat_int(_bookUser?.Book, AvailableBookStat.TOTALPAGES))
-            return;
-
-        var pageUserInBook = _bookUser.PageUsers
-            .Where(x => x.Page.Ordinal == targetPageNum)
-            .FirstOrDefault();
-
-        if (pageUserInBook is not null)
+        try
         {
-            _currentPageUser = pageUserInBook;
-            _paragraphs = pageUserInBook.Page.Paragraphs;
-            BookService.PageUpdateBookmark(_bookUser.Id, (int)_currentPageUser.Page.Id);
+            if (targetPageNum < 1) return;
+            if (targetPageNum > StatisticsHelper.GetBookStat_int(_bookUser?.Book, AvailableBookStat.TOTALPAGES))
+                return;
+
+            var pageUserInBook = _bookUser.PageUsers
+                .Where(x => x.Page.Ordinal == targetPageNum)
+                .FirstOrDefault();
+
+            if (pageUserInBook is not null)
+            {
+                _currentPageUser = pageUserInBook;
+                _paragraphs = pageUserInBook.Page.Paragraphs;
+                BookService.PageUpdateBookmark(_bookUser.Id, (int)_currentPageUser.Page.Id);
+                return;
+            }
+
+            // it should be in the DB but we haven't pulled it yet
+            var pageUserFromDb = FetchPageUserByOrderWithinBook(targetPageNum);
+            if (pageUserFromDb is not null)
+            {
+                _currentPageUser = pageUserFromDb;
+                _paragraphs = _currentPageUser.Page.Paragraphs;
+                _bookUser.PageUsers.Add(pageUserFromDb);
+                BookService.PageUpdateBookmark(_bookUser.Id, (int)_currentPageUser.Page.Id);
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("readErrorPageChange");
+            StateHasChanged();
             return;
         }
-
-        // it should be in the DB but we haven't pulled it yet
-        var pageUserFromDb = FetchPageUserByOrderWithinBook(targetPageNum);
-        if (pageUserFromDb is not null)
-        {
-            _currentPageUser = pageUserFromDb;
-            _paragraphs = _currentPageUser.Page.Paragraphs;
-            _bookUser.PageUsers.Add(pageUserFromDb);
-            BookService.PageUpdateBookmark(_bookUser.Id, (int)_currentPageUser.Page.Id);
-            return;
-        }
-        // todo: make distinct error messages for the diff types of errors on the read page
-        _isError = true;
-        _errorMessage = $"{UserService.GetUILabel("readErrorRetrievingData")} {UserService.GetUILabel("noDataReturned")}";
     }
     #endregion
 
 
     private List<Paragraph> _paragraphs;
     private Dictionary<string, Word> _commonWordsInLanguage;
-
-
-
-
-
-
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -245,8 +288,10 @@
         }
         catch (Exception ex)
         {
-            _isError = true;
-            _errorMessage = ex.Message;
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("readInitializationError");
+            StateHasChanged();
+            return;
         }
     }
     protected override void OnInitialized()
@@ -254,31 +299,31 @@
 
     }
     public void RefreshState() { StateHasChanged(); }
-    private void UpdateWordDictForNewPage()
-    {
-        foreach(var pp in _currentPageUser.Page.Paragraphs)
-        {
-            foreach(var s in pp.Sentences)
-            {
-                foreach (var token in s.Tokens)
-                {
-                    if (!_allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase))
-                    {
-                        AddTokenToWordDict(token);
-                    }
-                }
-            }
-        }
-    }
+    // private void UpdateWordDictForNewPage()
+    // {
+    //     foreach(var pp in _currentPageUser.Page.Paragraphs)
+    //     {
+    //         foreach(var s in pp.Sentences)
+    //         {
+    //             foreach (var token in s.Tokens)
+    //             {
+    //                 if (!_allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase))
+    //                 {
+    //                     AddTokenToWordDict(token);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
-    private void AddTokenToWordDict(Token token)
-    {
-        BookService.WordUserCreateAndSave(_languageUser, token.Word);
-        // pull from the DB fresh
-        var newWordUser = BookService.WordUserFetch(_languageUser, token.Word);
-        // and add to the dict
-        _allWordUsersInLanguage[token.Word.TextLowerCase] = newWordUser;
-    }
+    // private void AddTokenToWordDict(Token token)
+    // {
+    //     BookService.WordUserCreateAndSave(_languageUser, token.Word);
+    //     // pull from the DB fresh
+    //     var newWordUser = BookService.WordUserFetch(_languageUser, token.Word);
+    //     // and add to the dict
+    //     _allWordUsersInLanguage[token.Word.TextLowerCase] = newWordUser;
+    // }
 
     private BookUser? FetchBookUser()
     {
@@ -290,8 +335,7 @@
             var bookUserId = BookService.BookUserCreateAndSave(BookId, (int)_loggedInUser.Id);
             if(bookUserId == 0)
             {
-                _isError = true;
-                _errorMessage = $"{UserService.GetUILabel("readErrorRetrievingData")} {UserService.GetUILabel("noDataReturned")}";
+                ErrorHandler.LogAndThrow(2080);
                 return null;
             }
             bookUserFromDb = BookService.BookUserFetch((int)_loggedInUser.Id, BookId);
@@ -305,8 +349,7 @@
         var bookUserStatsFromDb = BookService.BookUserStatsFetch((int)_loggedInUser.Id, _bookUser.BookId);
         if (bookUserStatsFromDb is null)
         {
-            _isError = true;
-            _errorMessage = $"{UserService.GetUILabel("readErrorRetrievingData")} {UserService.GetUILabel("noDataReturned")}";
+            ErrorHandler.LogAndThrow(2090);
         }
         return bookUserStatsFromDb;
     }
@@ -334,7 +377,10 @@
         // pageUser is not created yet. Is the page created?
         var existingPage = BookService.PageFetchByOrdinalWithinBook(pageOrdinal, _bookUser.BookId);
         if (existingPage == null)
-            throw new InvalidDataException("Underlying Page does not exist when trying to retrieve PageUser.");
+        {
+            ErrorHandler.LogAndThrow(2070);
+        }
+        
 
         BookService.PageUserCreateAndSave(existingPage, _bookUser,
             _commonWordsInLanguage, _allWordUsersInLanguage);

@@ -1,4 +1,5 @@
 ﻿using DeepL;
+using Model;
 
 namespace Logic.Services
 {
@@ -27,7 +28,13 @@ namespace Logic.Services
             }
             catch (Exception ex)
             {
-
+                string[] args = [
+                    $"input = {input}",
+                    $"sourceLanguageCode = {sourceLanguageCode}",
+                    $"targetLanguageCode = {targetLanguageCode}",
+                    ];
+                ErrorHandler.LogAndThrow(3010, args, ex);
+                throw; // you'll never get here
                 throw;
             }
         }

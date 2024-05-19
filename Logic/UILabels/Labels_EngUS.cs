@@ -19,6 +19,9 @@ namespace Logic.UILabels
             _labels.Add("error", "Error");
             _labels.Add("unknownError", "There was an unknown error.");
             _labels.Add("notLoggedIn", "You must be logged in to view this content.");
+            _labels.Add("closeButton", "Close");
+            _labels.Add("saveButton", "Save Changes");
+            _labels.Add("getLoggedInUserError", "There was an error determining the logged in user.");
 
             #region nav
             _labels.Add("navHome", "Home");
@@ -30,6 +33,10 @@ namespace Logic.UILabels
             #endregion
 
             #region book list
+            _labels.Add("bookListInitializationError", "There was an error fetching your book list.");
+            _labels.Add("bookListRemoveBookError", "There was an error removing a book from the list");
+            _labels.Add("bookListSortTableError", "There was an error sorting your book list");
+            _labels.Add("bookListIsVisibleError", "There was an error determining your book list filter.");
             _labels.Add("bookListFormFilter", "Filter...");
 			_labels.Add("bookListLanguageColumnHead", "Language");
 			_labels.Add("bookListCompletedColumnHead", "");
@@ -43,7 +50,11 @@ namespace Logic.UILabels
             _labels.Add("btnUpdateBookListStats", "Update booklist statistics");
             #endregion
             #region read
-            _labels.Add("readErrorRetrievingData", "There was an error retrieving this book from the database.");
+            _labels.Add("readInitializationError", "There was an error retrieving this book from the database.");
+            _labels.Add("readErrorPageChange", "There was an error retrieving page data from the database.");
+            _labels.Add("showWordModalError", "There was an error opening the word edit form.");
+            _labels.Add("showPpModalError", "There was an error opening the paragraph translation dialog.");
+            _labels.Add("clearPageUserError", "There was an error updating all unknown words on the page.");
             _labels.Add("untranslatable", "untranslatable");
             _labels.Add("btnNextPage", "next page");
             _labels.Add("btnClearPage", "mark page complete");
@@ -56,12 +67,12 @@ namespace Logic.UILabels
             _labels.Add("statusLabel5", "learned 5");
             _labels.Add("statusLabel6", "ignored 6");
             _labels.Add("statusLabel7", "well known 7");
-            _labels.Add("closeButton", "Close");
-            _labels.Add("saveButton", "Save Changes");
             _labels.Add("TranslationFrom", "Translation from");
             _labels.Add("TranslationTo", "Translation to");
             #endregion
             #region book create
+            _labels.Add("bookCreateInitializationError", "There was an error setting up the book creation form");
+            _labels.Add("bookCreateSaveError", "There was an error saving the new book");
             _labels.Add("bcTitle", "Title");
             _labels.Add("bcLanguage", "What language is it written in?");
             _labels.Add("bcText", "Text");

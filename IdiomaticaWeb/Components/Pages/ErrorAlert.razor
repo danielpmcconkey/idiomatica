@@ -1,0 +1,66 @@
+﻿@page "/ErrorAlert"
+@rendermode InteractiveServer
+@inject UserService UserService;
+
+@if (ErrorState.isError)
+{
+    <div>
+        <Alert @ref="_errorAlert" Color="AlertColor.Danger">
+            <div>
+                <Icon Name="IconName.ExclamationTriangleFill" class="me-2"></Icon>
+                @ErrorState.errorMessage
+            </div>
+            <Button Color="ButtonColor.Primary" Size="Size.Small" @onclick="CloseErrorAlert">
+                @GetCloseLabel()
+            </Button>
+        </Alert>
+    </div>
+}
+
+
+@code {
+
+    // this class has to be bullet proof. Don't throw exceptions from within it
+    [Parameter]
+    public ErrorState ErrorState { get; set; }
+    
+    private Alert _errorAlert;
+
+    private async Task CloseErrorAlert() {
+        try
+        {
+            ErrorState.isError = false;
+            ErrorState.errorMessage = "";
+            await _errorAlert?.CloseAsync();
+        }
+        catch (Exception)
+        {
+            return;
+        }
+    }
+
+    // public async Task AlertErrorAsync(string message)
+    // {
+    //     try
+    //     {
+    //         errorState.errorMessage = message;
+    //         errorState.isError = true;
+    //         StateHasChanged();
+    //     }
+    //     catch (Exception)
+    //     {
+    //         return;
+    //     }
+    // }
+    private string GetCloseLabel()
+    {
+        try
+        {
+            return UserService.GetUILabel("closeButton");
+        }
+        catch(Exception)
+        {
+            return "Close";
+        }
+    }
+}

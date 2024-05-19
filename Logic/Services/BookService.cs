@@ -33,15 +33,15 @@ namespace Logic.Services
             var textT = (text == null) ? "" : text.Trim().Replace('\u00A0', ' ');
             if (string.IsNullOrEmpty(titleT))
             {
-                throw new ArgumentNullException("Title may not be null when creating a new book.");
+                ErrorHandler.LogAndThrow(1040);
             }
             if (string.IsNullOrEmpty(languageCodeT))
             {
-                throw new ArgumentNullException("Language code may not be null when creating a new book.");
+                ErrorHandler.LogAndThrow(1050);
             }
             if (string.IsNullOrEmpty(textT))
             {
-                throw new ArgumentNullException("Text may not be null when creating a new book.");
+                ErrorHandler.LogAndThrow(1060);
             }
 
 
@@ -51,7 +51,7 @@ namespace Logic.Services
             var language = context.Languages.Where(x => x.LanguageCode.Code == languageCodeT).FirstOrDefault();
             if (language == null || language.Id == null)
             {
-                throw new InvalidDataException("Language pull from DB returned null while creating a new book.");
+                ErrorHandler.LogAndThrow(2070);
             }
 
             // divide text into paragraphs
@@ -59,7 +59,7 @@ namespace Logic.Services
             var paragraphSplits = parser.SegmentTextByParagraphs(textT);
             if (paragraphSplits is null || paragraphSplits.Length == 0)
             {
-                throw new InvalidDataException("Paragraph splits returned null or empty while creating a new book.");
+                ErrorHandler.LogAndThrow(2080);
             }
 
             // add the book to the DB so you can save pages using its ID
@@ -75,7 +75,7 @@ namespace Logic.Services
 
             if (book.Id == null || book.Id == 0)
             {
-                throw new InvalidDataException("Saving the book returned a null ID from DB while creating a new book.");
+                ErrorHandler.LogAndThrow(2090);
             }
 
             // pull a list of common words from the database and put it
@@ -144,7 +144,10 @@ namespace Logic.Services
         #region BookStat
         public void BookStatCreateAndSave(int bookId)
         {
-            if (bookId < 1) throw new ArgumentException("Book ID cannot be less than 1 when creating BookStats");
+            if (bookId < 1)
+            {
+                ErrorHandler.LogAndThrow(1100);
+            }
             var context = _dbContextFactory.CreateDbContext();
             string q = $"""
             with allPages as (
@@ -195,7 +198,10 @@ namespace Logic.Services
             where BookId = {bookId}
             """;
             int numRows = context.Database.ExecuteSqlRaw(q);
-            if (numRows < 1) throw new InvalidDataException("Bookstats insert query updated no rows");
+            if (numRows < 1)
+            {
+                ErrorHandler.LogAndThrow(2110);
+            }
             //context.SaveChanges();
         }
         #endregion
@@ -210,19 +216,19 @@ namespace Logic.Services
                 .FirstOrDefault();
             if (book == null)
             {
-                throw new InvalidDataException("Book query returned null when trying to create book user");
+                ErrorHandler.LogAndThrow(2000);
             }
             var firstPage = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
             if(firstPage == null || firstPage.Id == 0)
             {
-                throw new InvalidDataException("First page returned null or 0 when trying to create book user");
+                ErrorHandler.LogAndThrow(2010);
             }
             var languageUser = context.LanguageUsers
                 .Where(lu => lu.LanguageId == book.LanguageId && lu.UserId == userId)
                 .FirstOrDefault();
             if (firstPage == null || firstPage.Id == 0)
             {
-                throw new InvalidDataException("Language user query returned null or 0 when trying to create book user");
+                ErrorHandler.LogAndThrow(2020);
             }
             BookUser bookUser = new BookUser() { 
                 BookId = bookId, 
@@ -233,7 +239,7 @@ namespace Logic.Services
             context.SaveChanges();
             if (bookUser.Id == 0)
             {
-                throw new InvalidDataException("BookUser.Id returned as 0 when trying to create book user");
+                ErrorHandler.LogAndThrow(2030);
             }
             return bookUser.Id;
         }
@@ -339,7 +345,7 @@ namespace Logic.Services
             context.SaveChanges();
             if (newPage.Id == null || newPage.Id == 0)
             {
-                throw new InvalidDataException("Saving a page returned a null ID from DB while creating a new book.");
+                ErrorHandler.LogAndThrow(2040);
             }
             // do the actual page parsing
             PageHelper.ParseParagraphsFromPageAndSave(
@@ -348,11 +354,20 @@ namespace Logic.Services
         }
         public void PageUpdateBookmark(int bookUserId, int currentPageId)
         {
-            if (bookUserId == 0) throw new ArgumentException("bookUserId cannot be 0 when saving current page.");
-            if (currentPageId == 0) throw new ArgumentException("currentPageId cannot be 0 when saving current page.");
+            if (bookUserId == 0)
+            {
+                ErrorHandler.LogAndThrow(1120);
+            }
+            if (currentPageId == 0)
+            {
+                ErrorHandler.LogAndThrow(1130);
+            }
             var context = _dbContextFactory.CreateDbContext();
             var bookUser = context.BookUsers.FirstOrDefault(x => x.Id == bookUserId);
-            if (bookUser == null) throw new ArgumentException($"no BookUser found with Id {bookUserId}. Cannot update bookmark");
+            if (bookUser == null)
+            {
+                ErrorHandler.LogAndThrow(2050, [$"bookUserId: {bookUserId}"]);
+            }
             bookUser.CurrentPageID = currentPageId;
             context.SaveChanges();
         }
@@ -361,15 +376,12 @@ namespace Logic.Services
         #region PageUser
         public void PageUserClearPage(PageUser pageUser, LanguageUser languageUser)
         {
-            if (pageUser == null) throw new ArgumentNullException("Page user cannot be null when clearing page");
+            if (pageUser == null) 
+            {
+                ErrorHandler.LogAndThrow(1140); 
+            }
             var context = _dbContextFactory.CreateDbContext();
-            //var page = (pageUser.Page != null) ? pageUser.Page :
-            //    context.Pages
-            //        .Where(p => p.Id == pageUser.PageId)
-            //        .Include(p => p.Paragraphs).ThenInclude(pp => pp.Sentences)
-            //            .ThenInclude(s => s.Tokens).ThenInclude(t => t.Word)
-            //        .FirstOrDefault();
-
+            
             var wordUsers = (from pu in context.PageUsers
                              join p in context.Pages on pu.PageId equals p.Id
                              join pp in context.Paragraphs on p.Id equals pp.PageId
@@ -386,36 +398,6 @@ namespace Logic.Services
                 wu.Status = AvailableWordUserStatus.WELLKNOWN;
             }
             context.SaveChanges();
-            
-            //var wordUsers = context.WordUsers
-            //    .Where(wu => wu.LanguageUserId == languageUser.Id
-            //            && wu.Word.Tokens.SelectMany(x => x))
-            //    .Include(wu => wu.Word).ThenInclude(w => w.Tokens)
-            //        .ThenInclude(t => t.Sentence).ThenInclude(s => s.Paragraph).ThenInclude(pp => pp.Page)
-            //            .ThenInclude(p => p.PageUsers)
-
-
-
-
-            //if (page == null) throw new InvalidDataException("Page cannot be null when clearing page");
-
-            //var allWordUsersInLanguage = WordUserFetchDictForLanguageUser(languageUser);
-
-            //foreach (var pp in page.Paragraphs)
-            //{
-            //    foreach(var s in pp.Sentences)
-            //    {
-            //        foreach(var t in s.Tokens)
-            //        {
-            //            var wordUser = (allWordUsersInLanguage.ContainsKey(t.Word.TextLowerCase) ?
-            //                allWordUsersInLanguage[t.Word.TextLowerCase] :
-            //                context.WordUsers.Where(wu => wu.WordId == t.Word.Id).FirstOrDefault());
-            //            if (wordUser == null) throw new InvalidDataException(
-            //                "word user returned null from DB when clearing page");
-            //        }
-            //    }
-            
-            //}
         }
         public int PageUserCreateAndSave(
             Page page, BookUser bookUser, Dictionary<string, Word> commonWordDict,
@@ -430,10 +412,19 @@ namespace Logic.Services
                 transaction.Commit();
                 return pageUserId;
             }
+            catch (IdiomaticaException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 transaction.Rollback();
-                throw;
+                string[] args = [
+                    $"page.Id = {page.Id}",
+                    $"bookUser.Id = {bookUser.Id}",
+                    ];
+                ErrorHandler.LogAndThrow(3000, args, ex);
+                throw; // you'll never get here
             }
         }
         public PageUser? PageUserFetchById(int pageId, int languageUserId)
@@ -517,11 +508,17 @@ namespace Logic.Services
         }
         public void WordUserUpdateStatusAndTranslation(int id, AvailableWordUserStatus newStatus, string translation)
         {
-            if (id == 0) throw new ArgumentException("id cannot be 0 when saving word user.");
+            if (id == 0)
+            {
+                ErrorHandler.LogAndThrow(1150);
+            }
             // first pull the existing one from the database
             var context = _dbContextFactory.CreateDbContext();
             var dbWordUser = context.WordUsers.Where(x => x.Id == id).FirstOrDefault();
-            if (dbWordUser == null) throw new InvalidDataException("provided ID doesn't match a word user in the database");
+            if (dbWordUser == null)
+            {
+                ErrorHandler.LogAndThrow(2060);
+            }
             // check if status has changed
             if (dbWordUser.Status != (AvailableWordUserStatus)newStatus)
             {

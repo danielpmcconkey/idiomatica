@@ -4,6 +4,7 @@
 @inject UserService UserService;
 
 <h3>@UserService.GetUILabel("NewBook")</h3>
+<ErrorAlert ErrorState="errorState"></ErrorAlert>
 <AuthorizeView>
     <Authorized>
         @if(_isSaveSuccess)
@@ -113,8 +114,7 @@
             return false;
         }
     }
-    private bool _isError = false;
-    private string _errorMessage = "";
+    public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isSaveSuccess = false;
     private int _newBookId = 0;
     private string _newBookUrl
@@ -148,9 +148,19 @@
     }
     private User _loggedInUser
     {
-        get // todo: move _loggedInUser population to an initializer
+        get
         {
-            return UserService.GetLoggedInUser();
+            try
+            {
+                return UserService.GetLoggedInUser();
+            }
+            catch (Exception ex)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = UserService.GetUILabel("getLoggedInUserError");
+                StateHasChanged();
+                return null;
+            }
         }
     }
 
@@ -169,8 +179,9 @@
         }
         catch (Exception ex)
         {
-            _isError = true;
-            _errorMessage = ex.Message;
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookCreateInitializationError");
+            StateHasChanged();
         }
     }
     private async Task OnSaveClick()
@@ -193,8 +204,9 @@
         }
         catch (Exception ex)
         {
-            _isError = true;
-            _errorMessage = ex.Message;
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookCreateSaveError");
+            StateHasChanged();
         }
 
         _isSaving = false;
