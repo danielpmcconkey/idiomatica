@@ -194,7 +194,7 @@
             {
                 int bookId = BookService.BookCreateAndSave(_titleInput, _languageCodeInput, _sourceURIInput, textInput);
                 // add the book stats
-                BookService.BookStatCreateAndSave(bookId);
+                BookService.BookStatsCreateAndSave(bookId);
                 // now create the book user for teh logged in user
                 BookService.BookUserCreateAndSave(bookId, (int)_loggedInUser.Id);
                 // throw up a success message

@@ -138,11 +138,20 @@ namespace Logic.Services
 
             return (int)book.Id;
         }
+        public Book BookFetch(BookUser bookUser)
+        {
+            var context = _dbContextFactory.CreateDbContext();
+
+            return context.Books.Where(b => b.Id == bookUser.BookId)
+                .Include(b => b.BookStats)
+                .FirstOrDefault()
+                ;
+        }
 
         #endregion
 
         #region BookStat
-        public void BookStatCreateAndSave(int bookId)
+        public void BookStatsCreateAndSave(int bookId)
         {
             if (bookId < 1)
             {
@@ -204,6 +213,11 @@ namespace Logic.Services
             }
             //context.SaveChanges();
         }
+        public List<BookStat> BookStatsFetch(int bookId)
+        {
+            var context = _dbContextFactory.CreateDbContext();
+            return context.BookStats.Where(bs => bs.BookId == bookId).ToList();
+        }
         #endregion
 
         #region bookuser
@@ -248,6 +262,22 @@ namespace Logic.Services
             var context = _dbContextFactory.CreateDbContext();
             return context.BookUsers
                 .Where(bu => bu.LanguageUser.UserId == loggedInUserId && bu.BookId == bookId)
+                .Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language).ThenInclude(l => l.LanguageCode)
+                .Include(bu => bu.Book).ThenInclude(b => b.BookStats)
+                .FirstOrDefault()
+                ;
+        }
+        public BookUser? BookUserFetch(PageUser pageUser)
+        {
+            var context = _dbContextFactory.CreateDbContext();
+            
+
+            return (from pu in context.PageUsers
+                    join p in context.Pages on pu.PageId equals p.Id
+                    join b in context.Books on p.BookId equals b.Id
+                    join bu in context.BookUsers on b.Id equals bu.BookId
+                    where (pu.PageId == pageUser.PageId)
+                    select bu)
                 .Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language).ThenInclude(l => l.LanguageCode)
                 .Include(bu => bu.Book).ThenInclude(b => b.BookStats)
                 .FirstOrDefault()
