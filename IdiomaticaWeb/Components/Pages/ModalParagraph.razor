@@ -54,7 +54,7 @@
             pp.ParagraphTranslations = BookService.ParagraphTranslationsFetchByParagraph(pp);
         }
         var currentTranslation = pp.ParagraphTranslations
-            .Where(x => x.LanguageCode.Code == toLang.Code)
+            .Where(x => x.Code == toLang.Code)
             .FirstOrDefault();
         if(currentTranslation is not null)
         {

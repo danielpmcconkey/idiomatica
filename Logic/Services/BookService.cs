@@ -359,6 +359,64 @@ namespace Logic.Services
         #endregion
 
         #region PageUser
+        public void PageUserClearPage(PageUser pageUser, LanguageUser languageUser)
+        {
+            if (pageUser == null) throw new ArgumentNullException("Page user cannot be null when clearing page");
+            var context = _dbContextFactory.CreateDbContext();
+            //var page = (pageUser.Page != null) ? pageUser.Page :
+            //    context.Pages
+            //        .Where(p => p.Id == pageUser.PageId)
+            //        .Include(p => p.Paragraphs).ThenInclude(pp => pp.Sentences)
+            //            .ThenInclude(s => s.Tokens).ThenInclude(t => t.Word)
+            //        .FirstOrDefault();
+
+            var wordUsers = (from pu in context.PageUsers
+                             join p in context.Pages on pu.PageId equals p.Id
+                             join pp in context.Paragraphs on p.Id equals pp.PageId
+                             join s in context.Sentences on pp.Id equals s.ParagraphId
+                             join t in context.Tokens on s.Id equals t.SentenceId
+                             join w in context.Words on t.WordId equals w.Id
+                             join wu in context.WordUsers on w.Id equals wu.WordId
+                             where (pu.PageId == pageUser.PageId && wu.LanguageUserId == languageUser.Id
+                                 && wu.Status == AvailableWordUserStatus.UNKNOWN)
+                             select wu).ToList();
+
+            foreach (var wu in wordUsers)
+            {
+                wu.Status = AvailableWordUserStatus.WELLKNOWN;
+            }
+            context.SaveChanges();
+            
+            //var wordUsers = context.WordUsers
+            //    .Where(wu => wu.LanguageUserId == languageUser.Id
+            //            && wu.Word.Tokens.SelectMany(x => x))
+            //    .Include(wu => wu.Word).ThenInclude(w => w.Tokens)
+            //        .ThenInclude(t => t.Sentence).ThenInclude(s => s.Paragraph).ThenInclude(pp => pp.Page)
+            //            .ThenInclude(p => p.PageUsers)
+
+
+
+
+            //if (page == null) throw new InvalidDataException("Page cannot be null when clearing page");
+
+            //var allWordUsersInLanguage = WordUserFetchDictForLanguageUser(languageUser);
+
+            //foreach (var pp in page.Paragraphs)
+            //{
+            //    foreach(var s in pp.Sentences)
+            //    {
+            //        foreach(var t in s.Tokens)
+            //        {
+            //            var wordUser = (allWordUsersInLanguage.ContainsKey(t.Word.TextLowerCase) ?
+            //                allWordUsersInLanguage[t.Word.TextLowerCase] :
+            //                context.WordUsers.Where(wu => wu.WordId == t.Word.Id).FirstOrDefault());
+            //            if (wordUser == null) throw new InvalidDataException(
+            //                "word user returned null from DB when clearing page");
+            //        }
+            //    }
+            
+            //}
+        }
         public int PageUserCreateAndSave(
             Page page, BookUser bookUser, Dictionary<string, Word> commonWordDict,
             Dictionary<string, WordUser> allWordUsersInLanguage)

@@ -46,6 +46,7 @@ namespace Logic.UILabels
             _labels.Add("readErrorRetrievingData", "There was an error retrieving this book from the database.");
             _labels.Add("untranslatable", "untranslatable");
             _labels.Add("btnNextPage", "next page");
+            _labels.Add("btnClearPage", "mark page complete");
             _labels.Add("btnPreviousPage", "previous page");
             _labels.Add("statusLabel8", "unknown 0");
             _labels.Add("statusLabel1", "new 1");

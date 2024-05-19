@@ -14,6 +14,11 @@
         </button>
     </div>
     <div class="col-2">
+        <button type="button" class="btn btn-success" @onclick="@(e => ClearPage(currentPageUser.Page.Ordinal + 1))">
+            @UserService.GetUILabel("btnClearPage")
+        </button>
+    </div>
+    <div class="col-2">
         <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(currentPageUser.Page.Ordinal + 1))">
             @UserService.GetUILabel("btnNextPage")
         </button>
@@ -24,9 +29,15 @@
     public PageUser? currentPageUser { get; set; }
     [Parameter]
     public EventCallback<int> OnMovePage { get; set; }
+    [Parameter]
+    public EventCallback<int> OnClearPage { get; set; }
 
     private void MovePage(int targetPageNum)
     {
         OnMovePage.InvokeAsync(targetPageNum);
+    }
+    private void ClearPage(int targetPageNum)
+    {
+        OnClearPage.InvokeAsync(targetPageNum);
     }
 }

@@ -109,7 +109,8 @@
             <div class="container px-4">
 
                 <PageTurner currentPageUser="_currentPageUser"
-                            OnMovePage="MovePage" />
+                            OnMovePage="MovePage"
+                            OnClearPage="ClearPage" />
 
                 @foreach (var paragraph in _paragraphs.OrderBy(x => x.Ordinal))
                 {
@@ -122,7 +123,8 @@
                 }
                 <hr />
                 <PageTurner currentPageUser="_currentPageUser"
-                            OnMovePage="MovePage" />
+                            OnMovePage="MovePage"
+                            OnClearPage="ClearPage" />
             </div>
         }
     </Authorized>
@@ -164,6 +166,12 @@
     }
     #endregion
     #region pageturner
+    private void ClearPage(int targetPageNum)
+    {
+        BookService.PageUserClearPage(_currentPageUser, _languageUser);
+        _allWordUsersInLanguage = BookService.WordUserFetchDictForLanguageUser(_languageUser);
+        MovePage(targetPageNum);
+    }
     private void MovePage(int targetPageNum)
     {
         if (targetPageNum < 1) return;
