@@ -11,6 +11,9 @@ namespace Model.DAL
         public DbSet<BookStat> BookStats { get; set; }
         public DbSet<BookUser> BookUsers { get; set; }
         public DbSet<BookUserStat> BookUserStats { get; set; }
+        public DbSet<FlashCard> FlashCards { get; set; }
+        public DbSet<FlashCardAttempt> FlashCardsAttempts { get; set; }
+        public DbSet<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridges { get; set; }
         public DbSet<Language> Languages { get; set; }
         public DbSet<LanguageCode> LanguageCodes { get; set; }
         public DbSet<LanguageUser> LanguageUsers { get; set; }
@@ -63,6 +66,27 @@ namespace Model.DAL
                 e.HasMany(bu => bu.PageUsers).WithOne(pu => pu.BookUser)
                     .HasForeignKey(pu => pu.BookUserId)
                     .OnDelete(DeleteBehavior.NoAction);
+            });
+            modelBuilder.Entity<FlashCard>(e => {
+                e.HasKey(fc => fc.Id);
+                e.HasOne(fc => fc.WordUser).WithOne(wu => wu.FlashCard)
+                    .HasForeignKey<FlashCard>(fc => fc.WordUserId);
+                e.HasMany(fc => fc.FlashCardParagraphTranslationBridges).WithOne(fcptb => fcptb.FlashCard)
+                    .HasForeignKey(fcpbt => fcpbt.FlashCardId);
+                e.HasMany(fc => fc.Attempts).WithOne(fca => fca.FlashCard).HasForeignKey(fca => fca.FlashCardId);
+                e.Property(fc => fc.Status).HasConversion<int>();
+            });
+            modelBuilder.Entity<FlashCardAttempt>(e => {
+                e.HasKey(fca => fca.Id);
+                e.HasOne(fca => fca.FlashCard).WithMany(fc => fc.Attempts).HasForeignKey(fca => fca.FlashCardId);
+                e.Property(fca => fca.Status).HasConversion<int>();
+            });
+            modelBuilder.Entity<FlashCardParagraphTranslationBridge>(e => {
+                e.HasKey(fcptb => fcptb.Id);
+                e.HasOne(fcptb => fcptb.FlashCard).WithMany(fc => fc.FlashCardParagraphTranslationBridges)
+                    .HasForeignKey(fcptb => fcptb.FlashCardId);
+                e.HasOne(fcptb => fcptb.ParagraphTranslation).WithMany(pt => pt.FlashCardParagraphTranslationBridges)
+                    .HasForeignKey(fcptb => fcptb.ParagraphTranslationId);
             });
             modelBuilder.Entity<Language>(e => {
                 e.HasKey(l => l.Id);

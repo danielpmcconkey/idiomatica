@@ -86,6 +86,9 @@ namespace Logic.UILabels
             _labels.Add("bcSuccess", "Book successfully saved");
             _labels.Add("bcStartReading", "Start reading it");
             #endregion
+            #region flash card review
+            _labels.Add("flashCardReviewInitializationError", "There was an error initializing flash card review.");
+            #endregion
             //_labels.Add("", "");
             //_labels.Add("", "");
         }

@@ -19,6 +19,7 @@ namespace Model
         public Word? Word { get; set; }
         public int LanguageUserId { get; set; }
         public LanguageUser? LanguageUser { get; set; }
+        public FlashCard? FlashCard { get; set; }
 
         #endregion
 

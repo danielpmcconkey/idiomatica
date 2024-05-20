@@ -1,0 +1,50 @@
+﻿@page "/FlashCard/Review"
+@rendermode InteractiveServer
+@inject BookService BookService;
+@inject UserService UserService;
+
+<h3>FlashCardReview</h3>
+
+<ErrorAlert ErrorState="errorState"></ErrorAlert>
+<AuthorizeView>
+    <Authorized>
+    </Authorized>
+    <NotAuthorized>
+        <p>@UserService.GetUILabel("notLoggedIn")</p>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
+    private User _loggedInUser
+    {
+        get
+        {
+            try
+            {
+                return UserService.GetLoggedInUser();
+            }
+            catch (Exception ex)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = UserService.GetUILabel("getLoggedInUserError");
+                StateHasChanged();
+                return null;
+            }
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            
+
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("flashCardReviewInitializationError");
+            StateHasChanged();
+            return;
+        }
+    }
+}
