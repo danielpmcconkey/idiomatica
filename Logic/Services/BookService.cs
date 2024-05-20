@@ -486,6 +486,18 @@ namespace Logic.Services
                     .ThenInclude(s => s.Word)
                 .FirstOrDefault();
         }
+        public void PageUserUpdateReadDate(int id, DateTime readDate)
+        {
+            var context = _dbContextFactory.CreateDbContext();
+            var pu = context.PageUsers.Where(pu => pu.Id == id).FirstOrDefault();
+            if (pu == null) 
+            {
+                ErrorHandler.LogAndThrow(2100);
+            }
+            pu.ReadDate = readDate;
+            context.SaveChanges();
+            return;
+        }
         #endregion
 
         #region ParagraphTranslation

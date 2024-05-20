@@ -57,7 +57,7 @@ namespace Logic
             { 2070, "Underlying Page does not exist when trying to retrieve PageUser." },
             { 2080, "BookUser.Id returned 0 after create and save in Read page." },
             { 2090, "bookUserStatsFromDb returned null after in Read page" },
-            { 2100, "" },
+            { 2100, "PageUser returned null from DB when trying to mark it as 'read'" },
             { 2110, "" },
             { 2120, "" },
             { 2130, "" },

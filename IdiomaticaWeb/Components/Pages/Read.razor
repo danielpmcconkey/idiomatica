@@ -215,10 +215,18 @@
             return;
         }
     }
+    private void MarkCurrentPageRead()
+    {
+        var readDate = DateTime.Now;
+        _currentPageUser.ReadDate = readDate;
+        BookService.PageUserUpdateReadDate((int)_currentPageUser.Id, readDate);
+    }
     private void OnMovePage(int targetPageNum)
     {
         try
         {
+            MarkCurrentPageRead();
+
             if (targetPageNum < 1) return;
             if (targetPageNum > StatisticsHelper.GetBookStat_int(_bookUser?.Book, AvailableBookStat.TOTALPAGES))
                 return;
