@@ -17,6 +17,7 @@ namespace Logic.Services
         private ClaimsPrincipal? _loggedInUserClaimsPrincipal;
         private User? _loggedInUser;
         private UILabels.UILabels _uiLabels;
+        private LanguageCode _uiLanguageCode;
 
         private IDbContextFactory<IdiomaticaContext> _dbContextFactory;
         private AuthenticationStateProvider _authenticationStateProvider;
@@ -47,7 +48,8 @@ namespace Logic.Services
             if (matchingUsers.Count() > 0)
             {
                 _loggedInUser = matchingUsers[0];
-                _uiLabels = UILabels.Factory.GetUILabels(_loggedInUser.LanguageCode.LanguageCodeEnum);
+                _uiLanguageCode = _loggedInUser.LanguageCode;
+                _uiLabels = UILabels.Factory.GetUILabels(_uiLanguageCode.LanguageCodeEnum);
                 return _loggedInUser;
             }
             return null;
@@ -66,6 +68,10 @@ namespace Logic.Services
         public string GetUILabelF(string name, object?[] args)
         {
             return _uiLabels.GetLabelF(name, args);
+        }
+        public LanguageCode GetUiLanguageCode()
+        {
+            return _uiLanguageCode;
         }
         private async Task<ClaimsPrincipal?> GetAppUserClaimsPrincipalAsync()
         {

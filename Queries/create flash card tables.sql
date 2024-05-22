@@ -47,3 +47,4 @@ REFERENCES [Idioma].ParagraphTranslation ([Id])
 ON DELETE NO ACTION
 GO
 
+ALTER TABLE [Idioma].[FlashCard] add  NextReview datetime;

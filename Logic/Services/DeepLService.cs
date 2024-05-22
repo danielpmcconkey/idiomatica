@@ -8,14 +8,27 @@ namespace Logic.Services
         public DeepLService() { }
         public async Task<string> TranslateAsync (string input, string sourceLanguageCode, string targetLanguageCode) 
         {
-            var authKey = Environment.GetEnvironmentVariable("DeepLApiKey");
-            var translator = new Translator(authKey);
+            try
+            {
+                var authKey = Environment.GetEnvironmentVariable("DeepLApiKey");
+                var translator = new Translator(authKey);
 
-            var translatedText = await translator.TranslateTextAsync(
-                  input,
-                  sourceLanguageCode,
-                  targetLanguageCode);
-            return translatedText.ToString(); 
+                var translatedText = await translator.TranslateTextAsync(
+                      input,
+                      sourceLanguageCode,
+                      targetLanguageCode);
+                return translatedText.ToString();
+            }
+            catch (Exception ex)
+            {
+                string[] args = [
+                    $"input = {input}",
+                    $"sourceLanguageCode = {sourceLanguageCode}",
+                    $"targetLanguageCode = {targetLanguageCode}",
+                    ];
+                ErrorHandler.LogAndThrow(3010, args, ex);
+                throw; // you'll never get here
+            } 
         }
 
         public string Translate(string input, string sourceLanguageCode, string targetLanguageCode)
@@ -35,7 +48,6 @@ namespace Logic.Services
                     ];
                 ErrorHandler.LogAndThrow(3010, args, ex);
                 throw; // you'll never get here
-                throw;
             }
         }
 

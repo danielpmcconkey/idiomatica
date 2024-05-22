@@ -1,13 +1,92 @@
 ﻿@page "/FlashCard/Review"
 @rendermode InteractiveServer
-@inject BookService BookService;
+@inject FlashCardService FlashCardService;
 @inject UserService UserService;
+@inject DeepLService DeepLService;
 
-<h3>FlashCardReview</h3>
+<h3>Flash Card Review</h3>
 
 <ErrorAlert ErrorState="errorState"></ErrorAlert>
 <AuthorizeView>
     <Authorized>
+        @if (_isLoading)
+        {
+            <Button Color="ButtonColor.Primary"
+                    Loading="true"
+                    LoadingText="@UserService.GetUILabel("fcLoading")" />
+        }
+        @if (_isDeckComplete)
+        {
+            <Alert Color="AlertColor.Success"> 
+                <Icon Name="IconName.CheckCircleFill" class="me-2"></Icon>
+                @UserService.GetUILabel("fcDeckComplete")
+            </Alert>
+        }
+        @if (_isDeckDefined == false)
+        {
+            <form method="post" @onsubmit="OnGetCardsClickAsync" @formname="GetCardsForm">
+                <div class="mb-3">
+                    <label class="form-label"
+                           for="LanguageInput">
+                        @UserService.GetUILabel("fcLanguage")
+                    </label>
+                    <InputSelect id="LanguageInput"
+                                 class="@_languageInputCss"
+                                 @bind-Value="_languageInput">
+                        <option value="0" selected disabled>@UserService.GetUILabel("fcSelectLanguage")</option>
+                        @foreach (var (key, value) in _languageOptions)
+                        {
+                            <option value="@key">@value.Language.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label"
+                           for="numNewCardsInput">
+                        @UserService.GetUILabel("fcNumNewCardsLabel")
+                    </label>
+                    <InputSelect id="numNewCardsInput"
+                                 class="@_numNewCardsInput"
+                                 @bind-Value="_numNewCardsInput">
+                        @foreach (var value in _numNewCardOptions)
+                        {
+                            <option value="@value">@value</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label"
+                           for="numOldCardsInput">
+                        @UserService.GetUILabel("fcNumOldCardsLabel")
+                    </label>
+                    <InputSelect id="numOldCardsInput"
+                                 class="@_numOldCardsInput"
+                                 @bind-Value="_numOldCardsInput">
+                        @foreach (var value in _numOldCardOptions)
+                        {
+                            <option value="@value">@value</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div>
+                    <button type="submit" disabled="@_isFormInValid"
+                            class="btn btn-primary">
+                        @UserService.GetUILabel("fcCreateDeck")
+                    </button>
+                
+                </div>
+            </form>
+        }
+        
+        <FlashCardView  @ref="_cardView"
+                        UiLanguageCode="UiLanguageCode" 
+                        OnNextCard="OnNextCardClickAsync"
+                        IsHidden="@_shouldHideCard">
+        </FlashCardView>
+        
+
+        
+        
     </Authorized>
     <NotAuthorized>
         <p>@UserService.GetUILabel("notLoggedIn")</p>
@@ -15,6 +94,8 @@
 </AuthorizeView>
 @code {
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
+    const int _maxNewCardsNew = 50;
+    const int _maxNewCardsReview = 50;
     private User _loggedInUser
     {
         get
@@ -32,12 +113,87 @@
             }
         }
     }
+    private LanguageUser _languageUser;
+    private LanguageCode UiLanguageCode;
+    private int _languageInput;
+    private string _languageInputCss
+    {
+        get
+        {
+            if (_languageInput == 0) return "form-select is-invalid";
+            return "form-select is-valid";
+        }
+    }
+    private int _numNewCardsInput;
+    private string _numNewCardsInputCss
+    {
+        get
+        {
+            if (_numNewCardsInput > -1 && _numNewCardsInput <= _maxNewCardsNew) return "form-select is-invalid";
+            return "form-select is-valid";
+        }
+    }
+    private int _numOldCardsInput;
+    private string _numOldCardsInputCss
+    {
+        get
+        {
+            if (_numOldCardsInput > -1 && _numOldCardsInput <= _maxNewCardsReview) return "form-select is-invalid";
+            return "form-select is-valid";
+        }
+    }
+    private Dictionary<int, LanguageUser> _languageOptions = new Dictionary<int, LanguageUser>();
+    private List<int> _numNewCardOptions = new List<int>();
+    private List<int> _numOldCardOptions = new List<int>();
+    private bool _isLoading = true;
+    private bool _shouldHideCard = true;
+    private bool _isDeckDefined = false;
+    private bool _isDeckComplete = false;
+    private bool _isFormInValid
+    {
+        get
+        {
+            if (_languageInput == 0) return true;
+            if (_numNewCardsInput < 0 || _numNewCardsInput > _maxNewCardsNew) return true;
+            if (_numOldCardsInput < 0 || _numOldCardsInput > _maxNewCardsReview) return true;
+            return false;
+        }
+    }
+    List<FlashCard> _deck = new List<FlashCard>();
+    private int _currentCardPosition = 0;
+    private int _cardCount = 0;
+    private FlashCard _currentCard = new FlashCard();
+    private FlashCardView _cardView = default!;
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            
-
+            var dbLanguageUsers = FlashCardService.LanguageUsersFetch((int)_loggedInUser.Id);
+            await FlashCardService.InitializeAsync(DeepLService, UserService);
+            if (_languageOptions.Count == 0)
+            {
+                foreach (var lu in dbLanguageUsers)
+                {
+                    _languageOptions.Add((int)lu.Id, lu);
+                }
+            }
+            if (_numNewCardOptions.Count == 0)
+            {
+                for (int i = 0; i <= _maxNewCardsNew; i += 5)
+                {
+                    _numNewCardOptions.Add(i);
+                }
+            }
+            if (_numOldCardOptions.Count == 0)
+            {
+                for (int i = 0; i <= _maxNewCardsReview; i += 5)
+                {
+                    _numOldCardOptions.Add(i);
+                }
+            }
+            UiLanguageCode = UserService.GetUiLanguageCode();
+            //
+            _isLoading = false;
         }
         catch (Exception ex)
         {
@@ -45,6 +201,68 @@
             errorState.errorMessage = UserService.GetUILabel("flashCardReviewInitializationError");
             StateHasChanged();
             return;
+        }
+    }
+    private async Task OnGetCardsClickAsync()
+    {
+        try
+        {
+            _isLoading = true;
+            await BuildDeck();
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("getLoggedInUserError");
+            StateHasChanged();
+        }
+    }
+    private async Task BuildDeck()
+    {
+        _languageUser = _languageOptions[_languageInput];
+
+        var oldCards = FlashCardService.FlashCardsFetchByNextReviewDate(_numOldCardsInput, _languageUser);
+        var newCards = FlashCardService.FlashCardsCreate(_numNewCardsInput, _languageUser);
+
+
+        _deck.AddRange(oldCards);
+        _deck.AddRange(newCards);
+
+        ShuffleDeck();
+
+        _cardCount = _deck.Count;
+        _currentCardPosition = 0;
+        _currentCard = _deck[0];
+        _isDeckDefined = true;
+        _cardView.SetCard(_currentCard);
+        _shouldHideCard = false;
+        _isLoading = false;
+    }
+    public async Task OnNextCardClickAsync()
+    {
+        _currentCardPosition++;
+        if(_currentCardPosition >= _deck.Count)
+        {
+            _isDeckComplete = true;
+            _isDeckDefined = false;
+            _shouldHideCard = true;
+            _deck = new List<FlashCard>();
+            return;
+        }
+        _currentCard = _deck[_currentCardPosition];
+        _cardView.SetCard(_currentCard);
+    }
+    private void ShuffleDeck()
+    {
+        Random rng = new Random();
+        int n = _deck.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = rng.Next(n + 1);
+            var value = _deck[k];
+            _deck[k] = _deck[n];
+            _deck[n] = value;
         }
     }
 }

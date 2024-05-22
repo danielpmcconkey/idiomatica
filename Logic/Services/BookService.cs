@@ -51,7 +51,7 @@ namespace Logic.Services
             var language = context.Languages.Where(x => x.LanguageCode.Code == languageCodeT).FirstOrDefault();
             if (language == null || language.Id == null)
             {
-                ErrorHandler.LogAndThrow(2070);
+                ErrorHandler.LogAndThrow(5070);
             }
 
             // divide text into paragraphs

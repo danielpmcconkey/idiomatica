@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
+@inject DeepLService DeepLService;
 @using System.Text;
 
 @* Modal for paragraph translation *@
@@ -32,11 +33,10 @@
     private string? _ppModalTitle;
     private string? _ppModalTranslateFrom;
     private string? _ppModalTranslateTo;
-    private DeepLService _deepLService;
 
     protected override async Task OnInitializedAsync()
     {
-        _deepLService = new DeepLService();
+        
     }
 
     public async Task OnShowPpModalClick(Paragraph pp)
@@ -62,7 +62,7 @@
         }
         else
         {
-            var deeplResult = _deepLService.Translate(input, fromLang.Code, toLang.Code);
+            var deeplResult = DeepLService.Translate(input, fromLang.Code, toLang.Code);
             if(deeplResult is not null)
             {
                 _ppModalTranslateTo = deeplResult;

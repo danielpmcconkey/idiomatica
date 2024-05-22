@@ -24,5 +24,6 @@ namespace Model
 
 
         #endregion
+        public DateTime? NextReview {  get; set; }
     }
 }

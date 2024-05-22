@@ -30,6 +30,7 @@ namespace Logic.UILabels
             _labels.Add("navRegister", "Register");
             _labels.Add("navLogIn", "Log In");
             _labels.Add("navNewBook", "Upload Book");
+            _labels.Add("navFlashcards", "Flash card review");
             #endregion
 
             #region book list
@@ -88,6 +89,20 @@ namespace Logic.UILabels
             #endregion
             #region flash card review
             _labels.Add("flashCardReviewInitializationError", "There was an error initializing flash card review.");
+            _labels.Add("fcLanguage", "Which language do you want to study today?");
+            _labels.Add("fcSelectLanguage", "Please select language");
+            _labels.Add("fcNumNewCardsLabel", "How many new cards do you want to create?");
+            _labels.Add("fcNumOldCardsLabel", "How many review cards do you want to fetch?");
+            _labels.Add("fcCreateDeck", "Create deck");
+            _labels.Add("fcSeeAnswer", "Show translation");
+            _labels.Add("fcWrong", "Wrong");
+            _labels.Add("fcHard", "Hard");
+            _labels.Add("fcGood", "Good");
+            _labels.Add("fcEasy", "Easy");
+            _labels.Add("fcStop", "Remove this card");
+            _labels.Add("fcLoading", "Loading...");
+            _labels.Add("fcDeckCreateError", "There was an error creating the card deck");
+            _labels.Add("fcDeckComplete", "You have finished reviewing all cards in this deck. Create another?");
             #endregion
             //_labels.Add("", "");
             //_labels.Add("", "");
