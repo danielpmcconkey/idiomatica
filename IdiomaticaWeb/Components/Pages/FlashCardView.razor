@@ -1,0 +1,158 @@
+﻿@rendermode InteractiveServer
+@inject FlashCardService FlashCardService;
+@inject UserService UserService;
+
+@if(IsHidden == false)
+{
+    <Card>
+        <CardBody>
+            <CardTitle>@_cardTitle</CardTitle>
+            <CardText>@_exampleParagraph</CardText>
+            @if(_isAnswerVisible == false)
+            {
+                <Button Color="ButtonColor.Primary" Type="ButtonType.Button" @onclick="OnShowAnswerClick">
+                    @UserService.GetUILabel("fcSeeAnswer")
+                </Button>
+            }
+        
+        </CardBody>
+        @if (_isAnswerVisible)
+        {
+            <hr />
+            <CardBody>
+                <CardTitle>@_cardTranslation</CardTitle>
+                <CardText>@_paragraphTranslation</CardText>
+            </CardBody>
+        }
+        <CardFooter>
+            <div class="container">
+                <div class="row">
+                    <div class="col-9">
+                        <Button Color="ButtonColor.Warning" Type="ButtonType.Button" Outline="true"
+                                @onclick="@(e => OnAdvanceCardClick(@AvailableFlashCardAttemptStatus.WRONG))">
+                            @UserService.GetUILabel("fcWrong")
+                        </Button>
+                        <Button Color="ButtonColor.Warning" Type="ButtonType.Button" Outline="true"
+                                @onclick="@(e => OnAdvanceCardClick(@AvailableFlashCardAttemptStatus.HARD))">
+                            @UserService.GetUILabel("fcHard")
+                        </Button>
+                        <Button Color="ButtonColor.Success" Type="ButtonType.Button" Outline="true"
+                                @onclick="@(e => OnAdvanceCardClick(@AvailableFlashCardAttemptStatus.GOOD))">
+                            @UserService.GetUILabel("fcGood")
+                        </Button>
+                        <Button Color="ButtonColor.Success" Type="ButtonType.Button" Outline="true"
+                                @onclick="@(e => OnAdvanceCardClick(@AvailableFlashCardAttemptStatus.EASY))">
+                            @UserService.GetUILabel("fcEasy")
+                        </Button>
+                    </div>
+                    <div class="col-3">
+                        <Button Color="ButtonColor.Danger" Type="ButtonType.Button" Outline="false"
+                                @onclick="@(e => OnAdvanceCardClick(@AvailableFlashCardAttemptStatus.STOP))">
+                            @UserService.GetUILabel("fcStop")
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </CardFooter>
+    </Card>
+}
+
+@code {
+
+    [Parameter]
+    public EventCallback OnNextCard { get; set; }
+    [Parameter]
+    public LanguageCode? UiLanguageCode { get; set; }
+    [Parameter]
+    public bool IsHidden { get; set; }
+
+    private FlashCard _card;
+    private FlashCardParagraphTranslationBridge _bridge;
+    private string _exampleParagraph;
+    private string _paragraphTranslation;
+    private bool _isAnswerVisible = false;
+    private string _cardTitle
+    {
+        get
+        {
+            if (_card is null) return "";
+            if (_card.WordUser is null) return "";
+            if (_card.WordUser.Word is null) return "";
+            return _card.WordUser.Word.TextLowerCase;
+        }
+    }
+    private string _cardTranslation
+    {
+        get
+        {
+            if (_card is null) return "";
+            if (_card.WordUser is null) return "";
+            if (_card.WordUser.Translation is null) return "";
+            return _card.WordUser.Translation;
+        }
+    }
+
+
+    private async Task OnShowAnswerClick()
+    {
+        _isAnswerVisible = true;
+    }
+    public void SetCard(FlashCard card)
+    {
+        _card = card;
+        ResetCard();
+    }
+    private async Task OnAdvanceCardClick(AvailableFlashCardAttemptStatus previousCardsStatus)
+    {
+        await FlashCardService.FlashCardAttemptCreateAsync((int)_card.Id, previousCardsStatus);
+        switch(previousCardsStatus)
+        {
+            default:
+            case AvailableFlashCardAttemptStatus.GOOD:
+                _card.NextReview = DateTime.Now.AddDays(1);
+                break;
+            case AvailableFlashCardAttemptStatus.WRONG:
+                _card.NextReview = DateTime.Now.AddMinutes(5);
+                break;
+            case AvailableFlashCardAttemptStatus.HARD:
+                _card.NextReview = DateTime.Now.AddHours(1);
+                break;
+            case AvailableFlashCardAttemptStatus.EASY:
+                _card.NextReview = DateTime.Now.AddDays(5);
+                break;
+            case AvailableFlashCardAttemptStatus.STOP:
+                _card.Status = AvailableFlashCardStatus.DONTUSE;
+                _card.NextReview = DateTime.Now.AddYears(5);
+                break;
+        }
+        await FlashCardService.FlashCardUpdateAfterReviewAsync((int)_card.Id, (DateTime)_card.NextReview,
+            (AvailableFlashCardStatus) _card.Status);
+        await OnNextCard.InvokeAsync();
+    }
+    private void ResetCard()
+    {
+        _paragraphTranslation = "";
+        _exampleParagraph = "";
+        // note some paragraph translations will be into languages the user 
+        // doesn't speak. That's not good. Filter it
+        var bridges = _card.FlashCardParagraphTranslationBridges
+            .Where(x => x.ParagraphTranslation.Code == UiLanguageCode.Code)
+            .ToList();
+        var bridgeCount = bridges.Count;
+        if(bridgeCount > 0)
+        {
+            Random rng = new Random();
+            int position = rng.Next(0, bridgeCount);
+            _bridge = bridges[position];
+            if (_bridge.ParagraphTranslation != null 
+                && _bridge.ParagraphTranslation.Paragraph != null
+                && _bridge.ParagraphTranslation.Paragraph.Sentences != null)
+            {
+                _paragraphTranslation = _bridge.ParagraphTranslation.TranslationText;
+                _exampleParagraph = FlashCardService
+                    .ParagraphGetFullText(_bridge.ParagraphTranslation.Paragraph);
+            }
+        }
+        _isAnswerVisible = false;
+    }
+}

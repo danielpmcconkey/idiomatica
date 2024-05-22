@@ -21,5 +21,6 @@ namespace Model
         public LanguageCode LanguageCode { get; set; }
         [StringLength(8000)]
         public string TranslationText { get; set; }
+        public List<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridges { get; set; }
     }
 }

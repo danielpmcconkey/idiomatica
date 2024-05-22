@@ -343,7 +343,7 @@
             var bookUserId = BookService.BookUserCreateAndSave(BookId, (int)_loggedInUser.Id);
             if(bookUserId == 0)
             {
-                ErrorHandler.LogAndThrow(2080);
+                ErrorHandler.LogAndThrow(5080);
                 return null;
             }
             bookUserFromDb = BookService.BookUserFetch((int)_loggedInUser.Id, BookId);
@@ -357,7 +357,7 @@
         var bookUserStatsFromDb = BookService.BookUserStatsFetch((int)_loggedInUser.Id, _bookUser.BookId);
         if (bookUserStatsFromDb is null)
         {
-            ErrorHandler.LogAndThrow(2090);
+            ErrorHandler.LogAndThrow(5090);
         }
         return bookUserStatsFromDb;
     }
