@@ -17,7 +17,7 @@ namespace Model
         DISTINCTWORDCOUNT = 7,
         TOTALWORDCOUNT = 8,
     }
-}
+} 
 
 /*
  * 

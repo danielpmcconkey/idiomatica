@@ -1,4 +1,5 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 
 <PageTitle>Blazor Bootstrap - WebAssembly Standalone App (.NET 8) - Starter Template</PageTitle>
 
@@ -12,17 +13,9 @@ Interactive render mode: Server
 Interactive location: Global
 
 
-<Modal @ref="modal" Title="Modal title">
-    <BodyTemplate>
-        Modal body text goes here.
-    </BodyTemplate>
-    <FooterTemplate>
-        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
-        <Button Color="ButtonColor.Primary">Save changes</Button>
-    </FooterTemplate>
-</Modal>
-
-<Button Color="ButtonColor.Primary" @onclick="OnShowModalClick">Show Modal</Button>
+<div>
+    <Button Color="ButtonColor.Primary" @onclick="OnAsyncTest">Async test</Button>
+</div>
 
 <AuthorizeView>
     <Authorized>
@@ -33,17 +26,63 @@ Interactive location: Global
     </NotAuthorized>
 </AuthorizeView>
 
+<p>@longs[0]</p>
+<p>@longs[1]</p>
+<p>@shorts[0]</p>
+<p>@shorts[1]</p>
+<p>@shorts[2]</p>
+<p>@shorts[3]</p>
+<p>@shorts[4]</p>
+
 
 @code {
     private Modal modal;
+    string[] longs = ["long 0", "long 1"];
+    private string[] shorts = ["short 0", "short 1", "short 2", "short 3", "short 4"];
 
-    private async Task OnShowModalClick()
+
+
+    private async Task OnAsyncTest()
     {
-        await modal?.ShowAsync();
+        // these will start immediately and run concurrently
+        Task[] tasks = [
+            ShortRunning(0),
+            ShortRunning(1),
+            ShortRunning(2)
+        ];
+        StateHasChanged();
+        await Task.WhenAll(tasks);
+
+        // this will start when all the 3 above finish
+        await LongRunning(0);
+        StateHasChanged();
+        // this will start when the above finishes
+        await ShortRunning(3);
+        StateHasChanged();
+        // this will start when the above finishes
+        await ShortRunning(4);
+        StateHasChanged();
+        await LongRunning(1);
+        StateHasChanged();
     }
-
-    private async Task OnHideModalClick()
+    private async Task LongRunning(int ordinal)
     {
-        await modal?.HideAsync();
+        longs[ordinal] = $"long running {ordinal} started at {GetTimeStamp()}. ";
+        await SleepFor(3);
+        longs[ordinal] += $"long running {ordinal} done at {GetTimeStamp()}";
+    }
+    private async Task ShortRunning(int ordinal)
+    {
+        shorts[ordinal] = $"short running {ordinal} started at {GetTimeStamp()}. ";
+        await SleepFor(1);
+        shorts[ordinal] += $"short running {ordinal} done at {GetTimeStamp()}";
+    }
+    private string GetTimeStamp()
+    {
+        return DateTime.Now.ToString("HH:mm:ss.ffffzzz");
+    }
+    private async Task SleepFor(int seconds)
+    {
+        await Task.Delay(seconds * 1000);
     }
 }

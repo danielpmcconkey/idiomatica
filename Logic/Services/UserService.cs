@@ -31,24 +31,30 @@ namespace Logic.Services
         }
         public User? GetLoggedInUser()
         {
-            var t = Task.Run(() => GetAppUserClaimsPrincipalAsync());
+            var t = Task.Run(() => GetLoggedInUserAsync());
             t.Wait();
-            _loggedInUserClaimsPrincipal = t.Result;
+            return t.Result;
+        }
+        public async Task<User?> GetLoggedInUserAsync()
+        {
+            _loggedInUserClaimsPrincipal = await GetAppUserClaimsPrincipalAsync();
+            return await processUserFromClaimPrincipal();
+        }
+        private async Task<User?> processUserFromClaimPrincipal()
+        {
             if (_loggedInUserClaimsPrincipal == null) return null;
             if (_loggedInUserClaimsPrincipal.Identity is null) return null;
             if (!_loggedInUserClaimsPrincipal.Identity.IsAuthenticated) return null;
-            
+
             var appUserId = _loggedInUserClaimsPrincipal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (appUserId == null) return null;
             //Console.WriteLine($"appUserId = {appUserId}");
             var context = _dbContextFactory.CreateDbContext();
-            var matchingUsers = context.Users.Where(x => x.ApplicationUserId == appUserId)
-                .Include(u => u.LanguageCode)
-                .ToList();
-            if (matchingUsers.Count() > 0)
+            var matchingUser = await DataCache.UserByApplicationUserIdReadAsync(appUserId, context);
+            if (matchingUser != null)
             {
-                _loggedInUser = matchingUsers[0];
-                _uiLanguageCode = _loggedInUser.LanguageCode;
+                _loggedInUser = matchingUser;
+                _uiLanguageCode = await DataCache.LanguageCodeByCodeReadAsync(_loggedInUser.Code, context);
                 _uiLabels = UILabels.Factory.GetUILabels(_uiLanguageCode.LanguageCodeEnum);
                 return _loggedInUser;
             }

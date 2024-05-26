@@ -68,8 +68,7 @@ namespace Logic.UILabels
             _labels.Add("statusLabel5", "learned 5");
             _labels.Add("statusLabel6", "ignored 6");
             _labels.Add("statusLabel7", "well known 7");
-            _labels.Add("TranslationFrom", "Translation from");
-            _labels.Add("TranslationTo", "Translation to");
+            _labels.Add("ppModalTitle", "Translation from {0} to {1}");
             #endregion
             #region book create
             _labels.Add("bookCreateInitializationError", "There was an error setting up the book creation form");

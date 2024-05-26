@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 
 <style>
     span.statusUNKNOWN {
@@ -75,29 +76,24 @@
 <AuthorizeView>
     <Authorized>
         
-        @if (_bookUser is null)
+        @if (_isDataInit == false)
         {
             <PageTitle>@UserService.GetUILabel("loading")</PageTitle>
-            <h1>@UserService.GetUILabel("loading")</h1>
+            <Button Color="ButtonColor.Primary" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+            
         }
         else
         {
-            <PageTitle>@_bookUser.Book.Title</PageTitle>
-            <h1>@_bookUser.Book.Title</h1>
-        }
-        @if (_currentPageUser is null)
-        {
-            <p>
-                @UserService.GetUILabel("loading")
-            </p>
-        }
-        else
-        {
+            <PageTitle>@_book.Title</PageTitle>
+            <h3>@_book.Title</h3>
+        
 
             <ModalWord @ref="_wModal" Parent="this"
-                       allWordUsersInLanguage="_allWordUsersInLanguage" />
+                       allWordUsersInPage="_allWordUsersInPage" />
 
-            <ModalParagraph @ref="_ppModal" Language="_bookUser?.LanguageUser?.Language" />
+            <ModalParagraph @ref="_ppModal" 
+                            LanguageFromCode="_languageFromCode"
+                            LanguageToCode="_languageToCode" />
 
 
 
@@ -105,23 +101,27 @@
 
             <div class="container px-4">
 
-                <PageTurner currentPageUser="_currentPageUser"
-                            OnMovePage="OnMovePage"
-                            OnClearPage="OnClearPageAsync" />
-
-                @foreach (var paragraph in _paragraphs.OrderBy(x => x.Ordinal))
+                <PageTurner currentPage="_currentPage"
+                            OnMovePageAsync="OnMovePageAsync"
+                            OnClearPageAsync="OnClearPageAsync"
+                            BookTotalPageCount="_bookTotalPages" />
+                @if (_paragraphs is not null)
                 {
-                    <hr />
-                    <ParagraphView paragraph="paragraph"
-                                   allWordUsersInLanguage="_allWordUsersInLanguage"
-                                   OnShowWordModal="OnShowWordModal"
-                                   OnShowPpModal="ShowPpModal"
-                                   Language="_bookUser?.LanguageUser?.Language" />
+                    @foreach (var paragraph in _paragraphs)
+                    {
+                        <hr />
+                        <ParagraphView paragraphAndChildren="paragraph"
+                            allWordUsersInPage="_allWordUsersInPage"
+                            OnShowWordModal="OnShowWordModal"
+                            OnShowPpModal="ShowPpModal"
+                            Language="_language" />
+                    }
                 }
                 <hr />
-                <PageTurner currentPageUser="_currentPageUser"
-                            OnMovePage="OnMovePage"
-                            OnClearPage="OnClearPageAsync" />
+                <PageTurner currentPage="_currentPage"
+                            OnMovePageAsync="OnMovePageAsync"
+                            OnClearPageAsync="OnClearPageAsync"
+                            BookTotalPageCount="_bookTotalPages" />
             </div>
         }
     </Authorized>
@@ -133,38 +133,151 @@
 
 @code {
 
+    #region parameters
     [Parameter]
     public int BookId { get; set; }
-    public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
-
-    private BookUser? _bookUser;
-    private IQueryable<BookUserStat>? _bookUserStats;
-
-    #region shared with multiple children
-    private User _loggedInUser
-    {
-        get
-        {
-            try
-            {
-                return UserService.GetLoggedInUser();
-            }
-            catch (Exception ex)
-            {
-                errorState.isError = true;
-                errorState.errorMessage = UserService.GetUILabel("getLoggedInUserError");
-                StateHasChanged();
-                return null;
-            }
-        }
-    }
-    private LanguageUser? _languageUser;
-    private Dictionary<string, WordUser> _allWordUsersInLanguage;
-    private PageUser? _currentPageUser;
     #endregion
 
-    #region wmodal
+    #region page loading stuff
+    public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
+    private User? _loggedInUser = null;
     private ModalWord _wModal = default!;
+    private ModalParagraph _ppModal = default!;
+    private bool _isDataInit = false;
+    private bool _isLoadingBook = false;
+    private bool _isLoadingBookUser = false;
+    private bool _isLoadingLanguageUser = false;
+    private bool _isLoadingBookUserStats = false;
+    private bool _isLoadingLoggedInUser = false;
+    private bool _isLoadingAllWordUsersInPage = false;
+    private bool _isLoadingWordsInPage = false;
+    private bool _isLoadingPageUser = false;
+    private bool _isLoadingParagraphs = false;
+    private bool _isLoadingCurrentPage = false;
+    private bool _isLoadingTotalPageCount = false;
+    private bool _isLoadingSentences = false;
+    private bool _isLoadingTokens = false;
+    private bool _isLoadingLanguage = false;
+    private bool _isLoadingLanguageToCode = false;
+    private bool _isLoadingLanguageFromCode = false;
+    #endregion
+
+    #region book and page data
+    private Book? _book = null;
+    private Dictionary<string, WordUser>? _allWordUsersInPage = null;
+    private int? _bookTotalPages = null;
+    private BookUser? _bookUser = null;
+    private List<BookUserStat>? _bookUserStats = null;
+    /// <summary>
+    ///     a list of common words from the database and put it in a dictionary 
+    ///     so that we don't always have to go back to the database just to get
+    ///     the word ID for every single word
+    /// </summary>
+    private Dictionary<string, Word>? _wordsInPage = null;
+    private PageUser? _currentPageUser = null;
+    private Page? _currentPage = null;
+    /// <summary>
+    /// the language the book is written in
+    /// </summary>
+    private Language? _language = null;
+    private LanguageUser? _languageUser = null;
+    private List<Paragraph>? _paragraphs = null;
+    private List<Sentence>? _sentences = null;
+    private List<Token>? _tokens = null;
+    ///  <summary>
+    /// the language the book is written in
+    /// </summary>
+    private LanguageCode? _languageFromCode = null;
+    /// <summary>
+    /// the user's UI preference language
+    /// </summary>
+    private LanguageCode? _languageToCode = null;
+    #endregion
+
+    #region init methods
+    private async Task InitData()
+    {
+        // tier 0 tasks, not dependent on anything
+        var t_loggedInUser = GetLoggedInUserAsync();
+        var t_book = GetBookAsync(BookId);
+        var t_bookTotalPageCount = GetBookTotalPagesAsync(BookId);
+
+        Task.WaitAll([t_loggedInUser, t_book, t_bookTotalPageCount]);
+
+        _loggedInUser = t_loggedInUser.Result;
+        _languageToCode = UserService.GetUiLanguageCode();
+        _book = t_book.Result;
+        _bookTotalPages = t_bookTotalPageCount.Result;
+
+        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id == 0)
+        {
+            ErrorHandler.LogAndThrow(2130);
+            return;
+        }
+        if (_book == null || _book.Id == null || _book.Id == 0)
+        {
+            ErrorHandler.LogAndThrow(2140);
+            return;
+        }
+
+
+        // tier 1 tasks, dependent on tier 0
+        var t_bookUser = GetBookUserAsync(BookId, (int)_loggedInUser.Id);
+        var t_bookUserStats = GetBookUserStatsAsync(BookId, (int)_loggedInUser.Id);
+        var t_languageUser = GetLanguageUserAsync(_book.LanguageId, (int)_loggedInUser.Id);
+        var t_language = GetLanguageAsync(_book.LanguageId);
+
+        Task.WaitAll([t_bookUser, t_bookUserStats, t_languageUser, t_language]);
+
+        _bookUser = t_bookUser.Result;
+        _bookUserStats = t_bookUserStats.Result;
+        _languageUser = t_languageUser.Result;
+        _language = t_language.Result;
+
+        if (_bookUser == null || _bookUser.Id == 0)
+        {
+            ErrorHandler.LogAndThrow(2150);
+            return;
+        }
+
+        // tier 2, dependent on tier 1
+        var t_currentPageUser = GetPageUserOnOpenAsync(_bookUser.CurrentPageID, _bookUser.LanguageUserId);
+        var t_languageFromCode = GetLanguageFromCodeAsync(_language.Code);
+
+        Task.WaitAll([t_currentPageUser, t_languageFromCode]);
+
+        _currentPageUser = t_currentPageUser.Result;
+        _languageFromCode = t_languageFromCode.Result;
+
+        if (_currentPageUser == null || _currentPageUser.PageId == 0)
+        {
+            ErrorHandler.LogAndThrow(2220);
+            return;
+        }
+
+        // tier 3, dependent on tier 2
+        await ResetPageData(_currentPageUser.PageId);
+
+        // fin
+        _isDataInit = true;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if(_isDataInit == false) await InitData();
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("readInitializationError");
+            StateHasChanged();
+            return;
+        }
+    }
+    #endregion
+
+    #region methods exposed to other elements
     public async Task OnShowWordModal(Token thisToken)
     {
         try
@@ -179,10 +292,6 @@
             return;
         }
     }
-    #endregion
-
-    #region ppmodal
-    private ModalParagraph _ppModal = default!;
     private async Task ShowPpModal(Paragraph pp)
     {
         try
@@ -197,62 +306,39 @@
             return;
         }
     }
-    #endregion
-    #region pageturner
-    private async Task OnClearPageAsync(int targetPageNum)
+    private async Task OnMovePageAsync(int targetPageNum)
     {
         try
         {
-            BookService.PageUserClearPage(_currentPageUser, _languageUser);
-            _allWordUsersInLanguage = BookService.WordUserFetchDictForLanguageUser(_languageUser);
-            OnMovePage(targetPageNum);
-        }
-        catch (Exception ex)
-        {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("clearPageUserError");
-            StateHasChanged();
-            return;
-        }
-    }
-    private void MarkCurrentPageRead()
-    {
-        var readDate = DateTime.Now;
-        _currentPageUser.ReadDate = readDate;
-        BookService.PageUserUpdateReadDate((int)_currentPageUser.Id, readDate);
-    }
-    private void OnMovePage(int targetPageNum)
-    {
-        try
-        {
-            MarkCurrentPageRead();
+            if(_languageUser is null || _languageUser.Id is null || _languageUser.Id == 0)
+            {
+                ErrorHandler.LogAndThrow(2170);
+                return;
+            }
+            if (_bookUser is null || _bookUser.Id == 0)
+            {
+                ErrorHandler.LogAndThrow(2180);
+                return;
+            }
+            if (_currentPageUser is null || _currentPageUser.Id is null || _currentPageUser.Id == 0)
+            {
+                ErrorHandler.LogAndThrow(2190);
+                return;
+            }
+            // mark the previous page as read before moving on
+            await MarkCurrentPageReadAsync(_currentPageUser.PageId);
 
+            var totalPages = await GetBookTotalPagesAsync(BookId);
             if (targetPageNum < 1) return;
-            if (targetPageNum > StatisticsHelper.GetBookStat_int(_bookUser?.Book, AvailableBookStat.TOTALPAGES))
+            if (targetPageNum > totalPages)
                 return;
 
-            var pageUserInBook = _bookUser.PageUsers
-                .Where(x => x.Page.Ordinal == targetPageNum)
-                .FirstOrDefault();
+            _currentPageUser = await FetchPageUserByOrderWithinBookAsync(
+                (int)_languageUser.Id, targetPageNum, BookId);
+            if (_currentPageUser == null) return;
 
-            if (pageUserInBook is not null)
-            {
-                _currentPageUser = pageUserInBook;
-                _paragraphs = pageUserInBook.Page.Paragraphs;
-                BookService.PageUpdateBookmark(_bookUser.Id, (int)_currentPageUser.Page.Id);
-                return;
-            }
+            await ResetPageData(_currentPageUser.PageId);
 
-            // it should be in the DB but we haven't pulled it yet
-            var pageUserFromDb = FetchPageUserByOrderWithinBook(targetPageNum);
-            if (pageUserFromDb is not null)
-            {
-                _currentPageUser = pageUserFromDb;
-                _paragraphs = _currentPageUser.Page.Paragraphs;
-                _bookUser.PageUsers.Add(pageUserFromDb);
-                BookService.PageUpdateBookmark(_bookUser.Id, (int)_currentPageUser.Page.Id);
-                return;
-            }
         }
         catch (Exception ex)
         {
@@ -262,81 +348,87 @@
             return;
         }
     }
-    #endregion
-
-
-    private List<Paragraph> _paragraphs;
-    private Dictionary<string, Word> _commonWordsInLanguage;
-
-    protected override async Task OnInitializedAsync()
+    private async Task OnClearPageAsync(int targetPageNum)
     {
         try
         {
-            // todo: don't load the entire book in at the beginning. Just the current page
-            _bookUser = FetchBookUser();
-            if (_bookUser is null) return;
-            if (_bookUser.LanguageUser is null) return;
-            if (_bookUser.Book is null) return;
-            _languageUser = _bookUser.LanguageUser;
-            _bookUserStats = FetchBookUserStats();
-
-            _allWordUsersInLanguage = BookService.WordUserFetchDictForLanguageUser(
-                    _bookUser.LanguageUser);
-
-            // pull a list of common words from the database and put it
-            // in a dictionary so that we don't always have to go back to the
-            // database just to get the word ID for every single word
-            _commonWordsInLanguage =
-                 BookService.WordFetchCommonDictForLanguage(_bookUser.LanguageUser.Language);
-
-            _currentPageUser = FetchPageUserOnBookOpen();
-            if (_currentPageUser is null) return;
-            _paragraphs = _currentPageUser.Page.Paragraphs;
-
+            BookService.PageUserClearPage(_currentPageUser, _languageUser);            
+            await OnMovePageAsync(targetPageNum);
         }
         catch (Exception ex)
         {
             errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("readInitializationError");
+            errorState.errorMessage = UserService.GetUILabel("clearPageUserError");
             StateHasChanged();
             return;
         }
     }
-    protected override void OnInitialized()
+    public void RefreshState() { StateHasChanged(); }
+    #endregion
+
+    #region private methods
+    private async Task ResetPageData(int pageId)
     {
+        if (pageId == 0)
+        {
+            ErrorHandler.LogAndThrow(1240);
+            return;
+        }
+        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id == 0)
+        {
+            ErrorHandler.LogAndThrow(2130);
+            return;
+        }
+        var t_currentPage = GetCurrentPageAsync(pageId);
+        var t_paragraphs = GetParagraphsAsync(pageId);
+        var t_wordsInPage = GetWordsInPageAsync(pageId);
+        var t_allWordUsersInPage = GetAllWordUsersInPageAsync(pageId, (int)_loggedInUser.Id);
+        var t_sentencesInPage = GetAllSentencesInPageAsync(pageId);
+        var t_tokensInPage = GetAllTokensInPageAsync(pageId);
+
+        Task.WaitAll([t_currentPage, t_paragraphs, t_wordsInPage, t_allWordUsersInPage, t_sentencesInPage, t_tokensInPage]);
+
+        _currentPage = t_currentPage.Result;
+        _paragraphs = t_paragraphs.Result;
+        _allWordUsersInPage = t_allWordUsersInPage.Result;
+        _wordsInPage = t_wordsInPage.Result;
+        _sentences = t_sentencesInPage.Result;
+        _tokens = t_tokensInPage.Result;
+
+
+        // now knit the paragraph data together
+        _paragraphs = _paragraphs.OrderBy(x => x.Ordinal).ToList();
+        foreach(var p in _paragraphs)
+        {
+            p.Sentences = _sentences
+                .Where(s => s.ParagraphId == p.Id)
+                .OrderBy(s => s.Ordinal)
+                .ToList();
+            foreach(var s in p.Sentences)
+            {
+                s.Tokens = _tokens
+                    .Where(t => t.SentenceId == s.Id)
+                    .OrderBy(t => t.Ordinal)
+                    .ToList();
+
+                foreach(var t in s.Tokens)
+                {
+                    var wordEntry = _wordsInPage.Where(w => w.Value.Id == t.WordId).FirstOrDefault();
+                    if(wordEntry.Value != null)
+                    {
+                        t.Word = wordEntry.Value;
+                    }
+                }
+            }
+        }
 
     }
-    public void RefreshState() { StateHasChanged(); }
-    // private void UpdateWordDictForNewPage()
-    // {
-    //     foreach(var pp in _currentPageUser.Page.Paragraphs)
-    //     {
-    //         foreach(var s in pp.Sentences)
-    //         {
-    //             foreach (var token in s.Tokens)
-    //             {
-    //                 if (!_allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase))
-    //                 {
-    //                     AddTokenToWordDict(token);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    // private void AddTokenToWordDict(Token token)
-    // {
-    //     BookService.WordUserCreateAndSave(_languageUser, token.Word);
-    //     // pull from the DB fresh
-    //     var newWordUser = BookService.WordUserFetch(_languageUser, token.Word);
-    //     // and add to the dict
-    //     _allWordUsersInLanguage[token.Word.TextLowerCase] = newWordUser;
-    // }
-
-    private BookUser? FetchBookUser()
+    
+    private async Task<BookUser?> FetchBookUserAsync(int bookId, int userId)
     {
-        var bookUserFromDb = BookService.BookUserFetch((int)_loggedInUser.Id, BookId);
-        // todo: wrap some try catch around UI elements
+        var context = await DbContextFactory.CreateDbContextAsync();
+        var bookUserFromDb = await DataCache.BookUserByUserIdAndBookIdReadAsync(
+            (bookId, userId), context);
         if (bookUserFromDb is null)
         {
             // try to create it
@@ -346,55 +438,395 @@
                 ErrorHandler.LogAndThrow(5080);
                 return null;
             }
-            bookUserFromDb = BookService.BookUserFetch((int)_loggedInUser.Id, BookId);
+            bookUserFromDb = await BookService.BookUserFetchAsync((int)_loggedInUser.Id, BookId);
         }
         return bookUserFromDb;
     }
-    private IQueryable<BookUserStat> FetchBookUserStats()
-    {
-        if (_bookUser is null) return null;
 
-        var bookUserStatsFromDb = BookService.BookUserStatsFetch((int)_loggedInUser.Id, _bookUser.BookId);
-        if (bookUserStatsFromDb is null)
-        {
-            ErrorHandler.LogAndThrow(5090);
-        }
-        return bookUserStatsFromDb;
-    }
-    private PageUser? FetchPageUserOnBookOpen()
-    {
-        // note this doesn't fetch the word_user becasue that will come
-        // from the _allWordUsersInLanguage dictionary
 
-        if (_bookUser is null) return null;
-        var dbPageUser = BookService.PageUserFetchById(_bookUser.CurrentPageID, _bookUser.LanguageUserId);
-        if (dbPageUser is not null) return dbPageUser;
-        return FetchPageUserByOrderWithinBook(1);
-    }
-    private PageUser? FetchPageUserByOrderWithinBook(int pageOrdinal)
+    private async Task<PageUser?> FetchPageUserByOrderWithinBookAsync(int languageUserId, int pageOrdinal, int bookId)
     {
-        // note this doesn't fetch the word_user becasue that will come
-        // from the _allWordUsersInLanguage dictionary
-        if (_bookUser is null) return null;
+        if (_bookUser is null) ErrorHandler.LogAndThrow(1200);
+        if (_wordsInPage is null) ErrorHandler.LogAndThrow(1210);
+        if (_allWordUsersInPage is null) ErrorHandler.LogAndThrow(1220);
 
-        var pageUserFromDb = BookService.PageUserFetchByOrdinalWithinBook(
-            pageOrdinal, _bookUser.BookId, (int)_loggedInUser.Id);
+        var context = await DbContextFactory.CreateDbContextAsync();
+        var pageUserFromDb = await DataCache.PageUserByLanguageUserIdOrdinalAndBookIdReadAsync(
+            (languageUserId, pageOrdinal, bookId), context);
 
         if (pageUserFromDb is not null) return pageUserFromDb;
 
         // pageUser is not created yet. Is the page created?
-        var existingPage = BookService.PageFetchByOrdinalWithinBook(pageOrdinal, _bookUser.BookId);
+        var existingPage = await DataCache.PageByOrdinalAndBookIdReadAsync(
+            (pageOrdinal, _bookUser.BookId), context);
         if (existingPage == null)
         {
             ErrorHandler.LogAndThrow(2070);
         }
-        
 
-        BookService.PageUserCreateAndSave(existingPage, _bookUser,
-            _commonWordsInLanguage, _allWordUsersInLanguage);
 
-        // re-fetch the page user to get all the related objects
-        return BookService.PageUserFetchByOrdinalWithinBook(
-            pageOrdinal, _bookUser.BookId, (int)_loggedInUser.Id);
+        int newPageUserId = BookService.PageUserCreateAndSave(existingPage, _bookUser,
+            _wordsInPage, _allWordUsersInPage);
+
+        return await DataCache.PageUserByIdReadAsync(newPageUserId, context);
     }
+    private async Task<LanguageCode?> GetLanguageFromCodeAsync(string code)
+    {
+        if (_languageFromCode == null)
+        {
+            if (_isLoadingLanguageFromCode == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetLanguageFromCodeAsync(code).Result;
+            }
+            try
+            {
+                _isLoadingLanguageFromCode = true;
+                var context = await DbContextFactory.CreateDbContextAsync();
+                _languageFromCode = await DataCache.LanguageCodeByCodeReadAsync(code, context);
+            }
+            catch
+            {
+                throw;
+            }
+            _isLoadingLanguageFromCode = false;
+        }
+        return _languageFromCode;
+    }
+    private async Task<List<Sentence>?> GetAllSentencesInPageAsync(int pageId)
+    {
+        if (_sentences == null)
+        {
+            if (_isLoadingSentences == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetAllSentencesInPageAsync(pageId).Result;
+            }
+            try
+            {
+                _isLoadingSentences = true;
+                var context = await DbContextFactory.CreateDbContextAsync();
+                _sentences = await DataCache.SentencesByPageIdReadAsync(pageId, context);
+            }
+            catch
+            {
+                throw;
+            }
+            _isLoadingSentences = false;
+        }
+        return _sentences;
+    }
+    private async Task<List<Token>?> GetAllTokensInPageAsync(int pageId)
+    {
+        if (_tokens == null)
+        {
+            if (_isLoadingTokens == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetAllTokensInPageAsync(pageId).Result;
+            }
+            try
+            {
+                _isLoadingTokens = true;
+                var context = await DbContextFactory.CreateDbContextAsync();
+                _tokens = await DataCache.TokensByPageIdReadAsync(pageId, context);
+            }
+            catch
+            {
+                throw;
+            }
+        _isLoadingTokens = false;
+        }
+        return _tokens;
+    }
+
+    private async Task<Dictionary<string, WordUser>?> GetAllWordUsersInPageAsync(int pageId, int userId)
+    {
+        if (_allWordUsersInPage == null)
+        {
+            if (_isLoadingAllWordUsersInPage == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetAllWordUsersInPageAsync(pageId, userId).Result;
+            }
+            try
+            {
+                _isLoadingAllWordUsersInPage = true;
+                var context = await DbContextFactory.CreateDbContextAsync();
+                _allWordUsersInPage = await DataCache.WordUsersDictByPageIdAndUserIdReadAsync((pageId, userId), context);
+            }
+            catch
+            {
+                throw;
+            }
+            _isLoadingAllWordUsersInPage = false;
+        }
+        return _allWordUsersInPage;
+    }
+    private async Task<Book?> GetBookAsync(int bookId)
+    {
+        if (_book == null)
+        {
+            if (_isLoadingBook == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetBookAsync(bookId).Result;
+            }
+            _isLoadingBook = true;
+            var context = await DbContextFactory.CreateDbContextAsync();
+            _book = await DataCache.BookByIdReadAsync(bookId, context);
+            _isLoadingBook = false;
+        }
+        return _book;
+    }
+    private async Task<int?> GetBookTotalPagesAsync(int bookId)
+    {
+        if (_bookTotalPages == null)
+        {
+            if (_isLoadingTotalPageCount == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetBookTotalPagesAsync(bookId).Result;
+            }
+            _isLoadingTotalPageCount = true;
+            var context = await DbContextFactory.CreateDbContextAsync();
+            var dbVal = await DataCache.BookStatByBookIdAndStatKeyReadAsync((bookId, AvailableBookStat.TOTALPAGES), context);
+            int outVal = 0;
+            int.TryParse(dbVal.Value, out outVal);
+            _bookTotalPages = outVal;
+            _isLoadingTotalPageCount = false;
+        }
+        return _bookTotalPages;
+    }
+    private async Task<Page?> GetCurrentPageAsync(int pageId)
+    {
+        if (_currentPage == null)
+        {
+            if (_isLoadingCurrentPage == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetCurrentPageAsync(pageId).Result;
+            }
+            _isLoadingCurrentPage = true;
+            try
+            {
+                var context = await DbContextFactory.CreateDbContextAsync();
+                _currentPage = await DataCache.PageByIdReadAsync(pageId, context);
+            }
+            catch
+            {
+                throw;
+            }
+            _isLoadingCurrentPage = false;
+        }
+        return _currentPage;
+    }
+    private async Task<PageUser?> GetPageUserOnOpenAsync(int currentPageID, int languageUserId)
+    {
+        if (_currentPageUser == null)
+        {
+            if (_isLoadingPageUser == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetPageUserOnOpenAsync(currentPageID, languageUserId).Result;
+            }
+            _isLoadingPageUser = true;
+
+            var context = await DbContextFactory.CreateDbContextAsync();
+            var dbPageUser = await DataCache.PageUserByPageIdAndLanguageUserIdReadAsync(
+                (currentPageID, languageUserId), context);
+            if (dbPageUser is not null) 
+            {
+                _currentPageUser = dbPageUser;
+            }
+            else _currentPageUser = await FetchPageUserByOrderWithinBookAsync(languageUserId, 1, BookId);
+
+            _isLoadingPageUser = false;
+        }
+        return _currentPageUser;
+    }
+    private async Task<BookUser?> GetBookUserAsync(int bookId, int userId)
+    {
+        if (_bookUser == null)
+        {
+            if (_isLoadingBookUser == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetBookUserAsync(bookId, userId).Result;
+            }
+            _isLoadingBookUser = true;
+            _bookUser = await FetchBookUserAsync(bookId, userId);
+            _isLoadingBookUser = false;
+        }
+        return _bookUser;
+    }
+    private async Task<List<BookUserStat>?> GetBookUserStatsAsync(int bookId, int userId)
+    {
+        if (_bookUserStats == null)
+        {
+            if (_isLoadingBookUserStats == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetBookUserStatsAsync(bookId, userId).Result;
+            }
+            _isLoadingBookUserStats = true;
+
+            var context = await DbContextFactory.CreateDbContextAsync();
+            var bookUserStatsFromDb = await DataCache.BookUserStatsByBookIdAndUserIdReadAsync(
+                (bookId, userId), context);
+            if (bookUserStatsFromDb is null)
+            {
+                ErrorHandler.LogAndThrow(5090);
+            }
+            _bookUserStats = bookUserStatsFromDb;
+            _isLoadingBookUserStats = false;
+            return bookUserStatsFromDb;
+        }
+        return _bookUserStats;
+    }
+    private async Task<Dictionary<string, Word>?> GetWordsInPageAsync(int pageId)
+    {
+        if (_wordsInPage == null)
+        {
+            if (_isLoadingWordsInPage == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetWordsInPageAsync(pageId).Result;
+            }
+            try
+            {
+                _isLoadingWordsInPage = true;
+                var context = await DbContextFactory.CreateDbContextAsync();
+                _wordsInPage = await DataCache.WordsDictByPageIdReadAsync(pageId, context);
+            }
+            catch
+            {
+                throw;
+            }
+            _isLoadingWordsInPage = false;
+        }
+        return _wordsInPage;
+    }
+    private async Task<Language?> GetLanguageAsync(int languageId)
+    {
+        if (_language == null)
+        {
+            if (_isLoadingLanguage == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetLanguageAsync(languageId).Result;
+            }
+            _isLoadingLanguage = true;
+            var context = await DbContextFactory.CreateDbContextAsync();
+            _language = await DataCache.LanguageByIdReadAsync((languageId), context);
+            _isLoadingLanguage = false;
+        }
+        return _language;
+    }
+    private async Task<LanguageUser?> GetLanguageUserAsync(int languageId, int userId)
+    {
+        if (_languageUser == null)
+        {
+            if (_isLoadingLanguageUser == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetLanguageUserAsync(languageId, userId).Result;
+            }
+            _isLoadingLanguageUser = true;
+            var context = await DbContextFactory.CreateDbContextAsync();
+            _languageUser = await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync((languageId, userId), context);
+            _isLoadingLanguageUser = false;
+        }
+        return _languageUser;
+    }
+    private async Task<User?> GetLoggedInUserAsync()
+    {
+        if (_loggedInUser == null)
+        {
+            if (_isLoadingLoggedInUser == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetLoggedInUserAsync().Result;
+            }
+            _isLoadingLoggedInUser = true;
+            _loggedInUser = await UserService.GetLoggedInUserAsync();
+            _isLoadingLoggedInUser = false;
+        }
+        return _loggedInUser;        
+    }
+    private async Task<List<Paragraph>?> GetParagraphsAsync(int pageId)
+    {
+        if (_paragraphs == null)
+        {
+            if (_isLoadingParagraphs == true)
+            {
+                // hold up. some other thread is loading it
+                Thread.Sleep(1000);
+                return GetParagraphsAsync(pageId).Result;
+            }
+            // are they already loaded and attached to the page user?
+            if (_currentPage != null && _currentPage.Paragraphs != null && _currentPage.Paragraphs.Count > 0)
+            {
+                _paragraphs = _currentPage.Paragraphs;
+            }
+            else
+            {
+                try
+                {
+                    _isLoadingParagraphs = true;
+                    var context = await DbContextFactory.CreateDbContextAsync();
+                    _paragraphs = await DataCache.ParagraphsByPageIdReadAsync(pageId, context);
+                }
+                catch 
+                {
+                    throw;
+                }
+            _isLoadingParagraphs = false;
+            }
+        }
+        return _paragraphs;
+    }
+    private async Task MarkCurrentPageReadAsync(int currentUserPageId)
+    {
+        var readDate = DateTime.Now;
+        BookService.PageUserUpdateReadDate(currentUserPageId, readDate);
+    }
+
+    // private async Task ResetPageDataAsync(Page newCurrentPage, PageUser newCurrentPageUser)
+    // {
+    //     if (_isLoadingParagraphs == true)
+    //     {
+    //         // hold up. some other thread is loading it
+    //         Thread.Sleep(1000);
+    //         await ResetPageDataAsync(newCurrentPage, newCurrentPageUser);
+    //         return;
+    //     }
+    //     // are they already loaded and attached to the page user?
+    //     if (_currentPage != null && _currentPage.Paragraphs != null && _currentPage.Paragraphs.Count > 0)
+    //     {
+    //         _paragraphs = _currentPage.Paragraphs;
+    //     }
+    //     else
+    //     {
+    //         _isLoadingParagraphs = true;
+    //         _paragraphs = await FetchParagraphsAsync();
+    //         _isLoadingParagraphs = false;
+    //     }
+    // }
+    
+    #endregion
 }

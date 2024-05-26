@@ -38,7 +38,7 @@
         }
         else
         {
-            <form method="post" @onsubmit="OnSaveClick" @formname="CreateBookForm">
+            <form method="post" @onsubmit="OnSaveClickAsync" @formname="CreateBookForm">
                 <AntiforgeryToken />
                 <div class="mb-3">
                     <label class="form-label" 
@@ -184,23 +184,21 @@
             StateHasChanged();
         }
     }
-    private async Task OnSaveClick()
+    private async Task OnSaveClickAsync()
     {
         _isSaving = true;
         try
         {
             string textInput = await _largeVolumeTextArea.GetTextValue();
-            await Task.Run(() =>
-            {
-                int bookId = BookService.BookCreateAndSave(_titleInput, _languageCodeInput, _sourceURIInput, textInput);
-                // add the book stats
-                BookService.BookStatsCreateAndSave(bookId);
-                // now create the book user for teh logged in user
-                BookService.BookUserCreateAndSave(bookId, (int)_loggedInUser.Id);
-                // throw up a success message
-                _isSaveSuccess = true;
-                _newBookId = bookId;
-            });
+            
+            int bookId = await BookService.BookCreateAndSaveAsync(_titleInput, _languageCodeInput, _sourceURIInput, textInput);
+            // add the book stats
+            BookService.BookStatsCreateAndSave(bookId);
+            // now create the book user for teh logged in user
+            BookService.BookUserCreateAndSave(bookId, (int)_loggedInUser.Id);
+            // throw up a success message
+            _isSaveSuccess = true;
+            _newBookId = bookId;
         }
         catch (Exception ex)
         {

@@ -27,7 +27,12 @@
     /// The language the book was written in
     /// </summary>
     [Parameter]
-    public Language Language { get; set; }
+    public LanguageCode? LanguageFromCode { get; set; }
+    /// <summary>
+    /// The user's preferred UI language
+    /// </summary>
+    [Parameter]
+    public LanguageCode? LanguageToCode { get; set; }
 
     private Modal ppModal = default!;
     private string? _ppModalTitle;
@@ -36,17 +41,22 @@
 
     protected override async Task OnInitializedAsync()
     {
-        
+
     }
 
     public async Task OnShowPpModalClick(Paragraph pp)
     {
+        if (LanguageToCode == null || LanguageFromCode == null)
+        {
+            ErrorHandler.LogAndThrow(2240);
+            return;
+        }
         var sentences = pp.Sentences.OrderBy(x => x.Ordinal).Select(s => s.Text);
         var input = String.Join(" ", sentences);
         _ppModalTranslateFrom = input;
-        var toLang = UserService.GetLoggedInUser()?.LanguageCode;
-        var fromLang = Language?.LanguageCode;
-        _ppModalTitle = $"{UserService.GetUILabel("TranslationFrom")}: {fromLang?.LanguageName}. {UserService.GetUILabel("TranslationFrom")}: {toLang?.LanguageName}";
+        var toLang = LanguageToCode.Code;
+        var fromLang = LanguageFromCode.Code;
+        _ppModalTitle = $"{UserService.GetUILabelF("ppModalTitle", [fromLang, toLang])}";
 
         // see if the translation already exists
         if (pp.ParagraphTranslations == null) 
@@ -54,7 +64,7 @@
             pp.ParagraphTranslations = BookService.ParagraphTranslationsFetchByParagraph(pp);
         }
         var currentTranslation = pp.ParagraphTranslations
-            .Where(x => x.Code == toLang.Code)
+            .Where(x => x.Code == toLang)
             .FirstOrDefault();
         if(currentTranslation is not null)
         {
@@ -62,7 +72,7 @@
         }
         else
         {
-            var deeplResult = DeepLService.Translate(input, fromLang.Code, toLang.Code);
+            var deeplResult = DeepLService.Translate(input, fromLang, toLang);
             if(deeplResult is not null)
             {
                 _ppModalTranslateTo = deeplResult;
@@ -71,7 +81,7 @@
                 ParagraphTranslation ppt = new ParagraphTranslation()
                 {
                     ParagraphId = (int)pp.Id,
-                    Code = toLang.Code, 
+                    Code = toLang, 
                     TranslationText = deeplResult
                 };
                 ppt = BookService.ParagraphTranslationSave(ppt);

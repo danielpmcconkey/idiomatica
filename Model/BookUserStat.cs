@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [Table("vw_BookUserStat", Schema = "Idioma")]
+    [Table("BookUserStat", Schema = "Idioma")]
     [PrimaryKey(nameof(BookId), nameof(LanguageUserId), nameof(Key))]
     public class BookUserStat
     {
@@ -18,10 +18,11 @@ namespace Model
         public AvailableBookUserStat Key { get; set; }
 
         #region relationships
-        //public Book Book { get; set; }
+        public Book Book { get; set; }
         public LanguageUser LanguageUser { get; set; }
         #endregion
         [StringLength(250)]
-        public string Value { get; set; }
+        public string? ValueString { get; set; }
+        public decimal? ValueNumeric { get; set; }
     }
 }

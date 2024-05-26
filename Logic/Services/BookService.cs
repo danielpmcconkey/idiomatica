@@ -16,6 +16,7 @@ namespace Logic.Services
     public class BookService
     {
         private IDbContextFactory<IdiomaticaContext> _dbContextFactory;
+        
         public BookService(IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             _dbContextFactory = dbContextFactory;
@@ -23,7 +24,7 @@ namespace Logic.Services
 
         #region book
 
-        public int BookCreateAndSave(string title, string languageCode, string url, string text)
+        public async Task<int> BookCreateAndSaveAsync(string title, string languageCode, string url, string text)
         {
             const int _targetCharCountPerPage = 1378;// this was arrived at by DB query after conversion
             // sanitize and validate input
@@ -34,24 +35,28 @@ namespace Logic.Services
             if (string.IsNullOrEmpty(titleT))
             {
                 ErrorHandler.LogAndThrow(1040);
+                return -1;
             }
             if (string.IsNullOrEmpty(languageCodeT))
             {
                 ErrorHandler.LogAndThrow(1050);
+                return -1;
             }
             if (string.IsNullOrEmpty(textT))
             {
                 ErrorHandler.LogAndThrow(1060);
+                return -1;
             }
 
 
-            var context = _dbContextFactory.CreateDbContext();
+            var context = await _dbContextFactory.CreateDbContextAsync();
 
             // pull language from the db
-            var language = context.Languages.Where(x => x.LanguageCode.Code == languageCodeT).FirstOrDefault();
-            if (language == null || language.Id == null)
+            var language = await DataCache.LanguageByCodeReadAsync(languageCodeT, context);
+            if (language == null || language.Id == null || language.Id == 0)
             {
-                ErrorHandler.LogAndThrow(5070);
+                ErrorHandler.LogAndThrow(2070);
+                return -1;
             }
 
             // divide text into paragraphs
@@ -60,6 +65,7 @@ namespace Logic.Services
             if (paragraphSplits is null || paragraphSplits.Length == 0)
             {
                 ErrorHandler.LogAndThrow(2080);
+                return -1;
             }
 
             // add the book to the DB so you can save pages using its ID
@@ -71,17 +77,23 @@ namespace Logic.Services
             };
             context.Books.Add(book);
             context.SaveChanges();
-            //book.Language = language;
 
             if (book.Id == null || book.Id == 0)
             {
                 ErrorHandler.LogAndThrow(2090);
+                return -1;
             }
 
             // pull a list of common words from the database and put it
             // in a dictionary so that we don't always have to go back to the
             // database just to get the word ID for every single word
-            var commonWordsInLanguage = WordFetchCommonDictForLanguage(language);
+            var commonWordsInLanguage = await WordFetchCommonDictForLanguageAsync((int)language.Id);
+            if (commonWordsInLanguage == null)
+            {
+                ErrorHandler.LogAndThrow(2200);
+                return -1;
+            }
+            
 
             var currentPageCount = 1;
             var pageText = "";
@@ -138,16 +150,11 @@ namespace Logic.Services
 
             return (int)book.Id;
         }
-        public Book BookFetch(BookUser bookUser)
-        {
-            var context = _dbContextFactory.CreateDbContext();
+        
+        #endregion
 
-            return context.Books.Where(b => b.Id == bookUser.BookId)
-                .Include(b => b.BookStats)
-                .FirstOrDefault()
-                ;
-        }
-
+        #region BookListRow
+        
         #endregion
 
         #region BookStat
@@ -218,6 +225,7 @@ namespace Logic.Services
             var context = _dbContextFactory.CreateDbContext();
             return context.BookStats.Where(bs => bs.BookId == bookId).ToList();
         }
+        
         #endregion
 
         #region bookuser
@@ -262,8 +270,18 @@ namespace Logic.Services
             var context = _dbContextFactory.CreateDbContext();
             return context.BookUsers
                 .Where(bu => bu.LanguageUser.UserId == loggedInUserId && bu.BookId == bookId)
-                .Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language).ThenInclude(l => l.LanguageCode)
-                .Include(bu => bu.Book).ThenInclude(b => b.BookStats)
+                //.Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language).ThenInclude(l => l.LanguageCode)
+                //.Include(bu => bu.Book).ThenInclude(b => b.BookStats)
+                .FirstOrDefault()
+                ;
+        }
+        public async Task<BookUser?> BookUserFetchAsync(int loggedInUserId, int bookId)
+        {
+            var context = await _dbContextFactory.CreateDbContextAsync();
+            return context.BookUsers
+                .Where(bu => bu.LanguageUser.UserId == loggedInUserId && bu.BookId == bookId)
+                //.Include(bu => bu.LanguageUser).ThenInclude(lu => lu.Language).ThenInclude(l => l.LanguageCode)
+                //.Include(bu => bu.Book).ThenInclude(b => b.BookStats)
                 .FirstOrDefault()
                 ;
         }
@@ -306,13 +324,13 @@ namespace Logic.Services
                 .Where(filter);
 
         }
-        public IQueryable<BookUserStat> BookUserStatsFetch(int loggedInUserId, int bookId)
+        public async Task<List<BookUserStat>> BookUserStatsFetchAsync(int loggedInUserId, int bookId)
         {
-            var context = _dbContextFactory.CreateDbContext();
+            var context = await _dbContextFactory.CreateDbContextAsync();
 
             return context.BookUserStats
-                .Where(x => x.LanguageUser.UserId == loggedInUserId && x.BookId == bookId);
-
+                .Where(x => x.LanguageUser.UserId == loggedInUserId && x.BookId == bookId)
+                .ToList();
         }
         #endregion
 
@@ -333,7 +351,7 @@ namespace Logic.Services
             var context = _dbContextFactory.CreateDbContext();
             return context.LanguageUsers
                 .Where(lu => lu.User.Id == userId && lu.LanguageId == languageId)
-                .Include(lu => lu.Language).ThenInclude(l => l.LanguageCode)
+                //.Include(lu => lu.Language).ThenInclude(l => l.LanguageCode)
                 .FirstOrDefault();
         }
         public LanguageUser LanguageUserFetch(int userId, string languageCode)
@@ -344,22 +362,18 @@ namespace Logic.Services
                 .Include(lu => lu.Language).ThenInclude(l => l.LanguageCode)
                 .FirstOrDefault();
         }
+        public LanguageUser LanguageUserFetch(int languageUserId)
+        {
+            var context = _dbContextFactory.CreateDbContext();
+            return context.LanguageUsers
+                .Where(lu => lu.Id == languageUserId)
+                .FirstOrDefault();
+        }
+        
         #endregion
 
         #region Page
-        public Page? PageFetchByOrdinalWithinBook(int ordinal, int bookId)
-        {
-            // pages are public. no need to check for a match to logged in user
-            var context = _dbContextFactory.CreateDbContext();
-            return context.Pages
-                .Where(p => p.Ordinal == ordinal
-                    && p.BookId == bookId)
-                .Include(p => p.Paragraphs)
-                    .ThenInclude(pp => pp.Sentences)
-                    .ThenInclude(s => s.Tokens)
-                    .ThenInclude(s => s.Word)
-                .FirstOrDefault();
-        }
+        
         public int PageCreateAndSaveDuringBookCreate(
             int bookId, int Ordinal, string pageText, IdiomaticaContext context,
             Language language, Dictionary<string,Word> commonWordsInLanguage)
@@ -382,7 +396,8 @@ namespace Logic.Services
                 context, newPage, language, commonWordsInLanguage);
             return (int)newPage.Id;
         }
-        public void PageUpdateBookmark(int bookUserId, int currentPageId)
+        
+        public async Task PageUpdateBookmarkAsync(int bookUserId, int currentPageId)
         {
             if (bookUserId == 0)
             {
@@ -392,14 +407,14 @@ namespace Logic.Services
             {
                 ErrorHandler.LogAndThrow(1130);
             }
-            var context = _dbContextFactory.CreateDbContext();
+            var context = await _dbContextFactory.CreateDbContextAsync();
             var bookUser = context.BookUsers.FirstOrDefault(x => x.Id == bookUserId);
             if (bookUser == null)
             {
                 ErrorHandler.LogAndThrow(2050, [$"bookUserId: {bookUserId}"]);
             }
             bookUser.CurrentPageID = currentPageId;
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
         #endregion
 
@@ -457,35 +472,8 @@ namespace Logic.Services
                 throw; // you'll never get here
             }
         }
-        public PageUser? PageUserFetchById(int pageId, int languageUserId)
-        {
-            // note this doesn't fetch the word_user
-
-            var context = _dbContextFactory.CreateDbContext();
-            return context.PageUsers
-                .Where(pu => pu.BookUser.LanguageUserId == languageUserId
-                    && pu.PageId == pageId)
-                .Include(pu => pu.Page)
-                    .ThenInclude(p => p.Paragraphs)
-                    .ThenInclude(pp => pp.Sentences)
-                    .ThenInclude(s => s.Tokens)
-                    .ThenInclude(s => s.Word)
-                .FirstOrDefault();
-        }
-        public PageUser? PageUserFetchByOrdinalWithinBook(int ordinal, int bookId, int loggedInUserId)
-        {
-            var context = _dbContextFactory.CreateDbContext();
-            return context.PageUsers
-                .Where(pu => pu.BookUser.LanguageUserId == loggedInUserId
-                    && pu.Page.Ordinal == ordinal
-                    && pu.Page.BookId == bookId)
-                .Include(pu => pu.Page)
-                    .ThenInclude(p => p.Paragraphs)
-                    .ThenInclude(pp => pp.Sentences)
-                    .ThenInclude(s => s.Tokens)
-                    .ThenInclude(s => s.Word)
-                .FirstOrDefault();
-        }
+        
+        
         public void PageUserUpdateReadDate(int id, DateTime readDate)
         {
             var context = _dbContextFactory.CreateDbContext();
@@ -498,6 +486,10 @@ namespace Logic.Services
             context.SaveChanges();
             return;
         }
+        #endregion
+
+        #region Paragraph
+        
         #endregion
 
         #region ParagraphTranslation
@@ -519,11 +511,29 @@ namespace Logic.Services
         #endregion
 
         #region Word
-        public Dictionary<string, Word> WordFetchCommonDictForLanguage(Language language)
+        
+        public async Task<Dictionary<string, Word>?> WordFetchCommonDictForLanguageAsync(int languageId)
         {
-            var context = _dbContextFactory.CreateDbContext();
-            return WordHelper.FetchCommonWordDictForLanguage(context, language);
+            if (languageId == 0)
+            {
+                ErrorHandler.LogAndThrow(1160);
+                return null;
+            }
+            var context = await _dbContextFactory.CreateDbContextAsync();
+
+            var topWordsInLanguage = await DataCache.WordsCommon1000ByLanguageIdReadAsync(languageId, context);
+
+            Dictionary<string, Word> wordDict = new Dictionary<string, Word>();
+            foreach (var word in topWordsInLanguage)
+            {
+
+                // TextLowerCase and LanguageId are a unique key in the database
+                // so no need to check if it already exists before adding
+                wordDict.Add(word.TextLowerCase, word);
+            }
+            return wordDict;
         }
+        
         #endregion
 
         #region WordUser
@@ -543,10 +553,33 @@ namespace Logic.Services
                 .Include(wu => wu.Word)
                 .FirstOrDefault();
         }
-        public Dictionary<string, WordUser> WordUserFetchDictForLanguageUser(LanguageUser languageUser)
+        
+        public async Task<Dictionary<string, WordUser>> WordUserFetchDictForLanguageUserAsync(
+            int userId, int languageId)
         {
-            var context = _dbContextFactory.CreateDbContext();
-            return WordHelper.FetchWordUserDictForLanguageUser(context, languageUser);
+            var context = await _dbContextFactory.CreateDbContextAsync();
+
+            Dictionary<string, WordUser> wordDict = new Dictionary<string, WordUser>();
+
+
+
+
+            var allWordUsersInLanguage = await DataCache.WordUsersByUserIdAndLanguageIdReadAsync(
+                (userId, languageId), context);
+
+            foreach (var wordUser in allWordUsersInLanguage)
+            {
+                if (wordUser.Word is null)
+                {
+                    wordUser.Word = await DataCache.WordByIdReadAsync(wordUser.WordId, context);
+                }
+
+                // TextLowerCase and LanguageId are a unique key in the database
+                // so no need to check if it already exists before adding
+                wordDict.Add(wordUser.Word.TextLowerCase, wordUser);
+            }
+
+            return wordDict;
         }
         public void WordUserUpdateStatusAndTranslation(int id, AvailableWordUserStatus newStatus, string translation)
         {

@@ -65,7 +65,7 @@
 
 @code {
     [Parameter]
-    public Dictionary<string, WordUser> allWordUsersInLanguage { get; set; }
+    public Dictionary<string, WordUser> allWordUsersInPage { get; set; }
     [Parameter]
     public Read? Parent { get; set; }
     private Modal modal = default!;
@@ -89,7 +89,7 @@
     {
         get
         {
-            if (!allWordUsersInLanguage.ContainsKey(_modalToken.Word.TextLowerCase))
+            if (!allWordUsersInPage.ContainsKey(_modalToken.Word.TextLowerCase))
             {
                 // this logic should have been done in the paragraphview so this is probably not needed
                 // first create
@@ -97,9 +97,9 @@
                 // pull from the DB fresh
                 var newWordUser = BookService.WordUserFetch(_languageUser, _modalToken.Word);
                 // and add to the dict
-                allWordUsersInLanguage[_modalToken.Word.TextLowerCase] = newWordUser;
+                allWordUsersInPage[_modalToken.Word.TextLowerCase] = newWordUser;
             }
-            return allWordUsersInLanguage[_modalToken.Word.TextLowerCase];
+            return allWordUsersInPage[_modalToken.Word.TextLowerCase];
         }
     }
     private string? _modalTitle
