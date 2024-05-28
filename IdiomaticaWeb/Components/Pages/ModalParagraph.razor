@@ -3,6 +3,7 @@
 @inject BookService BookService;
 @inject UserService UserService;
 @inject DeepLService DeepLService;
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 @using System.Text;
 
 @* Modal for paragraph translation *@
@@ -58,10 +59,12 @@
         var fromLang = LanguageFromCode.Code;
         _ppModalTitle = $"{UserService.GetUILabelF("ppModalTitle", [fromLang, toLang])}";
 
+        var context = await DbContextFactory.CreateDbContextAsync();
         // see if the translation already exists
         if (pp.ParagraphTranslations == null) 
         {
-            pp.ParagraphTranslations = BookService.ParagraphTranslationsFetchByParagraph(pp);
+            pp.ParagraphTranslations = await DataCache.ParagraphTranslationsByParargraphIdReadAsync(
+                (int)pp.Id, context);
         }
         var currentTranslation = pp.ParagraphTranslations
             .Where(x => x.Code == toLang)
@@ -77,14 +80,19 @@
             {
                 _ppModalTranslateTo = deeplResult;
                 // add to the DB
-                // need to move this to the book service
                 ParagraphTranslation ppt = new ParagraphTranslation()
                 {
                     ParagraphId = (int)pp.Id,
                     Code = toLang, 
                     TranslationText = deeplResult
                 };
-                ppt = BookService.ParagraphTranslationSave(ppt);
+                bool didSave = await DataCache.ParagraphTranslationCreateAsync(ppt, context);
+                if(!didSave || ppt.Id == null || ppt.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow(2340);
+                    return;
+                }
+                // BookService.ParagraphTranslationSave(ppt);
                 pp.ParagraphTranslations.Add(ppt);
             }
         }        

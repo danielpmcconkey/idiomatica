@@ -195,7 +195,7 @@
             // add the book stats
             BookService.BookStatsCreateAndSave(bookId);
             // now create the book user for teh logged in user
-            BookService.BookUserCreateAndSave(bookId, (int)_loggedInUser.Id);
+            BookService.BookUserCreateAndSaveAsync(bookId, (int)_loggedInUser.Id);
             // throw up a success message
             _isSaveSuccess = true;
             _newBookId = bookId;

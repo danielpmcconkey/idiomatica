@@ -1,5 +1,6 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@inject UserService UserService;
 
 <PageTitle>Blazor Bootstrap - WebAssembly Standalone App (.NET 8) - Starter Template</PageTitle>
 
@@ -12,10 +13,11 @@ Interactive render mode: Server
 <br />
 Interactive location: Global
 
-
+<ErrorAlert ErrorState="errorState"></ErrorAlert>
 <div>
     <Button Color="ButtonColor.Primary" @onclick="OnAsyncTest">Async test</Button>
 </div>
+
 
 <AuthorizeView>
     <Authorized>
@@ -26,63 +28,54 @@ Interactive location: Global
     </NotAuthorized>
 </AuthorizeView>
 
-<p>@longs[0]</p>
-<p>@longs[1]</p>
-<p>@shorts[0]</p>
-<p>@shorts[1]</p>
-<p>@shorts[2]</p>
-<p>@shorts[3]</p>
-<p>@shorts[4]</p>
+
+@foreach(var item in words)
+{
+    <Deleteme burp="@item" />
+}
+
+
 
 
 @code {
     private Modal modal;
+    public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     string[] longs = ["long 0", "long 1"];
     private string[] shorts = ["short 0", "short 1", "short 2", "short 3", "short 4"];
+    private List<string> words = new List<string>();
+    private bool _isDataInit = false;
+    private bool _burp = false;
 
+    private async Task InitData()
+    {
+        foreach (var item in longs) words.Add(item);
 
+        // fin
+        _isDataInit = true;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (_isDataInit == false) await InitData();
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("readInitializationError");
+            StateHasChanged();
+            return;
+        }
+    }
 
     private async Task OnAsyncTest()
     {
-        // these will start immediately and run concurrently
-        Task[] tasks = [
-            ShortRunning(0),
-            ShortRunning(1),
-            ShortRunning(2)
-        ];
-        StateHasChanged();
-        await Task.WhenAll(tasks);
+        _burp = !_burp;
+        words = new List<string>();
+        if (_burp) foreach (var item in shorts) words.Add(item);
+        else foreach (var item in longs) words.Add(item);
 
-        // this will start when all the 3 above finish
-        await LongRunning(0);
-        StateHasChanged();
-        // this will start when the above finishes
-        await ShortRunning(3);
-        StateHasChanged();
-        // this will start when the above finishes
-        await ShortRunning(4);
-        StateHasChanged();
-        await LongRunning(1);
-        StateHasChanged();
     }
-    private async Task LongRunning(int ordinal)
-    {
-        longs[ordinal] = $"long running {ordinal} started at {GetTimeStamp()}. ";
-        await SleepFor(3);
-        longs[ordinal] += $"long running {ordinal} done at {GetTimeStamp()}";
-    }
-    private async Task ShortRunning(int ordinal)
-    {
-        shorts[ordinal] = $"short running {ordinal} started at {GetTimeStamp()}. ";
-        await SleepFor(1);
-        shorts[ordinal] += $"short running {ordinal} done at {GetTimeStamp()}";
-    }
-    private string GetTimeStamp()
-    {
-        return DateTime.Now.ToString("HH:mm:ss.ffffzzz");
-    }
-    private async Task SleepFor(int seconds)
-    {
-        await Task.Delay(seconds * 1000);
-    }
+    
 }

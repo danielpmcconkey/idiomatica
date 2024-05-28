@@ -89,7 +89,9 @@
         
 
             <ModalWord @ref="_wModal" Parent="this"
-                       allWordUsersInPage="_allWordUsersInPage" />
+                       AllWordUsersInPage="_allWordUsersInPage"
+                       LoggedInUser="_loggedInUser"
+                       WordsInPage="_wordsInPage" />
 
             <ModalParagraph @ref="_ppModal" 
                             LanguageFromCode="_languageFromCode"
@@ -114,7 +116,8 @@
                             allWordUsersInPage="_allWordUsersInPage"
                             OnShowWordModal="OnShowWordModal"
                             OnShowPpModal="ShowPpModal"
-                            Language="_language" />
+                            Language="_language" 
+                            LanguageUser="_languageUser" />
                     }
                 }
                 <hr />
@@ -193,6 +196,7 @@
     /// </summary>
     private LanguageCode? _languageToCode = null;
     #endregion
+
 
     #region init methods
     private async Task InitData()
@@ -310,6 +314,24 @@
     {
         try
         {
+            // set isDataInit to false and force a delay of at least N 
+            // miliseconds. this forces the screen to re-draw the paragraphs. 
+            // Otherwise, you get the old paragraphs on the new page.
+            _isDataInit = false;
+            var t_delay = Task.Delay(1000); // this task is awaited at the end of this function to ensure you've waited at least the min time
+
+
+            /*
+             * where you are
+             * 
+             * you need to finish testing your prior changes.
+             * 
+             * Then the Modal word needs some revamp -- load data when its 
+             * invoked
+             * 
+             */
+
+
             if(_languageUser is null || _languageUser.Id is null || _languageUser.Id == 0)
             {
                 ErrorHandler.LogAndThrow(2170);
@@ -337,7 +359,13 @@
                 (int)_languageUser.Id, targetPageNum, BookId);
             if (_currentPageUser == null) return;
 
+           
             await ResetPageData(_currentPageUser.PageId);
+            await BookService.BookUserUpdateBookmarkAsync(_bookUser.Id, (int)_currentPage.Id);
+            StateHasChanged();
+            
+            await t_delay;
+            _isDataInit = true;
 
         }
         catch (Exception ex)
@@ -369,6 +397,7 @@
     #region private methods
     private async Task ResetPageData(int pageId)
     {
+        StateHasChanged();
         if (pageId == 0)
         {
             ErrorHandler.LogAndThrow(1240);
@@ -379,6 +408,17 @@
             ErrorHandler.LogAndThrow(2130);
             return;
         }
+        // wipe the old ones out
+        _currentPage = null;
+        _paragraphs = null;
+        _allWordUsersInPage = null;
+        _wordsInPage = null;
+        _sentences = null;
+        _tokens = null;
+
+
+
+        // and rebuild
         var t_currentPage = GetCurrentPageAsync(pageId);
         var t_paragraphs = GetParagraphsAsync(pageId);
         var t_wordsInPage = GetWordsInPageAsync(pageId);
@@ -398,6 +438,7 @@
 
         // now knit the paragraph data together
         _paragraphs = _paragraphs.OrderBy(x => x.Ordinal).ToList();
+        var pox = _paragraphs[0];
         foreach(var p in _paragraphs)
         {
             p.Sentences = _sentences
@@ -421,7 +462,8 @@
                 }
             }
         }
-
+        
+        
     }
     
     private async Task<BookUser?> FetchBookUserAsync(int bookId, int userId)
@@ -432,13 +474,14 @@
         if (bookUserFromDb is null)
         {
             // try to create it
-            var bookUserId = BookService.BookUserCreateAndSave(BookId, (int)_loggedInUser.Id);
+            var bookUserId = await BookService.BookUserCreateAndSaveAsync(BookId, (int)_loggedInUser.Id);
             if(bookUserId == 0)
             {
                 ErrorHandler.LogAndThrow(5080);
                 return null;
             }
-            bookUserFromDb = await BookService.BookUserFetchAsync((int)_loggedInUser.Id, BookId);
+            bookUserFromDb = await DataCache.BookUserByUserIdAndBookIdReadAsync(
+                (bookId, userId), context);
         }
         return bookUserFromDb;
     }
@@ -465,7 +508,7 @@
         }
 
 
-        int newPageUserId = BookService.PageUserCreateAndSave(existingPage, _bookUser,
+        int newPageUserId = await BookService.PageUserCreateAndSaveAsync(existingPage, _bookUser,
             _wordsInPage, _allWordUsersInPage);
 
         return await DataCache.PageUserByIdReadAsync(newPageUserId, context);
@@ -803,7 +846,7 @@
     private async Task MarkCurrentPageReadAsync(int currentUserPageId)
     {
         var readDate = DateTime.Now;
-        BookService.PageUserUpdateReadDate(currentUserPageId, readDate);
+        BookService.PageUserUpdateReadDateAsync(currentUserPageId, readDate);
     }
 
     // private async Task ResetPageDataAsync(Page newCurrentPage, PageUser newCurrentPageUser)

@@ -67,16 +67,11 @@ else
     /// </summary>
     [Parameter]
     public Language Language { get; set; }
+    [Parameter]
+    public LanguageUser LanguageUser { get; set; }
     private bool _isDataInit = false;
     private bool _isLoadingLoggedInUser = false;
     private User? _loggedInUser = null;
-    private LanguageUser _languageUser
-    {
-        get // todo: move _languageUser population to an initializer
-        {
-            return BookService.LanguageUserFetch((int)_loggedInUser.Id, (int)Language.Id);
-        }
-    }
     private List<Sentence> _sentences = null;
 
     private async Task InitData()
@@ -127,15 +122,28 @@ else
     }
     private List<Token> GetSentenceTokens(Sentence sentence)
     {
+        if (sentence.Id == null || sentence.Id == 0)
+        {
+            ErrorHandler.LogAndThrow(2230);
+            return new List<Token>();
+        }
+        var context = DbContextFactory.CreateDbContext();
         if (sentence.Tokens is null || sentence.Tokens.Count == 0)
         {
-            if (sentence.Id == null || sentence.Id == 0)
-            {
-                ErrorHandler.LogAndThrow(2230);
-                return new List<Token>();
-            }
-            var context = DbContextFactory.CreateDbContext();
+            // we shouldn't be here because tokens should have been added in the read page
             sentence.Tokens = DataCache.TokensBySentenceIdReadAsync((int)sentence.Id, context).Result;
+            // now get the words
+            var wordsInSentence = DataCache.WordsBySentenceIdReadAsync((int)sentence.Id, context).Result;
+            foreach(var t in sentence.Tokens)
+            {
+                var word = wordsInSentence.Where(w => w.Id == t.WordId).FirstOrDefault();
+                if (word == null)
+                {
+                    ErrorHandler.LogAndThrow(2370);
+                    return null;
+                }
+                t.Word = word;
+            }
         }
         // make sure each token has a word user and is in the dictionary
         // doing it here allows there to be continuity between the same word
@@ -143,20 +151,41 @@ else
         // the other.
         foreach (var token in sentence.Tokens)
         {
+
             if (!allWordUsersInPage.ContainsKey(token.Word.TextLowerCase))
             {
-                AddTokenToWordDict(token);
+                // check if there's already a wordUser
+                var wordUser = DataCache.WordUserByWordIdAndUserIdReadAsync(
+                    ((int)token.Word.Id, (int)_loggedInUser.Id), context).Result;
+                if(wordUser is null)
+                {
+                    // need to create
+                    // grab the languageUserId from another wordUser
+                    var languageUserId = allWordUsersInPage
+                        .Where(x => x.Value.LanguageUserId != 0)
+                        .FirstOrDefault()
+                        .Value
+                        .LanguageUserId;
+                    wordUser = new WordUser()
+                    {
+                        LanguageUserId = languageUserId,
+                        WordId = (int)token.Word.Id,
+                        Status = AvailableWordUserStatus.UNKNOWN,
+                        Translation = string.Empty
+                    };
+                    var isSaved = DataCache.WordUserCreateAsync(wordUser, context).Result;
+                    if(!isSaved || wordUser.Id < 1)
+                    {
+                        ErrorHandler.LogAndThrow(2380);
+                        return null;
+                    }
+                }
+
+                allWordUsersInPage[token.Word.TextLowerCase] = wordUser;
             }
         }
         return sentence.Tokens;
         
     }
-    private void AddTokenToWordDict(Token token)
-    {
-        BookService.WordUserCreateAndSave(_languageUser, token.Word);
-        // pull from the DB fresh
-        var newWordUser = BookService.WordUserFetch(_languageUser, token.Word);
-        // and add to the dict
-        allWordUsersInPage[token.Word.TextLowerCase] = newWordUser;
-    }
+    
 }
