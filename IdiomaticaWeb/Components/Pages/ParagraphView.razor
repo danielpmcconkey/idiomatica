@@ -2,54 +2,62 @@
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 
-
-<div class="row  g-2">
-    <div class="col-1">
-        <div class="">
-            <Button class="btn-sm" Color="ButtonColor.Primary"
-                    Outline="true" TooltipTitle="Translate paragraph"
-                    @onclick="@(e => OnPpTranslateClick())">
-                &#182;
-            </Button>
+@if(_isDataInit)
+{
+    <div class="row  g-2">
+        <div class="col-1">
+            <div class="">
+                <Button class="btn-sm" Color="ButtonColor.Primary"
+                        Outline="true" TooltipTitle="Translate paragraph"
+                        @onclick="@(e => OnPpTranslateClick())">
+                    &#182;
+                </Button>
+            </div>
         </div>
-    </div>
-    <div class="col-10">
-        <div>
-            <p class="readParagraph">
-                @foreach (var sentence in paragraph.Sentences.OrderBy(x => x.Ordinal))
-                {
-                    foreach (var token in GetSentenceTokens(sentence).OrderBy(x => x.Ordinal))
+        <div class="col-10">
+            <div>
+                <p class="readParagraph">
+                    @foreach (var sentence in _sentences)
                     {
+                        foreach (var token in GetSentenceTokens(sentence))
+                        {
                         
-                        <span class="readToken @GetTokenClass(token)"
-                              data-toggle="tooltip"
-                              data-placement="top"
-                              title="@GetTokenTranslation(token)"
-                              @onclick="@(e => OnTokenClick(@token))">
-                            @token.Display
-                        </span>
+                            <span class="readToken @GetTokenClass(token)"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  title="@GetTokenTranslation(token)"
+                                  @onclick="@(e => OnTokenClick(@token))">
+                                @token.Display
+                            </span>
+                        }
                     }
-                }
-            </p>
+                </p>
+            </div>
+        </div>
+        <div class="col-1">
+            <div class="">
+                <Button class="btn-sm" Color="ButtonColor.Primary"
+                        Outline="true" TooltipTitle="Translate paragraph"
+                        @onclick="@(e => OnPpTranslateClick())">
+                    &#182;
+                </Button>
+            </div>
         </div>
     </div>
-    <div class="col-1">
-        <div class="">
-            <Button class="btn-sm" Color="ButtonColor.Primary"
-                    Outline="true" TooltipTitle="Translate paragraph"
-                    @onclick="@(e => OnPpTranslateClick())">
-                &#182;
-            </Button>
-        </div>
-    </div>
-</div>
+}
+else
+{
+    <Button Color="ButtonColor.Primary"
+        Size="Size.Small" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+}
 @code {
 
     [Parameter]
-    public Paragraph paragraph { get; set; }
+    public Paragraph paragraphAndChildren { get; set; }
     [Parameter]
-    public Dictionary<string, WordUser> allWordUsersInLanguage { get; set; }
+    public Dictionary<string, WordUser> allWordUsersInPage { get; set; }
     [Parameter]
     public EventCallback<Token> OnShowWordModal { get; set; }
     [Parameter]
@@ -59,68 +67,125 @@
     /// </summary>
     [Parameter]
     public Language Language { get; set; }
-    private User _loggedInUser
+    [Parameter]
+    public LanguageUser LanguageUser { get; set; }
+    private bool _isDataInit = false;
+    private bool _isLoadingLoggedInUser = false;
+    private User? _loggedInUser = null;
+    private List<Sentence> _sentences = null;
+
+    private async Task InitData()
     {
-        get // todo: move _loggedInUser population to an initializer
+        if(paragraphAndChildren.Id == null || paragraphAndChildren.Id == 0)
         {
-            return UserService.GetLoggedInUser();
+            ErrorHandler.LogAndThrow(2210);
+            return;
+        }
+        var context = await DbContextFactory.CreateDbContextAsync();
+        _loggedInUser = await UserService.GetLoggedInUserAsync();
+        _sentences = paragraphAndChildren.Sentences.OrderBy(s => s.Ordinal).ToList();
+        _isDataInit = true;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (_isDataInit == false) await InitData();
+        }
+        catch (Exception ex)
+        {
+            throw;
         }
     }
-    private LanguageUser _languageUser
-    {
-        get // todo: move _languageUser population to an initializer
-        {
-            return BookService.LanguageUserFetch((int)_loggedInUser.Id, (int)Language.Id);
-        }
-    }
+
     private void OnTokenClick(Token token)
     {
         OnShowWordModal.InvokeAsync(token);
     }
     private void OnPpTranslateClick()
     {
-        OnShowPpModal.InvokeAsync(paragraph);
+        OnShowPpModal.InvokeAsync(paragraphAndChildren);
     }
     public string GetTokenClass(Token token)
     {
         if (token.Word is null) return "statusUNKNOWN";
-        if (!allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
-        var wordUser = allWordUsersInLanguage[token.Word.TextLowerCase];
+        if (!allWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
+        var wordUser = allWordUsersInPage[token.Word.TextLowerCase];
         return $"status{wordUser.Status}";
     }
     private string GetTokenTranslation(Token token)
     {
         if (token.Word is null) return "";
-        if (!allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase)) return "";
-        var wordUser = allWordUsersInLanguage[token.Word.TextLowerCase];
+        if (!allWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "";
+        var wordUser = allWordUsersInPage[token.Word.TextLowerCase];
         return wordUser.Translation;
     }
     private List<Token> GetSentenceTokens(Sentence sentence)
     {
-        if (sentence.Tokens is not null && sentence.Tokens.Count > 0) 
+        if (sentence.Id == null || sentence.Id == 0)
         {
-            // make sure each token has a word user and is in the dictionary
-            // doing it here allows there to be continuity between the same word
-            // in different paragraphs, so that, when you edit one, it updates
-            // the other.
-            foreach (var token in sentence.Tokens)
-            {
-                if (!allWordUsersInLanguage.ContainsKey(token.Word.TextLowerCase))
-                {
-                    AddTokenToWordDict(token);
-                }
-            }
-            return sentence.Tokens;
+            ErrorHandler.LogAndThrow(2230);
+            return new List<Token>();
         }
-        // todo: log error. there should not be a sentence w/out tokens at this point
-        return new List<Token>();
+        var context = DbContextFactory.CreateDbContext();
+        if (sentence.Tokens is null || sentence.Tokens.Count == 0)
+        {
+            // we shouldn't be here because tokens should have been added in the read page
+            sentence.Tokens = DataCache.TokensBySentenceIdReadAsync((int)sentence.Id, context).Result;
+            // now get the words
+            var wordsInSentence = DataCache.WordsBySentenceIdReadAsync((int)sentence.Id, context).Result;
+            foreach(var t in sentence.Tokens)
+            {
+                var word = wordsInSentence.Where(w => w.Id == t.WordId).FirstOrDefault();
+                if (word == null)
+                {
+                    ErrorHandler.LogAndThrow(2370);
+                    return null;
+                }
+                t.Word = word;
+            }
+        }
+        // make sure each token has a word user and is in the dictionary
+        // doing it here allows there to be continuity between the same word
+        // in different paragraphs, so that, when you edit one, it updates
+        // the other.
+        foreach (var token in sentence.Tokens)
+        {
+
+            if (!allWordUsersInPage.ContainsKey(token.Word.TextLowerCase))
+            {
+                // check if there's already a wordUser
+                var wordUser = DataCache.WordUserByWordIdAndUserIdReadAsync(
+                    ((int)token.Word.Id, (int)_loggedInUser.Id), context).Result;
+                if(wordUser is null)
+                {
+                    // need to create
+                    // grab the languageUserId from another wordUser
+                    var languageUserId = allWordUsersInPage
+                        .Where(x => x.Value.LanguageUserId != 0)
+                        .FirstOrDefault()
+                        .Value
+                        .LanguageUserId;
+                    wordUser = new WordUser()
+                    {
+                        LanguageUserId = languageUserId,
+                        WordId = (int)token.Word.Id,
+                        Status = AvailableWordUserStatus.UNKNOWN,
+                        Translation = string.Empty
+                    };
+                    var isSaved = DataCache.WordUserCreateAsync(wordUser, context).Result;
+                    if(!isSaved || wordUser.Id < 1)
+                    {
+                        ErrorHandler.LogAndThrow(2380);
+                        return null;
+                    }
+                }
+
+                allWordUsersInPage[token.Word.TextLowerCase] = wordUser;
+            }
+        }
+        return sentence.Tokens;
+        
     }
-    private void AddTokenToWordDict(Token token)
-    {
-        BookService.WordUserCreateAndSave(_languageUser, token.Word);
-        // pull from the DB fresh
-        var newWordUser = BookService.WordUserFetch(_languageUser, token.Word);
-        // and add to the dict
-        allWordUsersInLanguage[token.Word.TextLowerCase] = newWordUser;
-    }
+    
 }

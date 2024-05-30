@@ -8,6 +8,7 @@ namespace Model.DAL
         #region DBSets
 
         public DbSet<Book> Books { get; set; }
+        public DbSet<BookListRow> BookListRows { get; set; }
         public DbSet<BookStat> BookStats { get; set; }
         public DbSet<BookUser> BookUsers { get; set; }
         public DbSet<BookUserStat> BookUserStats { get; set; }
@@ -66,6 +67,12 @@ namespace Model.DAL
                 e.HasMany(bu => bu.PageUsers).WithOne(pu => pu.BookUser)
                     .HasForeignKey(pu => pu.BookUserId)
                     .OnDelete(DeleteBehavior.NoAction);
+            });
+            modelBuilder.Entity<BookUserStat>(e => {
+                e.HasKey(bus => new {bus.BookId, bus.LanguageUserId, bus.Key});
+                e.HasOne(bus => bus.Book).WithMany(b => b.BookUserStats).HasForeignKey(bus => bus.BookId);
+                e.HasOne(bus => bus.LanguageUser).WithMany(lu => lu.BookUsersStats)
+                    .HasForeignKey(bus => bus.LanguageUserId);
             });
             modelBuilder.Entity<FlashCard>(e => {
                 e.HasKey(fc => fc.Id);

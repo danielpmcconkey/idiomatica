@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 
 <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 <style>
@@ -21,13 +22,13 @@
                    @bind="_filter"
                    @bind:event="oninput" />
         </div>
-        @if (_bookUsers is null)
+        @if (_bookListRows is null)
         {
             <p>
                 @UserService.GetUILabel("loading")
             </p>
         }
-        else if (!_bookUsers.Any())
+        else if (!_bookListRows.Any())
         {
             <p>
                 @UserService.GetUILabel("bookListNoBookNotice")
@@ -79,51 +80,51 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var bookUser in _bookUsers)
+                    @foreach (var row in _bookListRows)
                     {
-                        if (!OnIsVisibleInListCheck(bookUser))
+                        if (!OnIsVisibleInListCheck(row.LanguageName, row.Title))
                             continue;
 
                         <tr>
-                            <td scope="row">@bookUser.Book.Id</td>
-                            <td scope="row">@bookUser.LanguageUser.Language.Name</td>
+                            <td scope="row">@row.BookId</td>
+                            <td scope="row">@row.LanguageName</td>
                             <td scope="row" class="text-center">
-                                @if (OnGetBookUserStat_bool(bookUser, AvailableBookUserStat.ISCOMPLETE))
+                                @if (OnFormatIsComplete(row.IsComplete))
                                 {
                                     <span class="completedMarker">&#x2713;</span>
                                 }
                             </td>
                             <td scope="row">
                                 <p>
-                                    @OnFormatTitle(bookUser.Book)
+                                    @OnFormatTitle(row.Title)
                                 </p>
                                 <p>
                                     <Button Color="ButtonColor.Primary"
                                             Type="ButtonType.Link"
                                             Size="Size.Small"
-                                            To="@OnGetBookLinkRead(bookUser.Book)">
+                                            To="@OnGetBookLinkRead(row.BookId)">
                                         Read
                                     </Button>
                                     <Button Color="ButtonColor.Secondary"
                                             Type="ButtonType.Link"
                                             Size="Size.Small"
-                                            To="@OnGetBookLinkUpdate(bookUser.Book)">
+                                            To="@OnGetBookLinkUpdate(row.BookId)">
                                         Update
                                     </Button>
                                     <Button Color="ButtonColor.Warning"
                                             Size="Size.Small"
-                                            @onclick="((args) => OnClickRemove(args, bookUser.Book))">
+                                            @onclick="((args) => OnClickRemove(args, row.BookId))">
                                         Remove
                                     </Button>
                                     
                                     
                                 </p>
                             </td>
-                            <td scope="row" class="text-center">@OnFormatProgress(bookUser.BookId)</td>
-                            <td scope="row" class="text-end">@OnFormatCount(bookUser.BookId, AvailableBookUserStat.TOTALWORDCOUNT)</td>
-                            <td scope="row" class="text-end">@OnFormatCount(bookUser.BookId, AvailableBookUserStat.TOTALKNOWNPERCENT)</td>
-                            <td scope="row" class="text-end">@OnFormatCount(bookUser.BookId, AvailableBookUserStat.DISTINCTWORDCOUNT)</td>
-                            <td scope="row" class="text-end">@OnFormatCount(bookUser.BookId, AvailableBookUserStat.DISTINCTKNOWNPERCENT)</td>
+                            <td scope="row" class="text-center">@OnFormatProgress(row.Progress)</td>
+                            <td scope="row" class="text-end">@OnFormatCount(row.TotalWordCount)</td>
+                            <td scope="row" class="text-end">@OnFormatCount(row.TotalKnownPercent)</td>
+                            <td scope="row" class="text-end">@OnFormatCount(row.DistinctWordCount)</td>
+                            <td scope="row" class="text-end">@OnFormatCount(row.DistinctKnownPercent)</td>
                         </tr>
                     }
                 </tbody>
@@ -139,8 +140,9 @@
 
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
 
-    private List<BookUser>? _bookUsers;
-    private List<BookUserStat>? _bookUserStats;
+    // private List<BookUser>? _bookUsers;
+    // private List<BookUserStat>? _bookUserStats;
+    private List<BookListRow> _bookListRows;
 
     private User _loggedInUser { get { return UserService.GetLoggedInUser(); } }
 
@@ -148,8 +150,8 @@
     private string _filter;
     private bool _isSortedAscending;
     private string _activeSortColumn;
-    Dictionary<string, Func<BookUser, object>> orderByFunctions =
-        new Dictionary<string, Func<BookUser, object>>();
+    Dictionary<string, Func<BookListRow, object>> orderByFunctions =
+        new Dictionary<string, Func<BookListRow, object>>();
     #endregion
 
 
@@ -162,8 +164,16 @@
     {
         try
         {
-            _bookUsers = BookService.BookUsersFetchWithoutStats((int)_loggedInUser.Id).ToList();
-            _bookUserStats = BookService.BookUserStatsFetch((int)_loggedInUser.Id).ToList();
+            var context = await DbContextFactory.CreateDbContextAsync();
+            _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context);
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
         }
         catch (Exception ex)
         {
@@ -176,15 +186,23 @@
     {
         try
         {
-            orderByFunctions.Add("Language", (x => x.LanguageUser.Language.Name));
-            orderByFunctions.Add("Id", (x => x.Id));
-            orderByFunctions.Add("Title", (x => x.Book.Title));
-            orderByFunctions.Add("PROGRESSPERCENT", (x => OnGetBookUserStat_int(x, AvailableBookUserStat.PROGRESSPERCENT)));
-            orderByFunctions.Add("ISCOMPLETE", (x => OnGetBookUserStat_bool(x, AvailableBookUserStat.ISCOMPLETE)));
-            orderByFunctions.Add("TOTALWORDCOUNT", (x => OnGetBookUserStat_int(x, AvailableBookUserStat.TOTALWORDCOUNT)));
-            orderByFunctions.Add("TOTALKNOWNPERCENT", (x => OnGetBookUserStat_int(x, AvailableBookUserStat.TOTALKNOWNPERCENT)));
-            orderByFunctions.Add("DISTINCTWORDCOUNT", (x => OnGetBookUserStat_int(x, AvailableBookUserStat.DISTINCTWORDCOUNT)));
-            orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => OnGetBookUserStat_int(x, AvailableBookUserStat.DISTINCTKNOWNPERCENT)));
+            orderByFunctions.Add("Language", (x => x.LanguageName));
+            orderByFunctions.Add("Id", (x => x.BookId));
+            orderByFunctions.Add("Title", (x => x.Title));
+            orderByFunctions.Add("PROGRESSPERCENT", (x => x.ProgressPercent));
+            orderByFunctions.Add("ISCOMPLETE", (x => x.IsComplete));
+            orderByFunctions.Add("TOTALWORDCOUNT", (x => x.TotalWordCount));
+            orderByFunctions.Add("TOTALKNOWNPERCENT", (x => x.TotalKnownPercent));
+            orderByFunctions.Add("DISTINCTWORDCOUNT", (x => x.DistinctWordCount));
+            orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => x.DistinctKnownPercent));
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
         }
         catch (Exception ex)
         {
@@ -193,18 +211,26 @@
             StateHasChanged();
         }
     }
-    private string OnFormatTitle(Book book)
+    private string OnFormatTitle(string? title)
     {
         try
         {
+            if (title == null) return null;
             int maxCharsInBookListTitle = 60;
-            string title = book.Title;
             if (title.Length > maxCharsInBookListTitle)
             {
                 title = title.Substring(0, maxCharsInBookListTitle) + "...";
             }
             return title;
         }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
         catch (Exception ex)
         {
             errorState.isError = true;
@@ -213,11 +239,20 @@
             return string.Empty;
         }
     }
-    private string OnGetBookLinkRead(Book book)
+    private string OnGetBookLinkRead(int? bookId)
     {
         try
         {
-            return $"/Book/{book.Id}/Read";
+            if (bookId == null) return "";
+            return $"/Book/{bookId}/Read";
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
         }
         catch (Exception ex)
         {
@@ -227,11 +262,20 @@
             return string.Empty;
         }
     }
-    private string OnGetBookLinkUpdate(Book book)
+    private string OnGetBookLinkUpdate(int? bookId)
     {
         try
         {
-            return $"/Book/{book.Id}/Update";
+            if (bookId == null) return "";
+            return $"/Book/{bookId}/Update";
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
         }
         catch (Exception ex)
         {
@@ -241,12 +285,20 @@
             return string.Empty;
         }
     }
-    private void OnClickRemove(EventArgs args, Book book)
+    private void OnClickRemove(EventArgs args, int? bookId)
     {
         try
         {
             throw new NotImplementedException("book removal not yet implemented");
 
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
         }
         catch (Exception ex)
         {
@@ -256,16 +308,27 @@
         }
 
     }
-    private bool OnIsVisibleInListCheck(BookUser bookUser)
+    private bool OnIsVisibleInListCheck(string? languageName, string? title)
     {
         try
         {
             if (string.IsNullOrEmpty(_filter))
                 return true;
-            if (bookUser.LanguageUser.Language.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+
+            string languageNameNotNull = languageName == null ? "" : (string)languageName;
+            string titleNotNull = title == null ? "" : (string)title;
+            if (languageNameNotNull.Contains(_filter, StringComparison.OrdinalIgnoreCase))
                 return true;
-            if (bookUser.Book.Title.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+            if (titleNotNull.Contains(_filter, StringComparison.OrdinalIgnoreCase))
                 return true;
+            return false;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListIsVisibleError");
+            errorState.code = ex.code;
+            StateHasChanged();
             return false;
         }
         catch (Exception ex)
@@ -280,12 +343,12 @@
     {
         try
         {
-            if (_bookUsers is null) return;
+            if (_bookListRows is null) return;
             if (!orderByFunctions.ContainsKey(columnName)) return;
 
             if (columnName != _activeSortColumn)
             {
-                _bookUsers = _bookUsers.OrderBy(orderByFunctions[columnName]).ToList();
+                _bookListRows = _bookListRows.OrderBy(orderByFunctions[columnName]).ToList();
                 _isSortedAscending = true;
                 _activeSortColumn = columnName;
             }
@@ -293,14 +356,22 @@
             {
                 if (_isSortedAscending)
                 {
-                    _bookUsers = _bookUsers.OrderByDescending(orderByFunctions[columnName]).ToList();
+                    _bookListRows = _bookListRows.OrderByDescending(orderByFunctions[columnName]).ToList();
                 }
                 else
                 {
-                    _bookUsers = _bookUsers.OrderBy(orderByFunctions[columnName]).ToList();
+                    _bookListRows = _bookListRows.OrderBy(orderByFunctions[columnName]).ToList();
                 }
                 _isSortedAscending = !_isSortedAscending;
             }
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListSortTableError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
         }
         catch (Exception ex)
         {
@@ -327,6 +398,14 @@
                 return "fa-sort-down";
             }
         }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
         catch (Exception ex)
         {
             errorState.isError = true;
@@ -335,17 +414,21 @@
             return string.Empty;
         }
     }
-    private string OnFormatCount(int bookId, AvailableBookUserStat key)
+    private string OnFormatCount(decimal? dbStat)
     {
         try
         {
-            var dbStat = _bookUserStats.Where(x => x.BookId == bookId && x.Key == key)
-                .FirstOrDefault();
             if (dbStat is null) return "0";
-
-            int outValInt = 0;
-            if (int.TryParse(dbStat.Value, out outValInt) == false) return "0";
-            return outValInt.ToString("N0");
+            var flooredVal = Math.Floor((decimal)dbStat);
+            return flooredVal.ToString("N0");
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
         }
         catch (Exception ex)
         {
@@ -355,15 +438,20 @@
             return string.Empty;
         }
     }
-    private string OnFormatProgress(int bookId)
+    private string OnFormatProgress(string? progress)
     {
         try
         {
-            var dbStat = _bookUserStats.Where(x => x.BookId == bookId && x.Key == AvailableBookUserStat.PROGRESS)
-                .FirstOrDefault();
-            if (dbStat is null) return "0 / 0";
-
-            return dbStat.Value;
+            if (progress is null) return "0 / 0";
+            return progress;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
         }
         catch (Exception ex)
         {
@@ -373,35 +461,23 @@
             return string.Empty;
         }
     }
-    private int OnGetBookUserStat_int(BookUser bookUser, AvailableBookUserStat stat)
+    private bool OnFormatIsComplete(string? isComplete)
     {
         try
         {
-            var dbStat = _bookUserStats.Where(x => x.BookId == bookUser.BookId && x.Key == stat)
-                .FirstOrDefault();
-            if (dbStat is null) return 0;
-            int outVal = 0;
-            if (int.TryParse(dbStat.Value, out outVal) == false) return 0;
-            return outVal;
-        }
-        catch (Exception ex)
-        {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
-            StateHasChanged();
-            return -1;
-        }
-    }
-    private bool OnGetBookUserStat_bool(BookUser bookUser, AvailableBookUserStat stat)
-    {
-        try
-        {
-            var dbStat = _bookUserStats.Where(x => x.BookId == bookUser.BookId && x.Key == stat)
-                .FirstOrDefault();
-            if (dbStat is null) return false;
+            
+            if (isComplete is null) return false;
             bool outVal = false;
-            if (bool.TryParse(dbStat.Value, out outVal) == false) return false;
+            if (bool.TryParse(isComplete, out outVal) == false) return false;
             return outVal;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return false;
         }
         catch (Exception ex)
         {

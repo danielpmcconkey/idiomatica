@@ -17,23 +17,4 @@ namespace Model
         DISTINCTWORDCOUNT = 7,
         TOTALWORDCOUNT = 8,
     }
-}
-
-/*
- * 
-with params as (
-	select 
-	  AvailableWordUserStatusUNKNOWN = 8
-, AvailableWordUserStatusLEARNED = 5
-, AvailableWordUserStatusIGNORED = 6
-, AvailableWordUserStatusWELLKNOWN = 7
-, AvailableBookUserStatISCOMPLETE = 1
-, AvailableBookUserStatLASTPAGEREAD = 2
-, AvailableBookUserStatPROGRESS = 3
-, AvailableBookUserStatPROGRESSPERCENT = 4
-, AvailableBookUserStatDISTINCTKNOWNPERCENT = 5
-, AvailableBookUserStatTOTALKNOWNPERCENT = 6
-, AvailableBookUserStatDISTINCTWORDCOUNT = 7
-, AvailableBookUserStatTOTALWORDCOUNT = 8
-
- * */
+} 

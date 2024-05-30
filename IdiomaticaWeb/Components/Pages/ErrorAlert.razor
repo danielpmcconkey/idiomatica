@@ -8,7 +8,11 @@
         <Alert @ref="_errorAlert" Color="AlertColor.Danger">
             <div>
                 <Icon Name="IconName.ExclamationTriangleFill" class="me-2"></Icon>
-                @ErrorState.errorMessage
+                <p>@ErrorState.errorMessage</p>
+                @if (ErrorState.code > 0)
+                {
+                    <p>Code: @ErrorState.code </p>
+                }
             </div>
             <Button Color="ButtonColor.Primary" Size="Size.Small" @onclick="CloseErrorAlert">
                 @GetCloseLabel()
@@ -23,7 +27,7 @@
     // this class has to be bullet proof. Don't throw exceptions from within it
     [Parameter]
     public ErrorState ErrorState { get; set; }
-    
+
     private Alert _errorAlert;
 
     private async Task CloseErrorAlert() {
@@ -31,6 +35,7 @@
         {
             ErrorState.isError = false;
             ErrorState.errorMessage = "";
+            ErrorState.code = 0;
             await _errorAlert?.CloseAsync();
         }
         catch (Exception)
@@ -39,19 +44,7 @@
         }
     }
 
-    // public async Task AlertErrorAsync(string message)
-    // {
-    //     try
-    //     {
-    //         errorState.errorMessage = message;
-    //         errorState.isError = true;
-    //         StateHasChanged();
-    //     }
-    //     catch (Exception)
-    //     {
-    //         return;
-    //     }
-    // }
+    
     private string GetCloseLabel()
     {
         try

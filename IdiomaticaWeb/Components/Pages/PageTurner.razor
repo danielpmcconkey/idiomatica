@@ -6,70 +6,45 @@
 
 <div class="row  g-2">
     <div class="col-2">
-        <p>Page @currentPageUser.Page.Ordinal of @OnGetTotalPages()</p>
+        <p>Page @currentPage.Ordinal of @OnGetTotalPages()</p>
     </div>
     <div class="col-2">
-        <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(currentPageUser.Page.Ordinal - 1))">
+        <button type="button" class="btn btn-primary" @onclick="@(e => MovePageAsync(currentPage.Ordinal - 1))">
             @UserService.GetUILabel("btnPreviousPage")
         </button>
     </div>
     <div class="col-2">
-        <button type="button" class="btn btn-success" @onclick="@(e => ClearPage(currentPageUser.Page.Ordinal + 1))">
+        <button type="button" class="btn btn-success" @onclick="@(e => ClearPageAsync(currentPage.Ordinal + 1))">
             @UserService.GetUILabel("btnClearPage")
         </button>
     </div>
     <div class="col-2">
-        <button type="button" class="btn btn-primary" @onclick="@(e => MovePage(currentPageUser.Page.Ordinal + 1))">
+        <button type="button" class="btn btn-primary" @onclick="@(e => MovePageAsync(currentPage.Ordinal + 1))">
             @UserService.GetUILabel("btnNextPage")
         </button>
     </div>
 </div>
 @code {
     [Parameter]
-    public PageUser? currentPageUser { get; set; }
+    public Page? currentPage { get; set; }
     [Parameter]
-    public EventCallback<int> OnMovePage { get; set; }
+    public EventCallback<int> OnMovePageAsync { get; set; }
     [Parameter]
-    public EventCallback<int> OnClearPage { get; set; }
+    public EventCallback<int> OnClearPageAsync { get; set; }
+    [Parameter]
+    public int? BookTotalPageCount { get; set; }
 
-    private void MovePage(int targetPageNum)
+    private async Task MovePageAsync(int targetPageNum)
     {
-        OnMovePage.InvokeAsync(targetPageNum);
+        await OnMovePageAsync.InvokeAsync(targetPageNum);
     }
-    private void ClearPage(int targetPageNum)
+    private async Task ClearPageAsync(int targetPageNum)
     {
-        OnClearPage.InvokeAsync(targetPageNum);
+        await OnClearPageAsync.InvokeAsync(targetPageNum);
     }
     private int OnGetTotalPages()
     {
-        if (currentPageUser is null) return -1;
-        if (currentPageUser.BookUser is null) currentPageUser.BookUser = BookService.BookUserFetch(currentPageUser);
-        if (currentPageUser.BookUser.Book is null)
-            currentPageUser.BookUser.Book = BookService.BookFetch(currentPageUser.BookUser);
-        if (currentPageUser.BookUser.Book.BookStats is null || currentPageUser.BookUser.Book.BookStats.Count == 0)
-        {
-            // first check if they're in the DB
-            currentPageUser.BookUser.Book.BookStats = BookService
-                .BookStatsFetch((int)currentPageUser.BookUser.Book.Id);
-        }
-        if (currentPageUser.BookUser.Book.BookStats is null || currentPageUser.BookUser.Book.BookStats.Count == 0)
-        {
-            // none in DB. try to create them
-            BookService.BookStatsCreateAndSave((int)currentPageUser.BookUser.Book.Id);
-            currentPageUser.BookUser.Book.BookStats = BookService
-                .BookStatsFetch((int)currentPageUser.BookUser.Book.Id);
-        }
-        if (currentPageUser.BookUser.Book.BookStats is null || currentPageUser.BookUser.Book.BookStats.Count == 0)
-        {
-            // something is wrong here
-            return -1;
-        }
-        var valueString = currentPageUser.BookUser.Book.BookStats
-            .Where(x => x.Key == AvailableBookStat.TOTALPAGES)
-            .FirstOrDefault()
-            .Value;
-        int outVal = -1;
-        int.TryParse(valueString, out outVal);
-        return outVal;
+        if (BookTotalPageCount == null) return 0;
+        return (int)BookTotalPageCount;
     }
 }

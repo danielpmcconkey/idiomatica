@@ -1,4 +1,6 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@inject UserService UserService;
 
 <PageTitle>Blazor Bootstrap - WebAssembly Standalone App (.NET 8) - Starter Template</PageTitle>
 
@@ -11,18 +13,11 @@ Interactive render mode: Server
 <br />
 Interactive location: Global
 
+<ErrorAlert ErrorState="errorState"></ErrorAlert>
+<div>
+    <Button Color="ButtonColor.Primary" @onclick="OnAsyncTest">Async test</Button>
+</div>
 
-<Modal @ref="modal" Title="Modal title">
-    <BodyTemplate>
-        Modal body text goes here.
-    </BodyTemplate>
-    <FooterTemplate>
-        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
-        <Button Color="ButtonColor.Primary">Save changes</Button>
-    </FooterTemplate>
-</Modal>
-
-<Button Color="ButtonColor.Primary" @onclick="OnShowModalClick">Show Modal</Button>
 
 <AuthorizeView>
     <Authorized>
@@ -34,16 +29,53 @@ Interactive location: Global
 </AuthorizeView>
 
 
+@foreach(var item in words)
+{
+    <Deleteme burp="@item" />
+}
+
+
+
+
 @code {
     private Modal modal;
+    public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
+    string[] longs = ["long 0", "long 1"];
+    private string[] shorts = ["short 0", "short 1", "short 2", "short 3", "short 4"];
+    private List<string> words = new List<string>();
+    private bool _isDataInit = false;
+    private bool _burp = false;
 
-    private async Task OnShowModalClick()
+    private async Task InitData()
     {
-        await modal?.ShowAsync();
+        foreach (var item in longs) words.Add(item);
+
+        // fin
+        _isDataInit = true;
     }
 
-    private async Task OnHideModalClick()
+    protected override async Task OnInitializedAsync()
     {
-        await modal?.HideAsync();
+        try
+        {
+            if (_isDataInit == false) await InitData();
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("readInitializationError");
+            StateHasChanged();
+            return;
+        }
     }
+
+    private async Task OnAsyncTest()
+    {
+        _burp = !_burp;
+        words = new List<string>();
+        if (_burp) foreach (var item in shorts) words.Add(item);
+        else foreach (var item in longs) words.Add(item);
+
+    }
+    
 }
