@@ -271,6 +271,14 @@
         {
             if(_isDataInit == false) await InitData();
         }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("readInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
         catch (Exception ex)
         {
             errorState.isError = true;
@@ -322,11 +330,11 @@
 
 
             /*
-             * where you are
-             * 
-             * you need to finish testing your prior changes.
-             * 
-             * Then the Modal word needs some revamp -- load data when its 
+            * where you are
+            * 
+            * you need to finish testing your prior changes.
+            * 
+            * Then the Modal word needs some revamp -- load data when its 
              * invoked
              * 
              */
@@ -359,14 +367,22 @@
                 (int)_languageUser.Id, targetPageNum, BookId);
             if (_currentPageUser == null) return;
 
-           
+
             await ResetPageData(_currentPageUser.PageId);
             await BookService.BookUserUpdateBookmarkAsync(_bookUser.Id, (int)_currentPage.Id);
             StateHasChanged();
-            
+
             await t_delay;
             _isDataInit = true;
 
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("readErrorPageChange");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
         }
         catch (Exception ex)
         {
@@ -382,6 +398,14 @@
         {
             BookService.PageUserClearPage(_currentPageUser, _languageUser);            
             await OnMovePageAsync(targetPageNum);
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("clearPageUserError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
         }
         catch (Exception ex)
         {
@@ -462,10 +486,10 @@
                 }
             }
         }
-        
-        
+
+
     }
-    
+
     private async Task<BookUser?> FetchBookUserAsync(int bookId, int userId)
     {
         var context = await DbContextFactory.CreateDbContextAsync();
@@ -490,8 +514,8 @@
     private async Task<PageUser?> FetchPageUserByOrderWithinBookAsync(int languageUserId, int pageOrdinal, int bookId)
     {
         if (_bookUser is null) ErrorHandler.LogAndThrow(1200);
-        if (_wordsInPage is null) ErrorHandler.LogAndThrow(1210);
-        if (_allWordUsersInPage is null) ErrorHandler.LogAndThrow(1220);
+
+
 
         var context = await DbContextFactory.CreateDbContextAsync();
         var pageUserFromDb = await DataCache.PageUserByLanguageUserIdOrdinalAndBookIdReadAsync(
@@ -506,8 +530,19 @@
         {
             ErrorHandler.LogAndThrow(2070);
         }
-
-
+        if (_wordsInPage is null)
+        {
+            // it shouldn't be null, but whenever you need to create the page
+            // user, these wouldn't be loaded yet
+            _wordsInPage = await GetWordsInPageAsync((int)existingPage.Id);
+        }
+        if (_allWordUsersInPage is null)
+        {
+            // it shouldn't be null, but whenever you need to create the page
+            // user, these wouldn't be loaded yet
+            _allWordUsersInPage = await GetAllWordUsersInPageAsync((int)existingPage.Id, (int)_loggedInUser.Id);
+        }
+        
         int newPageUserId = await BookService.PageUserCreateAndSaveAsync(existingPage, _bookUser,
             _wordsInPage, _allWordUsersInPage);
 

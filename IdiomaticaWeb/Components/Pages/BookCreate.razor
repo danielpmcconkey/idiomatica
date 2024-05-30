@@ -154,6 +154,14 @@
             {
                 return UserService.GetLoggedInUser();
             }
+            catch (IdiomaticaException ex)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = UserService.GetUILabel("getLoggedInUserError");
+                errorState.code = ex.code;
+                StateHasChanged();
+                return null;
+            }
             catch (Exception ex)
             {
                 errorState.isError = true;
@@ -177,6 +185,14 @@
                 _languageOptions.Add(lc.Code, lc.LanguageName);
             }
         }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookCreateInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
         catch (Exception ex)
         {
             errorState.isError = true;
@@ -190,15 +206,25 @@
         try
         {
             string textInput = await _largeVolumeTextArea.GetTextValue();
-            
+
             int bookId = await BookService.BookCreateAndSaveAsync(_titleInput, _languageCodeInput, _sourceURIInput, textInput);
             // add the book stats
             BookService.BookStatsCreateAndSave(bookId);
             // now create the book user for teh logged in user
-            BookService.BookUserCreateAndSaveAsync(bookId, (int)_loggedInUser.Id);
+            int bookUserId = await BookService.BookUserCreateAndSaveAsync(bookId, (int)_loggedInUser.Id);
+            
+
             // throw up a success message
             _isSaveSuccess = true;
             _newBookId = bookId;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookCreateSaveError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
         }
         catch (Exception ex)
         {

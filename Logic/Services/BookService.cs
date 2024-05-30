@@ -264,6 +264,10 @@ namespace Logic.Services
                 ErrorHandler.LogAndThrow(2030);
                 return -1;
             }
+
+            // now update BookUserStats
+            await BookUserStatsUpdate(bookUser.Id);
+
             return bookUser.Id;
         }
         public async Task BookUserUpdateBookmarkAsync(int bookUserId, int currentPageId)
@@ -294,6 +298,136 @@ namespace Logic.Services
 
         #region BookUserStat
 
+        private async Task BookUserStatsUpdate(int bookUserId)
+        {
+            var context = await _dbContextFactory.CreateDbContextAsync();
+            var bookUser = await DataCache.BookUserByIdReadAsync(bookUserId, context);
+            var languageUser = await DataCache.LanguageUserByIdReadAsync(bookUser.LanguageUserId, context);
+            var allWordsInBook = await DataCache.WordsByBookIdReadAsync(bookUser.BookId, context);
+            var allWordUsersInBook = await DataCache.WordUsersByBookIdAndLanguageUserIdReadAsync(
+                (bookUser.BookId, bookUser.LanguageUserId), context);
+            var pageUsers = await DataCache.PageUsersByBookUserIdReadAsync(bookUserId, context);
+            var pages = await DataCache.PagesByBookIdReadAsync (bookUserId, context);
+            var bookStats = await DataCache.BookStatsByBookIdReadAsync(bookUser.BookId, context);
+            var totalPagesStatline = bookStats.Where(x => x.Key == AvailableBookStat.TOTALPAGES).FirstOrDefault();
+            var totalWordsStatline = bookStats.Where(x => x.Key == AvailableBookStat.TOTALWORDCOUNT).FirstOrDefault();
+            var totalDistinctWordsStatline = bookStats.Where(x => x.Key == AvailableBookStat.DISTINCTWORDCOUNT).FirstOrDefault();
+            var readPages = (from pu in pageUsers
+                             join p in pages on pu.PageId equals p.Id
+                             where pu.ReadDate != null
+                             orderby p.Ordinal descending
+                             select p)
+                            .ToList();
+
+            //pageUsers.Where(x => x.ReadDate != null).OrderByDescending(x => x.or);
+            int totalPages = 0;
+            bool isComplete = false;
+
+            // is complete
+            if (totalPagesStatline != null)
+            {
+                int.TryParse(totalPagesStatline.Value, out totalPages);
+                isComplete = (readPages.Count() == totalPages) ? true : false;
+            }
+
+            // last page read
+            int lastPageRead = (readPages.Count > 0) ? readPages.First().Ordinal : 0;
+
+            // progress
+            string progress = $"{lastPageRead} / {totalPages}";
+
+            // progress percent
+            decimal progressPercent = (totalPages == 0) ? 0 : lastPageRead / (decimal)totalPages;
+
+            // AvailableBookUserStat.TOTALWORDCOUNT
+            int totalWordCount = 0;
+            if(totalWordsStatline != null)
+            {
+                int.TryParse(totalWordsStatline.Value, out totalWordCount);
+            }
+
+            // AvailableBookUserStat.DISTINCTWORDCOUNT
+            int distinctWordCount = allWordsInBook.Count;
+
+            // AvailableBookUserStat.DISTINCTKNOWNPERCENT
+            int knownDistinct = allWordUsersInBook
+                .Where(x =>
+                    x.Status == AvailableWordUserStatus.WELLKNOWN ||
+                    x.Status == AvailableWordUserStatus.LEARNED ||
+                    x.Status == AvailableWordUserStatus.IGNORED)
+                .Count();
+
+            decimal distinctKnownPercent = knownDistinct / (decimal)distinctWordCount;
+
+
+            // AvailableBookUserStat.TOTALKNOWNPERCENT
+            List<BookUserStat> stats = new List<BookUserStat>();
+            stats.Add(new BookUserStat()
+            {
+                Key = AvailableBookUserStat.ISCOMPLETE,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
+                ValueString = isComplete.ToString(),
+            }); ;
+            stats.Add(new BookUserStat()
+            {
+                Key = AvailableBookUserStat.LASTPAGEREAD,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
+                ValueNumeric = lastPageRead,
+            }); ;
+            stats.Add(new BookUserStat()
+            {
+                Key = AvailableBookUserStat.PROGRESS,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
+                ValueString = progress,
+            }); ;
+            stats.Add(new BookUserStat()
+            {
+                Key = AvailableBookUserStat.PROGRESSPERCENT,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
+                ValueNumeric = progressPercent,
+            }); ;
+            stats.Add(new BookUserStat()
+            {
+                Key = AvailableBookUserStat.DISTINCTKNOWNPERCENT,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
+                ValueNumeric = distinctKnownPercent,
+            }); ;
+            stats.Add(new BookUserStat()
+            {
+                Key = AvailableBookUserStat.DISTINCTWORDCOUNT,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
+                ValueNumeric = distinctWordCount,
+            }); ;
+            stats.Add(new BookUserStat()
+            {
+                Key = AvailableBookUserStat.TOTALWORDCOUNT,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
+                ValueNumeric = totalWordCount,
+            }); ;
+            stats.Add(new BookUserStat()
+            {
+                Key = AvailableBookUserStat.TOTALKNOWNPERCENT,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
+                ValueString = null,
+                ValueNumeric = null,
+            }); ;
+
+            // delete the booklistrows cache for this user
+            await DataCache.BookListRowsByUserIdDeleteAsync((int)languageUser.Id, context);
+            // delete the actual stats from teh database and bookuserstats cache
+            await DataCache.BookUserStatsByBookIdAndUserIdDelete((bookUser.BookId, languageUser.UserId), context);
+            // add the new stats
+            await DataCache.BookUserStatsByBookIdAndUserIdCreate(
+                (bookUser.BookId, languageUser.UserId), stats, context);
+        }
 
         #endregion
 

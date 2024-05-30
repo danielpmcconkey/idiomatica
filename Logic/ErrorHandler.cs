@@ -31,8 +31,8 @@ namespace Logic
             { 1180, "languageUser.Id cannot be null or 0 when fetching flash cards from the DB" },
             { 1190, "userId cannot be less that 1 when fetching language users from the DB" },
             { 1200, "_bookUser is null when pulling pageUser" },
-            { 1210, "_commonWordsInLanguage is null when pulling pageUser" },
-            { 1220, "_allWordUsersInLanguage is null when pulling pageUser" },
+            { 1210, "_wordsInPage is null when pulling pageUser" },
+            { 1220, "_wordUsersInPage is null when pulling pageUser" },
             { 1230, "bookId cannot be 0 when fetching words by book" },
             { 1240, "pageId cannot be 0 when resetting page data" },
             { 1250, "page cannot be null when parsing paragraphs" },
@@ -163,7 +163,8 @@ namespace Logic
         private static void ThrowError(int code)
         {
             var errorCode = ErrorCodes[code];
-            throw new IdiomaticaException(errorCode) { code = code };
+            var ex = new IdiomaticaException() { code = code };
+            throw ex;
         }
     }
     public class IdiomaticaException : Exception
@@ -191,5 +192,6 @@ namespace Logic
     {
         public bool isError;
         public string errorMessage;
+        public int code;
     }
 }

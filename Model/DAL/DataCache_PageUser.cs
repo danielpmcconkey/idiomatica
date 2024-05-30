@@ -12,6 +12,7 @@ namespace Model.DAL
         private static ConcurrentDictionary<int, PageUser> PageUserById = new ConcurrentDictionary<int, PageUser>();
         private static ConcurrentDictionary<(int pageId, int languageUserId), PageUser> PageUserByPageIdAndLanguageUserId = new ConcurrentDictionary<(int pageId, int languageUserId), PageUser>();
         private static ConcurrentDictionary<(int languageUserId, int ordinal, int bookId), PageUser> PageUserByLanguageUserIdOrdinalAndBookId = new ConcurrentDictionary<(int languageUserId, int ordinal, int bookId), PageUser>();
+        private static ConcurrentDictionary<int, List<PageUser>> PageUsersByBookUserId = new ConcurrentDictionary<int, List<PageUser>>();
 
         #region create
         public static async Task<bool> PageUserCreateAsync(PageUser value, IdiomaticaContext context)
@@ -116,6 +117,26 @@ namespace Model.DAL
             }
 
             return;
+        }
+        public static async Task<List<PageUser>> PageUsersByBookUserIdReadAsync(
+           int key, IdiomaticaContext context)
+        {
+            // check cache
+            if (PageUsersByBookUserId.ContainsKey(key))
+            {
+                return PageUsersByBookUserId[key];
+            }
+            // read DB
+            var value = (from bu in context.BookUsers
+                         join pu in context.PageUsers on bu.Id equals pu.BookUserId
+                         where (bu.Id == key)
+                         select pu)
+                .ToList();
+
+
+            // write to cache
+            PageUsersByBookUserId[key] = value;
+            return value;
         }
         #endregion
 

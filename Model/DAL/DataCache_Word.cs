@@ -14,6 +14,7 @@ namespace Model.DAL
         private static ConcurrentDictionary<int, Word> WordById = new ConcurrentDictionary<int, Word>();
         private static ConcurrentDictionary<(int languageId, string textLower), Word> WordByLanguageIdAndTextLower = new ConcurrentDictionary<(int languageId, string textLower), Word>();
         private static ConcurrentDictionary<int, List<Word>> WordsBySentenceId = new ConcurrentDictionary<int, List<Word>>();
+        private static ConcurrentDictionary<int, List<Word>> WordsByBookId = new ConcurrentDictionary<int, List<Word>>();
         private static ConcurrentDictionary<int, Dictionary<string, Word>> WordsDictByBookId = new ConcurrentDictionary<int, Dictionary<string, Word>>();
         private static ConcurrentDictionary<int, Dictionary<string, Word>> WordsDictByPageId = new ConcurrentDictionary<int, Dictionary<string, Word>>();
 
@@ -68,6 +69,29 @@ namespace Model.DAL
                           select w).ToList();
             // write to cache
             WordsBySentenceId[key] = value;
+            return value;
+        }
+        public static async Task<List<Word>> WordsByBookIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            // check cache
+            if (WordsByBookId.ContainsKey(key))
+            {
+                return WordsByBookId[key];
+            }
+            // read DB
+            var value = (from b in context.Books
+                         join p in context.Pages on b.Id equals p.BookId
+                         join pp in context.Paragraphs on p.Id equals pp.PageId
+                         join s in context.Sentences on pp.Id equals s.ParagraphId
+                         join t in context.Tokens on s.Id equals t.SentenceId
+                         join w in context.Words on t.WordId equals w.Id
+                         where (b.Id == key)
+                         select w).Distinct().ToList();
+            
+            
+            // write to cache
+            WordsByBookId[key] = value;
             return value;
         }
         public static async Task<Dictionary<string, Word>> WordsDictByBookIdReadAsync(
@@ -129,22 +153,7 @@ namespace Model.DAL
             WordsDictByPageId[key] = value;
             return value;
         }
-        public static async Task<WordUser> WordUserByIdReadAsync(int key, IdiomaticaContext context)
-        {
-            // check cache
-            if (WordUserById.ContainsKey(key))
-            {
-                return WordUserById[key];
-            }
-
-            // read DB
-            var value = context.WordUsers.Where(x => x.Id == key)
-                .FirstOrDefault();
-            if (value == null) return null;
-            // write to cache
-            WordUserById[key] = value;
-            return value;
-        }
+        
         public static async Task<List<Word>> WordsCommon1000ByLanguageIdReadAsync(
             int key, IdiomaticaContext context)
         {

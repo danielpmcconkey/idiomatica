@@ -84,9 +84,12 @@ namespace Model.DAL
                 context.Tokens.Remove(existingItem);
             }
             context.SaveChanges();
-            if(!TokensBySentenceId.TryRemove(key, out var value))
+            if (TokensBySentenceId.ContainsKey(key))
             {
-                throw new InvalidDataException($"Failed to remove TokenBySentenceId from cache where key = {key}");
+                if (!TokensBySentenceId.TryRemove(key, out var value))
+                {
+                    throw new InvalidDataException($"Failed to remove TokenBySentenceId from cache where key = {key}");
+                }
             }
         }
 

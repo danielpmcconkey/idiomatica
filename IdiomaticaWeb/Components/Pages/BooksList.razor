@@ -167,6 +167,14 @@
             var context = await DbContextFactory.CreateDbContextAsync();
             _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context);
         }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
         catch (Exception ex)
         {
             errorState.isError = true;
@@ -188,6 +196,14 @@
             orderByFunctions.Add("DISTINCTWORDCOUNT", (x => x.DistinctWordCount));
             orderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => x.DistinctKnownPercent));
         }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
         catch (Exception ex)
         {
             errorState.isError = true;
@@ -207,6 +223,14 @@
             }
             return title;
         }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
         catch (Exception ex)
         {
             errorState.isError = true;
@@ -221,6 +245,14 @@
         {
             if (bookId == null) return "";
             return $"/Book/{bookId}/Read";
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
         }
         catch (Exception ex)
         {
@@ -237,6 +269,14 @@
             if (bookId == null) return "";
             return $"/Book/{bookId}/Update";
         }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
         catch (Exception ex)
         {
             errorState.isError = true;
@@ -251,6 +291,14 @@
         {
             throw new NotImplementedException("book removal not yet implemented");
 
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
         }
         catch (Exception ex)
         {
@@ -273,6 +321,14 @@
                 return true;
             if (titleNotNull.Contains(_filter, StringComparison.OrdinalIgnoreCase))
                 return true;
+            return false;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListIsVisibleError");
+            errorState.code = ex.code;
+            StateHasChanged();
             return false;
         }
         catch (Exception ex)
@@ -309,6 +365,14 @@
                 _isSortedAscending = !_isSortedAscending;
             }
         }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListSortTableError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
         catch (Exception ex)
         {
             errorState.isError = true;
@@ -334,6 +398,14 @@
                 return "fa-sort-down";
             }
         }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
         catch (Exception ex)
         {
             errorState.isError = true;
@@ -350,6 +422,14 @@
             var flooredVal = Math.Floor((decimal)dbStat);
             return flooredVal.ToString("N0");
         }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
         catch (Exception ex)
         {
             errorState.isError = true;
@@ -364,6 +444,14 @@
         {
             if (progress is null) return "0 / 0";
             return progress;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
         }
         catch (Exception ex)
         {
@@ -382,6 +470,14 @@
             bool outVal = false;
             if (bool.TryParse(isComplete, out outVal) == false) return false;
             return outVal;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return false;
         }
         catch (Exception ex)
         {
