@@ -1,3 +1,5 @@
+-- already run in prod: true
+
 create table Idioma.LanguageCode (
 	Code varchar(25) not null primary key,
 	LanguageName varchar (250)

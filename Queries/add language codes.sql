@@ -1,3 +1,5 @@
+-- already run in prod: true
+
 SELECT  *
   FROM [Idiomatica].[Idioma].[LanguageCode]
 

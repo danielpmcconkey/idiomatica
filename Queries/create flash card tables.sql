@@ -1,3 +1,5 @@
+-- already run in prod: true
+
 ALTER TABLE [Idioma].ParagraphTranslation  ADD CONSTRAINT PK_ParagraphTranslation_Id PRIMARY KEY CLUSTERED (Id);
 GO
 

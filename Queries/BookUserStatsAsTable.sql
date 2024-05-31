@@ -1,3 +1,5 @@
+-- already run in prod: true
+
 drop table if exists Idioma.BookUserStat;
 
 create table Idioma.BookUserStat (
