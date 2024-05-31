@@ -356,7 +356,7 @@
                 return;
             }
             // mark the previous page as read before moving on
-            await MarkCurrentPageReadAsync(_currentPageUser.PageId);
+            await MarkCurrentPageReadAsync((int)_currentPageUser.Id);
 
             var totalPages = await GetBookTotalPagesAsync(BookId);
             if (targetPageNum < 1) return;
@@ -878,10 +878,10 @@
         }
         return _paragraphs;
     }
-    private async Task MarkCurrentPageReadAsync(int currentUserPageId)
+    private async Task MarkCurrentPageReadAsync(int currentPageUserId)
     {
         var readDate = DateTime.Now;
-        BookService.PageUserUpdateReadDateAsync(currentUserPageId, readDate);
+        BookService.PageUserUpdateReadDateAsync(currentPageUserId, readDate);
     }
 
     // private async Task ResetPageDataAsync(Page newCurrentPage, PageUser newCurrentPageUser)
