@@ -200,11 +200,9 @@ namespace Model.DAL
             context.SaveChanges();
 
             // now update the cache
-            WordUserById[(int)value.Id] = value;
-            
-            var cachedList1 = WordUserByWordIdAndUserId.Where(x => x.Value.Id == value.Id).ToList();
-            foreach (var item in cachedList1) WordUserByWordIdAndUserId[item.Key] = value;
-
+            var languageUser = await LanguageUserByIdReadAsync(value.LanguageUserId, context);
+            if (languageUser == null) return;
+            await WordUserUpdateAllCachesAsync(value, languageUser.UserId);
             return;
         }
         public static async Task WordUsersUpdateStatusByPageIdAndUserIdAndStatus(
@@ -226,44 +224,74 @@ namespace Model.DAL
             {
                 wordUser.Status = newStatus;
                 // update cache
-                var cachedList1 = WordUserById.Where(x => x.Value.Id == wordUser.Id).ToList();
-                foreach (var item in cachedList1) WordUserById[item.Key] = wordUser;
-
-                var cachedList2 = WordUserByWordIdAndUserId.Where(x => x.Value.Id == wordUser.Id).ToList();
-                foreach (var item in cachedList2) WordUserByWordIdAndUserId[item.Key] = wordUser;
-
-                var dictsByUser3 = WordUsersDictByBookIdAndUserId.Where(x => x.Key.userId == userId);
-                foreach(var kvpIntIntDict in  dictsByUser3)
-                {
-                    var cacheList3 = kvpIntIntDict.Value.Where(x => x.Value.Id == wordUser.Id);
-                    foreach (var kvpStringWordUser in cacheList3)
-                    {
-                        kvpStringWordUser.Value.Status = newStatus;
-                    }
-                }
-                var dictsByUser4 = WordUsersDictByPageIdAndUserId.Where(x => x.Key.userId == userId);
-                foreach (var kvpIntIntDict in dictsByUser4)
-                {
-                    var cacheList4 = kvpIntIntDict.Value.Where(x => x.Value.Id == wordUser.Id);
-                    foreach (var kvpStringWordUser in cacheList4)
-                    {
-                        kvpStringWordUser.Value.Status = newStatus;
-                    }
-                }
-                var dictsByUser5 = WordUsersByUserIdAndLanguageId.Where(x => x.Key.userId == userId);
-                foreach (var kvpIntIntList in dictsByUser5)
-                {
-                    var cacheList5 = kvpIntIntList.Value.Where(x => x.Id == wordUser.Id);
-                    foreach (var wu in cacheList5)
-                    {
-                        wu.Status = newStatus;
-                    }
-                }
+                await WordUserUpdateAllCachesAsync(wordUser, userId);
             }
             await context.SaveChangesAsync();
         }
         
         #endregion
+
+        private static bool doesWordUserListContainById(List<WordUser> list, int key)
+        {
+            return list.Where(x => x.Id == key).Any();
+        }
+        private static List<WordUser> WordUsersListGetUpdated(List<WordUser> list, WordUser value)
+        {
+            List<WordUser> newList = new List<WordUser>();
+            foreach (var wu in list)
+            {
+                if (wu.Id == value.Id) newList.Add(value);
+                else newList.Add(wu);
+            }
+            return newList;
+        }
+        private static Dictionary<string, WordUser> WordUsersDictGetUpdated(
+            Dictionary<string, WordUser> dict, WordUser value)
+        {
+            Dictionary<string, WordUser> newDict = new Dictionary<string, WordUser>();
+            foreach (var kvpStringWordUser in newDict)
+            {
+                if (kvpStringWordUser.Value.Id == value.Id) newDict[kvpStringWordUser.Key] = value;
+                else newDict[kvpStringWordUser.Key] = kvpStringWordUser.Value;
+            }
+            return newDict;
+        }
+        private static async Task WordUserUpdateAllCachesAsync(WordUser value, int userId)
+        {
+            WordUserById[(int)value.Id] = value;
+
+            var cachedList1 = WordUserByWordIdAndUserId.Where(x => x.Value.Id == value.Id).ToList();
+            foreach (var item in cachedList1) WordUserByWordIdAndUserId[item.Key] = value;
+
+            var cachedList2 = WordUsersByBookIdAndLanguageUserId
+                .Where(x => doesWordUserListContainById(x.Value, value.Id)).ToArray();
+            for (int i = 0; i < cachedList2.Length; i++)
+            {
+                var item = cachedList2[i];
+                var newList = WordUsersListGetUpdated(item.Value, value);
+                WordUsersByBookIdAndLanguageUserId[item.Key] = newList;
+            }
+            var dictsByUser3 = WordUsersDictByBookIdAndUserId.Where(x => x.Key.userId == userId);
+            foreach (var kvpIntIntDict in dictsByUser3)
+            {
+                var newDict = WordUsersDictGetUpdated(kvpIntIntDict.Value, value);
+                WordUsersDictByBookIdAndUserId[kvpIntIntDict.Key] = newDict;
+            }
+            var dictsByUser4 = WordUsersDictByPageIdAndUserId.Where(x => x.Key.userId == userId);
+            foreach (var kvpIntIntDict in dictsByUser4)
+            {
+                var newDict = WordUsersDictGetUpdated(kvpIntIntDict.Value, value);
+                WordUsersDictByPageIdAndUserId[kvpIntIntDict.Key] = newDict;
+            }
+            var cachedList5 = WordUsersByUserIdAndLanguageId.Where(x => x.Key.userId == userId).ToArray();
+            
+            for (int i = 0; i < cachedList5.Length; i++)
+            {
+                var item = cachedList5[i];
+                var newList = WordUsersListGetUpdated(item.Value, value);
+                WordUsersByUserIdAndLanguageId[item.Key] = newList;
+            }
+        }
 
     }
 }

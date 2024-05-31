@@ -22,7 +22,7 @@ namespace Logic.Services
             _dbContextFactory = dbContextFactory;
         }
 
-        #region book
+        #region Book
 
         public async Task<int> BookCreateAndSaveAsync(string title, string languageCode, string url, string text)
         {
@@ -678,7 +678,8 @@ namespace Logic.Services
         #region ParagraphTranslation
         
         #endregion
-        #region sentence
+
+        #region Sentence
         /// <summary>
         /// this will delete any existing DB tokens
         /// </summary>

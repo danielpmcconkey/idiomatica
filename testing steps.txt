@@ -1,0 +1,14 @@
+testing steps
+
+booklist
+read
+check word translation
+update word translation
+update word status
+if you update word status, do you see it reflected elsewhere on the page
+how about if you go forward and back? what's the cache?
+check paragraph translation
+check again and make sure it reads the saved one
+move page
+did the bookmark update?
+did the pageuser update its read date?
