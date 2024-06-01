@@ -3,10 +3,9 @@ using Model;
 
 namespace Logic.Services
 {
-    public class DeepLService
+    public static class DeepLService
     {
-        public DeepLService() { }
-        public async Task<string> TranslateAsync (string input, string sourceLanguageCode, string targetLanguageCode) 
+        public static async Task<string> TranslateAsync (string input, string sourceLanguageCode, string targetLanguageCode) 
         {
             try
             {
@@ -31,7 +30,7 @@ namespace Logic.Services
             } 
         }
 
-        public string Translate(string input, string sourceLanguageCode, string targetLanguageCode)
+        public static string Translate(string input, string sourceLanguageCode, string targetLanguageCode)
         {
             try
             {

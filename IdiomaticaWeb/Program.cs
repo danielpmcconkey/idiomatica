@@ -32,7 +32,6 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddTransient<BookService>();
 builder.Services.AddTransient<FlashCardService>();
 builder.Services.AddTransient<UserService>();
-builder.Services.AddTransient<DeepLService>();
 
 var connection = String.Empty;
 if (builder.Environment.IsDevelopment())

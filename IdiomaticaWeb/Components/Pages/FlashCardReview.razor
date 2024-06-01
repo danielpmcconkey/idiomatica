@@ -2,7 +2,6 @@
 @rendermode InteractiveServer
 @inject FlashCardService FlashCardService;
 @inject UserService UserService;
-@inject DeepLService DeepLService;
 
 <h3>Flash Card Review</h3>
 
@@ -169,7 +168,7 @@
         try
         {
             var dbLanguageUsers = FlashCardService.LanguageUsersFetch((int)_loggedInUser.Id);
-            await FlashCardService.InitializeAsync(DeepLService, UserService);
+            await FlashCardService.InitializeAsync(UserService);
             if (_languageOptions.Count == 0)
             {
                 foreach (var lu in dbLanguageUsers)

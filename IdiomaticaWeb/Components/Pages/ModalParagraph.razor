@@ -1,17 +1,15 @@
 ﻿@page "/ModalParagraph"
 @rendermode InteractiveServer
-@inject BookService BookService;
 @inject UserService UserService;
-@inject DeepLService DeepLService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 @using System.Text;
 
 @* Modal for paragraph translation *@
-<Modal @ref="ppModal" title="@_ppModalTitle" IsVerticallyCentered="true" Size="ModalSize.Large">
+<Modal @ref="ppModal" title="@_title" IsVerticallyCentered="true" Size="ModalSize.Large">
     <BodyTemplate>
-        <p>@_ppModalTranslateFrom</p>
+        <p>@_translateFrom</p>
         <hr />
-        <p>@_ppModalTranslateTo</p>
+        <p>@_translateTo</p>
     </BodyTemplate>
     <FooterTemplate>
         <Button Color="ButtonColor.Secondary" @onclick="OnHidePpModalClick">
@@ -24,21 +22,14 @@
 
 @code {
 
-    /// <summary>
-    /// The language the book was written in
-    /// </summary>
     [Parameter]
-    public LanguageCode? LanguageFromCode { get; set; }
-    /// <summary>
-    /// The user's preferred UI language
-    /// </summary>
-    [Parameter]
-    public LanguageCode? LanguageToCode { get; set; }
+    public BookService BookService { get; set; }
+
 
     private Modal ppModal = default!;
-    private string? _ppModalTitle;
-    private string? _ppModalTranslateFrom;
-    private string? _ppModalTranslateTo;
+    private string? _title;
+    private string? _translateFrom;
+    private string? _translateTo;
 
     protected override async Task OnInitializedAsync()
     {
@@ -47,55 +38,15 @@
 
     public async Task OnShowPpModalClick(Paragraph pp)
     {
-        if (LanguageToCode == null || LanguageFromCode == null)
-        {
-            ErrorHandler.LogAndThrow(2240);
-            return;
-        }
-        var sentences = pp.Sentences.OrderBy(x => x.Ordinal).Select(s => s.Text);
-        var input = String.Join(" ", sentences);
-        _ppModalTranslateFrom = input;
-        var toLang = LanguageToCode.Code;
-        var fromLang = LanguageFromCode.Code;
-        _ppModalTitle = $"{UserService.GetUILabelF("ppModalTitle", [fromLang, toLang])}";
 
+        var fromLang = BookService.LanguageFromCode;
+        var toLang = BookService.LanguageToCode;
+        _title = $"{UserService.GetUILabelF("ppModalTitle", [fromLang, toLang])}";
         var context = await DbContextFactory.CreateDbContextAsync();
-        // see if the translation already exists
-        if (pp.ParagraphTranslations == null) 
-        {
-            pp.ParagraphTranslations = await DataCache.ParagraphTranslationsByParargraphIdReadAsync(
-                (int)pp.Id, context);
-        }
-        var currentTranslation = pp.ParagraphTranslations
-            .Where(x => x.Code == toLang)
-            .FirstOrDefault();
-        if(currentTranslation is not null)
-        {
-            _ppModalTranslateTo = currentTranslation.TranslationText;
-        }
-        else
-        {
-            var deeplResult = DeepLService.Translate(input, fromLang, toLang);
-            if(deeplResult is not null)
-            {
-                _ppModalTranslateTo = deeplResult;
-                // add to the DB
-                ParagraphTranslation ppt = new ParagraphTranslation()
-                {
-                    ParagraphId = (int)pp.Id,
-                    Code = toLang, 
-                    TranslationText = deeplResult
-                };
-                bool didSave = await DataCache.ParagraphTranslationCreateAsync(ppt, context);
-                if(!didSave || ppt.Id == null || ppt.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow(2340);
-                    return;
-                }
-                // BookService.ParagraphTranslationSave(ppt);
-                pp.ParagraphTranslations.Add(ppt);
-            }
-        }        
+
+        var translation = await BookService.ParagraphTranslate(context, pp);
+        _translateFrom = translation.input;
+        _translateTo = translation.output;
 
         await ppModal.ShowAsync();
     }

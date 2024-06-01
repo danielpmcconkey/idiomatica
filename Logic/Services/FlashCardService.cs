@@ -13,7 +13,6 @@ namespace Logic.Services
     public class FlashCardService
     {
         private IDbContextFactory<IdiomaticaContext> _dbContextFactory;
-        private DeepLService _deepLService;
         private UserService _userService;
         private LanguageCode _uiLanguageCode;
         public FlashCardService(IDbContextFactory<IdiomaticaContext> dbContextFactory)
@@ -21,9 +20,8 @@ namespace Logic.Services
             _dbContextFactory = dbContextFactory;
         }
         #region FlashCard
-        public async Task InitializeAsync(DeepLService deepLService, UserService userService)
+        public async Task InitializeAsync(UserService userService)
         {
-            _deepLService = deepLService;
             _userService = userService;
             _uiLanguageCode = userService.GetUiLanguageCode();
         }
@@ -91,7 +89,7 @@ namespace Logic.Services
                             string input = ParagraphGetFullText(paragraph);
                             string toLang = _uiLanguageCode.Code;
                             string fromLang = wordUser.LanguageUser.Language?.Code;
-                            string translation = _deepLService.Translate(input, fromLang, toLang);
+                            string translation = DeepLService.Translate(input, fromLang, toLang);
                             ppt = new ParagraphTranslation()
                             {
                                 ParagraphId = (int)paragraph.Id,
