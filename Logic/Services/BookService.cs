@@ -15,16 +15,17 @@ namespace Logic.Services
 {
     public class BookService
     {
-        private IDbContextFactory<IdiomaticaContext> _dbContextFactory;
         
-        public BookService(IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        
+        public BookService()
         {
-            _dbContextFactory = dbContextFactory;
+            
         }
 
         #region Book
 
-        public async Task<int> BookCreateAndSaveAsync(string title, string languageCode, string url, string text)
+        public async Task<int> BookCreateAndSaveAsync(
+            IdiomaticaContext context, string title, string languageCode, string url, string text)
         {
             const int _targetCharCountPerPage = 1378;// this was arrived at by DB query after conversion
             // sanitize and validate input
@@ -47,9 +48,6 @@ namespace Logic.Services
                 ErrorHandler.LogAndThrow(1060);
                 return -1;
             }
-
-
-            var context = await _dbContextFactory.CreateDbContextAsync();
 
             // pull language from the db
             var language = await DataCache.LanguageByCodeReadAsync(languageCodeT, context);
@@ -85,7 +83,8 @@ namespace Logic.Services
             // pull a list of common words from the database and put it
             // in a dictionary so that we don't always have to go back to the
             // database just to get the word ID for every single word
-            var commonWordsInLanguage = await WordFetchCommonDictForLanguageAsync((int)language.Id);
+            var commonWordsInLanguage = await WordFetchCommonDictForLanguageAsync(
+                context, (int)language.Id);
             if (commonWordsInLanguage == null)
             {
                 ErrorHandler.LogAndThrow(2200);
@@ -120,7 +119,8 @@ namespace Logic.Services
                         // too big, stick it on the next one
                         i -= 1; // go back one
                         // make a new page
-                        int newPageId = await PageCreateAndSaveDuringBookCreateAsync((int)book.Id, currentPageCount,
+                        int newPageId = await PageCreateAndSaveDuringBookCreateAsync(
+                            context, (int)book.Id, currentPageCount,
                                     pageText, language, commonWordsInLanguage);
 
 
@@ -142,7 +142,8 @@ namespace Logic.Services
             if (!string.IsNullOrEmpty(pageText))
             {
                 // there's still text left. need to add it to a new page
-                int newPageId = await PageCreateAndSaveDuringBookCreateAsync((int)book.Id, currentPageCount,
+                int newPageId = await PageCreateAndSaveDuringBookCreateAsync(
+                    context, (int)book.Id, currentPageCount,
                             pageText, language, commonWordsInLanguage);
             }
 
@@ -156,13 +157,12 @@ namespace Logic.Services
         #endregion
 
         #region BookStat
-        public void BookStatsCreateAndSave(int bookId)
+        public void BookStatsCreateAndSave(IdiomaticaContext context, int bookId)
         {
             if (bookId < 1)
             {
                 ErrorHandler.LogAndThrow(1100);
             }
-            var context = _dbContextFactory.CreateDbContext();
             string q = $"""
             with allPages as (
             	SELECT b.id as bookId, p.Id as pageId, p.Ordinal as pageOrdinal
@@ -223,9 +223,8 @@ namespace Logic.Services
         #endregion
 
         #region bookuser
-        public async Task<int> BookUserCreateAndSaveAsync(int bookId, int userId)
+        public async Task<int> BookUserCreateAndSaveAsync(IdiomaticaContext context, int bookId, int userId)
         {
-            var context = await _dbContextFactory.CreateDbContextAsync();
             var book = await DataCache.BookByIdReadAsync(bookId, context);
             if(book == null)
             {
@@ -266,11 +265,11 @@ namespace Logic.Services
             }
 
             // now update BookUserStats
-            await BookUserStatsUpdate(bookUser.Id);
+            await BookUserStatsUpdate(context, bookUser.Id);
 
             return bookUser.Id;
         }
-        public async Task BookUserUpdateBookmarkAsync(int bookUserId, int currentPageId)
+        public async Task BookUserUpdateBookmarkAsync(IdiomaticaContext context, int bookUserId, int currentPageId)
         {
             if (bookUserId == 0)
             {
@@ -280,8 +279,7 @@ namespace Logic.Services
             {
                 ErrorHandler.LogAndThrow(1130);
             }
-            var context = await _dbContextFactory.CreateDbContextAsync();
-
+            
             var bookUser = await DataCache.BookUserByIdReadAsync(bookUserId, context);
             
             if (bookUser == null)
@@ -298,9 +296,8 @@ namespace Logic.Services
 
         #region BookUserStat
 
-        private async Task BookUserStatsUpdate(int bookUserId)
+        private async Task BookUserStatsUpdate(IdiomaticaContext context, int bookUserId)
         {
-            var context = await _dbContextFactory.CreateDbContextAsync();
             var bookUser = await DataCache.BookUserByIdReadAsync(bookUserId, context);
             var languageUser = await DataCache.LanguageUserByIdReadAsync(bookUser.LanguageUserId, context);
             var allWordsInBook = await DataCache.WordsByBookIdReadAsync(bookUser.BookId, context);
@@ -432,11 +429,10 @@ namespace Logic.Services
         #endregion
 
         #region LanguageCode
-        public IQueryable<LanguageCode> LanguageCodeFetchOptionsDuringBookCreate()
+        public IQueryable<LanguageCode> LanguageCodeFetchOptionsDuringBookCreate(IdiomaticaContext context)
         {
             // this isn't worth caching
-            var context = _dbContextFactory.CreateDbContext();
-
+            
             Expression<Func<LanguageCode, bool>> filter = (x => x.IsImplementedForLearning == true);
             return context.LanguageCodes
                 .Where(filter).OrderBy(x => x.LanguageName);
@@ -453,7 +449,7 @@ namespace Logic.Services
 
 
         public async Task<int> PageCreateAndSaveDuringBookCreateAsync(
-            int bookId, int Ordinal, string pageText,
+            IdiomaticaContext context, int bookId, int Ordinal, string pageText,
             Language language, Dictionary<string,Word> commonWordsInLanguage)
         {
             var newPage = new Page()
@@ -464,7 +460,6 @@ namespace Logic.Services
             };
 
 
-            var context = await _dbContextFactory.CreateDbContextAsync();
             bool isSaved = await DataCache.PageCreateNewAsync(newPage, context);
             if(!isSaved || newPage.Id == null || newPage.Id == 0)
             {
@@ -475,7 +470,7 @@ namespace Logic.Services
             
             // do the actual page parsing
             bool areParagraphsParsed = await ParagraphsParseFromPageAndSaveAsync(
-                newPage, language, commonWordsInLanguage);
+                context, newPage, language, commonWordsInLanguage);
             if(!areParagraphsParsed)
             {
                 ErrorHandler.LogAndThrow(2260);
@@ -488,17 +483,16 @@ namespace Logic.Services
         #endregion
 
         #region PageUser
-        public async void PageUserClearPage(PageUser pageUser, LanguageUser languageUser)
+        public async void PageUserClearPage(IdiomaticaContext context, PageUser pageUser, LanguageUser languageUser)
         {
             if (pageUser == null) 
             {
                 ErrorHandler.LogAndThrow(1140); 
             }
-            var context = _dbContextFactory.CreateDbContext();
             await DataCache.WordUsersUpdateStatusByPageIdAndUserIdAndStatus(pageUser.PageId, languageUser.UserId,
                 AvailableWordUserStatus.UNKNOWN, AvailableWordUserStatus.WELLKNOWN, context);
         }
-        public async Task<int> PageUserCreateAndSaveAsync(
+        public async Task<int> PageUserCreateAndSaveAsync(IdiomaticaContext context,
             Page page, BookUser bookUser, Dictionary<string, Word> commonWordDict,
             Dictionary<string, WordUser> allWordUsersInLanguage)
         {
@@ -525,7 +519,6 @@ namespace Logic.Services
 
             try
             {
-                var context = await _dbContextFactory.CreateDbContextAsync();
                 var language = await DataCache.LanguageByIdReadAsync(bookUser.LanguageUserId, context);
                 if (language == null)
                 {
@@ -538,7 +531,7 @@ namespace Logic.Services
                 if (paragraphs == null)
                 {
                     await ParagraphsParseFromPageAndSaveAsync(
-                        page, language, commonWordDict);
+                        context, page, language, commonWordDict);
                 }
                 var pageUser = new PageUser()
                 {
@@ -559,7 +552,7 @@ namespace Logic.Services
 
                     // need to create
                     var newWordUser = await WordUserCreateAndSaveUnknownAsync(
-                        bookUser.LanguageUserId, kvp.Value);
+                        context, bookUser.LanguageUserId, kvp.Value);
                     if (newWordUser == null || newWordUser.Id == 0)
                     {
                         ErrorHandler.LogAndThrow(2330);
@@ -585,9 +578,8 @@ namespace Logic.Services
                 throw; // you'll never get here
             }
         }
-        public async Task PageUserUpdateReadDateAsync(int id, DateTime readDate)
+        public async Task PageUserUpdateReadDateAsync(IdiomaticaContext context, int id, DateTime readDate)
         {
-            var context = await _dbContextFactory.CreateDbContextAsync();
             var pu = await DataCache.PageUserByIdReadAsync(id, context);
             if (pu == null) 
             {
@@ -606,7 +598,7 @@ namespace Logic.Services
         /// sentences, and tokens. it saves everything in the DB
         /// </summary>
         public async Task<bool> ParagraphsParseFromPageAndSaveAsync(
-            Page page, Language language, Dictionary<string, Word> commonWordDict)
+            IdiomaticaContext context, Page page, Language language, Dictionary<string, Word> commonWordDict)
         {
 
             if (page == null)
@@ -620,8 +612,7 @@ namespace Logic.Services
                 return false;
             }
 
-            var context = await _dbContextFactory.CreateDbContextAsync();
-
+            
             var parser = LanguageParser.Factory.GetLanguageParser(language);
             var paragraphSplits = parser.SegmentTextByParagraphs(page.OriginalText);
 
@@ -662,7 +653,7 @@ namespace Logic.Services
                     }
 
                     var areSavedTokens = await CreateTokensFromSentenceAndSaveAsync(
-                        newSentence, language, commonWordDict);
+                        context, newSentence, language, commonWordDict);
                     if (!areSavedTokens)
                     {
                         ErrorHandler.LogAndThrow(2300);
@@ -683,7 +674,7 @@ namespace Logic.Services
         /// <summary>
         /// this will delete any existing DB tokens
         /// </summary>
-        public async Task<bool> CreateTokensFromSentenceAndSaveAsync(
+        public async Task<bool> CreateTokensFromSentenceAndSaveAsync(IdiomaticaContext context,
             Sentence sentence, Language language, Dictionary<string, Word> commonWordDict)
         {
             if (sentence == null)
@@ -707,8 +698,7 @@ namespace Logic.Services
                 return false;
             }
 
-            var context = await _dbContextFactory.CreateDbContextAsync();
-
+            
             // check if any already exist. there shouldn't be any but whateves
             await DataCache.TokenBySentenceIdDelete((int)sentence.Id, context);
 
@@ -745,7 +735,8 @@ namespace Logic.Services
                         // of punctuation or a quotation from another language
                         // that uses different characters. either way, create
                         // an empty word and move on
-                        var emptyWord = await WordCreateAndSaveNewAsync(language, string.Empty, string.Empty);
+                        var emptyWord = await WordCreateAndSaveNewAsync(
+                            context, language, string.Empty, string.Empty);
                         commonWordDict[cleanWord] = emptyWord;
                         existingWord = emptyWord;
                     }
@@ -753,7 +744,8 @@ namespace Logic.Services
                     {
                         // this is a newly encountered word. save it to the DB
                         // todo: add actual romanization lookup here
-                        var newWord = await WordCreateAndSaveNewAsync(language, cleanWord, cleanWord);
+                        var newWord = await WordCreateAndSaveNewAsync(
+                            context, language, cleanWord, cleanWord);
                         commonWordDict.Add(cleanWord, newWord);
                         existingWord = newWord;
                     }
@@ -778,7 +770,7 @@ namespace Logic.Services
 
         #region Word
 
-        public async Task<Word> WordCreateAndSaveNewAsync(
+        public async Task<Word> WordCreateAndSaveNewAsync(IdiomaticaContext context,
             Language language, string text, string romanization)
         {
             if (language == null)
@@ -791,7 +783,6 @@ namespace Logic.Services
                 ErrorHandler.LogAndThrow(1350);
                 return null;
             }
-            var context = await _dbContextFactory.CreateDbContextAsync();
             Word newWord = new Word()
             {
                 LanguageId = (int)language.Id,
@@ -808,15 +799,15 @@ namespace Logic.Services
             return newWord;
         }
         
-        public async Task<Dictionary<string, Word>?> WordFetchCommonDictForLanguageAsync(int languageId)
+        public async Task<Dictionary<string, Word>?> WordFetchCommonDictForLanguageAsync(
+            IdiomaticaContext context, int languageId)
         {
             if (languageId == 0)
             {
                 ErrorHandler.LogAndThrow(1160);
                 return null;
             }
-            var context = await _dbContextFactory.CreateDbContextAsync();
-
+            
             var topWordsInLanguage = await DataCache.WordsCommon1000ByLanguageIdReadAsync(languageId, context);
 
             Dictionary<string, Word> wordDict = new Dictionary<string, Word>();
@@ -834,7 +825,8 @@ namespace Logic.Services
 
         #region WordUser
         
-        public async Task<WordUser> WordUserCreateAndSaveUnknownAsync(int languageUserId, Word word)
+        public async Task<WordUser> WordUserCreateAndSaveUnknownAsync(
+            IdiomaticaContext context, int languageUserId, Word word)
         {
             if (languageUserId == 0)
             {
@@ -847,8 +839,7 @@ namespace Logic.Services
                 return null;
             }
 
-            var context = await _dbContextFactory.CreateDbContextAsync();
-
+            
             WordUser newWordUser = new WordUser()
             {
                 LanguageUserId = (int)languageUserId,
@@ -867,10 +858,9 @@ namespace Logic.Services
         
         
         public async Task<Dictionary<string, WordUser>> WordUserFetchDictForLanguageUserAsync(
-            int userId, int languageId)
+            IdiomaticaContext context, int userId, int languageId)
         {
-            var context = await _dbContextFactory.CreateDbContextAsync();
-
+            
             Dictionary<string, WordUser> wordDict = new Dictionary<string, WordUser>();
 
 
@@ -898,7 +888,7 @@ namespace Logic.Services
         /// caches that are important to you
         /// </summary>
         /// <returns>true if the word user is changed and has been updated. false if not</returns>
-        public async Task WordUserUpdateStatusAndTranslationAsync(
+        public async Task WordUserUpdateStatusAndTranslationAsync(IdiomaticaContext context,
             int id, AvailableWordUserStatus newStatus, string translation)
         {
             if (id == 0)
@@ -907,7 +897,6 @@ namespace Logic.Services
                 return;
             }
             // first pull the existing one from the database
-            var context = await _dbContextFactory.CreateDbContextAsync();
             var dbWordUser = await DataCache.WordUserByIdReadAsync(id, context);
             if (dbWordUser == null)
             {
