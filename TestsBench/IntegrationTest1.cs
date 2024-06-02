@@ -9,24 +9,17 @@ namespace TestsBench.Tests
 {
     public class IntegrationTest1
     {
+        #region setup functions
         BookService? _bookService = null;
-        UserService? _userService = null;
 
         public IntegrationTest1()
         {
             _bookService = new BookService();
-            _userService = new UserService(null);
-
         }
-#if DEBUG
-        private void SetLoggedInUser(User user)
+        private UserService CreateUserService()
         {
-            var context = CreateContext();
-            _userService.SetLoggedInUserForTestBench(user, context);
+            return new UserService(null);
         }
-        
-#endif
-        #region BookList
         private IdiomaticaContext CreateContext()
         {
 
@@ -35,7 +28,7 @@ namespace TestsBench.Tests
             optionsBuilder.UseSqlServer(connectionstring);
             return new IdiomaticaContext(optionsBuilder.Options);
         }
-        private User CreateNewTestUser()
+        private User CreateNewTestUser(UserService userService)
         {
             var user = new User()
             {
@@ -56,17 +49,30 @@ namespace TestsBench.Tests
             context.SaveChanges();
 
 #if DEBUG
-            SetLoggedInUser(user);
+            SetLoggedInUser(user, userService);
 #endif
 
             return user;
         }
+#if DEBUG
+        private void SetLoggedInUser(User user, UserService userService)
+        {
+            var context = CreateContext();
+            userService.SetLoggedInUserForTestBench(user, context);
+        }
+#endif
+        #endregion
+
+
+        #region BookList
+        
         [Fact]
         public async Task ICannotAddTheSameBookUserTwice()
         {
             // arrange
             var context = CreateContext();
-            var user = CreateNewTestUser();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
             int bookId = 7;
             int userId = (int)user.Id;
             int firstBookUserId = 999;
@@ -95,7 +101,8 @@ namespace TestsBench.Tests
         {
             // arrange
             var context = CreateContext();
-            var user = CreateNewTestUser();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
             int bookId = 7;
             int userId = (int)user.Id;
             int bookUserId = 999;
@@ -122,7 +129,8 @@ namespace TestsBench.Tests
         {
             // arrange
             var context = CreateContext();
-            var user = CreateNewTestUser();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
             int book1Id = 7;
             int book2Id = 6;
             int userId = (int)user.Id;
@@ -159,15 +167,18 @@ namespace TestsBench.Tests
                 context.SaveChanges();
             }
         }
+
         #endregion
 
         #region Read
+
         [Fact]
         public async Task ReadingBook7Page1ShowsCorrectPageWordsAndSentences()
         {
             // arrange
             var context = CreateContext();
-            var user = CreateNewTestUser();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
             int bookId = 7;
             int userId = (int)user.Id;
             int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
@@ -178,7 +189,7 @@ namespace TestsBench.Tests
 
                 if (BookService.IsDataInitRead == false)
                 {
-                    await BookService.InitDataRead(context, _userService, bookId);
+                    await BookService.InitDataRead(context, userService, bookId);
                 }
 
                 var title = BookService.BookTitle;
@@ -220,12 +231,14 @@ namespace TestsBench.Tests
                 context.SaveChanges();
             }
         }
+
         [Fact]
         public async Task UpdatingWordStatusWorks()
         {
             // arrange
             var context = CreateContext();
-            var user = CreateNewTestUser();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
             int bookId = 7;
             int userId = (int)user.Id;
             int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
@@ -236,7 +249,7 @@ namespace TestsBench.Tests
 
                 if (BookService.IsDataInitRead == false)
                 {
-                    await BookService.InitDataRead(context, _userService, bookId);
+                    await BookService.InitDataRead(context, userService, bookId);
                 }
                 var wordUser = BookService.AllWordUsersInPage["administrativa"];
                 wordUser.Status = AvailableWordUserStatus.LEARNED;
@@ -264,12 +277,14 @@ namespace TestsBench.Tests
                 context.SaveChanges();
             }
         }
+
         [Fact]
         public async Task UpdatingWordTranslationWorks()
         {
             // arrange
             var context = CreateContext();
-            var user = CreateNewTestUser();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
             int bookId = 7;
             int userId = (int)user.Id;
             int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
@@ -281,7 +296,7 @@ namespace TestsBench.Tests
 
                 if (BookService.IsDataInitRead == false)
                 {
-                    await BookService.InitDataRead(context, _userService, bookId);
+                    await BookService.InitDataRead(context, userService, bookId);
                 }
                 var wordUser = BookService.AllWordUsersInPage["administrativa"];
                 wordUser.Translation = newTranslation;
@@ -309,6 +324,59 @@ namespace TestsBench.Tests
                 context.SaveChanges();
             }
         }
+
+        [Fact]
+        public async Task UpdatingWordStatusIsReflectedOnOtherPages()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            int bookId = 7;
+            int userId = (int)user.Id;
+            int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+            BookService BookService = new BookService();
+            try
+            {
+                // act
+
+                if (BookService.IsDataInitRead == false)
+                {
+                    await BookService.InitDataRead(context, userService, bookId);
+                }
+                
+                var word1 = BookService.Paragraphs[2].Sentences[4].Tokens[4].Word; // de
+                var wordUser1 = BookService.AllWordUsersInPage[word1.TextLowerCase];
+                wordUser1.Status = AvailableWordUserStatus.NEW2;
+                var wordUserStatus1 = wordUser1.Status.ToString();
+                await BookService.WordUserSaveModalDataAsync(
+                    context, wordUser1.Id, wordUser1.Status, wordUser1.Translation);
+
+                await BookService.PageMove(context, 2);
+                var word2 = BookService.Paragraphs[2].Sentences[0].Tokens[4].Word; // de
+                var wordUser2 = BookService.AllWordUsersInPage[word2.TextLowerCase];
+                var wordUserStatus2 = AvailableWordUserStatus.NEW2.ToString();
+
+                // assert
+                Assert.Equal(wordUserStatus1, wordUserStatus2);
+            }
+            finally
+            {
+                // clean-up
+                var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
+                if (bookUser != null)
+                {
+                    bookUser.LanguageUser = null;
+                    bookUser.Book = null;
+                    bookUser.PageUsers = new List<PageUser>();
+                    context.BookUsers.Remove(bookUser);
+                }
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+
         #endregion
     }
 }
