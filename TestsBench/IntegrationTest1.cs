@@ -16,12 +16,16 @@ namespace TestsBench.Tests
         {
             _bookService = new BookService();
             _userService = new UserService(null);
-#if DEBUG
-            var context = CreateContext();
-            var testUser = DataCache.UserByApplicationUserIdReadAsync("TESTER", context).Result;
-            _userService.SetLoggedInUserForTestBench(testUser, context);
-#endif
+
         }
+#if DEBUG
+        private void SetLoggedInUser(User user)
+        {
+            var context = CreateContext();
+            _userService.SetLoggedInUserForTestBench(user, context);
+        }
+        
+#endif
         #region BookList
         private IdiomaticaContext CreateContext()
         {
@@ -50,6 +54,10 @@ namespace TestsBench.Tests
             };
             context.LanguageUsers.Add(languageUser);
             context.SaveChanges();
+
+#if DEBUG
+            SetLoggedInUser(user);
+#endif
 
             return user;
         }
@@ -200,7 +208,102 @@ namespace TestsBench.Tests
             {
                 // clean-up
                 var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
-                if (bookUser != null) context.BookUsers.Remove(bookUser);
+                if (bookUser != null)
+                {
+                    bookUser.LanguageUser = null;
+                    bookUser.Book = null;
+                    bookUser.PageUsers = new List<PageUser>();
+                    context.BookUsers.Remove(bookUser);
+                }
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task UpdatingWordStatusWorks()
+        {
+            // arrange
+            var context = CreateContext();
+            var user = CreateNewTestUser();
+            int bookId = 7;
+            int userId = (int)user.Id;
+            int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+            BookService BookService = new BookService();
+            try
+            {
+                // act
+
+                if (BookService.IsDataInitRead == false)
+                {
+                    await BookService.InitDataRead(context, _userService, bookId);
+                }
+                var wordUser = BookService.AllWordUsersInPage["administrativa"];
+                wordUser.Status = AvailableWordUserStatus.LEARNED;
+                await BookService.WordUserSaveModalDataAsync(
+                    context, wordUser.Id, wordUser.Status, wordUser.Translation);
+
+                var wordUserFromDb = context.WordUsers.FirstOrDefault(x => x.Id == wordUser.Id);
+
+                // assert
+                Assert.Equal(wordUserFromDb.Status.ToString(), AvailableWordUserStatus.LEARNED.ToString());
+            }
+            finally
+            {
+                // clean-up
+                var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
+                if (bookUser != null)
+                {
+                    bookUser.LanguageUser = null;
+                    bookUser.Book = null;
+                    bookUser.PageUsers = new List<PageUser>();
+                    context.BookUsers.Remove(bookUser);
+                }
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task UpdatingWordTranslationWorks()
+        {
+            // arrange
+            var context = CreateContext();
+            var user = CreateNewTestUser();
+            int bookId = 7;
+            int userId = (int)user.Id;
+            int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+            BookService BookService = new BookService();
+            string newTranslation = "administrative";
+            try
+            {
+                // act
+
+                if (BookService.IsDataInitRead == false)
+                {
+                    await BookService.InitDataRead(context, _userService, bookId);
+                }
+                var wordUser = BookService.AllWordUsersInPage["administrativa"];
+                wordUser.Translation = newTranslation;
+                await BookService.WordUserSaveModalDataAsync(
+                    context, wordUser.Id, wordUser.Status, wordUser.Translation);
+
+                var wordUserFromDb = context.WordUsers.FirstOrDefault(x => x.Id == wordUser.Id);
+
+                // assert
+                Assert.Equal(wordUserFromDb.Translation, newTranslation);
+            }
+            finally
+            {
+                // clean-up
+                var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
+                if (bookUser != null)
+                {
+                    bookUser.LanguageUser = null;
+                    bookUser.Book = null;
+                    bookUser.PageUsers = new List<PageUser>();
+                    context.BookUsers.Remove(bookUser);
+                }
                 user.LanguageUsers = new List<LanguageUser>();
                 context.Users.Remove(user);
                 context.SaveChanges();

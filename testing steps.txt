@@ -1,10 +1,8 @@
 testing steps
 
 
-read
-check word translation
-update word translation
-update word status
+
+
 if you update word status, do you see it reflected elsewhere on the page
 how about if you go forward and back? what's the cache?
 check paragraph translation

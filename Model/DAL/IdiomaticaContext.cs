@@ -66,7 +66,8 @@ namespace Model.DAL
                     .HasForeignKey(bu => bu.LanguageUserId);
                 e.HasMany(bu => bu.PageUsers).WithOne(pu => pu.BookUser)
                     .HasForeignKey(pu => pu.BookUserId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                    //.OnDelete(DeleteBehavior.NoAction)
+                    ;
             });
             modelBuilder.Entity<BookUserStat>(e => {
                 e.HasKey(bus => new {bus.BookId, bus.LanguageUserId, bus.Key});
