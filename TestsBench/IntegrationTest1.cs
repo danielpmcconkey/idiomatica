@@ -2,13 +2,26 @@ using Logic.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Model.DAL;
+using Model;
 using System.Net;
 
 namespace TestsBench.Tests
 {
     public class IntegrationTest1
     {
-        
+        BookService? _bookService = null;
+        UserService? _userService = null;
+
+        public IntegrationTest1()
+        {
+            _bookService = new BookService();
+            _userService = new UserService(null);
+#if DEBUG
+            var context = CreateContext();
+            var testUser = DataCache.UserByApplicationUserIdReadAsync("TESTER", context).Result;
+            _userService.SetLoggedInUserForTestBench(testUser, context);
+#endif
+        }
         private IdiomaticaContext CreateContext() 
         {
             
@@ -17,18 +30,125 @@ namespace TestsBench.Tests
             optionsBuilder.UseSqlServer(connectionstring);
             return new IdiomaticaContext(optionsBuilder.Options);
         }
-
+        private User CreateNewTestUser()
+        {
+            var user = new User()
+            {
+                ApplicationUserId = Guid.NewGuid().ToString(),
+                Name = "Auto gen tester",
+                Code = "En-US"
+            };
+            var context = CreateContext();
+            context.Users.Add(user);
+            context.SaveChanges();
+            var languageUser = new LanguageUser()
+            {
+                LanguageId = 1, // espAnish
+                UserId = (int)user.Id,
+                TotalWordsRead = 0
+            };
+            context.LanguageUsers.Add(languageUser);
+            context.SaveChanges();
+            
+            return user;
+        }
         [Fact]
-        public async Task ThereAreBooks()
+        public async Task ICannotAddTheSameBookUserTwice()
         {
             // arrange
             var context = CreateContext();
+            var user = CreateNewTestUser();
+            int bookId = 7;
+            int userId = (int)user.Id;
+            int firstBookUserId = 999;
+            try
+            {
+                // act
+                firstBookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+                int newBookId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+                // assert
+                Assert.Equal(newBookId, firstBookUserId);
+            }
+            finally
+            {
+                // clean-up
+                var firstBookUser = context.BookUsers.Where(x => x.Id == firstBookUserId).FirstOrDefault();
+                if (firstBookUser != null) context.BookUsers.Remove(firstBookUser);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();                
+            }
 
-            // act
-            var book = context.Books.FirstOrDefault();
-            // assert
-            Assert.NotNull(book);
-            Assert.True(book.Id > 0);
+        }
+
+        [Fact]
+        public async Task ICanAddABookUser()
+        {
+            // arrange
+            var context = CreateContext();
+            var user = CreateNewTestUser();
+            int bookId = 7;
+            int userId = (int)user.Id;
+            int bookUserId = 999;
+            try
+            {
+                // act
+                bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+                // assert
+                Assert.True(bookUserId != 999 && bookUserId > 0);
+            }
+            finally
+            {
+                // clean-up
+                var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
+                if (bookUser != null) context.BookUsers.Remove(bookUser);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+
+        [Fact]
+        public async Task AddingAUserAndBookUsersWillShowBooksOnTheBookList()
+        {
+            // arrange
+            var context = CreateContext();
+            var user = CreateNewTestUser();
+            int book1Id = 7;
+            int book2Id = 6;
+            int userId = (int)user.Id;
+            int bookUser1Id = await _bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+            int bookUser2Id = await _bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            try
+            {
+                // act
+                
+                List<BookListRow> bookListRows = await DataCache.BookListRowsByUserIdReadAsync(userId, context);
+                var book1 = await DataCache.BookByIdReadAsync(book1Id, context);
+                var book2 = await DataCache.BookByIdReadAsync(book2Id, context);
+                List<string> titlesInList = new List<string>();
+                titlesInList.Add(book1.Title);
+                titlesInList.Add(book2.Title);
+                var titlesInConcat = string.Join("|", titlesInList.Order());
+                List<string> titlesOutList = new List<string>();
+                titlesOutList.Add(bookListRows[0].Title);
+                titlesOutList.Add(bookListRows[1].Title);
+                var titlesOutConcat = string.Join("|", titlesOutList.Order());
+
+                // assert
+                Assert.Equal(titlesInConcat, titlesOutConcat);
+            }
+            finally
+            {
+                // clean-up
+                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
+                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
+                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
+                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
         }
     }
 }

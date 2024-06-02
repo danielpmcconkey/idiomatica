@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject FlashCardService FlashCardService;
 @inject UserService UserService;
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 
 <h3>Flash Card Review</h3>
 
@@ -101,7 +102,7 @@
         {
             try
             {
-                return UserService.GetLoggedInUser();
+                return UserService.GetLoggedInUser(DbContextFactory.CreateDbContext());
             }
             catch (Exception ex)
             {

@@ -48,6 +48,13 @@ namespace Logic.Services
                 return _currentPage.Ordinal;
             }
         }
+        public List<BookListRow> BookListRows
+        {
+            get
+            {
+                return _bookListRows == null ? new List<BookListRow>() : _bookListRows;
+            }
+        }
         public bool IsDataInitRead { get { return _isDataInitRead; } }
         public string LanguageFromCode
         {
@@ -63,6 +70,7 @@ namespace Logic.Services
                 return (_languageToCode == null) ? "" : _languageToCode.Code;
             }
         }
+        public const int LoadingDelayMiliseconds = 1000;
         public List<Paragraph> Paragraphs
         {
             get 
@@ -96,6 +104,7 @@ namespace Logic.Services
         #region book and page data
         private int? _bookId = null;
         private Book? _book = null;
+        private List<BookListRow>? _bookListRows = null;
         private Dictionary<string, WordUser>? _allWordUsersInPage = null;
         private int? _bookTotalPageCount = null;
         private BookUser? _bookUser = null;
@@ -128,7 +137,11 @@ namespace Logic.Services
         private List<Paragraph>? _paragraphs = null;
         private List<Sentence>? _sentences = null;
         private List<Token>? _tokens = null;
-        
+
+        #endregion
+
+        #region specialty properties
+        Dictionary<string, Func<BookListRow, object>>? _bookListRowsOrderByFunctions = null;
         #endregion
 
         public BookService()
@@ -137,13 +150,30 @@ namespace Logic.Services
         }
 
         #region init methods
+        public async Task InitDataBookList(IdiomaticaContext context, UserService userService)
+        {
+            _userService = userService;
+            _loggedInUser = await UserGetLoggedInAsync(context);
+            _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context);
+
+            _bookListRowsOrderByFunctions = new Dictionary<string, Func<BookListRow, object>>();
+            _bookListRowsOrderByFunctions.Add("Language", (x => x.LanguageName));
+            _bookListRowsOrderByFunctions.Add("Id", (x => x.BookId));
+            _bookListRowsOrderByFunctions.Add("Title", (x => x.Title));
+            _bookListRowsOrderByFunctions.Add("PROGRESSPERCENT", (x => x.ProgressPercent));
+            _bookListRowsOrderByFunctions.Add("ISCOMPLETE", (x => x.IsComplete));
+            _bookListRowsOrderByFunctions.Add("TOTALWORDCOUNT", (x => x.TotalWordCount));
+            _bookListRowsOrderByFunctions.Add("TOTALKNOWNPERCENT", (x => x.TotalKnownPercent));
+            _bookListRowsOrderByFunctions.Add("DISTINCTWORDCOUNT", (x => x.DistinctWordCount));
+            _bookListRowsOrderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => x.DistinctKnownPercent));
+        }
         public async Task InitDataRead(IdiomaticaContext context, UserService userService, int bookId)
         {
             _userService = userService;
             _bookId = bookId;
 
             // tier 0 tasks, not dependent on anything
-            var t_loggedInUser = UserGetLoggedInAsync();
+            var t_loggedInUser = UserGetLoggedInAsync(context);
             var t_book = BookGetAsync(context, (int)_bookId);
             var t_bookTotalPageCount = BookGetTotalPagesAsync(context, (int)_bookId);
 
@@ -334,6 +364,20 @@ namespace Logic.Services
 
             return (int)book.Id;
         }
+        public async Task BookListRowsSort(string columnName, string currentlySortedColumn, bool isAscending)
+        {
+            if (_bookListRows is null) return;
+            if (!_bookListRowsOrderByFunctions.ContainsKey(columnName)) return;
+
+            if(isAscending)
+            {
+                _bookListRows = _bookListRows.OrderBy(_bookListRowsOrderByFunctions[columnName]).ToList();
+            }
+            else
+            {
+                _bookListRows = _bookListRows.OrderByDescending(_bookListRowsOrderByFunctions[columnName]).ToList();
+            }
+        }
         public void BookStatsCreateAndSave(IdiomaticaContext context, int bookId)
         {
             if (bookId < 1)
@@ -419,12 +463,24 @@ namespace Logic.Services
             {
                 ErrorHandler.LogAndThrow(2020);
             }
+            // make sure that bookUser doesn't already exist before creating it
+            var existingBookUser = await DataCache.BookUserByUserIdAndBookIdReadAsync(
+                (bookId, languageUser.UserId), context);
+            if(existingBookUser != null) 
+            {
+                // dude already exists. Just return it. 
+                // update the stats first, just in case
+                await BookUserStatsUpdate(context, existingBookUser.Id);
+                return existingBookUser.Id;
+            }
+
             BookUser bookUser = new BookUser()
             {
                 BookId = bookId,
                 CurrentPageID = (int)firstPage.Id,
                 LanguageUserId = (int)languageUser.Id
             };
+
             bool didSaveBookUser = await DataCache.BookUserCreateAsync(bookUser, context);
             if (!didSaveBookUser || bookUser.Id < 1)
             {
@@ -1556,7 +1612,7 @@ namespace Logic.Services
         #endregion
 
         #region User
-        private async Task<User?> UserGetLoggedInAsync()
+        private async Task<User?> UserGetLoggedInAsync(IdiomaticaContext context)
         {
             if (_loggedInUser == null)
             {
@@ -1564,10 +1620,10 @@ namespace Logic.Services
                 {
                     // hold up. some other thread is loading it
                     Thread.Sleep(1000);
-                    return UserGetLoggedInAsync().Result;
+                    return UserGetLoggedInAsync(context).Result;
                 }
                 _isLoadingLoggedInUser = true;
-                _loggedInUser = await _userService.GetLoggedInUserAsync();
+                _loggedInUser = await _userService.GetLoggedInUserAsync(context);
                 _isLoadingLoggedInUser = false;
             }
             return _loggedInUser;

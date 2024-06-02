@@ -152,8 +152,10 @@
             if (BookService.IsDataInitRead == false) 
             {
                 _isLoading = true;
+                var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
                 var context = await DbContextFactory.CreateDbContextAsync();
                 await BookService.InitDataRead(context, UserService, BookId);
+                await t_delay;
                 _isLoading = false;
             }
         }
@@ -211,7 +213,7 @@
             // force a delay of at least N miliseconds. this forces the screen
             // to re-draw the paragraphs. Otherwise, you get the old paragraphs
             // on the new page.
-            var t_delay = Task.Delay(1000);
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync(); 
             await BookService.PageMove(context, targetPageNum);
             await t_delay;

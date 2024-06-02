@@ -1,6 +1,7 @@
 ﻿@implements IDisposable
 @inject UserService UserService;
-@inject NavigationManager NavigationManager
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
+@inject NavigationManager NavigationManager;
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -76,7 +77,7 @@
     {
         get
         {
-            var user = UserService.GetLoggedInUser();
+            var user = UserService.GetLoggedInUser(DbContextFactory.CreateDbContext());
             if (user == null) return null;
             return user.Name;
         }
