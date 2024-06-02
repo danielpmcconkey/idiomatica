@@ -23,6 +23,7 @@ namespace Logic.Services
         private UserService _userService;
 
         #region public read-only properties
+
         public Dictionary<string, WordUser> AllWordUsersInPage
         {
             get
@@ -87,9 +88,11 @@ namespace Logic.Services
                 else return new List<Paragraph>();
             }
         }
+
         #endregion
 
         #region thread checking bools
+
         private bool _isDataInitRead = false;
         private bool _isLoadingBook = false;
         private bool _isLoadingBookUser = false;
@@ -107,36 +110,31 @@ namespace Logic.Services
         private bool _isLoadingLanguage = false;
         private bool _isLoadingLanguageToCode = false;
         private bool _isLoadingLanguageFromCode = false;
+
         #endregion
 
-        #region book and page data
-        private int? _bookId = null;
-        private Book? _book = null;
-        private List<BookListRow>? _bookListRows = null;
-        private Dictionary<string, WordUser>? _allWordUsersInPage = null;
-        private int? _bookTotalPageCount = null;
-        private BookUser? _bookUser = null;
-        private List<BookUserStat>? _bookUserStats = null;
-        
+        #region active book and page data
+
         /// <summary>
         ///     a list of common words from the database and put it in a dictionary 
         ///     so that we don't always have to go back to the database just to get
         ///     the word ID for every single word
         /// </summary>
-        private Dictionary<string, Word>? _wordsInPage = null;
-        private PageUser? _currentPageUser = null;
+        private Dictionary<string, Word>? _allWordsInPage = null;
+        private Dictionary<string, WordUser>? _allWordUsersInPage = null;
+        private Book? _book = null;
+        private int? _bookId = null;
+        private List<BookListRow>? _bookListRows = null;
+        private int? _bookTotalPageCount = null;
+        private BookUser? _bookUser = null;
+        private List<BookUserStat>? _bookUserStats = null;
         private Page? _currentPage = null;
-        
+        private PageUser? _currentPageUser = null;
+        private Language? _language = null;
         /// <summary>
         /// the language the book is written in
         /// </summary>
-        private Language? _language = null;
-
-        /// <summary>
-        /// The language the book was written in
-        /// </summary>
         private LanguageCode? _languageFromCode = null;
-
         /// <summary>
         /// The user's preferred UI language
         /// </summary>
@@ -149,7 +147,9 @@ namespace Logic.Services
         #endregion
 
         #region specialty properties
+
         Dictionary<string, Func<BookListRow, object>>? _bookListRowsOrderByFunctions = null;
+
         #endregion
 
         public BookService()
@@ -158,6 +158,7 @@ namespace Logic.Services
         }
 
         #region init methods
+
         public async Task InitDataBookList(IdiomaticaContext context, UserService userService)
         {
             _userService = userService;
@@ -244,9 +245,11 @@ namespace Logic.Services
             // fin
             _isDataInitRead = true;
         }
+
         #endregion
 
         #region public interface
+
         public async Task<int> BookCreateAndSaveAsync(
             IdiomaticaContext context, string title, string languageCode, string url, string text)
         {
@@ -506,7 +509,6 @@ namespace Logic.Services
 
             return bookUser.Id;
         }
-
         public IQueryable<LanguageCode> LanguageCodeFetchOptionsDuringBookCreate(IdiomaticaContext context)
         {
             // this isn't worth caching
@@ -639,7 +641,7 @@ namespace Logic.Services
                 // now get the words
                 foreach (var t in sentence.Tokens)
                 {
-                    var dictEntry = _wordsInPage.Where(w => w.Value.Id == t.WordId).FirstOrDefault();
+                    var dictEntry = _allWordsInPage.Where(w => w.Value.Id == t.WordId).FirstOrDefault();
                     if (dictEntry.Value == null)
                     {
                         ErrorHandler.LogAndThrow(2370);
@@ -690,7 +692,7 @@ namespace Logic.Services
             if (token.Word == null || token.WordId < 1)
             {
                 token.Word = await WordGetByIdAsync(context, token.WordId);
-                var wordEntry = _wordsInPage.Where(w => w.Value.Id == token.WordId).FirstOrDefault();
+                var wordEntry = _allWordsInPage.Where(w => w.Value.Id == token.WordId).FirstOrDefault();
                 if (wordEntry.Value != null)
                 {
                     token.Word = wordEntry.Value;
@@ -744,10 +746,10 @@ namespace Logic.Services
             dbWordUser.StatusChanged = DateTime.Now;
             await DataCache.WordUserUpdateAsync(dbWordUser, context);
         }
+
         #endregion
 
         #region Book
-
         
         private async Task<Book?> BookGetAsync(IdiomaticaContext context, int bookId)
         {
@@ -797,7 +799,7 @@ namespace Logic.Services
 
         #endregion
 
-        #region bookuser
+        #region bookuser 
         private async Task<BookUser?> BookUserGetAsync(IdiomaticaContext context, int bookId, int userId)
         {
             if (_bookUser == null)
@@ -852,10 +854,10 @@ namespace Logic.Services
             await DataCache.BookUserUpdateAsync(bookUser, context);
         }
 
-
         #endregion
 
         #region BookUserStat
+
         private async Task<List<BookUserStat>?> BookUserGetStatsAsync(
             IdiomaticaContext context, int bookId, int userId)
         {
@@ -1014,6 +1016,7 @@ namespace Logic.Services
         #endregion
 
         #region Language
+
         private async Task<Language?> LanguageGetAsync(IdiomaticaContext context, int languageId)
         {
             if (_language == null)
@@ -1053,6 +1056,7 @@ namespace Logic.Services
             }
             return _languageFromCode;
         }
+
         #endregion
 
         #region LanguageCode
@@ -1078,6 +1082,7 @@ namespace Logic.Services
             }
             return _languageUser;
         }
+
         #endregion
 
         #region Page
@@ -1135,7 +1140,6 @@ namespace Logic.Services
             }
             return _currentPage;
         }
-        
         private async Task PageResetDataForRead(IdiomaticaContext context, int pageId)
         {
             if (pageId == 0)
@@ -1152,7 +1156,7 @@ namespace Logic.Services
             _currentPage = null;
             _paragraphs = null;
             _allWordUsersInPage = null;
-            _wordsInPage = null;
+            _allWordsInPage = null;
             _sentences = null;
             _tokens = null;
 
@@ -1171,7 +1175,7 @@ namespace Logic.Services
             _currentPage = t_currentPage.Result;
             _paragraphs = t_paragraphs.Result;
             _allWordUsersInPage = t_allWordUsersInPage.Result;
-            _wordsInPage = t_wordsInPage.Result;
+            _allWordsInPage = t_wordsInPage.Result;
             _sentences = t_sentencesInPage.Result;
             _tokens = t_tokensInPage.Result;
 
@@ -1194,7 +1198,7 @@ namespace Logic.Services
 
                     foreach (var t in s.Tokens)
                     {
-                        var wordEntry = _wordsInPage.Where(w => w.Value.Id == t.WordId).FirstOrDefault();
+                        var wordEntry = _allWordsInPage.Where(w => w.Value.Id == t.WordId).FirstOrDefault();
                         if (wordEntry.Value != null)
                         {
                             t.Word = wordEntry.Value;
@@ -1209,6 +1213,7 @@ namespace Logic.Services
         #endregion
 
         #region PageUser
+
         private async Task<int> PageUserCreateAndSaveAsync(IdiomaticaContext context,
             Page page, BookUser bookUser, Dictionary<string, Word> commonWordDict,
             Dictionary<string, WordUser> allWordUsersInLanguage)
@@ -1312,11 +1317,11 @@ namespace Logic.Services
             {
                 ErrorHandler.LogAndThrow(2070);
             }
-            if (_wordsInPage is null)
+            if (_allWordsInPage is null)
             {
                 // it shouldn't be null, but whenever you need to create the page
                 // user, these wouldn't be loaded yet
-                _wordsInPage = await WordsGetInPageAsync(context, (int)existingPage.Id);
+                _allWordsInPage = await WordsGetInPageAsync(context, (int)existingPage.Id);
             }
             if (_allWordUsersInPage is null)
             {
@@ -1327,7 +1332,7 @@ namespace Logic.Services
             }
 
             int newPageUserId = await PageUserCreateAndSaveAsync(context, existingPage, _bookUser,
-                _wordsInPage, _allWordUsersInPage);
+                _allWordsInPage, _allWordUsersInPage);
 
             return await DataCache.PageUserByIdReadAsync(newPageUserId, context);
         }
@@ -1373,9 +1378,11 @@ namespace Logic.Services
             await DataCache.PageUserUpdateAsync(pu, context);
             return;
         }
+
         #endregion
 
         #region Paragraph
+
         /// <summary>
         /// parses the text through the language parser and returns paragraphs, 
         /// sentences, and tokens. it saves everything in the DB
@@ -1477,6 +1484,7 @@ namespace Logic.Services
             }
             return _paragraphs;
         }
+
         #endregion
 
         #region ParagraphTranslation
@@ -1484,6 +1492,7 @@ namespace Logic.Services
         #endregion
 
         #region Sentence
+
         /// <summary>
         /// this will delete any existing DB tokens
         /// </summary>
@@ -1602,9 +1611,11 @@ namespace Logic.Services
             }
             return _sentences;
         }
+
         #endregion
 
         #region Token
+
         private async Task<List<Token>?> TokensByPageIdAsync(IdiomaticaContext context, int pageId)
         {
             if (_tokens == null)
@@ -1628,9 +1639,11 @@ namespace Logic.Services
             }
             return _tokens;
         }
+
         #endregion
 
         #region User
+
         private async Task<User?> UserGetLoggedInAsync(IdiomaticaContext context)
         {
             if (_loggedInUser == null)
@@ -1647,6 +1660,7 @@ namespace Logic.Services
             }
             return _loggedInUser;
         }
+
         #endregion
 
         #region Word
@@ -1679,7 +1693,6 @@ namespace Logic.Services
             }
             return newWord;
         }
-
         private async Task<Dictionary<string, Word>?> WordFetchCommonDictForLanguageAsync(
             IdiomaticaContext context, int languageId)
         {
@@ -1707,7 +1720,7 @@ namespace Logic.Services
         }
         private async Task<Dictionary<string, Word>?> WordsGetInPageAsync(IdiomaticaContext context, int pageId)
         {
-            if (_wordsInPage == null)
+            if (_allWordsInPage == null)
             {
                 if (_isLoadingWordsInPage == true)
                 {
@@ -1718,7 +1731,7 @@ namespace Logic.Services
                 try
                 {
                     _isLoadingWordsInPage = true;
-                    _wordsInPage = await DataCache.WordsDictByPageIdReadAsync(pageId, context);
+                    _allWordsInPage = await DataCache.WordsDictByPageIdReadAsync(pageId, context);
                 }
                 catch
                 {
@@ -1726,7 +1739,7 @@ namespace Logic.Services
                 }
                 _isLoadingWordsInPage = false;
             }
-            return _wordsInPage;
+            return _allWordsInPage;
         }
 
         #endregion
@@ -1763,8 +1776,6 @@ namespace Logic.Services
             }
             return newWordUser;
         }
-
-
         private async Task<Dictionary<string, WordUser>> WordUserFetchDictForLanguageUserAsync(
             IdiomaticaContext context, int userId, int languageId)
         {
@@ -1815,6 +1826,7 @@ namespace Logic.Services
             }
             return _allWordUsersInPage;
         }
+
         #endregion
     }
 }
