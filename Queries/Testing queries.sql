@@ -14,8 +14,9 @@ left join [Idioma].[User] u on lu.UserId = u.Id
 left join [Idioma].[Page] p on p.BookId = b.Id
 left join [Idioma].[PageUser] pu on pu.BookUserId = bu.Id and pu.PageId = p.Id
 where 1=1 
-and u.Id = 94
-and b.Id = 7
+--and u.Id = 111
+--and b.Id = 7
+and bu.Id = 233
 
 
 select
@@ -36,3 +37,15 @@ and w.TextLowerCase = 'de'
 and [LanguageUserId] = 96
 
 
+-- word users in page
+select
+wu.*
+from [Idioma].[Page] p
+left join [Idioma].[Paragraph] pp on pp.PageId = p.Id
+left join [Idioma].[Sentence] s on pp.Id = s.ParagraphId
+left join [Idioma].[Token] t on s.Id = t.SentenceId
+left join [Idioma].[Word] w on w.Id = t.WordId
+left join [Idioma].[WordUser] wu on w.Id = wu.WordId
+left join [Idioma].[LanguageUser] lu on wu.LanguageUserId = lu.Id
+where p.Id = 79
+and lu.UserId = 101

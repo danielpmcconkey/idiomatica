@@ -515,7 +515,7 @@ namespace Logic.Services
             return context.LanguageCodes
                 .Where(filter).OrderBy(x => x.LanguageName);
         }
-        public async Task PageUserClearPage(IdiomaticaContext context)
+        public async Task PageUserClearPageAndMove(IdiomaticaContext context, int targetPageNum)
         {
             if (_currentPage == null || _currentPage.Id == null || _currentPage.Id < 1)
             {
@@ -527,6 +527,17 @@ namespace Logic.Services
             }
             await DataCache.WordUsersUpdateStatusByPageIdAndUserIdAndStatus((int)_currentPage.Id, (int)_loggedInUser.Id,
                 AvailableWordUserStatus.UNKNOWN, AvailableWordUserStatus.WELLKNOWN, context);
+
+            // now move forward, if there's another page
+            if (targetPageNum <= _bookTotalPageCount) // remember pages are 1-indexed
+            {
+                await PageMove(context, targetPageNum);
+            }
+            else
+            {
+                // refresh the word user cache
+                await PageResetDataForRead(context, _currentPageUser.PageId);
+            }
         }
         public async Task PageMove(IdiomaticaContext context, int targetPageNum)
         {

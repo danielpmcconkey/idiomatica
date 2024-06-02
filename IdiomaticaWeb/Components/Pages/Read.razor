@@ -246,8 +246,7 @@
             // on the new page.
             var t_delay = Task.Delay(1000); 
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.PageUserClearPage(context);
-            await OnMovePageAsync(targetPageNum);
+            await BookService.PageUserClearPageAndMove(context, targetPageNum);
             await t_delay;
             _isLoading = false;
         }

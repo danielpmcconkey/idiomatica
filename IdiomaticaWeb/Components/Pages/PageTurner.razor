@@ -7,21 +7,31 @@
     <div class="col-2">
         <p>Page @OnGetCurrentPageNum() of @OnGetTotalPages()</p>
     </div>
+    @if (_isPreviousEnabled)
+    {
+        <div class="col-2">
+            <button type="button" class="btn btn-primary" 
+                @onclick="@(e => MovePageAsync(@OnGetCurrentPageNum() - 1))">
+                @UserService.GetUILabel("btnPreviousPage")
+            </button>
+        </div>
+    }
     <div class="col-2">
-        <button type="button" class="btn btn-primary" @onclick="@(e => MovePageAsync(@OnGetCurrentPageNum() - 1))">
-            @UserService.GetUILabel("btnPreviousPage")
-        </button>
-    </div>
-    <div class="col-2">
-        <button type="button" class="btn btn-success" @onclick="@(e => ClearPageAsync(@OnGetCurrentPageNum() + 1))">
+        <button type="button" class="btn btn-success"
+            @onclick="@(e => ClearPageAsync(@OnGetCurrentPageNum() + 1))">
             @UserService.GetUILabel("btnClearPage")
         </button>
     </div>
-    <div class="col-2">
-        <button type="button" class="btn btn-primary" @onclick="@(e => MovePageAsync(@OnGetCurrentPageNum() + 1))">
-            @UserService.GetUILabel("btnNextPage")
-        </button>
-    </div>
+    @if (_isNextEnabled)
+    {
+        <div class="col-2">
+            <button type="button" class="btn btn-primary"
+                @onclick="@(e => MovePageAsync(@OnGetCurrentPageNum() + 1))">
+                @UserService.GetUILabel("btnNextPage")
+            </button>
+        </div>
+    }
+    
 </div>
 @code {
     [Parameter]
@@ -30,6 +40,25 @@
     public EventCallback<int> OnMovePageAsync { get; set; }
     [Parameter]
     public EventCallback<int> OnClearPageAsync { get; set; }
+
+    private bool _isPreviousEnabled
+    {
+        get
+        {
+            if (BookService is null) return false;
+            if (BookService.BookCurrentPageNum < 2) return false;
+            return true;
+        }
+    }
+    private bool _isNextEnabled
+    {
+        get
+        {
+            if (BookService is null) return false;
+            if (BookService.BookCurrentPageNum == BookService.BookTotalPageCount) return false;
+            return true;
+        }
+    }
 
     private async Task MovePageAsync(int targetPageNum)
     {
@@ -48,4 +77,5 @@
     {
         return BookService.BookTotalPageCount;
     }
+    
 }
