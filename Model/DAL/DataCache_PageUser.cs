@@ -23,7 +23,8 @@ namespace Model.DAL
             {
                 return false;
             }
-            PageUserById[(int)value.Id] = value;
+            // now update the cache
+            await PageUserUpdateAllCachesAsync(value);
             return true;
         }
         #endregion
@@ -41,8 +42,8 @@ namespace Model.DAL
             var value = context.PageUsers.Where(x => x.Id == key)
                 .FirstOrDefault();
             if (value == null) return null;
-            // write to cache
-            PageUserById[key] = value;
+            // now update the cache
+            await PageUserUpdateAllCachesAsync(value);
             return value;
         }
         public static async Task<PageUser?> PageUserByLanguageUserIdOrdinalAndBookIdReadAsync(
@@ -62,9 +63,8 @@ namespace Model.DAL
 
             if (value == null) return null;
 
-            // write to cache
-            PageUserByLanguageUserIdOrdinalAndBookId[key] = value;
-            PageUserById[(int)value.Id] = value;
+            // now update the cache
+            await PageUserUpdateAllCachesAsync(value);
             return value;
         }
         public static async Task<PageUser?> PageUserByPageIdAndLanguageUserIdReadAsync(
@@ -82,11 +82,34 @@ namespace Model.DAL
                 .FirstOrDefault();
 
             if (value == null) return null;
-            // write to cache
-            PageUserByPageIdAndLanguageUserId[key] = value;
-            PageUserById[(int)value.Id] = value;
+            // now update the cache
+            await PageUserUpdateAllCachesAsync(value);
             return value;
         }
+        public static async Task<List<PageUser>> PageUsersByBookUserIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            // check cache
+            if (PageUsersByBookUserId.ContainsKey(key))
+            {
+                return PageUsersByBookUserId[key];
+            }
+            // read DB
+            var value = (from bu in context.BookUsers
+                         join pu in context.PageUsers on bu.Id equals pu.BookUserId
+                         where (bu.Id == key)
+                         select pu)
+                .ToList();
+
+
+            // now update the cache
+            foreach (var item in value)
+            {
+                await PageUserUpdateAllCachesAsync(item);
+            }
+            return value;
+        }
+
         #endregion
 
         #region update
@@ -103,10 +126,32 @@ namespace Model.DAL
             context.SaveChanges();
 
             // now update the cache
+            await PageUserUpdateAllCachesAsync(value);
+
+            return;
+        }
+        #endregion
+
+        private static bool doesPageUserListContainPageUserId(List<PageUser> list, int key)
+        {
+            return list.Where(x => x.Id == key).Any();
+        }
+        private static List<PageUser> PageUsersListGetUpdated(List<PageUser> list, PageUser value)
+        {
+            List<PageUser> newList = new List<PageUser>();
+            foreach (var pu in list)
+            {
+                if (pu.Id == value.Id) newList.Add(value);
+                else newList.Add(pu);
+            }
+            return newList;
+        }
+        private static async Task PageUserUpdateAllCachesAsync(PageUser value)
+        {
             PageUserById[(int)value.Id] = value;
 
             var cachedItem1 = PageUserByPageIdAndLanguageUserId.Where(x => x.Value.Id == value.Id).FirstOrDefault();
-            if(cachedItem1.Value != null)
+            if (cachedItem1.Value != null)
             {
                 PageUserByPageIdAndLanguageUserId[cachedItem1.Key] = value;
             }
@@ -116,29 +161,15 @@ namespace Model.DAL
                 PageUserByLanguageUserIdOrdinalAndBookId[cachedItem2.Key] = value;
             }
 
-            return;
-        }
-        public static async Task<List<PageUser>> PageUsersByBookUserIdReadAsync(
-           int key, IdiomaticaContext context)
-        {
-            // check cache
-            if (PageUsersByBookUserId.ContainsKey(key))
+            var cachedList3 = PageUsersByBookUserId
+                .Where(x => doesPageUserListContainPageUserId(x.Value, (int)value.Id));
+            var cachedList3Array = cachedList3.ToArray();
+            for (int i = 0; i < cachedList3Array.Length; i++)
             {
-                return PageUsersByBookUserId[key];
+                var item = cachedList3Array[i];
+                var newList = PageUsersListGetUpdated(item.Value, value);
+                PageUsersByBookUserId[item.Key] = newList;
             }
-            // read DB
-            var value = (from bu in context.BookUsers
-                         join pu in context.PageUsers on bu.Id equals pu.BookUserId
-                         where (bu.Id == key)
-                         select pu)
-                .ToList();
-
-
-            // write to cache
-            PageUsersByBookUserId[key] = value;
-            return value;
         }
-        #endregion
-
     }
 }

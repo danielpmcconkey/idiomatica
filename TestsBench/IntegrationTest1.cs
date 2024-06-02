@@ -564,6 +564,56 @@ Fin
             }
         }
 
+        [Fact]
+        public async Task MovingPagesUpdatesTheBookmarkAndReadDate()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            int bookId = 7;
+            int userId = (int)user.Id;
+            int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+            BookService BookService = new BookService();
+            try
+            {
+                // act
+
+                if (BookService.IsDataInitRead == false)
+                {
+                    await BookService.InitDataRead(context, userService, bookId);
+                }
+                int originalPageId = BookService.BookCurrentPageId;
+                await BookService.PageMove(context, 2);
+                var bookUserFromDb = await DataCache.BookUserByIdReadAsync(bookUserId, context);
+                int bookmark = bookUserFromDb.CurrentPageID;
+                int expected = 80;
+                var pageUsers = await DataCache.PageUsersByBookUserIdReadAsync(bookUserId, context);
+                var originalPageUser = pageUsers.Where(x => x.PageId == originalPageId).FirstOrDefault();
+                var originalPageUserReadDate = originalPageUser.ReadDate;
+
+                // assert
+                Assert.Equal(bookmark, expected);
+                Assert.NotNull(originalPageUserReadDate);
+                Assert.True(originalPageUserReadDate >=  DateTime.Now.AddMinutes(-10));
+            }
+            finally
+            {
+                // clean-up
+                var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
+                if (bookUser != null)
+                {
+                    bookUser.LanguageUser = null;
+                    bookUser.Book = null;
+                    bookUser.PageUsers = new List<PageUser>();
+                    context.BookUsers.Remove(bookUser);
+                }
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+
         #endregion
     }
 }

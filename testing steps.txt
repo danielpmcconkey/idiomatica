@@ -4,8 +4,6 @@ testing steps
 
 
 
-check paragraph translation
-check again and make sure it reads the saved one
-move page
-did the bookmark update?
+
+
 did the pageuser update its read date?

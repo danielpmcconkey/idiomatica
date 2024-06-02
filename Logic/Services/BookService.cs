@@ -48,6 +48,14 @@ namespace Logic.Services
                 return _currentPage.Ordinal;
             }
         }
+        public int BookCurrentPageId
+        {
+            get
+            {
+                if (_currentPage == null || _currentPage.Id == null) return 0;
+                return (int)_currentPage.Id;
+            }
+        }
         public List<BookListRow> BookListRows
         {
             get
