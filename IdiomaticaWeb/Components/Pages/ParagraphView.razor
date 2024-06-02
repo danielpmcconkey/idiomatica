@@ -1,6 +1,5 @@
 ﻿@page "/ParagraphView"
 @rendermode InteractiveServer
-@inject BookService BookService;
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 
@@ -53,37 +52,29 @@ else
         Size="Size.Small" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
 }
 @code {
-
     [Parameter]
-    public Paragraph paragraphAndChildren { get; set; }
+    public BookService BookService { get; set; } = new BookService();
     [Parameter]
-    public Dictionary<string, WordUser> allWordUsersInPage { get; set; }
+    public Paragraph ParagraphAndChildren { get; set; } = new Paragraph();
     [Parameter]
     public EventCallback<Token> OnShowWordModal { get; set; }
     [Parameter]
     public EventCallback<Paragraph> OnShowPpModal { get; set; }
-    /// <summary>
-    /// The language the book was written in
-    /// </summary>
-    [Parameter]
-    public Language Language { get; set; }
-    [Parameter]
-    public LanguageUser LanguageUser { get; set; }
+
     private bool _isDataInit = false;
     private bool _isLoadingLoggedInUser = false;
     private User? _loggedInUser = null;
-    private List<Sentence> _sentences = null;
+    private List<Sentence> _sentences = new List<Sentence>();
 
     private async Task InitData()
     {
-        if(paragraphAndChildren.Id == null || paragraphAndChildren.Id == 0)
+        if(ParagraphAndChildren.Id == null || ParagraphAndChildren.Id == 0)
         {
             ErrorHandler.LogAndThrow(2210);
             return;
         }
         var context = await DbContextFactory.CreateDbContextAsync();
-        _loggedInUser = await UserService.GetLoggedInUserAsync();
-        _sentences = paragraphAndChildren.Sentences.OrderBy(s => s.Ordinal).ToList();
+        _sentences = ParagraphAndChildren.Sentences.OrderBy(s => s.Ordinal).ToList();
         _isDataInit = true;
     }
     protected override async Task OnInitializedAsync()
@@ -104,20 +95,20 @@ else
     }
     private void OnPpTranslateClick()
     {
-        OnShowPpModal.InvokeAsync(paragraphAndChildren);
+        OnShowPpModal.InvokeAsync(ParagraphAndChildren);
     }
     public string GetTokenClass(Token token)
     {
         if (token.Word is null) return "statusUNKNOWN";
-        if (!allWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
-        var wordUser = allWordUsersInPage[token.Word.TextLowerCase];
+        if (!BookService.AllWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
+        var wordUser = BookService.AllWordUsersInPage[token.Word.TextLowerCase];
         return $"status{wordUser.Status}";
     }
     private string GetTokenTranslation(Token token)
     {
         if (token.Word is null) return "";
-        if (!allWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "";
-        var wordUser = allWordUsersInPage[token.Word.TextLowerCase];
+        if (!BookService.AllWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "";
+        var wordUser = BookService.AllWordUsersInPage[token.Word.TextLowerCase];
         return wordUser.Translation;
     }
     private List<Token> GetSentenceTokens(Sentence sentence)
@@ -127,63 +118,9 @@ else
             ErrorHandler.LogAndThrow(2230);
             return new List<Token>();
         }
+
         var context = DbContextFactory.CreateDbContext();
-        if (sentence.Tokens is null || sentence.Tokens.Count == 0)
-        {
-            // we shouldn't be here because tokens should have been added in the read page
-            sentence.Tokens = DataCache.TokensBySentenceIdReadAsync((int)sentence.Id, context).Result;
-            // now get the words
-            var wordsInSentence = DataCache.WordsBySentenceIdReadAsync((int)sentence.Id, context).Result;
-            foreach(var t in sentence.Tokens)
-            {
-                var word = wordsInSentence.Where(w => w.Id == t.WordId).FirstOrDefault();
-                if (word == null)
-                {
-                    ErrorHandler.LogAndThrow(2370);
-                    return null;
-                }
-                t.Word = word;
-            }
-        }
-        // make sure each token has a word user and is in the dictionary
-        // doing it here allows there to be continuity between the same word
-        // in different paragraphs, so that, when you edit one, it updates
-        // the other.
-        foreach (var token in sentence.Tokens)
-        {
-
-            if (!allWordUsersInPage.ContainsKey(token.Word.TextLowerCase))
-            {
-                // check if there's already a wordUser
-                var wordUser = DataCache.WordUserByWordIdAndUserIdReadAsync(
-                    ((int)token.Word.Id, (int)_loggedInUser.Id), context).Result;
-                if(wordUser is null)
-                {
-                    // need to create
-                    // grab the languageUserId from another wordUser
-                    var languageUserId = allWordUsersInPage
-                        .Where(x => x.Value.LanguageUserId != 0)
-                        .FirstOrDefault()
-                        .Value
-                        .LanguageUserId;
-                    wordUser = new WordUser()
-                    {
-                        LanguageUserId = languageUserId,
-                        WordId = (int)token.Word.Id,
-                        Status = AvailableWordUserStatus.UNKNOWN,
-                        Translation = string.Empty
-                    };
-                    var isSaved = DataCache.WordUserCreateAsync(wordUser, context).Result;
-                    if(!isSaved || wordUser.Id < 1)
-                    {
-                        ErrorHandler.LogAndThrow(2380);
-                        return null;
-                    }
-                }
-
-                allWordUsersInPage[token.Word.TextLowerCase] = wordUser;
-            }
-        }
+        sentence = BookService.SentenceFillChildObjects(context, sentence).Result;
         return sentence.Tokens;
         
     }

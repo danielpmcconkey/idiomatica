@@ -16,15 +16,6 @@ namespace Model.DAL
         
         private static ConcurrentDictionary<string, User> UserByApplicationUserId = new ConcurrentDictionary<string, User>();
 
-
-        
-        
-        
-        
-        
-        
-        
-        
         public static async Task<User?> UserByApplicationUserIdReadAsync(string key, IdiomaticaContext context)
         {
             // check cache

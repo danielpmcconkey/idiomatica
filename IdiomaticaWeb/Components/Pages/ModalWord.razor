@@ -1,163 +1,125 @@
 ﻿@page "/ModalWord"
 @rendermode InteractiveServer
-@inject BookService BookService;
+
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 
-@if(true)
-{
-    <Modal @ref="modal" Title="@_title" Size="ModalSize.Large">
-        <BodyTemplate>
-            <div>
-                <label for="inputTranslation" class="form-label">Translation</label>
-                <textarea rows="4"
-                          cols="150"
-                          class="form-control"
-                          id="inputTranslation"
-                          @bind="_wordUser.Translation"
-                          @bind:event="oninput">
-                            </textarea>
-            </div>
-            <div>
-                <label class="form-label">Word status</label><br />
-                <span class="readToken @GetTokenClass(AvailableWordUserStatus.UNKNOWN) @GetTokenClassSelected(8)"
-                      @onclick="@(e => UpdateWordStatusSelected(8))">
-                    @UserService.GetUILabel($"statusLabel{8}")
-                </span>
-                <span class="readToken @GetTokenClass(AvailableWordUserStatus.NEW1) @GetTokenClassSelected(1)"
-                      @onclick="@(e => UpdateWordStatusSelected(1))">
-                    @UserService.GetUILabel($"statusLabel{1}")
-                </span>
-                <span class="readToken @GetTokenClass(AvailableWordUserStatus.NEW2) @GetTokenClassSelected(2)"
-                      @onclick="@(e => UpdateWordStatusSelected(2))">
-                    @UserService.GetUILabel($"statusLabel{2}")
-                </span>
-                <span class="readToken @GetTokenClass(AvailableWordUserStatus.LEARNING3) @GetTokenClassSelected(3)"
-                      @onclick="@(e => UpdateWordStatusSelected(3))">
-                    @UserService.GetUILabel($"statusLabel{3}")
-                </span>
-                <span class="readToken @GetTokenClass(AvailableWordUserStatus.LEARNING4) @GetTokenClassSelected(4)"
-                      @onclick="@(e => UpdateWordStatusSelected(4))">
-                    @UserService.GetUILabel($"statusLabel{4}")
-                </span>
-                <span class="readToken @GetTokenClass(AvailableWordUserStatus.LEARNED) @GetTokenClassSelected(5)"
-                      @onclick="@(e => UpdateWordStatusSelected(5))">
-                    @UserService.GetUILabel($"statusLabel{5}")
-                </span>
-                <span class="readToken @GetTokenClass(AvailableWordUserStatus.IGNORED) @GetTokenClassSelected(6)"
-                      @onclick="@(e => UpdateWordStatusSelected(6))">
-                    @UserService.GetUILabel($"statusLabel{6}")
-                </span>
-                <span class="readToken @GetTokenClass(AvailableWordUserStatus.WELLKNOWN) @GetTokenClassSelected(7)"
-                      @onclick="@(e => UpdateWordStatusSelected(7))">
-                    @UserService.GetUILabel($"statusLabel{7}")
-                </span>
-            </div>
+<Modal @ref="modal" Title="@_title" Size="ModalSize.Large">
+    <BodyTemplate>
+        <div>
+            <label for="inputTranslation" class="form-label">Translation</label>
+            <textarea rows="4"
+                        cols="150"
+                        class="form-control"
+                        id="inputTranslation"
+                        @bind="_wordUser.Translation"
+                        @bind:event="oninput">
+                        </textarea>
+        </div>
+        <div>
+            <label class="form-label">Word status</label><br />
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.UNKNOWN) @GetTokenClassSelected(8)"
+                    @onclick="@(e => UpdateWordStatusSelected(8))">
+                @UserService.GetUILabel($"statusLabel{8}")
+            </span>
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.NEW1) @GetTokenClassSelected(1)"
+                    @onclick="@(e => UpdateWordStatusSelected(1))">
+                @UserService.GetUILabel($"statusLabel{1}")
+            </span>
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.NEW2) @GetTokenClassSelected(2)"
+                    @onclick="@(e => UpdateWordStatusSelected(2))">
+                @UserService.GetUILabel($"statusLabel{2}")
+            </span>
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.LEARNING3) @GetTokenClassSelected(3)"
+                    @onclick="@(e => UpdateWordStatusSelected(3))">
+                @UserService.GetUILabel($"statusLabel{3}")
+            </span>
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.LEARNING4) @GetTokenClassSelected(4)"
+                    @onclick="@(e => UpdateWordStatusSelected(4))">
+                @UserService.GetUILabel($"statusLabel{4}")
+            </span>
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.LEARNED) @GetTokenClassSelected(5)"
+                    @onclick="@(e => UpdateWordStatusSelected(5))">
+                @UserService.GetUILabel($"statusLabel{5}")
+            </span>
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.IGNORED) @GetTokenClassSelected(6)"
+                    @onclick="@(e => UpdateWordStatusSelected(6))">
+                @UserService.GetUILabel($"statusLabel{6}")
+            </span>
+            <span class="readToken @GetTokenClass(AvailableWordUserStatus.WELLKNOWN) @GetTokenClassSelected(7)"
+                    @onclick="@(e => UpdateWordStatusSelected(7))">
+                @UserService.GetUILabel($"statusLabel{7}")
+            </span>
+        </div>
 
-        </BodyTemplate>
-        <FooterTemplate>
-            <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">
-                @UserService.GetUILabel("closeButton")
-            </Button>
-            <Button Color="ButtonColor.Primary" @onclick="OnSaveModal">
-                @UserService.GetUILabel("saveButton")
-            </Button>
-        </FooterTemplate>
-    </Modal>
-}
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">
+            @UserService.GetUILabel("closeButton")
+        </Button>
+        <Button Color="ButtonColor.Primary" @onclick="OnSaveModalAsync">
+            @UserService.GetUILabel("saveButton")
+        </Button>
+    </FooterTemplate>
+</Modal>
+
 
 @code {
     [Parameter]
     public Read? Parent { get; set; }
     [Parameter]
-    public User? LoggedInUser { get; set; }
-    [Parameter]
-    public Dictionary<string, Word>? WordsInPage { get; set; }
-    [Parameter]
-    public Dictionary<string, WordUser> AllWordUsersInPage { get; set; }
+    public BookService BookService { get; set; }
 
-    private bool _isDataInit = false;
     private Modal modal = default!;
     private Token? _token = null;
-    private Word? _word = null;
     private WordUser? _wordUser = null;
+    private Word? _word = null;
+
+    private bool _isDataInit = false;
     private string? _title = null;
     private string? _translation = null;
     private string? _selectedStatus = null;
 
-    private async Task InitData()
-    {
-        if(LoggedInUser == null || LoggedInUser.Id == null || LoggedInUser.Id < 1)
-        {
-            ErrorHandler.LogAndThrow(1400);
-            return;
-        }
-        var context = await DbContextFactory.CreateDbContextAsync();
-        // the token.Word is already supposed to be filled in, but check just in case
-        if (_token.Word == null || _token.WordId < 1)
-        {
-            var wordEntry = WordsInPage.Where(w => w.Value.Id == _token.WordId).FirstOrDefault();
-            if (wordEntry.Value != null)
-            {
-                _token.Word = wordEntry.Value;
-            }
-        }
-        _word = _token.Word;
-        if(_word == null || _word.Id == null || _word.Id < 1)
-        {
-            ErrorHandler.LogAndThrow(2390);
-            return;
-        }
-        if(AllWordUsersInPage.ContainsKey(_word.TextLowerCase))
-        {
-            _wordUser = AllWordUsersInPage[_word.TextLowerCase];
-        }
-        else
-        {
-            _wordUser = await DataCache.WordUserByWordIdAndUserIdReadAsync(((int)_word.Id, (int)LoggedInUser.Id), context);
-        }
-        if (_wordUser == null || _wordUser.Id < 1)
-        {
-            ErrorHandler.LogAndThrow(2400);
-            return;
-        }
-        _title = _word.TextLowerCase;
-        _translation = _wordUser.Translation;
-        _selectedStatus = UserService.GetUILabel($"statusLabel{(int)_wordUser.Status}");
-        _isDataInit = true;
-    }
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
 
-        }
-        catch (Exception ex)
-        {
-            StateHasChanged();
-            throw;
-        }
-    }
+
     public async Task OnShowModalClick(Token thisToken)
     {
         try
         {
+            var context = await DbContextFactory.CreateDbContextAsync();
+
             if(thisToken == null || thisToken.Id == null || thisToken.Id < 1)
             {
                 ErrorHandler.LogAndThrow(1390);
                 return;
             }
-            _token = thisToken;
-            await InitData();
+            var tokenAndChildren = await BookService.TokenGetChildObjects(context, thisToken);
+            _token = tokenAndChildren.t;
+            _wordUser = tokenAndChildren.wu;
+            _word = _token.Word;
+            if (_token.Word == null || _token.Word.Id == null || _token.Word.Id < 1)
+            {
+                ErrorHandler.LogAndThrow(2420);
+                return;
+            }
+            if (_wordUser == null || _wordUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow(2430);
+                return;
+            }
+
+            _title = _word.TextLowerCase;
+            _translation = _wordUser.Translation;
+            _selectedStatus = UserService.GetUILabel($"statusLabel{(int)_wordUser.Status}");
             await modal.ShowAsync();
         }
-        catch (Exception ex)
+        catch 
         {
             StateHasChanged();
             throw;
         }
-        
-        
+
+
     }
     private string GetTokenClassSelected(int statusToCheck)
     {
@@ -170,18 +132,32 @@
         await modal.HideAsync();
     }
 
-    private async Task OnSaveModal()
+    private async Task OnSaveModalAsync()
     {
-        BookService.WordUserUpdateStatusAndTranslationAsync(
-            _wordUser.Id, _wordUser.Status, _wordUser.Translation);
-        Parent.RefreshState();
-        await modal.HideAsync();
+        try
+        {
+            var context = await DbContextFactory.CreateDbContextAsync();
+            await BookService.WordUserSaveModalDataAsync(
+                context, _wordUser.Id, _wordUser.Status, _wordUser.Translation);
+            Parent.RefreshState();
+            await modal.HideAsync();
+        }
+        catch
+        {
+            StateHasChanged();
+            throw;
+        }
     }
+    /// <summary>
+    /// this updates the status on the word object w/out saving it
+    /// </summary>
+    /// <param name="newStatusInt"></param>
     private void UpdateWordStatusSelected(int newStatusInt)
     {
         if (_wordUser is null) return;
         _wordUser.Status = (AvailableWordUserStatus)newStatusInt;
     }
+    
     private string GetTokenClass(AvailableWordUserStatus status)
     {
         if (status == AvailableWordUserStatus.UNKNOWN) return "statusUNKNOWN";

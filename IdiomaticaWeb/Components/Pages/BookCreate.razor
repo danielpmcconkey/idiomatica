@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 
 <h3>@UserService.GetUILabel("NewBook")</h3>
 <ErrorAlert ErrorState="errorState"></ErrorAlert>
@@ -152,7 +153,7 @@
         {
             try
             {
-                return UserService.GetLoggedInUser();
+                return UserService.GetLoggedInUser(DbContextFactory.CreateDbContext());
             }
             catch (IdiomaticaException ex)
             {
@@ -179,7 +180,8 @@
     {
         try
         {
-            var dbLanguageCodes = BookService.LanguageCodeFetchOptionsDuringBookCreate();
+            var context = await DbContextFactory.CreateDbContextAsync();
+            var dbLanguageCodes = BookService.LanguageCodeFetchOptionsDuringBookCreate(context);
             foreach(var lc in dbLanguageCodes)
             {
                 _languageOptions.Add(lc.Code, lc.LanguageName);
@@ -205,13 +207,15 @@
         _isSaving = true;
         try
         {
+            var context = await DbContextFactory.CreateDbContextAsync();
+
             string textInput = await _largeVolumeTextArea.GetTextValue();
 
-            int bookId = await BookService.BookCreateAndSaveAsync(_titleInput, _languageCodeInput, _sourceURIInput, textInput);
+            int bookId = await BookService.BookCreateAndSaveAsync(context, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
             // add the book stats
-            BookService.BookStatsCreateAndSave(bookId);
+            BookService.BookStatsCreateAndSave(context, bookId);
             // now create the book user for teh logged in user
-            int bookUserId = await BookService.BookUserCreateAndSaveAsync(bookId, (int)_loggedInUser.Id);
+            int bookUserId = await BookService.BookUserCreateAndSaveAsync(context, bookId, (int)_loggedInUser.Id);
             
 
             // throw up a success message

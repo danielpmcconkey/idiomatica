@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Model;
 using Logic.UILabels;
+using Polly;
 
 namespace Logic.Services
 {
@@ -17,30 +18,55 @@ namespace Logic.Services
         private ClaimsPrincipal? _loggedInUserClaimsPrincipal;
         private User? _loggedInUser;
         private UILabels.UILabels _uiLabels;
-        private LanguageCode _uiLanguageCode;
+        private LanguageCode? _uiLanguageCode;
+#if DEBUG
+        /// <summary>
+        /// this is used so that the test bench can be used without needing to go through front-end login
+        /// </summary>
+        private bool _loggedInUserOverride = false;
+#endif
 
-        private IDbContextFactory<IdiomaticaContext> _dbContextFactory;
+
         private AuthenticationStateProvider _authenticationStateProvider;
         public UserService(
-            IDbContextFactory<IdiomaticaContext> dbContextFactory, 
             AuthenticationStateProvider AuthenticationStateProvider)
         {
-            _dbContextFactory = dbContextFactory;
             _authenticationStateProvider = AuthenticationStateProvider;
             _uiLabels = UILabels.Factory.GetUILabels(LanguageCodeEnum.EN_US);
         }
-        public User? GetLoggedInUser()
+#if DEBUG
+        /// <summary>
+        /// this is used so that the test bench can be used without needing to go through front-end login
+        /// </summary>
+        public void SetLoggedInUserForTestBench(User loggedInUser, IdiomaticaContext context)
         {
-            var t = Task.Run(() => GetLoggedInUserAsync());
+            _loggedInUser = loggedInUser;
+            _uiLanguageCode = DataCache.LanguageCodeByCodeReadAsync(_loggedInUser.Code, context).Result;
+            _uiLabels = UILabels.Factory.GetUILabels(_uiLanguageCode.LanguageCodeEnum);
+            _loggedInUserOverride = true;
+        }
+#endif
+        public User? GetLoggedInUser(IdiomaticaContext context)
+        {
+#if DEBUG
+            /// this is used so that the test bench can be used without needing to go through front-end login
+            if ( _loggedInUserOverride) return _loggedInUser;
+#endif
+            var t = Task.Run(() => GetLoggedInUserAsync(context));
             t.Wait();
             return t.Result;
         }
-        public async Task<User?> GetLoggedInUserAsync()
+        public async Task<User?> GetLoggedInUserAsync(IdiomaticaContext context)
         {
+
+#if DEBUG
+            /// this is used so that the test bench can be used without needing to go through front-end login
+            if (_loggedInUserOverride) return _loggedInUser;
+#endif
             _loggedInUserClaimsPrincipal = await GetAppUserClaimsPrincipalAsync();
-            return await processUserFromClaimPrincipal();
+            return await processUserFromClaimPrincipal(context);
         }
-        private async Task<User?> processUserFromClaimPrincipal()
+        private async Task<User?> processUserFromClaimPrincipal(IdiomaticaContext context)
         {
             if (_loggedInUserClaimsPrincipal == null) return null;
             if (_loggedInUserClaimsPrincipal.Identity is null) return null;
@@ -49,7 +75,7 @@ namespace Logic.Services
             var appUserId = _loggedInUserClaimsPrincipal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (appUserId == null) return null;
             //Console.WriteLine($"appUserId = {appUserId}");
-            var context = _dbContextFactory.CreateDbContext();
+           
             var matchingUser = await DataCache.UserByApplicationUserIdReadAsync(appUserId, context);
             if (matchingUser != null)
             {

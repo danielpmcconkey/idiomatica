@@ -76,7 +76,7 @@
 <AuthorizeView>
     <Authorized>
         
-        @if (_isDataInit == false)
+        @if (_isLoading)
         {
             <PageTitle>@UserService.GetUILabel("loading")</PageTitle>
             <Button Color="ButtonColor.Primary" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
@@ -84,18 +84,13 @@
         }
         else
         {
-            <PageTitle>@_book.Title</PageTitle>
-            <h3>@_book.Title</h3>
+            <PageTitle>@BookService.BookTitle</PageTitle>
+            <h3>@BookService.BookTitle</h3>
         
 
-            <ModalWord @ref="_wModal" Parent="this"
-                       AllWordUsersInPage="_allWordUsersInPage"
-                       LoggedInUser="_loggedInUser"
-                       WordsInPage="_wordsInPage" />
+            <ModalWord @ref="_wModal" Parent="this" BookService="BookService" />
 
-            <ModalParagraph @ref="_ppModal" 
-                            LanguageFromCode="_languageFromCode"
-                            LanguageToCode="_languageToCode" />
+            <ModalParagraph @ref="_ppModal" BookService="BookService" />
 
 
 
@@ -103,28 +98,24 @@
 
             <div class="container px-4">
 
-                <PageTurner currentPage="_currentPage"
+                <PageTurner BookService="BookService"
                             OnMovePageAsync="OnMovePageAsync"
-                            OnClearPageAsync="OnClearPageAsync"
-                            BookTotalPageCount="_bookTotalPages" />
-                @if (_paragraphs is not null)
+                            OnClearPageAsync="OnClearPageAsync" />
+
+                
+                @foreach (var paragraph in BookService.Paragraphs)
                 {
-                    @foreach (var paragraph in _paragraphs)
-                    {
-                        <hr />
-                        <ParagraphView paragraphAndChildren="paragraph"
-                            allWordUsersInPage="_allWordUsersInPage"
-                            OnShowWordModal="OnShowWordModal"
-                            OnShowPpModal="ShowPpModal"
-                            Language="_language" 
-                            LanguageUser="_languageUser" />
-                    }
+                    <hr />
+                    <ParagraphView BookService="BookService"
+                        ParagraphAndChildren="paragraph"
+                        OnShowWordModal="OnShowWordModal"
+                        OnShowPpModal="OnShowPpModal" />
                 }
+                
                 <hr />
-                <PageTurner currentPage="_currentPage"
+                <PageTurner BookService="BookService"
                             OnMovePageAsync="OnMovePageAsync"
-                            OnClearPageAsync="OnClearPageAsync"
-                            BookTotalPageCount="_bookTotalPages" />
+                            OnClearPageAsync="OnClearPageAsync" />
             </div>
         }
     </Authorized>
@@ -143,133 +134,30 @@
 
     #region page loading stuff
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
-    private User? _loggedInUser = null;
     private ModalWord _wModal = default!;
     private ModalParagraph _ppModal = default!;
-    private bool _isDataInit = false;
-    private bool _isLoadingBook = false;
-    private bool _isLoadingBookUser = false;
-    private bool _isLoadingLanguageUser = false;
-    private bool _isLoadingBookUserStats = false;
-    private bool _isLoadingLoggedInUser = false;
-    private bool _isLoadingAllWordUsersInPage = false;
-    private bool _isLoadingWordsInPage = false;
-    private bool _isLoadingPageUser = false;
-    private bool _isLoadingParagraphs = false;
-    private bool _isLoadingCurrentPage = false;
-    private bool _isLoadingTotalPageCount = false;
-    private bool _isLoadingSentences = false;
-    private bool _isLoadingTokens = false;
-    private bool _isLoadingLanguage = false;
-    private bool _isLoadingLanguageToCode = false;
-    private bool _isLoadingLanguageFromCode = false;
-    #endregion
+    private bool _isLoading = true;
 
-    #region book and page data
-    private Book? _book = null;
-    private Dictionary<string, WordUser>? _allWordUsersInPage = null;
-    private int? _bookTotalPages = null;
-    private BookUser? _bookUser = null;
-    private List<BookUserStat>? _bookUserStats = null;
-    /// <summary>
-    ///     a list of common words from the database and put it in a dictionary 
-    ///     so that we don't always have to go back to the database just to get
-    ///     the word ID for every single word
-    /// </summary>
-    private Dictionary<string, Word>? _wordsInPage = null;
-    private PageUser? _currentPageUser = null;
-    private Page? _currentPage = null;
-    /// <summary>
-    /// the language the book is written in
-    /// </summary>
-    private Language? _language = null;
-    private LanguageUser? _languageUser = null;
-    private List<Paragraph>? _paragraphs = null;
-    private List<Sentence>? _sentences = null;
-    private List<Token>? _tokens = null;
-    ///  <summary>
-    /// the language the book is written in
-    /// </summary>
-    private LanguageCode? _languageFromCode = null;
-    /// <summary>
-    /// the user's UI preference language
-    /// </summary>
-    private LanguageCode? _languageToCode = null;
     #endregion
 
 
-    #region init methods
-    private async Task InitData()
-    {
-        // tier 0 tasks, not dependent on anything
-        var t_loggedInUser = GetLoggedInUserAsync();
-        var t_book = GetBookAsync(BookId);
-        var t_bookTotalPageCount = GetBookTotalPagesAsync(BookId);
-
-        Task.WaitAll([t_loggedInUser, t_book, t_bookTotalPageCount]);
-
-        _loggedInUser = t_loggedInUser.Result;
-        _languageToCode = UserService.GetUiLanguageCode();
-        _book = t_book.Result;
-        _bookTotalPages = t_bookTotalPageCount.Result;
-
-        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id == 0)
-        {
-            ErrorHandler.LogAndThrow(2130);
-            return;
-        }
-        if (_book == null || _book.Id == null || _book.Id == 0)
-        {
-            ErrorHandler.LogAndThrow(2140);
-            return;
-        }
 
 
-        // tier 1 tasks, dependent on tier 0
-        var t_bookUser = GetBookUserAsync(BookId, (int)_loggedInUser.Id);
-        var t_bookUserStats = GetBookUserStatsAsync(BookId, (int)_loggedInUser.Id);
-        var t_languageUser = GetLanguageUserAsync(_book.LanguageId, (int)_loggedInUser.Id);
-        var t_language = GetLanguageAsync(_book.LanguageId);
 
-        Task.WaitAll([t_bookUser, t_bookUserStats, t_languageUser, t_language]);
-
-        _bookUser = t_bookUser.Result;
-        _bookUserStats = t_bookUserStats.Result;
-        _languageUser = t_languageUser.Result;
-        _language = t_language.Result;
-
-        if (_bookUser == null || _bookUser.Id == 0)
-        {
-            ErrorHandler.LogAndThrow(2150);
-            return;
-        }
-
-        // tier 2, dependent on tier 1
-        var t_currentPageUser = GetPageUserOnOpenAsync(_bookUser.CurrentPageID, _bookUser.LanguageUserId);
-        var t_languageFromCode = GetLanguageFromCodeAsync(_language.Code);
-
-        Task.WaitAll([t_currentPageUser, t_languageFromCode]);
-
-        _currentPageUser = t_currentPageUser.Result;
-        _languageFromCode = t_languageFromCode.Result;
-
-        if (_currentPageUser == null || _currentPageUser.PageId == 0)
-        {
-            ErrorHandler.LogAndThrow(2220);
-            return;
-        }
-
-        // tier 3, dependent on tier 2
-        await ResetPageData(_currentPageUser.PageId);
-
-        // fin
-        _isDataInit = true;
-    }
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            if(_isDataInit == false) await InitData();
+
+            if (BookService.IsDataInitRead == false) 
+            {
+                _isLoading = true;
+                var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+                var context = await DbContextFactory.CreateDbContextAsync();
+                await BookService.InitDataRead(context, UserService, BookId);
+                await t_delay;
+                _isLoading = false;
+            }
         }
         catch (IdiomaticaException ex)
         {
@@ -287,7 +175,6 @@
             return;
         }
     }
-    #endregion
 
     #region methods exposed to other elements
     public async Task OnShowWordModal(Token thisToken)
@@ -304,7 +191,7 @@
             return;
         }
     }
-    private async Task ShowPpModal(Paragraph pp)
+    private async Task OnShowPpModal(Paragraph pp)
     {
         try
         {
@@ -322,58 +209,15 @@
     {
         try
         {
-            // set isDataInit to false and force a delay of at least N 
-            // miliseconds. this forces the screen to re-draw the paragraphs. 
-            // Otherwise, you get the old paragraphs on the new page.
-            _isDataInit = false;
-            var t_delay = Task.Delay(1000); // this task is awaited at the end of this function to ensure you've waited at least the min time
-
-
-            /*
-            * where you are
-            * 
-            * you need to finish testing your prior changes.
-            * 
-            * Then the Modal word needs some revamp -- load data when its 
-             * invoked
-             * 
-             */
-
-
-            if(_languageUser is null || _languageUser.Id is null || _languageUser.Id == 0)
-            {
-                ErrorHandler.LogAndThrow(2170);
-                return;
-            }
-            if (_bookUser is null || _bookUser.Id == 0)
-            {
-                ErrorHandler.LogAndThrow(2180);
-                return;
-            }
-            if (_currentPageUser is null || _currentPageUser.Id is null || _currentPageUser.Id == 0)
-            {
-                ErrorHandler.LogAndThrow(2190);
-                return;
-            }
-            // mark the previous page as read before moving on
-            await MarkCurrentPageReadAsync((int)_currentPageUser.Id);
-
-            var totalPages = await GetBookTotalPagesAsync(BookId);
-            if (targetPageNum < 1) return;
-            if (targetPageNum > totalPages)
-                return;
-
-            _currentPageUser = await FetchPageUserByOrderWithinBookAsync(
-                (int)_languageUser.Id, targetPageNum, BookId);
-            if (_currentPageUser == null) return;
-
-
-            await ResetPageData(_currentPageUser.PageId);
-            await BookService.BookUserUpdateBookmarkAsync(_bookUser.Id, (int)_currentPage.Id);
-            StateHasChanged();
-
+            _isLoading = true;
+            // force a delay of at least N miliseconds. this forces the screen
+            // to re-draw the paragraphs. Otherwise, you get the old paragraphs
+            // on the new page.
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync(); 
+            await BookService.PageMove(context, targetPageNum);
             await t_delay;
-            _isDataInit = true;
+            _isLoading = false;
 
         }
         catch (IdiomaticaException ex)
@@ -396,8 +240,16 @@
     {
         try
         {
-            BookService.PageUserClearPage(_currentPageUser, _languageUser);            
+            _isLoading = true;
+            // force a delay of at least N miliseconds. this forces the screen
+            // to re-draw the paragraphs. Otherwise, you get the old paragraphs
+            // on the new page.
+            var t_delay = Task.Delay(1000); 
+            var context = await DbContextFactory.CreateDbContextAsync();
+            await BookService.PageUserClearPage(context);
             await OnMovePageAsync(targetPageNum);
+            await t_delay;
+            _isLoading = false;
         }
         catch (IdiomaticaException ex)
         {
@@ -416,495 +268,5 @@
         }
     }
     public void RefreshState() { StateHasChanged(); }
-    #endregion
-
-    #region private methods
-    private async Task ResetPageData(int pageId)
-    {
-        StateHasChanged();
-        if (pageId == 0)
-        {
-            ErrorHandler.LogAndThrow(1240);
-            return;
-        }
-        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id == 0)
-        {
-            ErrorHandler.LogAndThrow(2130);
-            return;
-        }
-        // wipe the old ones out
-        _currentPage = null;
-        _paragraphs = null;
-        _allWordUsersInPage = null;
-        _wordsInPage = null;
-        _sentences = null;
-        _tokens = null;
-
-
-
-        // and rebuild
-        var t_currentPage = GetCurrentPageAsync(pageId);
-        var t_paragraphs = GetParagraphsAsync(pageId);
-        var t_wordsInPage = GetWordsInPageAsync(pageId);
-        var t_allWordUsersInPage = GetAllWordUsersInPageAsync(pageId, (int)_loggedInUser.Id);
-        var t_sentencesInPage = GetAllSentencesInPageAsync(pageId);
-        var t_tokensInPage = GetAllTokensInPageAsync(pageId);
-
-        Task.WaitAll([t_currentPage, t_paragraphs, t_wordsInPage, t_allWordUsersInPage, t_sentencesInPage, t_tokensInPage]);
-
-        _currentPage = t_currentPage.Result;
-        _paragraphs = t_paragraphs.Result;
-        _allWordUsersInPage = t_allWordUsersInPage.Result;
-        _wordsInPage = t_wordsInPage.Result;
-        _sentences = t_sentencesInPage.Result;
-        _tokens = t_tokensInPage.Result;
-
-
-        // now knit the paragraph data together
-        _paragraphs = _paragraphs.OrderBy(x => x.Ordinal).ToList();
-        var pox = _paragraphs[0];
-        foreach(var p in _paragraphs)
-        {
-            p.Sentences = _sentences
-                .Where(s => s.ParagraphId == p.Id)
-                .OrderBy(s => s.Ordinal)
-                .ToList();
-            foreach(var s in p.Sentences)
-            {
-                s.Tokens = _tokens
-                    .Where(t => t.SentenceId == s.Id)
-                    .OrderBy(t => t.Ordinal)
-                    .ToList();
-
-                foreach(var t in s.Tokens)
-                {
-                    var wordEntry = _wordsInPage.Where(w => w.Value.Id == t.WordId).FirstOrDefault();
-                    if(wordEntry.Value != null)
-                    {
-                        t.Word = wordEntry.Value;
-                    }
-                }
-            }
-        }
-
-
-    }
-
-    private async Task<BookUser?> FetchBookUserAsync(int bookId, int userId)
-    {
-        var context = await DbContextFactory.CreateDbContextAsync();
-        var bookUserFromDb = await DataCache.BookUserByUserIdAndBookIdReadAsync(
-            (bookId, userId), context);
-        if (bookUserFromDb is null)
-        {
-            // try to create it
-            var bookUserId = await BookService.BookUserCreateAndSaveAsync(BookId, (int)_loggedInUser.Id);
-            if(bookUserId == 0)
-            {
-                ErrorHandler.LogAndThrow(5080);
-                return null;
-            }
-            bookUserFromDb = await DataCache.BookUserByUserIdAndBookIdReadAsync(
-                (bookId, userId), context);
-        }
-        return bookUserFromDb;
-    }
-
-
-    private async Task<PageUser?> FetchPageUserByOrderWithinBookAsync(int languageUserId, int pageOrdinal, int bookId)
-    {
-        if (_bookUser is null) ErrorHandler.LogAndThrow(1200);
-
-
-
-        var context = await DbContextFactory.CreateDbContextAsync();
-        var pageUserFromDb = await DataCache.PageUserByLanguageUserIdOrdinalAndBookIdReadAsync(
-            (languageUserId, pageOrdinal, bookId), context);
-
-        if (pageUserFromDb is not null) return pageUserFromDb;
-
-        // pageUser is not created yet. Is the page created?
-        var existingPage = await DataCache.PageByOrdinalAndBookIdReadAsync(
-            (pageOrdinal, _bookUser.BookId), context);
-        if (existingPage == null)
-        {
-            ErrorHandler.LogAndThrow(2070);
-        }
-        if (_wordsInPage is null)
-        {
-            // it shouldn't be null, but whenever you need to create the page
-            // user, these wouldn't be loaded yet
-            _wordsInPage = await GetWordsInPageAsync((int)existingPage.Id);
-        }
-        if (_allWordUsersInPage is null)
-        {
-            // it shouldn't be null, but whenever you need to create the page
-            // user, these wouldn't be loaded yet
-            _allWordUsersInPage = await GetAllWordUsersInPageAsync((int)existingPage.Id, (int)_loggedInUser.Id);
-        }
-        
-        int newPageUserId = await BookService.PageUserCreateAndSaveAsync(existingPage, _bookUser,
-            _wordsInPage, _allWordUsersInPage);
-
-        return await DataCache.PageUserByIdReadAsync(newPageUserId, context);
-    }
-    private async Task<LanguageCode?> GetLanguageFromCodeAsync(string code)
-    {
-        if (_languageFromCode == null)
-        {
-            if (_isLoadingLanguageFromCode == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetLanguageFromCodeAsync(code).Result;
-            }
-            try
-            {
-                _isLoadingLanguageFromCode = true;
-                var context = await DbContextFactory.CreateDbContextAsync();
-                _languageFromCode = await DataCache.LanguageCodeByCodeReadAsync(code, context);
-            }
-            catch
-            {
-                throw;
-            }
-            _isLoadingLanguageFromCode = false;
-        }
-        return _languageFromCode;
-    }
-    private async Task<List<Sentence>?> GetAllSentencesInPageAsync(int pageId)
-    {
-        if (_sentences == null)
-        {
-            if (_isLoadingSentences == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetAllSentencesInPageAsync(pageId).Result;
-            }
-            try
-            {
-                _isLoadingSentences = true;
-                var context = await DbContextFactory.CreateDbContextAsync();
-                _sentences = await DataCache.SentencesByPageIdReadAsync(pageId, context);
-            }
-            catch
-            {
-                throw;
-            }
-            _isLoadingSentences = false;
-        }
-        return _sentences;
-    }
-    private async Task<List<Token>?> GetAllTokensInPageAsync(int pageId)
-    {
-        if (_tokens == null)
-        {
-            if (_isLoadingTokens == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetAllTokensInPageAsync(pageId).Result;
-            }
-            try
-            {
-                _isLoadingTokens = true;
-                var context = await DbContextFactory.CreateDbContextAsync();
-                _tokens = await DataCache.TokensByPageIdReadAsync(pageId, context);
-            }
-            catch
-            {
-                throw;
-            }
-        _isLoadingTokens = false;
-        }
-        return _tokens;
-    }
-
-    private async Task<Dictionary<string, WordUser>?> GetAllWordUsersInPageAsync(int pageId, int userId)
-    {
-        if (_allWordUsersInPage == null)
-        {
-            if (_isLoadingAllWordUsersInPage == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetAllWordUsersInPageAsync(pageId, userId).Result;
-            }
-            try
-            {
-                _isLoadingAllWordUsersInPage = true;
-                var context = await DbContextFactory.CreateDbContextAsync();
-                _allWordUsersInPage = await DataCache.WordUsersDictByPageIdAndUserIdReadAsync((pageId, userId), context);
-            }
-            catch
-            {
-                throw;
-            }
-            _isLoadingAllWordUsersInPage = false;
-        }
-        return _allWordUsersInPage;
-    }
-    private async Task<Book?> GetBookAsync(int bookId)
-    {
-        if (_book == null)
-        {
-            if (_isLoadingBook == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetBookAsync(bookId).Result;
-            }
-            _isLoadingBook = true;
-            var context = await DbContextFactory.CreateDbContextAsync();
-            _book = await DataCache.BookByIdReadAsync(bookId, context);
-            _isLoadingBook = false;
-        }
-        return _book;
-    }
-    private async Task<int?> GetBookTotalPagesAsync(int bookId)
-    {
-        if (_bookTotalPages == null)
-        {
-            if (_isLoadingTotalPageCount == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetBookTotalPagesAsync(bookId).Result;
-            }
-            _isLoadingTotalPageCount = true;
-            var context = await DbContextFactory.CreateDbContextAsync();
-            var dbVal = await DataCache.BookStatByBookIdAndStatKeyReadAsync((bookId, AvailableBookStat.TOTALPAGES), context);
-            int outVal = 0;
-            int.TryParse(dbVal.Value, out outVal);
-            _bookTotalPages = outVal;
-            _isLoadingTotalPageCount = false;
-        }
-        return _bookTotalPages;
-    }
-    private async Task<Page?> GetCurrentPageAsync(int pageId)
-    {
-        if (_currentPage == null)
-        {
-            if (_isLoadingCurrentPage == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetCurrentPageAsync(pageId).Result;
-            }
-            _isLoadingCurrentPage = true;
-            try
-            {
-                var context = await DbContextFactory.CreateDbContextAsync();
-                _currentPage = await DataCache.PageByIdReadAsync(pageId, context);
-            }
-            catch
-            {
-                throw;
-            }
-            _isLoadingCurrentPage = false;
-        }
-        return _currentPage;
-    }
-    private async Task<PageUser?> GetPageUserOnOpenAsync(int currentPageID, int languageUserId)
-    {
-        if (_currentPageUser == null)
-        {
-            if (_isLoadingPageUser == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetPageUserOnOpenAsync(currentPageID, languageUserId).Result;
-            }
-            _isLoadingPageUser = true;
-
-            var context = await DbContextFactory.CreateDbContextAsync();
-            var dbPageUser = await DataCache.PageUserByPageIdAndLanguageUserIdReadAsync(
-                (currentPageID, languageUserId), context);
-            if (dbPageUser is not null) 
-            {
-                _currentPageUser = dbPageUser;
-            }
-            else _currentPageUser = await FetchPageUserByOrderWithinBookAsync(languageUserId, 1, BookId);
-
-            _isLoadingPageUser = false;
-        }
-        return _currentPageUser;
-    }
-    private async Task<BookUser?> GetBookUserAsync(int bookId, int userId)
-    {
-        if (_bookUser == null)
-        {
-            if (_isLoadingBookUser == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetBookUserAsync(bookId, userId).Result;
-            }
-            _isLoadingBookUser = true;
-            _bookUser = await FetchBookUserAsync(bookId, userId);
-            _isLoadingBookUser = false;
-        }
-        return _bookUser;
-    }
-    private async Task<List<BookUserStat>?> GetBookUserStatsAsync(int bookId, int userId)
-    {
-        if (_bookUserStats == null)
-        {
-            if (_isLoadingBookUserStats == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetBookUserStatsAsync(bookId, userId).Result;
-            }
-            _isLoadingBookUserStats = true;
-
-            var context = await DbContextFactory.CreateDbContextAsync();
-            var bookUserStatsFromDb = await DataCache.BookUserStatsByBookIdAndUserIdReadAsync(
-                (bookId, userId), context);
-            if (bookUserStatsFromDb is null)
-            {
-                ErrorHandler.LogAndThrow(5090);
-            }
-            _bookUserStats = bookUserStatsFromDb;
-            _isLoadingBookUserStats = false;
-            return bookUserStatsFromDb;
-        }
-        return _bookUserStats;
-    }
-    private async Task<Dictionary<string, Word>?> GetWordsInPageAsync(int pageId)
-    {
-        if (_wordsInPage == null)
-        {
-            if (_isLoadingWordsInPage == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetWordsInPageAsync(pageId).Result;
-            }
-            try
-            {
-                _isLoadingWordsInPage = true;
-                var context = await DbContextFactory.CreateDbContextAsync();
-                _wordsInPage = await DataCache.WordsDictByPageIdReadAsync(pageId, context);
-            }
-            catch
-            {
-                throw;
-            }
-            _isLoadingWordsInPage = false;
-        }
-        return _wordsInPage;
-    }
-    private async Task<Language?> GetLanguageAsync(int languageId)
-    {
-        if (_language == null)
-        {
-            if (_isLoadingLanguage == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetLanguageAsync(languageId).Result;
-            }
-            _isLoadingLanguage = true;
-            var context = await DbContextFactory.CreateDbContextAsync();
-            _language = await DataCache.LanguageByIdReadAsync((languageId), context);
-            _isLoadingLanguage = false;
-        }
-        return _language;
-    }
-    private async Task<LanguageUser?> GetLanguageUserAsync(int languageId, int userId)
-    {
-        if (_languageUser == null)
-        {
-            if (_isLoadingLanguageUser == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetLanguageUserAsync(languageId, userId).Result;
-            }
-            _isLoadingLanguageUser = true;
-            var context = await DbContextFactory.CreateDbContextAsync();
-            _languageUser = await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync((languageId, userId), context);
-            _isLoadingLanguageUser = false;
-        }
-        return _languageUser;
-    }
-    private async Task<User?> GetLoggedInUserAsync()
-    {
-        if (_loggedInUser == null)
-        {
-            if (_isLoadingLoggedInUser == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetLoggedInUserAsync().Result;
-            }
-            _isLoadingLoggedInUser = true;
-            _loggedInUser = await UserService.GetLoggedInUserAsync();
-            _isLoadingLoggedInUser = false;
-        }
-        return _loggedInUser;        
-    }
-    private async Task<List<Paragraph>?> GetParagraphsAsync(int pageId)
-    {
-        if (_paragraphs == null)
-        {
-            if (_isLoadingParagraphs == true)
-            {
-                // hold up. some other thread is loading it
-                Thread.Sleep(1000);
-                return GetParagraphsAsync(pageId).Result;
-            }
-            // are they already loaded and attached to the page user?
-            if (_currentPage != null && _currentPage.Paragraphs != null && _currentPage.Paragraphs.Count > 0)
-            {
-                _paragraphs = _currentPage.Paragraphs;
-            }
-            else
-            {
-                try
-                {
-                    _isLoadingParagraphs = true;
-                    var context = await DbContextFactory.CreateDbContextAsync();
-                    _paragraphs = await DataCache.ParagraphsByPageIdReadAsync(pageId, context);
-                }
-                catch 
-                {
-                    throw;
-                }
-            _isLoadingParagraphs = false;
-            }
-        }
-        return _paragraphs;
-    }
-    private async Task MarkCurrentPageReadAsync(int currentPageUserId)
-    {
-        var readDate = DateTime.Now;
-        BookService.PageUserUpdateReadDateAsync(currentPageUserId, readDate);
-    }
-
-    // private async Task ResetPageDataAsync(Page newCurrentPage, PageUser newCurrentPageUser)
-    // {
-    //     if (_isLoadingParagraphs == true)
-    //     {
-    //         // hold up. some other thread is loading it
-    //         Thread.Sleep(1000);
-    //         await ResetPageDataAsync(newCurrentPage, newCurrentPageUser);
-    //         return;
-    //     }
-    //     // are they already loaded and attached to the page user?
-    //     if (_currentPage != null && _currentPage.Paragraphs != null && _currentPage.Paragraphs.Count > 0)
-    //     {
-    //         _paragraphs = _currentPage.Paragraphs;
-    //     }
-    //     else
-    //     {
-    //         _isLoadingParagraphs = true;
-    //         _paragraphs = await FetchParagraphsAsync();
-    //         _isLoadingParagraphs = false;
-    //     }
-    // }
-    
     #endregion
 }

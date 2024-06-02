@@ -143,8 +143,9 @@ namespace Model.DAL
                           join s in context.Sentences on pp.Id equals s.ParagraphId
                           join t in context.Tokens on s.Id equals t.SentenceId
                           join w in context.Words on t.WordId equals w.Id
-                          join wu in context.WordUsers on w.Id equals wu.Id
-                          where (p.Id == key.pageId && wu.LanguageUser.UserId == key.userId)
+                          join wu in context.WordUsers on w.Id equals wu.WordId
+                          join lu in context.LanguageUsers on wu.LanguageUserId equals lu.Id
+                          where (p.Id == key.pageId && lu.UserId == key.userId)
                           select new { word = w, wordUser = wu }).Distinct()
                 .ToList();
             var value = new Dictionary<string, WordUser>();
