@@ -1217,7 +1217,7 @@ namespace Logic.Services
 
             try
             {
-                var language = await DataCache.LanguageByIdReadAsync(bookUser.LanguageUserId, context);
+                var language = await DataCache.LanguageByIdReadAsync(bookUser.LanguageUser.LanguageId, context);
                 if (language == null)
                 {
                     ErrorHandler.LogAndThrow(2320);

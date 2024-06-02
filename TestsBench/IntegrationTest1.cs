@@ -22,9 +22,10 @@ namespace TestsBench.Tests
             _userService.SetLoggedInUserForTestBench(testUser, context);
 #endif
         }
-        private IdiomaticaContext CreateContext() 
+        #region BookList
+        private IdiomaticaContext CreateContext()
         {
-            
+
             var connectionstring = "Server=localhost;Database=Idiomatica;Trusted_Connection=True;TrustServerCertificate=true;";
             var optionsBuilder = new DbContextOptionsBuilder<IdiomaticaContext>();
             optionsBuilder.UseSqlServer(connectionstring);
@@ -49,7 +50,7 @@ namespace TestsBench.Tests
             };
             context.LanguageUsers.Add(languageUser);
             context.SaveChanges();
-            
+
             return user;
         }
         [Fact]
@@ -76,7 +77,7 @@ namespace TestsBench.Tests
                 if (firstBookUser != null) context.BookUsers.Remove(firstBookUser);
                 user.LanguageUsers = new List<LanguageUser>();
                 context.Users.Remove(user);
-                context.SaveChanges();                
+                context.SaveChanges();
             }
 
         }
@@ -109,7 +110,7 @@ namespace TestsBench.Tests
         }
 
         [Fact]
-        public async Task AddingAUserAndBookUsersWillShowBooksOnTheBookList()
+        public async Task BookUsersWillShowBooksOnTheBookList()
         {
             // arrange
             var context = CreateContext();
@@ -122,7 +123,7 @@ namespace TestsBench.Tests
             try
             {
                 // act
-                
+
                 List<BookListRow> bookListRows = await DataCache.BookListRowsByUserIdReadAsync(userId, context);
                 var book1 = await DataCache.BookByIdReadAsync(book1Id, context);
                 var book2 = await DataCache.BookByIdReadAsync(book2Id, context);
@@ -150,5 +151,61 @@ namespace TestsBench.Tests
                 context.SaveChanges();
             }
         }
+        #endregion
+
+        #region Read
+        [Fact]
+        public async Task ReadingBook7Page1ShowsCorrectPageWordsAndSentences()
+        {
+            // arrange
+            var context = CreateContext();
+            var user = CreateNewTestUser();
+            int bookId = 7;
+            int userId = (int)user.Id;
+            int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+            BookService BookService = new BookService();
+            try
+            {
+                // act
+
+                if (BookService.IsDataInitRead == false)
+                {
+                    await BookService.InitDataRead(context, _userService, bookId);
+                }
+
+                var title = BookService.BookTitle;
+                var pageNum = BookService.BookCurrentPageNum;
+                var totalPages = BookService.BookTotalPageCount;
+                var numParagraphs = BookService.Paragraphs.Count;
+                var sentences = BookService.Paragraphs[3].Sentences;
+                var sentenceCount = sentences.Count;
+                var sentence = sentences[1];
+                var tokenCount = sentence.Tokens.Count;
+                var token = sentence.Tokens[2]; // administrativa
+                var word = token.Word;
+                var wordUser = BookService.AllWordUsersInPage[token.Word.TextLowerCase];
+                var wordUserStatus = wordUser.Status.ToString();
+
+                // assert
+                Assert.Equal(title, "Laura, la mujer invisible");
+                Assert.Equal(pageNum, 1);
+                Assert.Equal(totalPages, 17);
+                Assert.Equal(numParagraphs, 8);
+                Assert.Equal(sentenceCount, 7);
+                Assert.Equal(tokenCount, 12);
+                Assert.Equal(word.TextLowerCase, "administrativa");
+                Assert.Equal(wordUserStatus, "UNKNOWN");
+            }
+            finally
+            {
+                // clean-up
+                var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
+                if (bookUser != null) context.BookUsers.Remove(bookUser);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        #endregion
     }
 }

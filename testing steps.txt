@@ -1,6 +1,6 @@
 testing steps
 
-booklist
+
 read
 check word translation
 update word translation
