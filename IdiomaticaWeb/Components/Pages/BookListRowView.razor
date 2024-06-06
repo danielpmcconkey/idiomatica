@@ -1,0 +1,307 @@
+﻿@page "/BookListRowView"
+@rendermode InteractiveServer
+@inject UserService UserService;
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
+
+<div class="card mb-3">
+    <div class="card-header">
+        <h5 class="card-title float-start"># @Row.BookId @OnFormatTitle(Row.Title)</h5>
+        
+        <div class="float-end">
+            @if (OnFormatIsComplete(Row.IsComplete))
+            {
+                <span class="completedMarker">&#x2713;</span>
+            }
+        </div>
+    </div>
+    
+    <div class="container card-body">
+        <div class="row">
+            <div class="col">
+                <p class="fs-6 mb-0">@UserService.GetUILabel("bookListLanguageColumnHead")</p>
+                <p class="fs-5 mt-0">@Row.LanguageName</p>
+            </div>
+            <div class="col">
+                <p class="fs-6 mb-0">@UserService.GetUILabel("bookListProgressColumnHead")</p>
+                <p class="fs-5 mt-0">@OnFormatProgress(Row.Progress)</p>
+            </div>
+            <div class="col">
+                <p class="fs-6 mb-0">@UserService.GetUILabel("bookListTotalWordCountColumnHead")</p>
+                <p class="fs-5 mt-0">@OnFormatCount(Row.TotalWordCount)</p>
+            </div>
+            <div class="col">
+                <p class="fs-6 mb-0">@UserService.GetUILabel("bookListDistinctWordCountColumnHead")</p>
+                <p class="fs-5 mt-0">@OnFormatCount(Row.DistinctWordCount)</p>
+            </div>
+            <div class="col">
+                <p class="fs-6 mb-0">@UserService.GetUILabel("bookListDistinctKnownPercentColumnHead")</p>
+                <p class="fs-5 mt-0">@OnFormatPercent(Row.DistinctKnownPercent)</p>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <p>
+            <Button Color="ButtonColor.Primary"
+                    Type="ButtonType.Link"
+                    Size="Size.Small"
+                    To="@OnGetBookLinkRead(Row.BookId)">
+                @UserService.GetUILabel("bookListRead")
+            </Button>
+           @*  <Button Color="ButtonColor.Secondary"
+                    Type="ButtonType.Link"
+                    Size="Size.Small"
+                    To="@OnGetBookLinkUpdate(Row.BookId)">
+                @UserService.GetUILabel("bookListUpdate")
+            </Button> *@
+            <Button Color="ButtonColor.Warning"
+                    Size="Size.Small"
+                    @onclick="((args) => OnClickRemove(args, Row.BookId))">
+                @UserService.GetUILabel("bookListRemove")
+            </Button>
+            <Button Color="ButtonColor.Info"
+                    Size="Size.Small"
+                    @onclick="((args) => OnClickRefresh(args, Row.BookId))">
+                @UserService.GetUILabel("bookListRefreshBookStats")
+            </Button>
+
+
+        </p>
+    </div>
+</div>
+
+
+
+
+
+
+
+@code {
+    [Parameter]
+    public BookService BookService { get; set; } = new BookService();
+    [Parameter]
+    public BookListRow Row { get; set; } = new BookListRow();
+    public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
+    private bool _isLoading = false;
+
+    private string OnFormatTitle(string? title)
+    {
+        try
+        {
+            if (title == null) return null;
+            int maxCharsInBookListTitle = 60;
+            if (title.Length > maxCharsInBookListTitle)
+            {
+                title = title.Substring(0, maxCharsInBookListTitle) + "...";
+            }
+            return title;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            StateHasChanged();
+            return string.Empty;
+        }
+    }
+    private string OnGetBookLinkRead(int? bookId)
+    {
+        try
+        {
+            if (bookId == null) return "";
+            return $"/Book/{bookId}/Read";
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            StateHasChanged();
+            return string.Empty;
+        }
+    }
+    private string OnGetBookLinkUpdate(int? bookId)
+    {
+        try
+        {
+            if (bookId == null) return "";
+            return $"/Book/{bookId}/Update";
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            StateHasChanged();
+            return string.Empty;
+        }
+    }
+    private void OnClickRemove(EventArgs args, int? bookId)
+    {
+        try
+        {
+            throw new NotImplementedException("book removal not yet implemented");
+
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
+            StateHasChanged();
+        }
+
+    }
+    private string OnFormatCount(decimal? dbStat)
+    {
+        try
+        {
+            if (dbStat is null) return "0";
+            var flooredVal = Math.Floor((decimal)dbStat);
+            return flooredVal.ToString("N0");
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            StateHasChanged();
+            return string.Empty;
+        }
+    }
+    private string OnFormatPercent(decimal? dbStat)
+    {
+        const string percentFormat = "P2";
+        try
+        {
+            if (dbStat is null) return (0M).ToString(percentFormat);
+            return ((decimal)dbStat).ToString(percentFormat);
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            StateHasChanged();
+            return string.Empty;
+        }
+    }
+    private string OnFormatProgress(string? progress)
+    {
+        try
+        {
+            if (progress is null) return "0 / 0";
+            return progress;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            StateHasChanged();
+            return string.Empty;
+        }
+    }
+    private bool OnFormatIsComplete(string? isComplete)
+    {
+        try
+        {
+
+            if (isComplete is null) return false;
+            bool outVal = false;
+            if (bool.TryParse(isComplete, out outVal) == false) return false;
+            return outVal;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return false;
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            StateHasChanged();
+            return false;
+        }
+    }
+    private async Task OnClickRefresh(EventArgs args, int? bookId)
+    {
+        try
+        {
+            _isLoading = true;
+            StateHasChanged();
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            await BookService.BookUserUpdateStats(context, bookId);
+            await t_delay;
+            _isLoading = false;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListRefreshStatsError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListRefreshStatsError");
+            StateHasChanged();
+        }
+    }
+}

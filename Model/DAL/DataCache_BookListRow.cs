@@ -39,11 +39,9 @@ namespace Model.DAL
         * since BookListRow is just a view, delete methods 
         * will only delete the cache
         * */
-        public static async Task BookListRowsByUserIdDeleteAsync( int key, IdiomaticaContext context)
+        public static void BookListRowsByUserIdDeleteAsync( int key, IdiomaticaContext context)
         {
-            await Task.Run(() =>{
-                BookListRowsByUserId.TryRemove(key, out var deletedRow);
-            });
+            BookListRowsByUserId.TryRemove(key, out var deletedRow);
         }
         #endregion
 

@@ -23,6 +23,7 @@ namespace Model
         #endregion
         [StringLength(250)]
         public string? ValueString { get; set; }
+        [Column(TypeName ="numeric(10,4)")]
         public decimal? ValueNumeric { get; set; }
     }
 }

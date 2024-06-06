@@ -38,17 +38,25 @@ namespace Logic.UILabels
             _labels.Add("bookListRemoveBookError", "There was an error removing a book from the list");
             _labels.Add("bookListSortTableError", "There was an error sorting your book list");
             _labels.Add("bookListIsVisibleError", "There was an error determining your book list filter.");
-            _labels.Add("bookListFormFilter", "Filter...");
-			_labels.Add("bookListLanguageColumnHead", "Language");
-			_labels.Add("bookListCompletedColumnHead", "");
+            _labels.Add("bookListRefreshStatsError", "There was an error refreshing book user stats.");
+            _labels.Add("bookListFormFilter", "Filter on title or language...");
+            _labels.Add("bookListFormSortColumn", "Sort by...");
+            _labels.Add("bookListFormSortDirection", "Sort direction...");
+            _labels.Add("bookListFormSortAscending", "Ascending");
+            _labels.Add("bookListFormSortDescending", "Descending");
+            _labels.Add("bookListLanguageColumnHead", "Language");
+			_labels.Add("bookListCompletedColumnHead", "Completed");
 			_labels.Add("bookListTitleColumnHead", "Title");
 			_labels.Add("bookListProgressColumnHead", "Progress");
 			_labels.Add("bookListTotalWordCountColumnHead", "Total Word Count");
-			_labels.Add("bookListTotalKnownPercentColumnHead", "Total Known Percent");
 			_labels.Add("bookListDistinctWordCountColumnHead", "Distinct Word Count");
-			_labels.Add("bookListDistinctKnownPercentColumnHead", "Distinct Known Percent");
+			_labels.Add("bookListDistinctKnownPercentColumnHead", "Percent Known");
             _labels.Add("bookListNoBookNotice", "No books exist. Please add some.");
             _labels.Add("btnUpdateBookListStats", "Update booklist statistics");
+            _labels.Add("bookListRefreshBookStats", "Refresh stats");
+            _labels.Add("bookListRead", "Read");
+            _labels.Add("bookListUpdate", "Update");
+            _labels.Add("bookListRemove", "Remove");
             #endregion
             #region read
             _labels.Add("readInitializationError", "There was an error retrieving this book from the database.");

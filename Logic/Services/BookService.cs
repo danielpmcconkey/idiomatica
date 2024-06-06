@@ -375,9 +375,10 @@ namespace Logic.Services
 
             return (int)book.Id;
         }
-        public async Task BookListRowsSort(string columnName, string currentlySortedColumn, bool isAscending)
+        public async Task BookListRowsSort(string columnName, bool isAscending)
         {
             if (_bookListRows is null) return;
+            if(_bookListRowsOrderByFunctions == null) return;
             if (!_bookListRowsOrderByFunctions.ContainsKey(columnName)) return;
 
             if(isAscending)
@@ -475,7 +476,7 @@ namespace Logic.Services
                 ErrorHandler.LogAndThrow(2020);
             }
             // make sure that bookUser doesn't already exist before creating it
-            var existingBookUser = await DataCache.BookUserByUserIdAndBookIdReadAsync(
+            var existingBookUser = await DataCache.BookUserByBookIdAndUserIdReadAsync(
                 (bookId, languageUser.UserId), context);
             if(existingBookUser != null) 
             {
@@ -746,6 +747,18 @@ namespace Logic.Services
             dbWordUser.StatusChanged = DateTime.Now;
             await DataCache.WordUserUpdateAsync(dbWordUser, context);
         }
+        public async Task BookUserUpdateStats(IdiomaticaContext context, int? bookId)
+        {
+            _bookListRows = new List<BookListRow>();
+            if (bookId == null) return;
+            if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1) return;
+            var bookUser = await DataCache.BookUserByBookIdAndUserIdReadAsync(
+                    ((int)bookId, (int)_loggedInUser.Id), context);
+            if (bookUser == null || bookUser.Id < 1) return;
+            await BookUserStatsUpdate(context, bookUser.Id);
+            _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context);
+        }
+
 
         #endregion
 
@@ -812,7 +825,7 @@ namespace Logic.Services
                 }
                 _isLoadingBookUser = true;
 
-                var bookUserFromDb = await DataCache.BookUserByUserIdAndBookIdReadAsync(
+                var bookUserFromDb = await DataCache.BookUserByBookIdAndUserIdReadAsync(
                     (bookId, userId), context);
                 if (bookUserFromDb is null)
                 {
@@ -823,7 +836,7 @@ namespace Logic.Services
                         ErrorHandler.LogAndThrow(5080);
                         return null;
                     }
-                    bookUserFromDb = await DataCache.BookUserByUserIdAndBookIdReadAsync(
+                    bookUserFromDb = await DataCache.BookUserByBookIdAndUserIdReadAsync(
                         (bookId, userId), context);
                 }
                 _bookUser = bookUserFromDb;
@@ -1005,7 +1018,7 @@ namespace Logic.Services
             }); ;
 
             // delete the booklistrows cache for this user
-            await DataCache.BookListRowsByUserIdDeleteAsync((int)languageUser.Id, context);
+            DataCache.BookListRowsByUserIdDeleteAsync((int)languageUser.Id, context);
             // delete the actual stats from teh database and bookuserstats cache
             await DataCache.BookUserStatsByBookIdAndUserIdDelete((bookUser.BookId, languageUser.UserId), context);
             // add the new stats

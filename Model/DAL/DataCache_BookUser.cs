@@ -43,7 +43,7 @@ namespace Model.DAL
             BookUserById[key] = value;
             return value;
         }
-        public static async Task<BookUser> BookUserByUserIdAndBookIdReadAsync(
+        public static async Task<BookUser> BookUserByBookIdAndUserIdReadAsync(
             (int bookId, int userId) key, IdiomaticaContext context)
         {
             // check cache
