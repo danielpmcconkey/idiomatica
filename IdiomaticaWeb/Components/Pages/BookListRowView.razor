@@ -3,72 +3,90 @@
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 
-<div class="card mb-3">
-    <div class="card-header">
-        <h5 class="card-title float-start"># @Row.BookId @OnFormatTitle(Row.Title)</h5>
+
+
+@if (_isLoading)
+{
+    <Button Color="ButtonColor.Primary" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+}
+else
+{
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="card-title float-start"># @Row.BookId @OnFormatTitle(Row.Title)</h5>
         
-        <div class="float-end">
-            @if (OnFormatIsComplete(Row.IsComplete))
-            {
-                <span class="completedMarker">&#x2713;</span>
-            }
+            <div class="float-end">
+                @if (OnFormatIsComplete(Row.IsComplete))
+                {
+                    <span class="completedMarker">&#x2713;</span>
+                }
+            </div>
         </div>
-    </div>
     
-    <div class="container card-body">
-        <div class="row">
-            <div class="col">
-                <p class="fs-6 mb-0">@UserService.GetUILabel("bookListLanguageColumnHead")</p>
-                <p class="fs-5 mt-0">@Row.LanguageName</p>
+        <div class="container card-body">
+            <div class="row">
+                <div class="col">
+                    <p class="fs-6 mb-0">@UserService.GetUILabel("bookListLanguageColumnHead")</p>
+                    <p class="fs-5 mt-0">@Row.LanguageName</p>
+                </div>
+                <div class="col">
+                    <p class="fs-6 mb-0">@UserService.GetUILabel("bookListProgressColumnHead")</p>
+                    <p class="fs-5 mt-0">
+                        @if (_isLoading)
+                        {
+                            <Button Color="ButtonColor.Primary" Size="Size.Small" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+                        }
+                        else
+                        {
+                            @OnFormatProgress(Row.Progress)
+                        }
+                    </p>
+                </div>
+                <div class="col">
+                    <p class="fs-6 mb-0">@UserService.GetUILabel("bookListTotalWordCountColumnHead")</p>
+                    <p class="fs-5 mt-0">@OnFormatCount(Row.TotalWordCount)</p>
+                </div>
+                <div class="col">
+                    <p class="fs-6 mb-0">@UserService.GetUILabel("bookListDistinctWordCountColumnHead")</p>
+                    <p class="fs-5 mt-0">@OnFormatCount(Row.DistinctWordCount)</p>
+                </div>
+                <div class="col">
+                    <p class="fs-6 mb-0">@UserService.GetUILabel("bookListDistinctKnownPercentColumnHead")</p>
+                    <p class="fs-5 mt-0">@OnFormatPercent(Row.DistinctKnownPercent)</p>
+                </div>
             </div>
-            <div class="col">
-                <p class="fs-6 mb-0">@UserService.GetUILabel("bookListProgressColumnHead")</p>
-                <p class="fs-5 mt-0">@OnFormatProgress(Row.Progress)</p>
-            </div>
-            <div class="col">
-                <p class="fs-6 mb-0">@UserService.GetUILabel("bookListTotalWordCountColumnHead")</p>
-                <p class="fs-5 mt-0">@OnFormatCount(Row.TotalWordCount)</p>
-            </div>
-            <div class="col">
-                <p class="fs-6 mb-0">@UserService.GetUILabel("bookListDistinctWordCountColumnHead")</p>
-                <p class="fs-5 mt-0">@OnFormatCount(Row.DistinctWordCount)</p>
-            </div>
-            <div class="col">
-                <p class="fs-6 mb-0">@UserService.GetUILabel("bookListDistinctKnownPercentColumnHead")</p>
-                <p class="fs-5 mt-0">@OnFormatPercent(Row.DistinctKnownPercent)</p>
-            </div>
+        
+        </div>
+        <div class="card-footer">
+            <p>
+                <Button Color="ButtonColor.Primary"
+                        Type="ButtonType.Link"
+                        Size="Size.Small"
+                        To="@OnGetBookLinkRead(Row.BookId)">
+                    @UserService.GetUILabel("bookListRead")
+                </Button>
+               @*  <Button Color="ButtonColor.Secondary"
+                        Type="ButtonType.Link"
+                        Size="Size.Small"
+                        To="@OnGetBookLinkUpdate(Row.BookId)">
+                    @UserService.GetUILabel("bookListUpdate")
+                </Button> *@
+                <Button Color="ButtonColor.Warning"
+                        Size="Size.Small"
+                        @onclick="((args) => OnClickRemove(args, Row.BookId))">
+                    @UserService.GetUILabel("bookListRemove")
+                </Button>
+                <Button Color="ButtonColor.Info"
+                        Size="Size.Small"
+                        @onclick="((args) => OnClickRefresh(args, Row.BookId))">
+                    @UserService.GetUILabel("bookListRefreshBookStats")
+                </Button>
+
+
+            </p>
         </div>
     </div>
-    <div class="card-footer">
-        <p>
-            <Button Color="ButtonColor.Primary"
-                    Type="ButtonType.Link"
-                    Size="Size.Small"
-                    To="@OnGetBookLinkRead(Row.BookId)">
-                @UserService.GetUILabel("bookListRead")
-            </Button>
-           @*  <Button Color="ButtonColor.Secondary"
-                    Type="ButtonType.Link"
-                    Size="Size.Small"
-                    To="@OnGetBookLinkUpdate(Row.BookId)">
-                @UserService.GetUILabel("bookListUpdate")
-            </Button> *@
-            <Button Color="ButtonColor.Warning"
-                    Size="Size.Small"
-                    @onclick="((args) => OnClickRemove(args, Row.BookId))">
-                @UserService.GetUILabel("bookListRemove")
-            </Button>
-            <Button Color="ButtonColor.Info"
-                    Size="Size.Small"
-                    @onclick="((args) => OnClickRefresh(args, Row.BookId))">
-                @UserService.GetUILabel("bookListRefreshBookStats")
-            </Button>
-
-
-        </p>
-    </div>
-</div>
-
+}
 
 
 
@@ -282,7 +300,6 @@
         try
         {
             _isLoading = true;
-            StateHasChanged();
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
             await BookService.BookUserUpdateStats(context, bookId);
