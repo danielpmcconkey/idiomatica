@@ -14,6 +14,8 @@ using System.Net;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Logic.Telemetry;
+using Microsoft.Extensions.Logging;
 
 namespace Logic.Services
 {
@@ -21,6 +23,7 @@ namespace Logic.Services
     {
         private User? _loggedInUser = null;
         private UserService _userService;
+        private ILogger<IdiomaticaLogger> _logger;
 
         #region public read-only properties
 
@@ -152,18 +155,21 @@ namespace Logic.Services
 
         #endregion
 
-        public BookService()
+        public BookService(ILogger<IdiomaticaLogger> Logger)
         {
-            
+            _logger = Logger;
         }
 
         #region init methods
 
-        public async Task InitDataBookList(IdiomaticaContext context, UserService userService)
+        public async Task InitDataBookList(IdiomaticaContext context, ILogger<IdiomaticaLogger> logger
+            , UserService userService)
         {
             _userService = userService;
             _loggedInUser = await UserGetLoggedInAsync(context);
             _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context);
+
+            //logger.LogInformation("I'm a goofy goober");
 
             _bookListRowsOrderByFunctions = new Dictionary<string, Func<BookListRow, object>>();
             _bookListRowsOrderByFunctions.Add("Language", (x => x.LanguageName));

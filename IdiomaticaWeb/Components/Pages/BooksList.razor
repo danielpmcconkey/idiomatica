@@ -3,16 +3,10 @@
 @inject BookService BookService;
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
+@inject ILogger<IdiomaticaLogger> Logger
 
-<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-<style>
-    .sort-th {
-        cursor: pointer;
-    }
-    .fa {
-        float: right;
-    }    
-</style>
+
+
 <ErrorAlert ErrorState="errorState"></ErrorAlert>
 <AuthorizeView>
     <Authorized>
@@ -121,9 +115,10 @@
             _isLoading = true;
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.InitDataBookList(context, UserService);
+            await BookService.InitDataBookList(context, Logger, UserService);
             await t_delay;
             _isLoading = false;
+            // Logger.LogError("Hellow");
 
         }
         catch (IdiomaticaException ex)

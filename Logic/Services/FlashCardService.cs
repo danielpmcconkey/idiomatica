@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Logic.Telemetry;
+using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.DAL;
 using System;

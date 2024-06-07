@@ -1,4 +1,5 @@
 ﻿using DeepL;
+using Logic.Telemetry;
 using Model;
 
 namespace Logic.Services

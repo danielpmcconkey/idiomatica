@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
+@inject ILogger<IdiomaticaLogger> Logger
 
 
 
@@ -13,14 +14,40 @@ else
 {
     <div class="card mb-3">
         <div class="card-header">
-            <h5 class="card-title float-start"># @Row.BookId @OnFormatTitle(Row.Title)</h5>
-        
-            <div class="float-end">
-                @if (OnFormatIsComplete(Row.IsComplete))
-                {
-                    <span class="completedMarker">&#x2713;</span>
-                }
+            <div class="container">
+                <div class="row">
+                    <div class="col-1">
+                        @if (OnFormatIsComplete(Row.IsComplete))
+                        {
+                            <span class="completedMarker">&#x2713;</span>
+                        }
+                    </div>
+                    <div class="col-6">
+                        <h5 class="card-title"># @Row.BookId @OnFormatTitle(Row.Title)</h5>
+                    </div>
+                    <div class="col-5">
+                        <Button Color="ButtonColor.Primary"
+                                Type="ButtonType.Link"
+                                Size="Size.Small"
+                                To="@OnGetBookLinkRead(Row.BookId)">
+                            @UserService.GetUILabel("bookListRead")
+                        </Button>
+                        <Button Color="ButtonColor.Warning"
+                                Size="Size.Small"
+                                @onclick="((args) => OnClickRemove(args, Row.BookId))">
+                            @UserService.GetUILabel("bookListRemove")
+                        </Button>
+                        <Button Color="ButtonColor.Info"
+                                Size="Size.Small"
+                                @onclick="((args) => OnClickRefresh(args, Row.BookId))">
+                            @UserService.GetUILabel("bookListRefreshBookStats")
+                        </Button>
+                    </div>
+                </div>
             </div>
+            
+        
+            
         </div>
     
         <div class="container card-body">
@@ -59,28 +86,7 @@ else
         </div>
         <div class="card-footer">
             <p>
-                <Button Color="ButtonColor.Primary"
-                        Type="ButtonType.Link"
-                        Size="Size.Small"
-                        To="@OnGetBookLinkRead(Row.BookId)">
-                    @UserService.GetUILabel("bookListRead")
-                </Button>
-               @*  <Button Color="ButtonColor.Secondary"
-                        Type="ButtonType.Link"
-                        Size="Size.Small"
-                        To="@OnGetBookLinkUpdate(Row.BookId)">
-                    @UserService.GetUILabel("bookListUpdate")
-                </Button> *@
-                <Button Color="ButtonColor.Warning"
-                        Size="Size.Small"
-                        @onclick="((args) => OnClickRemove(args, Row.BookId))">
-                    @UserService.GetUILabel("bookListRemove")
-                </Button>
-                <Button Color="ButtonColor.Info"
-                        Size="Size.Small"
-                        @onclick="((args) => OnClickRefresh(args, Row.BookId))">
-                    @UserService.GetUILabel("bookListRefreshBookStats")
-                </Button>
+
 
 
             </p>
@@ -95,7 +101,7 @@ else
 
 @code {
     [Parameter]
-    public BookService BookService { get; set; } = new BookService();
+    public BookService BookService { get; set; }// = new BookService(Logger);
     [Parameter]
     public BookListRow Row { get; set; } = new BookListRow();
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };

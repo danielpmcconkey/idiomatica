@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic
+namespace Logic.Telemetry
 {
     public static class ErrorHandler
     {
@@ -14,7 +14,7 @@ namespace Logic
          * 
          * */
 
-        public static Dictionary<int, string> ErrorCodes = new Dictionary<int, string>() 
+        public static Dictionary<int, string> ErrorCodes = new Dictionary<int, string>()
         {
             // 1000 errors are invalid arguments
 
@@ -73,7 +73,7 @@ namespace Logic
             { 2070, "Language pull from DB returned null while creating a new book." },
             { 2080, "Paragraph splits returned null or empty while creating a new book." },
             { 2090, "Saving the book returned a null ID from DB while creating a new book." },
-            { 2110, "Bookstats insert query updated no rows" },            
+            { 2110, "Bookstats insert query updated no rows" },
             { 2100, "PageUser returned null from DB when trying to mark it as 'read'" },
             { 5070, "Underlying Page does not exist when trying to retrieve PageUser." },
             { 2130, "Either Logged in user or logged in user ID are null" },
@@ -166,32 +166,5 @@ namespace Logic
             var ex = new IdiomaticaException() { code = code };
             throw ex;
         }
-    }
-    public class IdiomaticaException : Exception
-    {
-        public int code;
-        public IdiomaticaException()
-        {
-        }
-
-        public IdiomaticaException(string message)
-            : base(message)
-        {
-        }
-
-        public IdiomaticaException(string message, Exception inner)
-            : base(message, inner)
-        {
-        }
-    }
-    /// <summary>
-    /// ErrorState is used so parent and child components can share a single
-    /// error state between one another
-    /// </summary>
-    public class ErrorState
-    {
-        public bool isError;
-        public string errorMessage;
-        public int code;
     }
 }
