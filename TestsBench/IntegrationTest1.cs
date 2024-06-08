@@ -145,11 +145,14 @@ Fin
         #endregion
 
         #region setup functions
-        BookService? _bookService = null;
 
         public IntegrationTest1()
         {
-            _bookService = new BookService();
+            
+        }
+        private BookService CreateBookService()
+        {
+            return new BookService(null);
         }
         private UserService CreateUserService()
         {
@@ -208,14 +211,15 @@ Fin
             var context = CreateContext();
             var userService = CreateUserService();
             var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
             int firstBookUserId = 999;
             try
             {
                 // act
-                firstBookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
-                int newBookId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+                firstBookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+                int newBookId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
                 // assert
                 Assert.Equal(newBookId, firstBookUserId);
             }
@@ -238,13 +242,14 @@ Fin
             var context = CreateContext();
             var userService = CreateUserService();
             var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
             int bookUserId = 999;
             try
             {
                 // act
-                bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+                bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
                 // assert
                 Assert.True(bookUserId != 999 && bookUserId > 0);
             }
@@ -266,11 +271,12 @@ Fin
             var context = CreateContext();
             var userService = CreateUserService();
             var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
             int book1Id = 7;
             int book2Id = 6;
             int userId = (int)user.Id;
-            int bookUser1Id = await _bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
-            int bookUser2Id = await _bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
             try
             {
                 // act
@@ -314,30 +320,30 @@ Fin
             var context = CreateContext();
             var userService = CreateUserService();
             var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
-            int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
-            BookService BookService = new BookService();
+            int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
             try
             {
                 // act
 
-                if (BookService.IsDataInitRead == false)
+                if (bookService.IsDataInitRead == false)
                 {
-                    await BookService.InitDataRead(context, userService, bookId);
+                    await bookService.InitDataRead(context, userService, bookId);
                 }
 
-                var title = BookService.BookTitle;
-                var pageNum = BookService.BookCurrentPageNum;
-                var totalPages = BookService.BookTotalPageCount;
-                var numParagraphs = BookService.Paragraphs.Count;
-                var sentences = BookService.Paragraphs[3].Sentences;
+                var title = bookService.BookTitle;
+                var pageNum = bookService.BookCurrentPageNum;
+                var totalPages = bookService.BookTotalPageCount;
+                var numParagraphs = bookService.Paragraphs.Count;
+                var sentences = bookService.Paragraphs[3].Sentences;
                 var sentenceCount = sentences.Count;
                 var sentence = sentences[1];
                 var tokenCount = sentence.Tokens.Count;
                 var token = sentence.Tokens[2]; // administrativa
                 var word = token.Word;
-                var wordUser = BookService.AllWordUsersInPage[token.Word.TextLowerCase];
+                var wordUser = bookService.AllWordUsersInPage[token.Word.TextLowerCase];
                 var wordUserStatus = wordUser.Status.ToString();
 
                 // assert
@@ -373,22 +379,23 @@ Fin
             // arrange
             var context = CreateContext();
             var userService = CreateUserService();
+            var bookService = CreateBookService();
             var user = CreateNewTestUser(userService);
             int bookId = 7;
             int userId = (int)user.Id;
-            int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
-            BookService BookService = new BookService();
+            int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+            
             try
             {
                 // act
 
-                if (BookService.IsDataInitRead == false)
+                if (bookService.IsDataInitRead == false)
                 {
-                    await BookService.InitDataRead(context, userService, bookId);
+                    await bookService.InitDataRead(context, userService, bookId);
                 }
-                var wordUser = BookService.AllWordUsersInPage["administrativa"];
+                var wordUser = bookService.AllWordUsersInPage["administrativa"];
                 wordUser.Status = AvailableWordUserStatus.LEARNED;
-                await BookService.WordUserSaveModalDataAsync(
+                await bookService.WordUserSaveModalDataAsync(
                     context, wordUser.Id, wordUser.Status, wordUser.Translation);
 
                 var wordUserFromDb = context.WordUsers.FirstOrDefault(x => x.Id == wordUser.Id);
@@ -420,22 +427,22 @@ Fin
             var context = CreateContext();
             var userService = CreateUserService();
             var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
-            int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
-            BookService BookService = new BookService();
+            int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
             string newTranslation = "administrative";
             try
             {
                 // act
 
-                if (BookService.IsDataInitRead == false)
+                if (bookService.IsDataInitRead == false)
                 {
-                    await BookService.InitDataRead(context, userService, bookId);
+                    await bookService.InitDataRead(context, userService, bookId);
                 }
-                var wordUser = BookService.AllWordUsersInPage["administrativa"];
+                var wordUser = bookService.AllWordUsersInPage["administrativa"];
                 wordUser.Translation = newTranslation;
-                await BookService.WordUserSaveModalDataAsync(
+                await bookService.WordUserSaveModalDataAsync(
                     context, wordUser.Id, wordUser.Status, wordUser.Translation);
 
                 var wordUserFromDb = context.WordUsers.FirstOrDefault(x => x.Id == wordUser.Id);
@@ -467,29 +474,29 @@ Fin
             var context = CreateContext();
             var userService = CreateUserService();
             var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
-            int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
-            BookService BookService = new BookService();
+            int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
             try
             {
                 // act
 
-                if (BookService.IsDataInitRead == false)
+                if (bookService.IsDataInitRead == false)
                 {
-                    await BookService.InitDataRead(context, userService, bookId);
+                    await bookService.InitDataRead(context, userService, bookId);
                 }
                 
-                var word1 = BookService.Paragraphs[2].Sentences[4].Tokens[4].Word; // de
-                var wordUser1 = BookService.AllWordUsersInPage[word1.TextLowerCase];
+                var word1 = bookService.Paragraphs[2].Sentences[4].Tokens[4].Word; // de
+                var wordUser1 = bookService.AllWordUsersInPage[word1.TextLowerCase];
                 wordUser1.Status = AvailableWordUserStatus.NEW2;
                 var wordUserStatus1 = wordUser1.Status.ToString();
-                await BookService.WordUserSaveModalDataAsync(
+                await bookService.WordUserSaveModalDataAsync(
                     context, wordUser1.Id, wordUser1.Status, wordUser1.Translation);
 
-                await BookService.PageMove(context, 2);
-                var word2 = BookService.Paragraphs[2].Sentences[0].Tokens[4].Word; // de
-                var wordUser2 = BookService.AllWordUsersInPage[word2.TextLowerCase];
+                await bookService.PageMove(context, 2);
+                var word2 = bookService.Paragraphs[2].Sentences[0].Tokens[4].Word; // de
+                var wordUser2 = bookService.AllWordUsersInPage[word2.TextLowerCase];
                 var wordUserStatus2 = AvailableWordUserStatus.NEW2.ToString();
 
                 // assert
@@ -519,26 +526,26 @@ Fin
             var context = CreateContext();
             var userService = CreateUserService();
             var user = CreateNewTestUser(userService);
-            BookService BookService = new BookService();
+            var bookService = CreateBookService();
             // create the book
-            int bookId = await BookService.BookCreateAndSaveAsync(context, 
+            int bookId = await bookService.BookCreateAndSaveAsync(context, 
                 _newBookTitle, _newBookLanguageCode, _newBookUrl, _newBookText);
             // add the book stats
-            BookService.BookStatsCreateAndSave(context, bookId);
+            bookService.BookStatsCreateAndSave(context, bookId);
             // now create the book user for teh logged in user
             int userId = (int)user.Id;
-            int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+            int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
             
             try
             {
                 // act
 
-                if (BookService.IsDataInitRead == false)
+                if (bookService.IsDataInitRead == false)
                 {
-                    await BookService.InitDataRead(context, userService, bookId);
+                    await bookService.InitDataRead(context, userService, bookId);
                 }
-                var pp = BookService.Paragraphs[0];
-                var translation = await BookService.ParagraphTranslate(context, pp);
+                var pp = bookService.Paragraphs[0];
+                var translation = await bookService.ParagraphTranslate(context, pp);
                 var expectedTranslation = "The selfish giant";
                 var actualTranslation = pp.ParagraphTranslations[0].TranslationText;
 
@@ -571,20 +578,20 @@ Fin
             var context = CreateContext();
             var userService = CreateUserService();
             var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
-            int bookUserId = await _bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
-            BookService BookService = new BookService();
+            int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
             try
             {
                 // act
 
-                if (BookService.IsDataInitRead == false)
+                if (bookService.IsDataInitRead == false)
                 {
-                    await BookService.InitDataRead(context, userService, bookId);
+                    await bookService.InitDataRead(context, userService, bookId);
                 }
-                int originalPageId = BookService.BookCurrentPageId;
-                await BookService.PageMove(context, 2);
+                int originalPageId = bookService.BookCurrentPageId;
+                await bookService.PageMove(context, 2);
                 var bookUserFromDb = await DataCache.BookUserByIdReadAsync(bookUserId, context);
                 int bookmark = bookUserFromDb.CurrentPageID;
                 int expected = 80;
