@@ -4,11 +4,26 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Model.DAL;
 using Model;
 using System.Net;
+using Logic.Telemetry;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace TestsBench.Tests
 {
     public class IntegrationTest1
     {
+        //private ILogger<IdiomaticaLogger> _logger;
+        //private ErrorHandler _errorHandler;
+        //private DeepLService _deepLService;
+        private ServiceProvider _serviceProvider;
+
         #region constants
         const string _newBookTitle = "El gigante egoísta";
         const string _newBookUrl = "https://www.youtube.com/watch?v=1iQh6IJwO9U";
@@ -148,19 +163,40 @@ Fin
 
         public IntegrationTest1()
         {
-            
+            //setup our DI
+            var connectionstring = "Server=localhost;Database=Idiomatica;Trusted_Connection=True;TrustServerCertificate=true;";
+
+            _serviceProvider = new ServiceCollection()
+                .AddLogging()
+                //.AddCascadingAuthenticationState()
+                //.AddScoped<IdentityUserAccessor>()
+                //.AddScoped<IdentityRedirectManager>()
+                .AddScoped<AuthenticationStateProvider, RevalidatingProviderForUnitTesting>()
+                .AddTransient<BookService>()
+                .AddTransient<UserService>()
+                .AddTransient<FlashCardService>()
+                .AddTransient<ErrorHandler>()
+                .AddTransient<DeepLService>()
+                //.AddDbContext<IdiomaticaContext>(options => {
+                //    options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("IdiomaticaWeb"));
+                //    })
+                .BuildServiceProvider();
         }
         private BookService CreateBookService()
         {
-            return new BookService(null);
+            return _serviceProvider.GetService<BookService>();
+            //return new BookService(_logger, _errorHandler, _deepLService);
         }
         private UserService CreateUserService()
         {
-            return new UserService(null);
+            //return new UserService(null);
+            return _serviceProvider.GetService<UserService>();
         }
         private IdiomaticaContext CreateContext()
         {
-
+            //var factory = _serviceProvider.GetService<DbContext<IdiomaticaContext>>();
+            //var context = factory.CreateDbContext();
+            //return context;
             var connectionstring = "Server=localhost;Database=Idiomatica;Trusted_Connection=True;TrustServerCertificate=true;";
             var optionsBuilder = new DbContextOptionsBuilder<IdiomaticaContext>();
             optionsBuilder.UseSqlServer(connectionstring);

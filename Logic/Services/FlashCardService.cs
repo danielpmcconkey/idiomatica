@@ -16,9 +16,14 @@ namespace Logic.Services
         private IDbContextFactory<IdiomaticaContext> _dbContextFactory;
         private UserService _userService;
         private LanguageCode _uiLanguageCode;
-        public FlashCardService(IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        private ErrorHandler _errorHandler;
+        private DeepLService _deepLService;
+        public FlashCardService(IDbContextFactory<IdiomaticaContext> dbContextFactory, ErrorHandler errorHandler,
+            DeepLService deepLService)
         {
             _dbContextFactory = dbContextFactory;
+            _errorHandler = errorHandler;
+            _deepLService = deepLService;
         }
         #region FlashCard
         public async Task InitializeAsync(UserService userService)
@@ -41,7 +46,7 @@ namespace Logic.Services
                     .FirstOrDefault();
                 if (wordUser == null || wordUser.Id == 0)
                 {
-                    ErrorHandler.LogAndThrow(5110);
+                    _errorHandler.LogAndThrow(5110);
                 }
                 card.WordUser = wordUser;
                 card.WordUserId = wordUserId;
@@ -51,7 +56,7 @@ namespace Logic.Services
                 context.SaveChanges();
                 if (card.Id == null || card.Id == 0)
                 {
-                    ErrorHandler.LogAndThrow(2120);
+                    _errorHandler.LogAndThrow(2120);
                 }
                 List<Word> wordUsages = context.Words
                     .Where(w => w.Id == wordUser.Word.Id)
@@ -90,7 +95,7 @@ namespace Logic.Services
                             string input = ParagraphGetFullText(paragraph);
                             string toLang = _uiLanguageCode.Code;
                             string fromLang = wordUser.LanguageUser.Language?.Code;
-                            string translation = DeepLService.Translate(input, fromLang, toLang);
+                            string translation = _deepLService.Translate(input, fromLang, toLang);
                             ppt = new ParagraphTranslation()
                             {
                                 ParagraphId = (int)paragraph.Id,
@@ -138,11 +143,11 @@ namespace Logic.Services
             }
             if (LanguageUser_learning == null)
             {
-                ErrorHandler.LogAndThrow(1170);
+                _errorHandler.LogAndThrow(1170);
             }
             if (LanguageUser_learning.Id == null || LanguageUser_learning.Id == 0)
             {
-                ErrorHandler.LogAndThrow(1180);
+                _errorHandler.LogAndThrow(1180);
             }
             var context = _dbContextFactory.CreateDbContext();
             List<FlashCard> cards = new List<FlashCard>();
@@ -182,11 +187,11 @@ namespace Logic.Services
             }
             if (languageUser == null)
             {
-                ErrorHandler.LogAndThrow(1170);
+                _errorHandler.LogAndThrow(1170);
             }
             if (languageUser.Id == null || languageUser.Id == 0)
             {
-                ErrorHandler.LogAndThrow(1180);
+                _errorHandler.LogAndThrow(1180);
             }
 
             var context = _dbContextFactory.CreateDbContext();
@@ -209,7 +214,7 @@ namespace Logic.Services
             var card = context.FlashCards.Where(x => x.Id == cardId).FirstOrDefault();
             if (card == null)
             {
-                ErrorHandler.LogAndThrow(2160);
+                _errorHandler.LogAndThrow(2160);
             }
             card.NextReview = nextReview;
             card.Status = status;
@@ -237,7 +242,7 @@ namespace Logic.Services
         {
             if (userId < 1)
             {
-                ErrorHandler.LogAndThrow(1190);
+                _errorHandler.LogAndThrow(1190);
             }
             var context = _dbContextFactory.CreateDbContext();
 

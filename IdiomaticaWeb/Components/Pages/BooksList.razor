@@ -3,7 +3,8 @@
 @inject BookService BookService;
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
-@inject ILogger<IdiomaticaLogger> Logger
+@inject ILogger<IdiomaticaLogger> Logger;
+@inject ErrorHandler ErrorHandler;
 
 
 
@@ -115,10 +116,9 @@
             _isLoading = true;
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.InitDataBookList(context, Logger, UserService);
+            await BookService.InitDataBookList(context);
             await t_delay;
             _isLoading = false;
-            // Logger.LogError("Hellow");
 
         }
         catch (IdiomaticaException ex)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,15 +7,13 @@ using System.Threading.Tasks;
 
 namespace Logic.Telemetry
 {
-    public static class ErrorHandler
+    public class ErrorHandler
     {
-        /*
-         * WARNING
-         * this class cannot hold data that is unique to a user or session
-         * 
-         * */
+        private ILogger<IdiomaticaLogger> _logger;
 
-        public static Dictionary<int, string> ErrorCodes = new Dictionary<int, string>()
+        public ErrorHandler(ILogger<IdiomaticaLogger> logger) => _logger = logger;
+
+        private  Dictionary<int, string> _errorCodes = new Dictionary<int, string>()
         {
             // 1000 errors are invalid arguments
 
@@ -141,28 +140,28 @@ namespace Logic.Telemetry
             { 3180, "" },
             { 3190, "" },
         };
-        public static void LogAndThrow(int code)
+        public void LogAndThrow(int code)
         {
             LogError(code, [], null);
             ThrowError(code);
         }
-        public static void LogAndThrow(int code, string[] args)
+        public void LogAndThrow(int code, string[] args)
         {
             LogError(code, args, null);
             ThrowError(code);
         }
-        public static void LogAndThrow(int code, string[] args, Exception ex)
+        public void LogAndThrow(int code, string[] args, Exception ex)
         {
             LogError(code, args, ex);
             ThrowError(code);
         }
-        private static void LogError(int code, string[] args, Exception ex)
+        private void LogError(int code, string[] args, Exception ex)
         {
             // todo: log errors
         }
-        private static void ThrowError(int code)
+        private void ThrowError(int code)
         {
-            var errorCode = ErrorCodes[code];
+            var errorCode = _errorCodes[code];
             var ex = new IdiomaticaException() { code = code };
             throw ex;
         }

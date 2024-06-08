@@ -1,21 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Model.DAL;
-using Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using Azure;
-using Polly;
-using Microsoft.EntityFrameworkCore.Query.Internal;
-using System.Net;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Logic.Telemetry;
+﻿using Logic.Telemetry;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Model;
+using Model.DAL;
+using System.Linq.Expressions;
 
 namespace Logic.Services
 {
@@ -23,7 +11,8 @@ namespace Logic.Services
     {
         private User? _loggedInUser = null;
         private UserService _userService;
-        private ILogger<IdiomaticaLogger> _logger;
+        private ErrorHandler _errorHandler;
+        private DeepLService _deepLService;
 
         #region public read-only properties
 
@@ -155,17 +144,18 @@ namespace Logic.Services
 
         #endregion
 
-        public BookService(ILogger<IdiomaticaLogger> Logger)
+        public BookService(ErrorHandler errorHandler, DeepLService deepLService, UserService userService)
         {
-            _logger = Logger;
+            _errorHandler = errorHandler;
+            _deepLService = deepLService;
+            _userService = userService;
         }
+        
 
         #region init methods
 
-        public async Task InitDataBookList(IdiomaticaContext context, ILogger<IdiomaticaLogger> logger
-            , UserService userService)
+        public async Task InitDataBookList(IdiomaticaContext context)
         {
-            _userService = userService;
             _loggedInUser = await UserGetLoggedInAsync(context);
             _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context);
 
@@ -201,12 +191,12 @@ namespace Logic.Services
 
             if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2130);
+                _errorHandler.LogAndThrow(2130);
                 return;
             }
             if (_book == null || _book.Id == null || _book.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2140);
+                _errorHandler.LogAndThrow(2140);
                 return;
             }
 
@@ -226,7 +216,7 @@ namespace Logic.Services
 
             if (_bookUser == null || _bookUser.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2150);
+                _errorHandler.LogAndThrow(2150);
                 return;
             }
 
@@ -241,7 +231,7 @@ namespace Logic.Services
 
             if (_currentPageUser == null || _currentPageUser.PageId == 0)
             {
-                ErrorHandler.LogAndThrow(2220);
+                _errorHandler.LogAndThrow(2220);
                 return;
             }
 
@@ -267,17 +257,17 @@ namespace Logic.Services
             var textT = (text == null) ? "" : text.Trim().Replace('\u00A0', ' ');
             if (string.IsNullOrEmpty(titleT))
             {
-                ErrorHandler.LogAndThrow(1040);
+                _errorHandler.LogAndThrow(1040);
                 return -1;
             }
             if (string.IsNullOrEmpty(languageCodeT))
             {
-                ErrorHandler.LogAndThrow(1050);
+                _errorHandler.LogAndThrow(1050);
                 return -1;
             }
             if (string.IsNullOrEmpty(textT))
             {
-                ErrorHandler.LogAndThrow(1060);
+                _errorHandler.LogAndThrow(1060);
                 return -1;
             }
 
@@ -285,7 +275,7 @@ namespace Logic.Services
             var language = await DataCache.LanguageByCodeReadAsync(languageCodeT, context);
             if (language == null || language.Id == null || language.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2070);
+                _errorHandler.LogAndThrow(2070);
                 return -1;
             }
 
@@ -294,7 +284,7 @@ namespace Logic.Services
             var paragraphSplits = parser.SegmentTextByParagraphs(textT);
             if (paragraphSplits is null || paragraphSplits.Length == 0)
             {
-                ErrorHandler.LogAndThrow(2080);
+                _errorHandler.LogAndThrow(2080);
                 return -1;
             }
 
@@ -308,7 +298,7 @@ namespace Logic.Services
             bool didSaveBook = await DataCache.BookCreateAsync(book, context);
             if (!didSaveBook || book.Id == null || book.Id < 1)
             {
-                ErrorHandler.LogAndThrow(2090);
+                _errorHandler.LogAndThrow(2090);
                 return -1;
             }
 
@@ -319,7 +309,7 @@ namespace Logic.Services
                 context, (int)language.Id);
             if (commonWordsInLanguage == null)
             {
-                ErrorHandler.LogAndThrow(2200);
+                _errorHandler.LogAndThrow(2200);
                 return -1;
             }
 
@@ -400,7 +390,7 @@ namespace Logic.Services
         {
             if (bookId < 1)
             {
-                ErrorHandler.LogAndThrow(1100);
+                _errorHandler.LogAndThrow(1100);
             }
             string q = $"""
             with allPages as (
@@ -453,7 +443,7 @@ namespace Logic.Services
             int numRows = context.Database.ExecuteSqlRaw(q);
             if (numRows < 1)
             {
-                ErrorHandler.LogAndThrow(2110);
+                _errorHandler.LogAndThrow(2110);
             }
             //context.SaveChanges();
         }
@@ -462,7 +452,7 @@ namespace Logic.Services
             var book = await DataCache.BookByIdReadAsync(bookId, context);
             if (book == null)
             {
-                ErrorHandler.LogAndThrow(2000);
+                _errorHandler.LogAndThrow(2000);
                 return 0;
             }
             book.Pages = await DataCache.PagesByBookIdReadAsync(bookId, context);
@@ -470,7 +460,7 @@ namespace Logic.Services
             var firstPage = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
             if (firstPage == null || firstPage.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2010);
+                _errorHandler.LogAndThrow(2010);
                 return 0;
             }
             var languageUser = await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync(
@@ -479,7 +469,7 @@ namespace Logic.Services
 
             if (languageUser == null || languageUser.Id == null || languageUser.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2020);
+                _errorHandler.LogAndThrow(2020);
             }
             // make sure that bookUser doesn't already exist before creating it
             var existingBookUser = await DataCache.BookUserByBookIdAndUserIdReadAsync(
@@ -502,12 +492,12 @@ namespace Logic.Services
             bool didSaveBookUser = await DataCache.BookUserCreateAsync(bookUser, context);
             if (!didSaveBookUser || bookUser.Id < 1)
             {
-                ErrorHandler.LogAndThrow(2250);
+                _errorHandler.LogAndThrow(2250);
                 return -1;
             }
             if (bookUser.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2030);
+                _errorHandler.LogAndThrow(2030);
                 return -1;
             }
 
@@ -528,11 +518,11 @@ namespace Logic.Services
         {
             if (_currentPage == null || _currentPage.Id == null || _currentPage.Id < 1)
             {
-                ErrorHandler.LogAndThrow(1140);
+                _errorHandler.LogAndThrow(1140);
             }
             if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1)
             {
-                ErrorHandler.LogAndThrow(1210);
+                _errorHandler.LogAndThrow(1210);
             }
             await DataCache.WordUsersUpdateStatusByPageIdAndUserIdAndStatus((int)_currentPage.Id, (int)_loggedInUser.Id,
                 AvailableWordUserStatus.UNKNOWN, AvailableWordUserStatus.WELLKNOWN, context);
@@ -554,22 +544,22 @@ namespace Logic.Services
 
             if (_languageUser is null || _languageUser.Id is null || _languageUser.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2170);
+                _errorHandler.LogAndThrow(2170);
                 return;
             }
             if (_bookUser is null || _bookUser.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2180);
+                _errorHandler.LogAndThrow(2180);
                 return;
             }
             if (_currentPageUser is null || _currentPageUser.Id is null || _currentPageUser.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2190);
+                _errorHandler.LogAndThrow(2190);
                 return;
             }
             if (_bookTotalPageCount is null || _bookTotalPageCount < 1)
             {
-                ErrorHandler.LogAndThrow(2410);
+                _errorHandler.LogAndThrow(2410);
                 return;
             }
             // mark the previous page as read before moving on
@@ -593,7 +583,7 @@ namespace Logic.Services
         {
             if (_languageToCode == null || _languageFromCode == null)
             {
-                ErrorHandler.LogAndThrow(2240);
+                _errorHandler.LogAndThrow(2240);
                 return ("", "");
             }
             var sentences = pp.Sentences.OrderBy(x => x.Ordinal).Select(s => s.Text);
@@ -616,7 +606,7 @@ namespace Logic.Services
             }
             else
             {
-                var deeplResult = DeepLService.Translate(input, _languageFromCode.Code, _languageToCode.Code);
+                var deeplResult = _deepLService.Translate(input, _languageFromCode.Code, _languageToCode.Code);
                 if (deeplResult is not null)
                 {
                     output = deeplResult;
@@ -630,7 +620,7 @@ namespace Logic.Services
                     bool didSave = await DataCache.ParagraphTranslationCreateAsync(ppt, context);
                     if (!didSave || ppt.Id == null || ppt.Id < 1)
                     {
-                        ErrorHandler.LogAndThrow(2340);
+                        _errorHandler.LogAndThrow(2340);
                         return ("", "");
                     }
                     // BookService.ParagraphTranslationSave(ppt);
@@ -651,7 +641,7 @@ namespace Logic.Services
                     var dictEntry = _allWordsInPage.Where(w => w.Value.Id == t.WordId).FirstOrDefault();
                     if (dictEntry.Value == null)
                     {
-                        ErrorHandler.LogAndThrow(2370);
+                        _errorHandler.LogAndThrow(2370);
                         return sentence;
                     }
                     t.Word = dictEntry.Value;
@@ -683,7 +673,7 @@ namespace Logic.Services
                         var isSaved = DataCache.WordUserCreateAsync(wordUser, context).Result;
                         if (!isSaved || wordUser.Id < 1)
                         {
-                            ErrorHandler.LogAndThrow(2380);
+                            _errorHandler.LogAndThrow(2380);
                             return null;
                         }
                     }
@@ -707,7 +697,7 @@ namespace Logic.Services
             }
             if (token.Word == null || token.Word.Id == null || token.Word.Id < 1)
             {
-                ErrorHandler.LogAndThrow(2390);
+                _errorHandler.LogAndThrow(2390);
                 return (token, wu);
             }
             if (_allWordUsersInPage.ContainsKey(token.Word.TextLowerCase))
@@ -721,7 +711,7 @@ namespace Logic.Services
             }
             if (wu == null || wu.Id < 1)
             {
-                ErrorHandler.LogAndThrow(2400);
+                _errorHandler.LogAndThrow(2400);
                 return (token, wu);
             }
             return (token, wu);
@@ -737,14 +727,14 @@ namespace Logic.Services
         {
             if (id == 0)
             {
-                ErrorHandler.LogAndThrow(1150);
+                _errorHandler.LogAndThrow(1150);
                 return;
             }
             // first pull the existing one from the database
             var dbWordUser = await DataCache.WordUserByIdReadAsync(id, context);
             if (dbWordUser == null)
             {
-                ErrorHandler.LogAndThrow(2060);
+                _errorHandler.LogAndThrow(2060);
                 return;
             }
 
@@ -839,7 +829,7 @@ namespace Logic.Services
                     var bookUserId = await BookUserCreateAndSaveAsync(context, bookId, (int)_loggedInUser.Id);
                     if (bookUserId == 0)
                     {
-                        ErrorHandler.LogAndThrow(5080);
+                        _errorHandler.LogAndThrow(5080);
                         return null;
                     }
                     bookUserFromDb = await DataCache.BookUserByBookIdAndUserIdReadAsync(
@@ -855,18 +845,18 @@ namespace Logic.Services
         {
             if (bookUserId == 0)
             {
-                ErrorHandler.LogAndThrow(1120);
+                _errorHandler.LogAndThrow(1120);
             }
             if (currentPageId == 0)
             {
-                ErrorHandler.LogAndThrow(1130);
+                _errorHandler.LogAndThrow(1130);
             }
             
             var bookUser = await DataCache.BookUserByIdReadAsync(bookUserId, context);
             
             if (bookUser == null)
             {
-                ErrorHandler.LogAndThrow(2050, [$"bookUserId: {bookUserId}"]);
+                _errorHandler.LogAndThrow(2050, [$"bookUserId: {bookUserId}"]);
                 return;
             }
             bookUser.CurrentPageID = currentPageId;
@@ -894,7 +884,7 @@ namespace Logic.Services
                     (bookId, userId), context);
                 if (bookUserStatsFromDb is null)
                 {
-                    ErrorHandler.LogAndThrow(5090);
+                    _errorHandler.LogAndThrow(5090);
                 }
                 _bookUserStats = bookUserStatsFromDb;
                 _isLoadingBookUserStats = false;
@@ -1121,7 +1111,7 @@ namespace Logic.Services
             bool isSaved = await DataCache.PageCreateNewAsync(newPage, context);
             if(!isSaved || newPage.Id == null || newPage.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2040);
+                _errorHandler.LogAndThrow(2040);
                 return -1;
             }
 
@@ -1131,7 +1121,7 @@ namespace Logic.Services
                 context, newPage, language, commonWordsInLanguage);
             if(!areParagraphsParsed)
             {
-                ErrorHandler.LogAndThrow(2260);
+                _errorHandler.LogAndThrow(2260);
                 return -1;
             }
             return (int)newPage.Id;
@@ -1163,12 +1153,12 @@ namespace Logic.Services
         {
             if (pageId == 0)
             {
-                ErrorHandler.LogAndThrow(1240);
+                _errorHandler.LogAndThrow(1240);
                 return;
             }
             if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2130);
+                _errorHandler.LogAndThrow(2130);
                 return;
             }
             // wipe the old ones out
@@ -1239,22 +1229,22 @@ namespace Logic.Services
         {
             if (page == null)
             {
-                ErrorHandler.LogAndThrow(1310);
+                _errorHandler.LogAndThrow(1310);
                 return 0;
             }
             if (page.Id == 0)
             {
-                ErrorHandler.LogAndThrow(1320);
+                _errorHandler.LogAndThrow(1320);
                 return 0;
             }
             if (bookUser == null)
             {
-                ErrorHandler.LogAndThrow(1330);
+                _errorHandler.LogAndThrow(1330);
                 return 0;
             }
             if (commonWordDict == null)
             {
-                ErrorHandler.LogAndThrow(1360);
+                _errorHandler.LogAndThrow(1360);
                 return 0;
             }
 
@@ -1263,7 +1253,7 @@ namespace Logic.Services
                 var language = await DataCache.LanguageByIdReadAsync(bookUser.LanguageUser.LanguageId, context);
                 if (language == null)
                 {
-                    ErrorHandler.LogAndThrow(2320);
+                    _errorHandler.LogAndThrow(2320);
                     return 0;
                 }
 
@@ -1282,7 +1272,7 @@ namespace Logic.Services
                 bool didSave = await DataCache.PageUserCreateAsync(pageUser, context);
                 if(! didSave || pageUser.Id == null || pageUser.Id == 0)
                 {
-                    ErrorHandler.LogAndThrow(2310);
+                    _errorHandler.LogAndThrow(2310);
                     return 0;
                 }
 
@@ -1296,7 +1286,7 @@ namespace Logic.Services
                         context, bookUser.LanguageUserId, kvp.Value);
                     if (newWordUser == null || newWordUser.Id == 0)
                     {
-                        ErrorHandler.LogAndThrow(2330);
+                        _errorHandler.LogAndThrow(2330);
                         return 0;
                     }
                     // and add to the dict
@@ -1315,14 +1305,14 @@ namespace Logic.Services
                     $"page.Id = {page.Id}",
                     $"bookUser.Id = {bookUser.Id}",
                     ];
-                ErrorHandler.LogAndThrow(3000, args, ex);
+                _errorHandler.LogAndThrow(3000, args, ex);
                 throw; // you'll never get here
             }
         }
         private async Task<PageUser?> PageUserGetByOrderWithinBookAsync(
             IdiomaticaContext context, int languageUserId, int pageOrdinal, int bookId)
         {
-            if (_bookUser is null) ErrorHandler.LogAndThrow(1200);
+            if (_bookUser is null) _errorHandler.LogAndThrow(1200);
 
             var pageUserFromDb = await DataCache.PageUserByLanguageUserIdOrdinalAndBookIdReadAsync(
                 (languageUserId, pageOrdinal, bookId), context);
@@ -1334,7 +1324,7 @@ namespace Logic.Services
                 (pageOrdinal, _bookUser.BookId), context);
             if (existingPage == null)
             {
-                ErrorHandler.LogAndThrow(2070);
+                _errorHandler.LogAndThrow(2070);
             }
             if (_allWordsInPage is null)
             {
@@ -1390,7 +1380,7 @@ namespace Logic.Services
             var pu = await DataCache.PageUserByIdReadAsync(id, context);
             if (pu == null) 
             {
-                ErrorHandler.LogAndThrow(2100);
+                _errorHandler.LogAndThrow(2100);
                 return;
             }
             pu.ReadDate = readDate;
@@ -1412,12 +1402,12 @@ namespace Logic.Services
 
             if (page == null)
             {
-                ErrorHandler.LogAndThrow(1250);
+                _errorHandler.LogAndThrow(1250);
                 return false;
             }
             if (page.Id == 0)
             {
-                ErrorHandler.LogAndThrow(1260);
+                _errorHandler.LogAndThrow(1260);
                 return false;
             }
 
@@ -1438,7 +1428,7 @@ namespace Logic.Services
                 bool isSaved = await DataCache.ParagraphCreateAsync(paragraph, context);
                 if (!isSaved || paragraph.Id == null || paragraph.Id == 0)
                 {
-                    ErrorHandler.LogAndThrow(2270);
+                    _errorHandler.LogAndThrow(2270);
                     return false;
                 }
                 paragraphOrder++;
@@ -1457,7 +1447,7 @@ namespace Logic.Services
                     var isSavedSentence = await DataCache.SentenceCreateAsync(newSentence, context);
                     if (!isSavedSentence || newSentence.Id == null || newSentence.Id == 0)
                     {
-                        ErrorHandler.LogAndThrow(2280);
+                        _errorHandler.LogAndThrow(2280);
                         return false;
                     }
 
@@ -1465,7 +1455,7 @@ namespace Logic.Services
                         context, newSentence, language, commonWordDict);
                     if (!areSavedTokens)
                     {
-                        ErrorHandler.LogAndThrow(2300);
+                        _errorHandler.LogAndThrow(2300);
                         return false;
                     }
                 }
@@ -1520,22 +1510,22 @@ namespace Logic.Services
         {
             if (sentence == null)
             {
-                ErrorHandler.LogAndThrow(1270);
+                _errorHandler.LogAndThrow(1270);
                 return false;
             }
             if (sentence.Id == null || sentence.Id < 1)
             {
-                ErrorHandler.LogAndThrow(1280);
+                _errorHandler.LogAndThrow(1280);
                 return false;
             }
             if (sentence.Text == null)
             {
-                ErrorHandler.LogAndThrow(1290);
+                _errorHandler.LogAndThrow(1290);
                 return false;
             }
             if (commonWordDict == null)
             {
-                ErrorHandler.LogAndThrow(1300);
+                _errorHandler.LogAndThrow(1300);
                 return false;
             }
 
@@ -1601,7 +1591,7 @@ namespace Logic.Services
                 bool isSaved = await DataCache.TokenCreateAsync(token, context);
                 if (!isSaved || token.Id == null || token.Id == 0)
                 {
-                    ErrorHandler.LogAndThrow(2290);
+                    _errorHandler.LogAndThrow(2290);
                     return false;
                 }
             }
@@ -1689,12 +1679,12 @@ namespace Logic.Services
         {
             if (language == null)
             {
-                ErrorHandler.LogAndThrow(1340);
+                _errorHandler.LogAndThrow(1340);
                 return null;
             }
             if (language.Id == 0)
             {
-                ErrorHandler.LogAndThrow(1350);
+                _errorHandler.LogAndThrow(1350);
                 return null;
             }
             Word newWord = new Word()
@@ -1707,7 +1697,7 @@ namespace Logic.Services
             var isSaved = await DataCache.WordCreateAsync(newWord, context);
             if(!isSaved || newWord.Id == null || newWord.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2350);
+                _errorHandler.LogAndThrow(2350);
                 return null;
             }
             return newWord;
@@ -1717,7 +1707,7 @@ namespace Logic.Services
         {
             if (languageId == 0)
             {
-                ErrorHandler.LogAndThrow(1160);
+                _errorHandler.LogAndThrow(1160);
                 return null;
             }
             
@@ -1770,12 +1760,12 @@ namespace Logic.Services
         {
             if (languageUserId == 0)
             {
-                ErrorHandler.LogAndThrow(1370);
+                _errorHandler.LogAndThrow(1370);
                 return null;
             }
             if (word == null)
             {
-                ErrorHandler.LogAndThrow(1380);
+                _errorHandler.LogAndThrow(1380);
                 return null;
             }
 
@@ -1790,7 +1780,7 @@ namespace Logic.Services
             var isSaved = await DataCache.WordUserCreateAsync(newWordUser, context);
             if (!isSaved || newWordUser.Id == 0)
             {
-                ErrorHandler.LogAndThrow(2360);
+                _errorHandler.LogAndThrow(2360);
                 return null;
             }
             return newWordUser;

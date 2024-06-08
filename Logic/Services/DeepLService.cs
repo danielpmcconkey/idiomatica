@@ -1,12 +1,21 @@
 ﻿using DeepL;
 using Logic.Telemetry;
+using Microsoft.Extensions.Logging;
 using Model;
 
 namespace Logic.Services
 {
-    public static class DeepLService
+    public class DeepLService
     {
-        public static async Task<string> TranslateAsync (string input, string sourceLanguageCode, string targetLanguageCode) 
+        private ILogger<IdiomaticaLogger> _logger;
+        private ErrorHandler _errorHandler;
+
+        public DeepLService(ILogger<IdiomaticaLogger> logger, ErrorHandler errorHandler)
+        {
+            _logger = logger;
+            _errorHandler = errorHandler;
+        }
+        public async Task<string> TranslateAsync (string input, string sourceLanguageCode, string targetLanguageCode) 
         {
             try
             {
@@ -26,12 +35,12 @@ namespace Logic.Services
                     $"sourceLanguageCode = {sourceLanguageCode}",
                     $"targetLanguageCode = {targetLanguageCode}",
                     ];
-                ErrorHandler.LogAndThrow(3010, args, ex);
+                _errorHandler.LogAndThrow(3010, args, ex);
                 throw; // you'll never get here
             } 
         }
 
-        public static string Translate(string input, string sourceLanguageCode, string targetLanguageCode)
+        public string Translate(string input, string sourceLanguageCode, string targetLanguageCode)
         {
             try
             {
@@ -46,7 +55,7 @@ namespace Logic.Services
                     $"sourceLanguageCode = {sourceLanguageCode}",
                     $"targetLanguageCode = {targetLanguageCode}",
                     ];
-                ErrorHandler.LogAndThrow(3010, args, ex);
+                _errorHandler.LogAndThrow(3010, args, ex);
                 throw; // you'll never get here
             }
         }
