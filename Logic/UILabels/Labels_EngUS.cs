@@ -78,6 +78,8 @@ namespace Logic.UILabels
             _labels.Add("statusLabel7", "well known 7");
             _labels.Add("ppModalTitle", "Translation from {0} to {1}");
             _labels.Add("pageTurnerCurrentPage", "Page {0} of {1}");
+            _labels.Add("readJumpDefault", "Jump to page...");
+            _labels.Add("readJumpSubmit", "Jump");
             _labels.Add("", "");
             #endregion
             #region book create
