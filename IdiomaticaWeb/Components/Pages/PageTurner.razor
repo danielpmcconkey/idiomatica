@@ -5,7 +5,7 @@
 
 <div class="row  g-2">
     <div class="col-2">
-        <p>Page @OnGetCurrentPageNum() of @OnGetTotalPages()</p>
+        <p>@OnGetPageOfPagesLabel()</p>
     </div>
     @if (_isPreviousEnabled)
     {
@@ -31,15 +31,16 @@
             </button>
         </div>
     }
+
     
 </div>
 @code {
-    [Parameter]
-    public BookService BookService { get; set; }
-    [Parameter]
-    public EventCallback<int> OnMovePageAsync { get; set; }
-    [Parameter]
-    public EventCallback<int> OnClearPageAsync { get; set; }
+        [Parameter]
+        public BookService BookService { get; set; }
+        [Parameter]
+        public EventCallback<int> OnMovePageAsync { get; set; }
+        [Parameter]
+        public EventCallback<int> OnClearPageAsync { get; set; }
 
     private bool _isPreviousEnabled
     {
@@ -68,14 +69,15 @@
     {
         await OnClearPageAsync.InvokeAsync(targetPageNum);
     }
+    private string OnGetPageOfPagesLabel()
+    {
+        var currentPage = (BookService is null) ? 0 : BookService.BookCurrentPageNum;
+        var totalPages = (BookService is null) ? 0 : BookService.BookTotalPageCount;
+        return UserService.GetUILabelF("pageTurnerCurrentPage", [currentPage, totalPages]);
+    }
     private int OnGetCurrentPageNum()
     {
         if (BookService is null) return 0;
         return BookService.BookCurrentPageNum;
     }
-    private int OnGetTotalPages()
-    {
-        return BookService.BookTotalPageCount;
-    }
-    
 }
