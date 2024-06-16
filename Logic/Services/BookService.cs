@@ -534,6 +534,8 @@ namespace Logic.Services
             }
             else
             {
+                // mark the previous page as read because you didn't do it in the PageMove function
+                await PageUserMarkAsReadAsync(context, (int)_currentPageUser.Id);
                 // refresh the word user cache
                 await PageResetDataForRead(context, _currentPageUser.PageId);
             }
