@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Model;
 using Model.DAL;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace Logic.Services
@@ -506,6 +507,17 @@ namespace Logic.Services
 
             return bookUser.Id;
         }
+        public async Task BookUserUpdateStats(IdiomaticaContext context, int? bookId)
+        {
+            _bookListRows = new List<BookListRow>();
+            if (bookId == null) return;
+            if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1) return;
+            var bookUser = await DataCache.BookUserByBookIdAndUserIdReadAsync(
+                    ((int)bookId, (int)_loggedInUser.Id), context);
+            if (bookUser == null || bookUser.Id < 1) return;
+            await BookUserStatsUpdate(context, bookUser.Id);
+            _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context);
+        }
         public IQueryable<LanguageCode> LanguageCodeFetchOptionsDuringBookCreate(IdiomaticaContext context)
         {
             // this isn't worth caching
@@ -718,7 +730,29 @@ namespace Logic.Services
             }
             return (token, wu);
         }
-
+        public async Task<List<(string language, int wordCount)>> WordsGetListOfReadCount(
+            IdiomaticaContext context, int? userId)
+        {
+            List<(string language, int wordCount)> returnList = new List<(string language, int wordCount)>();
+            var languageUsers = await LanguageUsersGetByUserIdAsync(context, userId);
+            foreach (var languageUser in languageUsers)
+            {
+                var lang = await DataCache.LanguageByIdReadAsync(languageUser.LanguageId, context);
+                if (lang == null) continue;
+                var count = (from lu in context.LanguageUsers
+                             join bu in context.BookUsers on lu.Id equals bu.LanguageUserId
+                             join pu in context.PageUsers on bu.Id equals pu.BookUserId
+                             join p in context.Pages on pu.PageId equals p.Id
+                             join pp in context.Paragraphs on p.Id equals pp.PageId
+                             join s in context.Sentences on pp.Id equals s.ParagraphId
+                             join t in context.Tokens on s.Id equals t.SentenceId
+                             where pu.ReadDate != null
+                                && lu.Id == languageUser.Id
+                             select t).Count();
+                returnList.Add((lang.Name, count));
+            }
+            return returnList;
+        }
         /// <summary>
         /// Updates the WordUser but doesn't update all the caches. reset any 
         /// caches that are important to you
@@ -744,17 +778,6 @@ namespace Logic.Services
             dbWordUser.Translation = translation;
             dbWordUser.StatusChanged = DateTime.Now;
             await DataCache.WordUserUpdateAsync(dbWordUser, context);
-        }
-        public async Task BookUserUpdateStats(IdiomaticaContext context, int? bookId)
-        {
-            _bookListRows = new List<BookListRow>();
-            if (bookId == null) return;
-            if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1) return;
-            var bookUser = await DataCache.BookUserByBookIdAndUserIdReadAsync(
-                    ((int)bookId, (int)_loggedInUser.Id), context);
-            if (bookUser == null || bookUser.Id < 1) return;
-            await BookUserStatsUpdate(context, bookUser.Id);
-            _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context);
         }
 
 
@@ -1092,6 +1115,12 @@ namespace Logic.Services
                 _isLoadingLanguageUser = false;
             }
             return _languageUser;
+        }
+        private async Task<List<LanguageUser>> LanguageUsersGetByUserIdAsync(
+            IdiomaticaContext context, int? userId)
+        {
+            if (userId == null || userId < 1) return new List<LanguageUser>();
+            return await DataCache.LanguageUsersByUserIdReadAsync((int)userId, context);
         }
 
         #endregion
@@ -1752,6 +1781,8 @@ namespace Logic.Services
             }
             return _allWordsInPage;
         }
+        
+
 
         #endregion
 

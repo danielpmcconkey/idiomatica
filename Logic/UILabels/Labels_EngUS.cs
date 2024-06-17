@@ -32,6 +32,11 @@ namespace Logic.UILabels
             _labels.Add("navNewBook", "Upload Book");
             _labels.Add("navFlashcards", "Flash card review");
             #endregion
+            #region home
+            _labels.Add("homeInitializationError", "There was an error initializing data for the home page."); 
+            _labels.Add("homeWordCountsHeader", "How many words have you read?");
+            _labels.Add("homeBookshelfButtonText", "Read more...");
+            #endregion
 
             #region book list
             _labels.Add("bookListInitializationError", "There was an error fetching your book list.");
