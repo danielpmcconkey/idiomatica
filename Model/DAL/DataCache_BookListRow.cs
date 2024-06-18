@@ -17,15 +17,15 @@ namespace Model.DAL
 
         #region read
         public static async Task<List<BookListRow>> BookListRowsByUserIdReadAsync(
-            int key, IdiomaticaContext context)
+            int key, IdiomaticaContext context, bool shouldFetchFreshValue = false)
         {
             // check cache
-            if (BookListRowsByUserId.ContainsKey(key))
+            if (BookListRowsByUserId.ContainsKey(key) && !shouldFetchFreshValue)
             {
                 return BookListRowsByUserId[key];
             }
             // read DB
-            var value = context.BookListRows.Where(x => x.UserId == key)
+            var value = context.BookListRows.Where(x => x.UserId == key && x.IsArchived != true)
                 .ToList();
 
             // write to cache

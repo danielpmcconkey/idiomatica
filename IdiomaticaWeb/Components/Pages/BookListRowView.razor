@@ -34,6 +34,7 @@ else
                             @UserService.GetUILabel("bookListRead")
                         </Button>
                         <Button Color="ButtonColor.Warning"
+                                TooltipTitle="@UserService.GetUILabel("bookListRemoveToolTip")"
                                 Size="Size.Small"
                                 @onclick="((args) => OnClickRemove(args, Row.BookId))">
                             @UserService.GetUILabel("bookListRemove")
@@ -105,6 +106,9 @@ else
     public BookService BookService { get; set; }// = new BookService(Logger);
     [Parameter]
     public BookListRow Row { get; set; } = new BookListRow();
+    [Parameter]
+    public EventCallback<int> OnArchiveAsync { get; set; }
+
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
 
@@ -182,28 +186,10 @@ else
             return string.Empty;
         }
     }
-    private void OnClickRemove(EventArgs args, int? bookId)
+    private async Task OnClickRemove(EventArgs args, int? bookId)
     {
-        try
-        {
-            throw new NotImplementedException("book removal not yet implemented");
-
-        }
-        catch (IdiomaticaException ex)
-        {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
-            errorState.code = ex.code;
-            StateHasChanged();
-            return;
-        }
-        catch (Exception ex)
-        {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
-            StateHasChanged();
-        }
-
+        if (bookId == null || bookId < 1) return;
+        await OnArchiveAsync.InvokeAsync((int)bookId);
     }
     private string OnFormatCount(decimal? dbStat)
     {

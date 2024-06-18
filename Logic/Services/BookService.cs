@@ -448,6 +448,25 @@ namespace Logic.Services
             }
             //context.SaveChanges();
         }
+        public async Task BookUserArchiveAsync(IdiomaticaContext context, int bookId)
+        {
+            if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1)
+            {
+                _errorHandler.LogAndThrow(1220);
+                return;
+            }
+            if (bookId < 1)
+            {
+                _errorHandler.LogAndThrow(1410);
+                return;
+            }
+            var bookUser = await BookUserGetAsync(context, bookId, (int)_loggedInUser.Id);
+            bookUser.IsArchived = true;
+            await DataCache.BookUserUpdateAsync(bookUser, context);
+
+            // now pull a fresh copy of the book list
+            _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context, true);
+        }
         public async Task<int> BookUserCreateAndSaveAsync(IdiomaticaContext context, int bookId, int userId)
         {
             var book = await DataCache.BookByIdReadAsync(bookId, context);

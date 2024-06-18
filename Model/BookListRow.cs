@@ -24,5 +24,6 @@ namespace Model
         public decimal? TotalKnownPercent { get; set; }
         public decimal? DistinctWordCount { get; set; }
         public decimal? DistinctKnownPercent { get; set; }
+        public bool? IsArchived { get; set; }
     }
 }

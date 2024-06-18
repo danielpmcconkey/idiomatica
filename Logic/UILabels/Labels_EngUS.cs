@@ -62,6 +62,7 @@ namespace Logic.UILabels
             _labels.Add("bookListRead", "Read");
             _labels.Add("bookListUpdate", "Update");
             _labels.Add("bookListRemove", "Remove");
+            _labels.Add("bookListRemoveToolTip", "Remove from your bookshelf. You can put it back later and keep your old stats.");
             #endregion
             #region read
             _labels.Add("readInitializationError", "There was an error retrieving this book from the database.");

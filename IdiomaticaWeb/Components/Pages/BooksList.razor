@@ -77,7 +77,7 @@
                     if (!OnIsVisibleInListCheck(row.LanguageName, row.Title))
                         continue;
 
-                    <BookListRowView BookService="BookService" Row="row" />
+                    <BookListRowView BookService="BookService" Row="row" OnArchiveAsync="OnArchiveBookUser" />
                 }
             </div>
 
@@ -190,5 +190,30 @@
             StateHasChanged();
         }
 
-    }    
+    }
+    private async Task OnArchiveBookUser(int bookId)
+    {
+        try
+        {
+            _isLoading = true;
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            await BookService.BookUserArchiveAsync(context, bookId);
+            // re-apply sort
+            var sortAscending = (_sortDirection == "Ascending") ? true : false;
+            await BookService.BookListRowsSort(_activeSortColumn, sortAscending);
+            // re-apply filter
+            await t_delay;
+            _isLoading = false;
+
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
+    }
 }
