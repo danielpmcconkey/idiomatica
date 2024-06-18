@@ -202,7 +202,6 @@
             // re-apply sort
             var sortAscending = (_sortDirection == "Ascending") ? true : false;
             await BookService.BookListRowsSort(_activeSortColumn, sortAscending);
-            // re-apply filter
             await t_delay;
             _isLoading = false;
 
