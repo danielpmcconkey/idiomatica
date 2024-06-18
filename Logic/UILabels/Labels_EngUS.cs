@@ -32,6 +32,11 @@ namespace Logic.UILabels
             _labels.Add("navNewBook", "Upload Book");
             _labels.Add("navFlashcards", "Flash card review");
             #endregion
+            #region home
+            _labels.Add("homeInitializationError", "There was an error initializing data for the home page."); 
+            _labels.Add("homeWordCountsHeader", "How many words have you read?");
+            _labels.Add("homeBookshelfButtonText", "Read more...");
+            #endregion
 
             #region book list
             _labels.Add("bookListInitializationError", "There was an error fetching your book list.");
@@ -77,6 +82,9 @@ namespace Logic.UILabels
             _labels.Add("statusLabel6", "ignored 6");
             _labels.Add("statusLabel7", "well known 7");
             _labels.Add("ppModalTitle", "Translation from {0} to {1}");
+            _labels.Add("pageTurnerCurrentPage", "Page {0} of {1}");
+            _labels.Add("readJumpDefault", "Jump to page...");
+            _labels.Add("readJumpSubmit", "Jump");
             _labels.Add("", "");
             #endregion
             #region book create

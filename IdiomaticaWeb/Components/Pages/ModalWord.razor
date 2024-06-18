@@ -1,8 +1,8 @@
 ﻿@page "/ModalWord"
 @rendermode InteractiveServer
-
 @inject UserService UserService;
-@inject IDbContextFactory<IdiomaticaContext> DbContextFactory
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
+@inject ErrorHandler ErrorHandler;
 
 <Modal @ref="modal" Title="@_title" Size="ModalSize.Large">
     <BodyTemplate>

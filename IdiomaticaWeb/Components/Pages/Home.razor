@@ -1,6 +1,8 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@inject BookService BookService;
 @inject UserService UserService;
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 
 <PageTitle>Blazor Bootstrap - WebAssembly Standalone App (.NET 8) - Starter Template</PageTitle>
 
@@ -14,14 +16,40 @@ Interactive render mode: Server
 Interactive location: Global
 
 <ErrorAlert ErrorState="errorState"></ErrorAlert>
-<div>
-    <Button Color="ButtonColor.Primary" @onclick="OnAsyncTest">Async test</Button>
-</div>
+
 
 
 <AuthorizeView>
     <Authorized>
         <p>Hello, @context.User.Identity?.Name!</p>
+        
+        @if(_wordsReadCountList.Any())
+        {
+            <Card>
+                <CardBody>
+                    <CardTitle>@_wordCountCardTitle</CardTitle>
+                    <dl class="row">
+                        @foreach (var item in _wordsReadCountList)
+                        {
+                            
+                            <dt class="col-sm-3">
+                                @item.language:</dt>
+                            <dd class="col-sm-9">
+                                @OnFormatCount(item.wordCount)
+                            </dd>
+
+                        }
+                    </dl>
+                    <Button Color="ButtonColor.Primary" To="/Books" Type="ButtonType.Link">
+                        @_bookshelfButtonText
+                    </Button>
+                </CardBody>
+            </Card>
+        }
+        
+        <p></p>
+        
+
     </Authorized>
     <NotAuthorized>
         <p>You're not authorized.</p>
@@ -29,10 +57,7 @@ Interactive location: Global
 </AuthorizeView>
 
 
-@foreach(var item in words)
-{
-    <Deleteme burp="@item" />
-}
+
 
 
 
@@ -40,15 +65,21 @@ Interactive location: Global
 @code {
     private Modal modal;
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
-    string[] longs = ["long 0", "long 1"];
-    private string[] shorts = ["short 0", "short 1", "short 2", "short 3", "short 4"];
-    private List<string> words = new List<string>();
     private bool _isDataInit = false;
-    private bool _burp = false;
+    private List<(string language, int wordCount)> _wordsReadCountList = new List<(string language, int wordCount)>();
+    private string? _wordCountCardTitle;
+    private string? _bookshelfButtonText;
 
     private async Task InitData()
     {
-        foreach (var item in longs) words.Add(item);
+        var context = await DbContextFactory.CreateDbContextAsync();
+        var loggedInUser = UserService.GetLoggedInUser(context);
+        if (loggedInUser == null) return;
+        _wordCountCardTitle = UserService.GetUILabel("homeWordCountsHeader");
+        _wordsReadCountList = await BookService.WordsGetListOfReadCount(
+            context, loggedInUser.Id);
+
+        _bookshelfButtonText = UserService.GetUILabel("homeBookshelfButtonText");
 
         // fin
         _isDataInit = true;
@@ -63,19 +94,34 @@ Interactive location: Global
         catch (Exception ex)
         {
             errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("readInitializationError");
+            errorState.errorMessage = UserService.GetUILabel("homeInitializationError");
             StateHasChanged();
             return;
         }
     }
-
-    private async Task OnAsyncTest()
+    private string OnFormatCount(int? stat)
     {
-        _burp = !_burp;
-        words = new List<string>();
-        if (_burp) foreach (var item in shorts) words.Add(item);
-        else foreach (var item in longs) words.Add(item);
-
+        try
+        {
+            if (stat is null) return "0";
+            return ((int)stat).ToString("N0");
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("homeInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("homeInitializationError");
+            StateHasChanged();
+            return string.Empty;
+        }
     }
+    
     
 }

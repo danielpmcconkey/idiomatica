@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
+@inject ErrorHandler ErrorHandler;
 
 @if(_isDataInit)
 {
