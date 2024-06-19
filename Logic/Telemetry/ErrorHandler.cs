@@ -54,9 +54,9 @@ namespace Logic.Telemetry
             { 1420, "bookId cannot be null or 0 when saving a BookTag" },
             { 1430, "userId cannot be null or 0 when saving a BookTag" },
             { 1440, "tag cannot be empty when saving a BookTag" },
-            { 1450, "" },
-            { 1460, "" },
-            { 1470, "" },
+            { 1450, "bookId cannot be null or 0 when removing a BookTag" },
+            { 1460, "userId cannot be null or 0 when removing a BookTag" },
+            { 1470, "tag cannot be empty when removing a BookTag" },
             { 1480, "" },
             { 1490, "" },
 

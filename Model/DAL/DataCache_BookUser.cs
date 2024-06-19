@@ -13,6 +13,7 @@ namespace Model.DAL
         private static ConcurrentDictionary<(int bookId, int userId), BookUser> BookUserByBookIdAndUserId = new ConcurrentDictionary<(int bookId, int userId), BookUser>();
 
         #region create
+
         public static async Task<bool> BookUserCreateAsync(BookUser value, IdiomaticaContext context)
         {
             context.BookUsers.Add(value);
@@ -24,6 +25,7 @@ namespace Model.DAL
             BookUserById[(int)value.Id] = value;
             return true;
         }
+
         #endregion
 
         #region read

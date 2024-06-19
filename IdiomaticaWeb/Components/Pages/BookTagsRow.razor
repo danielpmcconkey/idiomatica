@@ -1,0 +1,131 @@
+﻿@rendermode InteractiveServer
+@inject UserService UserService;
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
+@inject ILogger<IdiomaticaLogger> Logger;
+@inject ErrorHandler ErrorHandler;
+
+
+@if (_isLoading)
+{
+    <Button Color="ButtonColor.Primary" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+}
+else
+{
+    <div class="row">
+        <div class="col">
+
+            @foreach (var tag in _tags)
+            {
+                <TagBadge BookService="BookService" BookId="BookId" BookTag="tag" OnRefreshRowAsync="RefreshTags" />
+            }
+
+        </div>
+        <div class="col">
+            <form method="post" @onsubmit="OnAddTagAsync">
+                <div class="input-group">
+                    <InputText @bind-Value="_addTagInput" />
+                    <Button Color="ButtonColor.Secondary"
+                            Type="ButtonType.Submit"
+                            Size="Size.Small">
+                        @UserService.GetUILabel("bookListAddTag")
+                    </Button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+@code {
+    [Parameter]
+    public BookService BookService { get; set; }
+    [Parameter]
+    public int? BookId { get; set; }
+    private List<BookTag> _tags = new List<BookTag>();
+    private string? _addTagInput;
+    private User? _loggedInUser;
+    public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
+    private bool _isLoading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _isLoading = true;
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+
+            var context = await DbContextFactory.CreateDbContextAsync();
+            _loggedInUser = await UserService.GetLoggedInUserAsync(context);
+            if (_loggedInUser == null)
+            {
+                ErrorHandler.LogAndThrow(2450);
+                return;
+            }
+            _tags = await BookService.BookTagsGetByBookIdAndUserId(context, (int)BookId, _loggedInUser.Id);
+            await t_delay;
+            _isLoading = false;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("readInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("readInitializationError");
+            StateHasChanged();
+            return;
+        }
+    }
+    private async Task RefreshTags()
+    {
+        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1) return;
+        
+
+        try
+        {
+            _isLoading = true;
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            _tags = await BookService.BookTagsGetByBookIdAndUserId(context, (int)BookId, _loggedInUser.Id);
+            await t_delay;
+            _isLoading = false;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListAddTagError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
+    }
+    private async Task OnAddTagAsync()
+    {
+        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1) return;
+        if (_addTagInput == null) return;
+        var sanitized = _addTagInput.Trim().ToLower();
+        if (sanitized == string.Empty) return;
+
+        try
+        {
+            _isLoading = true;
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            await BookService.BookTagAdd(context, BookId, _loggedInUser.Id, sanitized);
+            _tags = await BookService.BookTagsGetByBookIdAndUserId(context, (int)BookId, _loggedInUser.Id);
+            await t_delay;
+            _isLoading = false;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListAddTagError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
+    }
+}

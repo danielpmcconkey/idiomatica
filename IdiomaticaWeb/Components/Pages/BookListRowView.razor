@@ -7,12 +7,7 @@
 
 
 
-@if (_isLoading)
-{
-    <Button Color="ButtonColor.Primary" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
-}
-else
-{
+
     <div class="card mb-3">
         <div class="card-header">
             <div class="container">
@@ -86,33 +81,15 @@ else
             </div>
         
         </div>
-        <div class="container card-footer">
-            <div class="row">
-                <div class="col">
-
-                    @foreach (var tag in _tags)
-                    {
-                        <Badge class="m-1" IndicatorType="BadgeIndicatorType.RoundedPill">@tag.Tag</Badge>
-                    }
-
-                </div>
-                <div class="col">
-                    <form method="post" @onsubmit="OnAddTagAsync">
-                        <div class="input-group">
-                            <InputText @bind-Value="_addTagInput" />
-                            <Button Color="ButtonColor.Secondary" 
-                                Type="ButtonType.Submit" 
-                                Size="Size.Small">
-                                @UserService.GetUILabel("bookListAddTag")
-                            </Button>
-                        </div>
-                    </form>
-                </div>
+        <div class="card-footer">
+            <div class="container">
+                @* <BookTagsRow /> *@
+                <BookTagsRow BookService="@BookService" BookId="@Row.BookId" />
             </div>
             
         </div>
     </div>
-}
+
 
 
 
@@ -129,9 +106,8 @@ else
 
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
-    private List<BookTag> _tags = new List<BookTag>();
-    private string? _addTagInput;
-    private User? _loggedInUser;
+    
+    
     private int? _bookId;
 
 
@@ -142,14 +118,7 @@ else
             _isLoading = true;
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
             _bookId = Row.BookId;
-            var context = await DbContextFactory.CreateDbContextAsync();
-            _loggedInUser = await UserService.GetLoggedInUserAsync(context);
-            if (_loggedInUser == null)
-            {
-                ErrorHandler.LogAndThrow(2450);
-                return;
-            }
-            _tags = await BookService.BookTagsGetByBookIdAndUserId(context, _bookId, _loggedInUser.Id);
+            
             await t_delay;
             _isLoading = false;
         }
@@ -370,31 +339,6 @@ else
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("bookListRefreshStatsError");
             StateHasChanged();
-        }
-    }
-    private async Task OnAddTagAsync()
-    {
-        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1) return;
-        if (_addTagInput == null) return;
-        var sanitized = _addTagInput.Trim().ToLower();
-        if (sanitized == string.Empty) return;
-
-        try
-        {
-            _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
-            var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.BookTagAdd(context, _bookId, _loggedInUser.Id, sanitized);
-            await t_delay;
-            _isLoading = false;
-        }
-        catch (IdiomaticaException ex)
-        {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListAddTagError");
-            errorState.code = ex.code;
-            StateHasChanged();
-            return;
         }
     }
 }

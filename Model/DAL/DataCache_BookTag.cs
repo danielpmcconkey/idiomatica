@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -114,5 +115,36 @@ namespace Model.DAL
         }
 
         #endregion
+
+        #region delete
+        public static async Task BookTagDelete(
+            (int bookId, int userId, string tag) key, IdiomaticaContext context)
+        {
+            string trimmed = key.tag.Trim();
+            if (trimmed == null) return;
+            // make sure this tag actually exists
+            var existingTags = context.BookTags.Where(x =>
+                    x.BookId == key.bookId &&
+                    x.UserId == key.userId &&
+                    x.Tag == trimmed);
+            if (existingTags.Any() == false) return;
+            foreach (var tag in existingTags)
+            {
+                context.BookTags.Remove(tag);
+                BookTagRemoveFromCache(tag);
+            }
+            context.SaveChanges();
+        }
+
+        #endregion
+
+        private static async Task BookTagRemoveFromCache(BookTag t)
+        {
+            if (t.BookId == null || t.UserId == null) return;
+            var existing = BookTagsByBookIdAndUserId[((int)t.BookId, (int)t.UserId)];
+            if (existing == null) return;
+            var listWithoutTag = existing.Where(x => x.Tag != t.Tag).ToList();
+            BookTagsByBookIdAndUserId[((int)t.BookId, (int)t.UserId)] = listWithoutTag;
+        }
     }
 }
