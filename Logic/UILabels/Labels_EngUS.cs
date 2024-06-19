@@ -44,6 +44,7 @@ namespace Logic.UILabels
             _labels.Add("bookListSortTableError", "There was an error sorting your book list");
             _labels.Add("bookListIsVisibleError", "There was an error determining your book list filter.");
             _labels.Add("bookListRefreshStatsError", "There was an error refreshing book user stats.");
+            _labels.Add("bookListAddTagError", "There was an error adding a book tag.");
             _labels.Add("bookListFormFilter", "Filter on title or language...");
             _labels.Add("bookListFormSortColumn", "Sort by...");
             _labels.Add("bookListFormSortDirection", "Sort direction...");
@@ -63,6 +64,7 @@ namespace Logic.UILabels
             _labels.Add("bookListUpdate", "Update");
             _labels.Add("bookListRemove", "Remove");
             _labels.Add("bookListRemoveToolTip", "Remove from your bookshelf. You can put it back later and keep your old stats.");
+            _labels.Add("bookListAddTag", "Add tag");
             #endregion
             #region read
             _labels.Add("readInitializationError", "There was an error retrieving this book from the database.");

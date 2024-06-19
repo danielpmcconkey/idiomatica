@@ -30,18 +30,18 @@ else
                         <Button Color="ButtonColor.Primary"
                                 Type="ButtonType.Link"
                                 Size="Size.Small"
-                                To="@OnGetBookLinkRead(Row.BookId)">
+                                To="@OnGetBookLinkRead()">
                             @UserService.GetUILabel("bookListRead")
                         </Button>
                         <Button Color="ButtonColor.Warning"
                                 TooltipTitle="@UserService.GetUILabel("bookListRemoveToolTip")"
                                 Size="Size.Small"
-                                @onclick="((args) => OnClickRemove(args, Row.BookId))">
+                                @onclick="OnClickRemove">
                             @UserService.GetUILabel("bookListRemove")
                         </Button>
                         <Button Color="ButtonColor.Info"
                                 Size="Size.Small"
-                                @onclick="((args) => OnClickRefresh(args, Row.BookId))">
+                                @onclick="OnClickRefresh">
                             @UserService.GetUILabel("bookListRefreshBookStats")
                         </Button>
                     </div>
@@ -86,12 +86,30 @@ else
             </div>
         
         </div>
-        <div class="card-footer">
-            <p>
+        <div class="container card-footer">
+            <div class="row">
+                <div class="col">
 
+                    @foreach (var tag in _tags)
+                    {
+                        <Badge class="m-1" IndicatorType="BadgeIndicatorType.RoundedPill">@tag.Tag</Badge>
+                    }
 
-
-            </p>
+                </div>
+                <div class="col">
+                    <form method="post" @onsubmit="OnAddTagAsync">
+                        <div class="input-group">
+                            <InputText @bind-Value="_addTagInput" />
+                            <Button Color="ButtonColor.Secondary" 
+                                Type="ButtonType.Submit" 
+                                Size="Size.Small">
+                                @UserService.GetUILabel("bookListAddTag")
+                            </Button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
         </div>
     </div>
 }
@@ -111,6 +129,46 @@ else
 
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
+    private List<BookTag> _tags = new List<BookTag>();
+    private string? _addTagInput;
+    private User? _loggedInUser;
+    private int? _bookId;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _isLoading = true;
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            _bookId = Row.BookId;
+            var context = await DbContextFactory.CreateDbContextAsync();
+            _loggedInUser = await UserService.GetLoggedInUserAsync(context);
+            if (_loggedInUser == null)
+            {
+                ErrorHandler.LogAndThrow(2450);
+                return;
+            }
+            _tags = await BookService.BookTagsGetByBookIdAndUserId(context, _bookId, _loggedInUser.Id);
+            await t_delay;
+            _isLoading = false;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("readInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("readInitializationError");
+            StateHasChanged();
+            return;
+        }
+    }
 
     private string OnFormatTitle(string? title)
     {
@@ -140,12 +198,12 @@ else
             return string.Empty;
         }
     }
-    private string OnGetBookLinkRead(int? bookId)
+    private string OnGetBookLinkRead()
     {
         try
         {
-            if (bookId == null) return "";
-            return $"/Book/{bookId}/Read";
+            if (_bookId == null) return "";
+            return $"/Book/{_bookId}/Read";
         }
         catch (IdiomaticaException ex)
         {
@@ -163,12 +221,12 @@ else
             return string.Empty;
         }
     }
-    private string OnGetBookLinkUpdate(int? bookId)
+    private string OnGetBookLinkUpdate()
     {
         try
         {
-            if (bookId == null) return "";
-            return $"/Book/{bookId}/Update";
+            if (_bookId == null) return "";
+            return $"/Book/{_bookId}/Update";
         }
         catch (IdiomaticaException ex)
         {
@@ -186,10 +244,10 @@ else
             return string.Empty;
         }
     }
-    private async Task OnClickRemove(EventArgs args, int? bookId)
+    private async Task OnClickRemove()
     {
-        if (bookId == null || bookId < 1) return;
-        await OnArchiveAsync.InvokeAsync((int)bookId);
+        if (_bookId == null || _bookId < 1) return;
+        await OnArchiveAsync.InvokeAsync((int)_bookId);
     }
     private string OnFormatCount(decimal? dbStat)
     {
@@ -288,14 +346,14 @@ else
             return false;
         }
     }
-    private async Task OnClickRefresh(EventArgs args, int? bookId)
+    private async Task OnClickRefresh()
     {
         try
         {
             _isLoading = true;
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.BookUserUpdateStats(context, bookId);
+            await BookService.BookUserUpdateStats(context, _bookId);
             await t_delay;
             _isLoading = false;
         }
@@ -312,6 +370,31 @@ else
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("bookListRefreshStatsError");
             StateHasChanged();
+        }
+    }
+    private async Task OnAddTagAsync()
+    {
+        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1) return;
+        if (_addTagInput == null) return;
+        var sanitized = _addTagInput.Trim().ToLower();
+        if (sanitized == string.Empty) return;
+
+        try
+        {
+            _isLoading = true;
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            await BookService.BookTagAdd(context, _bookId, _loggedInUser.Id, sanitized);
+            await t_delay;
+            _isLoading = false;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListAddTagError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
         }
     }
 }

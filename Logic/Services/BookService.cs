@@ -448,6 +448,47 @@ namespace Logic.Services
             }
             //context.SaveChanges();
         }
+        public async Task BookTagAdd(IdiomaticaContext context, int? bookId, int? userId, string? tag)
+        {
+            if (bookId == null || bookId < 1)
+            {
+                _errorHandler.LogAndThrow(1420);
+                return;
+            }
+            if (userId == null || userId < 1)
+            {
+                _errorHandler.LogAndThrow(1430);
+                return;
+            }
+            if (tag == null)
+            {
+                _errorHandler.LogAndThrow(1430);
+                return;
+            }
+            string trimmedTag = tag.Trim().ToLower();
+            if (trimmedTag == string.Empty) return;
+            DateTimeOffset created = DateTimeOffset.UtcNow;
+            // check if this user already saved this tag
+            var existingTag = context.BookTags.Where(x => 
+                    x.BookId == (int)bookId && 
+                    x.UserId == (int)userId && 
+                    x.Tag == trimmedTag).FirstOrDefault();
+            if (existingTag != null) return;
+            var newTag = new BookTag() { BookId = bookId, UserId = userId, Tag = trimmedTag, Created = created };
+            bool didSave = await DataCache.BookTagCreateAsync(newTag, context);
+            if(!didSave || newTag.Id == null || newTag.Id < 1)
+            {
+                _errorHandler.LogAndThrow(2440);
+            }
+        }
+        public async Task<List<BookTag>> BookTagsGetByBookIdAndUserId(
+            IdiomaticaContext context, int? bookId, int? userId)
+        {
+            if (bookId == null || bookId < 1) return new List<BookTag>();
+            if (userId == null || userId < 1) return new List<BookTag>();
+            var tags = await DataCache.BookTagsByBookIdAndUserIdReadAsync(((int)bookId, (int)userId), context);
+            return tags;
+        }
         public async Task BookUserArchiveAsync(IdiomaticaContext context, int bookId)
         {
             if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1)

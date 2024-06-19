@@ -29,7 +29,8 @@ namespace Model
         /// the primary language of the user; used for UI rendering and for translations
         /// </summary>
         public LanguageCode? LanguageCode { get; set; }
-        
+        public List<BookTag> BookTags { get; set; } = new List<BookTag>();
+
 
         #endregion
         [StringLength(250)]
