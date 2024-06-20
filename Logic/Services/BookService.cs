@@ -474,7 +474,14 @@ namespace Logic.Services
                     x.UserId == (int)userId &&
                     x.Tag == trimmedTag).FirstOrDefault();
             if (existingTag != null) return;
-            var newTag = new BookTag() { BookId = bookId, UserId = userId, Tag = trimmedTag, Created = created };
+            var newTag = new BookTag()
+            {
+                BookId = bookId,
+                UserId = userId,
+                Tag = trimmedTag,
+                Created = created,
+                IsPersonal = true
+            };
             bool didSave = await DataCache.BookTagCreateAsync(newTag, context);
             if (!didSave || newTag.Id == null || newTag.Id < 1)
             {
@@ -500,7 +507,6 @@ namespace Logic.Services
             }
             string trimmedTag = tag.Trim().ToLower();
             if (trimmedTag == string.Empty) return;
-            DateTimeOffset created = DateTimeOffset.UtcNow;
             await DataCache.BookTagDelete(((int)bookId, (int)userId, trimmedTag), context);
         }
         public async Task<List<BookTag>> BookTagsGetByBookIdAndUserId(

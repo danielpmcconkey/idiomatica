@@ -27,16 +27,7 @@ namespace Model.DAL
             {
                 return false;
             }
-            var currentList = BookTagsByBookIdAndUserId[((int)value.BookId, (int)value.UserId)];
-            if (currentList == null)
-            {
-                var newList = new List<BookTag>();
-                newList.Add(value);
-                BookTagsByBookIdAndUserId[((int)value.BookId, (int)value.UserId)] = newList;
-                return true;
-            }
-            currentList.Add(value);
-            BookTagsByBookIdAndUserId[((int)value.BookId, (int)value.UserId)] = currentList;
+            await BookTagAddToCache(value);
             return true;
         }
 
@@ -141,10 +132,52 @@ namespace Model.DAL
         private static async Task BookTagRemoveFromCache(BookTag t)
         {
             if (t.BookId == null || t.UserId == null) return;
+            // is there an existing cache
             var existing = BookTagsByBookIdAndUserId[((int)t.BookId, (int)t.UserId)];
             if (existing == null) return;
-            var listWithoutTag = existing.Where(x => x.Tag != t.Tag).ToList();
-            BookTagsByBookIdAndUserId[((int)t.BookId, (int)t.UserId)] = listWithoutTag;
+            // is the offensive tag present?
+            var existingValue = existing.Where(x => x.Tag == t.Tag).FirstOrDefault();
+            if (existingValue == null) return;
+            
+            // is the user the only one with this tag?
+            if (existingValue.Count < 2)
+            {
+                // yep. only one. kill it
+                var listWithoutTag = existing.Where(x => x.Tag != t.Tag).ToList();
+                BookTagsByBookIdAndUserId[((int)t.BookId, (int)t.UserId)] = listWithoutTag;
+                return;
+            }
+            // nope. others still tagged it. just update and move on
+            existingValue.Count--;
+            existingValue.IsPersonal = false;
+            return;
+        }
+        private static async Task BookTagAddToCache(BookTag t)
+        {
+            t.Count = 1; // temporarily, maybe. we'll increment the existing count if it's already preset later
+            t.IsPersonal = true;
+
+            // check if user already has a cached list for this book
+            var currentList = BookTagsByBookIdAndUserId[((int)t.BookId, (int)t.UserId)];
+            if (currentList == null)
+            {
+                var newList = new List<BookTag>();
+                newList.Add(t);
+                BookTagsByBookIdAndUserId[((int)t.BookId, (int)t.UserId)] = newList;
+                return;
+            }
+            // check if value is in current list
+            var currentValue = currentList.Where(x => x.Tag == t.Tag).FirstOrDefault();
+            if (currentValue != null)
+            {
+                currentValue.Count++;
+                currentValue.IsPersonal = true;
+            }
+            else
+            {
+                currentList.Add(t);
+            }
+            BookTagsByBookIdAndUserId[((int)t.BookId, (int)t.UserId)] = currentList;
         }
     }
 }
