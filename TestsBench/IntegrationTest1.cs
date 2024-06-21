@@ -344,6 +344,114 @@ Fin
                 context.SaveChanges();
             }
         }
+        [Fact]
+        public async Task AddingATagToABookWillIncrementItsCount()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user1 = CreateNewTestUser(userService);
+            var user2 = CreateNewTestUser(userService);
+            int userId1 = (int)user1.Id;
+            int userId2 = (int)user2.Id;
+            var bookService = CreateBookService();
+            int bookId = 7;
+            string tag = Guid.NewGuid().ToString();
+            int initialCount = 0;
+            int secondCount = 0;
+            BookTag initialTag = null;
+            BookTag secondTag = null;
+
+            try
+            {
+                // act
+                await bookService.BookTagAdd(context, bookId, userId1, tag);
+                var initialTags = await bookService.BookTagsGetByBookIdAndUserId(context, bookId, userId1);
+                initialTag = initialTags.Where(x => x.Tag == tag).FirstOrDefault();
+                initialCount = (int)initialTag.Count;
+
+                // set the initial tags state before adding it for user 2
+                var secondTags = await bookService.BookTagsGetByBookIdAndUserId(context, bookId, userId2);
+                await bookService.BookTagAdd(context, bookId, userId2, tag);
+                // pull the second user's tags again now
+                secondTags = await bookService.BookTagsGetByBookIdAndUserId(context, bookId, userId2);
+                secondTag = secondTags.Where(x => x.Tag == tag).FirstOrDefault();
+                secondCount = (int)secondTag.Count;
+
+                // assert
+                Assert.True(initialCount == 1);
+                Assert.True(secondCount == 2);
+            }
+            finally
+            {
+                // clean-up
+                context.BookTags.RemoveRange(
+                    context.BookTags.Where(x => x.UserId == userId1 || x.UserId == userId2));
+                
+                context.Users.Remove(user1);
+                context.Users.Remove(user2);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task RemovingATagFromABookWillDecrementItsCount()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user1 = CreateNewTestUser(userService);
+            var user2 = CreateNewTestUser(userService);
+            var user3 = CreateNewTestUser(userService);
+            int userId1 = (int)user1.Id;
+            int userId2 = (int)user2.Id; 
+            int userId3 = (int)user3.Id;
+            var bookService = CreateBookService();
+            int bookId = 7;
+            string tag = Guid.NewGuid().ToString();
+            int secondCount = 0;
+            // add the first two tags
+            await bookService.BookTagAdd(context, bookId, userId1, tag);
+            await bookService.BookTagAdd(context, bookId, userId2, tag);
+            // pre-load the tags so a list exists in cache to update. This
+            // mimics the online flow. You can only add tags from a page that's already pulled them
+            await bookService.BookTagsGetByBookIdAndUserId(context, bookId, userId3);
+            // add the user3 tag
+            await bookService.BookTagAdd(context, bookId, userId3, tag);
+            // now get the count for user 3 (should be 3)
+            var initialTags = await bookService.BookTagsGetByBookIdAndUserId(context, bookId, userId3);
+            var initialTag = initialTags.Where(x => x.Tag == tag).FirstOrDefault();
+            int initialCount = (int)initialTag.Count;
+
+
+            try
+            {
+                // act
+
+                // remove the tag from user 1
+                await bookService.BookTagRemove(context, bookId, userId1, tag);
+                
+                // get the tags from user 3 again
+                var secondTags = await bookService.BookTagsGetByBookIdAndUserId(context, bookId, userId3);
+                var secondTag = secondTags.Where(x => x.Tag == tag).FirstOrDefault();
+                secondCount = (int)secondTag.Count;
+
+
+                // assert
+                Assert.True(initialCount == 3);
+                Assert.True(secondCount == 2);
+            }
+            finally
+            {
+                // clean-up
+                context.BookTags.RemoveRange(
+                    context.BookTags.Where(x => x.UserId == userId1 || x.UserId == userId2 || x.UserId == userId3));
+
+                context.Users.Remove(user1);
+                context.Users.Remove(user2);
+                context.Users.Remove(user3);
+                context.SaveChanges();
+            }
+        }
 
         #endregion
 
