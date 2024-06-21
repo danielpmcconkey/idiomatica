@@ -6,7 +6,16 @@
 @inject ILogger<IdiomaticaLogger> Logger;
 @inject ErrorHandler ErrorHandler;
 
+<style>
+    .visibleBlRow {
+        display: block;
+    }
+    .invisibleBlRow {
+        display: none;
+    }
 
+    
+</style>
 
 <ErrorAlert ErrorState="errorState"></ErrorAlert>
 <AuthorizeView>
@@ -74,10 +83,7 @@
             <div>
                 @foreach (var row in BookService.BookListRows)
                 {
-                    if (!OnIsVisibleInListCheck(row.BookId, row.LanguageName, row.Title).Result)
-                        continue;
-
-                    <BookListRowView BookService="BookService" Row="row" OnArchiveAsync="OnArchiveBookUser" />
+                    <BookListRowView Class="@OnGetBookListRowClass(row).Result" BookService="BookService" Row="row" OnArchiveAsync="OnArchiveBookUser" />
                 }
             </div>
 
@@ -136,7 +142,11 @@
             StateHasChanged();
         }
     }
-
+    private async Task<string> OnGetBookListRowClass(BookListRow row)
+    {
+        if (await OnIsVisibleInListCheck(row.BookId, row.LanguageName, row.Title)) return "visibleBlRow";
+        return "invisibleBlRow";
+    }
     private async Task<bool> OnIsVisibleInListCheck(int? bookId, string? languageName, string? title)
     {
         try

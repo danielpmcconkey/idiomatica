@@ -7,7 +7,7 @@
 
 
 
-
+<div class="@Class">
     <div class="card mb-3">
         <div class="card-header">
             <div class="container">
@@ -89,8 +89,7 @@
             
         </div>
     </div>
-
-
+</div>
 
 
 
@@ -103,6 +102,8 @@
     public BookListRow Row { get; set; } = new BookListRow();
     [Parameter]
     public EventCallback<int> OnArchiveAsync { get; set; }
+    [Parameter]
+    public string? Class { get; set;  }
 
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
