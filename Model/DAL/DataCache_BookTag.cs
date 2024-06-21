@@ -141,31 +141,6 @@ namespace Model.DAL
             // add it
             existingList.Add(t);
             return;
-
-            //t.Count = 1; // temporarily, maybe. we'll increment the existing count if it's already preset later
-            //t.IsPersonal = true;
-
-            //// check if user already has a cached list for this book
-            //var currentList = new List<BookTag>();
-            //if (!BookTagsByBookIdAndUserId.TryGetValue(((int)t.BookId, (int)t.UserId), out currentList))
-            //{
-            //    var newList = new List<BookTag>();
-            //    newList.Add(t);
-            //    BookTagsByBookIdAndUserId[((int)t.BookId, (int)t.UserId)] = newList;
-            //    return;
-            //}
-            //// check if value is in current list
-            //var currentValue = currentList.Where(x => x.Tag == t.Tag).FirstOrDefault();
-            //if (currentValue != null)
-            //{
-            //    currentValue.Count++;
-            //    currentValue.IsPersonal = true;
-            //}
-            //else
-            //{
-            //    currentList.Add(t);
-            //}
-            //BookTagsByBookIdAndUserId[((int)t.BookId, (int)t.UserId)] = currentList;
         }
     }
 }

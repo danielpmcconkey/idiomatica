@@ -247,6 +247,14 @@ namespace Logic.Services
 
         #region public interface
 
+        public async Task<bool> BookDoesContainTagLikeText(IdiomaticaContext context, int? bookId, string? text)
+        {
+            if (bookId == null || bookId < 1 || text == null) return false;
+            // pull all tags
+            var tags = await DataCache.BookTagsByBookIdReadAsync((int)bookId, context);
+            var filteredTags = tags.Where(x => x.Tag.Contains(text, StringComparison.OrdinalIgnoreCase));
+            return filteredTags.Any();
+        }
         public async Task<int> BookCreateAndSaveAsync(
             IdiomaticaContext context, string title, string languageCode, string url, string text)
         {

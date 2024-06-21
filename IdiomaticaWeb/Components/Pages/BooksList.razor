@@ -74,7 +74,7 @@
             <div>
                 @foreach (var row in BookService.BookListRows)
                 {
-                    if (!OnIsVisibleInListCheck(row.LanguageName, row.Title))
+                    if (!OnIsVisibleInListCheck(row.BookId, row.LanguageName, row.Title).Result)
                         continue;
 
                     <BookListRowView BookService="BookService" Row="row" OnArchiveAsync="OnArchiveBookUser" />
@@ -137,7 +137,7 @@
         }
     }
 
-    private bool OnIsVisibleInListCheck(string? languageName, string? title)
+    private async Task<bool> OnIsVisibleInListCheck(int? bookId, string? languageName, string? title)
     {
         try
         {
@@ -150,7 +150,8 @@
                 return true;
             if (titleNotNull.Contains(_filter, StringComparison.OrdinalIgnoreCase))
                 return true;
-            return false;
+            var context = await DbContextFactory.CreateDbContextAsync();
+            return await BookService.BookDoesContainTagLikeText(context, bookId, _filter);
         }
         catch (IdiomaticaException ex)
         {
