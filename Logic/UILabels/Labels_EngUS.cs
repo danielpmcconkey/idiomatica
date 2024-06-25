@@ -26,12 +26,14 @@ namespace Logic.UILabels
             #region nav
             _labels.Add("navHome", "Home");
             _labels.Add("navLogOut", "Log Out");
+            _labels.Add("navBrowse", "Browse All Books");
             _labels.Add("navYourBookshelf", "Your Bookshelf");
             _labels.Add("navRegister", "Register");
             _labels.Add("navLogIn", "Log In");
             _labels.Add("navNewBook", "Upload Book");
             _labels.Add("navFlashcards", "Flash card review");
             #endregion
+
             #region home
             _labels.Add("homeInitializationError", "There was an error initializing data for the home page."); 
             _labels.Add("homeWordCountsHeader", "How many words have you read?");
@@ -65,6 +67,7 @@ namespace Logic.UILabels
             _labels.Add("bookListRemove", "Remove");
             _labels.Add("bookListRemoveToolTip", "Remove from your bookshelf. You can put it back later and keep your old stats.");
             _labels.Add("bookListAddTag", "Add tag");
+            _labels.Add("bookListBrowseForBooks", "Browse for books to add to your shelf");
             #endregion
             #region read
             _labels.Add("readInitializationError", "There was an error retrieving this book from the database.");

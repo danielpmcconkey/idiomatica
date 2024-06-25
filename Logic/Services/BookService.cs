@@ -151,7 +151,7 @@ namespace Logic.Services
             _deepLService = deepLService;
             _userService = userService;
         }
-        
+
 
         #region init methods
 
@@ -160,8 +160,7 @@ namespace Logic.Services
             _loggedInUser = await UserGetLoggedInAsync(context);
             _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context);
 
-            //logger.LogInformation("I'm a goofy goober");
-
+            
             _bookListRowsOrderByFunctions = new Dictionary<string, Func<BookListRow, object>>();
             _bookListRowsOrderByFunctions.Add("Language", (x => x.LanguageName));
             _bookListRowsOrderByFunctions.Add("Id", (x => x.BookId));
@@ -169,9 +168,12 @@ namespace Logic.Services
             _bookListRowsOrderByFunctions.Add("PROGRESSPERCENT", (x => x.ProgressPercent));
             _bookListRowsOrderByFunctions.Add("ISCOMPLETE", (x => x.IsComplete));
             _bookListRowsOrderByFunctions.Add("TOTALWORDCOUNT", (x => x.TotalWordCount));
-            _bookListRowsOrderByFunctions.Add("TOTALKNOWNPERCENT", (x => x.TotalKnownPercent));
             _bookListRowsOrderByFunctions.Add("DISTINCTWORDCOUNT", (x => x.DistinctWordCount));
             _bookListRowsOrderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => x.DistinctKnownPercent));
+        }
+        public async Task InitDataBrowse(IdiomaticaContext context)
+        {
+            _loggedInUser = await UserGetLoggedInAsync(context);
         }
         public async Task InitDataRead(IdiomaticaContext context, UserService userService, int bookId)
         {
@@ -614,6 +616,7 @@ namespace Logic.Services
             await BookUserStatsUpdate(context, bookUser.Id);
             _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context);
         }
+       
         public IQueryable<LanguageCode> LanguageCodeFetchOptionsDuringBookCreate(IdiomaticaContext context)
         {
             // this isn't worth caching

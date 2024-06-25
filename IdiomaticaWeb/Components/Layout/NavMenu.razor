@@ -40,6 +40,11 @@
                     </form>
                 </div>
                 <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/Books/Browse">
+                        <span class="bi bi-browse-nav-menu" aria-hidden="true"></span> @UserService.GetUILabel("navBrowse")
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
                     <NavLink class="nav-link" href="/Books">
                         <span class="bi bi-bookshelf-nav-menu" aria-hidden="true"></span> @UserService.GetUILabel("navYourBookshelf")
                     </NavLink>
