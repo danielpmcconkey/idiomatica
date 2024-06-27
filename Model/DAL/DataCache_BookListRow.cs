@@ -24,16 +24,23 @@ namespace Model.DAL
         public static async Task<List<BookListRow>> BookListRowsByUserIdReadAsync(
             int key, IdiomaticaContext context, bool shouldFetchFreshValue = false)
         {
-            //var lc = await DataCache.LanguageCodeByCodeReadAsync("EN-US", context);
-            var test = await BookListRowsPowerQueryAsync(key, 50, 0, false, null, null, null, AvailableBookListSortProperties.TITLE, false, context);
             // check cache
             if (BookListRowsByUserId.ContainsKey(key) && !shouldFetchFreshValue)
             {
                 return BookListRowsByUserId[key];
             }
             // read DB
-            var value = context.BookListRows.Where(x => x.UserId == key && x.IsArchived != true)
-                .ToList();
+            var value = await BookListRowsPowerQueryAsync(
+                key,                                          // userId
+                0,                                            // numRecords
+                0,                                            // skip
+                true,                                         // shouldShowOnlyInShelf
+                null,                                         // tagsFilter
+                null,                                         // lcFilter
+                null,                                         // titleFilter
+                AvailableBookListSortProperties.TITLE,        // orderBy
+                true,                                         // sortAscending
+                context); 
 
             // write to cache
             BookListRowsByUserId[key] = value;
@@ -48,10 +55,6 @@ namespace Model.DAL
              * note: none of the string fields are safe. and, since we don't 
              * use parameters, due to the way we're building the query, you must 
              * sanitize everything. No little Bobby Tables.
-            /* 
-             * you are here. you want to finish building out the power query 
-             * then use it in the method above then implement it for the browse
-             * page, which you want to make as a subset of the booklist page
              * */
             Func<string, string> sanitizeString = (input) =>
             {
@@ -67,26 +70,14 @@ namespace Model.DAL
                     return String.Empty;
                 }
             };
+
+            bool useTags = (tagsFilter != null && tagsFilter != string.Empty) ? true : false;
             
-            string showShelfWhereClause = shouldShowOnlyInShelf ? "and bu.Id is not null and bu.IsArchived <> 1" : "";
-            string tagsWhereClause1 = string.Empty; // pull filtered tags before you do the string ag function
-            string tagsWhereClause2 = string.Empty; // only pull rows where the above tags is not null
-            if (tagsFilter != null && tagsFilter != string.Empty)
-            {
-                string tagsFilterSanitized = tagsFilter;
-                tagsWhereClause1 = $"and bt.Tag like '%{sanitizeString(tagsFilter)}%'";
-                tagsWhereClause2 = "and at.Tag is not null";
-            }
-            string languageFilterWhereClause = string.Empty;
-            if (lcFilter is not null)
-            {
-                languageFilterWhereClause = $"and l.LanguageCode = '{lcFilter.Code}'";
-            }
-            string titleFilterWhereClause = string.Empty;
-            if (titleFilter is not null)
-            {
-                titleFilterWhereClause = $"and b.Title like '%{sanitizeString(titleFilter)}%'";
-            }
+            
+            
+            
+            
+            
             string sortDirection = sortAscending ? "asc" : "desc";
             string orderByClause = $"order by b.Id {sortDirection}";
             if (orderBy is not null)
@@ -118,20 +109,46 @@ namespace Model.DAL
                 }
             }
             
-            var value = context.Database.SqlQueryRaw<BookListRow>($"""
+            
+            
                 
-                    with AllTags as (
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append($"""
+                    with
+                """);
+            if (useTags)
+            {
+                sb.Append($"""
+                     AllTags as (
                         select 
                             b.Id as BookId
                             , bt.Tag
                         from Idioma.Book b
                         left join Idioma.BookTag bt on b.Id = bt.BookId
-                        where 1 = 1
-                        {tagsWhereClause1}
+                        where bt.Tag like '%{sanitizeString(tagsFilter)}%'
                         group by b.Id, bt.Tag
-                    ), AllResults as (
+                    ),
+                    """);
+            }
+            sb.Append($"""
+                    AllResults as (
                         select
+                """);
+            if (numRecords > 0)
+            {
+                sb.Append($"""
                             ROW_NUMBER() over ({orderByClause}) as RowNumber
+                    """);
+            }
+            else
+            {
+                sb.Append($"""
+                            cast(1 as bigint) as RowNumber
+                    """);
+            }
+            sb.Append($"""
                             , case when bu.Id is null or bu.IsArchived = 1 then cast(0 as bit) else cast (1 as bit) end as IsInShelf
                             , lu.UserId
                             , b.Id as BookId
@@ -145,27 +162,72 @@ namespace Model.DAL
                             , cast(bsDistinctWordCount.[Value] as int) as DistinctWordCount
                             , bus_DISTINCTKNOWNPERCENT.ValueNumeric as DistinctKnownPercent
                             , bu.IsArchived
+                """);
+            if (useTags)
+            {
+                sb.Append($"""
                             , STRING_AGG(at.Tag, ',') AS Tags
+                    """);
+            }
+            else
+            {
+                sb.Append($"""
+                            , null AS Tags
+                    """);
+            }
+            sb.Append($"""
                         from Idioma.Book b
                         left join Idioma.Language l on b.LanguageId = l.Id
                         left join Idioma.BookStat bsTotalPages on bsTotalPages.BookId = b.Id and bsTotalPages.[Key] = 1
                         left join Idioma.BookStat bsTotalWordCount on bsTotalWordCount.BookId = b.Id and bsTotalWordCount.[Key] = 2
                         left join Idioma.BookStat bsDistinctWordCount on bsDistinctWordCount.BookId = b.Id and bsDistinctWordCount.[Key] = 3
-                        left join AllTags at on at.BookId = b.Id
                         left join Idioma.LanguageUser lu on lu.LanguageId = b.LanguageId and lu.UserId = {userId}
                         left join Idioma.BookUser bu on bu.BookId = b.Id and bu.LanguageUserId = lu.Id
-                        left join [Idioma].[BookUserStat] bus_ISCOMPLETE on bus_ISCOMPLETE.BookId = b.Id and bus_ISCOMPLETE.LanguageUserId = lu.Id and bus_ISCOMPLETE.[Key] = 1 --AvailableBookUserStat.ISCOMPLETE
-                        left join [Idioma].[BookUserStat] bus_PROGRESS on bus_PROGRESS.BookId = b.Id and bus_PROGRESS.LanguageUserId = lu.Id and bus_PROGRESS.[Key] = 3 --AvailableBookUserStat.PROGRESS
-                        left join [Idioma].[BookUserStat] bus_PROGRESSPERCENT on bus_PROGRESSPERCENT.BookId = b.Id and bus_PROGRESSPERCENT.LanguageUserId = lu.Id and bus_PROGRESSPERCENT.[Key] = 4 --AvailableBookUserStat.PROGRESSPERCENT
-                        left join [Idioma].[BookUserStat] bus_TOTALWORDCOUNT on bus_TOTALWORDCOUNT.BookId = b.Id and bus_TOTALWORDCOUNT.LanguageUserId = lu.Id and bus_TOTALWORDCOUNT.[Key] = 8 --AvailableBookUserStat.TOTALWORDCOUNT
-                        left join [Idioma].[BookUserStat] bus_TOTALKNOWNPERCENT on bus_TOTALKNOWNPERCENT.BookId = b.Id and bus_TOTALKNOWNPERCENT.LanguageUserId = lu.Id and bus_TOTALKNOWNPERCENT.[Key] = 6 --AvailableBookUserStat.TOTALKNOWNPERCENT
-                        left join [Idioma].[BookUserStat] bus_DISTINCTWORDCOUNT on bus_DISTINCTWORDCOUNT.BookId = b.Id and bus_DISTINCTWORDCOUNT.LanguageUserId = lu.Id and bus_DISTINCTWORDCOUNT.[Key] = 7 --AvailableBookUserStat.DISTINCTWORDCOUNT
-                        left join [Idioma].[BookUserStat] bus_DISTINCTKNOWNPERCENT on bus_DISTINCTKNOWNPERCENT.BookId = b.Id and bus_DISTINCTKNOWNPERCENT.LanguageUserId = lu.Id and bus_DISTINCTKNOWNPERCENT.[Key] = 5 --AvailableBookUserStat.DISTINCTKNOWNPERCENT
+                        left join [Idioma].[BookUserStat] bus_ISCOMPLETE on bus_ISCOMPLETE.BookId = b.Id and bus_ISCOMPLETE.LanguageUserId = lu.Id and bus_ISCOMPLETE.[Key] = {(int)AvailableBookUserStat.ISCOMPLETE}
+                        left join [Idioma].[BookUserStat] bus_PROGRESS on bus_PROGRESS.BookId = b.Id and bus_PROGRESS.LanguageUserId = lu.Id and bus_PROGRESS.[Key] = {(int)AvailableBookUserStat.PROGRESS}
+                        left join [Idioma].[BookUserStat] bus_PROGRESSPERCENT on bus_PROGRESSPERCENT.BookId = b.Id and bus_PROGRESSPERCENT.LanguageUserId = lu.Id and bus_PROGRESSPERCENT.[Key] = {(int)AvailableBookUserStat.PROGRESSPERCENT}
+                        left join [Idioma].[BookUserStat] bus_TOTALWORDCOUNT on bus_TOTALWORDCOUNT.BookId = b.Id and bus_TOTALWORDCOUNT.LanguageUserId = lu.Id and bus_TOTALWORDCOUNT.[Key] = {(int)AvailableBookUserStat.TOTALWORDCOUNT}
+                        left join [Idioma].[BookUserStat] bus_TOTALKNOWNPERCENT on bus_TOTALKNOWNPERCENT.BookId = b.Id and bus_TOTALKNOWNPERCENT.LanguageUserId = lu.Id and bus_TOTALKNOWNPERCENT.[Key] = {(int)AvailableBookUserStat.TOTALKNOWNPERCENT}
+                        left join [Idioma].[BookUserStat] bus_DISTINCTWORDCOUNT on bus_DISTINCTWORDCOUNT.BookId = b.Id and bus_DISTINCTWORDCOUNT.LanguageUserId = lu.Id and bus_DISTINCTWORDCOUNT.[Key] = {(int)AvailableBookUserStat.DISTINCTWORDCOUNT}
+                        left join [Idioma].[BookUserStat] bus_DISTINCTKNOWNPERCENT on bus_DISTINCTKNOWNPERCENT.BookId = b.Id and bus_DISTINCTKNOWNPERCENT.LanguageUserId = lu.Id and bus_DISTINCTKNOWNPERCENT.[Key] = {(int)AvailableBookUserStat.DISTINCTKNOWNPERCENT}
+                """);
+            if (useTags)
+            {
+                sb.Append($"""
+                        left join AllTags at on at.BookId = b.Id
+                    """);
+            }
+             sb.Append($"""
+
                         where 1=1
-                        {showShelfWhereClause}
-                        {tagsWhereClause2}
-                        {languageFilterWhereClause}
-                        {titleFilterWhereClause}
+                """);
+            if (shouldShowOnlyInShelf)
+            {
+                sb.Append($"""
+                        and bu.Id is not null and bu.IsArchived <> 1
+                    """);
+            }
+            if (useTags)
+            {
+                sb.Append($"""
+                        and at.Tag is not null
+                    """);
+            }
+            if (lcFilter is not null)
+            {
+                sb.Append($"""
+                        and l.LanguageCode = '{lcFilter.Code}'
+                    """);
+            }
+            if (titleFilter is not null)
+            {
+                sb.Append($"""
+                        and b.Title like '%{sanitizeString(titleFilter)}%'
+                    """);
+            }
+            if (useTags) // we only aggregate when bringing in tags
+            {
+                sb.Append($"""
                         group by
                               b.Id
                             , bu.Id
@@ -180,15 +242,20 @@ namespace Model.DAL
                             , bsDistinctWordCount.[Value]
                             , bus_DISTINCTKNOWNPERCENT.ValueNumeric
                             , bu.IsArchived
+                    """);
+            }
+            sb.Append($"""
                     )
                     select * from AllResults
+                    """);
+            if (numRecords > 0)
+            {
+                sb.Append($"""
                     where RowNumber > {skip} 
                     and RowNumber <= {skip} + {numRecords}
-
-
-
-                
-                """);
+                    """);
+            }
+            var value = context.Database.SqlQueryRaw<BookListRow>(sb.ToString());
             return value.ToList();
         }
         #endregion
