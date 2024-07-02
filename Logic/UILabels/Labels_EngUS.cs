@@ -47,11 +47,15 @@ namespace Logic.UILabels
             _labels.Add("bookListIsVisibleError", "There was an error determining your book list filter.");
             _labels.Add("bookListRefreshStatsError", "There was an error refreshing book user stats.");
             _labels.Add("bookListAddTagError", "There was an error adding a book tag.");
-            _labels.Add("bookListFormFilter", "Filter on title or language...");
-            _labels.Add("bookListFormSortColumn", "Sort by...");
+            _labels.Add("bookListRefreshError", "There was an error refreshing the book list");
+            _labels.Add("bookListFormFilterLanguage", "Filter on language...");
+            _labels.Add("bookListFormFilterTitle", "Filter on title...");
+            _labels.Add("bookListFormFilterTags", "Filter on tags...");
+            _labels.Add("bookListFormFilterNone", "Filter on tags...");
+            _labels.Add("bookListFormSortColumn", "Sort by");
             _labels.Add("bookListFormSortDirection", "Sort direction...");
-            _labels.Add("bookListFormSortAscending", "Ascending");
-            _labels.Add("bookListFormSortDescending", "Descending");
+            _labels.Add("bookListFormSortAscending", "Sort ascending");
+            _labels.Add("bookListFormSortDescending", "Sort descending");
             _labels.Add("bookListLanguageColumnHead", "Language");
 			_labels.Add("bookListCompletedColumnHead", "Completed");
 			_labels.Add("bookListTitleColumnHead", "Title");
@@ -131,8 +135,16 @@ namespace Logic.UILabels
         }
         public override string GetLabel(string name)
         {
-            if (_labels.ContainsKey(name)) return _labels[name];
-            return "unknown";
+            try
+            {
+                if (_labels.ContainsKey(name)) return _labels[name];
+                return "unknown";
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
         public override string GetLabelF(string name, object?[] args)
         {

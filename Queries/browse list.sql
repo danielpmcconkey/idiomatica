@@ -10,6 +10,7 @@ with AllTags as (
 	select
 		  ROW_NUMBER() over (order by b.Id) as RowNumber
 		, case when bu.Id is null or bu.IsArchived = 1 then cast(0 as bit) else cast (1 as bit) end as IsInShelf
+		, bu.Id as BookUserId
 		, lu.UserId
 		, b.Id as BookId
 		, l.[Name] as LanguageName
@@ -38,7 +39,7 @@ with AllTags as (
 	left join [Idioma].[BookUserStat] bus_TOTALKNOWNPERCENT on bus_TOTALKNOWNPERCENT.BookId = b.Id and bus_TOTALKNOWNPERCENT.LanguageUserId = lu.Id and bus_TOTALKNOWNPERCENT.[Key] = 6 --AvailableBookUserStat.TOTALKNOWNPERCENT
 	left join [Idioma].[BookUserStat] bus_DISTINCTWORDCOUNT on bus_DISTINCTWORDCOUNT.BookId = b.Id and bus_DISTINCTWORDCOUNT.LanguageUserId = lu.Id and bus_DISTINCTWORDCOUNT.[Key] = 7 --AvailableBookUserStat.DISTINCTWORDCOUNT
 	left join [Idioma].[BookUserStat] bus_DISTINCTKNOWNPERCENT on bus_DISTINCTKNOWNPERCENT.BookId = b.Id and bus_DISTINCTKNOWNPERCENT.LanguageUserId = lu.Id and bus_DISTINCTKNOWNPERCENT.[Key] = 5 --AvailableBookUserStat.DISTINCTKNOWNPERCENT
-
+	where l.LanguageCode = 'EN-US'
 	group by
 		  b.Id
 		, bu.Id
@@ -56,7 +57,7 @@ with AllTags as (
 )
 select * from AllResults
 where RowNumber >= 5 
-and RowNumber < 5 + 5
+and RowNumber < 55 + 5
 
 
 

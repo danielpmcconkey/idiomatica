@@ -1,15 +1,15 @@
-﻿@page "/Books/Browse"
+﻿@page "/Books/Mine"
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
-@inject IDbContextFactory<IdiomaticaContext> DbContextFactory 
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 
-<h3>@UserService.GetUILabel("navBrowse")</h3>
+<h3>@UserService.GetUILabel("navYourBookshelf")</h3>
 
 <ErrorAlert ErrorState="errorState"></ErrorAlert>
 <AuthorizeView>
     <Authorized>
-        <BooksList IsBrowse="true" />
+        <BooksList IsBrowse="false" />
     </Authorized>
     <NotAuthorized>
         <p>@UserService.GetUILabel("notLoggedIn")</p>
@@ -18,5 +18,4 @@
 
 @code {
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
-    
 }

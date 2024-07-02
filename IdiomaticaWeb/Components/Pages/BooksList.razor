@@ -1,5 +1,4 @@
-﻿@page "/Books"
-@rendermode InteractiveServer
+﻿@rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
@@ -12,6 +11,10 @@
     }
     .invisibleBlRow {
         display: none;
+    }
+
+    .transport-control {
+        font-size: 0.8rem;
     }
 
     
@@ -30,7 +33,6 @@
         
         else
         {
-            <div class="container">
                 <div class="row">
                     @if (!BookService.BookListRows.Any())
                     {
@@ -39,59 +41,24 @@
                         </p>
                     }
                 </div>
-                <div class="row">
-                    <Button Color="ButtonColor.Primary" Type="ButtonType.Link" To="/Books/Browse">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
-                            <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0" />
-                            <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7" />
-                        </svg>
-                        @UserService.GetUILabel("bookListBrowseForBooks")
-                    </Button>
-                </div>
-            
-            
-                <div class="row align-items-center mb-2">
-                    <div class="col-6">
-                        <input class="form-control" 
-                               type="text" 
-                               placeholder="@UserService.GetUILabel("bookListFormFilter")"
-                               @bind="_filter"
-                               @bind:event="oninput" />
+                @if(IsBrowse == false)
+                {
+                    <div class="row">
+                        <Button Color="ButtonColor.Primary" Type="ButtonType.Link" To="/Books/Browse">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0" />
+                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7" />
+                            </svg>
+                            @UserService.GetUILabel("bookListBrowseForBooks")
+                        </Button>
                     </div>
-                    <div class="col-6">
-                        <div class="container">
-                            <div class="row input-group p-2 align-items-center bg-primary-subtle border border-primary-subtle rounded-3">
-                                <div class="col-5">
-                                    <InputSelect class="form-control"
-                                                 @bind-Value="_activeSortColumn">
-                                        <option value="Title" selected disabled>@UserService.GetUILabel("bookListFormSortColumn")</option>
-                                        <option value="Language">@UserService.GetUILabel("bookListLanguageColumnHead")</option>
-                                        <option value="ISCOMPLETE">@UserService.GetUILabel("bookListCompletedColumnHead")</option>
-                                        <option value="Title">@UserService.GetUILabel("bookListTitleColumnHead")</option>
-                                        <option value="PROGRESSPERCENT">@UserService.GetUILabel("bookListProgressColumnHead")</option>
-                                        <option value="TOTALWORDCOUNT">@UserService.GetUILabel("bookListTotalWordCountColumnHead")</option>
-                                        <option value="DISTINCTWORDCOUNT">@UserService.GetUILabel("bookListDistinctWordCountColumnHead")</option>
-                                        <option value="DISTINCTKNOWNPERCENT">@UserService.GetUILabel("bookListDistinctKnownPercentColumnHead")</option>
-                                    </InputSelect>
-                                </div>
-                                <div class="col-5">
-                                    <InputSelect class="form-control"
-                                                 @bind-Value="_sortDirection">
-                                        <option selected disabled value="">@UserService.GetUILabel("bookListFormSortDirection")</option>
-                                        <option value="Ascending">@UserService.GetUILabel("bookListFormSortAscending")</option>
-                                        <option value="Descending">@UserService.GetUILabel("bookListFormSortDescending")</option>
-                                    </InputSelect>
-                                </div>
-                                <div class="col-2">
-                                    <Button Color="ButtonColor.Primary" Size="Size.Small" @onclick="OnSortTableAsync">
-                                        Sort
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                }
+                
+                
+            <BookListTransport BookService="BookService"
+                               GetNext="GetNext"
+                               GetPrevious="GetPrevious"
+                               FilterAndSort="FilterAndSort" />
             
             <div>
                 @foreach (var row in BookService.BookListRows)
@@ -108,6 +75,7 @@
 </AuthorizeView>
 
 @code {
+    [Parameter] public bool IsBrowse { get; set;  }
 
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
@@ -132,12 +100,16 @@
     {
         try
         {
-            _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
-            var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.InitDataBookList(context);
-            await t_delay;
-            _isLoading = false;
+            if (BookService.IsDataInitBookList == false)
+            {
+                _isLoading = true;
+                var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+                var context = await DbContextFactory.CreateDbContextAsync();
+                await BookService.InitDataBookList(context, IsBrowse);
+                await t_delay;
+                _isLoading = false;
+            }
+            
 
         }
         catch (IdiomaticaException ex)
@@ -197,7 +169,7 @@
         try
         {
             var sortAscending = (_sortDirection == "Ascending") ? true : false;
-            await BookService.BookListRowsSort(_activeSortColumn, sortAscending);
+            //await BookService.BookListRowsSort(_activeSortColumn, sortAscending);
         }
         catch (IdiomaticaException ex)
         {
@@ -225,7 +197,7 @@
             await BookService.BookUserArchiveAsync(context, bookId);
             // re-apply sort
             var sortAscending = (_sortDirection == "Ascending") ? true : false;
-            await BookService.BookListRowsSort(_activeSortColumn, sortAscending);
+            //await BookService.BookListRowsSort(_activeSortColumn, sortAscending);
             await t_delay;
             _isLoading = false;
 
@@ -234,6 +206,71 @@
         {
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
+    }
+
+
+    private async Task GetNext()
+    {
+        try
+        {
+            _isLoading = true;
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            await BookService.BookListRowsNext(context);
+            await t_delay;
+            _isLoading = false;
+
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListRefreshError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
+    }
+    private async Task GetPrevious()
+    {
+        try
+        {
+            _isLoading = true;
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            await BookService.BookListRowsPrevious(context);
+            await t_delay;
+            _isLoading = false;
+
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListRefreshError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
+    }
+    private async Task FilterAndSort()
+    {
+        try
+        {
+            _isLoading = true;
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            await BookService.BookListRowsFilterAndSort(context);
+            await t_delay;
+            _isLoading = false;
+
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListRefreshError");
             errorState.code = ex.code;
             StateHasChanged();
             return;

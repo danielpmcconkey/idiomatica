@@ -1,10 +1,13 @@
 ﻿using Logic.Telemetry;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Logging;
 using Model;
 using Model.DAL;
+using PragmaticSegmenterNet.Languages;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Net;
 
 namespace Logic.Services
 {
@@ -58,6 +61,7 @@ namespace Logic.Services
             }
         }
         public bool IsDataInitRead { get { return _isDataInitRead; } }
+        public bool IsDataInitBookList { get { return _isDataInitBookList; } }
         public string LanguageFromCode
         {
             get
@@ -81,12 +85,36 @@ namespace Logic.Services
                 else return new List<Paragraph>();
             }
         }
+        public long? BookListFirstRowShown 
+        { 
+            get {
+                if (_bookListRows == null || !_bookListRows.Any()) return 0L;
+                else return _bookListRows.Min(x => x.RowNumber);
+            } 
+        }
+        public long? BookListLastRowShown
+        {
+            get
+            {
+                if (_bookListRows == null || !_bookListRows.Any()) return 0L;
+                else return _bookListRows.Max(x => x.RowNumber);
+            }
+        }
+        public long? BookListTotalRowsAtCurrentFilter
+        {
+            get
+            {
+                return _bookListTotalRowsAtCurrentFilter;
+            }
+        }
+
 
         #endregion
 
         #region thread checking bools
 
         private bool _isDataInitRead = false;
+        private bool _isDataInitBookList = false;
         private bool _isLoadingBook = false;
         private bool _isLoadingBookUser = false;
         private bool _isLoadingLanguageUser = false;
@@ -118,6 +146,7 @@ namespace Logic.Services
         private Book? _book = null;
         private int? _bookId = null;
         private List<BookListRow>? _bookListRows = null;
+        private long? _bookListTotalRowsAtCurrentFilter = null;
         private int? _bookTotalPageCount = null;
         private BookUser? _bookUser = null;
         private List<BookUserStat>? _bookUserStats = null;
@@ -139,9 +168,18 @@ namespace Logic.Services
 
         #endregion
 
-        #region specialty properties
+        #region properties for sorting the book lists
 
-        Dictionary<string, Func<BookListRow, object>>? _bookListRowsOrderByFunctions = null;
+        public bool IsBrowse = true;
+        public int SkipRecords = 0;
+        public string? TagsFilter = null;
+        public string? LcFilterCode = null;
+        public string? TitleFilter = null;
+        public int? OrderBy = 4;    // title
+        public bool SortAscending = true;
+        public const int BookListRowsToDisplay = 10;
+        public Dictionary<string, LanguageCode> LanguageOptions = new Dictionary<string, LanguageCode>();
+        public Dictionary<int, string> OrderByOptions = new Dictionary<int, string>();
 
         #endregion
 
@@ -155,26 +193,31 @@ namespace Logic.Services
 
         #region init methods
 
-        public async Task InitDataBookList(IdiomaticaContext context)
+        public async Task InitDataBookList(IdiomaticaContext context, bool isBrowse)
         {
-            _loggedInUser = await UserGetLoggedInAsync(context);
-            _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context);
+            try
+            {
+                IsBrowse = isBrowse;
+                _loggedInUser = await UserGetLoggedInAsync(context);
+                await BookListResetAsync(context);
+                await LanguageCodeDictionaryPopulate(context);
+                OrderByOptions[1] = "Book ID";
+                OrderByOptions[2] = "Language";
+                OrderByOptions[3] = "Completed";
+                OrderByOptions[4] = "Title";
+                OrderByOptions[5] = "Total Pages";
+                OrderByOptions[6] = "Total Word Count";
+                OrderByOptions[7] = "Distinct Word Count";
 
-            
-            _bookListRowsOrderByFunctions = new Dictionary<string, Func<BookListRow, object>>();
-            _bookListRowsOrderByFunctions.Add("Language", (x => x.LanguageName));
-            _bookListRowsOrderByFunctions.Add("Id", (x => x.BookId));
-            _bookListRowsOrderByFunctions.Add("Title", (x => x.Title));
-            _bookListRowsOrderByFunctions.Add("PROGRESSPERCENT", (x => x.ProgressPercent));
-            _bookListRowsOrderByFunctions.Add("ISCOMPLETE", (x => x.IsComplete));
-            _bookListRowsOrderByFunctions.Add("TOTALWORDCOUNT", (x => x.TotalWordCount));
-            _bookListRowsOrderByFunctions.Add("DISTINCTWORDCOUNT", (x => x.DistinctWordCount));
-            _bookListRowsOrderByFunctions.Add("DISTINCTKNOWNPERCENT", (x => x.DistinctKnownPercent));
+                _isDataInitBookList = true;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
-        public async Task InitDataBrowse(IdiomaticaContext context)
-        {
-            _loggedInUser = await UserGetLoggedInAsync(context);
-        }
+        
         public async Task InitDataRead(IdiomaticaContext context, UserService userService, int bookId)
         {
             _userService = userService;
@@ -382,21 +425,37 @@ namespace Logic.Services
 
             return (int)book.Id;
         }
-        public async Task BookListRowsSort(string columnName, bool isAscending)
+        public async Task BookListRowsFilterAndSort(IdiomaticaContext context)
         {
-            if (_bookListRows is null) return;
-            if(_bookListRowsOrderByFunctions == null) return;
-            if (!_bookListRowsOrderByFunctions.ContainsKey(columnName)) return;
-
-            if(isAscending)
-            {
-                _bookListRows = _bookListRows.OrderBy(_bookListRowsOrderByFunctions[columnName]).ToList();
-            }
-            else
-            {
-                _bookListRows = _bookListRows.OrderByDescending(_bookListRowsOrderByFunctions[columnName]).ToList();
-            }
+            SkipRecords = 0;
+            await BookListResetAsync(context);
         }
+        public async Task BookListRowsNext(IdiomaticaContext context)
+        {
+            SkipRecords += BookListRowsToDisplay;
+            await BookListResetAsync(context);
+        }
+        public async Task BookListRowsPrevious(IdiomaticaContext context)
+        {
+            SkipRecords -= BookListRowsToDisplay;
+            if (SkipRecords < 0) SkipRecords = 0;
+            await BookListResetAsync(context);
+        }
+        //public async Task BookListRowsSort(string columnName, bool isAscending)
+        //{
+        //    if (_bookListRows is null) return;
+        //    if(_bookListRowsOrderByFunctions == null) return;
+        //    if (!_bookListRowsOrderByFunctions.ContainsKey(columnName)) return;
+
+        //    if(isAscending)
+        //    {
+        //        _bookListRows = _bookListRows.OrderBy(_bookListRowsOrderByFunctions[columnName]).ToList();
+        //    }
+        //    else
+        //    {
+        //        _bookListRows = _bookListRows.OrderByDescending(_bookListRowsOrderByFunctions[columnName]).ToList();
+        //    }
+        //}
         public void BookStatsCreateAndSave(IdiomaticaContext context, int bookId)
         {
             if (bookId < 1)
@@ -544,7 +603,7 @@ namespace Logic.Services
             await DataCache.BookUserUpdateAsync(bookUser, context);
 
             // now pull a fresh copy of the book list
-            _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context, true);
+            await BookListResetAsync(context);
         }
         public async Task<int> BookUserCreateAndSaveAsync(IdiomaticaContext context, int bookId, int userId)
         {
@@ -614,16 +673,24 @@ namespace Logic.Services
                     ((int)bookId, (int)_loggedInUser.Id), context);
             if (bookUser == null || bookUser.Id < 1) return;
             await BookUserStatsUpdate(context, bookUser.Id);
-            _bookListRows = await DataCache.BookListRowsByUserIdReadAsync((int)_loggedInUser.Id, context);
+            await BookListResetAsync(context);
         }
-       
-        public IQueryable<LanguageCode> LanguageCodeFetchOptionsDuringBookCreate(IdiomaticaContext context)
+
+        public async Task<IQueryable<LanguageCode>> LanguageCodeFetchOptionsForLearning(IdiomaticaContext context)
         {
             // this isn't worth caching
 
             Expression<Func<LanguageCode, bool>> filter = (x => x.IsImplementedForLearning == true);
             return context.LanguageCodes
                 .Where(filter).OrderBy(x => x.LanguageName);
+        }
+        public async Task LanguageCodeDictionaryPopulate(IdiomaticaContext context)
+        {
+            var dbLanguageCodes = await LanguageCodeFetchOptionsForLearning(context);
+            foreach (var lc in dbLanguageCodes)
+            {
+                LanguageOptions.Add(lc.Code, lc);
+            }
         }
         public async Task PageUserClearPageAndMove(IdiomaticaContext context, int targetPageNum)
         {
@@ -923,11 +990,48 @@ namespace Logic.Services
         #endregion
 
         #region BookListRow
+        private async Task BookListResetAsync(IdiomaticaContext context)
+        {
+            try
+            {
+                LanguageCode? lcFilter = null;
+                if (LcFilterCode != null) LanguageOptions.TryGetValue(LcFilterCode, out lcFilter);
 
+                AvailableBookListSortProperties sortProperty = AvailableBookListSortProperties.TITLE;
+                try
+                {
+                    if (OrderBy != null) sortProperty = (AvailableBookListSortProperties)(int)OrderBy;
+                }
+                catch
+                {
+                    // just swallow it, you already assigned sortProperty to default
+                }
+
+
+                var powerQueryResults = await DataCache.BookListRowsPowerQueryAsync(
+                    (int)_loggedInUser.Id,
+                    BookListRowsToDisplay,
+                    SkipRecords,
+                    !IsBrowse,      // shouldShowOnlyInShelf
+                    TagsFilter,
+                    lcFilter,
+                    TitleFilter,
+                    sortProperty,
+                    SortAscending,
+                    context);
+                _bookListRows = powerQueryResults.results;
+                _bookListTotalRowsAtCurrentFilter = powerQueryResults.count;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         #endregion
 
         #region BookStat
-        
+
 
 
         #endregion

@@ -317,7 +317,7 @@ Fin
             {
                 // act
 
-                List<BookListRow> bookListRows = await DataCache.BookListRowsByUserIdReadAsync(userId, context);
+                List<BookListRow> bookListRows = new List<BookListRow>();// await DataCache.BookListRowsByUserIdReadAsync(userId, context);
                 var book1 = await DataCache.BookByIdReadAsync(book1Id, context);
                 var book2 = await DataCache.BookByIdReadAsync(book2Id, context);
                 List<string> titlesInList = new List<string>();

@@ -21,35 +21,35 @@ namespace Model.DAL
 
 
         #region read
-        public static async Task<List<BookListRow>> BookListRowsByUserIdReadAsync(
-            int key, IdiomaticaContext context, bool shouldFetchFreshValue = false)
-        {
-            // check cache
-            if (BookListRowsByUserId.ContainsKey(key) && !shouldFetchFreshValue)
-            {
-                return BookListRowsByUserId[key];
-            }
-            // read DB
-            var value = await BookListRowsPowerQueryAsync(
-                key,                                          // userId
-                0,                                            // numRecords
-                0,                                            // skip
-                true,                                         // shouldShowOnlyInShelf
-                null,                                         // tagsFilter
-                null,                                         // lcFilter
-                null,                                         // titleFilter
-                AvailableBookListSortProperties.TITLE,        // orderBy
-                true,                                         // sortAscending
-                context); 
+        //public static async Task<List<BookListRow>> BookListRowsByUserIdReadAsync(
+        //    int key, IdiomaticaContext context, bool shouldFetchFreshValue = false)
+        //{
+        //    // check cache
+        //    if (BookListRowsByUserId.ContainsKey(key) && !shouldFetchFreshValue)
+        //    {
+        //        return BookListRowsByUserId[key];
+        //    }
+        //    // read DB
+        //    var value = await BookListRowsPowerQueryAsync(
+        //        key,                                          // userId
+        //        0,                                            // numRecords
+        //        0,                                            // skip
+        //        true,                                         // shouldShowOnlyInShelf
+        //        null,                                         // tagsFilter
+        //        null,                                         // lcFilter
+        //        null,                                         // titleFilter
+        //        AvailableBookListSortProperties.TITLE,        // orderBy
+        //        true,                                         // sortAscending
+        //        context); 
 
-            // write to cache
-            BookListRowsByUserId[key] = value;
-            return value;
-        }
-        private static async Task<List<BookListRow>> BookListRowsPowerQueryAsync(
+        //    // write to cache
+        //    BookListRowsByUserId[key] = value;
+        //    return value;
+        //}
+        public static async Task<(long count, List<BookListRow> results)> BookListRowsPowerQueryAsync(
             int userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
-            LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy, bool sortAscending,
-            IdiomaticaContext context)
+            LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
+            bool sortAscending, IdiomaticaContext context)
         {
             /*
              * note: none of the string fields are safe. and, since we don't 
@@ -121,6 +121,7 @@ namespace Model.DAL
             if (useTags)
             {
                 sb.Append($"""
+
                      AllTags as (
                         select 
                             b.Id as BookId
@@ -133,22 +134,26 @@ namespace Model.DAL
                     """);
             }
             sb.Append($"""
+
                     AllResults as (
                         select
                 """);
             if (numRecords > 0)
             {
                 sb.Append($"""
+
                             ROW_NUMBER() over ({orderByClause}) as RowNumber
                     """);
             }
             else
             {
                 sb.Append($"""
+
                             cast(1 as bigint) as RowNumber
                     """);
             }
             sb.Append($"""
+
                             , case when bu.Id is null or bu.IsArchived = 1 then cast(0 as bit) else cast (1 as bit) end as IsInShelf
                             , lu.UserId
                             , b.Id as BookId
@@ -166,16 +171,19 @@ namespace Model.DAL
             if (useTags)
             {
                 sb.Append($"""
+
                             , STRING_AGG(at.Tag, ',') AS Tags
                     """);
             }
             else
             {
                 sb.Append($"""
+
                             , null AS Tags
                     """);
             }
             sb.Append($"""
+
                         from Idioma.Book b
                         left join Idioma.Language l on b.LanguageId = l.Id
                         left join Idioma.BookStat bsTotalPages on bsTotalPages.BookId = b.Id and bsTotalPages.[Key] = 1
@@ -194,6 +202,7 @@ namespace Model.DAL
             if (useTags)
             {
                 sb.Append($"""
+
                         left join AllTags at on at.BookId = b.Id
                     """);
             }
@@ -204,30 +213,35 @@ namespace Model.DAL
             if (shouldShowOnlyInShelf)
             {
                 sb.Append($"""
+
                         and bu.Id is not null and bu.IsArchived <> 1
                     """);
             }
             if (useTags)
             {
                 sb.Append($"""
+
                         and at.Tag is not null
                     """);
             }
             if (lcFilter is not null)
             {
                 sb.Append($"""
+
                         and l.LanguageCode = '{lcFilter.Code}'
                     """);
             }
             if (titleFilter is not null)
             {
                 sb.Append($"""
+
                         and b.Title like '%{sanitizeString(titleFilter)}%'
                     """);
             }
             if (useTags) // we only aggregate when bringing in tags
             {
                 sb.Append($"""
+
                         group by
                               b.Id
                             , bu.Id
@@ -245,18 +259,59 @@ namespace Model.DAL
                     """);
             }
             sb.Append($"""
+
                     )
+            """);
+            // add in the "leading" record to let consumers know how many results there would be if we didn't paginate
+            sb.Append($"""
+
+                    select
+                        count(*)  as RowNumber
+                        , null as IsInShelf
+                        , null as UserId
+                        , null as BookId
+                        , null as LanguageName
+                        , null as IsComplete
+                        , null as Title
+                        , null as TotalPages
+                        , null as Progress
+                        , null as ProgressPercent
+                        , null as TotalWordCount
+                        , null as DistinctWordCount
+                        , null as DistinctKnownPercent
+                        , null as IsArchived
+                        , null as Tags
+                    from AllResults
+                    union all
+                """);
+            sb.Append($"""
+
                     select * from AllResults
                     """);
             if (numRecords > 0)
             {
                 sb.Append($"""
+
                     where RowNumber > {skip} 
                     and RowNumber <= {skip} + {numRecords}
                     """);
             }
-            var value = context.Database.SqlQueryRaw<BookListRow>(sb.ToString());
-            return value.ToList();
+            var dbValue = context.Database.SqlQueryRaw<BookListRow>(sb.ToString()).ToList();
+            if (dbValue.Any()) {
+                var leadingRecord = dbValue.Where(
+                    x => x.BookId == null && x.Title == null && x.LanguageName == null)
+                    .FirstOrDefault();
+                if (leadingRecord != null && leadingRecord.RowNumber != null)
+                {
+                    long count = (long)leadingRecord.RowNumber;
+                    var realRows = dbValue.Where(
+                    x => x.BookId != null && x.Title != null && x.LanguageName != null)
+                        .OrderBy(x => x.RowNumber)
+                        .ToList();
+                    return (count,  realRows);
+                }
+            }
+            return (0L, new List<BookListRow>());
         }
         #endregion
 
