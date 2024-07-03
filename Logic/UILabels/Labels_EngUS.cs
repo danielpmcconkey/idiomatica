@@ -70,6 +70,9 @@ namespace Logic.UILabels
             _labels.Add("bookListUpdate", "Update");
             _labels.Add("bookListRemove", "Remove");
             _labels.Add("bookListRemoveToolTip", "Remove from your bookshelf. You can put it back later and keep your old stats.");
+            _labels.Add("bookListAdd", "Add");
+            _labels.Add("bookListButtonGroupLabel", "Book actions");
+            _labels.Add("bookListAddToolTip", "Add to your bookshelf.");
             _labels.Add("bookListAddTag", "Add tag");
             _labels.Add("bookListBrowseForBooks", "Browse for books to add to your shelf");
             #endregion

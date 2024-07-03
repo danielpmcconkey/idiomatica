@@ -7,7 +7,7 @@
 
 
 
-<div class="@Class">
+<div class="">
     <div class="card mb-3">
         <div class="card-header">
             <div class="container">
@@ -22,23 +22,55 @@
                         <h5 class="card-title"># @Row.BookId @OnFormatTitle(Row.Title)</h5>
                     </div>
                     <div class="col-5">
-                        <Button Color="ButtonColor.Primary"
-                                Type="ButtonType.Link"
-                                Size="Size.Small"
-                                To="@OnGetBookLinkRead()">
-                            @UserService.GetUILabel("bookListRead")
-                        </Button>
-                        <Button Color="ButtonColor.Warning"
-                                TooltipTitle="@UserService.GetUILabel("bookListRemoveToolTip")"
-                                Size="Size.Small"
-                                @onclick="OnClickRemove">
-                            @UserService.GetUILabel("bookListRemove")
-                        </Button>
-                        <Button Color="ButtonColor.Info"
-                                Size="Size.Small"
-                                @onclick="OnClickRefresh">
-                            @UserService.GetUILabel("bookListRefreshBookStats")
-                        </Button>
+                        
+                        <div class="btn-group" role="group" aria-label="@UserService.GetUILabel("bookListButtonGroupLabel")">
+                            <Button Color="ButtonColor.Primary"
+                                    Type="ButtonType.Link"
+                                    Size="Size.Small"
+                                    Outline="true"
+                                    To="@OnGetBookLinkRead()">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-book-half" viewBox="0 0 16 16">
+                                    <path d="M8.5 2.687c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783" />
+                                </svg>
+                                @UserService.GetUILabel("bookListRead")
+                            </Button>
+                            @if (Row.IsInShelf is not null && Row.IsInShelf == true)
+                            {
+                                <Button Color="ButtonColor.Warning"
+                                        TooltipTitle="@UserService.GetUILabel("bookListRemoveToolTip")"
+                                        Size="Size.Small"
+                                        Outline="true"
+                                        @onclick="OnClickRemove">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-dash-circle-fill" viewBox="0 0 16 16">
+                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M4.5 7.5a.5.5 0 0 0 0 1h7a.5.5 0 0 0 0-1z" />
+                                    </svg>
+                                    @UserService.GetUILabel("bookListRemove")
+                                </Button>
+                            }
+                            else
+                            {
+                                <Button Color="ButtonColor.Secondary"
+                                        TooltipTitle="@UserService.GetUILabel("bookListAddToolTip")"
+                                        Size="Size.Small"
+                                        Outline="true"
+                                        @onclick="OnClickAdd">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle-fill" viewBox="0 0 16 16">
+                                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+                                    </svg>
+                                    @UserService.GetUILabel("bookListAdd")
+                                </Button>
+                            }
+                            <Button Color="ButtonColor.Info"
+                                    Size="Size.Small"
+                                    Outline="true"
+                                    @onclick="OnClickRefresh">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-recycle" viewBox="0 0 16 16">
+                                    <path d="M9.302 1.256a1.5 1.5 0 0 0-2.604 0l-1.704 2.98a.5.5 0 0 0 .869.497l1.703-2.981a.5.5 0 0 1 .868 0l2.54 4.444-1.256-.337a.5.5 0 1 0-.26.966l2.415.647a.5.5 0 0 0 .613-.353l.647-2.415a.5.5 0 1 0-.966-.259l-.333 1.242zM2.973 7.773l-1.255.337a.5.5 0 1 1-.26-.966l2.416-.647a.5.5 0 0 1 .612.353l.647 2.415a.5.5 0 0 1-.966.259l-.333-1.242-2.545 4.454a.5.5 0 0 0 .434.748H5a.5.5 0 0 1 0 1H1.723A1.5 1.5 0 0 1 .421 12.24zm10.89 1.463a.5.5 0 1 0-.868.496l1.716 3.004a.5.5 0 0 1-.434.748h-5.57l.647-.646a.5.5 0 1 0-.708-.707l-1.5 1.5a.5.5 0 0 0 0 .707l1.5 1.5a.5.5 0 1 0 .708-.707l-.647-.647h5.57a1.5 1.5 0 0 0 1.302-2.244z" />
+                                </svg>
+                                @UserService.GetUILabel("bookListRefreshBookStats")
+                            </Button>
+                        </div>
+                        
                     </div>
                 </div>
             </div>
@@ -103,7 +135,8 @@
     [Parameter]
     public EventCallback<int> OnArchiveAsync { get; set; }
     [Parameter]
-    public string? Class { get; set;  }
+    public EventCallback<int> OnAddAsync { get; set; }
+    
 
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
@@ -218,6 +251,11 @@
     {
         if (_bookId == null || _bookId < 1) return;
         await OnArchiveAsync.InvokeAsync((int)_bookId);
+    }
+    private async Task OnClickAdd()
+    {
+        if (_bookId == null || _bookId < 1) return;
+        await OnAddAsync.InvokeAsync((int)_bookId);
     }
     private string OnFormatCount(decimal? dbStat)
     {

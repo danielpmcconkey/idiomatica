@@ -63,7 +63,12 @@
             <div>
                 @foreach (var row in BookService.BookListRows)
                 {
-                    <BookListRowView Class="@OnGetBookListRowClass(row).Result" BookService="BookService" Row="row" OnArchiveAsync="OnArchiveBookUser" />
+                    <BookListRowView 
+                        BookService="BookService"
+                        Row="row"
+                        OnArchiveAsync="OnArchiveBookUser"
+                        OnAddAsync="OnAddBookUser"
+                        />
                 }
             </div>
 
@@ -79,19 +84,6 @@
 
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
-
-
-
-
-    #region sorting and filtering
-    private string _filter;
-    private string _activeSortColumn = "Title";
-    private string _sortDirection = "Ascending";
-
-    #endregion
-
-
-
 
 
 
@@ -127,66 +119,9 @@
             StateHasChanged();
         }
     }
-    private async Task<string> OnGetBookListRowClass(BookListRow row)
-    {
-        if (await OnIsVisibleInListCheck(row.BookId, row.LanguageName, row.Title)) return "visibleBlRow";
-        return "invisibleBlRow";
-    }
-    private async Task<bool> OnIsVisibleInListCheck(int? bookId, string? languageName, string? title)
-    {
-        try
-        {
-            if (string.IsNullOrEmpty(_filter))
-                return true;
-
-            string languageNameNotNull = languageName == null ? "" : (string)languageName;
-            string titleNotNull = title == null ? "" : (string)title;
-            if (languageNameNotNull.Contains(_filter, StringComparison.OrdinalIgnoreCase))
-                return true;
-            if (titleNotNull.Contains(_filter, StringComparison.OrdinalIgnoreCase))
-                return true;
-            var context = await DbContextFactory.CreateDbContextAsync();
-            return await BookService.BookDoesContainTagLikeText(context, bookId, _filter);
-        }
-        catch (IdiomaticaException ex)
-        {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListIsVisibleError");
-            errorState.code = ex.code;
-            StateHasChanged();
-            return false;
-        }
-        catch (Exception ex)
-        {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListIsVisibleError");
-            StateHasChanged();
-            return false;
-        }
-    }
-    private async Task OnSortTableAsync()
-    {
-        try
-        {
-            var sortAscending = (_sortDirection == "Ascending") ? true : false;
-            //await BookService.BookListRowsSort(_activeSortColumn, sortAscending);
-        }
-        catch (IdiomaticaException ex)
-        {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListSortTableError");
-            errorState.code = ex.code;
-            StateHasChanged();
-            return;
-        }
-        catch (Exception ex)
-        {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListSortTableError");
-            StateHasChanged();
-        }
-
-    }
+    
+    
+    
     private async Task OnArchiveBookUser(int bookId)
     {
         try
@@ -195,9 +130,6 @@
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
             await BookService.BookUserArchiveAsync(context, bookId);
-            // re-apply sort
-            var sortAscending = (_sortDirection == "Ascending") ? true : false;
-            //await BookService.BookListRowsSort(_activeSortColumn, sortAscending);
             await t_delay;
             _isLoading = false;
 
@@ -211,7 +143,27 @@
             return;
         }
     }
+    private async Task OnAddBookUser(int bookId)
+    {
+        try
+        {
+            _isLoading = true;
+            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            await BookService.BookUserAddAsync(context, bookId);
+            await t_delay;
+            _isLoading = false;
 
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
+    }
 
     private async Task GetNext()
     {
