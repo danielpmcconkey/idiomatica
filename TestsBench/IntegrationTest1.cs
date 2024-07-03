@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using IdentityModel.OidcClient.Browser;
+using System.Text;
 
 namespace TestsBench.Tests
 {
@@ -308,29 +310,92 @@ Fin
             var userService = CreateUserService();
             var user = CreateNewTestUser(userService);
             var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = false;
+            await bookService.BookListRowsFilterAndSort(context);
             int book1Id = 7;
             int book2Id = 6;
             int userId = (int)user.Id;
-            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
-            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            int bookUser1Id = 0;
+            int bookUser2Id = 0;
+
             try
             {
                 // act
-
-                List<BookListRow> bookListRows = new List<BookListRow>();// await DataCache.BookListRowsByUserIdReadAsync(userId, context);
+                bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+                bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+                // force a re-pull of the booklist
+                await bookService.BookListRowsFilterAndSort(context);
+                // create a concatenated string of the titles of the bOokusers you just created
                 var book1 = await DataCache.BookByIdReadAsync(book1Id, context);
                 var book2 = await DataCache.BookByIdReadAsync(book2Id, context);
                 List<string> titlesInList = new List<string>();
                 titlesInList.Add(book1.Title);
                 titlesInList.Add(book2.Title);
                 var titlesInConcat = string.Join("|", titlesInList.Order());
+                // now do the same for the first 2 books in your booklist
                 List<string> titlesOutList = new List<string>();
-                titlesOutList.Add(bookListRows[0].Title);
-                titlesOutList.Add(bookListRows[1].Title);
+                titlesOutList.Add(bookService.BookListRows[0].Title);
+                titlesOutList.Add(bookService.BookListRows[1].Title);
                 var titlesOutConcat = string.Join("|", titlesOutList.Order());
 
                 // assert
                 Assert.Equal(titlesInConcat, titlesOutConcat);
+            }
+            finally
+            {
+                // clean-up
+                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
+                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
+                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
+                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        
+        [Fact]
+        public async Task ArchivingBookUsersWillTakeThemOffTheBookList()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = false;
+            await bookService.BookListRowsFilterAndSort(context);
+            int book1Id = 7;
+            int book2Id = 6;
+            int userId = (int)user.Id;
+            int bookUser1Id = bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+            int bookUser2Id = bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            // reset the book list
+            await bookService.BookListRowsFilterAndSort(context);
+            // now pull the title of just book 2
+            string book2Title = bookService.BookListRows[1].Title;
+
+            try
+            {
+                // act
+                await bookService.BookUserArchiveAsync(context, book1Id);
+                // force a re-pull of the booklist
+                await bookService.BookListRowsFilterAndSort(context);
+                // create a concatenated string of all titles in the book liSt
+                StringBuilder titles = new StringBuilder();
+                foreach (var b in bookService.BookListRows)
+                {
+                    titles.Append(b.Title);
+                }
+                // assert
+                Assert.Equal(titles.ToString(), book2Title);
             }
             finally
             {
@@ -452,6 +517,7 @@ Fin
                 context.SaveChanges();
             }
         }
+
 
         #endregion
 

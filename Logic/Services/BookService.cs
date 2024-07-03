@@ -922,6 +922,15 @@ namespace Logic.Services
             }
             return (token, wu);
         }
+#if DEBUG
+        /// <summary>
+        /// this is only used for the test bench to provide a logged in user outside of the standard app flow
+        /// </summary>
+        public void SetLoggedInUser(User user)
+        {
+            _loggedInUser = user;
+        }
+#endif
         public async Task<List<(string language, int wordCount)>> WordsGetListOfReadCount(
             IdiomaticaContext context, int? userId)
         {
