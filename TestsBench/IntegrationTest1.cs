@@ -357,7 +357,7 @@ Fin
                 context.SaveChanges();
             }
         }
-        
+
         [Fact]
         public async Task ArchivingBookUsersWillTakeThemOffTheBookList()
         {
@@ -375,8 +375,8 @@ Fin
             int book1Id = 7;
             int book2Id = 6;
             int userId = (int)user.Id;
-            int bookUser1Id = bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
-            int bookUser2Id = bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
             // reset the book list
             await bookService.BookListRowsFilterAndSort(context);
             // now pull the title of just book 2
@@ -404,6 +404,266 @@ Fin
                 if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
                 var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
                 if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task FilteringTheBookListByTitleIsCaseSensitive()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = false;
+            await bookService.BookListRowsFilterAndSort(context);
+            int book1Id = 7;    // Laura, la mujer invisible
+            int book2Id = 6;    // Tierras desconocidas
+            int book3Id = 14;   // LA VIDA EN NUESTRO PLANETA CAPÍTULO 8
+
+            int userId = (int)user.Id;
+            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            int bookUser3Id = await bookService.BookUserCreateAndSaveAsync(context, book3Id, userId);
+            // reset the book list
+            await bookService.BookListRowsFilterAndSort(context);
+            // now concat the title of just books 1 and 3, because those are the books we expect to survive the filter
+            var expectedTitleConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .Where(x => x.BookId == 7 || x.BookId == 14)
+                                        .OrderBy(x => x.BookId)
+                                        .Select(x => x.Title)
+                                        .ToArray()));
+
+            try
+            {
+                // act
+                bookService.TitleFilter = "La"; // casing is intentional as it doesn't match either title's case
+                // force a re-pull of the booklist
+                await bookService.BookListRowsFilterAndSort(context);
+                // create a concatenated string of all titles in the book liSt
+                var resultingTitleConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .OrderBy(x => x.BookId)
+                                        .Select(x => x.Title)
+                                        .ToArray()));
+                // assert
+                Assert.Equal(expectedTitleConcat, resultingTitleConcat);
+            }
+            finally
+            {
+                // clean-up
+                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
+                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
+                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
+                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
+                var bookUser3 = context.BookUsers.Where(x => x.Id == bookUser3Id).FirstOrDefault();
+                if (bookUser3 != null) context.BookUsers.Remove(bookUser3);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task FilteringTheBookListByTagIsCaseSensitive()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = false;
+            await bookService.BookListRowsFilterAndSort(context);
+            int book1Id = 7;
+            int book2Id = 6;
+            int book3Id = 8;
+
+            int userId = (int)user.Id;
+            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            int bookUser3Id = await bookService.BookUserCreateAndSaveAsync(context, book3Id, userId);
+            // reset the book list
+            await bookService.BookListRowsFilterAndSort(context);
+            // now concat the title of just books 2 and 3, because those are the books we expect to survive the filter
+            var expectedTitleConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .Where(x => x.BookId == 8 || x.BookId == 6)
+                                        .OrderBy(x => x.BookId)
+                                        .Select(x => x.Title)
+                                        .ToArray()));
+
+            try
+            {
+                // act
+                bookService.TagsFilter = "SPAIN"; // casing is intentional
+                // force a re-pull of the booklist
+                await bookService.BookListRowsFilterAndSort(context);
+                // create a concatenated string of all titles in the book liSt
+                var resultingTitleConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .OrderBy(x => x.BookId)
+                                        .Select(x => x.Title)
+                                        .ToArray()));
+                // assert
+                Assert.Equal(expectedTitleConcat, resultingTitleConcat);
+            }
+            finally
+            {
+                // clean-up
+                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
+                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
+                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
+                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
+                var bookUser3 = context.BookUsers.Where(x => x.Id == bookUser3Id).FirstOrDefault();
+                if (bookUser3 != null) context.BookUsers.Remove(bookUser3);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task SortByTitleDescendingWorks()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = false;
+            await bookService.BookListRowsFilterAndSort(context);
+            int book1Id = 7;    // Laura, la mujer invisible
+            int book2Id = 6;    // Tierras desconocidas
+            int book3Id = 14;   // LA VIDA EN NUESTRO PLANETA CAPÍTULO 8
+
+            int userId = (int)user.Id;
+            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            int bookUser3Id = await bookService.BookUserCreateAndSaveAsync(context, book3Id, userId);
+            // reset the book list
+            await bookService.BookListRowsFilterAndSort(context);
+            // now concat the titles of all books, in descending order
+            var expectedTitleConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .OrderByDescending(x => x.Title)
+                                        .Select(x => x.Title)
+                                        .ToArray()));
+
+            try
+            {
+                // act
+                bookService.OrderBy = 4;    // title
+                bookService.SortAscending = false;
+                // force a re-pull of the booklist
+                await bookService.BookListRowsFilterAndSort(context);
+                // create a concatenated string of all titles in the book liSt
+                var resultingTitleConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .Select(x => x.Title)
+                                        .ToArray()));
+                // assert
+                Assert.Equal(expectedTitleConcat, resultingTitleConcat);
+            }
+            finally
+            {
+                // clean-up
+                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
+                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
+                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
+                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
+                var bookUser3 = context.BookUsers.Where(x => x.Id == bookUser3Id).FirstOrDefault();
+                if (bookUser3 != null) context.BookUsers.Remove(bookUser3);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task SkippingForwardReturnsRows11Through20()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = true; // set to true so you don't have to assign all the book users
+            await bookService.BookListRowsFilterAndSort(context);
+            string expectedRowNumsConcat = "11|12|13|14|15|16|17|18|19|20";
+
+
+
+            try
+            {
+                // act
+                await bookService.BookListRowsNext(context);
+                var resultingRowNumsConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .OrderBy(x => x.RowNumber)
+                                        .Select(x => x.RowNumber.ToString())
+                                        .ToArray()));
+                // assert
+                Assert.Equal(expectedRowNumsConcat, resultingRowNumsConcat);
+            }
+            finally
+            {
+                // clean-up
+               
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task SkippingBackwardFromRow21ReturnsRows11Through20()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = true; // set to true so you don't have to assign all the book users
+            await bookService.BookListRowsFilterAndSort(context);
+            string expectedRowNumsConcat = "11|12|13|14|15|16|17|18|19|20";
+            await bookService.BookListRowsNext(context);
+            await bookService.BookListRowsNext(context); // this should put us at 21 - 30
+
+            try
+            {
+                // act
+                await bookService.BookListRowsPrevious(context);
+                var resultingRowNumsConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .OrderBy(x => x.RowNumber)
+                                        .Select(x => x.RowNumber.ToString())
+                                        .ToArray()));
+                // assert
+                Assert.Equal(expectedRowNumsConcat, resultingRowNumsConcat);
+            }
+            finally
+            {
+                // clean-up
+
                 user.LanguageUsers = new List<LanguageUser>();
                 context.Users.Remove(user);
                 context.SaveChanges();
