@@ -1,0 +1,22 @@
+﻿@page "/Books/Browse"
+@rendermode InteractiveServer
+@inject BookService BookService;
+@inject UserService UserService;
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory 
+
+<h3>@UserService.GetUILabel("navBrowse")</h3>
+
+<ErrorAlert ErrorState="errorState"></ErrorAlert>
+<AuthorizeView>
+    <Authorized>
+        <BooksList IsBrowse="true" />
+    </Authorized>
+    <NotAuthorized>
+        <p>@UserService.GetUILabel("notLoggedIn")</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
+    
+}

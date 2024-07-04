@@ -26,12 +26,14 @@ namespace Logic.UILabels
             #region nav
             _labels.Add("navHome", "Home");
             _labels.Add("navLogOut", "Log Out");
+            _labels.Add("navBrowse", "Browse All Books");
             _labels.Add("navYourBookshelf", "Your Bookshelf");
             _labels.Add("navRegister", "Register");
             _labels.Add("navLogIn", "Log In");
             _labels.Add("navNewBook", "Upload Book");
             _labels.Add("navFlashcards", "Flash card review");
             #endregion
+
             #region home
             _labels.Add("homeInitializationError", "There was an error initializing data for the home page."); 
             _labels.Add("homeWordCountsHeader", "How many words have you read?");
@@ -44,11 +46,16 @@ namespace Logic.UILabels
             _labels.Add("bookListSortTableError", "There was an error sorting your book list");
             _labels.Add("bookListIsVisibleError", "There was an error determining your book list filter.");
             _labels.Add("bookListRefreshStatsError", "There was an error refreshing book user stats.");
-            _labels.Add("bookListFormFilter", "Filter on title or language...");
-            _labels.Add("bookListFormSortColumn", "Sort by...");
+            _labels.Add("bookListAddTagError", "There was an error adding a book tag.");
+            _labels.Add("bookListRefreshError", "There was an error refreshing the book list");
+            _labels.Add("bookListFormFilterLanguage", "Filter on language...");
+            _labels.Add("bookListFormFilterTitle", "Filter on title...");
+            _labels.Add("bookListFormFilterTags", "Filter on tags...");
+            _labels.Add("bookListFormFilterNone", "Filter on tags...");
+            _labels.Add("bookListFormSortColumn", "Sort by");
             _labels.Add("bookListFormSortDirection", "Sort direction...");
-            _labels.Add("bookListFormSortAscending", "Ascending");
-            _labels.Add("bookListFormSortDescending", "Descending");
+            _labels.Add("bookListFormSortAscending", "Sort ascending");
+            _labels.Add("bookListFormSortDescending", "Sort descending");
             _labels.Add("bookListLanguageColumnHead", "Language");
 			_labels.Add("bookListCompletedColumnHead", "Completed");
 			_labels.Add("bookListTitleColumnHead", "Title");
@@ -62,6 +69,12 @@ namespace Logic.UILabels
             _labels.Add("bookListRead", "Read");
             _labels.Add("bookListUpdate", "Update");
             _labels.Add("bookListRemove", "Remove");
+            _labels.Add("bookListRemoveToolTip", "Remove from your bookshelf. You can put it back later and keep your old stats.");
+            _labels.Add("bookListAdd", "Add");
+            _labels.Add("bookListButtonGroupLabel", "Book actions");
+            _labels.Add("bookListAddToolTip", "Add to your bookshelf.");
+            _labels.Add("bookListAddTag", "Add tag");
+            _labels.Add("bookListBrowseForBooks", "Browse for books to add to your shelf");
             #endregion
             #region read
             _labels.Add("readInitializationError", "There was an error retrieving this book from the database.");
@@ -125,8 +138,16 @@ namespace Logic.UILabels
         }
         public override string GetLabel(string name)
         {
-            if (_labels.ContainsKey(name)) return _labels[name];
-            return "unknown";
+            try
+            {
+                if (_labels.ContainsKey(name)) return _labels[name];
+                return "unknown";
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
         public override string GetLabelF(string name, object?[] args)
         {

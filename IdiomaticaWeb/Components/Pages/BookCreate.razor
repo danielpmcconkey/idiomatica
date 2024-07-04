@@ -61,9 +61,9 @@
                                  class="@_languageCodeInputCss"
                                  @bind-Value="_languageCodeInput">
                         <option selected disabled>@UserService.GetUILabel("bcSelectLanguage")</option>
-                        @foreach (var (key, value) in _languageOptions)
+                        @foreach (var (key, value) in BookService.LanguageOptions)
                         {
-                            <option value="@key">@value</option>
+                            <option value="@key">@value.LanguageName</option>
                         }
                     </InputSelect>
                 </div>
@@ -175,18 +175,14 @@
     }
 
 
-    private Dictionary<string, string> _languageOptions = new Dictionary<string, string>();
+    
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             var context = await DbContextFactory.CreateDbContextAsync();
-            var dbLanguageCodes = BookService.LanguageCodeFetchOptionsDuringBookCreate(context);
-            foreach(var lc in dbLanguageCodes)
-            {
-                _languageOptions.Add(lc.Code, lc.LanguageName);
-            }
+            await BookService.LanguageCodeDictionaryPopulate(context);
         }
         catch (IdiomaticaException ex)
         {

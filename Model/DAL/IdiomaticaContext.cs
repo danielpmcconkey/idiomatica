@@ -10,6 +10,7 @@ namespace Model.DAL
         public DbSet<Book> Books { get; set; }
         public DbSet<BookListRow> BookListRows { get; set; }
         public DbSet<BookStat> BookStats { get; set; }
+        public DbSet<BookTag> BookTags { get; set; }
         public DbSet<BookUser> BookUsers { get; set; }
         public DbSet<BookUserStat> BookUserStats { get; set; }
         public DbSet<FlashCard> FlashCards { get; set; }
@@ -53,11 +54,17 @@ namespace Model.DAL
                 e.HasMany(b => b.BookStats).WithOne(bs => bs.Book).HasForeignKey(bs => bs.BookId);
                 e.HasMany(b => b.Pages).WithOne(p => p.Book).HasForeignKey(p => p.BookId);
                 e.HasMany(b => b.BookUsers).WithOne(bu => bu.Book).HasForeignKey(bu => bu.BookId);
+                e.HasMany(b => b.BookTags).WithOne(bt => bt.Book).HasForeignKey(bt => bt.BookId);
             });
             modelBuilder.Entity<BookStat>(e => {
                 e.HasKey(bs => new { bs.BookId, bs.Key });
                 e.HasOne(bs => bs.Book).WithMany(b => b.BookStats).HasForeignKey(bs => bs.BookId);
                 e.Property(bs => bs.Key).HasConversion<int>();
+            });
+            modelBuilder.Entity<BookTag>(e => {
+                e.HasKey(bt => bt.Id);
+                e.HasOne(bt => bt.Book).WithMany(b => b.BookTags).HasForeignKey(bt => bt.BookId);
+                e.HasOne(bt => bt.User).WithMany(b => b.BookTags).HasForeignKey(bt => bt.UserId);
             });
             modelBuilder.Entity<BookUser>(e => {
                 e.HasKey(bu => bu.Id);

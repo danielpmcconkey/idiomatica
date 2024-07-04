@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using IdentityModel.OidcClient.Browser;
+using System.Text;
 
 namespace TestsBench.Tests
 {
@@ -308,25 +310,36 @@ Fin
             var userService = CreateUserService();
             var user = CreateNewTestUser(userService);
             var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = false;
+            await bookService.BookListRowsFilterAndSort(context);
             int book1Id = 7;
             int book2Id = 6;
             int userId = (int)user.Id;
-            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
-            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            int bookUser1Id = 0;
+            int bookUser2Id = 0;
+
             try
             {
                 // act
-
-                List<BookListRow> bookListRows = await DataCache.BookListRowsByUserIdReadAsync(userId, context);
+                bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+                bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+                // force a re-pull of the booklist
+                await bookService.BookListRowsFilterAndSort(context);
+                // create a concatenated string of the titles of the bOokusers you just created
                 var book1 = await DataCache.BookByIdReadAsync(book1Id, context);
                 var book2 = await DataCache.BookByIdReadAsync(book2Id, context);
                 List<string> titlesInList = new List<string>();
                 titlesInList.Add(book1.Title);
                 titlesInList.Add(book2.Title);
                 var titlesInConcat = string.Join("|", titlesInList.Order());
+                // now do the same for the first 2 books in your booklist
                 List<string> titlesOutList = new List<string>();
-                titlesOutList.Add(bookListRows[0].Title);
-                titlesOutList.Add(bookListRows[1].Title);
+                titlesOutList.Add(bookService.BookListRows[0].Title);
+                titlesOutList.Add(bookService.BookListRows[1].Title);
                 var titlesOutConcat = string.Join("|", titlesOutList.Order());
 
                 // assert
@@ -344,6 +357,427 @@ Fin
                 context.SaveChanges();
             }
         }
+
+        [Fact]
+        public async Task ArchivingBookUsersWillTakeThemOffTheBookList()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = false;
+            await bookService.BookListRowsFilterAndSort(context);
+            int book1Id = 7;
+            int book2Id = 6;
+            int userId = (int)user.Id;
+            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            // reset the book list
+            await bookService.BookListRowsFilterAndSort(context);
+            // now pull the title of just book 2
+            string book2Title = bookService.BookListRows[1].Title;
+
+            try
+            {
+                // act
+                await bookService.BookUserArchiveAsync(context, book1Id);
+                // force a re-pull of the booklist
+                await bookService.BookListRowsFilterAndSort(context);
+                // create a concatenated string of all titles in the book liSt
+                StringBuilder titles = new StringBuilder();
+                foreach (var b in bookService.BookListRows)
+                {
+                    titles.Append(b.Title);
+                }
+                // assert
+                Assert.Equal(titles.ToString(), book2Title);
+            }
+            finally
+            {
+                // clean-up
+                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
+                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
+                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
+                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task FilteringTheBookListByTitleIsCaseSensitive()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = false;
+            await bookService.BookListRowsFilterAndSort(context);
+            int book1Id = 7;    // Laura, la mujer invisible
+            int book2Id = 6;    // Tierras desconocidas
+            int book3Id = 14;   // LA VIDA EN NUESTRO PLANETA CAPÍTULO 8
+
+            int userId = (int)user.Id;
+            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            int bookUser3Id = await bookService.BookUserCreateAndSaveAsync(context, book3Id, userId);
+            // reset the book list
+            await bookService.BookListRowsFilterAndSort(context);
+            // now concat the title of just books 1 and 3, because those are the books we expect to survive the filter
+            var expectedTitleConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .Where(x => x.BookId == 7 || x.BookId == 14)
+                                        .OrderBy(x => x.BookId)
+                                        .Select(x => x.Title)
+                                        .ToArray()));
+
+            try
+            {
+                // act
+                bookService.TitleFilter = "La"; // casing is intentional as it doesn't match either title's case
+                // force a re-pull of the booklist
+                await bookService.BookListRowsFilterAndSort(context);
+                // create a concatenated string of all titles in the book liSt
+                var resultingTitleConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .OrderBy(x => x.BookId)
+                                        .Select(x => x.Title)
+                                        .ToArray()));
+                // assert
+                Assert.Equal(expectedTitleConcat, resultingTitleConcat);
+            }
+            finally
+            {
+                // clean-up
+                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
+                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
+                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
+                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
+                var bookUser3 = context.BookUsers.Where(x => x.Id == bookUser3Id).FirstOrDefault();
+                if (bookUser3 != null) context.BookUsers.Remove(bookUser3);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task FilteringTheBookListByTagIsCaseSensitive()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = false;
+            await bookService.BookListRowsFilterAndSort(context);
+            int book1Id = 7;
+            int book2Id = 6;
+            int book3Id = 8;
+
+            int userId = (int)user.Id;
+            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            int bookUser3Id = await bookService.BookUserCreateAndSaveAsync(context, book3Id, userId);
+            // reset the book list
+            await bookService.BookListRowsFilterAndSort(context);
+            // now concat the title of just books 2 and 3, because those are the books we expect to survive the filter
+            var expectedTitleConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .Where(x => x.BookId == 8 || x.BookId == 6)
+                                        .OrderBy(x => x.BookId)
+                                        .Select(x => x.Title)
+                                        .ToArray()));
+
+            try
+            {
+                // act
+                bookService.TagsFilter = "SPAIN"; // casing is intentional
+                // force a re-pull of the booklist
+                await bookService.BookListRowsFilterAndSort(context);
+                // create a concatenated string of all titles in the book liSt
+                var resultingTitleConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .OrderBy(x => x.BookId)
+                                        .Select(x => x.Title)
+                                        .ToArray()));
+                // assert
+                Assert.Equal(expectedTitleConcat, resultingTitleConcat);
+            }
+            finally
+            {
+                // clean-up
+                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
+                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
+                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
+                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
+                var bookUser3 = context.BookUsers.Where(x => x.Id == bookUser3Id).FirstOrDefault();
+                if (bookUser3 != null) context.BookUsers.Remove(bookUser3);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task SortByTitleDescendingWorks()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = false;
+            await bookService.BookListRowsFilterAndSort(context);
+            int book1Id = 7;    // Laura, la mujer invisible
+            int book2Id = 6;    // Tierras desconocidas
+            int book3Id = 14;   // LA VIDA EN NUESTRO PLANETA CAPÍTULO 8
+
+            int userId = (int)user.Id;
+            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
+            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
+            int bookUser3Id = await bookService.BookUserCreateAndSaveAsync(context, book3Id, userId);
+            // reset the book list
+            await bookService.BookListRowsFilterAndSort(context);
+            // now concat the titles of all books, in descending order
+            var expectedTitleConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .OrderByDescending(x => x.Title)
+                                        .Select(x => x.Title)
+                                        .ToArray()));
+
+            try
+            {
+                // act
+                bookService.OrderBy = 4;    // title
+                bookService.SortAscending = false;
+                // force a re-pull of the booklist
+                await bookService.BookListRowsFilterAndSort(context);
+                // create a concatenated string of all titles in the book liSt
+                var resultingTitleConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .Select(x => x.Title)
+                                        .ToArray()));
+                // assert
+                Assert.Equal(expectedTitleConcat, resultingTitleConcat);
+            }
+            finally
+            {
+                // clean-up
+                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
+                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
+                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
+                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
+                var bookUser3 = context.BookUsers.Where(x => x.Id == bookUser3Id).FirstOrDefault();
+                if (bookUser3 != null) context.BookUsers.Remove(bookUser3);
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task SkippingForwardReturnsRows11Through20()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = true; // set to true so you don't have to assign all the book users
+            await bookService.BookListRowsFilterAndSort(context);
+            string expectedRowNumsConcat = "11|12|13|14|15|16|17|18|19|20";
+
+
+
+            try
+            {
+                // act
+                await bookService.BookListRowsNext(context);
+                var resultingRowNumsConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .OrderBy(x => x.RowNumber)
+                                        .Select(x => x.RowNumber.ToString())
+                                        .ToArray()));
+                // assert
+                Assert.Equal(expectedRowNumsConcat, resultingRowNumsConcat);
+            }
+            finally
+            {
+                // clean-up
+               
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task SkippingBackwardFromRow21ReturnsRows11Through20()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user = CreateNewTestUser(userService);
+            var bookService = CreateBookService();
+#if DEBUG
+            // this is only used for the test bench to provide a logged in user outside of the standard app flow
+            bookService.SetLoggedInUser(user);
+#endif
+            bookService.IsBrowse = true; // set to true so you don't have to assign all the book users
+            await bookService.BookListRowsFilterAndSort(context);
+            string expectedRowNumsConcat = "11|12|13|14|15|16|17|18|19|20";
+            await bookService.BookListRowsNext(context);
+            await bookService.BookListRowsNext(context); // this should put us at 21 - 30
+
+            try
+            {
+                // act
+                await bookService.BookListRowsPrevious(context);
+                var resultingRowNumsConcat = string.Join("|", (
+                                    bookService.BookListRows
+                                        .OrderBy(x => x.RowNumber)
+                                        .Select(x => x.RowNumber.ToString())
+                                        .ToArray()));
+                // assert
+                Assert.Equal(expectedRowNumsConcat, resultingRowNumsConcat);
+            }
+            finally
+            {
+                // clean-up
+
+                user.LanguageUsers = new List<LanguageUser>();
+                context.Users.Remove(user);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task AddingATagToABookWillIncrementItsCount()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user1 = CreateNewTestUser(userService);
+            var user2 = CreateNewTestUser(userService);
+            int userId1 = (int)user1.Id;
+            int userId2 = (int)user2.Id;
+            var bookService = CreateBookService();
+            int bookId = 7;
+            string tag = Guid.NewGuid().ToString();
+            int initialCount = 0;
+            int secondCount = 0;
+            BookTag initialTag = null;
+            BookTag secondTag = null;
+
+            try
+            {
+                // act
+                await bookService.BookTagAdd(context, bookId, userId1, tag);
+                var initialTags = await bookService.BookTagsGetByBookIdAndUserId(context, bookId, userId1);
+                initialTag = initialTags.Where(x => x.Tag == tag).FirstOrDefault();
+                initialCount = (int)initialTag.Count;
+
+                // set the initial tags state before adding it for user 2
+                var secondTags = await bookService.BookTagsGetByBookIdAndUserId(context, bookId, userId2);
+                await bookService.BookTagAdd(context, bookId, userId2, tag);
+                // pull the second user's tags again now
+                secondTags = await bookService.BookTagsGetByBookIdAndUserId(context, bookId, userId2);
+                secondTag = secondTags.Where(x => x.Tag == tag).FirstOrDefault();
+                secondCount = (int)secondTag.Count;
+
+                // assert
+                Assert.True(initialCount == 1);
+                Assert.True(secondCount == 2);
+            }
+            finally
+            {
+                // clean-up
+                context.BookTags.RemoveRange(
+                    context.BookTags.Where(x => x.UserId == userId1 || x.UserId == userId2));
+                
+                context.Users.Remove(user1);
+                context.Users.Remove(user2);
+                context.SaveChanges();
+            }
+        }
+        [Fact]
+        public async Task RemovingATagFromABookWillDecrementItsCount()
+        {
+            // arrange
+            var context = CreateContext();
+            var userService = CreateUserService();
+            var user1 = CreateNewTestUser(userService);
+            var user2 = CreateNewTestUser(userService);
+            var user3 = CreateNewTestUser(userService);
+            int userId1 = (int)user1.Id;
+            int userId2 = (int)user2.Id; 
+            int userId3 = (int)user3.Id;
+            var bookService = CreateBookService();
+            int bookId = 7;
+            string tag = Guid.NewGuid().ToString();
+            int secondCount = 0;
+            // add the first two tags
+            await bookService.BookTagAdd(context, bookId, userId1, tag);
+            await bookService.BookTagAdd(context, bookId, userId2, tag);
+            // pre-load the tags so a list exists in cache to update. This
+            // mimics the online flow. You can only add tags from a page that's already pulled them
+            await bookService.BookTagsGetByBookIdAndUserId(context, bookId, userId3);
+            // add the user3 tag
+            await bookService.BookTagAdd(context, bookId, userId3, tag);
+            // now get the count for user 3 (should be 3)
+            var initialTags = await bookService.BookTagsGetByBookIdAndUserId(context, bookId, userId3);
+            var initialTag = initialTags.Where(x => x.Tag == tag).FirstOrDefault();
+            int initialCount = (int)initialTag.Count;
+
+
+            try
+            {
+                // act
+
+                // remove the tag from user 1
+                await bookService.BookTagRemove(context, bookId, userId1, tag);
+                
+                // get the tags from user 3 again
+                var secondTags = await bookService.BookTagsGetByBookIdAndUserId(context, bookId, userId3);
+                var secondTag = secondTags.Where(x => x.Tag == tag).FirstOrDefault();
+                secondCount = (int)secondTag.Count;
+
+
+                // assert
+                Assert.True(initialCount == 3);
+                Assert.True(secondCount == 2);
+            }
+            finally
+            {
+                // clean-up
+                context.BookTags.RemoveRange(
+                    context.BookTags.Where(x => x.UserId == userId1 || x.UserId == userId2 || x.UserId == userId3));
+
+                context.Users.Remove(user1);
+                context.Users.Remove(user2);
+                context.Users.Remove(user3);
+                context.SaveChanges();
+            }
+        }
+
 
         #endregion
 

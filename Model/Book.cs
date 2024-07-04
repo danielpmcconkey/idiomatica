@@ -22,6 +22,7 @@ namespace Model
         public List<BookStat> BookStats { get; set; } = new List<BookStat>();
         public List<BookUserStat> BookUserStats { get; set; }
         public List<BookUser> BookUsers { get; set; } = new List<BookUser>();
+        public List<BookTag> BookTags { get; set; } = new List<BookTag>();
 
         #endregion
 
