@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +12,9 @@ namespace Model.DAL
     {
         private static ConcurrentDictionary<int, LanguageUser> LanguageUserById = new ConcurrentDictionary<int, LanguageUser>();
         private static ConcurrentDictionary<(int languageId, int userId), LanguageUser> LanguageUserByLanguageIdAndUserId = new ConcurrentDictionary<(int languageId, int userId), LanguageUser>();
-        private static ConcurrentDictionary<int, List<LanguageUser>> LanguageUsersByUserId = new ConcurrentDictionary<int, List<LanguageUser>>();
+        private static ConcurrentDictionary<int, List<LanguageUser>> LanguageUsersAndLanguageByUserId = new ConcurrentDictionary<int, List<LanguageUser>>();
 
-        public static async Task<LanguageUser> LanguageUserByIdReadAsync(
+        public static async Task<LanguageUser?> LanguageUserByIdReadAsync(
             int key, IdiomaticaContext context)
         {
             // check cache
@@ -23,15 +24,15 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.LanguageUsers
+            var value = await context.LanguageUsers
                 .Where(x => x.Id == key)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
             if (value == null) return null;
             // write to cache
             LanguageUserById[key] = value;
             return value;
         }
-        public static async Task<LanguageUser> LanguageUserByLanguageIdAndUserIdReadAsync(
+        public static async Task<LanguageUser?> LanguageUserByLanguageIdAndUserIdReadAsync(
             (int languageId, int userId) key, IdiomaticaContext context)
         {
             // check cache
@@ -41,30 +42,32 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.LanguageUsers
+            var value = await context.LanguageUsers
                 .Where(x => x.LanguageId == key.languageId && x.UserId == key.userId)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
             if (value == null) return null;
             // write to cache
             LanguageUserByLanguageIdAndUserId[key] = value;
             return value;
         }
-        public static async Task<List<LanguageUser>> LanguageUsersByUserIdReadAsync(
+        public static async Task<List<LanguageUser>> LanguageUsersAndLanguageByUserIdReadAsync(
             int key, IdiomaticaContext context)
         {
             // check cache
-            if (LanguageUsersByUserId.ContainsKey(key))
+            if (LanguageUsersAndLanguageByUserId.ContainsKey(key))
             {
-                return LanguageUsersByUserId[key];
+                return LanguageUsersAndLanguageByUserId[key];
             }
 
             // read DB
-            var value = context.LanguageUsers
+            var value = await context.LanguageUsers
                 .Where(x => x.UserId == key)
-                .ToList();
+                .Include(lu => lu.Language)
+                .OrderBy(x => x.Language.Name)
+                .ToListAsync();
             if (value == null) return null;
             // write to cache
-            LanguageUsersByUserId[key] = value;
+            LanguageUsersAndLanguageByUserId[key] = value;
             return value;
         }
     }

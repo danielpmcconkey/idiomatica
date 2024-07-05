@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace Model.DAL
     public static partial class DataCache
     {
         private static ConcurrentDictionary<int, WordUser> WordUserById = new ConcurrentDictionary<int, WordUser>();
+        private static ConcurrentDictionary<int, WordUser> WordUserAndLanguageUserAndLanguageById = new ConcurrentDictionary<int, WordUser>();
         private static ConcurrentDictionary<(int wordId, int userId), WordUser> WordUserByWordIdAndUserId = new ConcurrentDictionary<(int wordId, int userId), WordUser>();
         private static ConcurrentDictionary<(int bookId, int uselanguageUserIdrId), List<WordUser>> WordUsersByBookIdAndLanguageUserId = new ConcurrentDictionary<(int bookId, int languageUserId), List<WordUser>>();
         private static ConcurrentDictionary<(int bookId, int userId), Dictionary<string, WordUser>> WordUsersDictByBookIdAndUserId = new ConcurrentDictionary<(int bookId, int userId), Dictionary<string, WordUser>>();
@@ -22,12 +24,12 @@ namespace Model.DAL
         {
             context.WordUsers.Add(value);
             context.SaveChanges();
-            if (value.Id == null || value.Id == 0)
+            if (value.Id == null || value.Id < 1)
             {
                 return false;
             }
             // add to id cache
-            WordUserById[value.Id] = value;
+            WordUserById[(int)value.Id] = value;
             return true;
         }
         #endregion
@@ -42,11 +44,30 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.WordUsers.Where(x => x.Id == key)
-                .FirstOrDefault();
+            var value = await context.WordUsers.Where(x => x.Id == key).FirstOrDefaultAsync();
+                
             if (value == null) return null;
             // write to cache
             WordUserById[key] = value;
+            return value;
+        }
+        public static async Task<WordUser> WordUserAndLanguageUserAndLanguageByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            // check cache
+            if (WordUserAndLanguageUserAndLanguageById.ContainsKey(key))
+            {
+                return WordUserById[key];
+            }
+
+            // read DB
+            var value = await context.WordUsers
+                .Where(x => x.Id == key)
+                .Include(x => x.LanguageUser).ThenInclude(x=> x.Language)
+                .FirstOrDefaultAsync();
+
+            if (value == null) return null;
+            // write to cache
+            WordUserAndLanguageUserAndLanguageById[key] = value;
             return value;
         }
         public static async Task<WordUser?> WordUserByWordIdAndUserIdReadAsync(
@@ -119,7 +140,7 @@ namespace Model.DAL
             {
                 string wordText = g.word.TextLowerCase;// g.wordWordUser.word.TextLowerCase;
                 WordUser wordUser = g.wordUser;
-                int wordUserId = g.wordUser.Id;
+                int wordUserId = (int)g.wordUser.Id;
                 value[wordText] = wordUser;
                 // add it to the worduser cache
                 WordUserById[wordUserId] = wordUser;
@@ -153,7 +174,7 @@ namespace Model.DAL
             {
                 string wordText = g.word.TextLowerCase;
                 WordUser wordUser = g.wordUser;
-                int wordUserId = g.wordUser.Id;
+                int wordUserId = (int)g.wordUser.Id;
                 value[wordText] = wordUser;
                 // add it to the worduser cache
                 WordUserById[wordUserId] = wordUser;
@@ -201,9 +222,9 @@ namespace Model.DAL
             context.SaveChanges();
 
             // now update the cache
-            var languageUser = await LanguageUserByIdReadAsync(value.LanguageUserId, context);
+            var languageUser = await LanguageUserByIdReadAsync((int)value.LanguageUserId, context);
             if (languageUser == null) return;
-            await WordUserUpdateAllCachesAsync(value, languageUser.UserId);
+            await WordUserUpdateAllCachesAsync(value, (int)languageUser.UserId);
             return;
         }
         public static async Task WordUsersUpdateStatusByPageIdAndUserIdAndStatus(
@@ -265,7 +286,7 @@ namespace Model.DAL
             foreach (var item in cachedList1) WordUserByWordIdAndUserId[item.Key] = value;
 
             var cachedList2 = WordUsersByBookIdAndLanguageUserId
-                .Where(x => doesWordUserListContainById(x.Value, value.Id)).ToArray();
+                .Where(x => doesWordUserListContainById(x.Value, (int)value.Id)).ToArray();
             for (int i = 0; i < cachedList2.Length; i++)
             {
                 var item = cachedList2[i];

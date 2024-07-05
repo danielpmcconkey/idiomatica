@@ -10,10 +10,10 @@ namespace Model
     [Table("FlashCardParagraphTranslationBridge", Schema = "Idioma")]
     public class FlashCardParagraphTranslationBridge
     {
-        public int Id { get; set; }
-        public int FlashCardId { get; set; }
-        public FlashCard FlashCard { get; set; }
-        public int ParagraphTranslationId { get; set; }
-        public ParagraphTranslation ParagraphTranslation { get; set; }
+        public int? Id { get; set; }
+        public int? FlashCardId { get; set; }
+        public FlashCard? FlashCard { get; set; }
+        public int? ParagraphTranslationId { get; set; }
+        public ParagraphTranslation? ParagraphTranslation { get; set; }
     }
 }

@@ -24,7 +24,6 @@ namespace TestsBench.Tests
         //private ILogger<IdiomaticaLogger> _logger;
         //private ErrorHandler _errorHandler;
         //private DeepLService _deepLService;
-        private ServiceProvider _serviceProvider;
 
         #region constants
         const string _newBookTitle = "El gigante egoísta";
@@ -161,95 +160,18 @@ Fin
 ";
         #endregion
 
-        #region setup functions
-
-        public IntegrationTest1()
-        {
-            //setup our DI
-            var connectionstring = "Server=localhost;Database=Idiomatica;Trusted_Connection=True;TrustServerCertificate=true;";
-
-            _serviceProvider = new ServiceCollection()
-                .AddLogging()
-                //.AddCascadingAuthenticationState()
-                //.AddScoped<IdentityUserAccessor>()
-                //.AddScoped<IdentityRedirectManager>()
-                .AddScoped<AuthenticationStateProvider, RevalidatingProviderForUnitTesting>()
-                .AddTransient<BookService>()
-                .AddTransient<UserService>()
-                .AddTransient<FlashCardService>()
-                .AddTransient<ErrorHandler>()
-                .AddTransient<DeepLService>()
-                //.AddDbContext<IdiomaticaContext>(options => {
-                //    options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("IdiomaticaWeb"));
-                //    })
-                .BuildServiceProvider();
-        }
-        private BookService CreateBookService()
-        {
-            return _serviceProvider.GetService<BookService>();
-            //return new BookService(_logger, _errorHandler, _deepLService);
-        }
-        private UserService CreateUserService()
-        {
-            //return new UserService(null);
-            return _serviceProvider.GetService<UserService>();
-        }
-        private IdiomaticaContext CreateContext()
-        {
-            //var factory = _serviceProvider.GetService<DbContext<IdiomaticaContext>>();
-            //var context = factory.CreateDbContext();
-            //return context;
-            var connectionstring = "Server=localhost;Database=Idiomatica;Trusted_Connection=True;TrustServerCertificate=true;";
-            var optionsBuilder = new DbContextOptionsBuilder<IdiomaticaContext>();
-            optionsBuilder.UseSqlServer(connectionstring);
-            return new IdiomaticaContext(optionsBuilder.Options);
-        }
-        private User CreateNewTestUser(UserService userService)
-        {
-            var user = new User()
-            {
-                ApplicationUserId = Guid.NewGuid().ToString(),
-                Name = "Auto gen tester",
-                Code = "En-US"
-            };
-            var context = CreateContext();
-            context.Users.Add(user);
-            context.SaveChanges();
-            var languageUser = new LanguageUser()
-            {
-                LanguageId = 1, // espAnish
-                UserId = (int)user.Id,
-                TotalWordsRead = 0
-            };
-            context.LanguageUsers.Add(languageUser);
-            context.SaveChanges();
-
-#if DEBUG
-            SetLoggedInUser(user, userService);
-#endif
-
-            return user;
-        }
-#if DEBUG
-        private void SetLoggedInUser(User user, UserService userService)
-        {
-            var context = CreateContext();
-            userService.SetLoggedInUserForTestBench(user, context);
-        }
-#endif
-        #endregion
-
 
         #region BookList
-        
+
         [Fact]
         public async Task ICannotAddTheSameBookUserTwice()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
             int firstBookUserId = 999;
@@ -264,11 +186,8 @@ Fin
             finally
             {
                 // clean-up
-                var firstBookUser = context.BookUsers.Where(x => x.Id == firstBookUserId).FirstOrDefault();
-                if (firstBookUser != null) context.BookUsers.Remove(firstBookUser);
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
 
         }
@@ -277,10 +196,11 @@ Fin
         public async Task ICanAddABookUser()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
             int bookUserId = 999;
@@ -294,11 +214,8 @@ Fin
             finally
             {
                 // clean-up
-                var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
-                if (bookUser != null) context.BookUsers.Remove(bookUser);
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
 
@@ -306,10 +223,11 @@ Fin
         public async Task BookUsersWillShowBooksOnTheBookList()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
 #if DEBUG
             // this is only used for the test bench to provide a logged in user outside of the standard app flow
             bookService.SetLoggedInUser(user);
@@ -348,13 +266,8 @@ Fin
             finally
             {
                 // clean-up
-                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
-                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
-                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
-                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
 
@@ -362,10 +275,11 @@ Fin
         public async Task ArchivingBookUsersWillTakeThemOffTheBookList()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
 #if DEBUG
             // this is only used for the test bench to provide a logged in user outside of the standard app flow
             bookService.SetLoggedInUser(user);
@@ -400,23 +314,19 @@ Fin
             finally
             {
                 // clean-up
-                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
-                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
-                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
-                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
         [Fact]
         public async Task FilteringTheBookListByTitleIsCaseSensitive()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
 #if DEBUG
             // this is only used for the test bench to provide a logged in user outside of the standard app flow
             bookService.SetLoggedInUser(user);
@@ -459,25 +369,19 @@ Fin
             finally
             {
                 // clean-up
-                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
-                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
-                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
-                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
-                var bookUser3 = context.BookUsers.Where(x => x.Id == bookUser3Id).FirstOrDefault();
-                if (bookUser3 != null) context.BookUsers.Remove(bookUser3);
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
         [Fact]
         public async Task FilteringTheBookListByTagIsCaseSensitive()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
 #if DEBUG
             // this is only used for the test bench to provide a logged in user outside of the standard app flow
             bookService.SetLoggedInUser(user);
@@ -520,25 +424,19 @@ Fin
             finally
             {
                 // clean-up
-                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
-                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
-                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
-                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
-                var bookUser3 = context.BookUsers.Where(x => x.Id == bookUser3Id).FirstOrDefault();
-                if (bookUser3 != null) context.BookUsers.Remove(bookUser3);
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
         [Fact]
         public async Task SortByTitleDescendingWorks()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
 #if DEBUG
             // this is only used for the test bench to provide a logged in user outside of the standard app flow
             bookService.SetLoggedInUser(user);
@@ -580,25 +478,19 @@ Fin
             finally
             {
                 // clean-up
-                var bookUser1 = context.BookUsers.Where(x => x.Id == bookUser1Id).FirstOrDefault();
-                if (bookUser1 != null) context.BookUsers.Remove(bookUser1);
-                var bookUser2 = context.BookUsers.Where(x => x.Id == bookUser2Id).FirstOrDefault();
-                if (bookUser2 != null) context.BookUsers.Remove(bookUser2);
-                var bookUser3 = context.BookUsers.Where(x => x.Id == bookUser3Id).FirstOrDefault();
-                if (bookUser3 != null) context.BookUsers.Remove(bookUser3);
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
         [Fact]
         public async Task SkippingForwardReturnsRows11Through20()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
 #if DEBUG
             // this is only used for the test bench to provide a logged in user outside of the standard app flow
             bookService.SetLoggedInUser(user);
@@ -624,20 +516,19 @@ Fin
             finally
             {
                 // clean-up
-               
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
         [Fact]
         public async Task SkippingBackwardFromRow21ReturnsRows11Through20()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
 #if DEBUG
             // this is only used for the test bench to provide a logged in user outside of the standard app flow
             bookService.SetLoggedInUser(user);
@@ -664,22 +555,25 @@ Fin
             {
                 // clean-up
 
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
         [Fact]
         public async Task AddingATagToABookWillIncrementItsCount()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user1 = CreateNewTestUser(userService);
-            var user2 = CreateNewTestUser(userService);
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user1 = CommonFunctions.CreateNewTestUser(userService, context);
+            var user2 = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
+
+            
             int userId1 = (int)user1.Id;
             int userId2 = (int)user2.Id;
-            var bookService = CreateBookService();
+            
             int bookId = 7;
             string tag = Guid.NewGuid().ToString();
             int initialCount = 0;
@@ -710,27 +604,24 @@ Fin
             finally
             {
                 // clean-up
-                context.BookTags.RemoveRange(
-                    context.BookTags.Where(x => x.UserId == userId1 || x.UserId == userId2));
-                
-                context.Users.Remove(user1);
-                context.Users.Remove(user2);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
         [Fact]
         public async Task RemovingATagFromABookWillDecrementItsCount()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user1 = CreateNewTestUser(userService);
-            var user2 = CreateNewTestUser(userService);
-            var user3 = CreateNewTestUser(userService);
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user1 = CommonFunctions.CreateNewTestUser(userService, context);
+            var user2 = CommonFunctions.CreateNewTestUser(userService, context);
+            var user3 = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
             int userId1 = (int)user1.Id;
             int userId2 = (int)user2.Id; 
             int userId3 = (int)user3.Id;
-            var bookService = CreateBookService();
             int bookId = 7;
             string tag = Guid.NewGuid().ToString();
             int secondCount = 0;
@@ -768,13 +659,8 @@ Fin
             finally
             {
                 // clean-up
-                context.BookTags.RemoveRange(
-                    context.BookTags.Where(x => x.UserId == userId1 || x.UserId == userId2 || x.UserId == userId3));
 
-                context.Users.Remove(user1);
-                context.Users.Remove(user2);
-                context.Users.Remove(user3);
-                context.SaveChanges();
+                transaction.RollbackAsync();
             }
         }
 
@@ -787,10 +673,11 @@ Fin
         public async Task ReadingBook7Page1ShowsCorrectPageWordsAndSentences()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
             int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
@@ -829,17 +716,8 @@ Fin
             finally
             {
                 // clean-up
-                var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
-                if (bookUser != null)
-                {
-                    bookUser.LanguageUser = null;
-                    bookUser.Book = null;
-                    bookUser.PageUsers = new List<PageUser>();
-                    context.BookUsers.Remove(bookUser);
-                }
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
 
@@ -847,10 +725,11 @@ Fin
         public async Task UpdatingWordStatusWorks()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var bookService = CreateBookService();
-            var user = CreateNewTestUser(userService);
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
             int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
@@ -866,7 +745,7 @@ Fin
                 var wordUser = bookService.AllWordUsersInPage["administrativa"];
                 wordUser.Status = AvailableWordUserStatus.LEARNED;
                 await bookService.WordUserSaveModalDataAsync(
-                    context, wordUser.Id, wordUser.Status, wordUser.Translation);
+                    context, (int)wordUser.Id, (AvailableWordUserStatus)wordUser.Status, wordUser.Translation);
 
                 var wordUserFromDb = context.WordUsers.FirstOrDefault(x => x.Id == wordUser.Id);
 
@@ -876,17 +755,7 @@ Fin
             finally
             {
                 // clean-up
-                var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
-                if (bookUser != null)
-                {
-                    bookUser.LanguageUser = null;
-                    bookUser.Book = null;
-                    bookUser.PageUsers = new List<PageUser>();
-                    context.BookUsers.Remove(bookUser);
-                }
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+                transaction.RollbackAsync();
             }
         }
 
@@ -894,10 +763,11 @@ Fin
         public async Task UpdatingWordTranslationWorks()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
             int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
@@ -913,7 +783,7 @@ Fin
                 var wordUser = bookService.AllWordUsersInPage["administrativa"];
                 wordUser.Translation = newTranslation;
                 await bookService.WordUserSaveModalDataAsync(
-                    context, wordUser.Id, wordUser.Status, wordUser.Translation);
+                    context, (int)wordUser.Id, (AvailableWordUserStatus)wordUser.Status, wordUser.Translation);
 
                 var wordUserFromDb = context.WordUsers.FirstOrDefault(x => x.Id == wordUser.Id);
 
@@ -923,17 +793,7 @@ Fin
             finally
             {
                 // clean-up
-                var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
-                if (bookUser != null)
-                {
-                    bookUser.LanguageUser = null;
-                    bookUser.Book = null;
-                    bookUser.PageUsers = new List<PageUser>();
-                    context.BookUsers.Remove(bookUser);
-                }
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+                await transaction.RollbackAsync();
             }
         }
 
@@ -941,10 +801,11 @@ Fin
         public async Task UpdatingWordStatusIsReflectedOnOtherPages()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
             int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
@@ -962,7 +823,7 @@ Fin
                 wordUser1.Status = AvailableWordUserStatus.NEW2;
                 var wordUserStatus1 = wordUser1.Status.ToString();
                 await bookService.WordUserSaveModalDataAsync(
-                    context, wordUser1.Id, wordUser1.Status, wordUser1.Translation);
+                    context, (int)wordUser1.Id, (AvailableWordUserStatus)wordUser1.Status, wordUser1.Translation);
 
                 await bookService.PageMove(context, 2);
                 var word2 = bookService.Paragraphs[2].Sentences[0].Tokens[4].Word; // de
@@ -975,17 +836,8 @@ Fin
             finally
             {
                 // clean-up
-                var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
-                if (bookUser != null)
-                {
-                    bookUser.LanguageUser = null;
-                    bookUser.Book = null;
-                    bookUser.PageUsers = new List<PageUser>();
-                    context.BookUsers.Remove(bookUser);
-                }
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
 
@@ -993,10 +845,11 @@ Fin
         public async Task ParagraphTranslationWorks()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
             // create the book
             int bookId = await bookService.BookCreateAndSaveAsync(context, 
                 _newBookTitle, _newBookLanguageCode, _newBookUrl, _newBookText);
@@ -1025,19 +878,8 @@ Fin
             finally
             {
                 // clean-up
-                var book = context.Books.Where(x => x.Id == bookId).FirstOrDefault();
-                if (book != null)
-                {
-                    book.Language = null;
-                    book.Pages = null;
-                    book.BookStats = null;
-                    book.BookUserStats = null;
-                    book.BookUsers = null;
-                    context.Books.Remove(book);
-                }
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
 
@@ -1045,10 +887,11 @@ Fin
         public async Task MovingPagesUpdatesTheBookmarkAndReadDate()
         {
             // arrange
-            var context = CreateContext();
-            var userService = CreateUserService();
-            var user = CreateNewTestUser(userService);
-            var bookService = CreateBookService();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            var userService = CommonFunctions.CreateUserService();
+            var user = CommonFunctions.CreateNewTestUser(userService, context);
+            var bookService = CommonFunctions.CreateBookService();
             int bookId = 7;
             int userId = (int)user.Id;
             int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
@@ -1063,7 +906,7 @@ Fin
                 int originalPageId = bookService.BookCurrentPageId;
                 await bookService.PageMove(context, 2);
                 var bookUserFromDb = await DataCache.BookUserByIdReadAsync(bookUserId, context);
-                int bookmark = bookUserFromDb.CurrentPageID;
+                int bookmark = (int)bookUserFromDb.CurrentPageID;
                 int expected = 80;
                 var pageUsers = await DataCache.PageUsersByBookUserIdReadAsync(bookUserId, context);
                 var originalPageUser = pageUsers.Where(x => x.PageId == originalPageId).FirstOrDefault();
@@ -1077,17 +920,8 @@ Fin
             finally
             {
                 // clean-up
-                var bookUser = context.BookUsers.Where(x => x.Id == bookUserId).FirstOrDefault();
-                if (bookUser != null)
-                {
-                    bookUser.LanguageUser = null;
-                    bookUser.Book = null;
-                    bookUser.PageUsers = new List<PageUser>();
-                    context.BookUsers.Remove(bookUser);
-                }
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+
+                transaction.RollbackAsync();
             }
         }
 

@@ -42,7 +42,7 @@ namespace Logic.Services
             get 
             {
                 if(_currentPage == null) return 0;
-                return _currentPage.Ordinal;
+                return (int)_currentPage.Ordinal;
             }
         }
         public int BookCurrentPageId
@@ -250,8 +250,8 @@ namespace Logic.Services
             // tier 1 tasks, dependent on tier 0
             var t_bookUser = BookUserGetAsync(context, (int)_bookId, (int)_loggedInUser.Id);
             var t_bookUserStats = BookUserGetStatsAsync(context, (int)_bookId, (int)_loggedInUser.Id);
-            var t_languageUser = LanguageUserGetAsync(context, _book.LanguageId, (int)_loggedInUser.Id);
-            var t_language = LanguageGetAsync(context, _book.LanguageId);
+            var t_languageUser = LanguageUserGetAsync(context, (int)_book.LanguageId, (int)_loggedInUser.Id);
+            var t_language = LanguageGetAsync(context, (int)_book.LanguageId);
 
             Task.WaitAll([t_bookUser, t_bookUserStats, t_languageUser, t_language]);
 
@@ -267,7 +267,7 @@ namespace Logic.Services
             }
 
             // tier 2, dependent on tier 1
-            var t_currentPageUser = PageUserGetOnReadOpenAsync(context, _bookUser.CurrentPageID, _bookUser.LanguageUserId);
+            var t_currentPageUser = PageUserGetOnReadOpenAsync(context, (int)_bookUser.CurrentPageID, (int)_bookUser.LanguageUserId);
             var t_languageFromCode = LanguageGetByCodeAsync(context, _language.Code);
 
             Task.WaitAll([t_currentPageUser, t_languageFromCode]);
@@ -282,7 +282,7 @@ namespace Logic.Services
             }
 
             // tier 3, dependent on tier 2
-            await PageResetDataForRead(context, _currentPageUser.PageId);
+            await PageResetDataForRead(context, (int)_currentPageUser.PageId);
 
             // fin
             _isDataInitRead = true;
@@ -648,7 +648,7 @@ namespace Logic.Services
                 return 0;
             }
             var languageUser = await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync(
-                (book.LanguageId, userId), context);
+                ((int)book.LanguageId, userId), context);
 
 
             if (languageUser == null || languageUser.Id == null || languageUser.Id == 0)
@@ -657,13 +657,13 @@ namespace Logic.Services
             }
             // make sure that bookUser doesn't already exist before creating it
             var existingBookUser = await DataCache.BookUserByBookIdAndUserIdReadAsync(
-                (bookId, languageUser.UserId), context);
+                (bookId, (int)languageUser.UserId), context);
             if(existingBookUser != null) 
             {
                 // dude already exists. Just return it. 
                 // update the stats first, just in case
-                await BookUserStatsUpdate(context, existingBookUser.Id);
-                return existingBookUser.Id;
+                await BookUserStatsUpdate(context, (int)existingBookUser.Id);
+                return (int)existingBookUser.Id;
             }
 
             BookUser bookUser = new BookUser()
@@ -686,9 +686,9 @@ namespace Logic.Services
             }
 
             // now update BookUserStats
-            await BookUserStatsUpdate(context, bookUser.Id);
+            await BookUserStatsUpdate(context, (int)bookUser.Id);
 
-            return bookUser.Id;
+            return (int)bookUser.Id;
         }
         public async Task BookUserUpdateStats(IdiomaticaContext context, int? bookId)
         {
@@ -698,7 +698,7 @@ namespace Logic.Services
             var bookUser = await DataCache.BookUserByBookIdAndUserIdReadAsync(
                     ((int)bookId, (int)_loggedInUser.Id), context);
             if (bookUser == null || bookUser.Id < 1) return;
-            await BookUserStatsUpdate(context, bookUser.Id);
+            await BookUserStatsUpdate(context, (int)bookUser.Id);
             await BookListResetAsync(context);
         }
 
@@ -741,7 +741,7 @@ namespace Logic.Services
                 // mark the previous page as read because you didn't do it in the PageMove function
                 await PageUserMarkAsReadAsync(context, (int)_currentPageUser.Id);
                 // refresh the word user cache
-                await PageResetDataForRead(context, _currentPageUser.PageId);
+                await PageResetDataForRead(context, (int)_currentPageUser.PageId);
             }
         }
         public async Task PageMove(IdiomaticaContext context, int targetPageNum)
@@ -780,8 +780,8 @@ namespace Logic.Services
             if (_currentPageUser == null) return;
 
 
-            await PageResetDataForRead(context, _currentPageUser.PageId);
-            await BookUserUpdateBookmarkAsync(context, _bookUser.Id, (int)_currentPage.Id);
+            await PageResetDataForRead(context, (int)_currentPageUser.PageId);
+            await BookUserUpdateBookmarkAsync(context, (int)_bookUser.Id, (int)_currentPage.Id);
             _isDataInitRead = true;
         }
         public async Task<(string input, string output)> ParagraphTranslate(
@@ -894,7 +894,7 @@ namespace Logic.Services
             WordUser wu = new WordUser();
             if (token.Word == null || token.WordId < 1)
             {
-                token.Word = await WordGetByIdAsync(context, token.WordId);
+                token.Word = await WordGetByIdAsync(context, (int)token.WordId);
                 var wordEntry = _allWordsInPage.Where(w => w.Value.Id == token.WordId).FirstOrDefault();
                 if (wordEntry.Value != null)
                 {
@@ -935,11 +935,10 @@ namespace Logic.Services
             IdiomaticaContext context, int? userId)
         {
             List<(string language, int wordCount)> returnList = new List<(string language, int wordCount)>();
-            var languageUsers = await LanguageUsersGetByUserIdAsync(context, userId);
+            var languageUsers = await LanguageUsersAndLanguageGetByUserIdAsync(context, userId);
             foreach (var languageUser in languageUsers)
             {
-                var lang = await DataCache.LanguageByIdReadAsync(languageUser.LanguageId, context);
-                if (lang == null) continue;
+                if (languageUser.Language == null) continue;
                 var count = (from lu in context.LanguageUsers
                              join bu in context.BookUsers on lu.Id equals bu.LanguageUserId
                              join pu in context.PageUsers on bu.Id equals pu.BookUserId
@@ -950,7 +949,7 @@ namespace Logic.Services
                              where pu.ReadDate != null
                                 && lu.Id == languageUser.Id
                              select t).Count();
-                returnList.Add((lang.Name, count));
+                returnList.Add((languageUser.Language.Name, count));
             }
             return returnList;
         }
@@ -1158,13 +1157,13 @@ namespace Logic.Services
         private async Task BookUserStatsUpdate(IdiomaticaContext context, int bookUserId)
         {
             var bookUser = await DataCache.BookUserByIdReadAsync(bookUserId, context);
-            var languageUser = await DataCache.LanguageUserByIdReadAsync(bookUser.LanguageUserId, context);
-            var allWordsInBook = await DataCache.WordsByBookIdReadAsync(bookUser.BookId, context);
+            var languageUser = await DataCache.LanguageUserByIdReadAsync((int)bookUser.LanguageUserId, context);
+            var allWordsInBook = await DataCache.WordsByBookIdReadAsync((int)bookUser.BookId, context);
             var allWordUsersInBook = await DataCache.WordUsersByBookIdAndLanguageUserIdReadAsync(
-                (bookUser.BookId, bookUser.LanguageUserId), context);
+                ((int)bookUser.BookId, (int)bookUser.LanguageUserId), context);
             var pageUsers = await DataCache.PageUsersByBookUserIdReadAsync(bookUserId, context);
             var pages = await DataCache.PagesByBookIdReadAsync (bookUserId, context);
-            var bookStats = await DataCache.BookStatsByBookIdReadAsync(bookUser.BookId, context);
+            var bookStats = await DataCache.BookStatsByBookIdReadAsync((int)bookUser.BookId, context);
             var totalPagesStatline = bookStats.Where(x => x.Key == AvailableBookStat.TOTALPAGES).FirstOrDefault();
             var totalWordsStatline = bookStats.Where(x => x.Key == AvailableBookStat.TOTALWORDCOUNT).FirstOrDefault();
             var totalDistinctWordsStatline = bookStats.Where(x => x.Key == AvailableBookStat.DISTINCTWORDCOUNT).FirstOrDefault();
@@ -1187,7 +1186,7 @@ namespace Logic.Services
             }
 
             // last page read
-            int lastPageRead = (readPages.Count > 0) ? readPages.First().Ordinal : 0;
+            int lastPageRead = ((int)readPages.Count > 0) ? (int)readPages.First().Ordinal : 0;
 
             // progress
             string progress = $"{lastPageRead} / {totalPages}";
@@ -1279,10 +1278,10 @@ namespace Logic.Services
             // delete the booklistrows cache for this user
             DataCache.BookListRowsByUserIdDeleteAsync((int)languageUser.Id, context);
             // delete the actual stats from teh database and bookuserstats cache
-            await DataCache.BookUserStatsByBookIdAndUserIdDelete((bookUser.BookId, languageUser.UserId), context);
+            await DataCache.BookUserStatsByBookIdAndUserIdDelete(((int)bookUser.BookId, (int)languageUser.UserId), context);
             // add the new stats
             await DataCache.BookUserStatsByBookIdAndUserIdCreate(
-                (bookUser.BookId, languageUser.UserId), stats, context);
+                ((int)bookUser.BookId, (int)languageUser.UserId), stats, context);
         }
 
         #endregion
@@ -1354,11 +1353,11 @@ namespace Logic.Services
             }
             return _languageUser;
         }
-        private async Task<List<LanguageUser>> LanguageUsersGetByUserIdAsync(
+        private async Task<List<LanguageUser>> LanguageUsersAndLanguageGetByUserIdAsync(
             IdiomaticaContext context, int? userId)
         {
             if (userId == null || userId < 1) return new List<LanguageUser>();
-            return await DataCache.LanguageUsersByUserIdReadAsync((int)userId, context);
+            return await DataCache.LanguageUsersAndLanguageByUserIdReadAsync((int)userId, context);
         }
 
         #endregion
@@ -1519,7 +1518,7 @@ namespace Logic.Services
 
             try
             {
-                var language = await DataCache.LanguageByIdReadAsync(bookUser.LanguageUser.LanguageId, context);
+                var language = await DataCache.LanguageByIdReadAsync((int)bookUser.LanguageUser.LanguageId, context);
                 if (language == null)
                 {
                     _errorHandler.LogAndThrow(2320);
@@ -1552,7 +1551,7 @@ namespace Logic.Services
 
                     // need to create
                     var newWordUser = await WordUserCreateAndSaveUnknownAsync(
-                        context, bookUser.LanguageUserId, kvp.Value);
+                        context, (int)bookUser.LanguageUserId, kvp.Value);
                     if (newWordUser == null || newWordUser.Id == 0)
                     {
                         _errorHandler.LogAndThrow(2330);
@@ -1590,7 +1589,7 @@ namespace Logic.Services
 
             // pageUser is not created yet. Is the page created?
             var existingPage = await DataCache.PageByOrdinalAndBookIdReadAsync(
-                (pageOrdinal, _bookUser.BookId), context);
+                (pageOrdinal, (int)_bookUser.BookId), context);
             if (existingPage == null)
             {
                 _errorHandler.LogAndThrow(2070);
@@ -2072,7 +2071,7 @@ namespace Logic.Services
             {
                 if (wordUser.Word is null)
                 {
-                    wordUser.Word = await DataCache.WordByIdReadAsync(wordUser.WordId, context);
+                    wordUser.Word = await DataCache.WordByIdReadAsync((int)wordUser.WordId, context);
                 }
 
                 // TextLowerCase and LanguageId are a unique key in the database

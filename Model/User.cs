@@ -18,13 +18,13 @@ namespace Model
         public List<LanguageUser> LanguageUsers { get; set; } = new List<LanguageUser>();
         public List<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
         // not a strict EF Core relationship
-        public string ApplicationUserId { get; set; }
+        public string? ApplicationUserId { get; set; }
 
         /// <summary>
         /// the DB link to the primary language of the user; used for UI rendering and for translations
         /// </summary>
         [Column("LanguageCode")]
-        public string Code { get; set; } = "ENG-US";
+        public string? Code { get; set; } = "ENG-US";
         /// <summary>
         /// the primary language of the user; used for UI rendering and for translations
         /// </summary>
@@ -34,6 +34,6 @@ namespace Model
 
         #endregion
         [StringLength(250)]
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 }

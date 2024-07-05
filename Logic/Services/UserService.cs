@@ -32,7 +32,7 @@ namespace Logic.Services
             AuthenticationStateProvider AuthenticationStateProvider)
         {
             _authenticationStateProvider = AuthenticationStateProvider;
-            _uiLabels = UILabels.Factory.GetUILabels(LanguageCodeEnum.EN_US);
+            _uiLabels = UILabels.Factory.GetUILabels(AvailableLanguageCodes.EN_US);
         }
 #if DEBUG
         /// <summary>

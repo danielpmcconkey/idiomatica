@@ -15,15 +15,15 @@ namespace Model
 
         #region relationships
         public List<Sentence> Sentences { get; set; } = new List<Sentence>();
-        public int PageId { get; set; }
-        public Page Page { get; set; }
+        public int? PageId { get; set; }
+        public Page? Page { get; set; }
 
         // warning, do not auto create the ParagraphTranslations list or you'll
         // break the translation function's ability to look-up if we've already
         // pulled it
-        public List<ParagraphTranslation> ParagraphTranslations { get; set; } 
+        public List<ParagraphTranslation> ParagraphTranslations { get; set; } = new List<ParagraphTranslation>();
         #endregion
 
-        public int Ordinal { get; set; }
+        public int? Ordinal { get; set; }
     }
 }

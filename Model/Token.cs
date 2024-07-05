@@ -19,10 +19,10 @@ namespace Model
 
         #region relationships
 
-        public int WordId { get; set; }
-        public Word Word { get; set; }
-        public int SentenceId { get; set; }
-        public Sentence Sentence { get; set; }
+        public int? WordId { get; set; }
+        public Word? Word { get; set; }
+        public int? SentenceId { get; set; }
+        public Sentence? Sentence { get; set; }
 
         #endregion
 
@@ -30,12 +30,12 @@ namespace Model
         /// the text only component, regardless of status, includes any punctuation
         /// </summary>
         [StringLength(250)]
-        public string Display { get; set; }
+        public string? Display { get; set; }
 
 
         /// <summary>
         /// the order it appears within its sentence
         /// </summary>
-        public int Ordinal { get; set; }
+        public int? Ordinal { get; set; }
     }
 }

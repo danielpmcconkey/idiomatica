@@ -10,9 +10,9 @@ namespace Logic.UILabels
 	
 	public static class Factory
 	{
-		public static UILabels GetUILabels(LanguageCodeEnum languageCodeEnum)
+		public static UILabels GetUILabels(AvailableLanguageCodes languageCodeEnum)
 		{
-			if(languageCodeEnum == LanguageCodeEnum.EN_US) return new Labels_EngUS();
+			if(languageCodeEnum == AvailableLanguageCodes.EN_US) return new Labels_EngUS();
 			return new Labels_EngUS();
 		}
 	}

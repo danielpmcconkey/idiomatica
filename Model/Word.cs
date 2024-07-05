@@ -22,8 +22,8 @@ namespace Model
 
         #region relationships
         
-        public int LanguageId { get; set; }
-        public Language Language { get; set; }
+        public int? LanguageId { get; set; }
+        public Language? Language { get; set; }
         public List<Token> Tokens { get; set; } = new List<Token>();
         public List<WordUser> WordUsers { get; set; } = new List<WordUser>();
 
@@ -31,13 +31,13 @@ namespace Model
 
 
         [StringLength(250)]
-        public string Text { get; set; }
+        public string? Text { get; set; }
         [StringLength(250)]
-        public string TextLowerCase { get; set; }
+        public string? TextLowerCase { get; set; }
         
         [StringLength(250)]
         public string? Romanization { get; set; }
-        public int TokenCount { get; set; } = 0; // todo: understand token vs word in original lute and make a multi-word learning phrase in idiomatica
+        public int? TokenCount { get; set; } = 0; // todo: understand token vs word in original lute and make a multi-word learning phrase in idiomatica
         
     }
 }

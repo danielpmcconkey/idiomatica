@@ -15,12 +15,12 @@ namespace Model
         public int? Id { get; set; }
 
         #region relationships
-        public int ParagraphId { get; set; }
-        public Paragraph Paragraph { get; set; }
+        public int? ParagraphId { get; set; }
+        public Paragraph? Paragraph { get; set; }
         public List<Token> Tokens { get; set; } = new List<Token>();
         #endregion
 
-        public int Ordinal { get; set; }
+        public int? Ordinal { get; set; }
         [Column(TypeName = "TEXT")]
         public string? Text { get; set; }
     }

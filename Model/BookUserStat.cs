@@ -15,11 +15,11 @@ namespace Model
     {
         public int? BookId { get; set; }
         public int? LanguageUserId { get; set; }
-        public AvailableBookUserStat Key { get; set; }
+        public AvailableBookUserStat? Key { get; set; }
 
         #region relationships
-        public Book Book { get; set; }
-        public LanguageUser LanguageUser { get; set; }
+        public Book? Book { get; set; }
+        public LanguageUser? LanguageUser { get; set; }
         #endregion
         [StringLength(250)]
         public string? ValueString { get; set; }

@@ -16,7 +16,7 @@ namespace Model
     /// DeepL uses hyphens that can't be used in an enum value. So we 
     /// substitute hyphens for underscores.
     /// </summary>
-    public enum LanguageCodeEnum {
+    public enum AvailableLanguageCodes {
         BG,             // Bulgarian
         CS,             // Czech
         DA,             // Danish
@@ -55,7 +55,7 @@ namespace Model
     public class LanguageCode
     {
         [StringLength(25)]
-        public string Code { get; set; }
+        public string? Code { get; set; }
 
         /// <summary>
         /// LanguageCodeEnum is used to convert between the DeepL codes (which 
@@ -63,23 +63,23 @@ namespace Model
         /// enumerations
         /// </summary>
         [NotMapped]
-        public LanguageCodeEnum LanguageCodeEnum
+        public AvailableLanguageCodes LanguageCodeEnum
         {
             get
             {
                 string enumName = Code.Replace('-', '_');
-                LanguageCodeEnum outVal = LanguageCodeEnum.EN_US;
-                Enum.TryParse<LanguageCodeEnum>(enumName, out outVal);
+                AvailableLanguageCodes outVal = AvailableLanguageCodes.EN_US;
+                Enum.TryParse<AvailableLanguageCodes>(enumName, out outVal);
                 return outVal;
             }
         }
         [StringLength(250)]
-        public string LanguageName { get; set; }
-        public List<ParagraphTranslation> ParagraphTranslations { get; set; }
-        public List<User> Users { get; set; }
-        public Language Language { get; set; }
-        public bool IsImplementedForLearning { get; set; }
-        public bool IsImplementedForUI { get; set; }
-        public bool IsImplementedForTranslation { get; set; }
+        public string? LanguageName { get; set; }
+        public List<ParagraphTranslation> ParagraphTranslations { get; set; } = new List<ParagraphTranslation>();
+        public List<User> Users { get; set; } = new List<User>();
+        public Language? Language { get; set; }
+        public bool? IsImplementedForLearning { get; set; }
+        public bool? IsImplementedForUI { get; set; }
+        public bool? IsImplementedForTranslation { get; set; }
     }
 }

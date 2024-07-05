@@ -17,6 +17,7 @@ namespace Model.DAL
         private static ConcurrentDictionary<int, List<Word>> WordsByBookId = new ConcurrentDictionary<int, List<Word>>();
         private static ConcurrentDictionary<int, Dictionary<string, Word>> WordsDictByBookId = new ConcurrentDictionary<int, Dictionary<string, Word>>();
         private static ConcurrentDictionary<int, Dictionary<string, Word>> WordsDictByPageId = new ConcurrentDictionary<int, Dictionary<string, Word>>();
+        private static ConcurrentDictionary<int, List<Word>> WordsAndTokensAndSentencesAndParagraphsByWordId = new ConcurrentDictionary<int, List<Word>>();
 
         #region read
         public static async Task<Word?> WordByIdReadAsync(int key, IdiomaticaContext context)
@@ -190,6 +191,26 @@ namespace Model.DAL
             WordsCommon1000ByLanguageId[key] = value;
             // also write each word to cache
             foreach (var word in value) { WordById[(int)word.Id] = word; }
+            return value;
+        }
+        public static async Task<List<Word>> WordsAndTokensAndSentencesAndParagraphsByWordIdReadAsync(int key, IdiomaticaContext context)
+        {
+            // check cache
+            if (WordsAndTokensAndSentencesAndParagraphsByWordId.ContainsKey(key))
+            {
+                return WordsAndTokensAndSentencesAndParagraphsByWordId[key];
+            }
+
+            // read DB
+            var value = await context.Words
+                .Where(w => w.Id == key)
+                .Include(w => w.Tokens)
+                    .ThenInclude(t => t.Sentence)
+                    .ThenInclude(s => s.Paragraph)
+                .ToListAsync();
+            if (value == null) return null;
+            // write to cache
+            WordsAndTokensAndSentencesAndParagraphsByWordId[key] = value;
             return value;
         }
         #endregion

@@ -15,15 +15,15 @@ namespace Model
         public int? Id { get; set; }
 
         #region relationships
-        public int BookId { get; set; }
-        public Book Book { get; set; }
+        public int? BookId { get; set; }
+        public Book? Book { get; set; }
         public List<Paragraph> Paragraphs { get; set; } = new List<Paragraph>();
         public List<PageUser> PageUsers { get; set; } = new List<PageUser>();
         #endregion
 
-        public int Ordinal { get; set; }
+        public int? Ordinal { get; set; }
         [Column(TypeName = "TEXT")]
-        public string OriginalText { get; set; }
+        public string? OriginalText { get; set; }
 
     }
 }

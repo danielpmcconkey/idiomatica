@@ -61,7 +61,7 @@ namespace Model.DAL
             if (value == null) return null;
             // write to cache
             BookUserByBookIdAndUserId[key] = value;
-            BookUserById[value.Id] = value;
+            BookUserById[(int)value.Id] = value;
             return value;
         }
         #endregion

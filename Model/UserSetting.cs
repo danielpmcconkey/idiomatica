@@ -16,17 +16,17 @@ namespace Model
     public class UserSetting
     {
 
-        public int Key { get; set; }
+        public int? Key { get; set; }
 
 
         #region relationships
-        public int UserId { get; set; }
-        public User User { get; set; }
+        public int? UserId { get; set; }
+        public User? User { get; set; }
         #endregion
 
 
 
         [StringLength(1000)]
-        public string Value { get; set; }
+        public string? Value { get; set; }
     }
 }

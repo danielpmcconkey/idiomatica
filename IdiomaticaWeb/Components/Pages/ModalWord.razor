@@ -138,7 +138,7 @@
         {
             var context = await DbContextFactory.CreateDbContextAsync();
             await BookService.WordUserSaveModalDataAsync(
-                context, _wordUser.Id, _wordUser.Status, _wordUser.Translation);
+                context, (int)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
             Parent.RefreshState();
             await modal.HideAsync();
         }

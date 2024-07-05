@@ -13,10 +13,10 @@ namespace Model
         public int? Id { get; set; }
 
         #region relationships
-        public int BookUserId { get; set; }
-        public BookUser BookUser { get; set; }
-        public int PageId { get; set; }
-        public Page Page { get; set; }
+        public int? BookUserId { get; set; }
+        public BookUser? BookUser { get; set; }
+        public int? PageId { get; set; }
+        public Page? Page { get; set; }
         
         #endregion
 

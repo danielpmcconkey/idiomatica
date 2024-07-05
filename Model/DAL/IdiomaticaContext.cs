@@ -14,7 +14,7 @@ namespace Model.DAL
         public DbSet<BookUser> BookUsers { get; set; }
         public DbSet<BookUserStat> BookUserStats { get; set; }
         public DbSet<FlashCard> FlashCards { get; set; }
-        public DbSet<FlashCardAttempt> FlashCardsAttempts { get; set; }
+        public DbSet<FlashCardAttempt> FlashCardAttempts { get; set; }
         public DbSet<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridges { get; set; }
         public DbSet<Language> Languages { get; set; }
         public DbSet<LanguageCode> LanguageCodes { get; set; }

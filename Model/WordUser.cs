@@ -11,13 +11,13 @@ namespace Model
     [Table("WordUser", Schema = "Idioma")]
     public class WordUser
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         #region relationships
 
-        public int WordId { get; set; }
+        public int? WordId { get; set; }
         public Word? Word { get; set; }
-        public int LanguageUserId { get; set; }
+        public int? LanguageUserId { get; set; }
         public LanguageUser? LanguageUser { get; set; }
         public FlashCard? FlashCard { get; set; }
 
@@ -25,8 +25,8 @@ namespace Model
 
         [StringLength(2000)]
         public string? Translation { get; set; }
-        public AvailableWordUserStatus Status { get; set; }
-        public DateTime Created { get; set; } = DateTime.Now;
-        public DateTime StatusChanged { get; set; } = DateTime.Now;
+        public AvailableWordUserStatus? Status { get; set; }
+        public DateTime? Created { get; set; } = DateTime.Now;
+        public DateTime? StatusChanged { get; set; } = DateTime.Now;
     }
 }

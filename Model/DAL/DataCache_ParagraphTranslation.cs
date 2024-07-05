@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,8 +40,7 @@ namespace Model.DAL
                 return ParagraphTranslationsByParagraphId[key];
             }
             // read DB
-            var value = context.ParagraphTranslations.Where(x => x.ParagraphId == key)
-                .ToList();
+            var value = await context.ParagraphTranslations.Where(x => x.ParagraphId == key).ToListAsync();
 
             // write to cache
             ParagraphTranslationsByParagraphId[key] = value;
@@ -56,16 +56,21 @@ namespace Model.DAL
         {
             context.ParagraphTranslations.Add(value);
             context.SaveChanges();
-            if (value.Id == 0)
+            if (value.Id == null || value.Id == 0)
             {
                 return false;
             }
             // write to the ID cache
             ParagraphTranslationById[(int)value.Id] = value;
+
             // are there any lists with this one's paragraph already cached?
-            if (ParagraphTranslationsByParagraphId.ContainsKey(value.ParagraphId))
+            if (value.ParagraphId == null)
             {
-                var cachedList = ParagraphTranslationsByParagraphId[value.ParagraphId];
+                return true;
+            }
+            if (ParagraphTranslationsByParagraphId.ContainsKey((int)value.ParagraphId))
+            {
+                var cachedList = ParagraphTranslationsByParagraphId[(int)value.ParagraphId];
                 if (cachedList != null)
                 {
                     cachedList.Add(value);

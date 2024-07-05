@@ -16,11 +16,11 @@ namespace Model
 
         #region relationships
 
-        public int LanguageId { get; set; }
-        public Language Language { get; set; }
+        public int? LanguageId { get; set; }
+        public Language? Language { get; set; }
         public List<Page> Pages { get; set; } = new List<Page>();
         public List<BookStat> BookStats { get; set; } = new List<BookStat>();
-        public List<BookUserStat> BookUserStats { get; set; }
+        public List<BookUserStat> BookUserStats { get; set; } = new List<BookUserStat>();
         public List<BookUser> BookUsers { get; set; } = new List<BookUser>();
         public List<BookTag> BookTags { get; set; } = new List<BookTag>();
 
@@ -28,7 +28,7 @@ namespace Model
 
 
         [StringLength(250)]
-        public string Title { get; set; }
+        public string? Title { get; set; }
         [StringLength(1000)]
         public string? SourceURI { get; set; }
         

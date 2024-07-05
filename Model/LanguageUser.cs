@@ -14,16 +14,16 @@ namespace Model
         public int? Id { get; set; }
 
         #region relationships
-        public int LanguageId { get; set; }
-        public Language Language { get; set; }
-        public int UserId { get; set; }
-        public User User { get; set; }
+        public int? LanguageId { get; set; }
+        public Language? Language { get; set; }
+        public int? UserId { get; set; }
+        public User? User { get; set; }
         public List<BookUser> BookUsers { get; set; } = new List<BookUser>();
         public List<WordUser> WordUsers { get; set; } = new List<WordUser>();
         public List<BookUserStat> BookUsersStats { get; set; } = new List<BookUserStat>();
 
         #endregion
 
-        public int TotalWordsRead { get; set; } = 0;
+        public int? TotalWordsRead { get; set; } = 0;
     }
 }

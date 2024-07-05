@@ -10,7 +10,7 @@ namespace Model
     [Table("FlashCardAttempt", Schema = "Idioma")]
     public class FlashCardAttempt
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         #region relationships
 
 

@@ -13,13 +13,13 @@ namespace Model
     [PrimaryKey(nameof(BookId), nameof(Key))]
     public class BookStat
     {
-        public int BookId { get; set; }
-        public AvailableBookStat Key { get; set; }
+        public int? BookId { get; set; }
+        public AvailableBookStat? Key { get; set; }
 
         #region relationships
-        public Book Book { get; set; }
+        public Book? Book { get; set; }
         #endregion
         [StringLength(250)]
-        public string Value { get; set; }
+        public string? Value { get; set; }
     }
 }
