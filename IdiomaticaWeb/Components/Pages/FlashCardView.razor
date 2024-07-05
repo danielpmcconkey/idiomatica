@@ -1,158 +1,157 @@
 ﻿@rendermode InteractiveServer
-@inject FlashCardService FlashCardService;
 @inject UserService UserService;
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 
-@if(IsHidden == false)
-{
-    <Card>
-        <CardBody>
-            <CardTitle>@_cardTitle</CardTitle>
-            <CardText>@_exampleParagraph</CardText>
-            @if(_isAnswerVisible == false)
-            {
-                <Button Color="ButtonColor.Primary" Type="ButtonType.Button" @onclick="OnShowAnswerClick">
-                    @UserService.GetUILabel("fcSeeAnswer")
-                </Button>
-            }
-        
-        </CardBody>
-        @if (_isAnswerVisible)
+    
+<style>
+    .flashCardVisible {
+        display: block;
+    }
+
+    .flashCardInvisible {
+        display: none;
+    }
+</style>
+    
+<ErrorAlert ErrorState="errorState"></ErrorAlert>
+
+
+<Card Class="@CardCss">
+    <CardBody>
+        <CardTitle>@FlashCardService.CardTitle</CardTitle>
+        <CardText>@FlashCardService.ExampleParagraph</CardText>
+        @if(_isAnswerVisible == false)
         {
-            <hr />
+            <Button Color="ButtonColor.Primary" Type="ButtonType.Button" @onclick="OnShowAnswerClick">
+                @UserService.GetUILabel("fcSeeAnswer")
+            </Button>
+        }
+        
+    </CardBody>
+    @if (_isAnswerVisible)
+    {
+        <hr />
+        @if(_isLoading)
+        {
+            <Button Color="ButtonColor.Primary" Size="Size.Small" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+        }
+        else
+        {
             <CardBody>
-                <CardTitle>@_cardTranslation</CardTitle>
-                <CardText>@_paragraphTranslation</CardText>
+                <CardTitle>@FlashCardService.CardTranslation</CardTitle>
+                <CardText>@FlashCardService.ParagraphTranslation</CardText>
             </CardBody>
         }
-        <CardFooter>
+            
+    }
+    <CardFooter>
+        @if (_isLoading)
+        {
+            <Button Color="ButtonColor.Primary" Size="Size.Small" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+        }
+        else
+        {
             <div class="container">
                 <div class="row">
                     <div class="col-9">
                         <Button Color="ButtonColor.Warning" Type="ButtonType.Button" Outline="true"
-                                @onclick="@(e => OnAdvanceCardClick(@AvailableFlashCardAttemptStatus.WRONG))">
+                                @onclick="@(e => OnNextCardClickAsync(@AvailableFlashCardAttemptStatus.WRONG))">
                             @UserService.GetUILabel("fcWrong")
                         </Button>
                         <Button Color="ButtonColor.Warning" Type="ButtonType.Button" Outline="true"
-                                @onclick="@(e => OnAdvanceCardClick(@AvailableFlashCardAttemptStatus.HARD))">
+                                @onclick="@(e => OnNextCardClickAsync(@AvailableFlashCardAttemptStatus.HARD))">
                             @UserService.GetUILabel("fcHard")
                         </Button>
                         <Button Color="ButtonColor.Success" Type="ButtonType.Button" Outline="true"
-                                @onclick="@(e => OnAdvanceCardClick(@AvailableFlashCardAttemptStatus.GOOD))">
+                                @onclick="@(e => OnNextCardClickAsync(@AvailableFlashCardAttemptStatus.GOOD))">
                             @UserService.GetUILabel("fcGood")
                         </Button>
                         <Button Color="ButtonColor.Success" Type="ButtonType.Button" Outline="true"
-                                @onclick="@(e => OnAdvanceCardClick(@AvailableFlashCardAttemptStatus.EASY))">
+                                @onclick="@(e => OnNextCardClickAsync(@AvailableFlashCardAttemptStatus.EASY))">
                             @UserService.GetUILabel("fcEasy")
                         </Button>
                     </div>
                     <div class="col-3">
                         <Button Color="ButtonColor.Danger" Type="ButtonType.Button" Outline="false"
-                                @onclick="@(e => OnAdvanceCardClick(@AvailableFlashCardAttemptStatus.STOP))">
+                                @onclick="@(e => OnNextCardClickAsync(@AvailableFlashCardAttemptStatus.STOP))">
                             @UserService.GetUILabel("fcStop")
                         </Button>
                     </div>
                 </div>
             </div>
-        </CardFooter>
-    </Card>
-}
+        }
+    </CardFooter>
+</Card>
+
 
 @code {
+    [Parameter] public FlashCardService FlashCardService { get; set; }
+    [Parameter] public string? CardCss { get; set; }
 
-    [Parameter]
-    public EventCallback OnNextCard { get; set; }
-    [Parameter]
-    public LanguageCode? UiLanguageCode { get; set; }
-    [Parameter]
-    public bool IsHidden { get; set; }
 
-    private FlashCard _card;
-    private FlashCardParagraphTranslationBridge _bridge;
-    private string _exampleParagraph;
-    private string _paragraphTranslation;
+
+
+
+    private bool _isLoading = false;
     private bool _isAnswerVisible = false;
-    private string _cardTitle
-    {
-        get
-        {
-            if (_card is null) return "";
-            if (_card.WordUser is null) return "";
-            if (_card.WordUser.Word is null) return "";
-            return _card.WordUser.Word.TextLowerCase;
-        }
-    }
-    private string _cardTranslation
-    {
-        get
-        {
-            if (_card is null) return "";
-            if (_card.WordUser is null) return "";
-            if (_card.WordUser.Translation is null) return "";
-            return _card.WordUser.Translation;
-        }
-    }
-
+    public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
+    
 
     private async Task OnShowAnswerClick()
     {
-        _isAnswerVisible = true;
-    }
-    public void SetCard(FlashCard card)
-    {
-        _card = card;
-        ResetCard();
-    }
-    private async Task OnAdvanceCardClick(AvailableFlashCardAttemptStatus previousCardsStatus)
-    {
-        await FlashCardService.FlashCardAttemptCreateAsync((int)_card.Id, previousCardsStatus);
-        switch(previousCardsStatus)
+        
+        try
         {
-            default:
-            case AvailableFlashCardAttemptStatus.GOOD:
-                _card.NextReview = DateTime.Now.AddDays(1);
-                break;
-            case AvailableFlashCardAttemptStatus.WRONG:
-                _card.NextReview = DateTime.Now.AddMinutes(5);
-                break;
-            case AvailableFlashCardAttemptStatus.HARD:
-                _card.NextReview = DateTime.Now.AddHours(1);
-                break;
-            case AvailableFlashCardAttemptStatus.EASY:
-                _card.NextReview = DateTime.Now.AddDays(5);
-                break;
-            case AvailableFlashCardAttemptStatus.STOP:
-                _card.Status = AvailableFlashCardStatus.DONTUSE;
-                _card.NextReview = DateTime.Now.AddYears(5);
-                break;
+            _isLoading = true;
+            var t_delay = Task.Delay(FlashCardService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            _isAnswerVisible = true;
+            await t_delay;
+            _isLoading = false;
         }
-        await FlashCardService.FlashCardUpdateAfterReviewAsync((int)_card.Id, (DateTime)_card.NextReview,
-            (AvailableFlashCardStatus) _card.Status);
-        await OnNextCard.InvokeAsync();
-    }
-    private void ResetCard()
-    {
-        _paragraphTranslation = "";
-        _exampleParagraph = "";
-        // note some paragraph translations will be into languages the user 
-        // doesn't speak. That's not good. Filter it
-        var bridges = _card.FlashCardParagraphTranslationBridges
-            .Where(x => x.ParagraphTranslation.Code == UiLanguageCode.Code)
-            .ToList();
-        var bridgeCount = bridges.Count;
-        if(bridgeCount > 0)
+        catch (IdiomaticaException ex)
         {
-            Random rng = new Random();
-            int position = rng.Next(0, bridgeCount);
-            _bridge = bridges[position];
-            if (_bridge.ParagraphTranslation != null 
-                && _bridge.ParagraphTranslation.Paragraph != null
-                && _bridge.ParagraphTranslation.Paragraph.Sentences != null)
-            {
-                _paragraphTranslation = _bridge.ParagraphTranslation.TranslationText;
-                _exampleParagraph = FlashCardService
-                    .ParagraphGetFullText(_bridge.ParagraphTranslation.Paragraph);
-            }
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("flashCardReviewInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
         }
-        _isAnswerVisible = false;
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("getLoggflashCardReviewInitializationErroredInUserError");
+            StateHasChanged();
+        }
     }
+    
+    public async Task OnNextCardClickAsync(AvailableFlashCardAttemptStatus previousCardsStatus)
+    {
+        try
+        {
+            _isLoading = true;
+            var t_delay = Task.Delay(FlashCardService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            await FlashCardService.DeckAdvanceCardAsync(context, previousCardsStatus);
+            _isAnswerVisible = false;
+            await t_delay;
+            _isLoading = false;
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("flashCardReviewInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return;
+        }
+        catch (Exception ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("getLoggflashCardReviewInitializationErroredInUserError");
+            StateHasChanged();
+        }
+    }
+    
+    
 }
