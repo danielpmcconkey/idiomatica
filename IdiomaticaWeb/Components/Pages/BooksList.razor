@@ -109,6 +109,9 @@
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
             errorState.code = ex.code;
+            errorState.memberName = ex.memberName;
+            errorState.sourceFilePath = ex.sourceFilePath;
+            errorState.sourceLineNumber = ex.sourceLineNumber;
             StateHasChanged();
             return;
         }
@@ -139,6 +142,9 @@
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
             errorState.code = ex.code;
+            errorState.memberName = ex.memberName;
+            errorState.sourceFilePath = ex.sourceFilePath;
+            errorState.sourceLineNumber = ex.sourceLineNumber;
             StateHasChanged();
             return;
         }
@@ -160,6 +166,9 @@
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
             errorState.code = ex.code;
+            errorState.memberName = ex.memberName;
+            errorState.sourceFilePath = ex.sourceFilePath;
+            errorState.sourceLineNumber = ex.sourceLineNumber;
             StateHasChanged();
             return;
         }
@@ -182,6 +191,9 @@
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("bookListRefreshError");
             errorState.code = ex.code;
+            errorState.memberName = ex.memberName;
+            errorState.sourceFilePath = ex.sourceFilePath;
+            errorState.sourceLineNumber = ex.sourceLineNumber;
             StateHasChanged();
             return;
         }
@@ -203,6 +215,9 @@
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("bookListRefreshError");
             errorState.code = ex.code;
+            errorState.memberName = ex.memberName;
+            errorState.sourceFilePath = ex.sourceFilePath;
+            errorState.sourceLineNumber = ex.sourceLineNumber;
             StateHasChanged();
             return;
         }

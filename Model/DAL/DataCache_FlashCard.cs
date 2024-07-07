@@ -59,7 +59,9 @@ namespace Model.DAL
                 .Include(fc => fc.Attempts)
                 .Include(fc => fc.FlashCardParagraphTranslationBridges)
                     .ThenInclude(fcptb => fcptb.ParagraphTranslation)
+#nullable disable
                         .ThenInclude(pt => pt.Paragraph).ThenInclude(pp => pp.Sentences)
+#nullable restore
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache

@@ -164,6 +164,9 @@
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("readInitializationError");
             errorState.code = ex.code;
+            errorState.memberName = ex.memberName;
+            errorState.sourceFilePath = ex.sourceFilePath;
+            errorState.sourceLineNumber = ex.sourceLineNumber;
             StateHasChanged();
             return;
         }
@@ -225,6 +228,9 @@
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("readErrorPageChange");
             errorState.code = ex.code;
+            errorState.memberName = ex.memberName;
+            errorState.sourceFilePath = ex.sourceFilePath;
+            errorState.sourceLineNumber = ex.sourceLineNumber;
             StateHasChanged();
             return;
         }
@@ -255,6 +261,9 @@
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("clearPageUserError");
             errorState.code = ex.code;
+            errorState.memberName = ex.memberName;
+            errorState.sourceFilePath = ex.sourceFilePath;
+            errorState.sourceLineNumber = ex.sourceLineNumber;
             StateHasChanged();
             return;
         }

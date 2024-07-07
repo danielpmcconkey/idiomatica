@@ -97,7 +97,7 @@
     private int OnGetCurrentPageNum()
     {
         if (BookService is null) return 0;
-        return BookService.BookCurrentPageNum;
+        return (int)BookService.BookCurrentPageNum;
     }
     private async Task OnJumpClickAsync()
     {

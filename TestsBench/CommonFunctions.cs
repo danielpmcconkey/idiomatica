@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Logic;
 
 namespace TestsBench
 {
@@ -37,6 +38,7 @@ namespace TestsBench
                 .AddTransient<FlashCardService>()
                 .AddTransient<ErrorHandler>()
                 .AddTransient<DeepLService>()
+                .AddTransient<NullHandler>()
                 //.AddDbContext<IdiomaticaContext>(options => {
                 //    options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("IdiomaticaWeb"));
                 //    })

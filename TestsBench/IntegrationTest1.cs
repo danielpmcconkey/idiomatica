@@ -858,6 +858,8 @@ Fin
             // now create the book user for teh logged in user
             int userId = (int)user.Id;
             int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
+            string fromCode = "ES";
+            string toCode = "EN-US";
             
             try
             {
@@ -868,7 +870,7 @@ Fin
                     await bookService.InitDataRead(context, userService, bookId);
                 }
                 var pp = bookService.Paragraphs[0];
-                var translation = await bookService.ParagraphTranslate(context, pp);
+                var translation = await bookService.ParagraphTranslate(context, pp, fromCode, toCode);
                 var expectedTranslation = "The selfish giant";
                 var actualTranslation = pp.ParagraphTranslations[0].TranslationText;
 

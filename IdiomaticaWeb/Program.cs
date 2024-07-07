@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.DAL;
 using Logic.Telemetry;
+using Logic;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,7 @@ builder.Services.AddTransient<FlashCardService>();
 builder.Services.AddTransient<UserService>();
 builder.Services.AddTransient<ErrorHandler>();
 builder.Services.AddTransient<DeepLService>();
+builder.Services.AddTransient<NullHandler>();
 
 var connection = String.Empty;
 if (builder.Environment.IsDevelopment())

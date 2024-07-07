@@ -9,10 +9,12 @@
             <div>
                 <Icon Name="IconName.ExclamationTriangleFill" class="me-2"></Icon>
                 <p>@ErrorState.errorMessage</p>
-                @if (ErrorState.code > 0)
-                {
-                    <p>Code: @ErrorState.code </p>
-                }
+                
+                <p>Code: @ErrorState.code </p>
+                <p>Member name: @ErrorState.memberName </p>
+                <p>File: @ErrorState.sourceFilePath </p>
+                <p>Line: @ErrorState.sourceLineNumber </p>
+                
             </div>
             <Button Color="ButtonColor.Primary" Size="Size.Small" @onclick="CloseErrorAlert">
                 @GetCloseLabel()

@@ -13,6 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTransferCLI", "DataTran
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3364BEEC-7E63-42D4-8B22-15B19F74FE76}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		testing steps.txt = testing steps.txt
 	EndProjectSection
 EndProject

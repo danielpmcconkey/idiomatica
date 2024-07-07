@@ -44,7 +44,7 @@
         _title = $"{UserService.GetUILabelF("ppModalTitle", [fromLang, toLang])}";
         var context = await DbContextFactory.CreateDbContextAsync();
 
-        var translation = await BookService.ParagraphTranslate(context, pp);
+        var translation = await BookService.ParagraphTranslate(context, pp, fromLang, toLang);
         _translateFrom = translation.input;
         _translateTo = translation.output;
 

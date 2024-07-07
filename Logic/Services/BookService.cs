@@ -17,6 +17,7 @@ namespace Logic.Services
         private UserService _userService;
         private ErrorHandler _errorHandler;
         private DeepLService _deepLService;
+        private NullHandler _nullHandler;
 
         #region public read-only properties
 
@@ -28,21 +29,21 @@ namespace Logic.Services
                 return _allWordUsersInPage;
             }
         }
-        public string BookTitle { get
+        public string? BookTitle { get
             {
                 if (_book == null) return "";
                 return _book.Title;
             } }
-        public int BookTotalPageCount
+        public int? BookTotalPageCount
         {
-            get { return (int)_bookTotalPageCount; }
+            get { return _bookTotalPageCount; }
         }
-        public int BookCurrentPageNum
+        public int? BookCurrentPageNum
         {
             get 
             {
                 if(_currentPage == null) return 0;
-                return (int)_currentPage.Ordinal;
+                return _currentPage.Ordinal;
             }
         }
         public int BookCurrentPageId
@@ -62,14 +63,14 @@ namespace Logic.Services
         }
         public bool IsDataInitRead { get { return _isDataInitRead; } }
         public bool IsDataInitBookList { get { return _isDataInitBookList; } }
-        public string LanguageFromCode
+        public string? LanguageFromCode
         {
             get
             {
                 return (_languageFromCode == null) ? "" : _languageFromCode.Code;
             }
         }
-        public string LanguageToCode
+        public string? LanguageToCode
         {
             get
             {
@@ -183,11 +184,13 @@ namespace Logic.Services
 
         #endregion
 
-        public BookService(ErrorHandler errorHandler, DeepLService deepLService, UserService userService)
+        public BookService(ErrorHandler errorHandler, DeepLService deepLService, 
+            UserService userService, NullHandler nullHandler)
         {
             _errorHandler = errorHandler;
             _deepLService = deepLService;
             _userService = userService;
+            _nullHandler = nullHandler;
         }
 
 
@@ -217,7 +220,21 @@ namespace Logic.Services
                 throw;
             }
         }
-        
+        private void Deleteme()
+        {
+            User loggedInUserDenulled = _nullHandler.ThrowIfNull<User>(_loggedInUser);
+            int loggedInUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(loggedInUserDenulled.Id);
+            var languageUserDenulled = _nullHandler.ThrowIfNull<LanguageUser>(_languageUser);
+            int languageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(languageUserDenulled.Id);
+            var allWordsInPageDenulled = _nullHandler.ThrowIfNullOrEmptyDict(_allWordsInPage);
+            var allWordUsersInPageDenulled = _nullHandler.ThrowIfNullOrEmptyDict(_allWordUsersInPage);
+            BookUser bookUserDenulled = _nullHandler.ThrowIfNull<BookUser>(_bookUser);
+            Language languageDenulled = _nullHandler.ThrowIfNull<Language>(_language);
+            int languageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(languageDenulled.Id);
+            int bookIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(_bookId);
+
+        }
+
         public async Task InitDataRead(IdiomaticaContext context, UserService userService, int bookId)
         {
             _userService = userService;
@@ -235,23 +252,18 @@ namespace Logic.Services
             _book = t_book.Result;
             _bookTotalPageCount = t_bookTotalPageCount.Result;
 
-            if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id == 0)
-            {
-                _errorHandler.LogAndThrow(2130);
-                return;
-            }
-            if (_book == null || _book.Id == null || _book.Id == 0)
-            {
-                _errorHandler.LogAndThrow(2140);
-                return;
-            }
-
+            // create non-null values to use in later look-ups
+            Book bookDenulled = _nullHandler.ThrowIfNull<Book>(_book);
+            int bookIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(_bookId);
+            User loggedInUserDenulled = _nullHandler.ThrowIfNull<User>(_loggedInUser);
+            int loggedInUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(loggedInUserDenulled.Id);
+            int languageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(bookDenulled.LanguageId);
 
             // tier 1 tasks, dependent on tier 0
-            var t_bookUser = BookUserGetAsync(context, (int)_bookId, (int)_loggedInUser.Id);
-            var t_bookUserStats = BookUserGetStatsAsync(context, (int)_bookId, (int)_loggedInUser.Id);
-            var t_languageUser = LanguageUserGetAsync(context, (int)_book.LanguageId, (int)_loggedInUser.Id);
-            var t_language = LanguageGetAsync(context, (int)_book.LanguageId);
+            var t_bookUser = BookUserGetAsync(context, bookIdDenulled, loggedInUserIdDenulled);
+            var t_bookUserStats = BookUserGetStatsAsync(context, bookIdDenulled, loggedInUserIdDenulled);
+            var t_languageUser = LanguageUserGetAsync(context, languageIdDenulled, loggedInUserIdDenulled);
+            var t_language = LanguageGetAsync(context, languageIdDenulled);
 
             Task.WaitAll([t_bookUser, t_bookUserStats, t_languageUser, t_language]);
 
@@ -260,29 +272,29 @@ namespace Logic.Services
             _languageUser = t_languageUser.Result;
             _language = t_language.Result;
 
-            if (_bookUser == null || _bookUser.Id == 0)
-            {
-                _errorHandler.LogAndThrow(2150);
-                return;
-            }
+            // create non-null values to use in later look-ups
+            BookUser bookUserDenulled = _nullHandler.ThrowIfNull<BookUser>(_bookUser);
+            int currentPageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(bookUserDenulled.CurrentPageID);
+            int languageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(bookUserDenulled.LanguageUserId);
+            Language languageDenulled = _nullHandler.ThrowIfNull<Language>(_language);
+            string languageCodeDenulled = _nullHandler.ThrowIfNullOrEmptyString(languageDenulled.Code);
 
             // tier 2, dependent on tier 1
-            var t_currentPageUser = PageUserGetOnReadOpenAsync(context, (int)_bookUser.CurrentPageID, (int)_bookUser.LanguageUserId);
-            var t_languageFromCode = LanguageGetByCodeAsync(context, _language.Code);
+            var t_currentPageUser = PageUserGetOnReadOpenAsync(
+                context, currentPageIdDenulled, languageUserIdDenulled);
+            var t_languageFromCode = LanguageGetByCodeAsync(context, languageCodeDenulled);
 
             Task.WaitAll([t_currentPageUser, t_languageFromCode]);
 
             _currentPageUser = t_currentPageUser.Result;
             _languageFromCode = t_languageFromCode.Result;
 
-            if (_currentPageUser == null || _currentPageUser.PageId == 0)
-            {
-                _errorHandler.LogAndThrow(2220);
-                return;
-            }
+            // create non-null values to use in later look-ups
+            PageUser currentPageUserDenulled = _nullHandler.ThrowIfNull<PageUser>(_currentPageUser);
+            int pageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(currentPageUserDenulled.PageId);
 
             // tier 3, dependent on tier 2
-            await PageResetDataForRead(context, (int)_currentPageUser.PageId);
+            await PageResetDataForRead(context, pageIdDenulled);
 
             // fin
             _isDataInitRead = true;
@@ -297,7 +309,8 @@ namespace Logic.Services
             if (bookId == null || bookId < 1 || text == null) return false;
             // pull all tags
             var tags = await DataCache.BookTagsByBookIdReadAsync((int)bookId, context);
-            var filteredTags = tags.Where(x => x.Tag.Contains(text, StringComparison.OrdinalIgnoreCase));
+            var filteredTags = tags.Where(
+                x => x.Tag != null && x.Tag.Contains(text, StringComparison.OrdinalIgnoreCase));
             return filteredTags.Any();
         }
         public async Task<int> BookCreateAndSaveAsync(
@@ -305,49 +318,27 @@ namespace Logic.Services
         {
             const int _targetCharCountPerPage = 1378;// this was arrived at by DB query after conversion
             // sanitize and validate input
-            var titleT = (title == null) ? "" : title.Trim();
-            var languageCodeT = (languageCode == null) ? "" : languageCode.Trim();
+            var titleT = _nullHandler.ThrowIfNullOrEmptyString(title.Trim());
+            var languageCodeT = _nullHandler.ThrowIfNullOrEmptyString(languageCode.Trim());
             var urlT = (url == null) ? "" : url.Trim();
-            var textT = (text == null) ? "" : text.Trim().Replace('\u00A0', ' ');
-            if (string.IsNullOrEmpty(titleT))
-            {
-                _errorHandler.LogAndThrow(1040);
-                return -1;
-            }
-            if (string.IsNullOrEmpty(languageCodeT))
-            {
-                _errorHandler.LogAndThrow(1050);
-                return -1;
-            }
-            if (string.IsNullOrEmpty(textT))
-            {
-                _errorHandler.LogAndThrow(1060);
-                return -1;
-            }
+            var textT = _nullHandler.ThrowIfNullOrEmptyString(text.Trim().Replace('\u00A0', ' '));
 
             // pull language from the db
-            var language = await DataCache.LanguageByCodeReadAsync(languageCodeT, context);
-            if (language == null || language.Id == null || language.Id == 0)
-            {
-                _errorHandler.LogAndThrow(2070);
-                return -1;
-            }
+            var language = _nullHandler.ThrowIfNull<Language>(
+                await DataCache.LanguageByCodeReadAsync(languageCodeT, context));
+            
 
             // divide text into paragraphs
             var parser = LanguageParser.Factory.GetLanguageParser(language);
-            var paragraphSplits = parser.SegmentTextByParagraphs(textT);
-            if (paragraphSplits is null || paragraphSplits.Length == 0)
-            {
-                _errorHandler.LogAndThrow(2080);
-                return -1;
-            }
+            var paragraphSplitsRaw = parser.SegmentTextByParagraphs(textT);
+            string[] paragraphSplits = _nullHandler.ThrowIfNullOrEmptyArray<string>(paragraphSplitsRaw);
 
             // add the book to the DB so you can save pages using its ID
             Book book = new Book()
             {
                 Title = titleT,
                 SourceURI = urlT,
-                LanguageId = (int)language.Id,
+                LanguageId = _nullHandler.ThrowIfNullOrZeroInt(language.Id),
             };
             bool didSaveBook = await DataCache.BookCreateAsync(book, context);
             if (!didSaveBook || book.Id == null || book.Id < 1)
@@ -359,14 +350,9 @@ namespace Logic.Services
             // pull a list of common words from the database and put it
             // in a dictionary so that we don't always have to go back to the
             // database just to get the word ID for every single word
-            var commonWordsInLanguage = await WordFetchCommonDictForLanguageAsync(
-                context, (int)language.Id);
-            if (commonWordsInLanguage == null)
-            {
-                _errorHandler.LogAndThrow(2200);
-                return -1;
-            }
-
+            var commonWordsInLanguage = _nullHandler.ThrowIfNullOrEmptyDict(
+                await WordFetchCommonDictForLanguageAsync(context, 
+                    _nullHandler.ThrowIfNullOrZeroInt(language.Id)));
 
             var currentPageCount = 1;
             var pageText = "";
@@ -441,21 +427,6 @@ namespace Logic.Services
             if (SkipRecords < 0) SkipRecords = 0;
             await BookListResetAsync(context);
         }
-        //public async Task BookListRowsSort(string columnName, bool isAscending)
-        //{
-        //    if (_bookListRows is null) return;
-        //    if(_bookListRowsOrderByFunctions == null) return;
-        //    if (!_bookListRowsOrderByFunctions.ContainsKey(columnName)) return;
-
-        //    if(isAscending)
-        //    {
-        //        _bookListRows = _bookListRows.OrderBy(_bookListRowsOrderByFunctions[columnName]).ToList();
-        //    }
-        //    else
-        //    {
-        //        _bookListRows = _bookListRows.OrderByDescending(_bookListRowsOrderByFunctions[columnName]).ToList();
-        //    }
-        //}
         public void BookStatsCreateAndSave(IdiomaticaContext context, int bookId)
         {
             if (bookId < 1)
@@ -515,33 +486,22 @@ namespace Logic.Services
             {
                 _errorHandler.LogAndThrow(2110);
             }
-            //context.SaveChanges();
         }
         public async Task BookTagAdd(IdiomaticaContext context, int? bookId, int? userId, string? tag)
         {
-            if (bookId == null || bookId < 1)
-            {
-                _errorHandler.LogAndThrow(1420);
-                return;
-            }
-            if (userId == null || userId < 1)
-            {
-                _errorHandler.LogAndThrow(1430);
-                return;
-            }
-            if (tag == null)
-            {
-                _errorHandler.LogAndThrow(1440);
-                return;
-            }
-            string trimmedTag = tag.Trim().ToLower();
+
+            string trimmedTag = _nullHandler.ThrowIfNullOrEmptyString(tag).Trim().ToLower();
             if (trimmedTag == string.Empty) return;
+
+            int bookIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(bookId);
+            int userIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(userId);
             DateTimeOffset created = DateTimeOffset.UtcNow;
             // check if this user already saved this tag
             var existingTag = context.BookTags.Where(x =>
-                    x.BookId == (int)bookId &&
-                    x.UserId == (int)userId &&
-                    x.Tag == trimmedTag).FirstOrDefault();
+                    x.BookId == bookIdDenulled &&
+                    x.UserId == userIdDenulled &&
+                    x.Tag == trimmedTag)
+                .FirstOrDefault();
             if (existingTag != null) return;
             var newTag = new BookTag()
             {
@@ -559,24 +519,12 @@ namespace Logic.Services
         }
         public async Task BookTagRemove(IdiomaticaContext context, int? bookId, int? userId, string? tag)
         {
-            if (bookId == null || bookId < 1)
-            {
-                _errorHandler.LogAndThrow(1450);
-                return;
-            }
-            if (userId == null || userId < 1)
-            {
-                _errorHandler.LogAndThrow(1460);
-                return;
-            }
-            if (tag == null)
-            {
-                _errorHandler.LogAndThrow(1470);
-                return;
-            }
-            string trimmedTag = tag.Trim().ToLower();
+            
+            string trimmedTag = _nullHandler.ThrowIfNullOrEmptyString(tag).Trim().ToLower();
             if (trimmedTag == string.Empty) return;
-            await DataCache.BookTagDelete(((int)bookId, (int)userId, trimmedTag), context);
+            int bookIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(bookId);
+            int userIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(userId);
+            await DataCache.BookTagDelete((bookIdDenulled, userIdDenulled, trimmedTag), context);
         }
         public async Task<List<BookTag>> BookTagsGetByBookIdAndUserId(
             IdiomaticaContext context, int? bookId, int? userId)
@@ -588,17 +536,9 @@ namespace Logic.Services
         }
         public async Task BookUserAddAsync(IdiomaticaContext context, int bookId)
         {
-            if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1)
-            {
-                _errorHandler.LogAndThrow(1221);
-                return;
-            }
-            if (bookId < 1)
-            {
-                _errorHandler.LogAndThrow(1411);
-                return;
-            }
-            var bookUser = await BookUserGetAsync(context, bookId, (int)_loggedInUser.Id);
+            User loggedInUserDenulled = _nullHandler.ThrowIfNull<User>(_loggedInUser);
+            int loggedInUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(loggedInUserDenulled.Id);
+            var bookUser = await BookUserGetAsync(context, bookId, loggedInUserIdDenulled);
             if (bookUser != null)
             {
                 bookUser.IsArchived = false;
@@ -606,7 +546,7 @@ namespace Logic.Services
             }
             else
             {
-                int id = await BookUserCreateAndSaveAsync(context, bookId, (int)_loggedInUser.Id);
+                await BookUserCreateAndSaveAsync(context, bookId, loggedInUserIdDenulled);
             }
 
             // now pull a fresh copy of the book list
@@ -614,17 +554,17 @@ namespace Logic.Services
         }
         public async Task BookUserArchiveAsync(IdiomaticaContext context, int bookId)
         {
-            if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1)
-            {
-                _errorHandler.LogAndThrow(1220);
-                return;
-            }
+            User loggedInUserDenulled = _nullHandler.ThrowIfNull<User>(_loggedInUser);
+            int loggedInUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(loggedInUserDenulled.Id);
+            
             if (bookId < 1)
             {
                 _errorHandler.LogAndThrow(1410);
                 return;
             }
-            var bookUser = await BookUserGetAsync(context, bookId, (int)_loggedInUser.Id);
+            var bookUser = _nullHandler.ThrowIfNull<BookUser>(
+                await BookUserGetAsync(context, bookId, loggedInUserIdDenulled));
+            
             bookUser.IsArchived = true;
             await DataCache.BookUserUpdateAsync(bookUser, context);
 
@@ -633,32 +573,25 @@ namespace Logic.Services
         }
         public async Task<int> BookUserCreateAndSaveAsync(IdiomaticaContext context, int bookId, int userId)
         {
-            var book = await DataCache.BookByIdReadAsync(bookId, context);
-            if (book == null)
-            {
-                _errorHandler.LogAndThrow(2000);
-                return 0;
-            }
+            Book book = _nullHandler.ThrowIfNull<Book>(
+                await DataCache.BookByIdReadAsync(bookId, context));
+            int languageIdDebulled = _nullHandler.ThrowIfNullOrZeroInt(book.LanguageId);
+            
             book.Pages = await DataCache.PagesByBookIdReadAsync(bookId, context);
 
-            var firstPage = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
-            if (firstPage == null || firstPage.Id == 0)
-            {
-                _errorHandler.LogAndThrow(2010);
-                return 0;
-            }
-            var languageUser = await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync(
-                ((int)book.LanguageId, userId), context);
+            var firstPage = _nullHandler.ThrowIfNull<Page>(
+                book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault());
+            
+            var languageUser = _nullHandler.ThrowIfNull<LanguageUser>(
+                await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync(
+                    (languageIdDebulled, userId), context));
 
 
-            if (languageUser == null || languageUser.Id == null || languageUser.Id == 0)
-            {
-                _errorHandler.LogAndThrow(2020);
-            }
+            
             // make sure that bookUser doesn't already exist before creating it
             var existingBookUser = await DataCache.BookUserByBookIdAndUserIdReadAsync(
-                (bookId, (int)languageUser.UserId), context);
-            if(existingBookUser != null) 
+                (bookId, _nullHandler.ThrowIfNullOrZeroInt(languageUser.UserId)), context);
+            if(existingBookUser != null && existingBookUser.Id != null) 
             {
                 // dude already exists. Just return it. 
                 // update the stats first, just in case
@@ -669,24 +602,19 @@ namespace Logic.Services
             BookUser bookUser = new BookUser()
             {
                 BookId = bookId,
-                CurrentPageID = (int)firstPage.Id,
-                LanguageUserId = (int)languageUser.Id
+                CurrentPageID = _nullHandler.ThrowIfNullOrZeroInt(firstPage.Id),
+                LanguageUserId = _nullHandler.ThrowIfNullOrZeroInt(languageUser.Id)
             };
 
             bool didSaveBookUser = await DataCache.BookUserCreateAsync(bookUser, context);
-            if (!didSaveBookUser || bookUser.Id < 1)
+            if (!didSaveBookUser || bookUser.Id == null || bookUser.Id < 1)
             {
                 _errorHandler.LogAndThrow(2250);
                 return -1;
             }
-            if (bookUser.Id == 0)
-            {
-                _errorHandler.LogAndThrow(2030);
-                return -1;
-            }
 
             // now update BookUserStats
-            await BookUserStatsUpdate(context, (int)bookUser.Id);
+            await BookUserStatsUpdate(context, _nullHandler.ThrowIfNullOrZeroInt(bookUser.Id));
 
             return (int)bookUser.Id;
         }
@@ -697,7 +625,7 @@ namespace Logic.Services
             if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1) return;
             var bookUser = await DataCache.BookUserByBookIdAndUserIdReadAsync(
                     ((int)bookId, (int)_loggedInUser.Id), context);
-            if (bookUser == null || bookUser.Id < 1) return;
+            if (bookUser == null || bookUser.Id == null || bookUser.Id < 1) return;
             await BookUserStatsUpdate(context, (int)bookUser.Id);
             await BookListResetAsync(context);
         }
@@ -715,20 +643,21 @@ namespace Logic.Services
             var dbLanguageCodes = await LanguageCodeFetchOptionsForLearning(context);
             foreach (var lc in dbLanguageCodes)
             {
-                LanguageOptions.Add(lc.Code, lc);
+                LanguageOptions.Add(_nullHandler.ThrowIfNullOrEmptyString(lc.Code), lc);
             }
         }
         public async Task PageUserClearPageAndMove(IdiomaticaContext context, int targetPageNum)
         {
-            if (_currentPage == null || _currentPage.Id == null || _currentPage.Id < 1)
-            {
-                _errorHandler.LogAndThrow(1140);
-            }
-            if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1)
-            {
-                _errorHandler.LogAndThrow(1210);
-            }
-            await DataCache.WordUsersUpdateStatusByPageIdAndUserIdAndStatus((int)_currentPage.Id, (int)_loggedInUser.Id,
+            User loggedInUserDenulled = _nullHandler.ThrowIfNull<User>(_loggedInUser);
+            int loggedInUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(loggedInUserDenulled.Id);
+            Page currentPageDenulled = _nullHandler.ThrowIfNull<Page>(_currentPage);
+            int currentPageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(currentPageDenulled.Id);
+            PageUser currentPageUserDenulled = _nullHandler.ThrowIfNull<PageUser>(_currentPageUser);
+            int currentPageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(currentPageUserDenulled.Id);
+            int currentPagIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(currentPageUserDenulled.PageId);
+
+            await DataCache.WordUsersUpdateStatusByPageIdAndUserIdAndStatus(
+                currentPageIdDenulled, loggedInUserIdDenulled,
                 AvailableWordUserStatus.UNKNOWN, AvailableWordUserStatus.WELLKNOWN, context);
 
             // now move forward, if there's another page
@@ -739,88 +668,78 @@ namespace Logic.Services
             else
             {
                 // mark the previous page as read because you didn't do it in the PageMove function
-                await PageUserMarkAsReadAsync(context, (int)_currentPageUser.Id);
+                await PageUserMarkAsReadAsync(context, currentPageUserIdDenulled);
                 // refresh the word user cache
-                await PageResetDataForRead(context, (int)_currentPageUser.PageId);
+                await PageResetDataForRead(context, currentPagIdDenulled);
             }
         }
         public async Task PageMove(IdiomaticaContext context, int targetPageNum)
         {
             _isDataInitRead = false;
 
-            if (_languageUser is null || _languageUser.Id is null || _languageUser.Id == 0)
-            {
-                _errorHandler.LogAndThrow(2170);
-                return;
-            }
-            if (_bookUser is null || _bookUser.Id == 0)
-            {
-                _errorHandler.LogAndThrow(2180);
-                return;
-            }
-            if (_currentPageUser is null || _currentPageUser.Id is null || _currentPageUser.Id == 0)
-            {
-                _errorHandler.LogAndThrow(2190);
-                return;
-            }
-            if (_bookTotalPageCount is null || _bookTotalPageCount < 1)
-            {
-                _errorHandler.LogAndThrow(2410);
-                return;
-            }
+            LanguageUser languageUserDenulled = _nullHandler.ThrowIfNull<LanguageUser>(_languageUser);
+            int languageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(languageUserDenulled.Id);
+            PageUser currentPageUserDenulled = _nullHandler.ThrowIfNull<PageUser>(_currentPageUser);
+            int currentPageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(currentPageUserDenulled.Id);
+            BookUser bookUserDenulled = _nullHandler.ThrowIfNull<BookUser>(_bookUser);
+            int bookUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(bookUserDenulled.Id);
+            int bookIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(_bookId);
+
+
             // mark the previous page as read before moving on
-            await PageUserMarkAsReadAsync(context, (int)_currentPageUser.Id);
+            await PageUserMarkAsReadAsync(context, currentPageUserIdDenulled);
 
             if (targetPageNum < 1) return;
             if (targetPageNum > _bookTotalPageCount)
                 return;
 
+            // reload the current page user with the new target
             _currentPageUser = await PageUserGetByOrderWithinBookAsync(
-                context, (int)_languageUser.Id, targetPageNum, (int)_bookId);
+                context, languageUserIdDenulled, targetPageNum, bookIdDenulled);
             if (_currentPageUser == null) return;
 
-
-            await PageResetDataForRead(context, (int)_currentPageUser.PageId);
-            await BookUserUpdateBookmarkAsync(context, (int)_bookUser.Id, (int)_currentPage.Id);
+            int currentPageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(_currentPageUser.PageId);
+            
+            await PageResetDataForRead(context, currentPageIdDenulled);
+            await BookUserUpdateBookmarkAsync(context, bookUserIdDenulled, currentPageIdDenulled);
             _isDataInitRead = true;
         }
         public async Task<(string input, string output)> ParagraphTranslate(
-            IdiomaticaContext context, Paragraph pp)
+            IdiomaticaContext context, Paragraph pp, string fromCode, string toCode)
         {
-            if (_languageToCode == null || _languageFromCode == null)
-            {
-                _errorHandler.LogAndThrow(2240);
-                return ("", "");
-            }
-            var sentences = pp.Sentences.OrderBy(x => x.Ordinal).Select(s => s.Text);
-            var input = String.Join(" ", sentences);
-            var output = "";
+            var ppIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(pp.Id);
+
+            List<string> sentences = _nullHandler.ThrowIfNullOrEmptyList<Sentence>(pp.Sentences)
+                .OrderBy(x => x.Ordinal)
+                .Select(s => s.Text ?? "").ToList<string>();
+            string input = String.Join(" ", sentences);
+            string output = "";
 
 
             // see if the translation already exists
             if (pp.ParagraphTranslations == null)
             {
                 pp.ParagraphTranslations = await DataCache.ParagraphTranslationsByParargraphIdReadAsync(
-                    (int)pp.Id, context);
+                    ppIdDenulled, context);
             }
             var currentTranslation = pp.ParagraphTranslations
-                .Where(x => x.Code == _languageToCode.Code)
+                .Where(x => x.Code == toCode)
                 .FirstOrDefault();
-            if (currentTranslation is not null)
+            if (currentTranslation != null && currentTranslation.TranslationText != null)
             {
                 output = currentTranslation.TranslationText;
             }
             else
             {
-                var deeplResult = _deepLService.Translate(input, _languageFromCode.Code, _languageToCode.Code);
+                var deeplResult = _deepLService.Translate(input, fromCode, toCode);
                 if (deeplResult is not null)
                 {
                     output = deeplResult;
                     // add to the DB
                     ParagraphTranslation ppt = new ParagraphTranslation()
                     {
-                        ParagraphId = (int)pp.Id,
-                        Code = _languageToCode.Code,
+                        ParagraphId = ppIdDenulled,
+                        Code = toCode,
                         TranslationText = deeplResult
                     };
                     bool didSave = await DataCache.ParagraphTranslationCreateAsync(ppt, context);
@@ -829,7 +748,6 @@ namespace Logic.Services
                         _errorHandler.LogAndThrow(2340);
                         return ("", "");
                     }
-                    // BookService.ParagraphTranslationSave(ppt);
                     pp.ParagraphTranslations.Add(ppt);
                 }
             }
@@ -837,14 +755,21 @@ namespace Logic.Services
         }
         public async Task<Sentence> SentenceFillChildObjects(IdiomaticaContext context, Sentence sentence)
         {
+            User loggedInUserDenulled = _nullHandler.ThrowIfNull<User>(_loggedInUser);
+            int loggedInUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(loggedInUserDenulled.Id);
+            var languageUserDenulled = _nullHandler.ThrowIfNull<LanguageUser>(_languageUser);
+            int languageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(languageUserDenulled.Id);
+            var allWordsInPageDenulled = _nullHandler.ThrowIfNullOrEmptyDict(_allWordsInPage);
+            var allWordUsersInPageDenulled = _nullHandler.ThrowIfNullOrEmptyDict(_allWordUsersInPage);
             if (sentence.Tokens is null || sentence.Tokens.Count == 0)
             {
                 // we shouldn't be here because tokens should have been added in the read page
-                sentence.Tokens = await DataCache.TokensBySentenceIdReadAsync((int)sentence.Id, context);
+                sentence.Tokens = await DataCache.TokensBySentenceIdReadAsync(
+                    _nullHandler.ThrowIfNullOrZeroInt(sentence.Id), context);
                 // now get the words
                 foreach (var t in sentence.Tokens)
                 {
-                    var dictEntry = _allWordsInPage.Where(w => w.Value.Id == t.WordId).FirstOrDefault();
+                    var dictEntry = allWordsInPageDenulled.Where(w => w.Value.Id == t.WordId).FirstOrDefault();
                     if (dictEntry.Value == null)
                     {
                         _errorHandler.LogAndThrow(2370);
@@ -859,20 +784,27 @@ namespace Logic.Services
             // the other.
             foreach (var token in sentence.Tokens)
             {
+                Token tokenDenulled = _nullHandler.ThrowIfNull<Token>(token);
+                int tokenWordIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(tokenDenulled.WordId);
+                Word tokenWordDenulled = _nullHandler.ThrowIfNull<Word>(token.Word);
+                string tokenWordTextLCDenulled = _nullHandler.ThrowIfNullString(tokenWordDenulled.TextLowerCase);
 
-                if (!_allWordUsersInPage.ContainsKey(token.Word.TextLowerCase))
+                if (!allWordUsersInPageDenulled.ContainsKey(tokenWordTextLCDenulled))
                 {
+                    
                     // check if there's already a wordUser
-                    var wordUser = DataCache.WordUserByWordIdAndUserIdReadAsync(
-                        ((int)token.Word.Id, (int)_loggedInUser.Id), context).Result;
+                    var wordUser = DataCache.WordUserByWordIdAndUserIdReadAsync((
+                        tokenWordIdDenulled,
+                        loggedInUserIdDenulled
+                        ), context).Result;
                     if (wordUser is null)
                     {
                         // need to create
                        
                         wordUser = new WordUser()
                         {
-                            LanguageUserId = (int)_languageUser.Id,
-                            WordId = (int)token.Word.Id,
+                            LanguageUserId = languageUserIdDenulled,
+                            WordId = tokenWordIdDenulled,
                             Status = AvailableWordUserStatus.UNKNOWN,
                             Translation = string.Empty
                         };
@@ -880,11 +812,11 @@ namespace Logic.Services
                         if (!isSaved || wordUser.Id < 1)
                         {
                             _errorHandler.LogAndThrow(2380);
-                            return null;
+                            return sentence;
                         }
                     }
 
-                    _allWordUsersInPage[token.Word.TextLowerCase] = wordUser;
+                    allWordUsersInPageDenulled[tokenWordTextLCDenulled] = wordUser;
                 }
             }
             return sentence;
@@ -892,8 +824,29 @@ namespace Logic.Services
         public async Task<(Token? t, WordUser? wu)> TokenGetChildObjects(IdiomaticaContext context, Token token)
         {
             WordUser wu = new WordUser();
-            if (token.Word == null || token.WordId < 1)
+            if (token.WordId == null || token.WordId < 1)
             {
+                _errorHandler.LogAndThrow(1580);
+                return (token, wu);
+            }
+            if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1)
+            {
+                _errorHandler.LogAndThrow();
+                return (token, wu);
+            }
+            if (_allWordsInPage == null || !_allWordsInPage.Any())
+            {
+                _errorHandler.LogAndThrow(1580);
+                return (token, wu);
+            }
+            if (_allWordUsersInPage == null || !_allWordUsersInPage.Any())
+            {
+                _errorHandler.LogAndThrow();
+                return (token, wu);
+            }
+            if (token.Word == null)
+            {
+                // need to pull the word
                 token.Word = await WordGetByIdAsync(context, (int)token.WordId);
                 var wordEntry = _allWordsInPage.Where(w => w.Value.Id == token.WordId).FirstOrDefault();
                 if (wordEntry.Value != null)
@@ -906,14 +859,24 @@ namespace Logic.Services
                 _errorHandler.LogAndThrow(2390);
                 return (token, wu);
             }
+            if (string.IsNullOrEmpty(token.Word.TextLowerCase))
+            {
+                _errorHandler.LogAndThrow();
+                return (token, wu);
+            }
             if (_allWordUsersInPage.ContainsKey(token.Word.TextLowerCase))
             {
                 wu = AllWordUsersInPage[token.Word.TextLowerCase];
             }
             else
             {
-                wu = await DataCache.WordUserByWordIdAndUserIdReadAsync(
+                var wuFromDb = await DataCache.WordUserByWordIdAndUserIdReadAsync(
                     ((int)token.WordId, (int)_loggedInUser.Id), context);
+                if (wuFromDb == null)
+                {
+                    _errorHandler.LogAndThrow();
+                    return (token, wu);
+                }
             }
             if (wu == null || wu.Id < 1)
             {
@@ -938,7 +901,7 @@ namespace Logic.Services
             var languageUsers = await LanguageUsersAndLanguageGetByUserIdAsync(context, userId);
             foreach (var languageUser in languageUsers)
             {
-                if (languageUser.Language == null) continue;
+                if (languageUser.Language == null || languageUser.Language.Name == null) continue;
                 var count = (from lu in context.LanguageUsers
                              join bu in context.BookUsers on lu.Id equals bu.LanguageUserId
                              join pu in context.PageUsers on bu.Id equals pu.BookUserId
@@ -1014,7 +977,7 @@ namespace Logic.Services
                 _isLoadingTotalPageCount = true;
                 var dbVal = await DataCache.BookStatByBookIdAndStatKeyReadAsync((bookId, AvailableBookStat.TOTALPAGES), context);
                 int outVal = 0;
-                int.TryParse(dbVal.Value, out outVal);
+                if(dbVal != null) int.TryParse(dbVal.Value, out outVal);
                 _bookTotalPageCount = outVal;
                 _isLoadingTotalPageCount = false;
             }
@@ -1041,6 +1004,11 @@ namespace Logic.Services
                     // just swallow it, you already assigned sortProperty to default
                 }
 
+                if(_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1)
+                {
+                    _errorHandler.LogAndThrow();
+                    return;
+                }
 
                 var powerQueryResults = await DataCache.BookListRowsPowerQueryAsync(
                     (int)_loggedInUser.Id,
@@ -1073,6 +1041,11 @@ namespace Logic.Services
         #region bookuser 
         private async Task<BookUser?> BookUserGetAsync(IdiomaticaContext context, int bookId, int userId)
         {
+            if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1)
+            {
+                _errorHandler.LogAndThrow();
+                return null;
+            }
             if (_bookUser == null)
             {
                 if (_isLoadingBookUser == true)
@@ -1157,6 +1130,13 @@ namespace Logic.Services
         private async Task BookUserStatsUpdate(IdiomaticaContext context, int bookUserId)
         {
             var bookUser = await DataCache.BookUserByIdReadAsync(bookUserId, context);
+
+            if (bookUser == null || bookUser.LanguageUserId == null || bookUser.LanguageUserId < 1 
+                || bookUser.BookId == null || bookUser.BookId < 1)
+            {
+                _errorHandler.LogAndThrow();
+                return;
+            }
             var languageUser = await DataCache.LanguageUserByIdReadAsync((int)bookUser.LanguageUserId, context);
             var allWordsInBook = await DataCache.WordsByBookIdReadAsync((int)bookUser.BookId, context);
             var allWordUsersInBook = await DataCache.WordUsersByBookIdAndLanguageUserIdReadAsync(
@@ -1186,7 +1166,10 @@ namespace Logic.Services
             }
 
             // last page read
-            int lastPageRead = ((int)readPages.Count > 0) ? (int)readPages.First().Ordinal : 0;
+            int lastPageRead = 0;
+            var latestReadPage = readPages.FirstOrDefault();
+            if ((int)readPages.Count > 0 && latestReadPage != null && latestReadPage.Ordinal != null)
+                lastPageRead = (int)latestReadPage.Ordinal;
 
             // progress
             string progress = $"{lastPageRead} / {totalPages}";
@@ -1276,12 +1259,16 @@ namespace Logic.Services
             }); ;
 
             // delete the booklistrows cache for this user
-            DataCache.BookListRowsByUserIdDeleteAsync((int)languageUser.Id, context);
-            // delete the actual stats from teh database and bookuserstats cache
-            await DataCache.BookUserStatsByBookIdAndUserIdDelete(((int)bookUser.BookId, (int)languageUser.UserId), context);
-            // add the new stats
-            await DataCache.BookUserStatsByBookIdAndUserIdCreate(
-                ((int)bookUser.BookId, (int)languageUser.UserId), stats, context);
+            if(languageUser != null && languageUser.Id != null && languageUser.UserId != null)
+            {
+                DataCache.BookListRowsByUserIdDelete((int)languageUser.Id, context);
+                // delete the actual stats from teh database and bookuserstats cache
+                await DataCache.BookUserStatsByBookIdAndUserIdDelete(((int)bookUser.BookId, (int)languageUser.UserId), context);
+                // add the new stats
+                await DataCache.BookUserStatsByBookIdAndUserIdCreate(
+                    ((int)bookUser.BookId, (int)languageUser.UserId), stats, context);
+            }
+           
         }
 
         #endregion
@@ -1437,8 +1424,6 @@ namespace Logic.Services
             _sentences = null;
             _tokens = null;
 
-
-
             // and rebuild
             var t_currentPage = PageGetCurrentAsync(context, pageId);
             var t_paragraphs = ParagraphsGetByPageIdAsync(context, pageId);
@@ -1457,25 +1442,30 @@ namespace Logic.Services
             _tokens = t_tokensInPage.Result;
 
 
+
             // now knit the paragraph data together
-            _paragraphs = _paragraphs.OrderBy(x => x.Ordinal).ToList();
+            _paragraphs = _nullHandler.ThrowIfNullOrEmptyList<Paragraph>(_paragraphs)
+                .OrderBy(x => x.Ordinal)
+                .ToList();
             var pox = _paragraphs[0];
             foreach (var p in _paragraphs)
             {
-                p.Sentences = _sentences
+                p.Sentences = _nullHandler.ThrowIfNullOrEmptyList<Sentence>(_sentences)
                     .Where(s => s.ParagraphId == p.Id)
                     .OrderBy(s => s.Ordinal)
                     .ToList();
                 foreach (var s in p.Sentences)
                 {
-                    s.Tokens = _tokens
+                    s.Tokens = _nullHandler.ThrowIfNullOrEmptyList<Token>(_tokens)
                         .Where(t => t.SentenceId == s.Id)
                         .OrderBy(t => t.Ordinal)
                         .ToList();
 
                     foreach (var t in s.Tokens)
                     {
-                        var wordEntry = _allWordsInPage.Where(w => w.Value.Id == t.WordId).FirstOrDefault();
+                        var wordEntry = _nullHandler.ThrowIfNullOrEmptyDict(_allWordsInPage)
+                            .Where(w => w.Value.Id == t.WordId)
+                            .FirstOrDefault();
                         if (wordEntry.Value != null)
                         {
                             t.Word = wordEntry.Value;
@@ -1495,38 +1485,22 @@ namespace Logic.Services
             Page page, BookUser bookUser, Dictionary<string, Word> commonWordDict,
             Dictionary<string, WordUser> allWordUsersInLanguage)
         {
-            if (page == null)
-            {
-                _errorHandler.LogAndThrow(1310);
-                return 0;
-            }
-            if (page.Id == 0)
-            {
-                _errorHandler.LogAndThrow(1320);
-                return 0;
-            }
-            if (bookUser == null)
-            {
-                _errorHandler.LogAndThrow(1330);
-                return 0;
-            }
-            if (commonWordDict == null)
-            {
-                _errorHandler.LogAndThrow(1360);
-                return 0;
-            }
+
+            BookUser bookUserDenulled = _nullHandler.ThrowIfNull<BookUser>(bookUser);
+            var languageUserDenulled = _nullHandler.ThrowIfNull<LanguageUser>(bookUserDenulled.LanguageUser);
+            int languageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(languageUserDenulled.Id);
+            int languageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(languageUserDenulled.LanguageId);
+            int pageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(page.Id);
 
             try
             {
-                var language = await DataCache.LanguageByIdReadAsync((int)bookUser.LanguageUser.LanguageId, context);
-                if (language == null)
-                {
-                    _errorHandler.LogAndThrow(2320);
-                    return 0;
-                }
+                var language = _nullHandler.ThrowIfNull<Language>(
+                    await DataCache.LanguageByIdReadAsync(languageIdDenulled, context));
+                
 
                 // has the page ever been parsed?
-                var paragraphs = await DataCache.ParagraphsByPageIdReadAsync((int)page.Id, context);
+                var paragraphs = await DataCache.ParagraphsByPageIdReadAsync(
+                    pageIdDenulled, context);
                 if (paragraphs == null)
                 {
                     await ParagraphsParseFromPageAndSaveAsync(
@@ -1535,7 +1509,7 @@ namespace Logic.Services
                 var pageUser = new PageUser()
                 {
                     BookUserId = bookUser.Id,
-                    PageId = (int)page.Id
+                    PageId = pageIdDenulled
                 };
                 bool didSave = await DataCache.PageUserCreateAsync(pageUser, context);
                 if(! didSave || pageUser.Id == null || pageUser.Id == 0)
@@ -1551,7 +1525,7 @@ namespace Logic.Services
 
                     // need to create
                     var newWordUser = await WordUserCreateAndSaveUnknownAsync(
-                        context, (int)bookUser.LanguageUserId, kvp.Value);
+                        context, languageUserIdDenulled, kvp.Value);
                     if (newWordUser == null || newWordUser.Id == 0)
                     {
                         _errorHandler.LogAndThrow(2330);
@@ -1580,36 +1554,37 @@ namespace Logic.Services
         private async Task<PageUser?> PageUserGetByOrderWithinBookAsync(
             IdiomaticaContext context, int languageUserId, int pageOrdinal, int bookId)
         {
-            if (_bookUser is null) _errorHandler.LogAndThrow(1200);
-
             var pageUserFromDb = await DataCache.PageUserByLanguageUserIdOrdinalAndBookIdReadAsync(
                 (languageUserId, pageOrdinal, bookId), context);
 
             if (pageUserFromDb is not null) return pageUserFromDb;
 
+            User loggedInUserDenulled = _nullHandler.ThrowIfNull<User>(_loggedInUser);
+            int loggedInUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(loggedInUserDenulled.Id);
+
             // pageUser is not created yet. Is the page created?
-            var existingPage = await DataCache.PageByOrdinalAndBookIdReadAsync(
-                (pageOrdinal, (int)_bookUser.BookId), context);
-            if (existingPage == null)
-            {
-                _errorHandler.LogAndThrow(2070);
-            }
+            var existingPage = _nullHandler.ThrowIfNull<Page>(
+                await DataCache.PageByOrdinalAndBookIdReadAsync((pageOrdinal, bookId), context));
+            int existingPageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(existingPage.Id);
+            
             if (_allWordsInPage is null)
             {
                 // it shouldn't be null, but whenever you need to create the page
                 // user, these wouldn't be loaded yet
-                _allWordsInPage = await WordsGetInPageAsync(context, (int)existingPage.Id);
+                _allWordsInPage = await WordsGetInPageAsync(context, existingPageIdDenulled);
             }
             if (_allWordUsersInPage is null)
             {
                 // it shouldn't be null, but whenever you need to create the page
                 // user, these wouldn't be loaded yet
-                _allWordUsersInPage = await WordUsersGetAllInPageAsync(context, 
-                    (int)existingPage.Id, (int)_loggedInUser.Id);
+                _allWordUsersInPage = await WordUsersGetAllInPageAsync(context,
+                    existingPageIdDenulled, loggedInUserIdDenulled);
             }
-
-            int newPageUserId = await PageUserCreateAndSaveAsync(context, existingPage, _bookUser,
-                _allWordsInPage, _allWordUsersInPage);
+            
+            int newPageUserId = await PageUserCreateAndSaveAsync(context, existingPage,
+                _nullHandler.ThrowIfNull<BookUser>(_bookUser),
+                _nullHandler.ThrowIfNullOrEmptyDict(_allWordsInPage),
+                _nullHandler.ThrowIfNullDict(_allWordUsersInPage));
 
             return await DataCache.PageUserByIdReadAsync(newPageUserId, context);
         }
@@ -1632,7 +1607,7 @@ namespace Logic.Services
                     _currentPageUser = dbPageUser;
                 }
                 else _currentPageUser = await PageUserGetByOrderWithinBookAsync(
-                    context, languageUserId, 1, (int)_bookId);
+                    context, languageUserId, 1, _nullHandler.ThrowIfNullOrZeroInt(_bookId));
 
                 _isLoadingPageUser = false;
             }
@@ -1646,11 +1621,7 @@ namespace Logic.Services
         private async Task PageUserUpdateReadDateAsync(IdiomaticaContext context, int id, DateTime readDate)
         {
             var pu = await DataCache.PageUserByIdReadAsync(id, context);
-            if (pu == null) 
-            {
-                _errorHandler.LogAndThrow(2100);
-                return;
-            }
+            
             pu.ReadDate = readDate;
             await DataCache.PageUserUpdateAsync(pu, context);
             return;
@@ -1667,21 +1638,9 @@ namespace Logic.Services
         private async Task<bool> ParagraphsParseFromPageAndSaveAsync(
             IdiomaticaContext context, Page page, Language language, Dictionary<string, Word> commonWordDict)
         {
-
-            if (page == null)
-            {
-                _errorHandler.LogAndThrow(1250);
-                return false;
-            }
-            if (page.Id == 0)
-            {
-                _errorHandler.LogAndThrow(1260);
-                return false;
-            }
-
-            
             var parser = LanguageParser.Factory.GetLanguageParser(language);
-            var paragraphSplits = parser.SegmentTextByParagraphs(page.OriginalText);
+            var paragraphSplits = parser.SegmentTextByParagraphs(
+                _nullHandler.ThrowIfNullString(page.OriginalText));
 
             int paragraphOrder = 0;
 
@@ -1691,7 +1650,7 @@ namespace Logic.Services
                 Paragraph paragraph = new Paragraph()
                 {
                     Ordinal = paragraphOrder,
-                    PageId = (int)page.Id
+                    PageId = _nullHandler.ThrowIfNullOrZeroInt(page.Id)
                 };
                 bool isSaved = await DataCache.ParagraphCreateAsync(paragraph, context);
                 if (!isSaved || paragraph.Id == null || paragraph.Id == 0)
@@ -1776,37 +1735,20 @@ namespace Logic.Services
         private async Task<bool> CreateTokensFromSentenceAndSaveAsync(IdiomaticaContext context,
             Sentence sentence, Language language, Dictionary<string, Word> commonWordDict)
         {
-            if (sentence == null)
-            {
-                _errorHandler.LogAndThrow(1270);
-                return false;
-            }
-            if (sentence.Id == null || sentence.Id < 1)
-            {
-                _errorHandler.LogAndThrow(1280);
-                return false;
-            }
-            if (sentence.Text == null)
-            {
-                _errorHandler.LogAndThrow(1290);
-                return false;
-            }
-            if (commonWordDict == null)
-            {
-                _errorHandler.LogAndThrow(1300);
-                return false;
-            }
+            int sentenceIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(sentence.Id);
+            string sentenceTextDenulled = _nullHandler.ThrowIfNullOrEmptyString(sentence.Text);
+            int languageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(language.Id);
 
-            
+
             // check if any already exist. there shouldn't be any but whateves
-            await DataCache.TokenBySentenceIdDelete((int)sentence.Id, context);
+            await DataCache.TokenBySentenceIdDelete(sentenceIdDenulled, context);
 
             // parse new ones
 
             List<Token> tokens = new List<Token>();
 
             var parser = LanguageParser.Factory.GetLanguageParser(language);
-            var wordsSplits = parser.SegmentTextByWordsKeepingPunctuation(sentence.Text);
+            var wordsSplits = parser.SegmentTextByWordsKeepingPunctuation(sentenceTextDenulled);
 
             for (int i = 0; i < wordsSplits.Length; i++)
             {
@@ -1822,7 +1764,7 @@ namespace Logic.Services
                 {
                     // check if the word is already in the DB
                     existingWord = await DataCache
-                        .WordByLanguageIdAndTextLowerReadAsync(((int)language.Id, cleanWord), context);
+                        .WordByLanguageIdAndTextLowerReadAsync((languageIdDenulled, cleanWord), context);
                 }
                 if (existingWord == null)
                 {
@@ -1852,9 +1794,9 @@ namespace Logic.Services
                 Token token = new Token()
                 {
                     Display = $"{wordSplit} ", // add the space that you previously took out
-                    SentenceId = (int)sentence.Id,
+                    SentenceId = sentenceIdDenulled,
                     Ordinal = i,
-                    WordId = (int)existingWord.Id
+                    WordId = _nullHandler.ThrowIfNullOrZeroInt(existingWord.Id)
                 };
                 bool isSaved = await DataCache.TokenCreateAsync(token, context);
                 if (!isSaved || token.Id == null || token.Id == 0)
@@ -1945,19 +1887,10 @@ namespace Logic.Services
         private async Task<Word> WordCreateAndSaveNewAsync(IdiomaticaContext context,
             Language language, string text, string romanization)
         {
-            if (language == null)
-            {
-                _errorHandler.LogAndThrow(1340);
-                return null;
-            }
-            if (language.Id == 0)
-            {
-                _errorHandler.LogAndThrow(1350);
-                return null;
-            }
+            int languageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(language.Id);
             Word newWord = new Word()
             {
-                LanguageId = (int)language.Id,
+                LanguageId = languageIdDenulled,
                 Romanization = romanization,
                 Text = text.ToLower(),
                 TextLowerCase = text.ToLower(),
@@ -1966,20 +1899,18 @@ namespace Logic.Services
             if(!isSaved || newWord.Id == null || newWord.Id == 0)
             {
                 _errorHandler.LogAndThrow(2350);
-                return null;
+                return newWord;
             }
             return newWord;
         }
         private async Task<Dictionary<string, Word>?> WordFetchCommonDictForLanguageAsync(
             IdiomaticaContext context, int languageId)
         {
-            if (languageId == 0)
-            {
-                _errorHandler.LogAndThrow(1160);
-                return null;
-            }
             
-            var topWordsInLanguage = await DataCache.WordsCommon1000ByLanguageIdReadAsync(languageId, context);
+            
+            var topWordsInLanguage = await DataCache.WordsCommon1000ByLanguageIdReadAsync(
+                 _nullHandler.ThrowIfNullOrZeroInt(languageId),
+                context);
 
             Dictionary<string, Word> wordDict = new Dictionary<string, Word>();
             foreach (var word in topWordsInLanguage)
@@ -1987,7 +1918,7 @@ namespace Logic.Services
 
                 // TextLowerCase and LanguageId are a unique key in the database
                 // so no need to check if it already exists before adding
-                wordDict.Add(word.TextLowerCase, word);
+                wordDict.Add(_nullHandler.ThrowIfNullString(word.TextLowerCase), word);
             }
             return wordDict;
         }
@@ -2028,22 +1959,10 @@ namespace Logic.Services
         private async Task<WordUser> WordUserCreateAndSaveUnknownAsync(
             IdiomaticaContext context, int languageUserId, Word word)
         {
-            if (languageUserId == 0)
-            {
-                _errorHandler.LogAndThrow(1370);
-                return null;
-            }
-            if (word == null)
-            {
-                _errorHandler.LogAndThrow(1380);
-                return null;
-            }
-
-            
             WordUser newWordUser = new WordUser()
             {
-                LanguageUserId = (int)languageUserId,
-                WordId = (int)word.Id,
+                LanguageUserId = _nullHandler.ThrowIfNullOrZeroInt(languageUserId),
+                WordId = _nullHandler.ThrowIfNullOrZeroInt(word.Id),
                 Status = AvailableWordUserStatus.UNKNOWN,
                 Translation = string.Empty
             };
@@ -2051,7 +1970,7 @@ namespace Logic.Services
             if (!isSaved || newWordUser.Id == 0)
             {
                 _errorHandler.LogAndThrow(2360);
-                return null;
+                return newWordUser;
             }
             return newWordUser;
         }
@@ -2071,12 +1990,16 @@ namespace Logic.Services
             {
                 if (wordUser.Word is null)
                 {
-                    wordUser.Word = await DataCache.WordByIdReadAsync((int)wordUser.WordId, context);
+                    wordUser.Word = 
+                        await DataCache.WordByIdReadAsync(
+                            _nullHandler.ThrowIfNullOrZeroInt(wordUser.WordId), context)
+                        ;
                 }
-
+                Word wordDenulled = _nullHandler.ThrowIfNull<Word>(wordUser.Word);
+                string wordTextLcDenulled = _nullHandler.ThrowIfNullString(wordDenulled.TextLowerCase);
                 // TextLowerCase and LanguageId are a unique key in the database
                 // so no need to check if it already exists before adding
-                wordDict.Add(wordUser.Word.TextLowerCase, wordUser);
+                wordDict.Add(wordTextLcDenulled, wordUser);
             }
 
             return wordDict;

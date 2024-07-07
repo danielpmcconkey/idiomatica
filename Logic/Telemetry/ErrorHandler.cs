@@ -24,6 +24,8 @@ namespace Logic.Telemetry
             { 1120, "bookUserId cannot be 0 when saving current page." },
             { 1130, "currentPageId cannot be 0 when saving current page." },
             { 1140, "Page cannot be null and Page.Id cannot be null or 0 when clearing page" },
+            { 1141, "_currentPageUser or _currentPageUser.Id is null or 0 when clearing page" },
+            { 1142, "_currentPageUser.PageId is null or 0 when clearing page" },
             { 1150, "id cannot be 0 when saving word user." },
             { 1160, "Language ID cannot be zero when fetching common words" },
             { 1170, "languageUser cannot be null when fetching flash cards from the DB" },
@@ -59,14 +61,26 @@ namespace Logic.Telemetry
             { 1450, "bookId cannot be null or 0 when removing a BookTag" },
             { 1460, "userId cannot be null or 0 when removing a BookTag" },
             { 1470, "tag cannot be empty when removing a BookTag" },
-            { 1480, "" },
-            { 1490, "" },
+            { 1480, "_bookId is null or 0 in the PageMove function" },
+            { 1490, "_currentPageUser.PageId is null or 0 in the PageMove function" },
+            { 1500, "_currentPage or _currentPage.Id is null or 0 in the PageMove function" },
+            { 1510, "sentence.Id is null or 0 in SentenceFillChildObjects" },
+            { 1520, "_allWordsInPage is null in SentenceFillChildObjects" },
+            { 1530, "_allWordUsersInPage is null in SentenceFillChildObjects" },
+            { 1540, "token.Word was null while cycling through sentence tokens in SentenceFillChildObjects" },
+            { 1550, "token.Word.TextLowerCase was null while cycling through sentence tokens in SentenceFillChildObjects" },
+            { 1560, "_loggedInUser is null or _loggedInUser.Id is null or 0 in SentenceFillChildObjects" },
+            { 1570, "_languageUser is null or _languageUser.Id is null or 0 in SentenceFillChildObjects" },
+            { 1580, "token.WordId is null or 0 in TokenGetChildObjects" },
+            { 1590, "_allWordsInPage is null or empty in TokenGetChildObjects" },
 
             // 2000 errors are invalid data states
 
             { 2000, "Book query returned null when trying to create book user" },
+            { 2001, "Book.LanguageId returned null when trying to create book user" },
             { 2010, "First page returned null or 0 when trying to create book user" },
             { 2020, "Language user query returned null or 0 when trying to create book user" },
+            { 2021, "languageUser.UserId returned null or 0 when trying to create book user" },
             { 2030, "BookUser.Id returned as 0 when trying to create book user" },
             { 2040, "Saving a page returned a null ID from DB while creating a new book." },
             { 2050, "no BookUser found with that Id. Cannot update bookmark" },
@@ -79,7 +93,11 @@ namespace Logic.Telemetry
             { 5070, "Underlying Page does not exist when trying to retrieve PageUser." },
             { 2130, "Either Logged in user or logged in user ID are null" },
             { 2140, "Either book or book ID are null" },
-            { 2150, "BookUser is either null or BookUserId is 0" },
+            { 2141, "_book.LanguageId is either null or 0 on Read data init" },
+            { 2150, "BookUser is either null or BookUserId is 0 on Read data init" },
+            { 2151, "_bookUser.CurrentPageID is either null or 0 on Read data init" },
+            { 2152, "_bookUser.LanguageUserId is either null or 0 on Read data init" },
+            { 2153, "_language or _language.Code is either null or 0 on Read data init" },
             { 2160, "There is no card in the database that matches the provided ID while updating flash card" },
             { 5080, "BookUser.Id returned 0 after create and save in Read page." },
             { 5090, "bookUserStatsFromDb returned null after in Read page" },
@@ -93,6 +111,9 @@ namespace Logic.Telemetry
             { 2220, "_currentPageUser cannot be null and _currentPageUser.PageId cannot be 0 in read init data" },
             { 2230, "sentence ID is null or zero when trying to fetch tokens" },
             { 2240, "_languageToCode and _languageFromCode cannot be null when translating a paragraph" },
+            { 2241, "pp.Id cannot be null or 0 when translating a paragraph" },
+            { 2242, "_languageFromCode or _languageFromCode.Code is null or empty when translating a paragraph" },
+            { 2243, "_languageToCode or _languageToCode.Code is null or empty when translating a paragraph" },
             { 2250, "Error saving the bookUser while creating a new BookUser." },
             { 2260, "Paragraph parsing failed during page save" },
             { 2270, "Paragraph ID returned null or 0 after saving" },
@@ -122,12 +143,22 @@ namespace Logic.Telemetry
             { 2510, "CurrentCard or CurrentCard.Id is null when updating a flash card." },
             { 2520, "FlashCardAttempt.Id was null or zero after saving it." },
             { 2530, "_languageUser is null or _languageUser.LanguageId is null when creating new PageUser" },
-            { 2540, "" },
-            { 2550, "" },
+            { 2540, "bookUser returned null while trying to archive a book" },
+            { 2550, "Language code from DB has a null for its Code value" },
             { 2560, "" },
             { 2570, "" },
             { 2580, "" },
             { 2590, "" },
+            { 2600, "" },
+            { 2610, "" },
+            { 2620, "" },
+            { 2630, "" },
+            { 2640, "" },
+            { 2650, "" },
+            { 2660, "" },
+            { 2670, "" },
+            { 2680, "" },
+            { 2690, "" },
 
             // 3000 errors are other .net errors
 
@@ -152,6 +183,14 @@ namespace Logic.Telemetry
             { 3180, "" },
             { 3190, "" },
         };
+        public void LogAndThrow(
+            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
+            [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
+            [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
+        {
+            LogError(memberName, sourceFilePath, sourceLineNumber, [], null);
+            ThrowError(memberName, sourceFilePath, sourceLineNumber);
+        }
         public void LogAndThrow(int code)
         {
             LogError(code, [], null);
@@ -171,10 +210,25 @@ namespace Logic.Telemetry
         {
             // todo: log errors
         }
+        private void LogError(string memberName, string sourceFilePath, int sourceLineNumber, string[] args, Exception ex)
+        {
+            // todo: log errors
+        }
         private void ThrowError(int code)
         {
             var errorCode = _errorCodes[code];
             var ex = new IdiomaticaException() { code = code };
+            throw ex;
+        }
+        private void ThrowError(string memberName, string sourceFilePath, int sourceLineNumber)
+        {
+
+            var ex = new IdiomaticaException()
+            {
+                memberName = memberName,
+                sourceFilePath = sourceFilePath,
+                sourceLineNumber = sourceLineNumber
+            };
             throw ex;
         }
     }

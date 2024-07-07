@@ -9,6 +9,10 @@ namespace Logic.Telemetry
     public class IdiomaticaException : Exception
     {
         public int code;
+        public string memberName;
+        public string sourceFilePath;
+        public int sourceLineNumber;
+
         public IdiomaticaException()
         {
         }
