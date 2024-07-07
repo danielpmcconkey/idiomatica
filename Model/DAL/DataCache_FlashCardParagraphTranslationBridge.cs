@@ -24,9 +24,9 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.FlashCardParagraphTranslationBridges
+            var value = context.FlashCardParagraphTranslationBridges
                 .Where(x => x.Id == key)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
             if (value == null) return null;
             // write to cache
             FlashCardParagraphTranslationBridgeById[key] = value;

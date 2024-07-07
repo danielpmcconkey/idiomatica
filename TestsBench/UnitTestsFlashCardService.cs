@@ -35,14 +35,15 @@ namespace TestsBench
         {
             // arrange
             var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
             var userService = CommonFunctions.CreateUserService();
             var user = CommonFunctions.CreateNewTestUser(userService, context);
             var flashCardService = CommonFunctions.CreateFlashCardService();
             int ppId = 14721;
-            var pp = await context.Paragraphs
+            var pp = context.Paragraphs
                 .Where(x => x.Id == ppId)
                 .Include(s => s.Sentences)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
 
             var expected = "—Aunque pudiera, no lo haría. " +
                 "Las cicatrices pueden ser útiles. " +
@@ -59,9 +60,7 @@ namespace TestsBench
             finally
             {
                 // clean-up
-                user.LanguageUsers = new List<LanguageUser>();
-                context.Users.Remove(user);
-                context.SaveChanges();
+                await transaction.RollbackAsync();
             }
         }
     }

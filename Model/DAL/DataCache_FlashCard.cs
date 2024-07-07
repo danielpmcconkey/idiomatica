@@ -39,7 +39,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.FlashCards.Where(x => x.Id == key).FirstOrDefaultAsync();
+            var value = context.FlashCards.Where(x => x.Id == key).FirstOrDefault();
             if (value == null) return null;
             // write to cache
             FlashCardById[key] = value;
@@ -54,13 +54,13 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.FlashCards.Where(x => x.Id == key)
+            var value = context.FlashCards.Where(x => x.Id == key)
                 .Include(fc => fc.WordUser).ThenInclude(wu => wu.Word)
                 .Include(fc => fc.Attempts)
                 .Include(fc => fc.FlashCardParagraphTranslationBridges)
                     .ThenInclude(fcptb => fcptb.ParagraphTranslation)
                         .ThenInclude(pt => pt.Paragraph).ThenInclude(pp => pp.Sentences)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
             if (value == null) return null;
             // write to cache
             FlashCardById[key] = value;
@@ -76,7 +76,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.FlashCards
+            var value = context.FlashCards
                 .Where(fc => fc.WordUser.LanguageUserId == key.languageUserId
                     && fc.Status == AvailableFlashCardStatus.ACTIVE)
                 .Include(fc => fc.WordUser).ThenInclude(wu => wu.Word)
@@ -86,7 +86,7 @@ namespace Model.DAL
                         .ThenInclude(pt => pt.Paragraph).ThenInclude(pp => pp.Sentences)
                 .OrderBy(fc => fc.NextReview)
                 .Take(key.take)
-                .ToListAsync();
+                .ToList();
             if (value == null) return new List<FlashCard>();
             // write to cache
             FlashCardsActiveAndFullRelationshipsByLanguageUserId[key] = value;
@@ -104,7 +104,7 @@ namespace Model.DAL
         {
             if (value.Id == null || value.Id < 1) throw new ArgumentException("ID cannot be null or 0 when updating");
 
-            var valueFromDb = await context.FlashCards.Where(pu => pu.Id == value.Id).FirstOrDefaultAsync();
+            var valueFromDb = context.FlashCards.Where(pu => pu.Id == value.Id).FirstOrDefault();
             if (valueFromDb == null) throw new InvalidDataException("Value does not exist in the DB to update");
 
             valueFromDb.NextReview = value.NextReview;

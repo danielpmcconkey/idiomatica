@@ -121,7 +121,7 @@ namespace Logic.Telemetry
             { 2500, "wordUser.LanguageUser is null when trying to create new flash cards." },
             { 2510, "CurrentCard or CurrentCard.Id is null when updating a flash card." },
             { 2520, "FlashCardAttempt.Id was null or zero after saving it." },
-            { 2530, "" },
+            { 2530, "_languageUser is null or _languageUser.LanguageId is null when creating new PageUser" },
             { 2540, "" },
             { 2550, "" },
             { 2560, "" },

@@ -40,7 +40,7 @@ namespace Model.DAL
                 return ParagraphTranslationsByParagraphId[key];
             }
             // read DB
-            var value = await context.ParagraphTranslations.Where(x => x.ParagraphId == key).ToListAsync();
+            var value = context.ParagraphTranslations.Where(x => x.ParagraphId == key).ToList();
 
             // write to cache
             ParagraphTranslationsByParagraphId[key] = value;

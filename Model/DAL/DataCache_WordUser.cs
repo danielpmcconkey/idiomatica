@@ -44,7 +44,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.WordUsers.Where(x => x.Id == key).FirstOrDefaultAsync();
+            var value = context.WordUsers.Where(x => x.Id == key).FirstOrDefault();
                 
             if (value == null) return null;
             // write to cache
@@ -60,10 +60,10 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.WordUsers
+            var value = context.WordUsers
                 .Where(x => x.Id == key)
                 .Include(x => x.LanguageUser).ThenInclude(x=> x.Language)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
 
             if (value == null) return null;
             // write to cache

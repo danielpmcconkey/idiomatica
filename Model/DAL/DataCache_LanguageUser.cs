@@ -24,9 +24,9 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.LanguageUsers
+            var value = context.LanguageUsers
                 .Where(x => x.Id == key)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
             if (value == null) return null;
             // write to cache
             LanguageUserById[key] = value;
@@ -42,9 +42,9 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.LanguageUsers
+            var value = context.LanguageUsers
                 .Where(x => x.LanguageId == key.languageId && x.UserId == key.userId)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
             if (value == null) return null;
             // write to cache
             LanguageUserByLanguageIdAndUserId[key] = value;
@@ -60,11 +60,11 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.LanguageUsers
+            var value = context.LanguageUsers
                 .Where(x => x.UserId == key)
                 .Include(lu => lu.Language)
                 .OrderBy(x => x.Language.Name)
-                .ToListAsync();
+                .ToList();
             if (value == null) return null;
             // write to cache
             LanguageUsersAndLanguageByUserId[key] = value;

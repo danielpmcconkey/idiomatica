@@ -202,12 +202,12 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.Words
+            var value = context.Words
                 .Where(w => w.Id == key)
                 .Include(w => w.Tokens)
                     .ThenInclude(t => t.Sentence)
                     .ThenInclude(s => s.Paragraph)
-                .ToListAsync();
+                .ToList();
             if (value == null) return null;
             // write to cache
             WordsAndTokensAndSentencesAndParagraphsByWordId[key] = value;

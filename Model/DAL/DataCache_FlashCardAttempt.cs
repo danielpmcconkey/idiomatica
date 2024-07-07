@@ -38,7 +38,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.FlashCardAttempts.Where(x => x.FlashCardId == key).FirstOrDefaultAsync();
+            var value = context.FlashCardAttempts.Where(x => x.FlashCardId == key).FirstOrDefault();
             if (value == null) return null;
             // write to cache
             FlashCardAttemptById[key] = value;

@@ -187,7 +187,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
 
         }
@@ -215,7 +215,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
 
@@ -267,7 +267,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
 
@@ -315,7 +315,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
         [Fact]
@@ -370,7 +370,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
         [Fact]
@@ -425,7 +425,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
         [Fact]
@@ -479,7 +479,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
         [Fact]
@@ -517,7 +517,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
         [Fact]
@@ -556,7 +556,7 @@ Fin
                 // clean-up
 
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
         [Fact]
@@ -605,7 +605,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
         [Fact]
@@ -660,7 +660,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
 
@@ -717,7 +717,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
 
@@ -755,7 +755,7 @@ Fin
             finally
             {
                 // clean-up
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
 
@@ -837,7 +837,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
 
@@ -879,7 +879,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
 
@@ -921,7 +921,7 @@ Fin
             {
                 // clean-up
 
-                transaction.RollbackAsync();
+                await transaction.RollbackAsync();
             }
         }
 
