@@ -1487,8 +1487,23 @@ namespace Logic.Services
         {
 
             BookUser bookUserDenulled = _nullHandler.ThrowIfNull<BookUser>(bookUser);
+            int languageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(bookUserDenulled.LanguageUserId);
+            if (bookUserDenulled.LanguageUser == null)
+            {
+                // pull it from the db
+                bookUserDenulled.LanguageUser = await DataCache.LanguageUserByIdReadAsync(
+                    languageUserIdDenulled, context);
+            }
+            /*
+                 * 
+                 * 
+                 * you are here. the save operation below throws an error
+                 * thinking you're tracking teh same ID twice. this is seemingly
+                 * because bookuserDenulled is creating a duplicate of the orig ID
+                 * 
+                 * 
+                 * */
             var languageUserDenulled = _nullHandler.ThrowIfNull<LanguageUser>(bookUserDenulled.LanguageUser);
-            int languageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(languageUserDenulled.Id);
             int languageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(languageUserDenulled.LanguageId);
             int pageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(page.Id);
 
@@ -1511,6 +1526,7 @@ namespace Logic.Services
                     BookUserId = bookUser.Id,
                     PageId = pageIdDenulled
                 };
+                
                 bool didSave = await DataCache.PageUserCreateAsync(pageUser, context);
                 if(! didSave || pageUser.Id == null || pageUser.Id == 0)
                 {

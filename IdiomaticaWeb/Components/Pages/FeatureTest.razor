@@ -1,0 +1,35 @@
+﻿@page "/FeatureTest"
+@rendermode InteractiveServer
+@inject BookService BookService;
+@inject UserService UserService;
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
+@inject NullHandler _nullHandler;
+
+<h3>FeatureTest</h3>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var context = DbContextFactory.CreateDbContext();
+            BookUser? bookUser = context.BookUsers.Where(x => x.LanguageUserId == 1).FirstOrDefault();
+            var languageUser = await DataCache.LanguageUserByIdReadAsync(
+                     (int)bookUser.LanguageUserId, context);
+            bookUser.LanguageUser = languageUser;
+            //bookUser = _nullHandler.ThrowIfNull<BookUser>(bookUser);
+            //int languageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(bookUser.LanguageUserId);
+            // if (bookUser.LanguageUser == null)
+            // {
+            //     // pull it from the db
+            //     bookUser.LanguageUser = await DataCache.LanguageUserByIdReadAsync(
+            //         (int)bookUser.LanguageUserId, context);
+            // }
+            context.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            var burp = ex.ToString();
+        }
+    }
+}
