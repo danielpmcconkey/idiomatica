@@ -1,4 +1,3 @@
-using Logic.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Model.DAL;
@@ -16,6 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using IdentityModel.OidcClient.Browser;
 using System.Text;
+using Logic.Services.Level1;
 
 namespace TestsBench.Tests
 {
@@ -851,7 +851,7 @@ Fin
             var user = CommonFunctions.CreateNewTestUser(userService, context);
             var bookService = CommonFunctions.CreateBookService();
             // create the book
-            int bookId = await bookService.BookCreateAndSaveAsync(context, 
+            int bookId = await BookApiL1.BookCreateAndSaveAsync(context, 
                 _newBookTitle, _newBookLanguageCode, _newBookUrl, _newBookText);
             // add the book stats
             bookService.BookStatsCreateAndSave(context, bookId);

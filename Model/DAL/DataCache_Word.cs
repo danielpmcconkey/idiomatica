@@ -36,7 +36,7 @@ namespace Model.DAL
             WordById[key] = value;
             return value;
         }
-        public static async Task<Word?> WordByLanguageIdAndTextLowerReadAsync((int languageId, string textLower) key, IdiomaticaContext context)
+        public static Word? WordByLanguageIdAndTextLowerRead((int languageId, string textLower) key, IdiomaticaContext context)
         {
             // check cache
             if (WordByLanguageIdAndTextLower.ContainsKey(key))
@@ -48,7 +48,7 @@ namespace Model.DAL
             var value = context.Words
                 .Where(x => x.LanguageId == key.languageId && x.TextLowerCase == key.textLower)
                 .FirstOrDefault();
-            if (value == null) return null;
+            if (value == null || value.Id is null || value.Id < 1) return null;
             // write to cache
             WordByLanguageIdAndTextLower[key] = value;
             WordById[(int)value.Id] = value;

@@ -11,10 +11,10 @@ namespace Model.DAL
     {
         private static ConcurrentDictionary<string, Language> LanguageByCode = new ConcurrentDictionary<string, Language>();
         private static ConcurrentDictionary<int, Language> LanguageById = new ConcurrentDictionary<int, Language>();
-        
-        
+
+
         #region read
-        public static async Task<Language?> LanguageByCodeReadAsync(string key, IdiomaticaContext context)
+        public static Language? LanguageByCodeRead(string key, IdiomaticaContext context)
         {
             // check cache
             if (LanguageByCode.ContainsKey(key))
@@ -26,13 +26,14 @@ namespace Model.DAL
                 .Where(l => l.Code == key)
                 .FirstOrDefault();
 
-            if (value == null) return null;
+            if (value is null || value.Id is null or 0) return null;
             // write to cache
             LanguageByCode[key] = value;
             LanguageById[(int)value.Id] = value;
             return value;
         }
-        public static async Task<Language?> LanguageByIdReadAsync(int key, IdiomaticaContext context)
+        
+        public static Language? LanguageByIdRead(int key, IdiomaticaContext context)
         {
             // check cache
             if (LanguageById.ContainsKey(key))
@@ -44,9 +45,10 @@ namespace Model.DAL
                 .Where(l => l.Id == key)
                 .FirstOrDefault();
 
-            if (value == null) return null;
+            if (value is null || string.IsNullOrEmpty(value.Code)) return null;
             // write to cache
             LanguageById[key] = value;
+            LanguageByCode[value.Code] = value;
             return value;
         } 
         #endregion

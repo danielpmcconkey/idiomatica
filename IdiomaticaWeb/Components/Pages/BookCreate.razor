@@ -208,7 +208,7 @@
 
             string textInput = await _largeVolumeTextArea.GetTextValue();
 
-            int bookId = await BookService.BookCreateAndSaveAsync(context, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
+            int bookId = await BookApiL1.BookCreateAndSaveAsync(context, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
             // add the book stats
             BookService.BookStatsCreateAndSave(context, bookId);
             // now create the book user for teh logged in user

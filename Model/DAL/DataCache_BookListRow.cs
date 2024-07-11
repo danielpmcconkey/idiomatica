@@ -56,20 +56,7 @@ namespace Model.DAL
              * use parameters, due to the way we're building the query, you must 
              * sanitize everything. No little Bobby Tables.
              * */
-            Func<string, string> sanitizeString = (input) =>
-            {
-                try
-                {
-                    return Regex.Replace(input, @"[^\w\.@ -]", "",
-                                         RegexOptions.None, TimeSpan.FromSeconds(1.5));
-                }
-                // If we timeout when replacing invalid characters,
-                // we should return Empty.
-                catch (RegexMatchTimeoutException)
-                {
-                    return String.Empty;
-                }
-            };
+            
 
             bool useTags = (tagsFilter != null && tagsFilter != string.Empty) ? true : false;
             
@@ -128,7 +115,7 @@ namespace Model.DAL
                             , bt.Tag
                         from Idioma.Book b
                         left join Idioma.BookTag bt on b.Id = bt.BookId
-                        where bt.Tag like '%{sanitizeString(tagsFilter)}%'
+                        where bt.Tag like '%{DALUtilities.SanitizeString(tagsFilter)}%'
                         group by b.Id, bt.Tag
                     ),
                     """);
@@ -235,7 +222,7 @@ namespace Model.DAL
             {
                 sb.Append($"""
 
-                        and b.Title like '%{sanitizeString(titleFilter)}%'
+                        and b.Title like '%{DALUtilities.SanitizeString(titleFilter)}%'
                     """);
             }
             if (useTags) // we only aggregate when bringing in tags

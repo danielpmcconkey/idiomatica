@@ -304,113 +304,113 @@ namespace Logic.Services
 
         #region public interface
 
-        public async Task<bool> BookDoesContainTagLikeText(IdiomaticaContext context, int? bookId, string? text)
-        {
-            if (bookId == null || bookId < 1 || text == null) return false;
-            // pull all tags
-            var tags = await DataCache.BookTagsByBookIdReadAsync((int)bookId, context);
-            var filteredTags = tags.Where(
-                x => x.Tag != null && x.Tag.Contains(text, StringComparison.OrdinalIgnoreCase));
-            return filteredTags.Any();
-        }
-        public async Task<int> BookCreateAndSaveAsync(
-            IdiomaticaContext context, string title, string languageCode, string url, string text)
-        {
-            const int _targetCharCountPerPage = 1378;// this was arrived at by DB query after conversion
-            // sanitize and validate input
-            var titleT = _nullHandler.ThrowIfNullOrEmptyString(title.Trim());
-            var languageCodeT = _nullHandler.ThrowIfNullOrEmptyString(languageCode.Trim());
-            var urlT = (url == null) ? "" : url.Trim();
-            var textT = _nullHandler.ThrowIfNullOrEmptyString(text.Trim().Replace('\u00A0', ' '));
+        //public async Task<bool> BookDoesContainTagLikeText(IdiomaticaContext context, int? bookId, string? text)
+        //{
+        //    if (bookId == null || bookId < 1 || text == null) return false;
+        //    // pull all tags
+        //    var tags = await DataCache.BookTagsByBookIdReadAsync((int)bookId, context);
+        //    var filteredTags = tags.Where(
+        //        x => x.Tag != null && x.Tag.Contains(text, StringComparison.OrdinalIgnoreCase));
+        //    return filteredTags.Any();
+        //}
+        //public async Task<int> BookCreateAndSaveAsync(
+        //    IdiomaticaContext context, string title, string languageCode, string url, string text)
+        //{
+        //    const int _targetCharCountPerPage = 1378;// this was arrived at by DB query after conversion
+        //    // sanitize and validate input
+        //    var titleT = _nullHandler.ThrowIfNullOrEmptyString(title.Trim());
+        //    var languageCodeT = _nullHandler.ThrowIfNullOrEmptyString(languageCode.Trim());
+        //    var urlT = (url == null) ? "" : url.Trim();
+        //    var textT = _nullHandler.ThrowIfNullOrEmptyString(text.Trim().Replace('\u00A0', ' '));
 
-            // pull language from the db
-            var language = _nullHandler.ThrowIfNull<Language>(
-                await DataCache.LanguageByCodeReadAsync(languageCodeT, context));
+        //    // pull language from the db
+        //    var language = _nullHandler.ThrowIfNull<Language>(
+        //        await DataCache.LanguageByCodeReadAsync(languageCodeT, context));
             
 
-            // divide text into paragraphs
-            var parser = LanguageParser.Factory.GetLanguageParser(language);
-            var paragraphSplitsRaw = parser.SegmentTextByParagraphs(textT);
-            string[] paragraphSplits = _nullHandler.ThrowIfNullOrEmptyArray<string>(paragraphSplitsRaw);
+        //    // divide text into paragraphs
+        //    var parser = LanguageParser.Factory.GetLanguageParser(language);
+        //    var paragraphSplitsRaw = parser.SegmentTextByParagraphs(textT);
+        //    string[] paragraphSplits = _nullHandler.ThrowIfNullOrEmptyArray<string>(paragraphSplitsRaw);
 
-            // add the book to the DB so you can save pages using its ID
-            Book book = new Book()
-            {
-                Title = titleT,
-                SourceURI = urlT,
-                LanguageId = _nullHandler.ThrowIfNullOrZeroInt(language.Id),
-            };
-            bool didSaveBook = await DataCache.BookCreateAsync(book, context);
-            if (!didSaveBook || book.Id == null || book.Id < 1)
-            {
-                _errorHandler.LogAndThrow(2090);
-                return -1;
-            }
+        //    // add the book to the DB so you can save pages using its ID
+        //    Book book = new Book()
+        //    {
+        //        Title = titleT,
+        //        SourceURI = urlT,
+        //        LanguageId = _nullHandler.ThrowIfNullOrZeroInt(language.Id),
+        //    };
+        //    bool didSaveBook = await DataCache.BookCreateAsync(book, context);
+        //    if (!didSaveBook || book.Id == null || book.Id < 1)
+        //    {
+        //        _errorHandler.LogAndThrow(2090);
+        //        return -1;
+        //    }
 
-            // pull a list of common words from the database and put it
-            // in a dictionary so that we don't always have to go back to the
-            // database just to get the word ID for every single word
-            var commonWordsInLanguage = _nullHandler.ThrowIfNullOrEmptyDict(
-                await WordFetchCommonDictForLanguageAsync(context, 
-                    _nullHandler.ThrowIfNullOrZeroInt(language.Id)));
+        //    // pull a list of common words from the database and put it
+        //    // in a dictionary so that we don't always have to go back to the
+        //    // database just to get the word ID for every single word
+        //    var commonWordsInLanguage = _nullHandler.ThrowIfNullOrEmptyDict(
+        //        await WordFetchCommonDictForLanguageAsync(context, 
+        //            _nullHandler.ThrowIfNullOrZeroInt(language.Id)));
 
-            var currentPageCount = 1;
-            var pageText = "";
-            int currentCharCount = 0;
-            bool isFirstPpOfPage = true;
+        //    var currentPageCount = 1;
+        //    var pageText = "";
+        //    int currentCharCount = 0;
+        //    bool isFirstPpOfPage = true;
 
-            // loop through the paragraphs and add a page for the closest character count
-            for (int i = 0; i < paragraphSplits.Length; i++)
-            {
-                string paragraph = paragraphSplits[i].Trim();
-                if (string.IsNullOrEmpty(paragraph)) continue;
-                int thisCharCount = paragraph.Length;
-                if (currentCharCount + thisCharCount > _targetCharCountPerPage)
-                {
-                    if (isFirstPpOfPage)
-                    {
-                        // special weird case
-                        // it's too big to fit on one page and it is the first pp of this page
-                        // make it its own page
-                        pageText = $"{pageText}{"\r\n"}{paragraph}";
-                        currentCharCount += thisCharCount;
-                        isFirstPpOfPage = false;
-                    }
-                    else
-                    {
-                        // too big, stick it on the next one
-                        i -= 1; // go back one
-                        // make a new page
-                        int newPageId = await PageCreateAndSaveDuringBookCreateAsync(
-                            context, (int)book.Id, currentPageCount,
-                                    pageText, language, commonWordsInLanguage);
+        //    // loop through the paragraphs and add a page for the closest character count
+        //    for (int i = 0; i < paragraphSplits.Length; i++)
+        //    {
+        //        string paragraph = paragraphSplits[i].Trim();
+        //        if (string.IsNullOrEmpty(paragraph)) continue;
+        //        int thisCharCount = paragraph.Length;
+        //        if (currentCharCount + thisCharCount > _targetCharCountPerPage)
+        //        {
+        //            if (isFirstPpOfPage)
+        //            {
+        //                // special weird case
+        //                // it's too big to fit on one page and it is the first pp of this page
+        //                // make it its own page
+        //                pageText = $"{pageText}{"\r\n"}{paragraph}";
+        //                currentCharCount += thisCharCount;
+        //                isFirstPpOfPage = false;
+        //            }
+        //            else
+        //            {
+        //                // too big, stick it on the next one
+        //                i -= 1; // go back one
+        //                // make a new page
+        //                int newPageId = await PageCreateAndSaveDuringBookCreateAsync(
+        //                    context, (int)book.Id, currentPageCount,
+        //                            pageText, language, commonWordsInLanguage);
 
 
-                        // reset stuff
-                        pageText = "";
-                        currentCharCount = 0;
-                        currentPageCount++;
-                        isFirstPpOfPage = true;
-                    }
-                }
-                else
-                {
-                    // add to the stack
-                    pageText = $"{pageText}{"\r\n"}{paragraph}";
-                    currentCharCount += thisCharCount;
-                    isFirstPpOfPage = false;
-                }
-            }
-            if (!string.IsNullOrEmpty(pageText))
-            {
-                // there's still text left. need to add it to a new page
-                int newPageId = await PageCreateAndSaveDuringBookCreateAsync(
-                    context, (int)book.Id, currentPageCount,
-                            pageText, language, commonWordsInLanguage);
-            }
+        //                // reset stuff
+        //                pageText = "";
+        //                currentCharCount = 0;
+        //                currentPageCount++;
+        //                isFirstPpOfPage = true;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            // add to the stack
+        //            pageText = $"{pageText}{"\r\n"}{paragraph}";
+        //            currentCharCount += thisCharCount;
+        //            isFirstPpOfPage = false;
+        //        }
+        //    }
+        //    if (!string.IsNullOrEmpty(pageText))
+        //    {
+        //        // there's still text left. need to add it to a new page
+        //        int newPageId = await PageCreateAndSaveDuringBookCreateAsync(
+        //            context, (int)book.Id, currentPageCount,
+        //                    pageText, language, commonWordsInLanguage);
+        //    }
 
-            return (int)book.Id;
-        }
+        //    return (int)book.Id;
+        //}
         public async Task BookListRowsFilterAndSort(IdiomaticaContext context)
         {
             SkipRecords = 0;
@@ -1351,36 +1351,36 @@ namespace Logic.Services
 
         #region Page
 
-        private async Task<int> PageCreateAndSaveDuringBookCreateAsync(
-            IdiomaticaContext context, int bookId, int Ordinal, string pageText,
-            Language language, Dictionary<string,Word> commonWordsInLanguage)
-        {
-            var newPage = new Page()
-            {
-                BookId = bookId,
-                Ordinal = Ordinal,
-                OriginalText = pageText
-            };
+        //private async Task<int> PageCreateAndSaveDuringBookCreateAsync(
+        //    IdiomaticaContext context, int bookId, int Ordinal, string pageText,
+        //    Language language, Dictionary<string,Word> commonWordsInLanguage)
+        //{
+        //    var newPage = new Page()
+        //    {
+        //        BookId = bookId,
+        //        Ordinal = Ordinal,
+        //        OriginalText = pageText
+        //    };
 
 
-            bool isSaved = await DataCache.PageCreateNewAsync(newPage, context);
-            if(!isSaved || newPage.Id == null || newPage.Id == 0)
-            {
-                _errorHandler.LogAndThrow(2040);
-                return -1;
-            }
+        //    bool isSaved = await DataCache.PageCreateNewAsync(newPage, context);
+        //    if(!isSaved || newPage.Id == null || newPage.Id == 0)
+        //    {
+        //        _errorHandler.LogAndThrow(2040);
+        //        return -1;
+        //    }
 
             
-            // do the actual page parsing
-            bool areParagraphsParsed = await ParagraphsParseFromPageAndSaveAsync(
-                context, newPage, language, commonWordsInLanguage);
-            if(!areParagraphsParsed)
-            {
-                _errorHandler.LogAndThrow(2260);
-                return -1;
-            }
-            return (int)newPage.Id;
-        }
+        //    // do the actual page parsing
+        //    bool areParagraphsParsed = await ParagraphsParseFromPageAndSaveAsync(
+        //        context, newPage, language, commonWordsInLanguage);
+        //    if(!areParagraphsParsed)
+        //    {
+        //        _errorHandler.LogAndThrow(2260);
+        //        return -1;
+        //    }
+        //    return (int)newPage.Id;
+        //}
         private async Task<Page?> PageGetCurrentAsync(IdiomaticaContext context, int pageId)
         {
             if (_currentPage == null)
@@ -1651,60 +1651,60 @@ namespace Logic.Services
         /// parses the text through the language parser and returns paragraphs, 
         /// sentences, and tokens. it saves everything in the DB
         /// </summary>
-        private async Task<bool> ParagraphsParseFromPageAndSaveAsync(
-            IdiomaticaContext context, Page page, Language language, Dictionary<string, Word> commonWordDict)
-        {
-            var parser = LanguageParser.Factory.GetLanguageParser(language);
-            var paragraphSplits = parser.SegmentTextByParagraphs(
-                _nullHandler.ThrowIfNullString(page.OriginalText));
+        //private async Task<bool> ParagraphsParseFromPageAndSaveAsync(
+        //    IdiomaticaContext context, Page page, Language language, Dictionary<string, Word> commonWordDict)
+        //{
+        //    var parser = LanguageParser.Factory.GetLanguageParser(language);
+        //    var paragraphSplits = parser.SegmentTextByParagraphs(
+        //        _nullHandler.ThrowIfNullString(page.OriginalText));
 
-            int paragraphOrder = 0;
+        //    int paragraphOrder = 0;
 
-            foreach (var pText in paragraphSplits)
-            {
-                if (pText.Trim() == string.Empty) continue;
-                Paragraph paragraph = new Paragraph()
-                {
-                    Ordinal = paragraphOrder,
-                    PageId = _nullHandler.ThrowIfNullOrZeroInt(page.Id)
-                };
-                bool isSaved = await DataCache.ParagraphCreateAsync(paragraph, context);
-                if (!isSaved || paragraph.Id == null || paragraph.Id == 0)
-                {
-                    _errorHandler.LogAndThrow(2270);
-                    return false;
-                }
-                paragraphOrder++;
+        //    foreach (var pText in paragraphSplits)
+        //    {
+        //        if (pText.Trim() == string.Empty) continue;
+        //        Paragraph paragraph = new Paragraph()
+        //        {
+        //            Ordinal = paragraphOrder,
+        //            PageId = _nullHandler.ThrowIfNullOrZeroInt(page.Id)
+        //        };
+        //        bool isSaved = await DataCache.ParagraphCreateAsync(paragraph, context);
+        //        if (!isSaved || paragraph.Id == null || paragraph.Id == 0)
+        //        {
+        //            _errorHandler.LogAndThrow(2270);
+        //            return false;
+        //        }
+        //        paragraphOrder++;
 
-                var sentenceSplits = parser.SegmentTextBySentences(pText);
-                for (int i = 0; i < sentenceSplits.Length; i++)
-                {
-                    var sentenceSplit = sentenceSplits[i];
+        //        var sentenceSplits = parser.SegmentTextBySentences(pText);
+        //        for (int i = 0; i < sentenceSplits.Length; i++)
+        //        {
+        //            var sentenceSplit = sentenceSplits[i];
 
-                    var newSentence = new Sentence()
-                    {
-                        ParagraphId = (int)paragraph.Id,
-                        Text = sentenceSplit,
-                        Ordinal = i,
-                    };
-                    var isSavedSentence = await DataCache.SentenceCreateAsync(newSentence, context);
-                    if (!isSavedSentence || newSentence.Id == null || newSentence.Id == 0)
-                    {
-                        _errorHandler.LogAndThrow(2280);
-                        return false;
-                    }
+        //            var newSentence = new Sentence()
+        //            {
+        //                ParagraphId = (int)paragraph.Id,
+        //                Text = sentenceSplit,
+        //                Ordinal = i,
+        //            };
+        //            var isSavedSentence = await DataCache.SentenceCreateAsync(newSentence, context);
+        //            if (!isSavedSentence || newSentence.Id == null || newSentence.Id == 0)
+        //            {
+        //                _errorHandler.LogAndThrow(2280);
+        //                return false;
+        //            }
 
-                    var areSavedTokens = await CreateTokensFromSentenceAndSaveAsync(
-                        context, newSentence, language, commonWordDict);
-                    if (!areSavedTokens)
-                    {
-                        _errorHandler.LogAndThrow(2300);
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
+        //            var areSavedTokens = await CreateTokensFromSentenceAndSaveAsync(
+        //                context, newSentence, language, commonWordDict);
+        //            if (!areSavedTokens)
+        //            {
+        //                _errorHandler.LogAndThrow(2300);
+        //                return false;
+        //            }
+        //        }
+        //    }
+        //    return true;
+        //}
         private async Task<List<Paragraph>?> ParagraphsGetByPageIdAsync(IdiomaticaContext context, int pageId)
         {
             if (_paragraphs == null)
@@ -1748,81 +1748,81 @@ namespace Logic.Services
         /// <summary>
         /// this will delete any existing DB tokens
         /// </summary>
-        private async Task<bool> CreateTokensFromSentenceAndSaveAsync(IdiomaticaContext context,
-            Sentence sentence, Language language, Dictionary<string, Word> commonWordDict)
-        {
-            int sentenceIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(sentence.Id);
-            string sentenceTextDenulled = _nullHandler.ThrowIfNullOrEmptyString(sentence.Text);
-            int languageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(language.Id);
+        //private async Task<bool> CreateTokensFromSentenceAndSaveAsync(IdiomaticaContext context,
+        //    Sentence sentence, Language language, Dictionary<string, Word> commonWordDict)
+        //{
+        //    int sentenceIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(sentence.Id);
+        //    string sentenceTextDenulled = _nullHandler.ThrowIfNullOrEmptyString(sentence.Text);
+        //    int languageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(language.Id);
 
 
-            // check if any already exist. there shouldn't be any but whateves
-            await DataCache.TokenBySentenceIdDelete(sentenceIdDenulled, context);
+        //    // check if any already exist. there shouldn't be any but whateves
+        //    await DataCache.TokenBySentenceIdDelete(sentenceIdDenulled, context);
 
-            // parse new ones
+        //    // parse new ones
 
-            List<Token> tokens = new List<Token>();
+        //    List<Token> tokens = new List<Token>();
 
-            var parser = LanguageParser.Factory.GetLanguageParser(language);
-            var wordsSplits = parser.SegmentTextByWordsKeepingPunctuation(sentenceTextDenulled);
+        //    var parser = LanguageParser.Factory.GetLanguageParser(language);
+        //    var wordsSplits = parser.SegmentTextByWordsKeepingPunctuation(sentenceTextDenulled);
 
-            for (int i = 0; i < wordsSplits.Length; i++)
-            {
-                var wordSplit = wordsSplits[i];
-                var cleanWord = parser.StipNonWordCharacters(wordSplit).ToLower();
-                Word? existingWord = null;
-                // check if the word is in the word dict
-                if (commonWordDict.ContainsKey(cleanWord))
-                {
-                    existingWord = commonWordDict[cleanWord];
-                }
-                else
-                {
-                    // check if the word is already in the DB
-                    existingWord = await DataCache
-                        .WordByLanguageIdAndTextLowerReadAsync((languageIdDenulled, cleanWord), context);
-                }
-                if (existingWord == null)
-                {
-                    if (cleanWord == string.Empty)
-                    {
-                        // there shouldn't be any empty words. that would mean
-                        // that all non-word characters were stripped out and
-                        // only left an empty string. Something like a string
-                        // of punctuation or a quotation from another language
-                        // that uses different characters. either way, create
-                        // an empty word and move on
-                        var emptyWord = await WordCreateAndSaveNewAsync(
-                            context, language, string.Empty, string.Empty);
-                        commonWordDict[cleanWord] = emptyWord;
-                        existingWord = emptyWord;
-                    }
-                    else
-                    {
-                        // this is a newly encountered word. save it to the DB
-                        // todo: add actual romanization lookup here
-                        var newWord = await WordCreateAndSaveNewAsync(
-                            context, language, cleanWord, cleanWord);
-                        commonWordDict.Add(cleanWord, newWord);
-                        existingWord = newWord;
-                    }
-                }
-                Token token = new Token()
-                {
-                    Display = $"{wordSplit} ", // add the space that you previously took out
-                    SentenceId = sentenceIdDenulled,
-                    Ordinal = i,
-                    WordId = _nullHandler.ThrowIfNullOrZeroInt(existingWord.Id)
-                };
-                bool isSaved = await DataCache.TokenCreateAsync(token, context);
-                if (!isSaved || token.Id == null || token.Id == 0)
-                {
-                    _errorHandler.LogAndThrow(2290);
-                    return false;
-                }
-            }
-            return true;
-        }
+        //    for (int i = 0; i < wordsSplits.Length; i++)
+        //    {
+        //        var wordSplit = wordsSplits[i];
+        //        var cleanWord = parser.StipNonWordCharacters(wordSplit).ToLower();
+        //        Word? existingWord = null;
+        //        // check if the word is in the word dict
+        //        if (commonWordDict.ContainsKey(cleanWord))
+        //        {
+        //            existingWord = commonWordDict[cleanWord];
+        //        }
+        //        else
+        //        {
+        //            // check if the word is already in the DB
+        //            existingWord = await DataCache
+        //                .WordByLanguageIdAndTextLowerReadAsync((languageIdDenulled, cleanWord), context);
+        //        }
+        //        if (existingWord == null)
+        //        {
+        //            if (cleanWord == string.Empty)
+        //            {
+        //                // there shouldn't be any empty words. that would mean
+        //                // that all non-word characters were stripped out and
+        //                // only left an empty string. Something like a string
+        //                // of punctuation or a quotation from another language
+        //                // that uses different characters. either way, create
+        //                // an empty word and move on
+        //                var emptyWord = await WordCreateAndSaveNewAsync(
+        //                    context, language, string.Empty, string.Empty);
+        //                commonWordDict[cleanWord] = emptyWord;
+        //                existingWord = emptyWord;
+        //            }
+        //            else
+        //            {
+        //                // this is a newly encountered word. save it to the DB
+        //                // todo: add actual romanization lookup here
+        //                var newWord = await WordCreateAndSaveNewAsync(
+        //                    context, language, cleanWord, cleanWord);
+        //                commonWordDict.Add(cleanWord, newWord);
+        //                existingWord = newWord;
+        //            }
+        //        }
+        //        Token token = new Token()
+        //        {
+        //            Display = $"{wordSplit} ", // add the space that you previously took out
+        //            SentenceId = sentenceIdDenulled,
+        //            Ordinal = i,
+        //            WordId = _nullHandler.ThrowIfNullOrZeroInt(existingWord.Id)
+        //        };
+        //        bool isSaved = await DataCache.TokenCreateAsync(token, context);
+        //        if (!isSaved || token.Id == null || token.Id == 0)
+        //        {
+        //            _errorHandler.LogAndThrow(2290);
+        //            return false;
+        //        }
+        //    }
+        //    return true;
+        //}
         private async Task<List<Sentence>?> SentencesByPageIdAsync(IdiomaticaContext context, int pageId)
         {
             if (_sentences == null)
@@ -1900,25 +1900,25 @@ namespace Logic.Services
 
         #region Word
 
-        private async Task<Word> WordCreateAndSaveNewAsync(IdiomaticaContext context,
-            Language language, string text, string romanization)
-        {
-            int languageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(language.Id);
-            Word newWord = new Word()
-            {
-                LanguageId = languageIdDenulled,
-                Romanization = romanization,
-                Text = text.ToLower(),
-                TextLowerCase = text.ToLower(),
-            };
-            var isSaved = await DataCache.WordCreateAsync(newWord, context);
-            if(!isSaved || newWord.Id == null || newWord.Id == 0)
-            {
-                _errorHandler.LogAndThrow(2350);
-                return newWord;
-            }
-            return newWord;
-        }
+        //private async Task<Word> WordCreateAndSaveNewAsync(IdiomaticaContext context,
+        //    Language language, string text, string romanization)
+        //{
+        //    int languageIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(language.Id);
+        //    Word newWord = new Word()
+        //    {
+        //        LanguageId = languageIdDenulled,
+        //        Romanization = romanization,
+        //        Text = text.ToLower(),
+        //        TextLowerCase = text.ToLower(),
+        //    };
+        //    var isSaved = await DataCache.WordCreateAsync(newWord, context);
+        //    if(!isSaved || newWord.Id == null || newWord.Id == 0)
+        //    {
+        //        _errorHandler.LogAndThrow(2350);
+        //        return newWord;
+        //    }
+        //    return newWord;
+        //}
         private async Task<Dictionary<string, Word>?> WordFetchCommonDictForLanguageAsync(
             IdiomaticaContext context, int languageId)
         {
