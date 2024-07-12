@@ -18,7 +18,7 @@ namespace Logic.Services.Level2
         {
             if (paragraphId < 1) ErrorHandler.LogAndThrow();
             if (languageId < 1) ErrorHandler.LogAndThrow();
-            if (ordinal < 1) ErrorHandler.LogAndThrow();
+            if (ordinal < 0) ErrorHandler.LogAndThrow();
             if (string.IsNullOrEmpty(text)) ErrorHandler.LogAndThrow();
             var newSentence = new Sentence()
             {

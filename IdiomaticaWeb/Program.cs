@@ -35,9 +35,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddTransient<BookService>();
 builder.Services.AddTransient<FlashCardService>();
 builder.Services.AddTransient<UserService>();
-builder.Services.AddTransient<ErrorHandler>();
 builder.Services.AddTransient<DeepLService>();
-builder.Services.AddTransient<NullHandler>();
 
 var connection = String.Empty;
 if (builder.Environment.IsDevelopment())
@@ -56,7 +54,7 @@ else
 
 builder.Services.AddDbContextFactory<IdiomaticaContext>(options => {
     options.UseSqlServer(connection, b => b.MigrationsAssembly("IdiomaticaWeb"));
-    //options.EnableSensitiveDataLogging();
+    options.EnableSensitiveDataLogging();
 });
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();

@@ -851,8 +851,14 @@ Fin
             var user = CommonFunctions.CreateNewTestUser(userService, context);
             var bookService = CommonFunctions.CreateBookService();
             // create the book
-            int bookId = await BookApiL1.BookCreateAndSaveAsync(context, 
+            var book = await BookApiL1.BookCreateAndSaveAsync(context, 
                 _newBookTitle, _newBookLanguageCode, _newBookUrl, _newBookText);
+            if (book == null || book.Id == null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            int bookId = (int)book.Id;
             // add the book stats
             bookService.BookStatsCreateAndSave(context, bookId);
             // now create the book user for teh logged in user

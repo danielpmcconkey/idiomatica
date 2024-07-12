@@ -14,7 +14,7 @@ namespace Model.DAL
         private static ConcurrentDictionary<int, List<Page>> PagesByBookId = new ConcurrentDictionary<int, List<Page>>();
 
         #region read
-        public static async Task<Page> PageByIdReadAsync(int key, IdiomaticaContext context)
+        public static Page? PageByIdRead(int key, IdiomaticaContext context)
         {
             // check cache
             if (PageById.ContainsKey(key))

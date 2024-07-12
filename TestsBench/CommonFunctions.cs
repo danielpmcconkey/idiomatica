@@ -36,9 +36,7 @@ namespace TestsBench
                 .AddTransient<BookService>()
                 .AddTransient<UserService>()
                 .AddTransient<FlashCardService>()
-                .AddTransient<ErrorHandler>()
                 .AddTransient<DeepLService>()
-                .AddTransient<NullHandler>()
                 //.AddDbContext<IdiomaticaContext>(options => {
                 //    options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("IdiomaticaWeb"));
                 //    })

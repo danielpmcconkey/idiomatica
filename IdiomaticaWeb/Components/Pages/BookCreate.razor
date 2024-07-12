@@ -3,7 +3,7 @@
 @inject BookService BookService;
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
-@inject ErrorHandler ErrorHandler;
+@using Logic.Services.Level1;
 
 <h3>@UserService.GetUILabel("NewBook")</h3>
 <ErrorAlert ErrorState="errorState"></ErrorAlert>
@@ -175,7 +175,7 @@
     }
 
 
-    
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -202,18 +202,31 @@
     private async Task OnSaveClickAsync()
     {
         _isSaving = true;
+        var context = await DbContextFactory.CreateDbContextAsync();
         try
         {
-            var context = await DbContextFactory.CreateDbContextAsync();
+            await context.Database.BeginTransactionAsync();
 
             string textInput = await _largeVolumeTextArea.GetTextValue();
 
-            int bookId = await BookApiL1.BookCreateAndSaveAsync(context, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
+            Book? book = await BookApiL1.BookCreateAndSaveAsync(context, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
+            if(book is null || book.Id is null || book.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            int bookId = (int)book.Id;
             // add the book stats
             BookService.BookStatsCreateAndSave(context, bookId);
             // now create the book user for teh logged in user
+            if(_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
             int bookUserId = await BookService.BookUserCreateAndSaveAsync(context, bookId, (int)_loggedInUser.Id);
-            
+
+            await context.Database.CommitTransactionAsync();
 
             // throw up a success message
             _isSaveSuccess = true;
@@ -221,6 +234,7 @@
         }
         catch (IdiomaticaException ex)
         {
+            await context.Database.RollbackTransactionAsync();
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("bookCreateSaveError");
             errorState.code = ex.code;

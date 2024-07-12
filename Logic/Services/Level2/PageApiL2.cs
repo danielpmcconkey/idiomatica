@@ -43,22 +43,9 @@ namespace Logic.Services.Level2
                 ErrorHandler.LogAndThrow(2040);
                 return null;
             }
-            // parse paragraphs
-            var paragraphSplits = ParagraphApiL2.SplitTextToPotentialParagraphs(
-                context, text, language.Code);
-            int paragraphOrdinal = 0;
-            foreach (var paragraphSplit in paragraphSplits)
-            {
-                var paragraphSplitTrimmed = paragraphSplit.Trim();
-                if (string.IsNullOrEmpty(paragraphSplitTrimmed)) continue;
-                var paragraph = await ParagraphApiL2.CreateParagraphFromSplitAsync(context,
-                    paragraphSplitTrimmed, (int)newPage.Id, paragraphOrdinal, languageId);
-                if (paragraph is not null && paragraph.Id is not null or 0)
-                {
-                    newPage.Paragraphs.Add(paragraph);
-                }
-                paragraphOrdinal++;
-            }
+            // create paragraphs
+            newPage.Paragraphs = await ParagraphApiL2.CreateParagraphsFromPageAsync(
+                context, (int)newPage.Id, languageId);
             return newPage;
         }
         /// <summary>

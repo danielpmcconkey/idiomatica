@@ -56,6 +56,7 @@ namespace Logic.Services.Level2
             // create the words first
             List<(Word word, int ordinal)> words = await WordApiL2.CreateOrderedWordsFromSentenceIdAsync(
                 context, languageId, sentenceId);
+
             if (words.Count < 1) return new List<Token>();
 
             // now make the tokens
@@ -72,17 +73,8 @@ namespace Logic.Services.Level2
                 return newToken;
             });
             Task.WaitAll(tokenTasks.ToArray());
-            List<Token?> nullableTokens = tokenTasks
-                .Where(x => x.Result is not null)
-                .Select(x => x.Result)
-                .ToList();
-            var tokens = new List<Token>();
-            foreach (var token in nullableTokens)
-            {
-                if (token is null) continue;
-                tokens.Add(token);
-            }
-            return tokens;
+            var tokens = await DataCache.TokensBySentenceIdReadAsync(sentenceId, context);
+            return tokens ?? new List<Token>();
         }
     }
 }

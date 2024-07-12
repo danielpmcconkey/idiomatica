@@ -72,11 +72,13 @@ namespace Logic.Services.Level2
                     ((int)languageId, x.word), context);
                 if (existingWord is not null) return ((Word)existingWord, x.ordinal);
                 // word doesn't exist; create it
-                Word? newWord = await WordApiL2.CreateWordAsync(context, languageId, x, x);
+                Word? newWord = await WordApiL2.CreateWordAsync(
+                    context, languageId, x.word, x.word);
                 return (newWord, x.ordinal);
             });
             Task.WaitAll(wordTasks.ToArray());
             List<(Word word, int ordinal)> words = wordTasks.Select(x => x.Result).ToList();
+            
             return words;
         }
     }

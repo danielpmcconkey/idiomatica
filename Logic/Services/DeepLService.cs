@@ -8,12 +8,10 @@ namespace Logic.Services
     public class DeepLService
     {
         private ILogger<IdiomaticaLogger> _logger;
-        private ErrorHandler _errorHandler;
 
-        public DeepLService(ILogger<IdiomaticaLogger> logger, ErrorHandler errorHandler)
+        public DeepLService(ILogger<IdiomaticaLogger> logger)
         {
             _logger = logger;
-            _errorHandler = errorHandler;
         }
         public async Task<string> TranslateAsync (string input, string sourceLanguageCode, string targetLanguageCode) 
         {
@@ -35,7 +33,7 @@ namespace Logic.Services
                     $"sourceLanguageCode = {sourceLanguageCode}",
                     $"targetLanguageCode = {targetLanguageCode}",
                     ];
-                _errorHandler.LogAndThrow(3010, args, ex);
+                ErrorHandler.LogAndThrow(3010, args, ex);
                 throw; // you'll never get here
             } 
         }
@@ -55,7 +53,7 @@ namespace Logic.Services
                     $"sourceLanguageCode = {sourceLanguageCode}",
                     $"targetLanguageCode = {targetLanguageCode}",
                     ];
-                _errorHandler.LogAndThrow(3010, args, ex);
+                ErrorHandler.LogAndThrow(3010, args, ex);
                 throw; // you'll never get here
             }
         }
