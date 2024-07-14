@@ -21,7 +21,6 @@ namespace Logic.Services
         private User? _loggedInUser = null;
         private UserService _userService;
         private Model.LanguageCode? _uiLanguageCode;
-        private DeepLService _deepLService;
         private LanguageUser _languageUserLearning;
         public const int LoadingDelayMiliseconds = 500;
 
@@ -91,10 +90,9 @@ namespace Logic.Services
 
 
         #region init functions
-        public FlashCardService(DeepLService deepLService, UserService userService)
+        public FlashCardService(UserService userService)
         {
             _userService = userService;
-            _deepLService = deepLService;
 
         }
         public async Task InitDataAsync(IdiomaticaContext context)
@@ -296,7 +294,7 @@ namespace Logic.Services
                         string input = ParagraphGetFullText(paragraph);
                         string toLang = _uiLanguageCode.Code;
                         string fromLang = wordUser.LanguageUser.Language.Code;
-                        string translation = _deepLService.Translate(input, fromLang, toLang);
+                        string translation = DeepLService.Translate(input, fromLang, toLang);
                         ppts = new ParagraphTranslation()
                         {
                             ParagraphId = (int)paragraph.Id,

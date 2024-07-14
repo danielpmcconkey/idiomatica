@@ -3,6 +3,7 @@
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 @using System.Text;
+@using Logic.Services.Level1
 
 @* Modal for paragraph translation *@
 <Modal @ref="ppModal" title="@_title" IsVerticallyCentered="true" Size="ModalSize.Large">
@@ -23,7 +24,9 @@
 @code {
 
     [Parameter]
-    public BookService BookService { get; set; }
+    public LanguageCode? LanguageFromCode { get; set; }
+    [Parameter]
+    public LanguageCode? LanguageToCode { get; set; }
 
 
     private Modal ppModal = default!;
@@ -38,13 +41,26 @@
 
     public async Task OnShowPpModalClick(Paragraph pp)
     {
-
-        var fromLang = BookService.LanguageFromCode;
-        var toLang = BookService.LanguageToCode;
-        _title = $"{UserService.GetUILabelF("ppModalTitle", [fromLang, toLang])}";
+        if (pp is null || pp.Id is null || pp.Id < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        if (LanguageFromCode is null || string.IsNullOrEmpty(LanguageFromCode.Code)) 
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        if (LanguageToCode is null || string.IsNullOrEmpty(LanguageToCode.Code))
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        _title = $"{UserService.GetUILabelF("ppModalTitle", [LanguageFromCode.LanguageName, LanguageToCode.LanguageName])}";
         var context = await DbContextFactory.CreateDbContextAsync();
 
-        var translation = await BookService.ParagraphTranslate(context, pp, fromLang, toLang);
+        var translation = await ParagraphApiL1.ParagraphTranslate(
+            context, (int)pp.Id, LanguageFromCode.Code, LanguageToCode.Code);
         _translateFrom = translation.input;
         _translateTo = translation.output;
 

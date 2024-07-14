@@ -1,31 +1,34 @@
-﻿using Logic.Telemetry;
+﻿using Model.DAL;
 using Model;
-using Model.DAL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
+using Logic.Telemetry;
 
-namespace Logic.Services.Level2
+namespace Logic.Services.Level1
 {
-    public static class ParagraphApiL2
+    public static class ParagraphApiL1
     {
+        public static async Task<List<Paragraph>?> ParagraphsReadByPageIdAsync(IdiomaticaContext context, int pageId)
+        {
+            return await DataCache.ParagraphsByPageIdReadAsync(pageId, context);
+        }
         public static async Task<List<Paragraph>> CreateParagraphsFromPageAsync(
             IdiomaticaContext context, int pageId, int languageId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow(); 
+            if (pageId < 1) ErrorHandler.LogAndThrow();
             if (languageId < 1) ErrorHandler.LogAndThrow();
             var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null || language.Id is null || language.Id < 1||
+            if (language is null || language.Id is null || language.Id < 1 ||
                 string.IsNullOrEmpty(language.Code))
             {
                 ErrorHandler.LogAndThrow();
                 return [];
             }
             var page = DataCache.PageByIdRead(pageId, context);
-            if (page is null || page.Id is null || page.Id < 1 || 
+            if (page is null || page.Id is null || page.Id < 1 ||
                 string.IsNullOrEmpty(page.OriginalText))
             {
                 ErrorHandler.LogAndThrow();
@@ -57,7 +60,7 @@ namespace Logic.Services.Level2
             if (pageId < 1) ErrorHandler.LogAndThrow();
             if (languageId < 1) ErrorHandler.LogAndThrow();
             if (ordinal < 0) ErrorHandler.LogAndThrow();
-            
+
             Paragraph paragraph = new Paragraph()
             {
                 Ordinal = ordinal,
@@ -71,7 +74,7 @@ namespace Logic.Services.Level2
             }
 
             // now create the sentences
-            var sentenceSplits = SentenceApiL2.SplitTextToPotentialSentences(
+            var sentenceSplits = SentenceApiL1.SplitTextToPotentialSentences(
                 context, splitText, languageId);
             int sentenceOrdinal = 0;
             foreach (var sentenceSplit in sentenceSplits)
@@ -79,7 +82,7 @@ namespace Logic.Services.Level2
                 if (string.IsNullOrEmpty(sentenceSplit)) continue;
                 var trimmedSentenceSplit = sentenceSplit.Trim();
                 if (string.IsNullOrEmpty(trimmedSentenceSplit)) continue;
-                var sentence = await SentenceApiL2.CreateSentenceAsync(
+                var sentence = await SentenceApiL1.CreateSentenceAsync(
                     context, trimmedSentenceSplit, languageId, sentenceOrdinal, (int)paragraph.Id);
                 if (sentence != null)
                 {
@@ -112,5 +115,72 @@ namespace Logic.Services.Level2
             var paragraphSplitsRaw = parser.SegmentTextByParagraphs(textDenulled);
             return NullHandler.ThrowIfNullOrEmptyArray(paragraphSplitsRaw);
         }
+        public static async Task<string> ParagraphReadAllText(IdiomaticaContext context, int paragraphId)
+        {
+            if (paragraphId < 1) ErrorHandler.LogAndThrow();
+            var sentences = await DataCache.SentencesByParagraphIdReadAsync(paragraphId, context);
+            if (sentences is null || sentences.Count < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return string.Empty;
+            }
+            var sentenceTexts = sentences.OrderBy(x => x.Ordinal).Select(s => s.Text ?? "").ToList<string>();
+            if (sentenceTexts is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return string.Empty;
+            }
+            return String.Join(" ", sentences);
+        }
+        public static async Task<(string input, string output)> ParagraphTranslate(
+            IdiomaticaContext context, int paragraphId, string fromCode, string toCode)
+        {
+            if (paragraphId < 1) ErrorHandler.LogAndThrow();
+            if (string.IsNullOrEmpty(fromCode)) ErrorHandler.LogAndThrow();
+            if (string.IsNullOrEmpty(toCode)) ErrorHandler.LogAndThrow();
+
+
+            string input = await ParagraphReadAllText(context, paragraphId);
+            string output = "";
+
+            // see if the translation already exists
+            var existingTranslations = await DataCache.ParagraphTranslationsByParargraphIdReadAsync(
+                    paragraphId, context);
+            if (existingTranslations is not null && existingTranslations.Count > 0)
+            {
+                // are any in the right language?
+                var currentTranslation = existingTranslations
+                .Where(x => x.Code == toCode)
+                .FirstOrDefault();
+                if (currentTranslation != null && currentTranslation.TranslationText != null)
+                {
+                    output = currentTranslation.TranslationText;
+                    return (input, output);
+                }
+            }
+            // nope, no existing translations will work
+            
+            var deeplResult = DeepLService.Translate(input, fromCode, toCode);
+            if (deeplResult is not null)
+            {
+                output = deeplResult;
+                // add to the DB
+                ParagraphTranslation ppt = new ParagraphTranslation()
+                {
+                    ParagraphId = paragraphId,
+                    Code = toCode,
+                    TranslationText = deeplResult
+                };
+                bool didSave = await DataCache.ParagraphTranslationCreateAsync(ppt, context);
+                if (!didSave || ppt.Id == null || ppt.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow(2340);
+                    return ("", "");
+                }
+            }
+            
+            return (input, output);
+        }
+
     }
 }

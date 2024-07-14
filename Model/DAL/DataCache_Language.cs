@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +33,7 @@ namespace Model.DAL
             LanguageById[(int)value.Id] = value;
             return value;
         }
-        
+
         public static Language? LanguageByIdRead(int key, IdiomaticaContext context)
         {
             // check cache
@@ -50,7 +51,25 @@ namespace Model.DAL
             LanguageById[key] = value;
             LanguageByCode[value.Code] = value;
             return value;
-        } 
+        }
+        public static async Task<Language?> LanguageByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            // check cache
+            if (LanguageById.ContainsKey(key))
+            {
+                return LanguageById[key];
+            }
+            // read DB
+            var value = await context.Languages
+                .Where(l => l.Id == key)
+                .FirstOrDefaultAsync();
+
+            if (value is null || string.IsNullOrEmpty(value.Code)) return null;
+            // write to cache
+            LanguageById[key] = value;
+            LanguageByCode[value.Code] = value;
+            return value;
+        }
         #endregion
 
     }

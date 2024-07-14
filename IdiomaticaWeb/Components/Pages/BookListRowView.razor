@@ -3,6 +3,7 @@
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 @inject ILogger<IdiomaticaLogger> Logger;
+@using Logic.Services.Level1
 
 
 
@@ -135,13 +136,14 @@
     public EventCallback<int> OnArchiveAsync { get; set; }
     [Parameter]
     public EventCallback<int> OnAddAsync { get; set; }
-    
+
 
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
-    
-    
+
+
     private int? _bookId;
+    private User? _loggedInUser = null;
 
 
     protected override async Task OnInitializedAsync()
@@ -150,8 +152,10 @@
         {
             _isLoading = true;
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            _loggedInUser = await UserService.GetLoggedInUserAsync(context);
             _bookId = Row.BookId;
-            
+
             await t_delay;
             _isLoading = false;
         }
@@ -360,7 +364,25 @@
             _isLoading = true;
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.BookUserUpdateStats(context, _bookId);
+            if (_bookId is null || _bookId < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            var bookUser = await BookUserApiL1.BookUserByBookIdAndUserIdReadAsync(
+                context, (int)_bookId, (int)_loggedInUser.Id);
+            if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            await BookUserStatApiL1.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
+
             await t_delay;
             _isLoading = false;
         }

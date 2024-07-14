@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,21 @@ namespace Model.DAL
             // read DB
             var value = context.Pages.Where(x => x.Id == key)
                 .FirstOrDefault();
+            if (value == null) return null;
+            // write to cache
+            PageById[key] = value;
+            return value;
+        }
+        public static async Task<Page?> PageByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            // check cache
+            if (PageById.ContainsKey(key))
+            {
+                return PageById[key];
+            }
+
+            // read DB
+            var value = await context.Pages.Where(x => x.Id == key).FirstOrDefaultAsync();
             if (value == null) return null;
             // write to cache
             PageById[key] = value;

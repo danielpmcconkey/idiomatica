@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace Model.DAL
         private static ConcurrentDictionary<int, Token> TokenById = new ConcurrentDictionary<int, Token>(); 
         private static ConcurrentDictionary<int, List<Token>> TokensByPageId = new ConcurrentDictionary<int, List<Token>>();
         private static ConcurrentDictionary<int, List<Token>> TokensBySentenceId = new ConcurrentDictionary<int, List<Token>>();
+        private static ConcurrentDictionary<int, List<Token>> TokensAndWordsBySentenceId = new ConcurrentDictionary<int, List<Token>>();
 
         #region read
         public static async Task<Token?> TokenByIdReadAsync(int key, IdiomaticaContext context)
@@ -71,6 +73,30 @@ namespace Model.DAL
                 .ToList();
             // write to cache
             TokensBySentenceId[key] = value;
+            return value;
+        }
+        public static async Task<List<Token>> TokensAndWordsBySentenceIdReadAsync(int key, IdiomaticaContext context)
+        {
+            // check cache
+            if (TokensAndWordsBySentenceId.ContainsKey(key))
+            {
+                return TokensAndWordsBySentenceId[key];
+            }
+
+            // read DB
+            var value = await context.Tokens
+                .Include(x => x.Word)
+                .Where(x => x.SentenceId == key)
+                .OrderBy(x => x.Ordinal)
+                .ToListAsync();
+            // write to cache
+            TokensAndWordsBySentenceId[key] = value;
+            TokensBySentenceId[key] = value;
+            foreach(var t in value)
+            {
+                if(t.Id is null || t.Id < 1) continue;
+                TokenById[(int)t.Id] = t;
+            }
             return value;
         }
         #endregion

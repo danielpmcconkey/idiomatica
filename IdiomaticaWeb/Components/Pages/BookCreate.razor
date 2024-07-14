@@ -3,6 +3,7 @@
 @inject BookService BookService;
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
+@using Logic.Services.API
 @using Logic.Services.Level1;
 
 <h3>@UserService.GetUILabel("NewBook")</h3>
@@ -61,7 +62,7 @@
                                  class="@_languageCodeInputCss"
                                  @bind-Value="_languageCodeInput">
                         <option selected disabled>@UserService.GetUILabel("bcSelectLanguage")</option>
-                        @foreach (var (key, value) in BookService.LanguageOptions)
+                        @foreach (var (key, value) in BookListDataPacket.LanguageOptions)
                         {
                             <option value="@key">@value.LanguageName</option>
                         }
@@ -148,32 +149,8 @@
             return "form-select is-valid";
         }
     }
-    private User _loggedInUser
-    {
-        get
-        {
-            try
-            {
-                return UserService.GetLoggedInUser(DbContextFactory.CreateDbContext());
-            }
-            catch (IdiomaticaException ex)
-            {
-                errorState.isError = true;
-                errorState.errorMessage = UserService.GetUILabel("getLoggedInUserError");
-                errorState.code = ex.code;
-                StateHasChanged();
-                return null;
-            }
-            catch (Exception ex)
-            {
-                errorState.isError = true;
-                errorState.errorMessage = UserService.GetUILabel("getLoggedInUserError");
-                StateHasChanged();
-                return null;
-            }
-        }
-    }
-
+    private User? _loggedInUser = null;
+    private BookListDataPacket BookListDataPacket = new (); // used only for the built in language options dict
 
 
 
@@ -182,7 +159,8 @@
         try
         {
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.LanguageCodeDictionaryPopulate(context);
+            _loggedInUser = await UserService.GetLoggedInUserAsync(context);
+            BookListDataPacket = new (context, false);
         }
         catch (IdiomaticaException ex)
         {
@@ -217,14 +195,14 @@
             }
             int bookId = (int)book.Id;
             // add the book stats
-            BookService.BookStatsCreateAndSave(context, bookId);
+            await BookStatApi.BookStatsCreateAndSaveAsync(context, bookId);
             // now create the book user for teh logged in user
             if(_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            int bookUserId = await BookService.BookUserCreateAndSaveAsync(context, bookId, (int)_loggedInUser.Id);
+            var bookUser = await BookUserApiL1.BookUserCreateAsync(context, bookId, (int)_loggedInUser.Id);
 
             await context.Database.CommitTransactionAsync();
 

@@ -3,6 +3,7 @@
 @inject UserService UserService
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 @inject ILogger<IdiomaticaLogger> Logger;
+@using Logic.Services.Level1
 
 <style>
     .visibleBlRow {
@@ -33,7 +34,7 @@
         else
         {
                 <div class="row">
-                    @if (!BookService.BookListRows.Any())
+                    @if (BookListDataPacket.BookListRows is not null && BookListDataPacket.BookListRows.Count > 0)
                     {
                         <p>
                             @UserService.GetUILabel("bookListNoBookNotice")
@@ -52,23 +53,24 @@
                         </Button>
                     </div>
                 }
-                
-                
-            <BookListTransport BookService="BookService"
+
+
+            <BookListTransport BookListDataPacket="BookListDataPacket"
                                GetNext="GetNext"
                                GetPrevious="GetPrevious"
                                FilterAndSort="FilterAndSort" />
             
             <div>
-                @foreach (var row in BookService.BookListRows)
+                @if (BookListDataPacket.BookListRows is not null && BookListDataPacket.BookListRows.Count > 0)
                 {
-                    <BookListRowView 
-                        BookService="BookService"
-                        Row="row"
-                        OnArchiveAsync="OnArchiveBookUser"
-                        OnAddAsync="OnAddBookUser"
-                        />
+                    @foreach (var row in BookListDataPacket.BookListRows)
+                    {
+                        <BookListRowView Row="row"
+                                         OnArchiveAsync="OnArchiveBookUser"
+                                         OnAddAsync="OnAddBookUser" />
+                    }
                 }
+
             </div>
 
         }
@@ -83,24 +85,33 @@
 
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
+    private bool _isDataInitBookList = false;
+    private User? _loggedInUser = null;
+    private BookListDataPacket BookListDataPacket = new();
+
 
 
 
 
     protected override async Task OnInitializedAsync()
     {
+
         try
         {
-            if (BookService.IsDataInitBookList == false)
+            if (_isDataInitBookList == false)
             {
                 _isLoading = true;
+
                 var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
                 var context = await DbContextFactory.CreateDbContextAsync();
-                await BookService.InitDataBookList(context, IsBrowse);
+                BookListDataPacket = new BookListDataPacket(context, IsBrowse);
+                _loggedInUser = await UserService.GetLoggedInUserAsync(context);
+                await ResetBookListAsync();
+                _isDataInitBookList = true;
                 await t_delay;
                 _isLoading = false;
             }
-            
+
 
         }
         catch (IdiomaticaException ex)
@@ -121,9 +132,19 @@
             StateHasChanged();
         }
     }
-    
-    
-    
+
+    private async Task ResetBookListAsync()
+    {
+        var context = await DbContextFactory.CreateDbContextAsync();
+        if (_loggedInUser is null || _loggedInUser.Id is null) return;
+
+
+        BookListDataPacket = await BookApiL1.BookListReadAsync(
+            context, (int)_loggedInUser.Id, BookListDataPacket);
+
+    }
+
+
     private async Task OnArchiveBookUser(int bookId)
     {
         try
@@ -131,7 +152,20 @@
             _isLoading = true;
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.BookUserArchiveAsync(context, bookId);
+            if (_loggedInUser is null || _loggedInUser.Id is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            var bookUser = await BookUserApiL1.BookUserByBookIdAndUserIdReadAsync(context, bookId, (int)_loggedInUser.Id);
+            if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            await BookUserApiL1.BookUserArchiveAsync(context, (int)bookUser.Id);
+            // now pull a fresh copy of the book list
+            await ResetBookListAsync();
             await t_delay;
             _isLoading = false;
 
@@ -155,7 +189,12 @@
             _isLoading = true;
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.BookUserAddAsync(context, bookId);
+            if (_loggedInUser is null || _loggedInUser.Id is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            await BookUserApiL1.BookUserCreateAsync(context, bookId, (int)_loggedInUser.Id);
             await t_delay;
             _isLoading = false;
 
@@ -179,8 +218,7 @@
         {
             _isLoading = true;
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
-            var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.BookListRowsNext(context);
+            await BookListRowsNext();
             await t_delay;
             _isLoading = false;
 
@@ -203,8 +241,7 @@
         {
             _isLoading = true;
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
-            var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.BookListRowsPrevious(context);
+            await BookListRowsPrevious();
             await t_delay;
             _isLoading = false;
 
@@ -227,8 +264,7 @@
         {
             _isLoading = true;
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
-            var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.BookListRowsFilterAndSort(context);
+            await BookListRowsFilterAndSort();
             await t_delay;
             _isLoading = false;
 
@@ -241,5 +277,21 @@
             StateHasChanged();
             return;
         }
+    }
+    private async Task BookListRowsNext()
+    {
+        BookListDataPacket.SkipRecords += BookListDataPacket.BookListRowsToDisplay;
+        await ResetBookListAsync();
+    }
+    private async Task BookListRowsPrevious()
+    {
+        BookListDataPacket.SkipRecords -= BookListDataPacket.BookListRowsToDisplay;
+        if (BookListDataPacket.SkipRecords < 0) BookListDataPacket.SkipRecords = 0;
+        await ResetBookListAsync();
+    }
+    public async Task BookListRowsFilterAndSort()
+    {
+        BookListDataPacket.SkipRecords = 0;
+        await ResetBookListAsync();
     }
 }

@@ -36,7 +36,6 @@ namespace TestsBench
                 .AddTransient<BookService>()
                 .AddTransient<UserService>()
                 .AddTransient<FlashCardService>()
-                .AddTransient<DeepLService>()
                 //.AddDbContext<IdiomaticaContext>(options => {
                 //    options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("IdiomaticaWeb"));
                 //    })
@@ -46,10 +45,7 @@ namespace TestsBench
         {
             return _serviceProvider.GetService<BookService>();
         }
-        internal static DeepLService CreateDeepLService()
-        {
-            return _serviceProvider.GetService<DeepLService>();
-        }
+        
         internal static FlashCardService CreateFlashCardService()
         {
             return _serviceProvider.GetService<FlashCardService>();

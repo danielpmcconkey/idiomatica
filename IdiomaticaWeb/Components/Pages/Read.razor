@@ -3,6 +3,7 @@
 @inject BookService BookService;
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
+@using Logic.Services.Level1;
 
 <style>
     span.statusUNKNOWN {
@@ -84,13 +85,13 @@
         }
         else
         {
-            <PageTitle>@BookService.BookTitle</PageTitle>
-            <h3>@BookService.BookTitle</h3>
-        
+            <PageTitle>@BookTitle</PageTitle>
+            <h3>@BookTitle</h3>
 
-            <ModalWord @ref="_wModal" Parent="this" BookService="BookService" />
 
-            <ModalParagraph @ref="_ppModal" BookService="BookService" />
+            <ModalWord @ref="_wModal" Parent="this" LanguageUser="_languageUser" />
+
+            <ModalParagraph @ref="_ppModal" LanguageFromCode="_languageFromCode" LanguageToCode="_languageToCode" />
 
 
 
@@ -100,21 +101,23 @@
 
                 <PageTurner BookService="BookService"
                             OnMovePageAsync="OnMovePageAsync"
-                            OnClearPageAsync="OnClearPageAsync" />
+                            OnClearPageAsync="OnClearPageAsync"
+                            BookCurrentPageNum="BookCurrentPageNum"
+                            BookTotalPageCount="_bookTotalPageCount" />
 
                 
-                @foreach (var paragraph in BookService.Paragraphs)
+                @foreach (var paragraph in _paragraphs)
                 {
                     <hr />
-                    <ParagraphView BookService="BookService"
+                    <ParagraphView 
                         ParagraphAndChildren="paragraph"
                         OnShowWordModal="OnShowWordModal"
-                        OnShowPpModal="OnShowPpModal" />
+                        OnShowPpModal="OnShowPpModal"
+                        AllWordUsersInPage="_allWordUsersInPage" />
                 }
                 
                 <hr />
-                <PageTurner BookService="BookService"
-                            OnMovePageAsync="OnMovePageAsync"
+                <PageTurner OnMovePageAsync="OnMovePageAsync"
                             OnClearPageAsync="OnClearPageAsync" />
             </div>
         }
@@ -130,6 +133,14 @@
     #region parameters
     [Parameter]
     public int BookId { get; set; }
+    public string? BookTitle 
+    { 
+        get
+        {
+            if (_book == null) return "";
+            return _book.Title;
+        } 
+    }
     #endregion
 
     #region page loading stuff
@@ -137,9 +148,39 @@
     private ModalWord _wModal = default!;
     private ModalParagraph _ppModal = default!;
     private bool _isLoading = true;
-
+    private bool _isDataInitRead = false;
     #endregion
 
+    private Book _book;
+    private User? _loggedInUser = null;
+    /// <summary>
+    /// the language the book is written in
+    /// </summary>
+    private LanguageCode? _languageFromCode = null;
+    /// <summary>
+    /// The user's preferred UI language
+    /// </summary>
+    private LanguageCode? _languageToCode = null;
+    private int _bookTotalPageCount = 0;
+    private BookUser? _bookUser = null;
+    private List<BookUserStat>? _bookUserStats = null;
+    private LanguageUser? _languageUser = null;
+    private Language? _language = null;
+    private Page? _currentPage = null;
+    private PageUser? _currentPageUser = null;
+    private Dictionary<string, Word>? _allWordsInPage = null;
+    private Dictionary<string, WordUser>? _allWordUsersInPage = null;
+    private List<Paragraph>? _paragraphs = null;
+    private List<Sentence>? _sentences = null;
+    private List<Token>? _tokens = null;
+    public int BookCurrentPageNum
+    {
+       get
+       {
+            if (_currentPage is null || _currentPage.Ordinal is null) return 0;
+           return (int)_currentPage.Ordinal;
+       }
+    }
 
 
 
@@ -149,12 +190,11 @@
         try
         {
 
-            if (BookService.IsDataInitRead == false) 
+            if (_isDataInitRead == false)
             {
                 _isLoading = true;
                 var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
-                var context = await DbContextFactory.CreateDbContextAsync();
-                await BookService.InitDataRead(context, UserService, BookId);
+                await InitDataAsync();
                 await t_delay;
                 _isLoading = false;
             }
@@ -177,6 +217,117 @@
             StateHasChanged();
             return;
         }
+    }
+    private async Task InitDataAsync()
+    {
+        var context = await DbContextFactory.CreateDbContextAsync();
+
+        // tier 0 tasks, not dependent on anything
+        var t_loggedInUser = UserService.GetLoggedInUserAsync(context);
+        var t_book = BookApiL1.BookGetAsync(context, BookId);
+        var t_bookTotalPageCount = BookApiL1.BookGetPageCountAsync(context, BookId);
+
+        Task.WaitAll([t_loggedInUser, t_book, t_bookTotalPageCount]);
+
+        _loggedInUser = t_loggedInUser.Result;
+        _languageToCode = UserService.GetUiLanguageCode();
+        _book = t_book.Result ?? new();
+        _bookTotalPageCount = t_bookTotalPageCount.Result;
+
+        if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        if (_languageToCode is null || string.IsNullOrEmpty(_languageToCode.Code))
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        if(_book is null || _book.Id is null || _book.Id < 1 || _book.LanguageId is null || _book.LanguageId < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+
+        // tier 1 tasks, dependent on tier 0
+        var t_bookUser = BookUserApiL1.BookUserByBookIdAndUserIdReadAsync(context, (int)_book.Id, (int)_loggedInUser.Id);
+        var t_languageUser = LanguageUserApiL1.LanguageUserGetAsync(context, (int)_book.LanguageId, (int)_loggedInUser.Id);
+        var t_language = LanguageApiL1.LanguageReadAsync(context, (int)_book.LanguageId);
+
+        Task.WaitAll([t_bookUser, t_languageUser, t_language]);
+
+        _bookUser = t_bookUser.Result;
+        _languageUser = t_languageUser.Result;
+        _language = t_language.Result;
+
+        if(_bookUser is null)
+        {
+            // create it
+            _bookUser = await BookUserApiL1.BookUserCreateAsync(context, (int)_book.Id, (int)_loggedInUser.Id);
+        }
+        if (_bookUser is null || _bookUser.Id is null || _bookUser.Id < 1)
+        {
+            // still null, something went wrong
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        if (_languageUser is null || _languageUser.Id is null || _languageUser.Id < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        if (_language is null || _language.Id is null || _language.Id < 1 || string.IsNullOrEmpty(_language.Code))
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        // tier 2, dependent on tier 1
+        var t_bookUserStats = BookUserStatApiL1.BookUserStatsReadAsync(context, (int)_book.Id, (int)_loggedInUser.Id);
+        var t_currentPageUser = PageUserApiL1.PageUserReadBookmarkedOrFirstAsync(context, (int)_bookUser.Id);
+        var t_languageFromCode = LanguageApiL1.LanguageReadByCodeAsync(context, (string)_language.Code);
+
+        Task.WaitAll([t_bookUserStats, t_currentPageUser, t_languageFromCode]);
+
+        _bookUserStats = t_bookUserStats.Result;
+        _currentPageUser = t_currentPageUser.Result;
+        _languageFromCode = t_languageFromCode.Result;
+
+        // create the page user if it was null from the previous call
+        if (_currentPageUser is null)
+        {
+            // but first need to pull the page
+            _currentPage = await PageApiL1.PageReadFirstByBookIdAsync(context, BookId);
+            if (_currentPage is null || _currentPage.Id is null || _currentPage.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            _currentPageUser = await PageUserApiL1.PageUserCreateForPageIdAndUserId(
+                context, (int)_currentPage.Id, (int)_loggedInUser.Id);
+        }
+        else
+        {
+            // just pull the current page
+            if (_currentPageUser.PageId is null || _currentPageUser.PageId < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            _currentPage = await PageApiL1.PageReadByIdAsync(context, (int)_currentPageUser.PageId);
+        }
+        if (_currentPage is null || _currentPage.Id is null || _currentPage.Id < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+
+        // tier 3, dependent on tier 2
+        await PageResetDataForRead(context, (int)_currentPage.Id);
+
+        // fin
+
+        _isDataInitRead = true;
     }
 
     #region methods exposed to other elements
@@ -218,7 +369,7 @@
             // on the new page.
             var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync(); 
-            await BookService.PageMove(context, targetPageNum);
+            await PageMove(context, targetPageNum);
             await t_delay;
             _isLoading = false;
 
@@ -252,7 +403,26 @@
             // on the new page.
             var t_delay = Task.Delay(1000); 
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.PageUserClearPageAndMove(context, targetPageNum);
+            if(_currentPageUser is null || _currentPageUser.Id is null || _currentPageUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            // update all unknowns to well known
+            await PageUserApiL1.PageUserUpdateUnknowWordsToWellKnown(context, (int)_currentPageUser.Id);
+            // now move forward, if there's another page
+            if (targetPageNum <= _bookTotalPageCount) // remember pages are 1-indexed
+            {
+                await PageMove(context, targetPageNum);
+            }
+            else
+            {
+                // mark the previous page as read because you didn't do it in the PageMove function
+                await PageUserApiL1.PageUserMarkAsReadAsync(context, (int)_currentPageUser.Id);
+                // refresh the word user cache
+                await PageResetDataForRead(context, (int)_currentPageUser.Id);
+            }
+
             await t_delay;
             _isLoading = false;
         }
@@ -276,5 +446,133 @@
         }
     }
     public void RefreshState() { StateHasChanged(); }
+    private async Task PageResetDataForRead(IdiomaticaContext context, int pageId)
+    {
+        if (pageId < 1)
+        {
+            ErrorHandler.LogAndThrow(1240);
+            return;
+        }
+        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id == 0)
+        {
+            ErrorHandler.LogAndThrow(2130);
+            return;
+        }
+        // wipe the old ones out
+        _currentPage = null;
+        _paragraphs = null;
+        _allWordUsersInPage = null;
+        _allWordsInPage = null;
+        _sentences = null;
+        _tokens = null;
+
+        // and rebuild
+        var t_currentPage = PageApiL1.PageReadByIdAsync(context, pageId);
+        var t_paragraphs = ParagraphApiL1.ParagraphsReadByPageIdAsync(context, pageId);
+        var t_wordsInPage = WordApiL1.WordsDictReadByPageIdAsync(context, pageId);
+        var t_sentencesInPage = SentenceApiL1.SentencesReadByPageIdAsync(context, pageId);
+        var t_tokensInPage = TokenApiL1.TokensReadByPageIdAsync(context, pageId);
+
+        Task.WaitAll([t_currentPage, t_paragraphs, t_wordsInPage, t_sentencesInPage, t_tokensInPage]);
+
+        _currentPage = t_currentPage.Result;
+        _paragraphs = t_paragraphs.Result;
+        _allWordsInPage = t_wordsInPage.Result;
+        _sentences = t_sentencesInPage.Result;
+        _tokens = t_tokensInPage.Result;
+
+        if (_allWordsInPage is null)
+        {
+            ErrorHandler.LogAndThrow(2130);
+            return;
+        }
+
+        // do not do this until you've already pulled the _allWordsInPage as 
+        // that makes it way more efficient since it checks the words dict cache
+        _allWordUsersInPage = await WordUserApiL1.WordUsersDictByPageIdAndUserIdReadAsync(
+            context, pageId, (int)_loggedInUser.Id);
+
+        if (_allWordUsersInPage is null)
+        {
+            ErrorHandler.LogAndThrow(2130);
+            return;
+        }
+        if (_paragraphs is null)
+        {
+            ErrorHandler.LogAndThrow(2130);
+            return;
+        }
+
+        // now knit the paragraph data together
+
+        foreach (var p in _paragraphs)
+        {
+            p.Sentences = NullHandler.ThrowIfNullOrEmptyList<Sentence>(_sentences)
+                .Where(s => s.ParagraphId == p.Id)
+                .OrderBy(s => s.Ordinal)
+                .ToList();
+            foreach (var s in p.Sentences)
+            {
+                s.Tokens = NullHandler.ThrowIfNullOrEmptyList<Token>(_tokens)
+                    .Where(t => t.SentenceId == s.Id)
+                    .OrderBy(t => t.Ordinal)
+                    .ToList();
+
+                foreach (var t in s.Tokens)
+                {
+                    var wordEntry = NullHandler.ThrowIfNullOrEmptyDict(_allWordsInPage)
+                        .Where(w => w.Value.Id == t.WordId)
+                        .FirstOrDefault();
+                    if (wordEntry.Value != null)
+                    {
+                        t.Word = wordEntry.Value;
+                    }
+                }
+            }
+        }
+
+
+    }
+    private async Task PageMove(IdiomaticaContext context, int targetPageNum)
+    {
+        _isDataInitRead = false;
+
+        if (_languageUser is null || _languageUser.Id is null || _languageUser.Id < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        if (_currentPageUser is null || _currentPageUser.Id is null || _currentPageUser.Id < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        if (_bookUser is null || _bookUser.Id is null || _bookUser.Id < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+
+        // mark the previous page as read before moving on
+        
+        await PageUserApiL1.PageUserMarkAsReadAsync(context, (int)_currentPageUser.Id);
+
+        if (targetPageNum < 1) return;
+        if (targetPageNum > _bookTotalPageCount)
+            return;
+
+        // reload the current page user with the new target
+        _currentPageUser = await PageUserApiL1.PageUserReadByOrderWithinBookAsync(
+            context, (int)_languageUser.Id, targetPageNum, BookId);
+        if (_currentPageUser is null || _currentPageUser.PageId is null) 
+        {
+            // should we throw an exception? keep an eye here
+            return;
+        }
+
+        await PageResetDataForRead(context, (int)_currentPageUser.PageId);
+        await BookUserApiL1.BookUserUpdateBookmarkAsync(context, (int)_bookUser.Id, (int)_currentPageUser.PageId);
+        _isDataInitRead = true;
+    }
     #endregion
 }

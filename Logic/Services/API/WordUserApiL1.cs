@@ -1,0 +1,71 @@
+﻿using Model.DAL;
+using Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Logic.Telemetry;
+using System.ComponentModel.DataAnnotations;
+
+namespace Logic.Services.Level1
+{
+    public static class WordUserApiL1
+    {
+        public static async Task<Dictionary<string, WordUser>?> WordUsersDictByPageIdAndUserIdReadAsync(
+            IdiomaticaContext context, int pageId, int userId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.WordUsersDictByPageIdAndUserIdReadAsync((pageId, userId), context);
+        }
+        public static async Task<WordUser?> WordUserCreate(
+            IdiomaticaContext context, int wordId, int languageUserId, string? translation,
+            AvailableWordUserStatus? status)
+        {
+            if (wordId < 1) ErrorHandler.LogAndThrow();
+            if (languageUserId < 1) ErrorHandler.LogAndThrow();
+            if (status is null) status = AvailableWordUserStatus.UNKNOWN;
+            if (wordId < 1) ErrorHandler.LogAndThrow();
+            if (wordId < 1) ErrorHandler.LogAndThrow();
+            if (wordId < 1) ErrorHandler.LogAndThrow();
+            
+            WordUser wu = new()
+            {
+                WordId = wordId,
+                LanguageUserId = languageUserId,
+                Translation = translation,
+                Status = status,
+                Created = DateTime.Now,
+                StatusChanged = DateTime.Now,
+            };
+            bool isSaved = await DataCache.WordUserCreateAsync(wu, context);
+            if (!isSaved)
+            {
+                ErrorHandler.LogAndThrow();
+            }
+            return wu;
+        }
+        public static async Task WordUserUpdateAsync(IdiomaticaContext context,
+            int id, AvailableWordUserStatus newStatus, string translation)
+        {
+            if (id < 1)
+            {
+                ErrorHandler.LogAndThrow(1150);
+                return;
+            }
+            // first pull the existing one from the database
+            var dbWordUser = await DataCache.WordUserByIdReadAsync(id, context);
+            if (dbWordUser == null)
+            {
+                ErrorHandler.LogAndThrow(2060);
+                return;
+            }
+
+            dbWordUser.Status = newStatus;
+            dbWordUser.Translation = translation;
+            dbWordUser.StatusChanged = DateTime.Now;
+            await DataCache.WordUserUpdateAsync(dbWordUser, context);
+        }
+    }
+}

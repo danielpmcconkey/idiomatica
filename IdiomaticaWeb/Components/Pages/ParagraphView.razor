@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
+@using Logic.Services.Level1
 
 @if(_isDataInit)
 {
@@ -20,9 +21,8 @@
                 <p class="readParagraph">
                     @foreach (var sentence in _sentences)
                     {
-                        foreach (var token in GetSentenceTokens(sentence))
+                        @foreach (var token in sentence.Tokens)
                         {
-                        
                             <span class="readToken @GetTokenClass(token)"
                                   data-toggle="tooltip"
                                   data-placement="top"
@@ -60,6 +60,8 @@ else
     public EventCallback<Token> OnShowWordModal { get; set; }
     [Parameter]
     public EventCallback<Paragraph> OnShowPpModal { get; set; }
+    [Parameter]
+    public Dictionary<string, WordUser>? AllWordUsersInPage { get; set; }
 
     private bool _isDataInit = false;
     private bool _isLoadingLoggedInUser = false;
@@ -75,6 +77,11 @@ else
         }
         var context = await DbContextFactory.CreateDbContextAsync();
         _sentences = ParagraphAndChildren.Sentences.OrderBy(s => s.Ordinal).ToList();
+        foreach( var sentence in _sentences)
+        {
+            if (sentence.Tokens is not null && sentence.Tokens.Count > 0) continue;
+            sentence.Tokens = await GetSentenceTokens(sentence);
+    }
         _isDataInit = true;
     }
     protected override async Task OnInitializedAsync()
@@ -99,28 +106,32 @@ else
     }
     public string GetTokenClass(Token token)
     {
-        if (token.Word is null) return "statusUNKNOWN";
-        if (!BookService.AllWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
-        var wordUser = BookService.AllWordUsersInPage[token.Word.TextLowerCase];
+        if (token.Word is null || token.Word.TextLowerCase is null) return "statusUNKNOWN";
+        if (AllWordUsersInPage is null) return "statusUNKNOWN";
+        if (!AllWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
+        var wordUser = AllWordUsersInPage[token.Word.TextLowerCase];
         return $"status{wordUser.Status}";
     }
     private string GetTokenTranslation(Token token)
     {
-        if (token.Word is null) return "";
-        if (!BookService.AllWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "";
-        var wordUser = BookService.AllWordUsersInPage[token.Word.TextLowerCase];
+        if (token.Word is null || token.Word.TextLowerCase is null) return "";
+        if (AllWordUsersInPage is null) return "";
+        if (!AllWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "";
+        var wordUser = AllWordUsersInPage[token.Word.TextLowerCase];
+        if (wordUser is null || wordUser.Translation is null) return "";
         return wordUser.Translation;
     }
-    private List<Token> GetSentenceTokens(Sentence sentence)
+    private async Task<List<Token>> GetSentenceTokens(Sentence sentence)
     {
-        if (sentence.Id == null || sentence.Id == 0)
+        if (sentence.Id is null || sentence.Id < 1)
         {
             ErrorHandler.LogAndThrow(2230);
             return new List<Token>();
         }
+        
 
         var context = DbContextFactory.CreateDbContext();
-        sentence = BookService.SentenceFillChildObjects(context, sentence).Result;
+        sentence.Tokens = await TokenApiL1.TokensAndWordsReadBySentenceId(context, (int)sentence.Id);
         return sentence.Tokens;
         
     }

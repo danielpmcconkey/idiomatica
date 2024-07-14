@@ -53,11 +53,13 @@
 </div>
 @code {
     [Parameter]
-    public BookService BookService { get; set; }
-    [Parameter]
     public EventCallback<int> OnMovePageAsync { get; set; }
     [Parameter]
     public EventCallback<int> OnClearPageAsync { get; set; }
+    [Parameter]
+    public int BookCurrentPageNum { get; set; }
+    [Parameter]
+    public int BookTotalPageCount { get; set; }
 
     private int? _jumpInput;
 
@@ -65,8 +67,7 @@
     {
         get
         {
-            if (BookService is null) return false;
-            if (BookService.BookCurrentPageNum < 2) return false;
+            if (BookCurrentPageNum < 2) return false;
             return true;
         }
     }
@@ -74,8 +75,7 @@
     {
         get
         {
-            if (BookService is null) return false;
-            if (BookService.BookCurrentPageNum == BookService.BookTotalPageCount) return false;
+            if (BookCurrentPageNum == BookTotalPageCount) return false;
             return true;
         }
     }
@@ -90,18 +90,15 @@
     }
     private string OnGetPageOfPagesLabel()
     {
-        var currentPage = (BookService is null) ? 0 : BookService.BookCurrentPageNum;
-        var totalPages = (BookService is null) ? 0 : BookService.BookTotalPageCount;
-        return UserService.GetUILabelF("pageTurnerCurrentPage", [currentPage, totalPages]);
+        return UserService.GetUILabelF("pageTurnerCurrentPage", [BookCurrentPageNum, BookTotalPageCount]);
     }
     private int OnGetCurrentPageNum()
     {
-        if (BookService is null) return 0;
-        return (int)BookService.BookCurrentPageNum;
+        return BookCurrentPageNum;
     }
     private async Task OnJumpClickAsync()
     {
-        if (_jumpInput is not null && _jumpInput > 0 && _jumpInput <= BookService.BookTotalPageCount)
+        if (_jumpInput is not null && _jumpInput > 0 && _jumpInput <= BookTotalPageCount)
         {
             await OnMovePageAsync.InvokeAsync((int)_jumpInput);
         }
@@ -110,13 +107,7 @@
     {
         List<int> returnVals = new List<int>();
 
-        if (BookService is null) 
-        {
-            returnVals.Add(1);
-            return returnVals;
-        }
-
-        for (int i = 2; i <= BookService.BookTotalPageCount; i++)
+        for (int i = 1; i <= BookTotalPageCount; i++)
         {
             returnVals.Add(i);
         }

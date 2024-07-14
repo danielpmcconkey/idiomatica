@@ -1,18 +1,20 @@
-﻿using System;
+﻿using Model.DAL;
+using Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Model;
-using Model.DAL;
-using static System.Net.Mime.MediaTypeNames;
 
-namespace Logic.Services.Level2
+namespace Logic.Services.Level1
 {
-    public static class WordApiL2
+    public static class WordApiL1
     {
+        public static async Task<Dictionary<string, Word>?> WordsDictReadByPageIdAsync(IdiomaticaContext context, int pageId)
+        {
+            return await DataCache.WordsDictByPageIdReadAsync(pageId, context);
+        }
         public static async Task<Word> CreateWordAsync(IdiomaticaContext context,
             int languageId, string text, string romanization)
         {
@@ -56,14 +58,14 @@ namespace Logic.Services.Level2
 
             var parser = LanguageParser.Factory.GetLanguageParser(language);
             var wordsSplits = parser.SegmentTextByWordsKeepingPunctuation(sentence.Text);
-            if (wordsSplits is null || wordsSplits.Length == 0) 
+            if (wordsSplits is null || wordsSplits.Length == 0)
                 return new List<(Word word, int ordinal)>();
             var orderedSplits = new List<(string split, int ordinal)>();
             for (int i = 0; i < wordsSplits.Length; i++)
             {
                 orderedSplits.Add((wordsSplits[i], i));
             }
-            
+
             List<(string word, int ordinal)> cleanWords = orderedSplits
                 .Select(x => (parser.StipNonWordCharacters(x.split), x.ordinal))
                 .ToList();
@@ -72,14 +74,37 @@ namespace Logic.Services.Level2
                     ((int)languageId, x.word), context);
                 if (existingWord is not null) return ((Word)existingWord, x.ordinal);
                 // word doesn't exist; create it
-                Word? newWord = await WordApiL2.CreateWordAsync(
+                Word? newWord = await WordApiL1.CreateWordAsync(
                     context, languageId, x.word, x.word);
                 return (newWord, x.ordinal);
             });
             Task.WaitAll(wordTasks.ToArray());
             List<(Word word, int ordinal)> words = wordTasks.Select(x => x.Result).ToList();
-            
+
             return words;
+        }
+        public static async Task<List<(string language, int wordCount)>> WordsGetListOfReadCount(
+            IdiomaticaContext context, int userId)
+        {
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            List<(string language, int wordCount)> returnList = new List<(string language, int wordCount)>();
+            var languageUsers = await LanguageUserApiL1.LanguageUsersAndLanguageGetByUserIdAsync(context, userId);
+            foreach (var languageUser in languageUsers)
+            {
+                if (languageUser.Language == null || languageUser.Language.Name == null) continue;
+                var count = (from lu in context.LanguageUsers
+                             join bu in context.BookUsers on lu.Id equals bu.LanguageUserId
+                             join pu in context.PageUsers on bu.Id equals pu.BookUserId
+                             join p in context.Pages on pu.PageId equals p.Id
+                             join pp in context.Paragraphs on p.Id equals pp.PageId
+                             join s in context.Sentences on pp.Id equals s.ParagraphId
+                             join t in context.Tokens on s.Id equals t.SentenceId
+                             where pu.ReadDate != null
+                                && lu.Id == languageUser.Id
+                             select t).Count();
+                returnList.Add((languageUser.Language.Name, count));
+            }
+            return returnList;
         }
     }
 }

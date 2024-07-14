@@ -5,19 +5,25 @@ using Model;
 
 namespace Logic.Services
 {
-    public class DeepLService
+    public static class DeepLService
     {
-        private ILogger<IdiomaticaLogger> _logger;
+        //private ILogger<IdiomaticaLogger> _logger;
 
-        public DeepLService(ILogger<IdiomaticaLogger> logger)
-        {
-            _logger = logger;
-        }
-        public async Task<string> TranslateAsync (string input, string sourceLanguageCode, string targetLanguageCode) 
+        //public DeepLService(ILogger<IdiomaticaLogger> logger)
+        //{
+        //    _logger = logger;
+        //}
+        public static async Task<string> TranslateAsync (
+            string input, string sourceLanguageCode, string targetLanguageCode) 
         {
             try
             {
                 var authKey = Environment.GetEnvironmentVariable("DeepLApiKey");
+                if (string.IsNullOrEmpty(authKey))
+                {
+                    ErrorHandler.LogAndThrow();
+                    return string.Empty;
+                }
                 var translator = new Translator(authKey);
 
                 var translatedText = await translator.TranslateTextAsync(
@@ -38,7 +44,8 @@ namespace Logic.Services
             } 
         }
 
-        public string Translate(string input, string sourceLanguageCode, string targetLanguageCode)
+        public static string Translate(
+            string input, string sourceLanguageCode, string targetLanguageCode)
         {
             try
             {

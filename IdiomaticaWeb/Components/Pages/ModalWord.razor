@@ -1,4 +1,5 @@
 ﻿@page "/ModalWord"
+@using Logic.Services.Level1
 @rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
@@ -67,7 +68,7 @@
     [Parameter]
     public Read? Parent { get; set; }
     [Parameter]
-    public BookService BookService { get; set; }
+    public LanguageUser? LanguageUser { get; set; }
 
     private Modal modal = default!;
     private Token? _token = null;
@@ -87,12 +88,28 @@
         {
             var context = await DbContextFactory.CreateDbContextAsync();
 
-            if(thisToken == null || thisToken.Id == null || thisToken.Id < 1)
+            if (thisToken == null || thisToken.Id == null || thisToken.Id < 1)
             {
                 ErrorHandler.LogAndThrow(1390);
                 return;
             }
-            var tokenAndChildren = await BookService.TokenGetChildObjects(context, thisToken);
+            if (LanguageUser is null || LanguageUser.Id is null || LanguageUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            var tokenAndChildren = await TokenApiL1.TokenGetChildObjects(
+                context, (int)thisToken.Id, (int)LanguageUser.Id);
+            if (tokenAndChildren.t is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            if (tokenAndChildren.wu is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
             _token = tokenAndChildren.t;
             _wordUser = tokenAndChildren.wu;
             _word = _token.Word;
@@ -106,8 +123,9 @@
                 ErrorHandler.LogAndThrow(2430);
                 return;
             }
+            _wordUser.Status = _wordUser.Status is null ? AvailableWordUserStatus.UNKNOWN : _wordUser.Status;
 
-            _title = _word.TextLowerCase;
+            _title = (_word is null) ? "" : _word.TextLowerCase;
             _translation = _wordUser.Translation;
             _selectedStatus = UserService.GetUILabel($"statusLabel{(int)_wordUser.Status}");
             await modal.ShowAsync();
@@ -122,7 +140,7 @@
     }
     private string GetTokenClassSelected(int statusToCheck)
     {
-        if (_wordUser is null) return "unselectedWordStatus";
+        if (_wordUser is null || _wordUser.Status is null) return "unselectedWordStatus";
         if ((int)_wordUser.Status == statusToCheck) return "selectedWordStatus";
         return "unselectedWordStatus";
     }
@@ -135,10 +153,23 @@
     {
         try
         {
+            if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            if (_wordUser.Status is null)
+            {
+                _wordUser.Status = AvailableWordUserStatus.UNKNOWN;
+            }
+            if (_wordUser.Translation is null)
+            {
+                _wordUser.Translation = string.Empty;
+            }
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.WordUserSaveModalDataAsync(
+            await WordUserApiL1.WordUserUpdateAsync(
                 context, (int)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
-            Parent.RefreshState();
+            if (Parent is not null) Parent.RefreshState();
             await modal.HideAsync();
         }
         catch
@@ -169,5 +200,6 @@
         if (status == AvailableWordUserStatus.IGNORED) return "statusIGNORED";
         return "statusUNKNOWN";
     }
+    
 
 }

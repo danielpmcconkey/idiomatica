@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Logic.Services.Level1
 @rendermode InteractiveServer
 @inject BookService BookService;
 @inject UserService UserService;
@@ -63,7 +64,6 @@ Interactive location: Global
 
 
 @code {
-    private Modal modal;
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isDataInit = false;
     private List<(string language, int wordCount)> _wordsReadCountList = new List<(string language, int wordCount)>();
@@ -74,10 +74,10 @@ Interactive location: Global
     {
         var context = await DbContextFactory.CreateDbContextAsync();
         var loggedInUser = UserService.GetLoggedInUser(context);
-        if (loggedInUser == null) return;
+        if (loggedInUser is null || loggedInUser.Id is null || loggedInUser.Id < 1) return;
         _wordCountCardTitle = UserService.GetUILabel("homeWordCountsHeader");
-        _wordsReadCountList = await BookService.WordsGetListOfReadCount(
-            context, loggedInUser.Id);
+        _wordsReadCountList = await WordApiL1.WordsGetListOfReadCount(
+            context, (int)loggedInUser.Id);
 
         _bookshelfButtonText = UserService.GetUILabel("homeBookshelfButtonText");
 

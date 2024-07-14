@@ -3,15 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DeepL;
 using Logic.Telemetry;
 using Model;
 using Model.DAL;
 
-namespace Logic.Services.Level2
+namespace Logic.Services.Level1
 {
-    public static class PageApiL2
+    public static class PageApiL1
     {
+        public static async Task<Page?> PageReadFirstByBookIdAsync(IdiomaticaContext context, int bookId)
+        {
+            if (bookId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.PageByOrdinalAndBookIdReadAsync((1, bookId), context);
+        }
+        public static async Task<Page?> PageReadByIdAsync(IdiomaticaContext context, int pageId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.PageByIdReadAsync(pageId, context);
+        }
+
         public static async Task<Page?> CreatePageFromPageSplit(
             IdiomaticaContext context, int ordinal, string text,
             int bookId, int languageId)
@@ -24,7 +34,7 @@ namespace Logic.Services.Level2
 
             // pull language from the db
             var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null || 
+            if (language is null ||
                 language.Id is null or 0 ||
                 string.IsNullOrEmpty(language.Code))
             {
@@ -44,7 +54,7 @@ namespace Logic.Services.Level2
                 return null;
             }
             // create paragraphs
-            newPage.Paragraphs = await ParagraphApiL2.CreateParagraphsFromPageAsync(
+            newPage.Paragraphs = await ParagraphApiL1.CreateParagraphsFromPageAsync(
                 context, (int)newPage.Id, languageId);
             return newPage;
         }

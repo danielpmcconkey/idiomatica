@@ -1,17 +1,21 @@
-﻿using Logic.Telemetry;
+﻿using Model.DAL;
 using Model;
-using Model.DAL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YamlDotNet.Core;
+using Logic.Telemetry;
 
-namespace Logic.Services.Level2
+namespace Logic.Services.Level1
 {
-    public static class SentenceApiL2
+    public static class SentenceApiL1
     {
+        public static async Task<List<Sentence>?> SentencesReadByPageIdAsync(IdiomaticaContext context, int pageId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.SentencesByPageIdReadAsync(pageId, context);
+        }
         public static async Task<Sentence?> CreateSentenceAsync(
             IdiomaticaContext context, string text, int languageId, int ordinal,
             int paragraphId)
@@ -32,7 +36,7 @@ namespace Logic.Services.Level2
                 ErrorHandler.LogAndThrow(2280);
                 return null;
             }
-            newSentence.Tokens = await TokenApiL2.CreateTokensFromSentence(context, 
+            newSentence.Tokens = await TokenApiL1.CreateTokensFromSentence(context,
                 (int)newSentence.Id, languageId);
             return newSentence;
         }
@@ -53,5 +57,6 @@ namespace Logic.Services.Level2
             var parser = LanguageParser.Factory.GetLanguageParser(language);
             return parser.SegmentTextBySentences(text);
         }
+        
     }
 }

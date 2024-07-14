@@ -6,14 +6,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Logic.Services.Level2;
+using IdentityModel.OidcClient.Browser;
 
 namespace Logic.Services.Level1
 {
     public static class BookApiL1
     {
         public static async Task<Book?> BookCreateAndSaveAsync(
-            IdiomaticaContext context, string title, string languageCode, string? url, string text)
+            IdiomaticaContext context, string title, string languageCode,
+            string? url, string text)
         {
             // sanitize and validate input
             var titleT = NullHandler.ThrowIfNullOrEmptyString(title.Trim());
@@ -30,7 +31,7 @@ namespace Logic.Services.Level1
             }
 
             // divide text into paragraphs
-            string[] paragraphSplits = ParagraphApiL2.SplitTextToPotentialParagraphs(context, text, languageCode);
+            string[] paragraphSplits = ParagraphApiL1.SplitTextToPotentialParagraphs(context, text, languageCode);
             
 
             // add the book to the DB so you can save pages using its ID
@@ -47,7 +48,7 @@ namespace Logic.Services.Level1
                 return null;
             }
 
-            var pageSplits = PageApiL2.CreatePageSplitsFromParagraphSplits(paragraphSplits);
+            var pageSplits = PageApiL1.CreatePageSplitsFromParagraphSplits(paragraphSplits);
             if (pageSplits is null || pageSplits.Count == 0)
             {
                 ErrorHandler.LogAndThrow();
@@ -59,7 +60,7 @@ namespace Logic.Services.Level1
             {
                 string pageSplitTextTrimmed = pageSplit.pageText.Trim();
                 if (string.IsNullOrEmpty(pageSplitTextTrimmed)) continue;
-                Page? page = await PageApiL2.CreatePageFromPageSplit(context,
+                Page? page = await PageApiL1.CreatePageFromPageSplit(context,
                     pageSplit.pageNum, pageSplitTextTrimmed, 
                     (int)book.Id, (int)language.Id);
                 if (page is not null && page.Id is not null or 0)
@@ -69,6 +70,37 @@ namespace Logic.Services.Level1
             }
 
             return book;
+        }
+        public static async Task<Book?> BookGetAsync(IdiomaticaContext context, int bookId)
+        {
+            return await DataCache.BookByIdReadAsync(bookId, context);
+        }
+        public static async Task<int> BookGetPageCountAsync(IdiomaticaContext context, int bookId)
+        {
+            var dbVal = await DataCache.BookStatByBookIdAndStatKeyReadAsync((bookId, AvailableBookStat.TOTALPAGES), context);
+            int outVal = 0;
+            if (dbVal != null) int.TryParse(dbVal.Value, out outVal);
+            return outVal;
+        }
+        public static async Task<BookListDataPacket> BookListReadAsync(
+            IdiomaticaContext context, int loggedInUserId, BookListDataPacket bookListDataPacket)
+        {
+            var powerQueryResults = await DataCache.BookListRowsPowerQueryAsync(
+                    loggedInUserId,
+                    bookListDataPacket.BookListRowsToDisplay,
+                    bookListDataPacket.SkipRecords,
+                    bookListDataPacket.ShouldShowOnlyInShelf,
+                    bookListDataPacket.TagsFilter,
+                    bookListDataPacket.LcFilter,
+                    bookListDataPacket.TitleFilter,
+                    bookListDataPacket.SortProperty,
+                    bookListDataPacket.ShouldSortAscending,
+                    context);
+
+            bookListDataPacket.BookListRows = powerQueryResults.results;
+            bookListDataPacket.BookListTotalRowsAtCurrentFilter = powerQueryResults.count;
+            return bookListDataPacket;
+
         }
     }
 }
