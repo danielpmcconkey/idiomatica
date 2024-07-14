@@ -32,7 +32,6 @@ builder.Services.AddAuthentication(options =>
 })
     .AddIdentityCookies();
 
-builder.Services.AddTransient<BookService>();
 builder.Services.AddTransient<FlashCardService>();
 builder.Services.AddTransient<UserService>();
 

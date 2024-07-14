@@ -37,13 +37,12 @@
     [Parameter]
     public BookTag BookTag { get; set; }
     [Parameter]
-    public BookService BookService { get; set; }
-    [Parameter]
     public int? BookId { get; set; }
     [Parameter]
     public EventCallback OnRefreshRowAsync { get; set; }
 
     private bool _isLoading = false;
+    const int LoadingDelayMiliseconds = 500;
     private User? _loggedInUser;
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private string _count { get
@@ -59,7 +58,7 @@
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
             _loggedInUser = await UserService.GetLoggedInUserAsync(context);
             if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
@@ -103,7 +102,7 @@
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
             _loggedInUser = await UserService.GetLoggedInUserAsync(context);
             if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)

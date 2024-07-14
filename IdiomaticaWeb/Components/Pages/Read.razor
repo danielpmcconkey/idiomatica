@@ -1,6 +1,5 @@
 ﻿@page "/Book/{bookid:int}/Read"
 @rendermode InteractiveServer
-@inject BookService BookService;
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 @using Logic.Services.Level1;
@@ -173,6 +172,7 @@
     private List<Paragraph>? _paragraphs = null;
     private List<Sentence>? _sentences = null;
     private List<Token>? _tokens = null;
+    const int LoadingDelayMiliseconds = 500;
     public int BookCurrentPageNum
     {
        get
@@ -193,7 +193,7 @@
             if (_isDataInitRead == false)
             {
                 _isLoading = true;
-                var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+                var t_delay = Task.Delay(LoadingDelayMiliseconds);
                 await InitDataAsync();
                 await t_delay;
                 _isLoading = false;
@@ -367,7 +367,7 @@
             // force a delay of at least N miliseconds. this forces the screen
             // to re-draw the paragraphs. Otherwise, you get the old paragraphs
             // on the new page.
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync(); 
             await PageMove(context, targetPageNum);
             await t_delay;

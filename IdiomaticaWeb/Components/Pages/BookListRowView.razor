@@ -116,7 +116,7 @@
         <div class="card-footer">
             <div class="container">
                 @* <BookTagsRow /> *@
-                <BookTagsRow BookService="@BookService" BookId="@Row.BookId" />
+                <BookTagsRow BookId="@Row.BookId" />
             </div>
             
         </div>
@@ -129,8 +129,6 @@
 
 @code {
     [Parameter]
-    public BookService BookService { get; set; }// = new BookService(Logger);
-    [Parameter]
     public BookListRow Row { get; set; } = new BookListRow();
     [Parameter]
     public EventCallback<int> OnArchiveAsync { get; set; }
@@ -140,6 +138,7 @@
 
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
+    const int LoadingDelayMiliseconds = 500;
 
 
     private int? _bookId;
@@ -151,7 +150,7 @@
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
             _loggedInUser = await UserService.GetLoggedInUserAsync(context);
             _bookId = Row.BookId;
@@ -362,7 +361,7 @@
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
             if (_bookId is null || _bookId < 1)
             {

@@ -33,7 +33,6 @@ namespace TestsBench
                 //.AddScoped<IdentityUserAccessor>()
                 //.AddScoped<IdentityRedirectManager>()
                 .AddScoped<AuthenticationStateProvider, RevalidatingProviderForUnitTesting>()
-                .AddTransient<BookService>()
                 .AddTransient<UserService>()
                 .AddTransient<FlashCardService>()
                 //.AddDbContext<IdiomaticaContext>(options => {
@@ -41,10 +40,7 @@ namespace TestsBench
                 //    })
                 .BuildServiceProvider();
         }
-        internal static BookService CreateBookService()
-        {
-            return _serviceProvider.GetService<BookService>();
-        }
+        
         
         internal static FlashCardService CreateFlashCardService()
         {

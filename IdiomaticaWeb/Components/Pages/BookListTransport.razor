@@ -177,6 +177,7 @@
     public EventCallback<int> FilterAndSort { get; set; }
     private bool _isLoadingCounts = false;
     private bool _isLoadingFilterAndSort = false;
+    const int LoadingDelayMiliseconds = 500;
     public long? BookListFirstRowShown
     {
         get
@@ -207,7 +208,7 @@
     private async Task OnGetNext()
     {
         _isLoadingCounts = true;
-        var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+        var t_delay = Task.Delay(LoadingDelayMiliseconds);
         await GetNext.InvokeAsync();
         await t_delay;
         StateHasChanged();
@@ -216,7 +217,7 @@
     private async Task OnGetPrevious()
     {
         _isLoadingCounts = true;
-        var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+        var t_delay = Task.Delay(LoadingDelayMiliseconds);
         await GetPrevious.InvokeAsync();
         await t_delay;
         StateHasChanged();
@@ -225,7 +226,7 @@
     private async Task OnFilter()
     {
         _isLoadingCounts = true;
-        var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+        var t_delay = Task.Delay(LoadingDelayMiliseconds);
         await FilterAndSort.InvokeAsync();
         await t_delay;
         StateHasChanged();
@@ -234,7 +235,7 @@
     private async Task OnSort(bool isAscending)
     {
         _isLoadingCounts = true;
-        var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+        var t_delay = Task.Delay(LoadingDelayMiliseconds);
         BookListDataPacket.ShouldSortAscending = isAscending;
         await FilterAndSort.InvokeAsync();
         await t_delay;

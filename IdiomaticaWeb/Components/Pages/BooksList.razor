@@ -1,5 +1,4 @@
 ﻿@rendermode InteractiveServer
-@inject BookService BookService
 @inject UserService UserService
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 @inject ILogger<IdiomaticaLogger> Logger;
@@ -88,6 +87,7 @@
     private bool _isDataInitBookList = false;
     private User? _loggedInUser = null;
     private BookListDataPacket BookListDataPacket = new();
+    const int LoadingDelayMiliseconds = 500;
 
 
 
@@ -102,7 +102,7 @@
             {
                 _isLoading = true;
 
-                var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+                var t_delay = Task.Delay(LoadingDelayMiliseconds);
                 var context = await DbContextFactory.CreateDbContextAsync();
                 BookListDataPacket = new BookListDataPacket(context, IsBrowse);
                 _loggedInUser = await UserService.GetLoggedInUserAsync(context);
@@ -150,7 +150,7 @@
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
             if (_loggedInUser is null || _loggedInUser.Id is null)
             {
@@ -187,7 +187,7 @@
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
             if (_loggedInUser is null || _loggedInUser.Id is null)
             {
@@ -217,7 +217,7 @@
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             await BookListRowsNext();
             await t_delay;
             _isLoading = false;
@@ -240,7 +240,7 @@
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             await BookListRowsPrevious();
             await t_delay;
             _isLoading = false;
@@ -263,7 +263,7 @@
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             await BookListRowsFilterAndSort();
             await t_delay;
             _isLoading = false;
