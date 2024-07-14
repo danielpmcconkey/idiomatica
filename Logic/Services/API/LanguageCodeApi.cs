@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.DAL;
 
-namespace Logic.Services.Level1
+namespace Logic.Services.API
 {
-    public static class LanguageCodeApiL1
+    public static class LanguageCodeApi
     {
         public static async Task<Dictionary<string, LanguageCode>> LanguageCodeOptionsReadAsync(
             IdiomaticaContext context, Expression<Func<LanguageCode, bool>> filter)

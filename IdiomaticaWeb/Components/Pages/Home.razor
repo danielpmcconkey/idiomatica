@@ -1,5 +1,5 @@
 ﻿@page "/"
-@using Logic.Services.Level1
+@using Logic.Services.API
 @rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
@@ -75,7 +75,7 @@ Interactive location: Global
         var loggedInUser = UserService.GetLoggedInUser(context);
         if (loggedInUser is null || loggedInUser.Id is null || loggedInUser.Id < 1) return;
         _wordCountCardTitle = UserService.GetUILabel("homeWordCountsHeader");
-        _wordsReadCountList = await WordApiL1.WordsGetListOfReadCount(
+        _wordsReadCountList = await WordApi.WordsGetListOfReadCount(
             context, (int)loggedInUser.Id);
 
         _bookshelfButtonText = UserService.GetUILabel("homeBookshelfButtonText");

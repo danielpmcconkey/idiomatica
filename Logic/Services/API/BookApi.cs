@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using IdentityModel.OidcClient.Browser;
 
-namespace Logic.Services.Level1
+namespace Logic.Services.API
 {
-    public static class BookApiL1
+    public static class BookApi
     {
         public static async Task<Book?> BookCreateAndSaveAsync(
             IdiomaticaContext context, string title, string languageCode,
@@ -31,7 +31,7 @@ namespace Logic.Services.Level1
             }
 
             // divide text into paragraphs
-            string[] paragraphSplits = ParagraphApiL1.SplitTextToPotentialParagraphs(context, text, languageCode);
+            string[] paragraphSplits = ParagraphApi.SplitTextToPotentialParagraphs(context, text, languageCode);
             
 
             // add the book to the DB so you can save pages using its ID
@@ -48,7 +48,7 @@ namespace Logic.Services.Level1
                 return null;
             }
 
-            var pageSplits = PageApiL1.CreatePageSplitsFromParagraphSplits(paragraphSplits);
+            var pageSplits = PageApi.CreatePageSplitsFromParagraphSplits(paragraphSplits);
             if (pageSplits is null || pageSplits.Count == 0)
             {
                 ErrorHandler.LogAndThrow();
@@ -60,7 +60,7 @@ namespace Logic.Services.Level1
             {
                 string pageSplitTextTrimmed = pageSplit.pageText.Trim();
                 if (string.IsNullOrEmpty(pageSplitTextTrimmed)) continue;
-                Page? page = await PageApiL1.CreatePageFromPageSplit(context,
+                Page? page = await PageApi.CreatePageFromPageSplit(context,
                     pageSplit.pageNum, pageSplitTextTrimmed, 
                     (int)book.Id, (int)language.Id);
                 if (page is not null && page.Id is not null or 0)

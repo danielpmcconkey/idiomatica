@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
 
-namespace Logic.Services.Level1
+namespace Logic.Services.API
 {
-    public static class ParagraphApiL1
+    public static class ParagraphApi
     {
         public static async Task<List<Paragraph>?> ParagraphsReadByPageIdAsync(IdiomaticaContext context, int pageId)
         {
@@ -74,7 +74,7 @@ namespace Logic.Services.Level1
             }
 
             // now create the sentences
-            var sentenceSplits = SentenceApiL1.SplitTextToPotentialSentences(
+            var sentenceSplits = SentenceApi.SplitTextToPotentialSentences(
                 context, splitText, languageId);
             int sentenceOrdinal = 0;
             foreach (var sentenceSplit in sentenceSplits)
@@ -82,7 +82,7 @@ namespace Logic.Services.Level1
                 if (string.IsNullOrEmpty(sentenceSplit)) continue;
                 var trimmedSentenceSplit = sentenceSplit.Trim();
                 if (string.IsNullOrEmpty(trimmedSentenceSplit)) continue;
-                var sentence = await SentenceApiL1.CreateSentenceAsync(
+                var sentence = await SentenceApi.CreateSentenceAsync(
                     context, trimmedSentenceSplit, languageId, sentenceOrdinal, (int)paragraph.Id);
                 if (sentence != null)
                 {

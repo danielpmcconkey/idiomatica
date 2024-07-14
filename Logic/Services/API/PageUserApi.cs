@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
 
-namespace Logic.Services.Level1
+namespace Logic.Services.API
 {
-    public static class PageUserApiL1
+    public static class PageUserApi
     {
         public static async Task<PageUser?> PageUserReadBookmarkedOrFirstAsync(
             IdiomaticaContext context, int bookUserId)

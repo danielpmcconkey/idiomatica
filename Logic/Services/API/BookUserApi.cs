@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Services.Level1
+namespace Logic.Services.API
 {
-    public static class BookUserApiL1
+    public static class BookUserApi
     {
         public static async Task<BookUser?> BookUserByBookIdAndUserIdReadAsync(
             IdiomaticaContext context, int bookId, int userId)
@@ -64,7 +64,7 @@ namespace Logic.Services.Level1
                 existingBookUser.IsArchived = false;
                 context.SaveChanges();
                 // now update the stats in case they're super old
-                await BookUserStatApiL1.BookUserStatsUpdateByBookUserIdAsync(context, (int)existingBookUser.Id);
+                await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)existingBookUser.Id);
                 return existingBookUser;
             }
 
@@ -83,7 +83,7 @@ namespace Logic.Services.Level1
             }
 
             // now update BookUserStats
-            await BookUserStatApiL1.BookUserStatsUpdateByBookUserIdAsync(context, NullHandler.ThrowIfNullOrZeroInt(bookUser.Id));
+            await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, NullHandler.ThrowIfNullOrZeroInt(bookUser.Id));
 
             return bookUser;
 

@@ -3,7 +3,7 @@
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 @using Logic.Services.API
-@using Logic.Services.Level1;
+@using Logic.Services.API;
 
 <h3>@UserService.GetUILabel("NewBook")</h3>
 <ErrorAlert ErrorState="errorState"></ErrorAlert>
@@ -186,7 +186,7 @@
 
             string textInput = await _largeVolumeTextArea.GetTextValue();
 
-            Book? book = await BookApiL1.BookCreateAndSaveAsync(context, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
+            Book? book = await BookApi.BookCreateAndSaveAsync(context, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
             if(book is null || book.Id is null || book.Id < 1)
             {
                 ErrorHandler.LogAndThrow();
@@ -201,7 +201,7 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var bookUser = await BookUserApiL1.BookUserCreateAsync(context, bookId, (int)_loggedInUser.Id);
+            var bookUser = await BookUserApi.BookUserCreateAsync(context, bookId, (int)_loggedInUser.Id);
 
             await context.Database.CommitTransactionAsync();
 

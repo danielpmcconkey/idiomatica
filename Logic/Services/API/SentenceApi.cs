@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
 
-namespace Logic.Services.Level1
+namespace Logic.Services.API
 {
-    public static class SentenceApiL1
+    public static class SentenceApi
     {
         public static async Task<List<Sentence>?> SentencesReadByPageIdAsync(IdiomaticaContext context, int pageId)
         {
@@ -36,7 +36,7 @@ namespace Logic.Services.Level1
                 ErrorHandler.LogAndThrow(2280);
                 return null;
             }
-            newSentence.Tokens = await TokenApiL1.CreateTokensFromSentence(context,
+            newSentence.Tokens = await TokenApi.CreateTokensFromSentence(context,
                 (int)newSentence.Id, languageId);
             return newSentence;
         }

@@ -3,7 +3,7 @@
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 @inject ILogger<IdiomaticaLogger> Logger;
-@using Logic.Services.Level1
+@using Logic.Services.API
 
 
 
@@ -373,14 +373,14 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var bookUser = await BookUserApiL1.BookUserByBookIdAndUserIdReadAsync(
+            var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(
                 context, (int)_bookId, (int)_loggedInUser.Id);
             if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            await BookUserStatApiL1.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
+            await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
 
             await t_delay;
             _isLoading = false;

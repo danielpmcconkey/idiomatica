@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
 
-namespace Logic.Services.Level1
+namespace Logic.Services.API
 {
-    public static class WordApiL1
+    public static class WordApi
     {
         public static async Task<Dictionary<string, Word>?> WordsDictReadByPageIdAsync(IdiomaticaContext context, int pageId)
         {
@@ -74,7 +74,7 @@ namespace Logic.Services.Level1
                     ((int)languageId, x.word), context);
                 if (existingWord is not null) return ((Word)existingWord, x.ordinal);
                 // word doesn't exist; create it
-                Word? newWord = await WordApiL1.CreateWordAsync(
+                Word? newWord = await WordApi.CreateWordAsync(
                     context, languageId, x.word, x.word);
                 return (newWord, x.ordinal);
             });
@@ -88,7 +88,7 @@ namespace Logic.Services.Level1
         {
             if (userId < 1) ErrorHandler.LogAndThrow();
             List<(string language, int wordCount)> returnList = new List<(string language, int wordCount)>();
-            var languageUsers = await LanguageUserApiL1.LanguageUsersAndLanguageGetByUserIdAsync(context, userId);
+            var languageUsers = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(context, userId);
             foreach (var languageUser in languageUsers)
             {
                 if (languageUser.Language == null || languageUser.Language.Name == null) continue;

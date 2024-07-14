@@ -3,7 +3,7 @@
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 @using System.Text;
-@using Logic.Services.Level1
+@using Logic.Services.API
 
 @* Modal for paragraph translation *@
 <Modal @ref="ppModal" title="@_title" IsVerticallyCentered="true" Size="ModalSize.Large">
@@ -59,7 +59,7 @@
         _title = $"{UserService.GetUILabelF("ppModalTitle", [LanguageFromCode.LanguageName, LanguageToCode.LanguageName])}";
         var context = await DbContextFactory.CreateDbContextAsync();
 
-        var translation = await ParagraphApiL1.ParagraphTranslate(
+        var translation = await ParagraphApi.ParagraphTranslate(
             context, (int)pp.Id, LanguageFromCode.Code, LanguageToCode.Code);
         _translateFrom = translation.input;
         _translateTo = translation.output;

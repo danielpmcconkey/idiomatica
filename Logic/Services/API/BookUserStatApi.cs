@@ -7,9 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Services.Level1
+namespace Logic.Services.API
 {
-    public static class BookUserStatApiL1
+    public static class BookUserStatApi
     {
         public static async Task<List<BookUserStat>?> BookUserStatsReadAsync(
             IdiomaticaContext context, int bookId, int userId)

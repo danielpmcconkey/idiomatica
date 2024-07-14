@@ -1,5 +1,5 @@
 ﻿@page "/ModalWord"
-@using Logic.Services.Level1
+@using Logic.Services.API
 @rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
@@ -98,7 +98,7 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var tokenAndChildren = await TokenApiL1.TokenGetChildObjects(
+            var tokenAndChildren = await TokenApi.TokenGetChildObjects(
                 context, (int)thisToken.Id, (int)LanguageUser.Id);
             if (tokenAndChildren.t is null)
             {
@@ -167,7 +167,7 @@
                 _wordUser.Translation = string.Empty;
             }
             var context = await DbContextFactory.CreateDbContextAsync();
-            await WordUserApiL1.WordUserUpdateAsync(
+            await WordUserApi.WordUserUpdateAsync(
                 context, (int)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
             if (Parent is not null) Parent.RefreshState();
             await modal.HideAsync();

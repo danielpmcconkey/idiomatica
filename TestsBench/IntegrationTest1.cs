@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using IdentityModel.OidcClient.Browser;
 using System.Text;
-using Logic.Services.Level1;
+using Logic.Services.API;
 
 namespace TestsBench.Tests
 {

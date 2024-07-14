@@ -2,7 +2,7 @@
 @rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
-@using Logic.Services.Level1;
+@using Logic.Services.API;
 
 <style>
     span.statusUNKNOWN {
@@ -224,8 +224,8 @@
 
         // tier 0 tasks, not dependent on anything
         var t_loggedInUser = UserService.GetLoggedInUserAsync(context);
-        var t_book = BookApiL1.BookGetAsync(context, BookId);
-        var t_bookTotalPageCount = BookApiL1.BookGetPageCountAsync(context, BookId);
+        var t_book = BookApi.BookGetAsync(context, BookId);
+        var t_bookTotalPageCount = BookApi.BookGetPageCountAsync(context, BookId);
 
         Task.WaitAll([t_loggedInUser, t_book, t_bookTotalPageCount]);
 
@@ -251,9 +251,9 @@
         }
 
         // tier 1 tasks, dependent on tier 0
-        var t_bookUser = BookUserApiL1.BookUserByBookIdAndUserIdReadAsync(context, (int)_book.Id, (int)_loggedInUser.Id);
-        var t_languageUser = LanguageUserApiL1.LanguageUserGetAsync(context, (int)_book.LanguageId, (int)_loggedInUser.Id);
-        var t_language = LanguageApiL1.LanguageReadAsync(context, (int)_book.LanguageId);
+        var t_bookUser = BookUserApi.BookUserByBookIdAndUserIdReadAsync(context, (int)_book.Id, (int)_loggedInUser.Id);
+        var t_languageUser = LanguageUserApi.LanguageUserGetAsync(context, (int)_book.LanguageId, (int)_loggedInUser.Id);
+        var t_language = LanguageApi.LanguageReadAsync(context, (int)_book.LanguageId);
 
         Task.WaitAll([t_bookUser, t_languageUser, t_language]);
 
@@ -264,7 +264,7 @@
         if(_bookUser is null)
         {
             // create it
-            _bookUser = await BookUserApiL1.BookUserCreateAsync(context, (int)_book.Id, (int)_loggedInUser.Id);
+            _bookUser = await BookUserApi.BookUserCreateAsync(context, (int)_book.Id, (int)_loggedInUser.Id);
         }
         if (_bookUser is null || _bookUser.Id is null || _bookUser.Id < 1)
         {
@@ -283,9 +283,9 @@
             return;
         }
         // tier 2, dependent on tier 1
-        var t_bookUserStats = BookUserStatApiL1.BookUserStatsReadAsync(context, (int)_book.Id, (int)_loggedInUser.Id);
-        var t_currentPageUser = PageUserApiL1.PageUserReadBookmarkedOrFirstAsync(context, (int)_bookUser.Id);
-        var t_languageFromCode = LanguageApiL1.LanguageReadByCodeAsync(context, (string)_language.Code);
+        var t_bookUserStats = BookUserStatApi.BookUserStatsReadAsync(context, (int)_book.Id, (int)_loggedInUser.Id);
+        var t_currentPageUser = PageUserApi.PageUserReadBookmarkedOrFirstAsync(context, (int)_bookUser.Id);
+        var t_languageFromCode = LanguageApi.LanguageReadByCodeAsync(context, (string)_language.Code);
 
         Task.WaitAll([t_bookUserStats, t_currentPageUser, t_languageFromCode]);
 
@@ -297,13 +297,13 @@
         if (_currentPageUser is null)
         {
             // but first need to pull the page
-            _currentPage = await PageApiL1.PageReadFirstByBookIdAsync(context, BookId);
+            _currentPage = await PageApi.PageReadFirstByBookIdAsync(context, BookId);
             if (_currentPage is null || _currentPage.Id is null || _currentPage.Id < 1)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            _currentPageUser = await PageUserApiL1.PageUserCreateForPageIdAndUserId(
+            _currentPageUser = await PageUserApi.PageUserCreateForPageIdAndUserId(
                 context, (int)_currentPage.Id, (int)_loggedInUser.Id);
         }
         else
@@ -314,7 +314,7 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            _currentPage = await PageApiL1.PageReadByIdAsync(context, (int)_currentPageUser.PageId);
+            _currentPage = await PageApi.PageReadByIdAsync(context, (int)_currentPageUser.PageId);
         }
         if (_currentPage is null || _currentPage.Id is null || _currentPage.Id < 1)
         {
@@ -409,7 +409,7 @@
                 return;
             }
             // update all unknowns to well known
-            await PageUserApiL1.PageUserUpdateUnknowWordsToWellKnown(context, (int)_currentPageUser.Id);
+            await PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)_currentPageUser.Id);
             // now move forward, if there's another page
             if (targetPageNum <= _bookTotalPageCount) // remember pages are 1-indexed
             {
@@ -418,7 +418,7 @@
             else
             {
                 // mark the previous page as read because you didn't do it in the PageMove function
-                await PageUserApiL1.PageUserMarkAsReadAsync(context, (int)_currentPageUser.Id);
+                await PageUserApi.PageUserMarkAsReadAsync(context, (int)_currentPageUser.Id);
                 // refresh the word user cache
                 await PageResetDataForRead(context, (int)_currentPageUser.Id);
             }
@@ -467,11 +467,11 @@
         _tokens = null;
 
         // and rebuild
-        var t_currentPage = PageApiL1.PageReadByIdAsync(context, pageId);
-        var t_paragraphs = ParagraphApiL1.ParagraphsReadByPageIdAsync(context, pageId);
-        var t_wordsInPage = WordApiL1.WordsDictReadByPageIdAsync(context, pageId);
-        var t_sentencesInPage = SentenceApiL1.SentencesReadByPageIdAsync(context, pageId);
-        var t_tokensInPage = TokenApiL1.TokensReadByPageIdAsync(context, pageId);
+        var t_currentPage = PageApi.PageReadByIdAsync(context, pageId);
+        var t_paragraphs = ParagraphApi.ParagraphsReadByPageIdAsync(context, pageId);
+        var t_wordsInPage = WordApi.WordsDictReadByPageIdAsync(context, pageId);
+        var t_sentencesInPage = SentenceApi.SentencesReadByPageIdAsync(context, pageId);
+        var t_tokensInPage = TokenApi.TokensReadByPageIdAsync(context, pageId);
 
         Task.WaitAll([t_currentPage, t_paragraphs, t_wordsInPage, t_sentencesInPage, t_tokensInPage]);
 
@@ -489,7 +489,7 @@
 
         // do not do this until you've already pulled the _allWordsInPage as 
         // that makes it way more efficient since it checks the words dict cache
-        _allWordUsersInPage = await WordUserApiL1.WordUsersDictByPageIdAndUserIdReadAsync(
+        _allWordUsersInPage = await WordUserApi.WordUsersDictByPageIdAndUserIdReadAsync(
             context, pageId, (int)_loggedInUser.Id);
 
         if (_allWordUsersInPage is null)
@@ -555,14 +555,14 @@
 
         // mark the previous page as read before moving on
         
-        await PageUserApiL1.PageUserMarkAsReadAsync(context, (int)_currentPageUser.Id);
+        await PageUserApi.PageUserMarkAsReadAsync(context, (int)_currentPageUser.Id);
 
         if (targetPageNum < 1) return;
         if (targetPageNum > _bookTotalPageCount)
             return;
 
         // reload the current page user with the new target
-        _currentPageUser = await PageUserApiL1.PageUserReadByOrderWithinBookAsync(
+        _currentPageUser = await PageUserApi.PageUserReadByOrderWithinBookAsync(
             context, (int)_languageUser.Id, targetPageNum, BookId);
         if (_currentPageUser is null || _currentPageUser.PageId is null) 
         {
@@ -571,7 +571,7 @@
         }
 
         await PageResetDataForRead(context, (int)_currentPageUser.PageId);
-        await BookUserApiL1.BookUserUpdateBookmarkAsync(context, (int)_bookUser.Id, (int)_currentPageUser.PageId);
+        await BookUserApi.BookUserUpdateBookmarkAsync(context, (int)_bookUser.Id, (int)_currentPageUser.PageId);
         _isDataInitRead = true;
     }
     #endregion

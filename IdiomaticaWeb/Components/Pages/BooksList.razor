@@ -2,7 +2,7 @@
 @inject UserService UserService
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 @inject ILogger<IdiomaticaLogger> Logger;
-@using Logic.Services.Level1
+@using Logic.Services.API
 
 <style>
     .visibleBlRow {
@@ -139,7 +139,7 @@
         if (_loggedInUser is null || _loggedInUser.Id is null) return;
 
 
-        BookListDataPacket = await BookApiL1.BookListReadAsync(
+        BookListDataPacket = await BookApi.BookListReadAsync(
             context, (int)_loggedInUser.Id, BookListDataPacket);
 
     }
@@ -157,13 +157,13 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var bookUser = await BookUserApiL1.BookUserByBookIdAndUserIdReadAsync(context, bookId, (int)_loggedInUser.Id);
+            var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(context, bookId, (int)_loggedInUser.Id);
             if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            await BookUserApiL1.BookUserArchiveAsync(context, (int)bookUser.Id);
+            await BookUserApi.BookUserArchiveAsync(context, (int)bookUser.Id);
             // now pull a fresh copy of the book list
             await ResetBookListAsync();
             await t_delay;
@@ -194,7 +194,7 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            await BookUserApiL1.BookUserCreateAsync(context, bookId, (int)_loggedInUser.Id);
+            await BookUserApi.BookUserCreateAsync(context, bookId, (int)_loggedInUser.Id);
             await t_delay;
             _isLoading = false;
 

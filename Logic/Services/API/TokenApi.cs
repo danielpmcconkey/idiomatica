@@ -8,9 +8,9 @@ using Model;
 using Logic.Telemetry;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
-namespace Logic.Services.Level1
+namespace Logic.Services.API
 {
-    public static class TokenApiL1
+    public static class TokenApi
     {
         public static async Task<List<Token>?> TokensReadByPageIdAsync(IdiomaticaContext context, int pageId)
         {
@@ -59,7 +59,7 @@ namespace Logic.Services.Level1
             }
 
             // create the words first
-            List<(Word word, int ordinal)> words = await WordApiL1.CreateOrderedWordsFromSentenceIdAsync(
+            List<(Word word, int ordinal)> words = await WordApi.CreateOrderedWordsFromSentenceIdAsync(
                 context, languageId, sentenceId);
 
             if (words.Count < 1) return new List<Token>();
@@ -126,7 +126,7 @@ namespace Logic.Services.Level1
             if (wu is null)
             {
                 // create it
-                wu = await WordUserApiL1.WordUserCreate(context, (int)t.Word.Id,
+                wu = await WordUserApi.WordUserCreate(context, (int)t.Word.Id,
                     (int)languageUser.Id, string.Empty, AvailableWordUserStatus.UNKNOWN);
             }
             return (t, wu);

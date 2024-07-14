@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using Logic.Telemetry;
 using System.ComponentModel.DataAnnotations;
 
-namespace Logic.Services.Level1
+namespace Logic.Services.API
 {
-    public static class WordUserApiL1
+    public static class WordUserApi
     {
         public static async Task<Dictionary<string, WordUser>?> WordUsersDictByPageIdAndUserIdReadAsync(
             IdiomaticaContext context, int pageId, int userId)

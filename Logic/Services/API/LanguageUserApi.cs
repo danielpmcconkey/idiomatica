@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
 
-namespace Logic.Services.Level1
+namespace Logic.Services.API
 {
-    public static class LanguageUserApiL1
+    public static class LanguageUserApi
     {
         public static async Task<LanguageUser?> LanguageUserGetAsync(
             IdiomaticaContext context, int languageId, int userId)

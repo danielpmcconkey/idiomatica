@@ -7,9 +7,9 @@ using Logic.Telemetry;
 using Model;
 using Model.DAL;
 
-namespace Logic.Services.Level1
+namespace Logic.Services.API
 {
-    public static class PageApiL1
+    public static class PageApi
     {
         public static async Task<Page?> PageReadFirstByBookIdAsync(IdiomaticaContext context, int bookId)
         {
@@ -54,7 +54,7 @@ namespace Logic.Services.Level1
                 return null;
             }
             // create paragraphs
-            newPage.Paragraphs = await ParagraphApiL1.CreateParagraphsFromPageAsync(
+            newPage.Paragraphs = await ParagraphApi.CreateParagraphsFromPageAsync(
                 context, (int)newPage.Id, languageId);
             return newPage;
         }
