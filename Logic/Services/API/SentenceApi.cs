@@ -36,7 +36,7 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow(2280);
                 return null;
             }
-            newSentence.Tokens = await TokenApi.CreateTokensFromSentence(context,
+            newSentence.Tokens = await TokenApi.CreateTokensFromSentenceAsync(context,
                 (int)newSentence.Id, languageId);
             return newSentence;
         }

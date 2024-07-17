@@ -184,23 +184,35 @@
     }
     private async Task OnAddBookUser(int bookId)
     {
+        _isLoading = true;
+        var t_delay = Task.Delay(LoadingDelayMiliseconds);
+        var context = await DbContextFactory.CreateDbContextAsync();
+        await context.Database.BeginTransactionAsync();
         try
         {
-            _isLoading = true;
-            var t_delay = Task.Delay(LoadingDelayMiliseconds);
-            var context = await DbContextFactory.CreateDbContextAsync();
             if (_loggedInUser is null || _loggedInUser.Id is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            await BookUserApi.BookUserCreateAsync(context, bookId, (int)_loggedInUser.Id);
-            await t_delay;
-            _isLoading = false;
 
+            // create the base bookUser
+            var bookUser = await BookUserApi.BookUserCreateAsync(context, bookId, (int)_loggedInUser.Id);
+            if (bookUser is null || bookUser.Id is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            // create the wordUsers
+            await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, (int)_loggedInUser.Id);
+            // update bookUserStats
+            await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
+            // finally commit the write
+            await context.Database.CommitTransactionAsync();
         }
         catch (IdiomaticaException ex)
         {
+            await context.Database.RollbackTransactionAsync();
             errorState.isError = true;
             errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
             errorState.code = ex.code;
@@ -209,6 +221,12 @@
             errorState.sourceLineNumber = ex.sourceLineNumber;
             StateHasChanged();
             return;
+        }
+        finally
+        {
+            
+            await t_delay;
+            _isLoading = false;
         }
     }
 

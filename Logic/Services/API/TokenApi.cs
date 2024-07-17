@@ -35,7 +35,7 @@ namespace Logic.Services.API
             }
             return token;
         }
-        public static async Task<List<Token>> CreateTokensFromSentence(IdiomaticaContext context,
+        public static async Task<List<Token>> CreateTokensFromSentenceAsync(IdiomaticaContext context,
             int sentenceId, int languageId)
         {
             if (sentenceId < 1) ErrorHandler.LogAndThrow();
@@ -84,14 +84,14 @@ namespace Logic.Services.API
         /// <summary>
         /// Returns the list of tokens plus child word
         /// </summary>
-        public static async Task<List<Token>> TokensAndWordsReadBySentenceId(
+        public static async Task<List<Token>> TokensAndWordsReadBySentenceIdAsync(
             IdiomaticaContext context, int sentenceId)
         {
             if (sentenceId < 1) ErrorHandler.LogAndThrow();
 
             return await DataCache.TokensAndWordsBySentenceIdReadAsync(sentenceId, context);
         }
-        public static async Task<(Token? t, WordUser? wu)> TokenGetChildObjects(
+        public static async Task<(Token? t, WordUser? wu)> TokenGetChildObjectsAsync(
             IdiomaticaContext context, int tokenId, int languageUserId)
         {
             Token? t = new();
@@ -126,7 +126,7 @@ namespace Logic.Services.API
             if (wu is null)
             {
                 // create it
-                wu = await WordUserApi.WordUserCreate(context, (int)t.Word.Id,
+                wu = await WordUserApi.WordUserCreateAsync(context, (int)t.Word.Id,
                     (int)languageUser.Id, string.Empty, AvailableWordUserStatus.UNKNOWN);
             }
             return (t, wu);

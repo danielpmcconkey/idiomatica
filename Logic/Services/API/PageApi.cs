@@ -11,18 +11,18 @@ namespace Logic.Services.API
 {
     public static class PageApi
     {
-        public static async Task<Page?> PageReadFirstByBookIdAsync(IdiomaticaContext context, int bookId)
-        {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.PageByOrdinalAndBookIdReadAsync((1, bookId), context);
-        }
         public static async Task<Page?> PageReadByIdAsync(IdiomaticaContext context, int pageId)
         {
             if (pageId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.PageByIdReadAsync(pageId, context);
         }
+        public static async Task<Page?> PageReadFirstByBookIdAsync(IdiomaticaContext context, int bookId)
+        {
+            if (bookId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.PageByOrdinalAndBookIdReadAsync((1, bookId), context);
+        }
 
-        public static async Task<Page?> CreatePageFromPageSplit(
+        public static async Task<Page?> CreatePageFromPageSplitAsync(
             IdiomaticaContext context, int ordinal, string text,
             int bookId, int languageId)
         {

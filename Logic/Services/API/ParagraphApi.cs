@@ -115,7 +115,7 @@ namespace Logic.Services.API
             var paragraphSplitsRaw = parser.SegmentTextByParagraphs(textDenulled);
             return NullHandler.ThrowIfNullOrEmptyArray(paragraphSplitsRaw);
         }
-        public static async Task<string> ParagraphReadAllText(IdiomaticaContext context, int paragraphId)
+        public static async Task<string> ParagraphReadAllTextAsync(IdiomaticaContext context, int paragraphId)
         {
             if (paragraphId < 1) ErrorHandler.LogAndThrow();
             var sentences = await DataCache.SentencesByParagraphIdReadAsync(paragraphId, context);
@@ -132,7 +132,7 @@ namespace Logic.Services.API
             }
             return String.Join(" ", sentences);
         }
-        public static async Task<(string input, string output)> ParagraphTranslate(
+        public static async Task<(string input, string output)> ParagraphTranslateAsync(
             IdiomaticaContext context, int paragraphId, string fromCode, string toCode)
         {
             if (paragraphId < 1) ErrorHandler.LogAndThrow();
@@ -140,7 +140,7 @@ namespace Logic.Services.API
             if (string.IsNullOrEmpty(toCode)) ErrorHandler.LogAndThrow();
 
 
-            string input = await ParagraphReadAllText(context, paragraphId);
+            string input = await ParagraphReadAllTextAsync(context, paragraphId);
             string output = "";
 
             // see if the translation already exists

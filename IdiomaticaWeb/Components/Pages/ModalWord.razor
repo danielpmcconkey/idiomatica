@@ -98,7 +98,7 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var tokenAndChildren = await TokenApi.TokenGetChildObjects(
+            var tokenAndChildren = await TokenApi.TokenGetChildObjectsAsync(
                 context, (int)thisToken.Id, (int)LanguageUser.Id);
             if (tokenAndChildren.t is null)
             {

@@ -16,10 +16,6 @@ namespace Logic.Services.API
             if (languageId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.LanguageByIdReadAsync((languageId), context);
         }
-        public static async Task<LanguageCode?> LanguageReadByCodeAsync(IdiomaticaContext context, string code)
-        {
-            if (!string.IsNullOrEmpty(code)) ErrorHandler.LogAndThrow();
-            return await DataCache.LanguageCodeByCodeReadAsync(code, context);
-        }
+        
     }
 }

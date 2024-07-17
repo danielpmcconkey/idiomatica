@@ -175,11 +175,11 @@
     const int LoadingDelayMiliseconds = 500;
     public int BookCurrentPageNum
     {
-       get
-       {
+        get
+        {
             if (_currentPage is null || _currentPage.Ordinal is null) return 0;
-           return (int)_currentPage.Ordinal;
-       }
+            return (int)_currentPage.Ordinal;
+        }
     }
 
 
@@ -263,8 +263,8 @@
 
         if(_bookUser is null)
         {
-            // create it
-            _bookUser = await BookUserApi.BookUserCreateAsync(context, (int)_book.Id, (int)_loggedInUser.Id);
+            // create it, I guess
+            _bookUser = await CreateBookUserAsync();
         }
         if (_bookUser is null || _bookUser.Id is null || _bookUser.Id < 1)
         {
@@ -285,7 +285,7 @@
         // tier 2, dependent on tier 1
         var t_bookUserStats = BookUserStatApi.BookUserStatsReadAsync(context, (int)_book.Id, (int)_loggedInUser.Id);
         var t_currentPageUser = PageUserApi.PageUserReadBookmarkedOrFirstAsync(context, (int)_bookUser.Id);
-        var t_languageFromCode = LanguageApi.LanguageReadByCodeAsync(context, (string)_language.Code);
+        var t_languageFromCode = LanguageCodeApi.LanguageCodeReadByCodeAsync(context, (string)_language.Code);
 
         Task.WaitAll([t_bookUserStats, t_currentPageUser, t_languageFromCode]);
 
@@ -554,7 +554,7 @@
         }
 
         // mark the previous page as read before moving on
-        
+
         await PageUserApi.PageUserMarkAsReadAsync(context, (int)_currentPageUser.Id);
 
         if (targetPageNum < 1) return;
@@ -573,6 +573,46 @@
         await PageResetDataForRead(context, (int)_currentPageUser.PageId);
         await BookUserApi.BookUserUpdateBookmarkAsync(context, (int)_bookUser.Id, (int)_currentPageUser.PageId);
         _isDataInitRead = true;
+    }
+    private async Task<BookUser?> CreateBookUserAsync()
+    {
+        var context = await DbContextFactory.CreateDbContextAsync();
+        await context.Database.BeginTransactionAsync();
+        try
+        {
+            if (_loggedInUser is null || _loggedInUser.Id is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return null;
+            }
+
+            // create the base bookUser
+            var bookUser = await BookUserApi.BookUserCreateAsync(context, BookId, (int)_loggedInUser.Id);
+            if (bookUser is null || bookUser.Id is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return null;
+            }
+            // create the wordUsers
+            await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, BookId, (int)_loggedInUser.Id);
+            // update bookUserStats
+            await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
+            // finally commit the write
+            await context.Database.CommitTransactionAsync();
+            return bookUser;
+        }
+        catch (IdiomaticaException ex)
+        {
+            await context.Database.RollbackTransactionAsync();
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListRemoveBookError");
+            errorState.code = ex.code;
+            errorState.memberName = ex.memberName;
+            errorState.sourceFilePath = ex.sourceFilePath;
+            errorState.sourceLineNumber = ex.sourceLineNumber;
+            StateHasChanged();
+            return null;
+        }
     }
     #endregion
 }

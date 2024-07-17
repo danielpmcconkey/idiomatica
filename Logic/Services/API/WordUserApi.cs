@@ -7,11 +7,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
 using System.ComponentModel.DataAnnotations;
+using Azure;
 
 namespace Logic.Services.API
 {
     public static class WordUserApi
     {
+        public static async Task WordUsersCreateAllForBookIdAndUserIdAsync(
+            IdiomaticaContext context, int bookId, int userId)
+        {
+            if (bookId < 1) ErrorHandler.LogAndThrow();
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            await DataCache.WordUsersCreateAllForBookIdAndUserId((bookId, userId), context);
+        }
         public static async Task<Dictionary<string, WordUser>?> WordUsersDictByPageIdAndUserIdReadAsync(
             IdiomaticaContext context, int pageId, int userId)
         {
@@ -19,7 +27,7 @@ namespace Logic.Services.API
             if (userId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.WordUsersDictByPageIdAndUserIdReadAsync((pageId, userId), context);
         }
-        public static async Task<WordUser?> WordUserCreate(
+        public static async Task<WordUser?> WordUserCreateAsync(
             IdiomaticaContext context, int wordId, int languageUserId, string? translation,
             AvailableWordUserStatus? status)
         {

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Logic.Services.API;
 
 namespace Logic
 {
@@ -24,18 +25,9 @@ namespace Logic
             OrderByOptions[6] = "Total Word Count";
             OrderByOptions[7] = "Distinct Word Count";
 
-            var dbLanguageOptions = context.LanguageCodes
-                .Where(x => x.IsImplementedForLearning == true)
-                .OrderBy(x => x.LanguageName)
-                .ToList();
-            if (dbLanguageOptions is not null)
-            {
-                foreach (var lc in dbLanguageOptions)
-                {
-                    if (lc is null || string.IsNullOrEmpty(lc.Code)) continue;
-                    LanguageOptions.Add(lc.Code, lc);
-                }
-            }
+            LanguageOptions = LanguageCodeApi.LanguageCodeOptionsRead(context, 
+                (x => x.IsImplementedForLearning == true));
+            
             ShouldShowOnlyInShelf = !isBrowse;
         }
         public int BookListRowsToDisplay { get; set; } = 10;

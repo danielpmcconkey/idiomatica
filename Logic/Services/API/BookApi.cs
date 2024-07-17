@@ -31,7 +31,7 @@ namespace Logic.Services.API
             }
 
             // divide text into paragraphs
-            string[] paragraphSplits = ParagraphApi.SplitTextToPotentialParagraphs(context, text, languageCode);
+            string[] paragraphSplits = ParagraphApi.SplitTextToPotentialParagraphs(context, text, languageCodeT);
             
 
             // add the book to the DB so you can save pages using its ID
@@ -60,7 +60,7 @@ namespace Logic.Services.API
             {
                 string pageSplitTextTrimmed = pageSplit.pageText.Trim();
                 if (string.IsNullOrEmpty(pageSplitTextTrimmed)) continue;
-                Page? page = await PageApi.CreatePageFromPageSplit(context,
+                Page? page = await PageApi.CreatePageFromPageSplitAsync(context,
                     pageSplit.pageNum, pageSplitTextTrimmed, 
                     (int)book.Id, (int)language.Id);
                 if (page is not null && page.Id is not null or 0)

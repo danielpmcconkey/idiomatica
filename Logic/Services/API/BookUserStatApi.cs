@@ -31,8 +31,9 @@ namespace Logic.Services.API
             }
             var languageUser = await DataCache.LanguageUserByIdReadAsync((int)bookUser.LanguageUserId, context);
             var allWordsInBook = await DataCache.WordsByBookIdReadAsync((int)bookUser.BookId, context);
+           
             var allWordUsersInBook = await DataCache.WordUsersByBookIdAndLanguageUserIdReadAsync(
-                ((int)bookUser.BookId, (int)bookUser.LanguageUserId), context);
+                ((int)bookUser.BookId, (int)bookUser.LanguageUserId), context, true);
             var pageUsers = await DataCache.PageUsersByBookUserIdReadAsync(bookUserId, context);
             var pages = await DataCache.PagesByBookIdReadAsync(bookUserId, context);
             var bookStats = await DataCache.BookStatsByBookIdReadAsync((int)bookUser.BookId, context);

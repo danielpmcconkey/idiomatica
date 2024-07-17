@@ -20,6 +20,7 @@ namespace Logic.Services.API
             return await DataCache.BookUserByBookIdAndUserIdReadAsync(
                 (bookId, userId), context);
         }
+        
         public static async Task<BookUser?> BookUserCreateAsync(IdiomaticaContext context, int bookId, int userId)
         {
             if (bookId < 1) ErrorHandler.LogAndThrow();
@@ -62,9 +63,7 @@ namespace Logic.Services.API
                 // dude already exists. Just return it. 
                 // mark it as not-archived though
                 existingBookUser.IsArchived = false;
-                context.SaveChanges();
-                // now update the stats in case they're super old
-                await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)existingBookUser.Id);
+                await context.SaveChangesAsync();
                 return existingBookUser;
             }
 
@@ -81,15 +80,10 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow(2250);
                 return null;
             }
-
-            // now update BookUserStats
-            await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, NullHandler.ThrowIfNullOrZeroInt(bookUser.Id));
-
             return bookUser;
-
-
         }
-        public static async Task BookUserUpdateBookmarkAsync(IdiomaticaContext context, int bookUserId, int currentPageId)
+        public static async Task BookUserUpdateBookmarkAsync(
+            IdiomaticaContext context, int bookUserId, int currentPageId)
         {
             if (bookUserId < 1)
             {

@@ -14,6 +14,21 @@ namespace Model.DAL
         private static ConcurrentDictionary<(int languageId, int userId), LanguageUser> LanguageUserByLanguageIdAndUserId = new ConcurrentDictionary<(int languageId, int userId), LanguageUser>();
         private static ConcurrentDictionary<int, List<LanguageUser>> LanguageUsersAndLanguageByUserId = new ConcurrentDictionary<int, List<LanguageUser>>();
 
+        #region create
+        public static async Task<bool> LanguageUserCreateAsync(LanguageUser value, IdiomaticaContext context)
+        {
+            context.LanguageUsers.Add(value);
+            await context.SaveChangesAsync();
+            if (value.Id == null || value.Id == 0)
+            {
+                return false;
+            }
+            LanguageUserById[(int)value.Id] = value;
+            return true;
+        }
+        #endregion
+
+        #region read
         public static async Task<LanguageUser?> LanguageUserByIdReadAsync(
             int key, IdiomaticaContext context)
         {
@@ -69,6 +84,7 @@ namespace Model.DAL
             // write to cache
             LanguageUsersAndLanguageByUserId[key] = value;
             return value;
-        }
+        } 
+        #endregion
     }
 }

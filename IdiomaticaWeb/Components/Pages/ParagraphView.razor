@@ -129,7 +129,7 @@ else
         
 
         var context = DbContextFactory.CreateDbContext();
-        sentence.Tokens = await TokenApi.TokensAndWordsReadBySentenceId(context, (int)sentence.Id);
+        sentence.Tokens = await TokenApi.TokensAndWordsReadBySentenceIdAsync(context, (int)sentence.Id);
         return sentence.Tokens;
         
     }
