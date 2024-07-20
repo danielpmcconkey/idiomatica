@@ -61,7 +61,7 @@ namespace TestsBench
             optionsBuilder.UseSqlServer(connectionstring);
             return new IdiomaticaContext(optionsBuilder.Options);
         }
-        internal static User CreateNewTestUser(UserService userService, IdiomaticaContext context)
+        internal static User? CreateNewTestUser(UserService userService, IdiomaticaContext context)
         {
             var user = new User()
             {
@@ -69,16 +69,21 @@ namespace TestsBench
                 Name = "Auto gen tester",
                 Code = "En-US"
             };
+            user = DataCache.UserCreate(user, context);
+            if (user is null || user.Id is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return user;
+            }
             context.Users.Add(user);
-            context.SaveChanges();
             var languageUser = new LanguageUser()
             {
                 LanguageId = 1, // espAnish
                 UserId = (int)user.Id,
                 TotalWordsRead = 0
             };
+            DataCache.LanguageUserCreate(languageUser, context);
             context.LanguageUsers.Add(languageUser);
-            context.SaveChanges();
 
 #if DEBUG
             SetLoggedInUser(user, userService, context);

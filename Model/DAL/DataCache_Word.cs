@@ -72,6 +72,11 @@ namespace Model.DAL
             WordsBySentenceId[key] = value;
             return value;
         }
+        public static List<Word> WordsByBookIdRead(
+            int key, IdiomaticaContext context)
+        {
+            return WordsByBookIdReadAsync(key, context).Result;
+        }
         public static async Task<List<Word>> WordsByBookIdReadAsync(
             int key, IdiomaticaContext context)
         {
@@ -81,14 +86,14 @@ namespace Model.DAL
                 return WordsByBookId[key];
             }
             // read DB
-            var value = (from b in context.Books
+            var value = await (from b in context.Books
                          join p in context.Pages on b.Id equals p.BookId
                          join pp in context.Paragraphs on p.Id equals pp.PageId
                          join s in context.Sentences on pp.Id equals s.ParagraphId
                          join t in context.Tokens on s.Id equals t.SentenceId
                          join w in context.Words on t.WordId equals w.Id
                          where (b.Id == key)
-                         select w).Distinct().ToList();
+                         select w).Distinct().ToListAsync();
             
             
             // write to cache
@@ -125,7 +130,7 @@ namespace Model.DAL
             WordsDictByBookId[key] = value;
             return value;
         }
-        public static async Task<Dictionary<string, Word>> WordsDictByPageIdReadAsync(
+        public static Dictionary<string, Word> WordsDictByPageIdRead(
             int key, IdiomaticaContext context)
         {
             // check cache
@@ -145,6 +150,7 @@ namespace Model.DAL
             var value = new Dictionary<string, Word>();
             foreach (var g in groups)
             {
+                if (g.word is null || g.word.Id is null || g.word.TextLowerCase is null) continue;
                 value[g.word.TextLowerCase] = g.word;
                 // add it to the word cache
                 WordById[(int)g.word.Id] = g.word;
@@ -154,7 +160,16 @@ namespace Model.DAL
             WordsDictByPageId[key] = value;
             return value;
         }
-        
+        public static async Task<Dictionary<string, Word>> WordsDictByPageIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            return await Task<Dictionary<string, Word>>.Run(() =>
+            {
+                return WordsDictByPageIdRead(key, context);
+            });
+        }
+
+
         public static async Task<List<Word>> WordsCommon1000ByLanguageIdReadAsync(
             int key, IdiomaticaContext context)
         {
@@ -216,17 +231,49 @@ namespace Model.DAL
         #endregion
 
         #region create
-        public static async Task<bool> WordCreateAsync(Word value, IdiomaticaContext context)
+
+
+        public static Word? WordCreate(Word word, IdiomaticaContext context)
         {
-            context.Words.Add(value);
-            context.SaveChanges();
-            if (value.Id == null || value.Id == 0)
+            if (word.LanguageId is null) throw new ArgumentNullException(nameof(word.LanguageId));
+            if (word.TextLowerCase is null) throw new ArgumentNullException(nameof(word.TextLowerCase));
+
+            Guid guid = Guid.NewGuid();
+            int numRows = context.Database.ExecuteSql($"""
+                        
+                INSERT INTO [Idioma].[Word]
+                           ([LanguageId]
+                           ,[Text]
+                           ,[TextLowerCase]
+                           ,[Romanization]
+                           ,[TokenCount]
+                           ,[UniqueKey])
+                     VALUES
+                           (<LanguageId, int,>
+                           ,<Text, nvarchar(250),>
+                           ,<TextLowerCase, nvarchar(250),>
+                           ,<Romanization, nvarchar(250),>
+                           ,<TokenCount, int,>
+                           ,{guid})
+                """);
+            if (numRows < 1) throw new InvalidDataException("creating Word affected 0 rows");
+            var newEntity = context.Words.Where(x => x.UniqueKey == guid).FirstOrDefault();
+            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
             {
-                return false;
+                throw new InvalidDataException("newEntity is null in WordCreate");
             }
-            WordById[(int)value.Id] = value;
-            return true;
+
+
+            // add it to cache
+            WordById[(int)newEntity.Id] = newEntity;
+
+            return newEntity;
         }
+        public static async Task<Word?> WordCreateAsync(Word value, IdiomaticaContext context)
+        {
+            return await Task.Run(() => { return WordCreate(value, context); });
+        }
+       
         #endregion
 
     }

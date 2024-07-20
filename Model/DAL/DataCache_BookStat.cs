@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Model.DAL
         private static ConcurrentDictionary<(int bookId, AvailableBookStat statKey), BookStat> BookStatByBookIdAndStatKey = new ConcurrentDictionary<(int bookId, AvailableBookStat statKey), BookStat>();
         private static ConcurrentDictionary<int, List<BookStat>> BookStatsByBookId = new ConcurrentDictionary<int, List<BookStat>>();
 
-        public static async Task<BookStat?> BookStatByBookIdAndStatKeyReadAsync(
+        public static BookStat? BookStatByBookIdAndStatKeyRead(
             (int bookId, AvailableBookStat statKey) key, IdiomaticaContext context)
         {
             // check cache
@@ -29,7 +30,20 @@ namespace Model.DAL
             BookStatByBookIdAndStatKey[key] = value;
             return value;
         }
-        public static async Task<List<BookStat>> BookStatsByBookIdReadAsync(
+        public static async Task<BookStat?> BookStatByBookIdAndStatKeyReadAsync(
+            (int bookId, AvailableBookStat statKey) key, IdiomaticaContext context)
+        {
+            return await Task<BookStat?>.Run(() =>
+            {
+                return BookStatByBookIdAndStatKeyRead(key, context);
+            });
+        }
+        public static List<BookStat>? BookStatsByBookIdRead(
+            int key, IdiomaticaContext context)
+        {
+            return BookStatsByBookIdReadAsync(key, context).Result;
+        }
+        public static async Task<List<BookStat>?> BookStatsByBookIdReadAsync(
             int key, IdiomaticaContext context)
         {
             // check cache
@@ -38,8 +52,8 @@ namespace Model.DAL
                 return BookStatsByBookId[key];
             }
             // read DB
-            var value = context.BookStats
-                .Where(x => x.BookId == key).ToList();
+            var value = await context.BookStats
+                .Where(x => x.BookId == key).ToListAsync();
             if (value == null) return null;
             // write to cache
             BookStatsByBookId[key] = value;

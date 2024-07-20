@@ -12,23 +12,28 @@ namespace Logic.Services.API
 {
     public static class TokenApi
     {
+        public static List<Token>? TokensReadByPageId(IdiomaticaContext context, int pageId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.TokensByPageIdRead(pageId, context);
+        }
         public static async Task<List<Token>?> TokensReadByPageIdAsync(IdiomaticaContext context, int pageId)
         {
             if (pageId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.TokensByPageIdReadAsync(pageId, context);
         }
-        public static async Task<Token?> CreateTokenAsync(IdiomaticaContext context,
+        public static Token? CreateToken(IdiomaticaContext context,
            string display, int sentenceId, int ordinal, int wordId)
         {
-            Token token = new Token()
+            var token = new Token()
             {
                 Display = display,
                 SentenceId = sentenceId,
                 Ordinal = ordinal,
                 WordId = wordId
             };
-            bool isSaved = await DataCache.TokenCreateAsync(token, context);
-            if (!isSaved || token.Id == null || token.Id == 0)
+            token =  DataCache.TokenCreate(token, context);
+            if (token is null || token.Id == null || token.Id == 0)
             {
                 ErrorHandler.LogAndThrow(2290);
                 return null;
@@ -47,7 +52,7 @@ namespace Logic.Services.API
             }
 
             // check if any already exist. there shouldn't be any but whateves
-            await DataCache.TokenBySentenceIdDelete(sentenceId, context);
+            DataCache.TokenBySentenceIdDelete(sentenceId, context);
 
             var language = DataCache.LanguageByIdRead(languageId, context);
             if (language is null ||
@@ -65,10 +70,10 @@ namespace Logic.Services.API
             if (words.Count < 1) return new List<Token>();
 
             // now make the tokens
-            var tokenTasks = words.Select(async x => {
+            var tokenTasks = words.Select(x => {
                 if (x.word is null || x.word.Id is null or 0 || x.word.Text is null)
                     return null;
-                Token? newToken = await CreateTokenAsync(
+                Token? newToken = CreateToken(
                     context,
                     $"{x.word.Text} ", // display; add the space that you previously took out
                     sentenceId,
@@ -77,7 +82,6 @@ namespace Logic.Services.API
                     );
                 return newToken;
             });
-            Task.WaitAll(tokenTasks.ToArray());
             var tokens = await DataCache.TokensBySentenceIdReadAsync(sentenceId, context);
             return tokens ?? new List<Token>();
         }

@@ -115,5 +115,17 @@ namespace Logic.Services.API.Tests
                 await transaction.RollbackAsync();
             }
         }
+
+        [TestMethod()]
+        public void WordUsersCreateAllForBookIdAndUserIdTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void WordUsersDictByPageIdAndUserIdReadTest()
+        {
+            Assert.Fail();
+        }
     }
 }

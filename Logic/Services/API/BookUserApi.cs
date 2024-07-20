@@ -11,22 +11,49 @@ namespace Logic.Services.API
 {
     public static class BookUserApi
     {
-        public static async Task<BookUser?> BookUserByBookIdAndUserIdReadAsync(
+        /// <summary>
+        /// Create the book user, word users, and book user stats
+        /// </summary>
+        public static BookUser? OrchestrateBookUserCreationAndSubProcesses(
+            IdiomaticaContext context, int bookId, int userId)
+        {
+            var bookUser = BookUserApi.BookUserCreate(context, bookId, userId);
+            if (bookUser is null || bookUser.Id is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return null;
+            }
+            // create the wordUsers
+            WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
+            // update bookUserStats
+            BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (int)bookUser.Id);
+
+            return bookUser;
+        }
+        public static BookUser? BookUserByBookIdAndUserIdRead(
             IdiomaticaContext context, int bookId, int userId)
         {
             if (bookId < 1) ErrorHandler.LogAndThrow();
             if (userId < 1) ErrorHandler.LogAndThrow();
 
-            return await DataCache.BookUserByBookIdAndUserIdReadAsync(
+            return DataCache.BookUserByBookIdAndUserIdRead(
                 (bookId, userId), context);
         }
-        
-        public static async Task<BookUser?> BookUserCreateAsync(IdiomaticaContext context, int bookId, int userId)
+        public static async Task<BookUser?> BookUserByBookIdAndUserIdReadAsync(
+            IdiomaticaContext context, int bookId, int userId)
+        {
+            return await Task<BookUser?>.Run(() => 
+            {
+                return BookUserByBookIdAndUserIdRead(context, bookId, userId);
+            });
+        }
+
+        public static BookUser? BookUserCreate(IdiomaticaContext context, int bookId, int userId)
         {
             if (bookId < 1) ErrorHandler.LogAndThrow();
             if (userId < 1) ErrorHandler.LogAndThrow();
 
-            Book? book = await DataCache.BookByIdReadAsync(bookId, context);
+            Book? book = DataCache.BookByIdRead(bookId, context);
             if (book is null || book.Id is null || book.Id < 1)
             {
                 ErrorHandler.LogAndThrow();
@@ -38,7 +65,7 @@ namespace Logic.Services.API
                 return null;
             }
 
-            book.Pages = await DataCache.PagesByBookIdReadAsync(bookId, context);
+            book.Pages = DataCache.PagesByBookIdRead(bookId, context);
 
             var firstPage = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
             if (firstPage is null || firstPage.Id is null || firstPage.Id < 1)
@@ -46,9 +73,8 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow();
                 return null;
             }
-
-            var languageUser = await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync(
-                    ((int)book.LanguageId, userId), context);
+            var languageUser = LanguageUserApi.LanguageUserGet(context, (int)book.LanguageId, userId);
+            
             if (languageUser is null || languageUser.Id is null || languageUser.Id < 1)
             {
                 ErrorHandler.LogAndThrow();
@@ -56,33 +82,31 @@ namespace Logic.Services.API
             }
 
             // make sure that bookUser doesn't already exist before creating it
-            var existingBookUser = await DataCache.BookUserByBookIdAndUserIdReadAsync(
+            var existingBookUser = DataCache.BookUserByBookIdAndUserIdRead(
                 (bookId, userId), context);
             if (existingBookUser != null && existingBookUser.Id != null)
             {
                 // dude already exists. Just return it. 
                 // mark it as not-archived though
                 existingBookUser.IsArchived = false;
-                await context.SaveChangesAsync();
+                DataCache.BookUserUpdate(existingBookUser, context);
                 return existingBookUser;
             }
 
-            BookUser bookUser = new BookUser()
+            var bookUser = DataCache.BookUserCreate(new BookUser()
             {
                 BookId = bookId,
-                CurrentPageID = firstPage.Id,
-                LanguageUserId = languageUser.Id
-            };
-
-            bool didSaveBookUser = await DataCache.BookUserCreateAsync(bookUser, context);
-            if (!didSaveBookUser || bookUser.Id == null || bookUser.Id < 1)
+                CurrentPageID = (int)firstPage.Id,
+                LanguageUserId = (int)languageUser.Id
+            }, context);
+            if (bookUser is null || bookUser.Id == null || bookUser.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2250);
                 return null;
             }
             return bookUser;
         }
-        public static async Task BookUserUpdateBookmarkAsync(
+        public static void BookUserUpdateBookmark(
             IdiomaticaContext context, int bookUserId, int currentPageId)
         {
             if (bookUserId < 1)
@@ -94,7 +118,7 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow(1130);
             }
 
-            var bookUser = await DataCache.BookUserByIdReadAsync(bookUserId, context);
+            var bookUser = DataCache.BookUserByIdRead(bookUserId, context);
 
             if (bookUser is null)
             {
@@ -102,7 +126,12 @@ namespace Logic.Services.API
                 return;
             }
             bookUser.CurrentPageID = currentPageId;
-            await DataCache.BookUserUpdateAsync(bookUser, context);
+            DataCache.BookUserUpdate(bookUser, context);
+        }
+        public static async Task BookUserUpdateBookmarkAsync(
+            IdiomaticaContext context, int bookUserId, int currentPageId)
+        {
+            await Task.Run(() => { BookUserUpdateBookmark(context, bookUserId, currentPageId); });
         }
         public static async Task BookUserArchiveAsync(IdiomaticaContext context, int bookUserId)
         {

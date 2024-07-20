@@ -13,24 +13,24 @@ namespace Logic.Services.API.Tests
     public class BookTagApiTests
     {
         [TestMethod()]
-        public async Task BookTagAddTest()
+        public void BookTagAddTest()
         {
             // assemble
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
+            using var transaction = context.Database.BeginTransaction();
             string tag = Guid.NewGuid().ToString();
             int bookId = 6;
             int userId = 1;
 
-            var originalTags = await BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
+            var originalTags = BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
             int originalCount = originalTags is null ? 0 : originalTags.Count;
             int expectedNewCount = originalCount + 1;
 
             try
             {
                 // act
-                await BookTagApi.BookTagAdd(context, bookId, userId, tag);
-                var newTags = await BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
+                BookTagApi.BookTagAdd(context, bookId, userId, tag);
+                var newTags = BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
                 int newCount = newTags is null ? 0 : newTags.Count;
 
                 // assert
@@ -44,22 +44,22 @@ namespace Logic.Services.API.Tests
             {
                 // clean-up
 
-                await transaction.RollbackAsync();
+                transaction.Rollback();
             }
         }
 
         [TestMethod()]
-        public async Task BookTagRemoveTest()
+        public void BookTagRemoveTest()
         {
             // assemble
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
+            using var transaction = context.Database.BeginTransaction();
             string tag1 = Guid.NewGuid().ToString();
             string tag2 = $"{Guid.NewGuid().ToString()}varbit"; // just adding an extra string in case the two are somehow identical
             int bookId = 6;
             int userId = 1;
 
-            var originalTags = await BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
+            var originalTags = BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
             int originalCount = originalTags is null ? 0 : originalTags.Count;
             int expectedNewCountFirst = originalCount + 2;
             int expectedNewCountSecond = originalCount + 1;
@@ -67,12 +67,12 @@ namespace Logic.Services.API.Tests
             try
             {
                 // act
-                await BookTagApi.BookTagAdd(context, bookId, userId, tag1);
-                await BookTagApi.BookTagAdd(context, bookId, userId, tag2);
-                var newTagsFirst = await BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
+                BookTagApi.BookTagAdd(context, bookId, userId, tag1);
+                BookTagApi.BookTagAdd(context, bookId, userId, tag2);
+                var newTagsFirst = BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
                 int newCountFirst = newTagsFirst is null ? 0 : newTagsFirst.Count;
-                await BookTagApi.BookTagRemove(context, bookId, userId, tag1);
-                var newTagsSecond = await BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
+                BookTagApi.BookTagRemove(context, bookId, userId, tag1);
+                var newTagsSecond = BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
                 int newCountSecond = newTagsFirst is null ? 0 : newTagsSecond.Count;
 
                 // assert
@@ -89,8 +89,14 @@ namespace Logic.Services.API.Tests
             {
                 // clean-up
 
-                await transaction.RollbackAsync();
+                transaction.Rollback();
             }
+        }
+
+        [TestMethod()]
+        public void BookTagRemoveAsynTest()
+        {
+            Assert.Fail();
         }
     }
 }

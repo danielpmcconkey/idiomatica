@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using Model;
 using Model.DAL;
 using Logic.Telemetry;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Logic.Services.API
 {
     public static class BookTagApi
     {
-        public static async Task BookTagAdd(IdiomaticaContext context, int bookId, int userId, string tag)
+        public static void BookTagAdd(IdiomaticaContext context, int bookId, int userId, string tag)
         {
             if (bookId < 1) ErrorHandler.LogAndThrow();
             if (userId < 1) ErrorHandler.LogAndThrow();
@@ -35,13 +36,17 @@ namespace Logic.Services.API
                 Created = created,
                 IsPersonal = true
             };
-            bool didSave = await DataCache.BookTagCreateAsync(newTag, context);
-            if (!didSave || newTag.Id == null || newTag.Id < 1)
+            newTag = DataCache.BookTagCreate(newTag, context);
+            if (newTag is null || newTag.Id is null || newTag.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2440);
             }
         }
-        public static async Task BookTagRemove(IdiomaticaContext context, int bookId, int userId, string tag)
+        public static async Task BookTagAddAsync(IdiomaticaContext context, int bookId, int userId, string tag)
+        {
+            await Task.Run(() => BookTagAdd(context, bookId, userId, tag));
+        }
+        public static void BookTagRemove(IdiomaticaContext context, int bookId, int userId, string tag)
         {
 
             if (bookId < 1) ErrorHandler.LogAndThrow();
@@ -49,15 +54,27 @@ namespace Logic.Services.API
             string trimmedTag = tag.Trim().ToLower();
             if (trimmedTag == string.Empty) return;
 
-            await DataCache.BookTagDelete((bookId, userId, trimmedTag), context);
+            DataCache.BookTagDelete((bookId, userId, trimmedTag), context);
         }
-        public static async Task<List<BookTag>> BookTagsGetByBookIdAndUserId(
+        public static async Task BookTagRemoveAsyn(IdiomaticaContext context, int bookId, int userId, string tag)
+        {
+            await Task.Run(() => BookTagRemove(context, bookId, userId, tag));
+        }
+        public static List<BookTag> BookTagsGetByBookIdAndUserId(
             IdiomaticaContext context, int bookId, int userId)
         {
             if (bookId < 1) ErrorHandler.LogAndThrow();
             if (userId < 1) ErrorHandler.LogAndThrow();
-            var tags = await DataCache.BookTagsByBookIdAndUserIdReadAsync((bookId, userId), context);
+            var tags = DataCache.BookTagsByBookIdAndUserIdRead((bookId, userId), context);
             return tags;
+        }
+        public static async Task<List<BookTag>> BookTagsGetByBookIdAndUserIdAsync(
+            IdiomaticaContext context, int bookId, int userId)
+        {
+            return await Task<List<BookTag>>.Run(() =>
+            {
+                return BookTagsGetByBookIdAndUserId(context, bookId, userId);
+            });
         }
     }
 }

@@ -37,5 +37,7 @@ namespace Model
         /// the order it appears within its sentence
         /// </summary>
         public int? Ordinal { get; set; }
+        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
+
     }
 }

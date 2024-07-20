@@ -380,7 +380,7 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
+            BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (int)bookUser.Id);
 
             await t_delay;
             _isLoading = false;

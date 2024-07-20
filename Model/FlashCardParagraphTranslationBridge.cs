@@ -15,5 +15,7 @@ namespace Model
         public FlashCard? FlashCard { get; set; }
         public int? ParagraphTranslationId { get; set; }
         public ParagraphTranslation? ParagraphTranslation { get; set; }
+        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,22 +16,56 @@ namespace Model.DAL
         private static ConcurrentDictionary<int, List<PageUser>> PageUsersByBookUserId = new ConcurrentDictionary<int, List<PageUser>>();
 
         #region create
-        public static async Task<bool> PageUserCreateAsync(PageUser value, IdiomaticaContext context)
+
+
+        public static PageUser? PageUserCreate(PageUser pageUser, IdiomaticaContext context)
         {
-            context.PageUsers.Add(value);
-            context.SaveChanges();
-            if (value.Id == null || value.Id == 0)
+            if (pageUser.BookUserId is null) throw new ArgumentNullException(nameof(pageUser.BookUserId));
+            if (pageUser.PageId is null) throw new ArgumentNullException(nameof(pageUser.PageId));
+
+            Guid guid = Guid.NewGuid();
+            int numRows = context.Database.ExecuteSql($"""
+                        
+                INSERT INTO [Idioma].[PageUser]
+                      ([BookUserId]
+                      ,[PageId]
+                      ,[ReadDate]
+                      ,[UniqueKey])
+                VALUES
+                      ({pageUser.BookUserId}
+                      ,{pageUser.PageId}
+                      ,{pageUser.ReadDate}
+                      ,{guid})
+        
+                """);
+            if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
+            var newEntity = context.PageUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
+            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
             {
-                return false;
+                throw new InvalidDataException("newEntity is null in FlashCardCreate");
             }
-            // now update the cache
-            await PageUserUpdateAllCachesAsync(value);
-            return true;
+
+
+            // add it to cache
+            PageUserUpdateAllCaches(newEntity);
+
+            return newEntity;
         }
+        public static async Task<PageUser?> PageUserCreateAsync(PageUser value, IdiomaticaContext context)
+        {
+            return await Task.Run(() => { return PageUserCreate(value, context); });
+        }
+
+
+        
         #endregion
 
         #region read
-        public static async Task<PageUser> PageUserByIdReadAsync(int key, IdiomaticaContext context)
+        public static PageUser? PageUserByIdRead(int key, IdiomaticaContext context)
+        {
+            return PageUserByIdReadAsync(key, context).Result;
+        }
+        public static async Task<PageUser?> PageUserByIdReadAsync(int key, IdiomaticaContext context)
         {
             // check cache
             if (PageUserById.ContainsKey(key))
@@ -43,10 +78,10 @@ namespace Model.DAL
                 .FirstOrDefault();
             if (value == null) return null;
             // now update the cache
-            await PageUserUpdateAllCachesAsync(value);
+            PageUserUpdateAllCaches(value);
             return value;
         }
-        public static async Task<PageUser?> PageUserByLanguageUserIdOrdinalAndBookIdReadAsync(
+        public static PageUser? PageUserByLanguageUserIdOrdinalAndBookIdRead(
             (int languageUserId, int ordinal, int bookId) key, IdiomaticaContext context)
         {
             // check cache
@@ -56,7 +91,9 @@ namespace Model.DAL
             }
             // read DB
             var value = context.PageUsers
-                .Where(pu => pu.BookUser.LanguageUserId == key.languageUserId
+                .Where(pu => pu.BookUser != null 
+                    && pu.BookUser.LanguageUserId == key.languageUserId
+                    && pu.Page != null
                     && pu.Page.Ordinal == key.ordinal
                     && pu.Page.BookId == key.bookId)
                 .FirstOrDefault();
@@ -64,10 +101,18 @@ namespace Model.DAL
             if (value == null) return null;
 
             // now update the cache
-            await PageUserUpdateAllCachesAsync(value);
+            PageUserUpdateAllCaches(value);
             return value;
         }
-        public static async Task<PageUser?> PageUserByPageIdAndLanguageUserIdReadAsync(
+        public static async Task<PageUser?> PageUserByLanguageUserIdOrdinalAndBookIdReadAsync(
+            (int languageUserId, int ordinal, int bookId) key, IdiomaticaContext context)
+        {
+            return await Task<PageUser?>.Run(() =>
+            {
+                return PageUserByLanguageUserIdOrdinalAndBookIdRead(key, context);
+            });
+        }
+        public static PageUser? PageUserByPageIdAndLanguageUserIdRead(
             (int pageId, int languageUserId) key, IdiomaticaContext context)
         {
             // check cache
@@ -77,16 +122,26 @@ namespace Model.DAL
             }
             // read DB
             var value = context.PageUsers
-                .Where(pu => pu.BookUser.LanguageUserId == key.languageUserId
+                .Where(pu => pu.BookUser != null
+                    && pu.BookUser.LanguageUserId == key.languageUserId
                     && pu.PageId == key.pageId)
                 .FirstOrDefault();
 
             if (value == null) return null;
             // now update the cache
-            await PageUserUpdateAllCachesAsync(value);
+            PageUserUpdateAllCaches(value);
             return value;
         }
-        public static async Task<List<PageUser>> PageUsersByBookUserIdReadAsync(
+        public static async Task<PageUser?> PageUserByPageIdAndLanguageUserIdReadAsync(
+            (int pageId, int languageUserId) key, IdiomaticaContext context)
+        {
+            return await Task<PageUser?>.Run(() =>
+            {
+                return PageUserByPageIdAndLanguageUserIdRead(key, context);
+            });
+        }
+        
+        public static List<PageUser> PageUsersByBookUserIdRead(
             int key, IdiomaticaContext context)
         {
             // check cache
@@ -105,30 +160,49 @@ namespace Model.DAL
             // now update the cache
             foreach (var item in value)
             {
-                await PageUserUpdateAllCachesAsync(item);
+                PageUserUpdateAllCaches(item);
             }
             return value;
+        }
+        public static async Task<List<PageUser>> PageUsersByBookUserIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            return await Task<List<PageUser>>.Run(() =>
+            {
+                return PageUsersByBookUserIdRead(key, context);
+            });
         }
 
         #endregion
 
         #region update
-        public static async Task PageUserUpdateAsync(PageUser value, IdiomaticaContext context)
+
+        public static void PageUserUpdate(PageUser value, IdiomaticaContext context)
         {
-            if (value.Id == null || value.Id < 1) throw new ArgumentException("ID cannot be null or 0 when updating");
+            if (value.Id == null || value.Id < 1) 
+                throw new ArgumentException("ID cannot be null or 0 when updating PageUser");
 
-            var valueFromDb = context.PageUsers.Where(pu => pu.Id == value.Id).FirstOrDefault();
-            if (valueFromDb == null) throw new InvalidDataException("Value does not exist in the DB to update");
 
-            valueFromDb.ReadDate = value.ReadDate;
-            valueFromDb.BookUserId = value.BookUserId;
-            valueFromDb.PageId = value.PageId;
-            context.SaveChanges();
+            int numRows = context.Database.ExecuteSql($"""
+                                
+                UPDATE [Idioma].[PageUser]
+                   SET [BookUserId] = {value.BookUserId}
+                      ,[PageId] = {value.PageId}
+                      ,[ReadDate] = {value.ReadDate}
+                      ,[UniqueKey] = {value.UniqueKey}
+                 WHERE Id = {value.Id}
+
+                """);
 
             // now update the cache
-            await PageUserUpdateAllCachesAsync(value);
+            PageUserUpdateAllCaches(value);
 
             return;
+        }
+
+        public static async Task PageUserUpdateAsync(PageUser value, IdiomaticaContext context)
+        {
+            await Task.Run(() => { PageUserUpdate(value, context); });
         }
         #endregion
 
@@ -146,8 +220,9 @@ namespace Model.DAL
             }
             return newList;
         }
-        private static async Task PageUserUpdateAllCachesAsync(PageUser value)
+        private static void PageUserUpdateAllCaches(PageUser value)
         {
+            if (value.Id is null || value.Id < 1) return;
             PageUserById[(int)value.Id] = value;
 
             var cachedItem1 = PageUserByPageIdAndLanguageUserId.Where(x => x.Value.Id == value.Id).FirstOrDefault();

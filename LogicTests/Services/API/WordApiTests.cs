@@ -115,5 +115,11 @@ namespace Logic.Services.API.Tests
                 await transaction.RollbackAsync();
             }
         }
+
+        [TestMethod()]
+        public void WordsDictReadByPageIdTest()
+        {
+            Assert.Fail();
+        }
     }
 }

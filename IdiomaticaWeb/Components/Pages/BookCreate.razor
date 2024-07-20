@@ -186,38 +186,25 @@
 
             string textInput = await _largeVolumeTextArea.GetTextValue();
 
-            Book? book = await BookApi.BookCreateAndSaveAsync(context, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
-            if(book is null || book.Id is null || book.Id < 1)
+            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            int bookId = (int)book.Id;
-            // add the book stats
-            await BookStatApi.BookStatsCreateAndSaveAsync(context, bookId);
-            // now create the book user for the logged in user
-            if(_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            Book? book = await BookApi.OrchestrateBookCreationAndSubProcesses(
+                context, (int)_loggedInUser.Id, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
+            if (book is null || book.Id is null || book.Id < 1)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            // create the base bookUser
-            var bookUser = await BookUserApi.BookUserCreateAsync(context, bookId, (int)_loggedInUser.Id);
-            if (bookUser is null || bookUser.Id is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return;
-            }
-            // create the wordUsers
-            await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, (int)_loggedInUser.Id);
-            // update bookUserStats
-            await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
+            _newBookId = (int)book.Id;
+
             // finally commit the write
             await context.Database.CommitTransactionAsync();
 
             // throw up a success message
             _isSaveSuccess = true;
-            _newBookId = bookId;
         }
         catch (IdiomaticaException ex)
         {

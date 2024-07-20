@@ -193,5 +193,51 @@ namespace Logic.Services.API.Tests
                 await transaction.RollbackAsync();
             }
         }
+
+        [TestMethod()]
+        public void PageUserReadBookmarkedOrFirstTest()
+        {
+            Assert.Fail();
+        }
+
+       
+
+        [TestMethod()]
+        public void PageUserReadByPageIdAndLanguageUserIdTest()
+        {
+            Assert.Fail();
+        }
+
+        
+
+        [TestMethod()]
+        public void PageUserReadByOrderWithinBookTest()
+        {
+            Assert.Fail();
+        }
+
+        
+
+        
+
+        [TestMethod()]
+        public void PageUserCreateForPageIdAndUserIdAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void PageUserMarkAsReadTest()
+        {
+            Assert.Fail();
+        }
+
+        
+
+        [TestMethod()]
+        public void PageUserUpdateReadDateTest()
+        {
+            Assert.Fail();
+        }
     }
 }

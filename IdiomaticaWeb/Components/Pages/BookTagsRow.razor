@@ -60,7 +60,7 @@ else
             }
             if (BookId is not null)
             {
-                _tags = await BookTagApi.BookTagsGetByBookIdAndUserId(context, (int)BookId, (int)_loggedInUser.Id);
+                _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (int)BookId, (int)_loggedInUser.Id);
             }
             
             await t_delay;
@@ -99,7 +99,7 @@ else
             }
             if (BookId is not null)
             {
-                _tags = await BookTagApi.BookTagsGetByBookIdAndUserId(context, (int)BookId, (int)_loggedInUser.Id);
+                _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (int)BookId, (int)_loggedInUser.Id);
             }
             await t_delay;
             _isLoading = false;
@@ -135,8 +135,8 @@ else
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            await BookTagApi.BookTagAdd(context, (int)BookId, (int)_loggedInUser.Id, sanitized);
-            _tags = await BookTagApi.BookTagsGetByBookIdAndUserId(context, (int)BookId, (int)_loggedInUser.Id);
+            BookTagApi.BookTagAdd(context, (int)BookId, (int)_loggedInUser.Id, sanitized);
+            _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (int)BookId, (int)_loggedInUser.Id);
             await t_delay;
             _isLoading = false;
         }

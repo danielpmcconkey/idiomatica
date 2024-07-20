@@ -141,5 +141,17 @@ namespace Logic.Services.API.Tests
                 await transaction.RollbackAsync();
             }
         }
+
+        [TestMethod()]
+        public void TokensReadByPageIdTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void CreateTokenTest()
+        {
+            Assert.Fail();
+        }
     }
 }

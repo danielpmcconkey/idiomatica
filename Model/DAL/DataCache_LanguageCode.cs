@@ -12,7 +12,7 @@ namespace Model.DAL
         private static ConcurrentDictionary<string, LanguageCode> LanguageCodeByCode = new ConcurrentDictionary<string, LanguageCode>();
         
         #region read
-        public static async Task<LanguageCode?> LanguageCodeByCodeReadAsync(string key, IdiomaticaContext context)
+        public static LanguageCode? LanguageCodeByCodeRead(string key, IdiomaticaContext context)
         {
             // check cache
             if (LanguageCodeByCode.ContainsKey(key))
@@ -28,6 +28,13 @@ namespace Model.DAL
             // write to cache
             LanguageCodeByCode[key] = value;
             return value;
+        }
+        public static async Task<LanguageCode?> LanguageCodeByCodeReadAsync(string key, IdiomaticaContext context)
+        {
+            return await Task<LanguageCode?>.Run(() =>
+            {
+                return LanguageCodeByCodeRead(key, context);
+            });
         }
         #endregion
 

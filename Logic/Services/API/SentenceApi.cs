@@ -11,6 +11,11 @@ namespace Logic.Services.API
 {
     public static class SentenceApi
     {
+        public static List<Sentence>? SentencesReadByPageId(IdiomaticaContext context, int pageId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.SentencesByPageIdRead(pageId, context);
+        }
         public static async Task<List<Sentence>?> SentencesReadByPageIdAsync(IdiomaticaContext context, int pageId)
         {
             if (pageId < 1) ErrorHandler.LogAndThrow();
@@ -30,8 +35,8 @@ namespace Logic.Services.API
                 Text = text,
                 Ordinal = ordinal,
             };
-            var isSavedSentence = await DataCache.SentenceCreateAsync(newSentence, context);
-            if (!isSavedSentence || newSentence.Id is null || newSentence.Id < 1)
+            newSentence = await DataCache.SentenceCreateAsync(newSentence, context);
+            if (newSentence is null || newSentence.Id is null || newSentence.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2280);
                 return null;

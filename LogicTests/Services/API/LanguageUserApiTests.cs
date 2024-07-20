@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
 using LogicTests;
+using Model.DAL;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 
 namespace Logic.Services.API.Tests
 {
@@ -19,7 +21,7 @@ namespace Logic.Services.API.Tests
             // assemble
             var context = CommonFunctions.CreateContext();
             using var transaction = await context.Database.BeginTransactionAsync();
-            
+
 
             try
             {
@@ -80,17 +82,43 @@ namespace Logic.Services.API.Tests
             // assemble
             var context = CommonFunctions.CreateContext();
             using var transaction = await context.Database.BeginTransactionAsync();
-
-
+            int languageId = 2;
+            string expectedResult = "English";
 
 
             try
             {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUsersBefore = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
+                    context, (int)user.Id);
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, languageId, (int)user.Id);
+
                 // act
+                var languageUsersAfter = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
+                    context, (int)user.Id);
+
+                var matchingLanguageUser = languageUsersAfter
+                    .Where(x => x.LanguageId == languageId)
+                    .FirstOrDefault();
+
+                if (matchingLanguageUser is null || matchingLanguageUser.Language is null
+                    || matchingLanguageUser.Language.Name is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                string actualResult = matchingLanguageUser.Language.Name;
 
 
                 // assert
-                Assert.Fail();
+                Assert.AreEqual(expectedResult, actualResult);
             }
             finally
             {
@@ -106,17 +134,37 @@ namespace Logic.Services.API.Tests
             // assemble
             var context = CommonFunctions.CreateContext();
             using var transaction = await context.Database.BeginTransactionAsync();
-
-
+            int languageId = 1;
 
 
             try
             {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUsersBefore = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
+                    context, (int)user.Id);
+
+                int countBefore = languageUsersBefore.Count;
+                int expectedCountAfter = countBefore + 1;
+
                 // act
+
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, languageId, (int)user.Id);
+                var languageUsersAfter = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
+                    context, (int)user.Id);
+                int actualCountAfter = languageUsersAfter.Count;
 
 
                 // assert
-                Assert.Fail();
+                Assert.IsNotNull(languageUser);
+                Assert.IsNotNull(languageUser.Id);
+                Assert.IsTrue(languageUser.Id > 0);
+                Assert.AreEqual(expectedCountAfter, actualCountAfter);
             }
             finally
             {
@@ -124,6 +172,58 @@ namespace Logic.Services.API.Tests
 
                 await transaction.RollbackAsync();
             }
+        }
+
+        [TestMethod()]
+        public void LanguageUserCreateTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+            int languageId = 1;
+
+
+            try
+            {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUsersBefore = DataCache.LanguageUsersAndLanguageByUserIdRead(
+                    (int)user.Id, context);
+
+                int countBefore = languageUsersBefore.Count;
+                int expectedCountAfter = countBefore + 1;
+
+                // act
+
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
+                var languageUsersAfter = DataCache.LanguageUsersAndLanguageByUserIdRead(
+                    (int)user.Id, context);
+                int actualCountAfter = languageUsersAfter.Count;
+
+
+                // assert
+                Assert.IsNotNull(languageUser);
+                Assert.IsNotNull(languageUser.Id);
+                Assert.IsTrue(languageUser.Id > 0);
+                Assert.AreEqual(expectedCountAfter, actualCountAfter);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.RollbackAsync();
+            }
+        }
+
+        [TestMethod()]
+        public void LanguageUserGetTest()
+        {
+            Assert.Fail();
         }
     }
 }

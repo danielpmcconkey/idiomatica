@@ -11,6 +11,14 @@ namespace Logic.Services.API
 {
     public static class BookUserStatApi
     {
+        public static List<BookUserStat>? BookUserStatsRead(
+            IdiomaticaContext context, int bookId, int userId)
+        {
+            if (bookId < 1) ErrorHandler.LogAndThrow();
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.BookUserStatsByBookIdAndUserIdRead(
+                    (bookId, userId), context);
+        }
         public static async Task<List<BookUserStat>?> BookUserStatsReadAsync(
             IdiomaticaContext context, int bookId, int userId)
         {
@@ -19,9 +27,9 @@ namespace Logic.Services.API
             return await DataCache.BookUserStatsByBookIdAndUserIdReadAsync(
                     (bookId, userId), context);
         }
-        public static async Task BookUserStatsUpdateByBookUserIdAsync(IdiomaticaContext context, int bookUserId)
+        public static void BookUserStatsUpdateByBookUserId(IdiomaticaContext context, int bookUserId)
         {
-            var bookUser = await DataCache.BookUserByIdReadAsync(bookUserId, context);
+            var bookUser = DataCache.BookUserByIdRead(bookUserId, context);
 
             if (bookUser == null || bookUser.LanguageUserId == null || bookUser.LanguageUserId < 1
                 || bookUser.BookId == null || bookUser.BookId < 1)
@@ -29,14 +37,31 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var languageUser = await DataCache.LanguageUserByIdReadAsync((int)bookUser.LanguageUserId, context);
-            var allWordsInBook = await DataCache.WordsByBookIdReadAsync((int)bookUser.BookId, context);
+            var languageUser = DataCache.LanguageUserByIdRead((int)bookUser.LanguageUserId, context);
+            if (languageUser is null || languageUser.Id is null || languageUser.UserId is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            
+            // delete the booklistrows cache for this user
+            DataCache.BookListRowsByUserIdDelete((int)languageUser.Id, context);
+            // delete the actual stats from teh database and bookuserstats cache
+            DataCache.BookUserStatsByBookIdAndUserIdDelete(((int)bookUser.BookId, (int)languageUser.UserId), context);
+
+            var allWordsInBook = DataCache.WordsByBookIdRead((int)bookUser.BookId, context);
            
-            var allWordUsersInBook = await DataCache.WordUsersByBookIdAndLanguageUserIdReadAsync(
+            var allWordUsersInBook = DataCache.WordUsersByBookIdAndLanguageUserIdRead(
                 ((int)bookUser.BookId, (int)bookUser.LanguageUserId), context, true);
-            var pageUsers = await DataCache.PageUsersByBookUserIdReadAsync(bookUserId, context);
-            var pages = await DataCache.PagesByBookIdReadAsync(bookUserId, context);
-            var bookStats = await DataCache.BookStatsByBookIdReadAsync((int)bookUser.BookId, context);
+            var pageUsers = DataCache.PageUsersByBookUserIdRead(bookUserId, context);
+            var pages = DataCache.PagesByBookIdRead(bookUserId, context);
+            var bookStats = DataCache.BookStatsByBookIdRead((int)bookUser.BookId, context);
+            if (bookStats is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+
             var totalPagesStatline = bookStats.Where(x => x.Key == AvailableBookStat.TOTALPAGES).FirstOrDefault();
             var totalWordsStatline = bookStats.Where(x => x.Key == AvailableBookStat.TOTALWORDCOUNT).FirstOrDefault();
             var totalDistinctWordsStatline = bookStats.Where(x => x.Key == AvailableBookStat.DISTINCTWORDCOUNT).FirstOrDefault();
@@ -99,49 +124,49 @@ namespace Logic.Services.API
                 BookId = bookUser.BookId,
                 LanguageUserId = bookUser.LanguageUserId,
                 ValueString = isComplete.ToString(),
-            }); ;
+            });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.LASTPAGEREAD,
                 BookId = bookUser.BookId,
                 LanguageUserId = bookUser.LanguageUserId,
                 ValueNumeric = lastPageRead,
-            }); ;
+            });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.PROGRESS,
                 BookId = bookUser.BookId,
                 LanguageUserId = bookUser.LanguageUserId,
                 ValueString = progress,
-            }); ;
+            });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.PROGRESSPERCENT,
                 BookId = bookUser.BookId,
                 LanguageUserId = bookUser.LanguageUserId,
                 ValueNumeric = progressPercent,
-            }); ;
+            });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.DISTINCTKNOWNPERCENT,
                 BookId = bookUser.BookId,
                 LanguageUserId = bookUser.LanguageUserId,
                 ValueNumeric = distinctKnownPercent,
-            }); ;
+            });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.DISTINCTWORDCOUNT,
                 BookId = bookUser.BookId,
                 LanguageUserId = bookUser.LanguageUserId,
                 ValueNumeric = distinctWordCount,
-            }); ;
+            });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.TOTALWORDCOUNT,
                 BookId = bookUser.BookId,
                 LanguageUserId = bookUser.LanguageUserId,
                 ValueNumeric = totalWordCount,
-            }); ;
+            });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.TOTALKNOWNPERCENT,
@@ -149,18 +174,13 @@ namespace Logic.Services.API
                 LanguageUserId = bookUser.LanguageUserId,
                 ValueString = null,
                 ValueNumeric = null,
-            }); ;
+            });
 
-            // delete the booklistrows cache for this user
-            if (languageUser != null && languageUser.Id != null && languageUser.UserId != null)
-            {
-                DataCache.BookListRowsByUserIdDelete((int)languageUser.Id, context);
-                // delete the actual stats from teh database and bookuserstats cache
-                await DataCache.BookUserStatsByBookIdAndUserIdDelete(((int)bookUser.BookId, (int)languageUser.UserId), context);
-                // add the new stats
-                await DataCache.BookUserStatsByBookIdAndUserIdCreate(
-                    ((int)bookUser.BookId, (int)languageUser.UserId), stats, context);
-            }
+            
+            // add the new stats
+            DataCache.BookUserStatsByBookIdAndUserIdCreate(
+                ((int)bookUser.BookId, (int)languageUser.UserId), stats, context);
+            
 
         }
     }

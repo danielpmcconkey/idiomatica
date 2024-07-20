@@ -29,7 +29,8 @@ namespace Logic.Services.API.Tests
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var languageUser = LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
+            var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+            if (languageUser is null) ErrorHandler.LogAndThrow();
             int bookId = 6;
             int expectedStatsCount = 8;
             string expectedProgress = "0 / 13";
@@ -39,22 +40,19 @@ namespace Logic.Services.API.Tests
             {
                 // act
                 // create the base bookUser
-                var bookUser = await BookUserApi.BookUserCreateAsync(context, bookId, (int)user.Id);
+                var bookUser = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
+                    context, bookId, (int)user.Id);
                 if (bookUser is null || bookUser.Id is null || bookUser.LanguageUserId is null)
                 {
                     ErrorHandler.LogAndThrow();
                     return;
                 }
-                // create the wordUsers
-                await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, (int)user.Id);
-                // update bookUserStats
-                await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
                 // carry on with the test
                 var bookUserStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (int)user.Id);
                 int actualStatsCount = bookUserStats is null ? 0 : bookUserStats.Count;
                 BookUserStat? progressStat = bookUserStats is null ? null :
                     bookUserStats.Where(x => x.Key == AvailableBookUserStat.PROGRESS).FirstOrDefault();
-                if(progressStat is null || progressStat.LanguageUserId is null || progressStat.ValueString is null)
+                if (progressStat is null || progressStat.LanguageUserId is null || progressStat.ValueString is null)
                 {
                     ErrorHandler.LogAndThrow();
                     return;
@@ -82,7 +80,8 @@ namespace Logic.Services.API.Tests
             // assemble
             var context = CommonFunctions.CreateContext();
             using var transaction = await context.Database.BeginTransactionAsync();
-            
+            decimal expectedWordCount = 3046.0M;
+            decimal expectedDistinctKnowPercent = 0.18M;
 
             try
             {
@@ -93,38 +92,21 @@ namespace Logic.Services.API.Tests
                     ErrorHandler.LogAndThrow();
                     return;
                 }
-                var languageUser = LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                if (languageUser is null) ErrorHandler.LogAndThrow();
                 int bookId = 6;
-                decimal expectedWordCount = 3046.0M;
-                decimal expectedDistinctKnowPercent = 0.18M;
-                
-                
-                /*
-                 * 
-                 * 
-                 * you are here. the line below is failing citing that there 
-                 * already is an open reader that needs to be closed first
-                 * 
-                 * 
-                 * 
-                 * 
-                 * */
-                
-                
-                
+
+
                 var originalPacket = new BookListDataPacket(context, false);
 
                 // act
-                var bookUser = await BookUserApi.BookUserCreateAsync(context, bookId, (int)user.Id);
+                var bookUser = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
+                    context, bookId, (int)user.Id);
                 if (bookUser is null || bookUser.Id is null || bookUser.LanguageUserId is null)
                 {
                     ErrorHandler.LogAndThrow();
                     return;
                 }
-                // create the wordUsers
-                await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, (int)user.Id);
-                // update bookUserStats
-                await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
                 // carry on with the test
                 var bookUserStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (int)user.Id);
                 // checking total word count here because we already tested progress
@@ -141,17 +123,17 @@ namespace Logic.Services.API.Tests
                     ErrorHandler.LogAndThrow();
                     return;
                 }
-                var pageUser = await PageUserApi.PageUserCreateForPageIdAndUserId(
+                var pageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
                     context, (int)firstPage.Id, (int)user.Id);
                 if (pageUser is null || pageUser.Id is null || pageUser.Id < 1)
                 {
                     ErrorHandler.LogAndThrow();
                     return;
                 }
-                
+
 
                 // update all unknowns to well known
-                await PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)pageUser.Id);
+                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)pageUser.Id);
                 // mark the first page as read
                 await PageUserApi.PageUserMarkAsReadAsync(context, (int)pageUser.Id);
                 // now move forward to page 2
@@ -159,18 +141,18 @@ namespace Logic.Services.API.Tests
                     context, (int)bookUser.LanguageUserId, 2, bookId);
 
                 // now we need to regen the stats
-                await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
+                BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (int)bookUser.Id);
                 // finally, re-pull the stats
                 var newStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (int)user.Id);
                 BookUserStat? distinctKnownPercentStat = newStats is null ? null :
                     newStats.Where(x => x.Key == AvailableBookUserStat.DISTINCTKNOWNPERCENT).FirstOrDefault();
-                if(distinctKnownPercentStat is null || distinctKnownPercentStat.ValueNumeric is null)
+                if (distinctKnownPercentStat is null || distinctKnownPercentStat.ValueNumeric is null)
                 {
                     ErrorHandler.LogAndThrow();
                     return;
                 }
                 decimal actualDistinctKnown = Math.Round((decimal)distinctKnownPercentStat.ValueNumeric, 2);
-                
+
                 // assert
                 Assert.AreEqual(expectedWordCount, actualWordCount);
                 Assert.AreEqual(expectedDistinctKnowPercent, actualDistinctKnown);
@@ -181,6 +163,12 @@ namespace Logic.Services.API.Tests
 
                 await transaction.RollbackAsync();
             }
+        }
+
+        [TestMethod()]
+        public void BookUserStatsReadTest()
+        {
+            Assert.Fail();
         }
     }
 }

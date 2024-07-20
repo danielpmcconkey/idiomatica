@@ -35,6 +35,8 @@ namespace Model
         //public int WordCount { get; set; } // todo: get rid of Book.WordCount
         [StringLength(250)]
         public string? AudioFilename { get; set; }
-        		
+
+        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
+
     }
 }

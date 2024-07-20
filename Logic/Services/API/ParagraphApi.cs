@@ -11,6 +11,10 @@ namespace Logic.Services.API
 {
     public static class ParagraphApi
     {
+        public static List<Paragraph>? ParagraphsReadByPageId(IdiomaticaContext context, int pageId)
+        {
+            return DataCache.ParagraphsByPageIdRead(pageId, context);
+        }
         public static async Task<List<Paragraph>?> ParagraphsReadByPageIdAsync(IdiomaticaContext context, int pageId)
         {
             return await DataCache.ParagraphsByPageIdReadAsync(pageId, context);
@@ -61,13 +65,13 @@ namespace Logic.Services.API
             if (languageId < 1) ErrorHandler.LogAndThrow();
             if (ordinal < 0) ErrorHandler.LogAndThrow();
 
-            Paragraph paragraph = new Paragraph()
+            var paragraph = new Paragraph()
             {
                 Ordinal = ordinal,
                 PageId = pageId
             };
-            bool isSaved = await DataCache.ParagraphCreateAsync(paragraph, context);
-            if (!isSaved || paragraph.Id == null || paragraph.Id == 0)
+            paragraph = await DataCache.ParagraphCreateAsync(paragraph, context);
+            if (paragraph is null || paragraph.Id is null || paragraph.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2270);
                 return null;
@@ -165,14 +169,14 @@ namespace Logic.Services.API
             {
                 output = deeplResult;
                 // add to the DB
-                ParagraphTranslation ppt = new ParagraphTranslation()
+                var ppt = new ParagraphTranslation()
                 {
                     ParagraphId = paragraphId,
                     Code = toCode,
                     TranslationText = deeplResult
                 };
-                bool didSave = await DataCache.ParagraphTranslationCreateAsync(ppt, context);
-                if (!didSave || ppt.Id == null || ppt.Id < 1)
+                ppt = await DataCache.ParagraphTranslationCreateAsync(ppt, context);
+                if (ppt is null || ppt.Id is null || ppt.Id < 1)
                 {
                     ErrorHandler.LogAndThrow(2340);
                     return ("", "");

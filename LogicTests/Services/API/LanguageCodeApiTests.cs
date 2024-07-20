@@ -50,7 +50,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void LanguageCodeOptionsReadTest()
         {
-            
+
             var context = CommonFunctions.CreateContext();
             using var transaction = context.Database.BeginTransaction();
 
@@ -84,6 +84,12 @@ namespace Logic.Services.API.Tests
 
                 transaction.Rollback();
             }
+        }
+
+        [TestMethod()]
+        public void LanguageCodeReadByCodeTest()
+        {
+            Assert.Fail();
         }
     }
 }

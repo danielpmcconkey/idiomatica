@@ -197,16 +197,17 @@
             }
 
             // create the base bookUser
-            var bookUser = await BookUserApi.BookUserCreateAsync(context, bookId, (int)_loggedInUser.Id);
+            var bookUser = Task.Run(() =>
+            {
+                return BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
+                context, bookId, (int)_loggedInUser.Id);
+            }).Result;
             if (bookUser is null || bookUser.Id is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            // create the wordUsers
-            await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, (int)_loggedInUser.Id);
-            // update bookUserStats
-            await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
+           
             // finally commit the write
             await context.Database.CommitTransactionAsync();
         }

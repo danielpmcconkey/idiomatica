@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace Model.DAL
             SentenceById[key] = value;
             return value;
         }
-        public static async Task<List<Sentence>> SentencesByPageIdReadAsync(
+        public static List<Sentence> SentencesByPageIdRead(
             int key, IdiomaticaContext context)
         {
             // check cache
@@ -54,6 +55,14 @@ namespace Model.DAL
             SentencesByPageId[key] = value;
             return value;
         }
+        public static async Task<List<Sentence>> SentencesByPageIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            return await Task<List<Sentence>>.Run(() =>
+            {
+                return SentencesByPageIdRead(key, context);
+            });
+        }
         public static async Task<List<Sentence>> SentencesByParagraphIdReadAsync(int key, IdiomaticaContext context)
         {
             // check cache
@@ -75,17 +84,46 @@ namespace Model.DAL
         #endregion
 
         #region create
-        public static async Task<bool> SentenceCreateAsync(Sentence value, IdiomaticaContext context)
+
+
+        public static Sentence? SentenceCreate(Sentence sentence, IdiomaticaContext context)
         {
-            context.Sentences.Add(value);
-            context.SaveChanges();
-            if (value.Id == null || value.Id == 0)
+            if (sentence.ParagraphId is null) throw new ArgumentNullException(nameof(sentence.ParagraphId));
+            if (sentence.Ordinal is null) throw new ArgumentNullException(nameof(sentence.Ordinal));
+
+            Guid guid = Guid.NewGuid();
+            int numRows = context.Database.ExecuteSql($"""
+                        
+                INSERT INTO [Idioma].[Sentence]
+                      ([ParagraphId]
+                      ,[Ordinal]
+                      ,[Text]
+                      ,[UniqueKey])
+                VALUES
+                      ({sentence.ParagraphId}
+                      ,{sentence.Ordinal}
+                      ,{sentence.Text}
+                      ,{guid})
+        
+                """);
+            if (numRows < 1) throw new InvalidDataException("creating Sentence affected 0 rows");
+            var newEntity = context.Sentences.Where(x => x.UniqueKey == guid).FirstOrDefault();
+            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
             {
-                return false;
+                throw new InvalidDataException("newEntity is null in SentenceCreate");
             }
-            SentenceById[(int)value.Id] = value;
-            return true;
+
+
+            // add it to cache
+            SentenceById[(int)newEntity.Id] = newEntity;
+
+            return newEntity;
         }
+        public static async Task<Sentence?> SentenceCreateAsync(Sentence value, IdiomaticaContext context)
+        {
+            return await Task.Run(() => { return SentenceCreate(value, context); });
+        }
+
         #endregion
     }
 }

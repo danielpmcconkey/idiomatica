@@ -74,13 +74,13 @@ namespace LogicTests
                 Name = "Auto gen tester",
                 Code = "En-US"
             };
-            context.Users.Add(user);
-            context.SaveChanges();
-            if (user.Id is null)
+            user = DataCache.UserCreate(user, context);
+            if (user is null || user.Id is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
             }
+            context.Users.Add(user);
             
 
 #if DEBUG

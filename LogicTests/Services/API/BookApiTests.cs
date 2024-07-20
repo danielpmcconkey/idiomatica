@@ -128,5 +128,23 @@ namespace Logic.Services.API.Tests
                 await transaction.RollbackAsync();
             }
         }
+
+        [TestMethod()]
+        public void OrchestrateBookCreationAndSubProcessesTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void BookGetTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void BookGetPageCountTest()
+        {
+            Assert.Fail();
+        }
     }
 }

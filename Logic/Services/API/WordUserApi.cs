@@ -13,12 +13,19 @@ namespace Logic.Services.API
 {
     public static class WordUserApi
     {
-        public static async Task WordUsersCreateAllForBookIdAndUserIdAsync(
+        public static void WordUsersCreateAllForBookIdAndUserId(
             IdiomaticaContext context, int bookId, int userId)
         {
             if (bookId < 1) ErrorHandler.LogAndThrow();
             if (userId < 1) ErrorHandler.LogAndThrow();
-            await DataCache.WordUsersCreateAllForBookIdAndUserId((bookId, userId), context);
+            DataCache.WordUsersCreateAllForBookIdAndUserId((bookId, userId), context);
+        }
+        public static Dictionary<string, WordUser>? WordUsersDictByPageIdAndUserIdRead(
+            IdiomaticaContext context, int pageId, int userId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.WordUsersDictByPageIdAndUserIdRead((pageId, userId), context);
         }
         public static async Task<Dictionary<string, WordUser>?> WordUsersDictByPageIdAndUserIdReadAsync(
             IdiomaticaContext context, int pageId, int userId)
@@ -38,7 +45,7 @@ namespace Logic.Services.API
             if (wordId < 1) ErrorHandler.LogAndThrow();
             if (wordId < 1) ErrorHandler.LogAndThrow();
             
-            WordUser wu = new()
+            WordUser? wu = new()
             {
                 WordId = wordId,
                 LanguageUserId = languageUserId,
@@ -47,8 +54,8 @@ namespace Logic.Services.API
                 Created = DateTime.Now,
                 StatusChanged = DateTime.Now,
             };
-            bool isSaved = await DataCache.WordUserCreateAsync(wu, context);
-            if (!isSaved)
+            wu = await DataCache.WordUserCreateAsync(wu, context);
+            if (wu is null || wu.Id is null || wu.Id < 1)
             {
                 ErrorHandler.LogAndThrow();
             }

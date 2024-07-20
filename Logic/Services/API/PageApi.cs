@@ -11,17 +11,26 @@ namespace Logic.Services.API
 {
     public static class PageApi
     {
+        public static Page? PageReadById(IdiomaticaContext context, int pageId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.PageByIdRead(pageId, context);
+        }
         public static async Task<Page?> PageReadByIdAsync(IdiomaticaContext context, int pageId)
         {
             if (pageId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.PageByIdReadAsync(pageId, context);
+        }
+        public static Page? PageReadFirstByBookId(IdiomaticaContext context, int bookId)
+        {
+            if (bookId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.PageByOrdinalAndBookIdRead((1, bookId), context);
         }
         public static async Task<Page?> PageReadFirstByBookIdAsync(IdiomaticaContext context, int bookId)
         {
             if (bookId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.PageByOrdinalAndBookIdReadAsync((1, bookId), context);
         }
-
         public static async Task<Page?> CreatePageFromPageSplitAsync(
             IdiomaticaContext context, int ordinal, string text,
             int bookId, int languageId)
@@ -47,8 +56,8 @@ namespace Logic.Services.API
                 Ordinal = ordinal,
                 OriginalText = textTrimmed
             };
-            bool isSaved = await DataCache.PageCreateNewAsync(newPage, context);
-            if (!isSaved || newPage.Id == null || newPage.Id == 0)
+            newPage = await DataCache.PageCreateAsync(newPage, context);
+            if (newPage is null || newPage.Id is null || newPage.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2040);
                 return null;

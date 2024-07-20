@@ -113,14 +113,14 @@ namespace Logic.Services.API.Tests
 
 
                 // add the book to the DB so you can save pages using its ID
-                Book book = new Book()
+                Book? book = new Book()
                 {
                     Title = TestConstants.NewBookTitle,
                     SourceURI = TestConstants.NewBookUrl,
                     LanguageId = language.Id,
                 };
-                bool didSaveBook = await DataCache.BookCreateAsync(book, context);
-                if (!didSaveBook || book.Id == null || book.Id < 1)
+                book = await DataCache.BookCreateAsync(book, context);
+                if (book is null || book.Id is null || book.Id < 1)
                 {
                     ErrorHandler.LogAndThrow(2090);
                     return;
@@ -134,9 +134,9 @@ namespace Logic.Services.API.Tests
                 }
 
                 var pageSplit = pageSplits.FirstOrDefault();
-                
+
                 // create page objects
-                
+
                 string pageSplitTextTrimmed = pageSplit.pageText.Trim();
                 if (string.IsNullOrEmpty(pageSplitTextTrimmed))
                 {
@@ -193,14 +193,14 @@ namespace Logic.Services.API.Tests
 
 
                 // add the book to the DB so you can save pages using its ID
-                Book book = new Book()
+                Book? book = new Book()
                 {
                     Title = TestConstants.NewBookTitle,
                     SourceURI = TestConstants.NewBookUrl,
                     LanguageId = language.Id,
                 };
-                bool didSaveBook = await DataCache.BookCreateAsync(book, context);
-                if (!didSaveBook || book.Id == null || book.Id < 1)
+                book = await DataCache.BookCreateAsync(book, context);
+                if (book is null || book.Id is null || book.Id < 1)
                 {
                     ErrorHandler.LogAndThrow(2090);
                     return;
@@ -228,5 +228,16 @@ namespace Logic.Services.API.Tests
             }
         }
 
+        [TestMethod()]
+        public void PageReadByIdTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void PageReadFirstByBookIdTest()
+        {
+            Assert.Fail();
+        }
     }
 }

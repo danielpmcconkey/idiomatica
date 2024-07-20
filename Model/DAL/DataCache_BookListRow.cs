@@ -21,31 +21,7 @@ namespace Model.DAL
 
 
         #region read
-        //public static async Task<List<BookListRow>> BookListRowsByUserIdReadAsync(
-        //    int key, IdiomaticaContext context, bool shouldFetchFreshValue = false)
-        //{
-        //    // check cache
-        //    if (BookListRowsByUserId.ContainsKey(key) && !shouldFetchFreshValue)
-        //    {
-        //        return BookListRowsByUserId[key];
-        //    }
-        //    // read DB
-        //    var value = await BookListRowsPowerQueryAsync(
-        //        key,                                          // userId
-        //        0,                                            // numRecords
-        //        0,                                            // skip
-        //        true,                                         // shouldShowOnlyInShelf
-        //        null,                                         // tagsFilter
-        //        null,                                         // lcFilter
-        //        null,                                         // titleFilter
-        //        AvailableBookListSortProperties.TITLE,        // orderBy
-        //        true,                                         // sortAscending
-        //        context); 
-
-        //    // write to cache
-        //    BookListRowsByUserId[key] = value;
-        //    return value;
-        //}
+        
         public static async Task<(long count, List<BookListRow> results)> BookListRowsPowerQueryAsync(
             int userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
             LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,

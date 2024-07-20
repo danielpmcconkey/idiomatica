@@ -11,22 +11,26 @@ namespace Logic.Services.API
 {
     public static class WordApi
     {
+        public static Dictionary<string, Word>? WordsDictReadByPageId(IdiomaticaContext context, int pageId)
+        {
+            return DataCache.WordsDictByPageIdRead(pageId, context);
+        }
         public static async Task<Dictionary<string, Word>?> WordsDictReadByPageIdAsync(IdiomaticaContext context, int pageId)
         {
             return await DataCache.WordsDictByPageIdReadAsync(pageId, context);
         }
-        public static async Task<Word> CreateWordAsync(IdiomaticaContext context,
+        public static async Task<Word?> CreateWordAsync(IdiomaticaContext context,
             int languageId, string text, string romanization)
         {
-            Word newWord = new Word()
+            var newWord = new Word()
             {
                 LanguageId = languageId,
                 Romanization = romanization,
                 Text = text.ToLower(),
                 TextLowerCase = text.ToLower(),
             };
-            var isSaved = await DataCache.WordCreateAsync(newWord, context);
-            if (!isSaved || newWord.Id == null || newWord.Id == 0)
+            newWord = await DataCache.WordCreateAsync(newWord, context);
+            if (newWord is null || newWord.Id is null || newWord.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2350);
                 return newWord;
@@ -45,7 +49,7 @@ namespace Logic.Services.API
             }
 
             // check if any already exist. there shouldn't be any but whateves
-            await DataCache.TokenBySentenceIdDelete(sentenceId, context);
+            DataCache.TokenBySentenceIdDelete(sentenceId, context);
 
             var language = DataCache.LanguageByIdRead(languageId, context);
             if (language is null ||

@@ -13,6 +13,11 @@ namespace Logic.Services.API
 {
     public static class LanguageCodeApi
     {
+        public static LanguageCode? LanguageCodeReadByCode(IdiomaticaContext context, string code)
+        {
+            if (string.IsNullOrEmpty(code)) ErrorHandler.LogAndThrow();
+            return DataCache.LanguageCodeByCodeRead(code, context);
+        }
         public static async Task<LanguageCode?> LanguageCodeReadByCodeAsync(IdiomaticaContext context, string code)
         {
             if (string.IsNullOrEmpty(code)) ErrorHandler.LogAndThrow();
