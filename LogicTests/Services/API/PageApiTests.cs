@@ -11,6 +11,7 @@ using Model.DAL;
 using Model;
 using static System.Net.Mime.MediaTypeNames;
 using DeepL;
+using System.Net;
 
 namespace Logic.Services.API.Tests
 {
@@ -429,6 +430,272 @@ namespace Logic.Services.API.Tests
                 // clean-up
 
                 transaction.Rollback();
+            }
+        }
+
+        [TestMethod()]
+        public void OrchestrateResetReadDataForNewPageTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+            int bookId = 2;
+            int languageId = 1;
+            int wordCount = 134;
+            int wordUsersCount = 134;
+            int paragraphCount = 29;
+
+            try
+            {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
+                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // act
+                var readDataPacket = PageApi.OrchestrateReadDataInit(context, userService, bookId);
+                if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
+                    readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
+                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
+                    readDataPacket.LanguageUser.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                // now pretend to move the page forward and reset
+                int targetPageNum = 2;
+
+                PageUserApi.PageUserMarkAsRead(context, (int)readDataPacket.CurrentPageUser.Id);
+
+                // create the new page user
+                
+                // but first need to pull the page
+                readDataPacket.CurrentPage = PageApi.PageReadByOrdinalAndBookId(context, targetPageNum, bookId);
+                if (readDataPacket.CurrentPage is null || readDataPacket.CurrentPage.Id is null ||
+                    readDataPacket.CurrentPage.Id < 1 || readDataPacket.LoggedInUser is null ||
+                    readDataPacket.LoggedInUser.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                readDataPacket.CurrentPageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
+                    context, (int)readDataPacket.CurrentPage.Id, (int)readDataPacket.LoggedInUser.Id);
+                
+                if (readDataPacket.CurrentPageUser is null || readDataPacket.CurrentPageUser.PageId is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                //finally, we get to reset the data
+                var newReadDataPacket = PageApi.OrchestrateResetReadDataForNewPage(
+                    context, readDataPacket, (int)readDataPacket.CurrentPageUser.PageId);
+                if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
+                    newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
+                    newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
+                    newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+
+                // assert
+                Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
+                Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
+                Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
+                Assert.AreEqual(wordUsersCount, newReadDataPacket.AllWordUsersInPage.Count);
+                Assert.AreEqual(paragraphCount, newReadDataPacket.Paragraphs.Count);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
+            }
+        }
+
+        [TestMethod()]
+        public void OrchestrateReadDataInitTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+            int bookId = 2;
+            int languageId = 1;
+            int wordCount = 135;
+            int wordUsersCount = 135;
+            int paragraphCount = 13;
+            int bookUserStatsCount = 8;
+
+            try
+            {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
+                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // act
+                var readDataPacket = PageApi.OrchestrateReadDataInit(context, userService, bookId);
+                if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
+                    readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
+                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    readDataPacket.BookUserStats is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+
+                // assert
+                Assert.IsTrue(readDataPacket.BookCurrentPageNum == 1);
+                Assert.IsNotNull(readDataPacket.BookTotalPageCount == 12);
+                Assert.AreEqual(wordCount, readDataPacket.AllWordsInPage.Count);
+                Assert.AreEqual(wordUsersCount, readDataPacket.AllWordUsersInPage.Count);
+                Assert.AreEqual(paragraphCount, readDataPacket.Paragraphs.Count);
+                Assert.AreEqual(bookUserStatsCount, readDataPacket.BookUserStats.Count);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
+            }
+        }
+
+        [TestMethod()]
+        public void OrchestrateMovePageTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+            int bookId = 2;
+            int languageId = 1;
+            int wordCount = 134;
+            int wordUsersCount = 134;
+            int paragraphCount = 29;
+
+            try
+            {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
+                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // act
+                var readDataPacket = PageApi.OrchestrateReadDataInit(context, userService, bookId);
+                if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
+                    readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
+                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
+                    readDataPacket.LanguageUser.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                
+
+                //finally, we get to reset the data
+                var newReadDataPacket = PageApi.OrchestrateMovePage(context, readDataPacket, bookId, 2);
+                if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
+                    newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
+                    newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
+                    newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+
+                // assert
+                Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
+                Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
+                Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
+                Assert.AreEqual(wordUsersCount, newReadDataPacket.AllWordUsersInPage.Count);
+                Assert.AreEqual(paragraphCount, newReadDataPacket.Paragraphs.Count);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
+            }
+        }
+
+        [TestMethod()]
+        public void PageReadByOrdinalAndBookIdTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+            int bookId = 2;
+            int ordinal = 2;
+            string expectedResult = "y viejas. ¡Ven aquí!"; // the right-most 20 chars
+
+            try
+            {
+                var page = PageApi.PageReadByOrdinalAndBookId(context, ordinal, bookId);
+                if (page == null || string.IsNullOrEmpty(page.OriginalText))
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                string actualResults = page.OriginalText.Substring(page.OriginalText.Length - 20, 20);
+
+                // assert
+                Assert.AreEqual(expectedResult, actualResults);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
+            }
+        }
+
+        [TestMethod()]
+        public async Task PageReadByOrdinalAndBookIdAsyncTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            int bookId = 2;
+            int ordinal = 2;
+            string expectedResult = "y viejas. ¡Ven aquí!"; // the right-most 20 chars
+
+            try
+            {
+                var page = await PageApi.PageReadByOrdinalAndBookIdAsync(context, ordinal, bookId);
+                if (page == null || string.IsNullOrEmpty(page.OriginalText))
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                string actualResults = page.OriginalText.Substring(page.OriginalText.Length - 20, 20);
+
+                // assert
+                Assert.AreEqual(expectedResult, actualResults);
+            }
+            finally
+            {
+                // clean-up
+
+                await transaction.RollbackAsync();
             }
         }
     }
