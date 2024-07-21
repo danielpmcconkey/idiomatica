@@ -139,5 +139,13 @@ namespace Logic.Services.API
             }
             return pageSplits;
         }
+        public static async Task<List<(int pageNum, string pageText)>> CreatePageSplitsFromParagraphSplitsAsync(
+            string[] paragraphSplits)
+        {
+            return await Task<List<(int pageNum, string pageText)>>.Run(() =>
+            {
+                return CreatePageSplitsFromParagraphSplits(paragraphSplits);
+            });
+        }
     }
 }

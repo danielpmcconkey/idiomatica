@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Model.DAL
 {
@@ -32,6 +33,13 @@ namespace Model.DAL
             LanguageByCode[key] = value;
             LanguageById[(int)value.Id] = value;
             return value;
+        }
+        public static async Task<Language?> LanguageByCodeReadAsync(string key, IdiomaticaContext context)
+        {
+            return await Task<Language?>.Run(() =>
+            {
+                return LanguageByCodeRead(key, context);
+            });
         }
 
         public static Language? LanguageByIdRead(int key, IdiomaticaContext context)

@@ -138,6 +138,15 @@ namespace Logic.Services.API
             var paragraphSplitsRaw = parser.SegmentTextByParagraphs(textDenulled);
             return NullHandler.ThrowIfNullOrEmptyArray(paragraphSplitsRaw);
         }
+        public static async Task<string[]> SplitTextToPotentialParagraphsAsync(
+            IdiomaticaContext context, string text, string languageCode)
+        {
+            return await Task<string[]>.Run(() =>
+            {
+                return SplitTextToPotentialParagraphs(context, text, languageCode);
+            });
+
+        }
         public static async Task<string> ParagraphReadAllTextAsync(IdiomaticaContext context, int paragraphId)
         {
             if (paragraphId < 1) ErrorHandler.LogAndThrow();
