@@ -16,6 +16,38 @@ namespace Logic.Services.API.Tests
     public class LanguageCodeApiTests
     {
         [TestMethod()]
+        public void LanguageCodeReadByCodeTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            string code = "HU";
+            string expectedName = "Hungarian";
+
+
+            try
+            {
+                // act
+                var languageCode = LanguageCodeApi.LanguageCodeReadByCode(context, code);
+                if (languageCode == null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                // assert
+                Assert.AreEqual(expectedName, languageCode.LanguageName);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
+            }
+        }
+
+        [TestMethod()]
         public async Task LanguageCodeReadByCodeAsyncTest()
         {
             // assemble
@@ -87,9 +119,41 @@ namespace Logic.Services.API.Tests
         }
 
         [TestMethod()]
-        public void LanguageCodeReadByCodeTest()
+        public async Task LanguageCodeOptionsReadAsyncTest()
         {
-            Assert.Fail();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+
+            Expression<Func<LanguageCode, bool>> filter1 = (x => x.IsImplementedForLearning == true);
+            Expression<Func<LanguageCode, bool>> filter2 = (x => x.IsImplementedForUI == true);
+            Expression<Func<LanguageCode, bool>> filter3 = (x => x.IsImplementedForTranslation == true);
+
+
+            try
+            {
+                // act
+                var languageOptions1 = await LanguageCodeApi.LanguageCodeOptionsReadAsync(context, filter1);
+                var languageOptions2 = await LanguageCodeApi.LanguageCodeOptionsReadAsync(context, filter2);
+                var languageOptions3 = await LanguageCodeApi.LanguageCodeOptionsReadAsync(context, filter3);
+
+                var spanishFrom1 = languageOptions1["ES"];
+                var englishFrom2 = languageOptions2["EN-US"];
+                var englishFrom3 = languageOptions3["EN-US"];
+
+                // assert
+                Assert.IsNotNull(spanishFrom1);
+                Assert.IsNotNull(englishFrom2);
+                Assert.IsNotNull(englishFrom3);
+                Assert.AreEqual("Spanish", spanishFrom1.LanguageName);
+                Assert.AreEqual("English (American)", englishFrom2.LanguageName);
+                Assert.AreEqual("English (American)", englishFrom3.LanguageName);
+            }
+            finally
+            {
+                // clean-up
+
+                await transaction.RollbackAsync();
+            }
         }
     }
 }

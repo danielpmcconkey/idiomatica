@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
+using DeepL;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Logic.Services.API
 {
@@ -19,7 +21,7 @@ namespace Logic.Services.API
         {
             return await DataCache.ParagraphsByPageIdReadAsync(pageId, context);
         }
-        public static async Task<List<Paragraph>> CreateParagraphsFromPageAsync(
+        public static List<Paragraph> CreateParagraphsFromPage(
             IdiomaticaContext context, int pageId, int languageId)
         {
             if (pageId < 1) ErrorHandler.LogAndThrow();
@@ -46,7 +48,7 @@ namespace Logic.Services.API
             {
                 var paragraphSplitTrimmed = paragraphSplit.Trim();
                 if (string.IsNullOrEmpty(paragraphSplitTrimmed)) continue;
-                var paragraph = await CreateParagraphFromSplitAsync(context,
+                var paragraph = CreateParagraphFromSplit(context,
                     paragraphSplitTrimmed, pageId, paragraphOrdinal, languageId);
                 if (paragraph is not null && paragraph.Id is not null or 0)
                 {
@@ -56,7 +58,15 @@ namespace Logic.Services.API
             }
             return paragraphs;
         }
-        public static async Task<Paragraph?> CreateParagraphFromSplitAsync(
+        public static async Task<List<Paragraph>> CreateParagraphsFromPageAsync(
+            IdiomaticaContext context, int pageId, int languageId)
+        {
+            return await Task<List<Paragraph>>.Run(() =>
+            {
+                return CreateParagraphsFromPage(context, pageId, languageId);
+            });
+        }
+        public static Paragraph? CreateParagraphFromSplit(
             IdiomaticaContext context, string splitText, int pageId,
             int ordinal, int languageId)
         {
@@ -70,7 +80,7 @@ namespace Logic.Services.API
                 Ordinal = ordinal,
                 PageId = pageId
             };
-            paragraph = await DataCache.ParagraphCreateAsync(paragraph, context);
+            paragraph = DataCache.ParagraphCreate(paragraph, context);
             if (paragraph is null || paragraph.Id is null || paragraph.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2270);
@@ -86,7 +96,7 @@ namespace Logic.Services.API
                 if (string.IsNullOrEmpty(sentenceSplit)) continue;
                 var trimmedSentenceSplit = sentenceSplit.Trim();
                 if (string.IsNullOrEmpty(trimmedSentenceSplit)) continue;
-                var sentence = await SentenceApi.CreateSentenceAsync(
+                var sentence = SentenceApi.CreateSentence(
                     context, trimmedSentenceSplit, languageId, sentenceOrdinal, (int)paragraph.Id);
                 if (sentence != null)
                 {
@@ -94,6 +104,15 @@ namespace Logic.Services.API
                 }
             }
             return paragraph;
+        }
+        public static async Task<Paragraph?> CreateParagraphFromSplitAsync(
+            IdiomaticaContext context, string splitText, int pageId,
+            int ordinal, int languageId)
+        {
+            return await Task<Paragraph?>.Run(() =>
+            {
+                return CreateParagraphFromSplit(context, splitText, pageId, ordinal, languageId);
+            });
         }
         /// <summary>
         /// Used to take the string contents of the book creation page and 

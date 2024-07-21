@@ -95,5 +95,11 @@ namespace Logic.Services.API.Tests
         {
             Assert.Fail();
         }
+
+        [TestMethod()]
+        public void CreateSentenceTest()
+        {
+            Assert.Fail();
+        }
     }
 }

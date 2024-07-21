@@ -22,7 +22,7 @@ namespace Model.DAL
 
         #region read
         
-        public static async Task<(long count, List<BookListRow> results)> BookListRowsPowerQueryAsync(
+        public static (long count, List<BookListRow> results) BookListRowsPowerQuery(
             int userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
             LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
             bool sortAscending, IdiomaticaContext context)
@@ -275,6 +275,17 @@ namespace Model.DAL
                 }
             }
             return (0L, new List<BookListRow>());
+        }
+        public static async Task<(long count, List<BookListRow> results)> BookListRowsPowerQueryAsync(
+            int userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
+            LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
+            bool sortAscending, IdiomaticaContext context)
+        {
+            return await Task<(long count, List<BookListRow> results)>.Run(() =>
+            {
+                return BookListRowsPowerQuery(userId, numRecords, skip, shouldShowOnlyInShelf, tagsFilter,
+                    lcFilter, titleFilter, orderBy, sortAscending, context);
+            });
         }
         #endregion
 

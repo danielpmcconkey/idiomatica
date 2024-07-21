@@ -153,5 +153,11 @@ namespace Logic.Services.API.Tests
         {
             Assert.Fail();
         }
+
+        [TestMethod()]
+        public void CreateTokensFromSentenceTest()
+        {
+            Assert.Fail();
+        }
     }
 }

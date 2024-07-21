@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
+using DeepL;
 
 namespace Logic.Services.API
 {
@@ -21,7 +22,7 @@ namespace Logic.Services.API
             if (pageId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.SentencesByPageIdReadAsync(pageId, context);
         }
-        public static async Task<Sentence?> CreateSentenceAsync(
+        public static Sentence? CreateSentence(
             IdiomaticaContext context, string text, int languageId, int ordinal,
             int paragraphId)
         {
@@ -35,15 +36,24 @@ namespace Logic.Services.API
                 Text = text,
                 Ordinal = ordinal,
             };
-            newSentence = await DataCache.SentenceCreateAsync(newSentence, context);
+            newSentence = DataCache.SentenceCreate(newSentence, context);
             if (newSentence is null || newSentence.Id is null || newSentence.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2280);
                 return null;
             }
-            newSentence.Tokens = await TokenApi.CreateTokensFromSentenceAsync(context,
+            newSentence.Tokens = TokenApi.CreateTokensFromSentence(context,
                 (int)newSentence.Id, languageId);
             return newSentence;
+        }
+        public static async Task<Sentence?> CreateSentenceAsync(
+            IdiomaticaContext context, string text, int languageId, int ordinal,
+            int paragraphId)
+        {
+            return await Task<Sentence?>.Run(() =>
+            {
+                return CreateSentence(context, text, languageId, ordinal, paragraphId);
+            });
         }
         public static string[] SplitTextToPotentialSentences(
             IdiomaticaContext context, string text, int languageId)

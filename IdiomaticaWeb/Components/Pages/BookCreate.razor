@@ -3,7 +3,6 @@
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 @using Logic.Services.API
-@using Logic.Services.API;
 
 <h3>@UserService.GetUILabel("NewBook")</h3>
 <ErrorAlert ErrorState="errorState"></ErrorAlert>
@@ -191,7 +190,7 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            Book? book = await BookApi.OrchestrateBookCreationAndSubProcesses(
+            Book? book = BookApi.OrchestrateBookCreationAndSubProcesses(
                 context, (int)_loggedInUser.Id, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
             if (book is null || book.Id is null || book.Id < 1)
             {

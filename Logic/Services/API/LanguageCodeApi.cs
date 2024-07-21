@@ -8,6 +8,7 @@ using Logic.Telemetry;
 using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.DAL;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Logic.Services.API
 {
@@ -38,6 +39,15 @@ namespace Logic.Services.API
                 }
             }
             return returnDict;
+        }
+        public static async Task<Dictionary<string, LanguageCode>> LanguageCodeOptionsReadAsync(
+            IdiomaticaContext context, Expression<Func<LanguageCode, bool>> filter)
+        {
+            return await Task<Dictionary<string, LanguageCode>>.Run(() =>
+            {
+                return LanguageCodeOptionsRead(context, filter);
+            });
+
         }
     }
 }

@@ -65,6 +65,12 @@ namespace Logic.Services.API.Tests
         }
 
         [TestMethod()]
+        public void CreateParagraphsFromPageAsyncTest1()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
         public async Task CreateParagraphFromSplitAsyncTest()
         {
             // assemble
@@ -174,5 +180,10 @@ namespace Logic.Services.API.Tests
             Assert.Fail();
         }
 
+        [TestMethod()]
+        public void CreateParagraphFromSplitTest()
+        {
+            Assert.Fail();
+        }
     }
 }

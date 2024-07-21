@@ -12,13 +12,13 @@ namespace Logic.Services.API
 {
     public static class BookStatApi
     {
-        public static async Task BookStatsCreateAndSaveAsync(IdiomaticaContext context, int bookId)
+        public static void BookStatsCreateAndSave(IdiomaticaContext context, int bookId)
         {
             if (bookId < 1)
             {
                 ErrorHandler.LogAndThrow(1100);
             }
-            string q = $"""
+            int numRows = context.Database.ExecuteSql($"""
             with allPages as (
             	SELECT b.id as bookId, p.Id as pageId, p.Ordinal as pageOrdinal
             	FROM [Idiomatica].[Idioma].[Book] b
@@ -65,12 +65,15 @@ namespace Logic.Services.API
             insert into [Idioma].[BookStat](BookId, [Key], [Value])
             select * from bookStatQueries
             where BookId = {bookId}
-            """;
-            int numRows = await context.Database.ExecuteSqlRawAsync(q);
+            """);
             if (numRows < 1)
             {
                 ErrorHandler.LogAndThrow(2110);
             }
+        }
+        public static async Task BookStatsCreateAndSaveAsync(IdiomaticaContext context, int bookId)
+        {
+            await Task.Run(() => BookStatsCreateAndSave(context, bookId));
         }
     }
 }

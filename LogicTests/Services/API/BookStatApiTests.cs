@@ -47,5 +47,41 @@ namespace Logic.Services.API.Tests
                 await transaction.RollbackAsync();
             }
         }
+
+        [TestMethod()]
+        public void BookStatsCreateAndSaveTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+            int expectedPageCount = 3;
+
+            try
+            {
+                // act
+
+                var newBook = BookApi.BookCreateAndSave(
+                    context,
+                    TestConstants.NewBookTitle,
+                    TestConstants.NewBookLanguageCode,
+                    TestConstants.NewBookUrl,
+                    TestConstants.NewBookText
+                    );
+                int newId = (newBook is not null) ? (newBook.Id is not null) ? (int)newBook.Id : 0 : 0;
+
+                BookStatApi.BookStatsCreateAndSave(context, newId);
+
+                // assert
+                int actualPageCount = BookApi.BookGetPageCount(context, newId);
+                // assert
+                Assert.AreEqual(expectedPageCount, actualPageCount);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
+            }
+        }
     }
 }

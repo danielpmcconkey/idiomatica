@@ -19,7 +19,7 @@ namespace Logic.Services.API
         {
             return await DataCache.WordsDictByPageIdReadAsync(pageId, context);
         }
-        public static async Task<Word?> CreateWordAsync(IdiomaticaContext context,
+        public static Word? CreateWord(IdiomaticaContext context,
             int languageId, string text, string romanization)
         {
             var newWord = new Word()
@@ -29,23 +29,31 @@ namespace Logic.Services.API
                 Text = text.ToLower(),
                 TextLowerCase = text.ToLower(),
             };
-            newWord = await DataCache.WordCreateAsync(newWord, context);
+            newWord = DataCache.WordCreate(newWord, context);
             if (newWord is null || newWord.Id is null || newWord.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2350);
                 return newWord;
             }
             return newWord;
+        }        
+        public static async Task<Word?> CreateWordAsync(IdiomaticaContext context,
+            int languageId, string text, string romanization)
+        {
+            return await Task<Word?>.Run(() =>
+            {
+                return CreateWord(context, languageId, text, romanization);
+            });
         }
-        public static async Task<List<(Word word, int ordinal)>> CreateOrderedWordsFromSentenceIdAsync(
+        public static List<(Word? word, int ordinal)> CreateOrderedWordsFromSentenceId(
             IdiomaticaContext context, int languageId, int sentenceId)
         {
             if (sentenceId < 1) ErrorHandler.LogAndThrow();
-            var sentence = await DataCache.SentenceByIdReadAsync(sentenceId, context);
+            var sentence = DataCache.SentenceByIdRead(sentenceId, context);
             if (sentence == null || string.IsNullOrEmpty(sentence.Text))
             {
                 ErrorHandler.LogAndThrow();
-                return new List<(Word word, int ordinal)>();
+                return new List<(Word? word, int ordinal)>();
             }
 
             // check if any already exist. there shouldn't be any but whateves
@@ -57,13 +65,13 @@ namespace Logic.Services.API
                 string.IsNullOrEmpty(language.Code))
             {
                 ErrorHandler.LogAndThrow();
-                return new List<(Word word, int ordinal)>();
+                return new List<(Word? word, int ordinal)>();
             }
 
             var parser = LanguageParser.Factory.GetLanguageParser(language);
             var wordsSplits = parser.SegmentTextByWordsKeepingPunctuation(sentence.Text);
             if (wordsSplits is null || wordsSplits.Length == 0)
-                return new List<(Word word, int ordinal)>();
+                return new List<(Word? word, int ordinal)>();
             var orderedSplits = new List<(string split, int ordinal)>();
             for (int i = 0; i < wordsSplits.Length; i++)
             {
@@ -73,26 +81,42 @@ namespace Logic.Services.API
             List<(string word, int ordinal)> cleanWords = orderedSplits
                 .Select(x => (parser.StipNonWordCharacters(x.split), x.ordinal))
                 .ToList();
-            var wordTasks = cleanWords.Select(async x => {
+            List<(Word? word, int ordinal)> words = new();
+            foreach (var cleanWord in cleanWords)
+            {
                 Word? existingWord = DataCache.WordByLanguageIdAndTextLowerRead(
-                    ((int)languageId, x.word), context);
-                if (existingWord is not null) return ((Word)existingWord, x.ordinal);
+                    ((int)languageId, cleanWord.word), context);
+                if (existingWord is not null)
+                {
+                    words.Add(((Word?)existingWord, cleanWord.ordinal));
+                    continue;
+                }
                 // word doesn't exist; create it
-                Word? newWord = await WordApi.CreateWordAsync(
-                    context, languageId, x.word, x.word);
-                return (newWord, x.ordinal);
-            });
-            Task.WaitAll(wordTasks.ToArray());
-            List<(Word word, int ordinal)> words = wordTasks.Select(x => x.Result).ToList();
+                Word? newWord = WordApi.CreateWord(
+                    context, languageId, cleanWord.word, cleanWord.word);
+                words.Add((newWord, cleanWord.ordinal));
+            }
 
             return words;
         }
-        public static async Task<List<(string language, int wordCount)>> WordsGetListOfReadCount(
+        public static async Task<List<(Word? word, int ordinal)>> CreateOrderedWordsFromSentenceIdAsync(
+            IdiomaticaContext context, int languageId, int sentenceId)
+        {
+            return await Task<List<(Word word, int ordinal)>>.Run(() =>
+            {
+                return CreateOrderedWordsFromSentenceId(context, languageId, sentenceId);
+            });
+        }
+        public static List<(string language, int wordCount)> WordsGetListOfReadCount(
             IdiomaticaContext context, int userId)
         {
             if (userId < 1) ErrorHandler.LogAndThrow();
             List<(string language, int wordCount)> returnList = new List<(string language, int wordCount)>();
-            var languageUsers = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(context, userId);
+            var languageUsers = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(context, userId);
+            if (languageUsers is null)
+            {
+                return new();
+            }
             foreach (var languageUser in languageUsers)
             {
                 if (languageUser.Language == null || languageUser.Language.Name == null) continue;
@@ -109,6 +133,14 @@ namespace Logic.Services.API
                 returnList.Add((languageUser.Language.Name, count));
             }
             return returnList;
+        }
+        public static async Task<List<(string language, int wordCount)>> WordsGetListOfReadCountAsync(
+           IdiomaticaContext context, int userId)
+        {
+            return await Task<List<(string language, int wordCount)>>.Run(() =>
+            {
+                return WordsGetListOfReadCount(context, userId);
+            });
         }
     }
 }

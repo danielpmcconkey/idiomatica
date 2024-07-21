@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DeepL;
 using Logic.Telemetry;
 using Model;
 using Model.DAL;
@@ -31,7 +32,7 @@ namespace Logic.Services.API
             if (bookId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.PageByOrdinalAndBookIdReadAsync((1, bookId), context);
         }
-        public static async Task<Page?> CreatePageFromPageSplitAsync(
+        public static Page? CreatePageFromPageSplit(
             IdiomaticaContext context, int ordinal, string text,
             int bookId, int languageId)
         {
@@ -56,16 +57,25 @@ namespace Logic.Services.API
                 Ordinal = ordinal,
                 OriginalText = textTrimmed
             };
-            newPage = await DataCache.PageCreateAsync(newPage, context);
+            newPage = DataCache.PageCreate(newPage, context);
             if (newPage is null || newPage.Id is null || newPage.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2040);
                 return null;
             }
             // create paragraphs
-            newPage.Paragraphs = await ParagraphApi.CreateParagraphsFromPageAsync(
+            newPage.Paragraphs = ParagraphApi.CreateParagraphsFromPage(
                 context, (int)newPage.Id, languageId);
             return newPage;
+        }
+        public static async Task<Page?> CreatePageFromPageSplitAsync(
+            IdiomaticaContext context, int ordinal, string text,
+            int bookId, int languageId)
+        {
+            return await Task<Page?>.Run(() =>
+            {
+                return CreatePageFromPageSplit(context, ordinal, text, bookId, languageId);
+            });
         }
         /// <summary>
         ///  Used to take a string array (paragraph splits) made from the 

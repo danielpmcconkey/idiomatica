@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Model;
 using Logic.Telemetry;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using DeepL;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Logic.Services.API
 {
@@ -40,11 +42,11 @@ namespace Logic.Services.API
             }
             return token;
         }
-        public static async Task<List<Token>> CreateTokensFromSentenceAsync(IdiomaticaContext context,
+        public static List<Token> CreateTokensFromSentence(IdiomaticaContext context,
             int sentenceId, int languageId)
         {
             if (sentenceId < 1) ErrorHandler.LogAndThrow();
-            var sentence = await DataCache.SentenceByIdReadAsync(sentenceId, context);
+            var sentence = DataCache.SentenceByIdRead(sentenceId, context);
             if (sentence == null || string.IsNullOrEmpty(sentence.Text))
             {
                 ErrorHandler.LogAndThrow();
@@ -64,15 +66,16 @@ namespace Logic.Services.API
             }
 
             // create the words first
-            List<(Word word, int ordinal)> words = await WordApi.CreateOrderedWordsFromSentenceIdAsync(
+            List<(Word? word, int ordinal)> words = WordApi.CreateOrderedWordsFromSentenceId(
                 context, languageId, sentenceId);
 
             if (words.Count < 1) return new List<Token>();
 
             // now make the tokens
-            var tokenTasks = words.Select(x => {
-                if (x.word is null || x.word.Id is null or 0 || x.word.Text is null)
-                    return null;
+            List<Token> tokens = [];
+            foreach (var x in words)
+            {
+                if (x.word is null || x.word.Id is null || x.word.Id < 1 || x.word.Text is null) continue;
                 Token? newToken = CreateToken(
                     context,
                     $"{x.word.Text} ", // display; add the space that you previously took out
@@ -80,10 +83,22 @@ namespace Logic.Services.API
                     x.ordinal,
                     (int)x.word.Id
                     );
-                return newToken;
+                if(newToken is null || newToken.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return [];
+                }
+                tokens.Add(newToken);
+            }
+            return tokens;
+        }
+        public static async Task<List<Token>> CreateTokensFromSentenceAsync(IdiomaticaContext context,
+            int sentenceId, int languageId)
+        {
+            return await Task<List<Token>>.Run(() =>
+            {
+                return CreateTokensFromSentence(context, sentenceId, languageId);
             });
-            var tokens = await DataCache.TokensBySentenceIdReadAsync(sentenceId, context);
-            return tokens ?? new List<Token>();
         }
         /// <summary>
         /// Returns the list of tokens plus child word

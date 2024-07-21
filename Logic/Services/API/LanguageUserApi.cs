@@ -66,7 +66,13 @@ namespace Logic.Services.API
             if (userId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync((languageId, userId), context);
         }
-        public static async Task<List<LanguageUser>> LanguageUsersAndLanguageGetByUserIdAsync(
+        public static List<LanguageUser>? LanguageUsersAndLanguageGetByUserId(
+            IdiomaticaContext context, int userId)
+        {
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.LanguageUsersAndLanguageByUserIdRead((int)userId, context);
+        }
+        public static async Task<List<LanguageUser>?> LanguageUsersAndLanguageGetByUserIdAsync(
             IdiomaticaContext context, int userId)
         {
             if (userId < 1) ErrorHandler.LogAndThrow();

@@ -239,5 +239,11 @@ namespace Logic.Services.API.Tests
         {
             Assert.Fail();
         }
+
+        [TestMethod()]
+        public void CreatePageFromPageSplitTest()
+        {
+            Assert.Fail();
+        }
     }
 }

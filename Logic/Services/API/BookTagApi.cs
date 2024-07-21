@@ -56,7 +56,7 @@ namespace Logic.Services.API
 
             DataCache.BookTagDelete((bookId, userId, trimmedTag), context);
         }
-        public static async Task BookTagRemoveAsyn(IdiomaticaContext context, int bookId, int userId, string tag)
+        public static async Task BookTagRemoveAsync(IdiomaticaContext context, int bookId, int userId, string tag)
         {
             await Task.Run(() => BookTagRemove(context, bookId, userId, tag));
         }

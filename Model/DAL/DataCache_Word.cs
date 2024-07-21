@@ -249,11 +249,11 @@ namespace Model.DAL
                            ,[TokenCount]
                            ,[UniqueKey])
                      VALUES
-                           (<LanguageId, int,>
-                           ,<Text, nvarchar(250),>
-                           ,<TextLowerCase, nvarchar(250),>
-                           ,<Romanization, nvarchar(250),>
-                           ,<TokenCount, int,>
+                           ({word.LanguageId}
+                           ,{word.Text}
+                           ,{word.TextLowerCase}
+                           ,{word.Romanization}
+                           ,{word.TokenCount}
                            ,{guid})
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Word affected 0 rows");

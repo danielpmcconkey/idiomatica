@@ -75,7 +75,7 @@ Interactive location: Global
         var loggedInUser = UserService.GetLoggedInUser(context);
         if (loggedInUser is null || loggedInUser.Id is null || loggedInUser.Id < 1) return;
         _wordCountCardTitle = UserService.GetUILabel("homeWordCountsHeader");
-        _wordsReadCountList = await WordApi.WordsGetListOfReadCount(
+        _wordsReadCountList = WordApi.WordsGetListOfReadCount(
             context, (int)loggedInUser.Id);
 
         _bookshelfButtonText = UserService.GetUILabel("homeBookshelfButtonText");
