@@ -511,7 +511,16 @@ namespace Logic.Services.API.Tests
             }
         }
 
-        
-        
+        [TestMethod()]
+        public void WordGetByIdTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void WordGetByIdAsyncTest()
+        {
+            Assert.Fail();
+        }
     }
 }

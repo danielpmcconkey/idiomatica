@@ -289,7 +289,7 @@ namespace Model.DAL
             // add all the worduser objects that might not exist
             context.Database.ExecuteSql($"""
                 insert into [Idioma].[WordUser] 
-                ([WordId],[LanguageUserId],[Translation],[Status],[Created],[StatusChanged])
+                ([WordId],[LanguageUserId],[Translation],[Status],[Created],[StatusChanged],[UniqueKey])
                 select 
                 	 w.Id as wordId
                 	, lu.Id as languageUserId
@@ -297,6 +297,7 @@ namespace Model.DAL
                 	, {(int)AvailableWordUserStatus.UNKNOWN} as unknownStatus
                 	, CURRENT_TIMESTAMP as created
                 	, CURRENT_TIMESTAMP as statusChanged
+                    , NEWID() as uniqueKey
                 from [Idioma].[Page] p
                 left join [Idioma].[Book] b on p.BookId = b.Id
                 left join [Idioma].[Language] l on b.LanguageId = l.Id
@@ -309,6 +310,7 @@ namespace Model.DAL
                 where p.Id = {key.pageId}
                 and lu.UserId = {key.userId}
                 and wu.Id is null
+                and w.Id is not null
                 group by 
                 	  w.Id
                 	, lu.Id
@@ -504,13 +506,18 @@ namespace Model.DAL
             }
             return newList;
         }
+        /// <summary>
+        /// iterate through every entry in dict and, where the WordUser in the 
+        /// dict shares an ID with the updatedWordUser, then replace the dict 
+        /// entry with the updatedWordUser
+        /// </summary>
         private static Dictionary<string, WordUser> WordUsersDictGetUpdated(
-            Dictionary<string, WordUser> dict, WordUser value)
+            Dictionary<string, WordUser> dict, WordUser updatedWordUser)
         {
             Dictionary<string, WordUser> newDict = new Dictionary<string, WordUser>();
-            foreach (var kvpStringWordUser in newDict)
+            foreach (var kvpStringWordUser in dict)
             {
-                if (kvpStringWordUser.Value.Id == value.Id) newDict[kvpStringWordUser.Key] = value;
+                if (kvpStringWordUser.Value.Id == updatedWordUser.Id) newDict[kvpStringWordUser.Key] = updatedWordUser;
                 else newDict[kvpStringWordUser.Key] = kvpStringWordUser.Value;
             }
             return newDict;

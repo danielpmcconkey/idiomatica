@@ -68,7 +68,7 @@
     [Parameter]
     public Read? Parent { get; set; }
     [Parameter]
-    public LanguageUser? LanguageUser { get; set; }
+    public ReadDataPacket ReadDataPacket { get; set; } = new();
 
     private Modal modal = default!;
     private Token? _token = null;
@@ -90,34 +90,34 @@
 
             if (thisToken == null || thisToken.Id == null || thisToken.Id < 1)
             {
-                ErrorHandler.LogAndThrow(1390);
+                ErrorHandler.LogAndThrow();
                 return;
             }
-            if (LanguageUser is null || LanguageUser.Id is null || LanguageUser.Id < 1)
+            if (thisToken.WordId == null || thisToken.WordId < 1)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var tokenAndChildren = await TokenApi.TokenGetChildObjectsAsync(
-                context, (int)thisToken.Id, (int)LanguageUser.Id);
-            if (tokenAndChildren.t is null)
+            _word = WordApi.WordGetById(context, (int)thisToken.WordId);
+            if (_word == null || _word.Id is null || _word.Id < 1 || _word.TextLowerCase is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (tokenAndChildren.wu is null)
+            if (ReadDataPacket == null || ReadDataPacket.AllWordUsersInPage is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            _token = tokenAndChildren.t;
-            _wordUser = tokenAndChildren.wu;
-            _word = _token.Word;
-            if (_token.Word == null || _token.Word.Id == null || _token.Word.Id < 1)
+            if (!ReadDataPacket.AllWordUsersInPage.ContainsKey(_word.TextLowerCase))
             {
-                ErrorHandler.LogAndThrow(2420);
+                ErrorHandler.LogAndThrow();
                 return;
             }
+            _wordUser = ReadDataPacket.AllWordUsersInPage[_word.TextLowerCase];
+            _token = thisToken;
+            _token.Word = _word;
+            
             if (_wordUser == null || _wordUser.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2430);

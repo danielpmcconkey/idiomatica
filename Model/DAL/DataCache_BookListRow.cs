@@ -16,12 +16,38 @@ namespace Model.DAL
     {
 
         private static ConcurrentDictionary<int, List<BookListRow>> BookListRowsByUserId = new ConcurrentDictionary<int, List<BookListRow>>();
-
+        private static ConcurrentDictionary<(int bookId, int userId), BookListRow?> BookListRowByBookIdAndUserId = new ();
 
 
 
         #region read
-        
+        public static BookListRow? BookListRowByBookIdAndUserIdRead(
+            (int bookId, int userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+        {
+            // check cache
+            if (BookListRowByBookIdAndUserId.ContainsKey(key) && !shouldOverrideCache)
+            {
+                return BookListRowByBookIdAndUserId[key];
+            }
+
+            // read DB
+            var value = context.BookListRows.Where(x => x.BookId == key.bookId && x.UserId == key.userId)
+                .FirstOrDefault();
+            if (value == null) return null;
+            // write to cache
+            BookListRowByBookIdAndUserId[key] = value;
+            return value;
+        }
+        public static async Task<BookListRow?> BookListRowByBookIdAndUserIdReadAsync(
+            (int bookId, int userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+        {
+            return await Task<BookListRow?>.Run(() =>
+            {
+                return BookListRowByBookIdAndUserIdRead(key, context);
+            });
+        }
+
+
         public static (long count, List<BookListRow> results) BookListRowsPowerQuery(
             int userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
             LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,

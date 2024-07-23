@@ -142,10 +142,10 @@ namespace Model.DAL
         }
         
         public static List<PageUser> PageUsersByBookUserIdRead(
-            int key, IdiomaticaContext context)
+            int key, IdiomaticaContext context, bool shouldOverrideCache = false)
         {
             // check cache
-            if (PageUsersByBookUserId.ContainsKey(key))
+            if (PageUsersByBookUserId.ContainsKey(key) && !shouldOverrideCache)
             {
                 return PageUsersByBookUserId[key];
             }
@@ -165,11 +165,11 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<PageUser>> PageUsersByBookUserIdReadAsync(
-            int key, IdiomaticaContext context)
+            int key, IdiomaticaContext context, bool shouldOverrideCache = false)
         {
             return await Task<List<PageUser>>.Run(() =>
             {
-                return PageUsersByBookUserIdRead(key, context);
+                return PageUsersByBookUserIdRead(key, context, shouldOverrideCache);
             });
         }
 

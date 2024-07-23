@@ -88,7 +88,9 @@
             <h3>@ReadDataPacket.BookTitle</h3>
 
 
-            <ModalWord @ref="_wModal" Parent="this" LanguageUser="ReadDataPacket.LanguageUser" />
+            <ModalWord @ref="_wModal"
+                       Parent="this"
+                       ReadDataPacket="ReadDataPacket" />
 
             <ModalParagraph @ref="_ppModal" LanguageFromCode="ReadDataPacket.LanguageFromCode" LanguageToCode="ReadDataPacket.LanguageToCode" />
 
@@ -103,17 +105,18 @@
                             BookCurrentPageNum="ReadDataPacket.BookCurrentPageNum"
                             BookTotalPageCount="ReadDataPacket.BookTotalPageCount" />
 
-
-                @foreach (var paragraph in ReadDataPacket.Paragraphs)
+                @if(ReadDataPacket is not null && ReadDataPacket.Paragraphs is not null)
                 {
-                    <hr />
-                    <ParagraphView 
-                        ParagraphAndChildren="paragraph"
-                        OnShowWordModal="OnShowWordModal"
-                        OnShowPpModal="OnShowPpModal"
-                                   AllWordUsersInPage="ReadDataPacket.AllWordUsersInPage" />
-                }
-                
+                    @foreach (var paragraph in ReadDataPacket.Paragraphs)
+                    {
+                        <hr />
+                        <ParagraphView 
+                            ParagraphAndChildren="paragraph"
+                            OnShowWordModal="OnShowWordModal"
+                            OnShowPpModal="OnShowPpModal"
+                            ReadDataPacket="ReadDataPacket" />
+                    }
+                }              
                 <hr />
                 <PageTurner OnMovePageAsync="OnMovePageAsync"
                             OnClearPageAsync="OnClearPageAsync"
@@ -276,27 +279,16 @@
             // on the new page.
             var t_delay = Task.Delay(1000); 
             var context = await DbContextFactory.CreateDbContextAsync();
-            if(ReadDataPacket.CurrentPageUser is null || ReadDataPacket.CurrentPageUser.Id is null || ReadDataPacket.CurrentPageUser.Id < 1)
+            var newReadDataPacket = await Task.Run(() =>
+            {
+                return PageApi.OrchestrateClearPageAndMove(context, ReadDataPacket, targetPageNum);
+            });
+            if (newReadDataPacket is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            // update all unknowns to well known
-            PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)ReadDataPacket.CurrentPageUser.Id);
-            // now move forward, if there's another page
-            if (targetPageNum <= ReadDataPacket.BookTotalPageCount) // remember pages are 1-indexed
-            {
-                await Task.Run(() => PageMove(context, targetPageNum));
-            }
-            else
-            {
-                // mark the previous page as read because you didn't do it in the PageMove function
-                await PageUserApi.PageUserMarkAsReadAsync(context, (int)ReadDataPacket.CurrentPageUser.Id);
-                // refresh the word user cache
-                await Task.Run(() => PageApi.OrchestrateResetReadDataForNewPage(
-                    context, ReadDataPacket, (int)ReadDataPacket.CurrentPageUser.Id));
-            }
-
+            ReadDataPacket = newReadDataPacket;
             await t_delay;
             _isLoading = false;
         }

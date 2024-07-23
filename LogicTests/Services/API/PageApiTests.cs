@@ -26,10 +26,6 @@ namespace Logic.Services.API.Tests
             using var transaction = await context.Database.BeginTransactionAsync();
             string expectedResult = "alió un hermosa flor";
 
-
-
-
-
             try
             {
                 // act
@@ -310,8 +306,6 @@ namespace Logic.Services.API.Tests
             int pageId = 3;
             string expectedResult = "varos al aeropuerto."; // the right-most 20 chars
 
-
-
             try
             {
                 // act
@@ -341,8 +335,6 @@ namespace Logic.Services.API.Tests
             using var transaction = await context.Database.BeginTransactionAsync();
             int pageId = 3;
             string expectedResult = "varos al aeropuerto."; // the right-most 20 chars
-
-
 
             try
             {
@@ -375,8 +367,6 @@ namespace Logic.Services.API.Tests
             int bookId = 2;
             string expectedResult = "pezaron la caminata."; // the right-most 20 chars
 
-
-
             try
             {
                 // act
@@ -408,8 +398,6 @@ namespace Logic.Services.API.Tests
             using var transaction = context.Database.BeginTransaction();
             int bookId = 2;
             string expectedResult = "pezaron la caminata."; // the right-most 20 chars
-
-
 
             try
             {
@@ -474,7 +462,7 @@ namespace Logic.Services.API.Tests
                 PageUserApi.PageUserMarkAsRead(context, (int)readDataPacket.CurrentPageUser.Id);
 
                 // create the new page user
-                
+
                 // but first need to pull the page
                 readDataPacket.CurrentPage = PageApi.PageReadByOrdinalAndBookId(context, targetPageNum, bookId);
                 if (readDataPacket.CurrentPage is null || readDataPacket.CurrentPage.Id is null ||
@@ -486,7 +474,7 @@ namespace Logic.Services.API.Tests
                 }
                 readDataPacket.CurrentPageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
                     context, (int)readDataPacket.CurrentPage.Id, (int)readDataPacket.LoggedInUser.Id);
-                
+
                 if (readDataPacket.CurrentPageUser is null || readDataPacket.CurrentPageUser.PageId is null)
                 {
                     ErrorHandler.LogAndThrow();
@@ -608,7 +596,7 @@ namespace Logic.Services.API.Tests
                     return;
                 }
 
-                
+
 
                 //finally, we get to reset the data
                 var newReadDataPacket = PageApi.OrchestrateMovePage(context, readDataPacket, bookId, 2);
@@ -696,6 +684,111 @@ namespace Logic.Services.API.Tests
                 // clean-up
 
                 await transaction.RollbackAsync();
+            }
+        }
+
+        [TestMethod()]
+        public void OrchestrateClearPageAndMoveTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+            int bookId = 2;
+            int languageId = 1;
+            int wordCount = 134;
+            int wordUsersCount = 134;
+            int paragraphCount = 29;
+            string wordToLookUp = "conocido";
+            AvailableWordUserStatus statusBeforeExpected = AvailableWordUserStatus.UNKNOWN;
+            AvailableWordUserStatus statusAfterExpected = AvailableWordUserStatus.WELLKNOWN;
+
+            try
+            {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
+                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // act
+                var readDataPacket = PageApi.OrchestrateReadDataInit(context, userService, bookId);
+                if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
+                    readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
+                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
+                    readDataPacket.LanguageUser.Id is null || readDataPacket.CurrentPageUser.PageId is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                // check the word and its status
+                WordUser? foundUserBefore = null;
+                if (!readDataPacket.AllWordUsersInPage.TryGetValue(wordToLookUp, out foundUserBefore))
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                if (foundUserBefore is null || foundUserBefore.Status is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var statusBeforeActual = foundUserBefore.Status;
+
+                // pull the current page ID before moving so you can later look up its wordUsers
+
+                int origPageId = (int)readDataPacket.CurrentPageUser.PageId;
+
+                // clear the unknown words and move to the new page
+                var newReadDataPacket = PageApi.OrchestrateClearPageAndMove(context, readDataPacket, 2);
+                if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
+                    newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
+                    newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
+                    newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                // pull the previous page's wordUser list
+                var priorPageWordDict = WordUserApi.WordUsersDictByPageIdAndUserIdRead(context, origPageId, (int)user.Id);
+                if(priorPageWordDict is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                WordUser? foundUserAfter = null;
+                if(!priorPageWordDict.TryGetValue(wordToLookUp, out foundUserAfter))
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                if (foundUserAfter is null || foundUserAfter.Status is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var statusAfterActual = foundUserAfter.Status;
+
+
+                // assert
+                Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
+                Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
+                Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
+                Assert.AreEqual(wordUsersCount, newReadDataPacket.AllWordUsersInPage.Count);
+                Assert.AreEqual(paragraphCount, newReadDataPacket.Paragraphs.Count);
+                Assert.AreEqual(statusBeforeExpected, statusBeforeActual);
+                Assert.AreEqual(statusAfterExpected, statusAfterActual);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
             }
         }
     }

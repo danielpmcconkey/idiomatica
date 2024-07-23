@@ -426,5 +426,16 @@ namespace Logic.Services.API.Tests
             }
         }
 
+        [TestMethod()]
+        public void BookListRowByBookIdAndUserIdReadTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void BookListRowByBookIdAndUserIdReadAsyncTest()
+        {
+            Assert.Fail();
+        }
     }
 }

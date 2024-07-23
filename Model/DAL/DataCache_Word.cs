@@ -20,7 +20,7 @@ namespace Model.DAL
         private static ConcurrentDictionary<int, List<Word>> WordsAndTokensAndSentencesAndParagraphsByWordId = new ConcurrentDictionary<int, List<Word>>();
 
         #region read
-        public static async Task<Word?> WordByIdReadAsync(int key, IdiomaticaContext context)
+        public static  Word? WordByIdRead(int key, IdiomaticaContext context)
         {
             // check cache
             if (WordById.ContainsKey(key))
@@ -35,6 +35,13 @@ namespace Model.DAL
             // write to cache
             WordById[key] = value;
             return value;
+        }
+        public static async Task<Word?> WordByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<Word?>.Run(() =>
+            {
+                return WordByIdRead(key, context);
+            });
         }
         public static Word? WordByLanguageIdAndTextLowerRead((int languageId, string textLower) key, IdiomaticaContext context)
         {

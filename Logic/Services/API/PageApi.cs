@@ -37,10 +37,15 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow();
                 return null;
             }
+            if (readDataPacket.CurrentPage is null || readDataPacket.CurrentPage.Id is null || readDataPacket.CurrentPage.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return null;
+            }
 
-            // mark the previous page as read before moving on
-
-            PageUserApi.PageUserMarkAsRead(context, (int)readDataPacket.CurrentPageUser.Id);
+            // mark the previous page as read if moving forward
+            if (targetPageNum > readDataPacket.CurrentPage.Ordinal)
+                PageUserApi.PageUserMarkAsRead(context, (int)readDataPacket.CurrentPageUser.Id);
 
             if (targetPageNum < 1) return null;
             if (targetPageNum > readDataPacket.BookTotalPageCount)
@@ -62,6 +67,11 @@ namespace Logic.Services.API
                 }
                 readDataPacket.CurrentPageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
                     context, (int)readDataPacket.CurrentPage.Id, (int)readDataPacket.LoggedInUser.Id);
+            }
+            if(readDataPacket.CurrentPageUser is null || readDataPacket.CurrentPageUser.PageId is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return null;
             }
 
 
@@ -259,6 +269,46 @@ namespace Logic.Services.API
             }
             return resetDataPacket;
 
+        }
+        public static ReadDataPacket? OrchestrateClearPageAndMove(IdiomaticaContext context, ReadDataPacket readDataPacket, int targetPageNum)
+        {
+            ReadDataPacket? outPacket = readDataPacket;
+            if (readDataPacket.CurrentPageUser is null || readDataPacket.CurrentPageUser.Id is null || readDataPacket.CurrentPageUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return null;
+            }
+            // update all unknowns to well known
+            PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)readDataPacket.CurrentPageUser.Id);
+            // now move forward, if there's another page
+            if (targetPageNum <= readDataPacket.BookTotalPageCount) // remember pages are 1-indexed
+            {
+                if(readDataPacket.Book is null || readDataPacket.Book.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return null;
+                }
+                outPacket = OrchestrateMovePage(context, readDataPacket, (int)readDataPacket.Book.Id, targetPageNum);
+                if (outPacket is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return null;
+                }
+            }
+            else
+            {
+                // mark the previous page as read because you didn't do it in the PageMove function
+                PageUserApi.PageUserMarkAsRead(context, (int)readDataPacket.CurrentPageUser.Id);
+                // refresh the word user cache
+                if(outPacket is null || outPacket.CurrentPageUser is null || outPacket.CurrentPageUser.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return null;
+                }
+                outPacket = OrchestrateResetReadDataForNewPage(
+                    context, readDataPacket, (int)outPacket.CurrentPageUser.Id);
+            }
+            return outPacket;
         }
         public static Page? PageReadById(IdiomaticaContext context, int pageId)
         {

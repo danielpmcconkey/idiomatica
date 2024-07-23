@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
+using DeepL;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Logic.Services.API
 {
@@ -105,6 +107,18 @@ namespace Logic.Services.API
             return await Task<List<(Word word, int ordinal)>>.Run(() =>
             {
                 return CreateOrderedWordsFromSentenceId(context, languageId, sentenceId);
+            });
+        }
+        public static Word? WordGetById(IdiomaticaContext context, int wordId)
+        {
+            if (wordId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.WordByIdRead(wordId, context);
+        }
+        public static async Task<Word?> WordGetByIdAsync(IdiomaticaContext context, int wordId)
+        {
+            return await Task<Word?>.Run(() =>
+            {
+                return WordGetById(context, wordId);
             });
         }
         public static List<(string language, int wordCount)> WordsGetListOfReadCount(

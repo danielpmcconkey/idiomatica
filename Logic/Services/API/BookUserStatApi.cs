@@ -53,8 +53,8 @@ namespace Logic.Services.API
            
             var allWordUsersInBook = DataCache.WordUsersByBookIdAndLanguageUserIdRead(
                 ((int)bookUser.BookId, (int)bookUser.LanguageUserId), context, true);
-            var pageUsers = DataCache.PageUsersByBookUserIdRead(bookUserId, context);
-            var pages = DataCache.PagesByBookIdRead(bookUserId, context);
+            var pageUsers = DataCache.PageUsersByBookUserIdRead(bookUserId, context, true);
+            var pages = DataCache.PagesByBookIdRead((int)bookUser.BookId, context);
             var bookStats = DataCache.BookStatsByBookIdRead((int)bookUser.BookId, context);
             if (bookStats is null)
             {

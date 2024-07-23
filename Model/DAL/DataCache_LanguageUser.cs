@@ -106,12 +106,6 @@ namespace Model.DAL
         public static List<LanguageUser>? LanguageUsersAndLanguageByUserIdRead(
             int key, IdiomaticaContext context)
         {
-            var task = LanguageUsersAndLanguageByUserIdReadAsync(key, context);
-            return task.Result;
-        }
-        public static async Task<List<LanguageUser>?> LanguageUsersAndLanguageByUserIdReadAsync(
-            int key, IdiomaticaContext context)
-        {
             // check cache
             if (LanguageUsersAndLanguageByUserId.ContainsKey(key))
             {
@@ -119,19 +113,27 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.LanguageUsers
-                .Where(x => x.UserId == key)
+            var value = context.LanguageUsers
+                .Where(x => x.UserId == key && x.Language != null)
                 .Include(lu => lu.Language)
-                .OrderBy(x => x.Language != null ? x.Language.Name : "zzzzz")
-                .ToListAsync();
+                .OrderBy(x => x.Language)
+                .ToList();
             if (value == null) return null;
             // write to cache
             LanguageUsersAndLanguageByUserId[key] = value;
-            foreach(var v in value)
+            foreach (var v in value)
             {
                 LanguageUserUpdateCache(v, context);
             }
             return value;
+        }
+        public static async Task<List<LanguageUser>?> LanguageUsersAndLanguageByUserIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            return await Task<List<LanguageUser>?>.Run(() =>
+            {
+                return LanguageUsersAndLanguageByUserIdRead(key, context);
+            });
         }
         #endregion
 

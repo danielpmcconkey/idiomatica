@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IdentityModel.OidcClient.Browser;
+using DeepL;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Logic.Services.API
 {
@@ -178,6 +180,21 @@ namespace Logic.Services.API
             bookListDataPacket.BookListRows = powerQueryResults.results;
             bookListDataPacket.BookListTotalRowsAtCurrentFilter = powerQueryResults.count;
             return bookListDataPacket;
+
+        }
+        public static BookListRow? BookListRowByBookIdAndUserIdRead(
+            IdiomaticaContext context, int bookId, int userId, bool shouldOverrideCache = false)
+        {
+            return DataCache.BookListRowByBookIdAndUserIdRead((bookId, userId), context, true);
+
+        }
+        public static async Task<BookListRow?> BookListRowByBookIdAndUserIdReadAsync(
+            IdiomaticaContext context, int bookId, int userId, bool shouldOverrideCache = false)
+        {
+            return await Task<BookListRow?>.Run(() =>
+            {
+                return BookListRowByBookIdAndUserIdRead(context, bookId, userId, shouldOverrideCache);
+            });
 
         }
     }

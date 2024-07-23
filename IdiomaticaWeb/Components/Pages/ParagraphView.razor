@@ -58,8 +58,10 @@ else
     public EventCallback<Token> OnShowWordModal { get; set; }
     [Parameter]
     public EventCallback<Paragraph> OnShowPpModal { get; set; }
+    // [Parameter]
+    //public Dictionary<string, WordUser>? AllWordUsersInPage { get; set; }
     [Parameter]
-    public Dictionary<string, WordUser>? AllWordUsersInPage { get; set; }
+    public ReadDataPacket ReadDataPacket { get; set; } = new();
 
     private bool _isDataInit = false;
     private bool _isLoadingLoggedInUser = false;
@@ -105,17 +107,17 @@ else
     public string GetTokenClass(Token token)
     {
         if (token.Word is null || token.Word.TextLowerCase is null) return "statusUNKNOWN";
-        if (AllWordUsersInPage is null) return "statusUNKNOWN";
-        if (!AllWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
-        var wordUser = AllWordUsersInPage[token.Word.TextLowerCase];
+        if (ReadDataPacket.AllWordUsersInPage is null) return "statusUNKNOWN";
+        if (!ReadDataPacket.AllWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
+        var wordUser = ReadDataPacket.AllWordUsersInPage[token.Word.TextLowerCase];
         return $"status{wordUser.Status}";
     }
     private string GetTokenTranslation(Token token)
     {
         if (token.Word is null || token.Word.TextLowerCase is null) return "";
-        if (AllWordUsersInPage is null) return "";
-        if (!AllWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "";
-        var wordUser = AllWordUsersInPage[token.Word.TextLowerCase];
+        if (ReadDataPacket.AllWordUsersInPage is null) return "";
+        if (!ReadDataPacket.AllWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "";
+        var wordUser = ReadDataPacket.AllWordUsersInPage[token.Word.TextLowerCase];
         if (wordUser is null || wordUser.Translation is null) return "";
         return wordUser.Translation;
     }
