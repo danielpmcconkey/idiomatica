@@ -51,7 +51,7 @@ namespace Logic.UILabels
             _labels.Add("bookListFormFilterLanguage", "Filter on language...");
             _labels.Add("bookListFormFilterTitle", "Filter on title...");
             _labels.Add("bookListFormFilterTags", "Filter on tags...");
-            _labels.Add("bookListFormFilterNone", "Filter on tags...");
+            _labels.Add("bookListFormFilterNone", "No filter...");
             _labels.Add("bookListFormSortColumn", "Sort by");
             _labels.Add("bookListFormSortDirection", "Sort direction...");
             _labels.Add("bookListFormSortAscending", "Sort ascending");

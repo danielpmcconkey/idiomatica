@@ -51,7 +51,7 @@ namespace Model.DAL
         public static (long count, List<BookListRow> results) BookListRowsPowerQuery(
             int userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
             LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
-            bool sortAscending, IdiomaticaContext context)
+            bool sortAscending, IdiomaticaContext context, int? bookIdOverride = null)
         {
             /*
              * note: none of the string fields are safe. and, since we don't 
@@ -61,12 +61,10 @@ namespace Model.DAL
             
 
             bool useTags = (tagsFilter != null && tagsFilter != string.Empty) ? true : false;
-            
-            
-            
-            
-            
-            
+            int skipVal = (bookIdOverride is null) ? skip : 0;
+            int numRecordsVal = (bookIdOverride is null) ? numRecords : 1;
+
+
             string sortDirection = sortAscending ? "asc" : "desc";
             string orderByClause = $"order by b.Id {sortDirection}";
             if (orderBy is not null)
@@ -97,17 +95,13 @@ namespace Model.DAL
 
                 }
             }
-            
-            
-            
-                
 
             StringBuilder sb = new StringBuilder();
 
             sb.Append($"""
                     with
                 """);
-            if (useTags)
+            if (useTags && tagsFilter is not null && bookIdOverride is null)
             {
                 sb.Append($"""
 
@@ -157,7 +151,7 @@ namespace Model.DAL
                             , bus_DISTINCTKNOWNPERCENT.ValueNumeric as DistinctKnownPercent
                             , bu.IsArchived
                 """);
-            if (useTags)
+            if (useTags && bookIdOverride is null)
             {
                 sb.Append($"""
 
@@ -188,7 +182,7 @@ namespace Model.DAL
                         left join [Idioma].[BookUserStat] bus_DISTINCTWORDCOUNT on bus_DISTINCTWORDCOUNT.BookId = b.Id and bus_DISTINCTWORDCOUNT.LanguageUserId = lu.Id and bus_DISTINCTWORDCOUNT.[Key] = {(int)AvailableBookUserStat.DISTINCTWORDCOUNT}
                         left join [Idioma].[BookUserStat] bus_DISTINCTKNOWNPERCENT on bus_DISTINCTKNOWNPERCENT.BookId = b.Id and bus_DISTINCTKNOWNPERCENT.LanguageUserId = lu.Id and bus_DISTINCTKNOWNPERCENT.[Key] = {(int)AvailableBookUserStat.DISTINCTKNOWNPERCENT}
                 """);
-            if (useTags)
+            if (useTags && bookIdOverride is null)
             {
                 sb.Append($"""
 
@@ -199,35 +193,42 @@ namespace Model.DAL
 
                         where 1=1
                 """);
-            if (shouldShowOnlyInShelf)
+            if (bookIdOverride is not null && bookIdOverride > 0)
+            {
+                sb.Append($"""
+
+                        and b.Id = {bookIdOverride}
+                    """);
+            }
+            if (shouldShowOnlyInShelf && bookIdOverride is null)
             {
                 sb.Append($"""
 
                         and bu.Id is not null and bu.IsArchived <> 1
                     """);
             }
-            if (useTags)
+            if (useTags && bookIdOverride is null)
             {
                 sb.Append($"""
 
                         and at.Tag is not null
                     """);
             }
-            if (lcFilter is not null)
+            if (lcFilter is not null && bookIdOverride is null)
             {
                 sb.Append($"""
 
                         and l.LanguageCode = '{lcFilter.Code}'
                     """);
             }
-            if (titleFilter is not null)
+            if (titleFilter is not null && bookIdOverride is null)
             {
                 sb.Append($"""
 
                         and b.Title like '%{DALUtilities.SanitizeString(titleFilter)}%'
                     """);
             }
-            if (useTags) // we only aggregate when bringing in tags
+            if (useTags && bookIdOverride is null) // we only aggregate when bringing in tags
             {
                 sb.Append($"""
 
@@ -281,12 +282,12 @@ namespace Model.DAL
             {
                 sb.Append($"""
 
-                    where RowNumber > {skip} 
-                    and RowNumber <= {skip} + {numRecords}
+                    where RowNumber > {skipVal} 
+                    and RowNumber <= {skipVal} + {numRecordsVal}
                     """);
             }
             var dbValue = context.Database.SqlQueryRaw<BookListRow>(sb.ToString()).ToList();
-            if (dbValue.Any()) {
+            if (dbValue.Count > 0) {
                 var leadingRecord = dbValue.Where(
                     x => x.BookId == null && x.Title == null && x.LanguageName == null)
                     .FirstOrDefault();
@@ -305,12 +306,12 @@ namespace Model.DAL
         public static async Task<(long count, List<BookListRow> results)> BookListRowsPowerQueryAsync(
             int userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
             LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
-            bool sortAscending, IdiomaticaContext context)
+            bool sortAscending, IdiomaticaContext context, int? bookIdOverride = null)
         {
             return await Task<(long count, List<BookListRow> results)>.Run(() =>
             {
                 return BookListRowsPowerQuery(userId, numRecords, skip, shouldShowOnlyInShelf, tagsFilter,
-                    lcFilter, titleFilter, orderBy, sortAscending, context);
+                    lcFilter, titleFilter, orderBy, sortAscending, context, bookIdOverride);
             });
         }
         #endregion

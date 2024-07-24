@@ -429,7 +429,104 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookListRowByBookIdAndUserIdReadTest()
         {
-            Assert.Fail();
+
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+            string expectedTitle = TestConstants.NewBookTitle;
+            string secondProgressExpected = "1 / 3";
+
+
+            try
+            {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                if (languageUser is null) ErrorHandler.LogAndThrow();
+
+                
+                Book? book = BookApi.OrchestrateBookCreationAndSubProcesses(
+                    context,
+                    (int)user.Id,
+                    TestConstants.NewBookTitle,
+                    TestConstants.NewBookLanguageCode,
+                    TestConstants.NewBookUrl,
+                    TestConstants.NewBookText);
+                if (book is null || book.Id is null || book.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
+                    context, (int)book.Id, (int)user.Id);
+                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                // act
+                // take the first row -- should be pretty empty
+
+
+                /*
+                 * 
+                 * 
+                 * you are here
+                 * 
+                 * the underlying booklistrow view has a bug where it hard
+                 * wires user ID to 1. you need to confirm that the actual
+                 * booklist powerquery doesn't use this view and then figrue
+                 * out the right way to re-load the row when refreshing stats
+                 * from the UI
+                 * 
+                 * 
+                 * */
+                var firstRow = BookApi.BookListRowByBookIdAndUserIdRead(context, (int)book.Id, (int)user.Id);
+                if(firstRow is null || firstRow.Title is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                string actualTitle = firstRow.Title;
+
+                // start reading it
+                var readDataPacket = PageApi.OrchestrateReadDataInit(context, userService, (int)book.Id);
+                if(readDataPacket is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                // clear page and move forward
+                PageApi.OrchestrateClearPageAndMove(context, readDataPacket, 2);
+
+                // refresh the stats
+                BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (int)bookUser.Id);
+
+                // grab the row again -- expect it to be new
+                var secondRow = BookApi.BookListRowByBookIdAndUserIdRead(context, (int)book.Id, (int)user.Id);
+                if (secondRow is null || secondRow.Progress is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                string secondProgressActual = secondRow.Progress;
+
+                // assert
+                Assert.AreEqual(expectedTitle, actualTitle);
+                Assert.AreEqual(secondProgressExpected, secondProgressActual);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
+            }
         }
 
         [TestMethod()]

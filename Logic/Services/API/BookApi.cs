@@ -183,17 +183,29 @@ namespace Logic.Services.API
 
         }
         public static BookListRow? BookListRowByBookIdAndUserIdRead(
-            IdiomaticaContext context, int bookId, int userId, bool shouldOverrideCache = false)
+            IdiomaticaContext context, int bookId, int userId)
         {
-            return DataCache.BookListRowByBookIdAndUserIdRead((bookId, userId), context, true);
+            var powerQueryResults = DataCache.BookListRowsPowerQuery(
+                    userId,
+                    1,
+                    0,
+                    false,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true,
+                    context,
+                    bookId);
 
+            return powerQueryResults.results.FirstOrDefault();
         }
         public static async Task<BookListRow?> BookListRowByBookIdAndUserIdReadAsync(
-            IdiomaticaContext context, int bookId, int userId, bool shouldOverrideCache = false)
+            IdiomaticaContext context, int bookId, int userId)
         {
             return await Task<BookListRow?>.Run(() =>
             {
-                return BookListRowByBookIdAndUserIdRead(context, bookId, userId, shouldOverrideCache);
+                return BookListRowByBookIdAndUserIdRead(context, bookId, userId);
             });
 
         }
