@@ -756,13 +756,13 @@ namespace Logic.Services.API.Tests
 
                 // pull the previous page's wordUser list
                 var priorPageWordDict = WordUserApi.WordUsersDictByPageIdAndUserIdRead(context, origPageId, (int)user.Id);
-                if(priorPageWordDict is null)
+                if (priorPageWordDict is null)
                 {
                     ErrorHandler.LogAndThrow();
                     return;
                 }
                 WordUser? foundUserAfter = null;
-                if(!priorPageWordDict.TryGetValue(wordToLookUp, out foundUserAfter))
+                if (!priorPageWordDict.TryGetValue(wordToLookUp, out foundUserAfter))
                 {
                     ErrorHandler.LogAndThrow();
                     return;
@@ -789,6 +789,163 @@ namespace Logic.Services.API.Tests
                 // clean-up
 
                 transaction.Rollback();
+            }
+        }
+
+        [TestMethod()]
+        public async Task OrchestrateReadDataInitAsyncTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            int bookId = 2;
+            int languageId = 1;
+            int wordCount = 135;
+            int wordUsersCount = 135;
+            int paragraphCount = 13;
+            int bookUserStatsCount = 8;
+
+            try
+            {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, languageId, (int)user.Id);
+                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // act
+                var readDataPacket = await PageApi.OrchestrateReadDataInitAsync(context, userService, bookId);
+                if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
+                    readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
+                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    readDataPacket.BookUserStats is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+
+                // assert
+                Assert.IsTrue(readDataPacket.BookCurrentPageNum == 1);
+                Assert.IsNotNull(readDataPacket.BookTotalPageCount == 12);
+                Assert.AreEqual(wordCount, readDataPacket.AllWordsInPage.Count);
+                Assert.AreEqual(wordUsersCount, readDataPacket.AllWordUsersInPage.Count);
+                Assert.AreEqual(paragraphCount, readDataPacket.Paragraphs.Count);
+                Assert.AreEqual(bookUserStatsCount, readDataPacket.BookUserStats.Count);
+            }
+            finally
+            {
+                // clean-up
+
+                await transaction.RollbackAsync();
+            }
+        }
+
+        [TestMethod()]
+        public async Task OrchestrateClearPageAndMoveAsyncTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            int bookId = 2;
+            int languageId = 1;
+            int wordCount = 134;
+            int wordUsersCount = 134;
+            int paragraphCount = 29;
+            string wordToLookUp = "conocido";
+            AvailableWordUserStatus statusBeforeExpected = AvailableWordUserStatus.UNKNOWN;
+            AvailableWordUserStatus statusAfterExpected = AvailableWordUserStatus.WELLKNOWN;
+
+            try
+            {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, languageId, (int)user.Id);
+                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // act
+                var readDataPacket = await PageApi.OrchestrateReadDataInitAsync(context, userService, bookId);
+                if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
+                    readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
+                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
+                    readDataPacket.LanguageUser.Id is null || readDataPacket.CurrentPageUser.PageId is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                // check the word and its status
+                WordUser? foundUserBefore = null;
+                if (!readDataPacket.AllWordUsersInPage.TryGetValue(wordToLookUp, out foundUserBefore))
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                if (foundUserBefore is null || foundUserBefore.Status is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var statusBeforeActual = foundUserBefore.Status;
+
+                // pull the current page ID before moving so you can later look up its wordUsers
+
+                int origPageId = (int)readDataPacket.CurrentPageUser.PageId;
+
+                // clear the unknown words and move to the new page
+                var newReadDataPacket = await PageApi.OrchestrateClearPageAndMoveAsync(context, readDataPacket, 2);
+                if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
+                    newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
+                    newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
+                    newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                // pull the previous page's wordUser list
+                var priorPageWordDict = await WordUserApi.WordUsersDictByPageIdAndUserIdReadAsync(context, origPageId, (int)user.Id);
+                if (priorPageWordDict is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                WordUser? foundUserAfter = null;
+                if (!priorPageWordDict.TryGetValue(wordToLookUp, out foundUserAfter))
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                if (foundUserAfter is null || foundUserAfter.Status is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var statusAfterActual = foundUserAfter.Status;
+
+
+                // assert
+                Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
+                Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
+                Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
+                Assert.AreEqual(wordUsersCount, newReadDataPacket.AllWordUsersInPage.Count);
+                Assert.AreEqual(paragraphCount, newReadDataPacket.Paragraphs.Count);
+                Assert.AreEqual(statusBeforeExpected, statusBeforeActual);
+                Assert.AreEqual(statusAfterExpected, statusAfterActual);
+            }
+            finally
+            {
+                // clean-up
+
+                await transaction.RollbackAsync();
             }
         }
     }

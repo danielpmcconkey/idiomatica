@@ -270,6 +270,14 @@ namespace Logic.Services.API
             return resetDataPacket;
 
         }
+        public static async Task<ReadDataPacket?> OrchestrateReadDataInitAsync(
+            IdiomaticaContext context, UserService userService, int bookId)
+        {
+            return await Task<ReadDataPacket?>.Run(() => 
+            { 
+                return OrchestrateReadDataInit(context, userService, bookId); 
+            });
+        }
         public static ReadDataPacket? OrchestrateClearPageAndMove(IdiomaticaContext context, ReadDataPacket readDataPacket, int targetPageNum)
         {
             ReadDataPacket? outPacket = readDataPacket;
@@ -309,6 +317,14 @@ namespace Logic.Services.API
                     context, readDataPacket, (int)outPacket.CurrentPageUser.Id);
             }
             return outPacket;
+        }
+        public static async Task<ReadDataPacket?> OrchestrateClearPageAndMoveAsync(
+            IdiomaticaContext context, ReadDataPacket readDataPacket, int targetPageNum)
+        {
+            return await Task<ReadDataPacket?>.Run(() =>
+            {
+                return OrchestrateClearPageAndMove(context, readDataPacket, targetPageNum);
+            });
         }
         public static Page? PageReadById(IdiomaticaContext context, int pageId)
         {

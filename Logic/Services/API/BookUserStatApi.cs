@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace Logic.Services.API
 {
@@ -182,6 +183,13 @@ namespace Logic.Services.API
                 ((int)bookUser.BookId, (int)languageUser.UserId), stats, context);
             
 
+        }
+        public static async Task BookUserStatsUpdateByBookUserIdAsync(IdiomaticaContext context, int bookUserId)
+        {
+            await Task.Run(() =>
+            {
+                BookUserStatsUpdateByBookUserId(context, bookUserId);
+            });
         }
     }
 }
