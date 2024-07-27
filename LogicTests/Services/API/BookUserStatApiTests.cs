@@ -128,12 +128,12 @@ namespace Logic.Services.API.Tests
                     ErrorHandler.LogAndThrow();
                     return;
                 }
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
                 // act
                 // create the base bookUser
-                var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
+                var bookUser = await OrchestrationApi.OrchestrateBookUserCreationAndSubProcessesAsync(
                     context, bookId, (int)user.Id);
                 if (bookUser is null || bookUser.Id is null || bookUser.LanguageUserId is null)
                 {

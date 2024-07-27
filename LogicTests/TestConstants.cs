@@ -141,6 +141,20 @@ Era el jardín más hermoso del mundo
 
 Fin
 ";
+        internal static string NewPageText = @"El gigante egoísta
+De Óscar Wilde
+Versión en español por SpanishInput
+Primera parte: voy a construir una pared
+Cada tarde, después de la escuela. Los niños iban a jugar al jardín del gigante. Era un jardín grande y bonito.
+Por todos lados había flores. También había  árboles llenos de flores. A los pájaros les gustaba  descansar en los árboles y cantar. A los niños, les gustaba oír a los pájaros. Todos eran muy felices
+Un día, el gigante volvió. Había estado con un amigo por siete años. Después de los siete años, volvió a su casa. Llegó y vio a los niños jugando en jardín.
+""¿Qué hacen aquí?"" dijo con voz fuerte.
+Los niños se fueron corriendo.
+""¡Mi jardín es mi jardín!"" dijo el gigante. ""¡Nadie más  puede venir a jugar aquí!""
+""¡Voy a construir una pared para que nadie venga aquí!""
+Hizo una pared grande alrededor del jardín. Y puso un cartel que decía, ""no entrar"". Era un gigante muy egoísta. 
+";
+
         #endregion
     }
 }

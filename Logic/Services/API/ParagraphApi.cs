@@ -45,10 +45,20 @@ namespace Logic.Services.API
                 if (string.IsNullOrEmpty(trimmedSentenceSplit)) continue;
                 var sentence = SentenceApi.SentenceCreate(
                     context, trimmedSentenceSplit, languageId, sentenceOrdinal, (int)paragraph.Id);
-                if (sentence != null)
+                if (sentence is null || sentence.Id is  null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return null;
+                }
+                // the EFCore context is already appending the sentence to
+                // the paragraph when it creates the sentence with that
+                // paragraph ID. so only add it if not there already
+                if (paragraph.Sentences.Where(x => x.Id == sentence.Id).FirstOrDefault() is null)
                 {
                     paragraph.Sentences.Add(sentence);
                 }
+
+                sentenceOrdinal++;
             }
             return paragraph;
         }

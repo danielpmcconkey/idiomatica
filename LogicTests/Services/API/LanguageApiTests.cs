@@ -77,5 +77,16 @@ namespace Logic.Services.API.Tests
             }
         }
 
+        [TestMethod()]
+        public void LanguageReadByCodeTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void LanguageReadByCodeAsyncTest()
+        {
+            Assert.Fail();
+        }
     }
 }

@@ -769,14 +769,21 @@ namespace Logic.Services.API.Tests
             // assemble
             var context = CommonFunctions.CreateContext();
             using var transaction = context.Database.BeginTransaction();
+            int languageUserId = 3;
+            int pageId = 79;
+            int pageUserIdExpected = 590;
 
             try
             {
                 // act
-
+                var pageUser = PageUserApi.PageUserReadByPageIdAndLanguageUserId(
+                    context, pageId, languageUserId);
 
                 // assert
-                Assert.Fail();
+                Assert.IsNotNull(pageUser);
+                Assert.IsNotNull(pageUser.Id);
+                Assert.AreEqual(pageId, pageUser.PageId);
+                Assert.AreEqual(pageUserIdExpected, pageUser.Id);
             }
             finally
             {
@@ -790,22 +797,25 @@ namespace Logic.Services.API.Tests
             // assemble
             var context = CommonFunctions.CreateContext();
             using var transaction = await context.Database.BeginTransactionAsync();
-
-
-
+            int languageUserId = 3;
+            int pageId = 79;
+            int pageUserIdExpected = 590;
 
             try
             {
                 // act
-
+                var pageUser = await PageUserApi.PageUserReadByPageIdAndLanguageUserIdAsync(
+                    context, pageId, languageUserId);
 
                 // assert
-                Assert.Fail();
+                Assert.IsNotNull(pageUser);
+                Assert.IsNotNull(pageUser.Id);
+                Assert.AreEqual(pageId, pageUser.PageId);
+                Assert.AreEqual(pageUserIdExpected, pageUser.Id);
             }
             finally
             {
                 // clean-up
-
                 await transaction.RollbackAsync();
             }
         }
@@ -817,14 +827,68 @@ namespace Logic.Services.API.Tests
             // assemble
             var context = CommonFunctions.CreateContext();
             using var transaction = context.Database.BeginTransaction();
+            var startDateTime = DateTime.Now;
 
             try
             {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                if (languageUser is null || languageUser.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                // create the book
+                Book? book = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
+                    context,
+                    (int)user.Id,
+                    TestConstants.NewBookTitle,
+                    TestConstants.NewBookLanguageCode,
+                    TestConstants.NewBookUrl,
+                    TestConstants.NewBookText);
+                if (book is null || book.Id is null || book.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                // get the page Id
+                var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+                if (page is null || page.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var pageUserBefore = PageUserApi.PageUserCreateForPageIdAndUserId(
+                    context, (int)page.Id, (int)user.Id);
+
+                if (pageUserBefore is null || pageUserBefore.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
                 // act
 
+                PageUserApi.PageUserUpdateReadDate(context, (int)pageUserBefore.Id, DateTime.Now);
+
+                // now read it back
+                var pageUserAfter = PageUserApi.PageUserReadByPageIdAndLanguageUserId(
+                    context, (int)page.Id, (int)languageUser.Id);
 
                 // assert
-                Assert.Fail();
+                Assert.IsNotNull(pageUserAfter);
+                Assert.IsNotNull(pageUserAfter.Id);
+                Assert.IsNotNull(pageUserAfter.ReadDate);
+                Assert.IsTrue(pageUserAfter.ReadDate >= startDateTime);
             }
             finally
             {
@@ -838,46 +902,159 @@ namespace Logic.Services.API.Tests
             // assemble
             var context = CommonFunctions.CreateContext();
             using var transaction = await context.Database.BeginTransactionAsync();
-
-
-
+            var startDateTime = DateTime.Now;
 
             try
             {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
+                if (languageUser is null || languageUser.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                // create the book
+                Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
+                    context,
+                    (int)user.Id,
+                    TestConstants.NewBookTitle,
+                    TestConstants.NewBookLanguageCode,
+                    TestConstants.NewBookUrl,
+                    TestConstants.NewBookText);
+                if (book is null || book.Id is null || book.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                // get the page Id
+                var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+                if (page is null || page.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var pageUserBefore = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
+                    context, (int)page.Id, (int)user.Id);
+
+                if (pageUserBefore is null || pageUserBefore.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
                 // act
 
+                await PageUserApi.PageUserUpdateReadDateAsync(context, (int)pageUserBefore.Id, DateTime.Now);
+
+                // now read it back
+                var pageUserAfter = PageUserApi.PageUserReadByPageIdAndLanguageUserId(
+                    context, (int)page.Id, (int)languageUser.Id);
 
                 // assert
-                Assert.Fail();
+                Assert.IsNotNull(pageUserAfter);
+                Assert.IsNotNull(pageUserAfter.Id);
+                Assert.IsNotNull(pageUserAfter.ReadDate);
+                Assert.IsTrue(pageUserAfter.ReadDate >= startDateTime);
             }
             finally
             {
                 // clean-up
-
                 await transaction.RollbackAsync();
             }
         }
 
 
         [TestMethod()]
-        public void PageUserUpdateUnknowWordsToWellKnownAsyncTest()
-        {
-            Assert.Fail();
-        }
-        [TestMethod()]
         public void PageUserUpdateUnknowWordsToWellKnownTest()
         {
             // assemble
             var context = CommonFunctions.CreateContext();
             using var transaction = context.Database.BeginTransaction();
+            decimal expectedWordCount = 3046.0M;
+            decimal expectedDistinctKnowPercent = 0.18M;
 
             try
             {
-                // act
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                if (languageUser is null) ErrorHandler.LogAndThrow();
+                int bookId = 6;
 
+
+                var originalPacket = new BookListDataPacket(context, false);
+
+                // act
+                var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
+                    context, bookId, (int)user.Id);
+                if (bookUser is null || bookUser.Id is null || bookUser.LanguageUserId is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                // carry on with the test
+                var bookUserStats = BookUserStatApi.BookUserStatsRead(context, bookId, (int)user.Id);
+                // checking total word count here because we already tested progress
+                // it's good to mix these up so we eventually get coverage
+                BookUserStat? totalWordCountStat = bookUserStats is null ? null :
+                    bookUserStats.Where(x => x.Key == AvailableBookUserStat.TOTALWORDCOUNT).FirstOrDefault();
+                decimal actualWordCount = totalWordCountStat is null ? 0 :
+                    totalWordCountStat.ValueNumeric is null ? 0 : (decimal)totalWordCountStat.ValueNumeric;
+
+                // now move the page forward a couple of times as if we're reading it
+                var firstPage = PageApi.PageReadFirstByBookId(context, bookId);
+                if (firstPage is null || firstPage.Id is null || firstPage.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var pageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
+                    context, (int)firstPage.Id, (int)user.Id);
+                if (pageUser is null || pageUser.Id is null || pageUser.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+
+                // update all unknowns to well known
+                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)pageUser.Id);
+                // mark the first page as read
+                PageUserApi.PageUserMarkAsRead(context, (int)pageUser.Id);
+                // now move forward to page 2
+                var newPageUser = PageUserApi.PageUserReadByOrderWithinBook(
+                    context, (int)bookUser.LanguageUserId, 2, bookId);
+
+                // now we need to regen the stats
+                BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (int)bookUser.Id);
+                // finally, re-pull the stats
+                var newStats = BookUserStatApi.BookUserStatsRead(context, bookId, (int)user.Id);
+                BookUserStat? distinctKnownPercentStat = newStats is null ? null :
+                    newStats.Where(x => x.Key == AvailableBookUserStat.DISTINCTKNOWNPERCENT).FirstOrDefault();
+                if (distinctKnownPercentStat is null || distinctKnownPercentStat.ValueNumeric is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                decimal actualDistinctKnown = Math.Round((decimal)distinctKnownPercentStat.ValueNumeric, 2);
 
                 // assert
-                Assert.Fail();
+                Assert.AreEqual(expectedWordCount, actualWordCount);
+                Assert.AreEqual(expectedDistinctKnowPercent, actualDistinctKnown);
             }
             finally
             {
@@ -885,16 +1062,94 @@ namespace Logic.Services.API.Tests
                 transaction.Rollback();
             }
         }
+        [TestMethod()]
+        public async Task PageUserUpdateUnknowWordsToWellKnownAsyncTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            decimal expectedWordCount = 3046.0M;
+            decimal expectedDistinctKnowPercent = 0.18M;
+
+            try
+            {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
+                if (languageUser is null) ErrorHandler.LogAndThrow();
+                int bookId = 6;
 
 
+                var originalPacket = new BookListDataPacket(context, false);
+
+                // act
+                var bookUser = await OrchestrationApi.OrchestrateBookUserCreationAndSubProcessesAsync(
+                    context, bookId, (int)user.Id);
+                if (bookUser is null || bookUser.Id is null || bookUser.LanguageUserId is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                // carry on with the test
+                var bookUserStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (int)user.Id);
+                // checking total word count here because we already tested progress
+                // it's good to mix these up so we eventually get coverage
+                BookUserStat? totalWordCountStat = bookUserStats is null ? null :
+                    bookUserStats.Where(x => x.Key == AvailableBookUserStat.TOTALWORDCOUNT).FirstOrDefault();
+                decimal actualWordCount = totalWordCountStat is null ? 0 :
+                    totalWordCountStat.ValueNumeric is null ? 0 : (decimal)totalWordCountStat.ValueNumeric;
+
+                // now move the page forward a couple of times as if we're reading it
+                var firstPage = await PageApi.PageReadFirstByBookIdAsync(context, bookId);
+                if (firstPage is null || firstPage.Id is null || firstPage.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var pageUser = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
+                    context, (int)firstPage.Id, (int)user.Id);
+                if (pageUser is null || pageUser.Id is null || pageUser.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
 
 
+                // update all unknowns to well known
+                await PageUserApi.PageUserUpdateUnknowWordsToWellKnownAsync(context, (int)pageUser.Id);
+                // mark the first page as read
+                await PageUserApi.PageUserMarkAsReadAsync(context, (int)pageUser.Id);
+                // now move forward to page 2
+                var newPageUser = await PageUserApi.PageUserReadByOrderWithinBookAsync(
+                    context, (int)bookUser.LanguageUserId, 2, bookId);
 
+                // now we need to regen the stats
+                await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
+                // finally, re-pull the stats
+                var newStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (int)user.Id);
+                BookUserStat? distinctKnownPercentStat = newStats is null ? null :
+                    newStats.Where(x => x.Key == AvailableBookUserStat.DISTINCTKNOWNPERCENT).FirstOrDefault();
+                if (distinctKnownPercentStat is null || distinctKnownPercentStat.ValueNumeric is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                decimal actualDistinctKnown = Math.Round((decimal)distinctKnownPercentStat.ValueNumeric, 2);
 
-
-
-
-
-
+                // assert
+                Assert.AreEqual(expectedWordCount, actualWordCount);
+                Assert.AreEqual(expectedDistinctKnowPercent, actualDistinctKnown);
+            }
+            finally
+            {
+                // clean-up
+                await transaction.RollbackAsync();
+            }
+        }
     }
 }
