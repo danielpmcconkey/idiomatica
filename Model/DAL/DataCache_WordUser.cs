@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -154,7 +155,7 @@ namespace Model.DAL
         #endregion
 
         #region read
-        public static async Task<WordUser> WordUserByIdReadAsync(int key, IdiomaticaContext context)
+        public static WordUser? WordUserByIdRead(int key, IdiomaticaContext context)
         {
             // check cache
             if (WordUserById.ContainsKey(key))
@@ -164,12 +165,21 @@ namespace Model.DAL
 
             // read DB
             var value = context.WordUsers.Where(x => x.Id == key).FirstOrDefault();
-                
+
             if (value == null) return null;
             // write to cache
             WordUserById[key] = value;
             return value;
         }
+        public static async Task<WordUser?> WordUserByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<WordUser?>.Run(() =>
+            {
+                return WordUserByIdRead(key, context);
+            });
+        }
+
+
         public static async Task<WordUser> WordUserAndLanguageUserAndLanguageByIdReadAsync(int key, IdiomaticaContext context)
         {
             // check cache

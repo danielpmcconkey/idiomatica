@@ -13,26 +13,11 @@ namespace Logic.Services.API
 {
     public static class WordUserApi
     {
-        public static void WordUsersCreateAllForBookIdAndUserId(
-            IdiomaticaContext context, int bookId, int userId)
+        public static WordUser? WordUserCreate(
+            IdiomaticaContext context, int wordId, int languageUserId, string? translation,
+            AvailableWordUserStatus? status)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            DataCache.WordUsersCreateAllForBookIdAndUserId((bookId, userId), context);
-        }
-        public static Dictionary<string, WordUser>? WordUsersDictByPageIdAndUserIdRead(
-            IdiomaticaContext context, int pageId, int userId)
-        {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.WordUsersDictByPageIdAndUserIdRead((pageId, userId), context);
-        }
-        public static async Task<Dictionary<string, WordUser>?> WordUsersDictByPageIdAndUserIdReadAsync(
-            IdiomaticaContext context, int pageId, int userId)
-        {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.WordUsersDictByPageIdAndUserIdReadAsync((pageId, userId), context);
+            return WordUserCreateAsync(context, wordId, languageUserId, translation, status).Result;
         }
         public static async Task<WordUser?> WordUserCreateAsync(
             IdiomaticaContext context, int wordId, int languageUserId, string? translation,
@@ -61,6 +46,63 @@ namespace Logic.Services.API
             }
             return wu;
         }
+
+
+        public static void WordUsersCreateAllForBookIdAndUserId(
+            IdiomaticaContext context, int bookId, int userId)
+        {
+            if (bookId < 1) ErrorHandler.LogAndThrow();
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            DataCache.WordUsersCreateAllForBookIdAndUserId((bookId, userId), context);
+        }
+        public static async Task WordUsersCreateAllForBookIdAndUserIdAsync(
+            IdiomaticaContext context, int bookId, int userId)
+        {
+            await Task.Run(() =>
+            {
+                return WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, userId);
+            });
+        }
+
+
+        public static Dictionary<string, WordUser>? WordUsersDictByPageIdAndUserIdRead(
+            IdiomaticaContext context, int pageId, int userId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.WordUsersDictByPageIdAndUserIdRead((pageId, userId), context);
+        }
+        public static async Task<Dictionary<string, WordUser>?> WordUsersDictByPageIdAndUserIdReadAsync(
+            IdiomaticaContext context, int pageId, int userId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.WordUsersDictByPageIdAndUserIdReadAsync((pageId, userId), context);
+        }
+
+
+        public static void WordUserUpdate(IdiomaticaContext context,
+            int id, AvailableWordUserStatus newStatus, string translation)
+        {
+            if (id < 1)
+            {
+                ErrorHandler.LogAndThrow(1150);
+                return;
+            }
+            // first pull the existing one from the database
+            var dbWordUser = DataCache.WordUserByIdRead(id, context);
+            if (dbWordUser == null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+
+            dbWordUser.Status = newStatus;
+            dbWordUser.Translation = translation;
+            dbWordUser.StatusChanged = DateTime.Now;
+            DataCache.WordUserUpdate(dbWordUser, context);
+
+        }        
         public static async Task WordUserUpdateAsync(IdiomaticaContext context,
             int id, AvailableWordUserStatus newStatus, string translation)
         {

@@ -13,42 +13,6 @@ namespace Logic.Services.API.Tests
     public class BookStatApiTests
     {
         [TestMethod()]
-        public async Task BookStatsCreateAndSaveAsyncTest()
-        {
-            // assemble
-            var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-            int expectedPageCount = 3;
-
-            try
-            {
-                // act
-
-                var newBook = await BookApi.BookCreateAndSaveAsync(
-                    context,
-                    TestConstants.NewBookTitle,
-                    TestConstants.NewBookLanguageCode,
-                    TestConstants.NewBookUrl,
-                    TestConstants.NewBookText
-                    );
-                int newId = (newBook is not null) ? (newBook.Id is not null) ? (int)newBook.Id : 0 : 0;
-
-                await BookStatApi.BookStatsCreateAndSaveAsync(context, newId);
-
-                // assert
-                int actualPageCount = await BookApi.BookGetPageCountAsync(context, newId);
-                // assert
-                Assert.AreEqual(expectedPageCount, actualPageCount);
-            }
-            finally
-            {
-                // clean-up
-
-                await transaction.RollbackAsync();
-            }
-        }
-
-        [TestMethod()]
         public void BookStatsCreateAndSaveTest()
         {
             // assemble
@@ -72,7 +36,7 @@ namespace Logic.Services.API.Tests
                 BookStatApi.BookStatsCreateAndSave(context, newId);
 
                 // assert
-                int actualPageCount = BookApi.BookGetPageCount(context, newId);
+                int actualPageCount = BookApi.BookReadPageCount(context, newId);
                 // assert
                 Assert.AreEqual(expectedPageCount, actualPageCount);
             }
@@ -81,6 +45,41 @@ namespace Logic.Services.API.Tests
                 // clean-up
 
                 transaction.Rollback();
+            }
+        }
+        [TestMethod()]
+        public async Task BookStatsCreateAndSaveAsyncTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            int expectedPageCount = 3;
+
+            try
+            {
+                // act
+
+                var newBook = await BookApi.BookCreateAndSaveAsync(
+                    context,
+                    TestConstants.NewBookTitle,
+                    TestConstants.NewBookLanguageCode,
+                    TestConstants.NewBookUrl,
+                    TestConstants.NewBookText
+                    );
+                int newId = (newBook is not null) ? (newBook.Id is not null) ? (int)newBook.Id : 0 : 0;
+
+                await BookStatApi.BookStatsCreateAndSaveAsync(context, newId);
+
+                // assert
+                int actualPageCount = await BookApi.BookReadPageCountAsync(context, newId);
+                // assert
+                Assert.AreEqual(expectedPageCount, actualPageCount);
+            }
+            finally
+            {
+                // clean-up
+
+                await transaction.RollbackAsync();
             }
         }
     }

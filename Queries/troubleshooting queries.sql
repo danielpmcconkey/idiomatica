@@ -25,12 +25,14 @@ left join [Idioma].[Word] w on t.WordId = w.Id
 left join [Idioma].[BookUser] bu on b.Id = bu.BookId and lu.Id = bu.LanguageUserId
 left join [Idioma].[PageUser] pu on bu.Id =  pu.BookUserId and p.Id = pu.PageId
 left join [Idioma].[WordUser] wu on w.Id = wu.WordId and wu.LanguageUserId = lu.Id
-where p.BookId = 2
-and lu.UserId = 1
+where p.BookId = 1230--1944
+and lu.UserId = 1944--1230
 --and p.Ordinal = 2
 --group by b.Id, p.Ordinal, w.Id
 --order by p.Ordinal, pp.Ordinal --, s.Ordinal, t.Ordinal
 
+select * from [Idioma].Book where Id = 1944
+select * from [Idioma].[vw_BookListRow] where BookId = 1234 or UserId = 1948
 select 
 b.Title,p.Ordinal,p.OriginalText
 ,

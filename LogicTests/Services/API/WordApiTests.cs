@@ -113,7 +113,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 // act
-                var newWord = WordApi.CreateWord(context, languageId, text, romanization);
+                var newWord = WordApi.WordCreate(context, languageId, text, romanization);
 
 
                 // assert
@@ -145,7 +145,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 // act
-                var newWord = await WordApi.CreateWordAsync(context, languageId, text, romanization);
+                var newWord = await WordApi.WordCreateAsync(context, languageId, text, romanization);
 
                 // assert
                 Assert.IsNotNull(newWord);
@@ -178,7 +178,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 // act
-                var wordOrderPair = WordApi.CreateOrderedWordsFromSentenceId(
+                var wordOrderPair = WordApi.WordsCreateOrderedFromSentenceId(
                     context, languageId, sentenceId);
                 int actualCount = wordOrderPair.Count;
                 var checkedWord = wordOrderPair.Where(x => x.ordinal == wordOrdinalToCheck).FirstOrDefault();
@@ -218,7 +218,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 // act
-                var wordOrderPair = await WordApi.CreateOrderedWordsFromSentenceIdAsync(
+                var wordOrderPair = await WordApi.WordsCreateOrderedFromSentenceIdAsync(
                     context, languageId, sentenceId);
                 int actualCount = wordOrderPair.Count;
                 var checkedWord = wordOrderPair.Where(x => x.ordinal == wordOrdinalToCheck).FirstOrDefault();
@@ -281,7 +281,7 @@ namespace Logic.Services.API.Tests
                 var languageUser1 = LanguageUserApi.LanguageUserCreate(context, language1, (int)user.Id);
                 if (languageUser1 is null) ErrorHandler.LogAndThrow();
 
-                var bookUser1 = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
+                var bookUser1 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookIdSpanish, (int)user.Id);
                 if (bookUser1 is null || bookUser1.Id is null || bookUser1.LanguageUserId is null)
                 {
@@ -305,7 +305,7 @@ namespace Logic.Services.API.Tests
                 var languageUser2 = LanguageUserApi.LanguageUserCreate(context, language2, (int)user.Id);
                 if (languageUser2 is null) ErrorHandler.LogAndThrow();
 
-                var bookUser2 = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
+                var bookUser2 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookIdEnglish, (int)user.Id);
                 if (bookUser2 is null || bookUser2.Id is null || bookUser2.LanguageUserId is null)
                 {
@@ -416,7 +416,7 @@ namespace Logic.Services.API.Tests
                 var languageUser1 = LanguageUserApi.LanguageUserCreate(context, language1, (int)user.Id);
                 if (languageUser1 is null) ErrorHandler.LogAndThrow();
 
-                var bookUser1 = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
+                var bookUser1 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookIdSpanish, (int)user.Id);
                 if (bookUser1 is null || bookUser1.Id is null || bookUser1.LanguageUserId is null)
                 {
@@ -440,7 +440,7 @@ namespace Logic.Services.API.Tests
                 var languageUser2 = LanguageUserApi.LanguageUserCreate(context, language2, (int)user.Id);
                 if (languageUser2 is null) ErrorHandler.LogAndThrow();
 
-                var bookUser2 = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
+                var bookUser2 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookIdEnglish, (int)user.Id);
                 if (bookUser2 is null || bookUser2.Id is null || bookUser2.LanguageUserId is null)
                 {
@@ -514,7 +514,23 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordGetByIdTest()
         {
-            Assert.Fail();
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            try
+            {
+                // act
+
+
+                // assert
+                Assert.Fail();
+            }
+            finally
+            {
+                // clean-up
+                transaction.Rollback();
+            }
         }
 
         [TestMethod()]

@@ -119,11 +119,61 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordUsersCreateAllForBookIdAndUserIdTest()
         {
-            Assert.Fail();
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            try
+            {
+                // act
+
+
+                // assert
+                Assert.Fail();
+            }
+            finally
+            {
+                // clean-up
+                transaction.Rollback();
+            }
         }
 
         [TestMethod()]
         public void WordUsersDictByPageIdAndUserIdReadTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            try
+            {
+                // act
+
+
+                // assert
+                Assert.Fail();
+            }
+            finally
+            {
+                // clean-up
+                transaction.Rollback();
+            }
+        }
+
+        [TestMethod()]
+        public void WordUserCreateTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void WordUsersCreateAllForBookIdAndUserIdAsyncTest1()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void WordUserUpdateTest()
         {
             Assert.Fail();
         }

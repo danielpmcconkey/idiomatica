@@ -52,6 +52,8 @@ namespace Logic.Services.API
 
             return languageUser;
         }
+
+
         #endregion
         public static LanguageUser? LanguageUserGet(
             IdiomaticaContext context, int languageId, int userId)
@@ -66,6 +68,8 @@ namespace Logic.Services.API
             if (userId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync((languageId, userId), context);
         }
+
+
         public static List<LanguageUser>? LanguageUsersAndLanguageGetByUserId(
             IdiomaticaContext context, int userId)
         {

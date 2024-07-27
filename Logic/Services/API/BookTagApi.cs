@@ -12,7 +12,8 @@ namespace Logic.Services.API
 {
     public static class BookTagApi
     {
-        public static void BookTagAdd(IdiomaticaContext context, int bookId, int userId, string tag)
+        public static void BookTagAdd(
+            IdiomaticaContext context, int bookId, int userId, string tag)
         {
             if (bookId < 1) ErrorHandler.LogAndThrow();
             if (userId < 1) ErrorHandler.LogAndThrow();
@@ -42,11 +43,15 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow(2440);
             }
         }
-        public static async Task BookTagAddAsync(IdiomaticaContext context, int bookId, int userId, string tag)
+        public static async Task BookTagAddAsync(
+            IdiomaticaContext context, int bookId, int userId, string tag)
         {
             await Task.Run(() => BookTagAdd(context, bookId, userId, tag));
         }
-        public static void BookTagRemove(IdiomaticaContext context, int bookId, int userId, string tag)
+
+
+        public static void BookTagRemove(
+            IdiomaticaContext context, int bookId, int userId, string tag)
         {
 
             if (bookId < 1) ErrorHandler.LogAndThrow();
@@ -56,10 +61,13 @@ namespace Logic.Services.API
 
             DataCache.BookTagDelete((bookId, userId, trimmedTag), context);
         }
-        public static async Task BookTagRemoveAsync(IdiomaticaContext context, int bookId, int userId, string tag)
+        public static async Task BookTagRemoveAsync(
+            IdiomaticaContext context, int bookId, int userId, string tag)
         {
             await Task.Run(() => BookTagRemove(context, bookId, userId, tag));
         }
+
+
         public static List<BookTag> BookTagsGetByBookIdAndUserId(
             IdiomaticaContext context, int bookId, int userId)
         {

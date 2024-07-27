@@ -15,6 +15,97 @@ namespace Logic.Services.API.Tests
     [TestClass()]
     public class LanguageUserApiTests
     {
+        [TestMethod()]
+        public void LanguageUserCreateTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+            int languageId = 1;
+
+
+            try
+            {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUsersBefore = DataCache.LanguageUsersAndLanguageByUserIdRead(
+                    (int)user.Id, context);
+
+                int countBefore = languageUsersBefore.Count;
+                int expectedCountAfter = countBefore + 1;
+
+                // act
+
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
+                var languageUsersAfter = DataCache.LanguageUsersAndLanguageByUserIdRead(
+                    (int)user.Id, context);
+                int actualCountAfter = languageUsersAfter.Count;
+
+
+                // assert
+                Assert.IsNotNull(languageUser);
+                Assert.IsNotNull(languageUser.Id);
+                Assert.IsTrue(languageUser.Id > 0);
+                Assert.AreEqual(expectedCountAfter, actualCountAfter);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.RollbackAsync();
+            }
+        }
+        [TestMethod()]
+        public async Task LanguageUserCreateAsyncTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            int languageId = 1;
+
+
+            try
+            {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUsersBefore = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
+                    context, (int)user.Id);
+
+                int countBefore = languageUsersBefore.Count;
+                int expectedCountAfter = countBefore + 1;
+
+                // act
+
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, languageId, (int)user.Id);
+                var languageUsersAfter = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
+                    context, (int)user.Id);
+                int actualCountAfter = languageUsersAfter.Count;
+
+
+                // assert
+                Assert.IsNotNull(languageUser);
+                Assert.IsNotNull(languageUser.Id);
+                Assert.IsTrue(languageUser.Id > 0);
+                Assert.AreEqual(expectedCountAfter, actualCountAfter);
+            }
+            finally
+            {
+                // clean-up
+
+                await transaction.RollbackAsync();
+            }
+        }
+
 
         [TestMethod()]
         public void LanguageUserGetTest()
@@ -137,6 +228,7 @@ namespace Logic.Services.API.Tests
             }
         }
 
+
         [TestMethod()]
         public void LanguageUsersAndLanguageGetByUserIdTest()
         {
@@ -194,7 +286,6 @@ namespace Logic.Services.API.Tests
                 transaction.Rollback();
             }
         }
-
         [TestMethod()]
         public async Task LanguageUsersAndLanguageGetByUserIdAsyncTest()
         {
@@ -250,98 +341,6 @@ namespace Logic.Services.API.Tests
                 // clean-up
 
                 await transaction.RollbackAsync();
-            }
-        }
-
-        [TestMethod()]
-        public async Task LanguageUserCreateAsyncTest()
-        {
-            // assemble
-            var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-            int languageId = 1;
-
-
-            try
-            {
-                var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUsersBefore = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
-                    context, (int)user.Id);
-
-                int countBefore = languageUsersBefore.Count;
-                int expectedCountAfter = countBefore + 1;
-
-                // act
-
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, languageId, (int)user.Id);
-                var languageUsersAfter = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
-                    context, (int)user.Id);
-                int actualCountAfter = languageUsersAfter.Count;
-
-
-                // assert
-                Assert.IsNotNull(languageUser);
-                Assert.IsNotNull(languageUser.Id);
-                Assert.IsTrue(languageUser.Id > 0);
-                Assert.AreEqual(expectedCountAfter, actualCountAfter);
-            }
-            finally
-            {
-                // clean-up
-
-                await transaction.RollbackAsync();
-            }
-        }
-
-        [TestMethod()]
-        public void LanguageUserCreateTest()
-        {
-            // assemble
-            var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
-            int languageId = 1;
-
-
-            try
-            {
-                var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUsersBefore = DataCache.LanguageUsersAndLanguageByUserIdRead(
-                    (int)user.Id, context);
-
-                int countBefore = languageUsersBefore.Count;
-                int expectedCountAfter = countBefore + 1;
-
-                // act
-
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
-                var languageUsersAfter = DataCache.LanguageUsersAndLanguageByUserIdRead(
-                    (int)user.Id, context);
-                int actualCountAfter = languageUsersAfter.Count;
-
-
-                // assert
-                Assert.IsNotNull(languageUser);
-                Assert.IsNotNull(languageUser.Id);
-                Assert.IsTrue(languageUser.Id > 0);
-                Assert.AreEqual(expectedCountAfter, actualCountAfter);
-            }
-            finally
-            {
-                // clean-up
-
-                transaction.RollbackAsync();
             }
         }
     }

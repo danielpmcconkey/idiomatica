@@ -16,6 +16,61 @@ namespace Logic.Services.API.Tests
     public class BookUserApiTests
     {
         [TestMethod()]
+        public void BookUserArchiveTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            int bookId1 = 6;
+            int bookId2 = 7;
+            int bookId3 = 8;
+            int expectedCountBefore = 3;
+            int expectedCountAfter = 2;
+
+            try
+            {
+                var originalPacket = new BookListDataPacket(context, false);
+
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                if (languageUser is null) ErrorHandler.LogAndThrow();
+
+                // act
+                var bookUser1 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
+                    context, bookId1, (int)user.Id);
+                var bookUser2 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
+                    context, bookId2, (int)user.Id);
+                var bookUser3 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
+                    context, bookId3, (int)user.Id);
+                var newPacketBefore = BookApi.BookListRead(context, (int)user.Id, originalPacket);
+                int actualCountBefore = newPacketBefore is null ? 0 :
+                    newPacketBefore.BookListRows is null ? 0 : newPacketBefore.BookListRows.Count;
+                int bookUser2Id = bookUser2 is null ? 0 : bookUser2.Id is null ? 0 : (int)bookUser2.Id;
+                BookUserApi.BookUserArchive(context, bookUser2Id);
+                var newPacketAfter = BookApi.BookListRead(context, (int)user.Id, originalPacket);
+                int actualCountAfter = newPacketAfter is null ? 0 :
+                    newPacketAfter.BookListRows is null ? 0 : newPacketAfter.BookListRows.Count;
+                // assert
+
+                Assert.AreEqual(expectedCountBefore, actualCountBefore);
+                Assert.AreEqual(expectedCountAfter, actualCountAfter);
+
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
+            }
+        }
+        [TestMethod()]
         public async Task BookUserArchiveAsyncTest()
         {
             // assemble
@@ -43,11 +98,11 @@ namespace Logic.Services.API.Tests
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
                 // act
-                var bookUser1 = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
+                var bookUser1 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookId1, (int)user.Id);
-                var bookUser2 = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
+                var bookUser2 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookId2, (int)user.Id);
-                var bookUser3 = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
+                var bookUser3 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookId3, (int)user.Id);
                 var newPacketBefore = await BookApi.BookListReadAsync(context, (int)user.Id, originalPacket);
                 int actualCountBefore = newPacketBefore is null ? 0 :
@@ -70,6 +125,7 @@ namespace Logic.Services.API.Tests
                 await transaction.RollbackAsync();
             }
         }
+
 
         [TestMethod()]
         public void BookUserByBookIdAndUserIdReadTest()
@@ -100,7 +156,6 @@ namespace Logic.Services.API.Tests
                 transaction.Rollback();
             }
         }
-
         [TestMethod()]
         public async Task BookUserByBookIdAndUserIdReadAsyncTest()
         {
@@ -131,6 +186,48 @@ namespace Logic.Services.API.Tests
             }
         }
 
+
+        [TestMethod()]
+        public void BookUserCreateTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+
+            int bookId = 6;
+            //var firstPage = PageApi.PageReadFirstByBookId(context, bookId);
+            //var firstPageId = firstPage is null ? 0 : firstPage.Id is null ? 0 : (int)firstPage.Id;
+
+
+            try
+            {
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+
+                if (user is null || user.Id is null || user.Id < 1)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                if (languageUser is null) ErrorHandler.LogAndThrow();
+
+                // act
+                var bookUser = BookUserApi.BookUserCreate(context, bookId, (int)user.Id);
+                // assert
+
+                Assert.IsNotNull(bookUser);
+                Assert.AreEqual(bookId, bookUser.BookId);
+                Assert.IsNotNull(bookUser.LanguageUserId);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
+            }
+        }
         [TestMethod()]
         public async Task BookUserCreateAsyncTest()
         {
@@ -173,6 +270,7 @@ namespace Logic.Services.API.Tests
             }
         }
 
+
         [TestMethod()]
         public void BookUserUpdateBookmarkTest()
         {
@@ -200,7 +298,7 @@ namespace Logic.Services.API.Tests
 
 
                 // act
-                var bookUser = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
+                var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                 context, bookId, (int)user.Id);
                 if (bookUser is null || bookUser.Id is null)
                 {
@@ -227,7 +325,6 @@ namespace Logic.Services.API.Tests
                 transaction.Rollback();
             }
         }
-
         [TestMethod()]
         public async Task BookUserUpdateBookmarkAsyncTest()
         {
@@ -255,7 +352,7 @@ namespace Logic.Services.API.Tests
 
 
                 // act
-                var bookUser = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
+                var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                 context, bookId, (int)user.Id);
                 if (bookUser is null || bookUser.Id is null)
                 {
@@ -282,5 +379,8 @@ namespace Logic.Services.API.Tests
                 await transaction.RollbackAsync();
             }
         }
+
+
+
     }
 }

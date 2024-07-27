@@ -145,7 +145,23 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void TokensReadByPageIdTest()
         {
-            Assert.Fail();
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            try
+            {
+                // act
+
+
+                // assert
+                Assert.Fail();
+            }
+            finally
+            {
+                // clean-up
+                transaction.Rollback();
+            }
         }
 
         [TestMethod()]
@@ -156,6 +172,40 @@ namespace Logic.Services.API.Tests
 
         [TestMethod()]
         public void CreateTokensFromSentenceTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            try
+            {
+                // act
+
+
+                // assert
+                Assert.Fail();
+            }
+            finally
+            {
+                // clean-up
+                transaction.Rollback();
+            }
+        }
+
+        [TestMethod()]
+        public void TokenCreateAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void TokenGetChildObjectsTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void TokensAndWordsReadBySentenceIdTest()
         {
             Assert.Fail();
         }

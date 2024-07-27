@@ -11,25 +11,33 @@ namespace Logic.Services.API
 {
     public static class BookUserApi
     {
-        /// <summary>
-        /// Create the book user, word users, and book user stats
-        /// </summary>
-        public static BookUser? OrchestrateBookUserCreationAndSubProcesses(
-            IdiomaticaContext context, int bookId, int userId)
+        public static void BookUserArchive(
+            IdiomaticaContext context, int bookUserId)
         {
-            var bookUser = BookUserApi.BookUserCreate(context, bookId, userId);
-            if (bookUser is null || bookUser.Id is null)
+            if (bookUserId < 1) ErrorHandler.LogAndThrow();
+            var bookUser = DataCache.BookUserByIdRead(bookUserId, context);
+            if (bookUser is null)
             {
                 ErrorHandler.LogAndThrow();
-                return null;
+                return;
             }
-            // create the wordUsers
-            WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
-            // update bookUserStats
-            BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (int)bookUser.Id);
-
-            return bookUser;
+            bookUser.IsArchived = true;
+            DataCache.BookUserUpdate(bookUser, context);
         }
+        public static async Task BookUserArchiveAsync(IdiomaticaContext context, int bookUserId)
+        {
+            if (bookUserId < 1) ErrorHandler.LogAndThrow();
+            var bookUser = await DataCache.BookUserByIdReadAsync(bookUserId, context);
+            if (bookUser is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            bookUser.IsArchived = true;
+            await DataCache.BookUserUpdateAsync(bookUser, context);
+        }
+
+
         public static BookUser? BookUserByBookIdAndUserIdRead(
             IdiomaticaContext context, int bookId, int userId)
         {
@@ -47,6 +55,7 @@ namespace Logic.Services.API
                 return BookUserByBookIdAndUserIdRead(context, bookId, userId);
             });
         }
+
 
         public static BookUser? BookUserCreate(IdiomaticaContext context, int bookId, int userId)
         {
@@ -74,7 +83,7 @@ namespace Logic.Services.API
                 return null;
             }
             var languageUser = LanguageUserApi.LanguageUserGet(context, (int)book.LanguageId, userId);
-            
+
             if (languageUser is null || languageUser.Id is null || languageUser.Id < 1)
             {
                 ErrorHandler.LogAndThrow();
@@ -106,6 +115,15 @@ namespace Logic.Services.API
             }
             return bookUser;
         }
+        public static async Task<BookUser?> BookUserCreateAsync(IdiomaticaContext context, int bookId, int userId)
+        {
+            return await Task<BookUser?>.Run(() =>
+            {
+                return BookUserCreate(context, bookId, userId);
+            });
+        }
+
+
         public static void BookUserUpdateBookmark(
             IdiomaticaContext context, int bookUserId, int currentPageId)
         {
@@ -132,18 +150,6 @@ namespace Logic.Services.API
             IdiomaticaContext context, int bookUserId, int currentPageId)
         {
             await Task.Run(() => { BookUserUpdateBookmark(context, bookUserId, currentPageId); });
-        }
-        public static async Task BookUserArchiveAsync(IdiomaticaContext context, int bookUserId)
-        {
-            if (bookUserId < 1) ErrorHandler.LogAndThrow();
-            var bookUser = await DataCache.BookUserByIdReadAsync(bookUserId, context);
-            if (bookUser is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return;
-            }
-            bookUser.IsArchived = true;
-            await DataCache.BookUserUpdateAsync(bookUser, context);
         }
     }
 }

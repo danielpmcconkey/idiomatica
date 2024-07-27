@@ -93,11 +93,49 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void SentencesReadByPageIdTest()
         {
-            Assert.Fail();
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            try
+            {
+                // act
+
+
+                // assert
+                Assert.Fail();
+            }
+            finally
+            {
+                // clean-up
+                transaction.Rollback();
+            }
         }
 
         [TestMethod()]
         public void CreateSentenceTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            try
+            {
+                // act
+
+
+                // assert
+                Assert.Fail();
+            }
+            finally
+            {
+                // clean-up
+                transaction.Rollback();
+            }
+        }
+
+        [TestMethod()]
+        public void PotentialSentencesSplitFromTextAsyncTest()
         {
             Assert.Fail();
         }

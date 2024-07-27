@@ -19,11 +19,14 @@ namespace Logic.Services.API
             if (string.IsNullOrEmpty(code)) ErrorHandler.LogAndThrow();
             return DataCache.LanguageCodeByCodeRead(code, context);
         }
-        public static async Task<LanguageCode?> LanguageCodeReadByCodeAsync(IdiomaticaContext context, string code)
+        public static async Task<LanguageCode?> LanguageCodeReadByCodeAsync(
+            IdiomaticaContext context, string code)
         {
             if (string.IsNullOrEmpty(code)) ErrorHandler.LogAndThrow();
             return await DataCache.LanguageCodeByCodeReadAsync(code, context);
         }
+
+
         public static Dictionary<string, LanguageCode> LanguageCodeOptionsRead(
             IdiomaticaContext context, Expression<Func<LanguageCode, bool>> filter)
         {

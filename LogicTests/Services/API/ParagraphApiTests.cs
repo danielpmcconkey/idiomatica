@@ -177,17 +177,61 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void ParagraphsReadByPageIdTest()
         {
-            Assert.Fail();
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            try
+            {
+                // act
+
+
+                // assert
+                Assert.Fail();
+            }
+            finally
+            {
+                // clean-up
+                transaction.Rollback();
+            }
         }
 
         [TestMethod()]
         public void CreateParagraphFromSplitTest()
         {
-            Assert.Fail();
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            try
+            {
+                // act
+
+
+                // assert
+                Assert.Fail();
+            }
+            finally
+            {
+                // clean-up
+                transaction.Rollback();
+            }
         }
 
         [TestMethod()]
         public void ParagraphReadAllTextAsyncTest1()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void ParagraphReadAllTextTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void ParagraphTranslateTest()
         {
             Assert.Fail();
         }

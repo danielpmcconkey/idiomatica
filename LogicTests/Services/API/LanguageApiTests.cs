@@ -15,6 +15,37 @@ namespace Logic.Services.API.Tests
     public class LanguageApiTests
     {
         [TestMethod()]
+        public void LanguageReadTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            int languageId = 2;
+            string expectedCode = "EN-US";
+
+
+            try
+            {
+                // act
+                var language = LanguageApi.LanguageRead(context, languageId);
+                if (language == null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+
+                // assert
+                Assert.AreEqual(expectedCode, language.Code);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
+            }
+        }
+        [TestMethod()]
         public async Task LanguageReadAsyncTest()
         {
             // assemble
@@ -46,36 +77,5 @@ namespace Logic.Services.API.Tests
             }
         }
 
-        [TestMethod()]
-        public void LanguageReadTest()
-        {
-            // assemble
-            var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
-
-            int languageId = 2;
-            string expectedCode = "EN-US";
-
-
-            try
-            {
-                // act
-                var language = LanguageApi.LanguageRead(context, languageId);
-                if (language == null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // assert
-                Assert.AreEqual(expectedCode, language.Code);
-            }
-            finally
-            {
-                // clean-up
-
-                transaction.Rollback();
-            }
-        }
     }
 }

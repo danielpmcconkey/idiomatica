@@ -14,44 +14,6 @@ namespace Logic.Services.API
 {
     public static class BookApi
     {
-        /// <summary>
-        /// orchestrates the processes to create the book, book stats, book user 
-        /// for the creating user, word users for the creating user, and the 
-        /// book user stats for the creating user
-        /// </summary>
-        public static Book? OrchestrateBookCreationAndSubProcesses(
-            IdiomaticaContext context, int userId,  string title, string languageCode,
-            string? url, string text)
-        {
-            Book? book = BookApi.BookCreateAndSave(context, title, languageCode, url, text);
-            if(book is null || book.Id is null || book.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            int bookId = (int)book.Id;
-            // add the book stats
-            BookStatApi.BookStatsCreateAndSave(context, bookId);
-            // now create the book user for the logged in user
-            if(userId < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            var bookUser = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(context, bookId, userId);
-            
-
-            return book;
-        }
-        public static async Task<Book?> OrchestrateBookCreationAndSubProcessesAsync(
-            IdiomaticaContext context, int userId, string title, string languageCode,
-            string? url, string text)
-        {
-            return await Task<Book?>.Run(() =>
-            {
-                return OrchestrateBookCreationAndSubProcesses(context, userId, title, languageCode, url, text);
-            });
-        }
         public static Book? BookCreateAndSave(
             IdiomaticaContext context, string title, string languageCode,
             string? url, string text)
@@ -71,7 +33,7 @@ namespace Logic.Services.API
             }
 
             // divide text into paragraphs
-            string[] paragraphSplits = ParagraphApi.SplitTextToPotentialParagraphs(context, text, languageCodeT);
+            string[] paragraphSplits = ParagraphApi.PotentialParagraphsSplitFromText(context, text, languageCodeT);
 
 
             // add the book to the DB so you can save pages using its ID
@@ -88,7 +50,7 @@ namespace Logic.Services.API
                 return null;
             }
 
-            var pageSplits = PageApi.CreatePageSplitsFromParagraphSplits(paragraphSplits);
+            var pageSplits = PageApi.PageSplitsCreateFromParagraphSplits(paragraphSplits);
             if (pageSplits is null || pageSplits.Count == 0)
             {
                 ErrorHandler.LogAndThrow();
@@ -100,7 +62,7 @@ namespace Logic.Services.API
             {
                 string pageSplitTextTrimmed = pageSplit.pageText.Trim();
                 if (string.IsNullOrEmpty(pageSplitTextTrimmed)) continue;
-                Page? page = PageApi.CreatePageFromPageSplit(context,
+                Page? page = PageApi.PageCreateFromPageSplit(context,
                     pageSplit.pageNum, pageSplitTextTrimmed,
                     (int)book.Id, (int)language.Id);
                 if (page is not null && page.Id is not null or 0)
@@ -120,28 +82,34 @@ namespace Logic.Services.API
                 return BookCreateAndSave(context, title, languageCode, url, text);
             });
         }
-        public static Book? BookGet(IdiomaticaContext context, int bookId)
+
+
+        public static Book? BookRead(IdiomaticaContext context, int bookId)
         {
             return DataCache.BookByIdRead(bookId, context);
         }
-        public static async Task<Book?> BookGetAsync(IdiomaticaContext context, int bookId)
+        public static async Task<Book?> BookReadAsync(IdiomaticaContext context, int bookId)
         {
             return await DataCache.BookByIdReadAsync(bookId, context);
         }
-        public static int BookGetPageCount(IdiomaticaContext context, int bookId)
+
+
+        public static int BookReadPageCount(IdiomaticaContext context, int bookId)
         {
             var dbVal = DataCache.BookStatByBookIdAndStatKeyRead((bookId, AvailableBookStat.TOTALPAGES), context);
             int outVal = 0;
             if (dbVal != null) int.TryParse(dbVal.Value, out outVal);
             return outVal;
         }
-        public static async Task<int> BookGetPageCountAsync(IdiomaticaContext context, int bookId)
+        public static async Task<int> BookReadPageCountAsync(IdiomaticaContext context, int bookId)
         {
             return await Task<int>.Run(() =>
             {
-                return BookGetPageCount(context, bookId);
+                return BookReadPageCount(context, bookId);
             });
         }
+
+
         public static BookListDataPacket BookListRead(
             IdiomaticaContext context, int loggedInUserId, BookListDataPacket bookListDataPacket)
         {
@@ -182,6 +150,8 @@ namespace Logic.Services.API
             return bookListDataPacket;
 
         }
+
+
         public static BookListRow? BookListRowByBookIdAndUserIdRead(
             IdiomaticaContext context, int bookId, int userId)
         {

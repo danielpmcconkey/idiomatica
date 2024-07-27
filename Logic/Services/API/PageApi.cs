@@ -14,351 +14,7 @@ namespace Logic.Services.API
 {
     public static class PageApi
     {
-        public static ReadDataPacket? OrchestrateMovePage(
-            IdiomaticaContext context, ReadDataPacket readDataPacket, int bookId, int targetPageNum)
-        {
-            if (readDataPacket.LanguageUser is null || readDataPacket.LanguageUser.Id is null || readDataPacket.LanguageUser.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            if (readDataPacket.CurrentPageUser is null || readDataPacket.CurrentPageUser.Id is null || readDataPacket.CurrentPageUser.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            if (readDataPacket.BookUser is null || readDataPacket.BookUser.Id is null || readDataPacket.BookUser.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            if (readDataPacket.LoggedInUser is null || readDataPacket.LoggedInUser.Id is null || readDataPacket.LoggedInUser.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            if (readDataPacket.CurrentPage is null || readDataPacket.CurrentPage.Id is null || readDataPacket.CurrentPage.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-
-            // mark the previous page as read if moving forward
-            if (targetPageNum > readDataPacket.CurrentPage.Ordinal)
-                PageUserApi.PageUserMarkAsRead(context, (int)readDataPacket.CurrentPageUser.Id);
-
-            if (targetPageNum < 1) return null;
-            if (targetPageNum > readDataPacket.BookTotalPageCount)
-                return null;
-
-            // reload the current page user with the new target
-            readDataPacket.CurrentPageUser = PageUserApi.PageUserReadByOrderWithinBook(
-                context, (int)readDataPacket.LanguageUser.Id, targetPageNum, bookId);
-            
-            // create the page user if it hasn't been created already
-            if (readDataPacket.CurrentPageUser is null || readDataPacket.CurrentPageUser.PageId is null)
-            {
-                // but first need to pull the page
-                readDataPacket.CurrentPage = PageReadByOrdinalAndBookId(context, targetPageNum, bookId);
-                if (readDataPacket.CurrentPage is null || readDataPacket.CurrentPage.Id is null || readDataPacket.CurrentPage.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return null;
-                }
-                readDataPacket.CurrentPageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (int)readDataPacket.CurrentPage.Id, (int)readDataPacket.LoggedInUser.Id);
-            }
-            if(readDataPacket.CurrentPageUser is null || readDataPacket.CurrentPageUser.PageId is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-
-
-            var newReadDataPacket = OrchestrateResetReadDataForNewPage(
-                context, readDataPacket, (int)readDataPacket.CurrentPageUser.PageId);
-            if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
-                newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
-                newReadDataPacket.CurrentPageUser.PageId is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            readDataPacket = newReadDataPacket;
-            BookUserApi.BookUserUpdateBookmark(
-                context, (int)readDataPacket.BookUser.Id, (int)readDataPacket.CurrentPageUser.PageId);
-
-            return readDataPacket;
-        }
-        public static ReadDataPacket? OrchestrateResetReadDataForNewPage(IdiomaticaContext context, ReadDataPacket readDataPacket, int newPageId)
-        {
-            if (newPageId < 1)
-            {
-                ErrorHandler.LogAndThrow(1240);
-                return null;
-            }
-            if (readDataPacket.LoggedInUser == null || readDataPacket.LoggedInUser.Id == null || readDataPacket.LoggedInUser.Id == 0)
-            {
-                ErrorHandler.LogAndThrow(2130);
-                return null;
-            }
-            // wipe the old ones out
-            readDataPacket.CurrentPage = null;
-            readDataPacket.Paragraphs = null;
-            readDataPacket.AllWordUsersInPage = null;
-            readDataPacket.AllWordsInPage = null;
-            readDataPacket.Sentences = null;
-            readDataPacket.Tokens = null;
-
-            // and rebuild
-            readDataPacket.CurrentPage = PageApi.PageReadById(context, newPageId);
-            readDataPacket.Paragraphs = ParagraphApi.ParagraphsReadByPageId(context, newPageId);
-            readDataPacket.AllWordsInPage = WordApi.WordsDictReadByPageId(context, newPageId);
-            readDataPacket.Sentences = SentenceApi.SentencesReadByPageId(context, newPageId);
-            readDataPacket.Tokens = TokenApi.TokensReadByPageId(context, newPageId);
-
-            if (readDataPacket.AllWordsInPage is null)
-            {
-                ErrorHandler.LogAndThrow(2130);
-                return null;
-            }
-
-            // do not do this until you've already pulled the _allWordsInPage as 
-            // that makes it way more efficient since it checks the words dict cache
-            readDataPacket.AllWordUsersInPage = WordUserApi.WordUsersDictByPageIdAndUserIdRead(
-                context, newPageId, (int)readDataPacket.LoggedInUser.Id);
-
-            if (readDataPacket.AllWordUsersInPage is null)
-            {
-                ErrorHandler.LogAndThrow(2130);
-                return null;
-            }
-            if (readDataPacket.Paragraphs is null)
-            {
-                ErrorHandler.LogAndThrow(2130);
-                return null;
-            }
-
-            // now knit the paragraph data together
-
-            foreach (var p in readDataPacket.Paragraphs)
-            {
-                p.Sentences = NullHandler.ThrowIfNullOrEmptyList<Sentence>(readDataPacket.Sentences)
-                    .Where(s => s.ParagraphId == p.Id)
-                    .OrderBy(s => s.Ordinal)
-                    .ToList();
-                foreach (var s in p.Sentences)
-                {
-                    s.Tokens = NullHandler.ThrowIfNullOrEmptyList<Token>(readDataPacket.Tokens)
-                        .Where(t => t.SentenceId == s.Id)
-                        .OrderBy(t => t.Ordinal)
-                        .ToList();
-
-                    foreach (var t in s.Tokens)
-                    {
-                        var wordEntry = NullHandler.ThrowIfNullOrEmptyDict(readDataPacket.AllWordsInPage)
-                            .Where(w => w.Value.Id == t.WordId)
-                            .FirstOrDefault();
-                        if (wordEntry.Value != null)
-                        {
-                            t.Word = wordEntry.Value;
-                        }
-                    }
-                }
-            }
-            return readDataPacket;
-        }
-        public static ReadDataPacket? OrchestrateReadDataInit(
-            IdiomaticaContext context, UserService userService, int bookId)
-        {
-            ReadDataPacket readDataPacket = new();
-            // tier 0 tasks, not dependent on anything
-            readDataPacket.LoggedInUser = userService.GetLoggedInUser(context);
-            readDataPacket.Book = BookApi.BookGet(context, bookId);
-            readDataPacket.BookTotalPageCount = BookApi.BookGetPageCount(context, bookId);
-            readDataPacket.LanguageToCode = userService.GetUiLanguageCode();
-
-            if (readDataPacket.LoggedInUser is null || readDataPacket.LoggedInUser.Id is null || readDataPacket.LoggedInUser.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            if (readDataPacket.LanguageToCode is null || string.IsNullOrEmpty(readDataPacket.LanguageToCode.Code))
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            if (readDataPacket.Book is null || readDataPacket.Book.Id is null || readDataPacket.Book.Id < 1 || readDataPacket.Book.LanguageId is null || readDataPacket.Book.LanguageId < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-
-            // tier 1 tasks, dependent on tier 0
-            readDataPacket.BookUser = BookUserApi.BookUserByBookIdAndUserIdRead(context, (int)readDataPacket.Book.Id, (int)readDataPacket.LoggedInUser.Id);
-            readDataPacket.LanguageUser = LanguageUserApi.LanguageUserGet(context, (int)readDataPacket.Book.LanguageId, (int)readDataPacket.LoggedInUser.Id);
-            readDataPacket.Language = LanguageApi.LanguageRead(context, (int)readDataPacket.Book.LanguageId);
-
-
-
-            if (readDataPacket.BookUser is null)
-            {
-                // create it, I guess
-                readDataPacket.BookUser = BookUserApi.OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookId, (int)readDataPacket.LoggedInUser.Id);
-            }
-            if (readDataPacket.BookUser is null || readDataPacket.BookUser.Id is null || readDataPacket.BookUser.Id < 1)
-            {
-                // still null, something went wrong
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            if (readDataPacket.LanguageUser is null || readDataPacket.LanguageUser.Id is null || readDataPacket.LanguageUser.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            if (readDataPacket.Language is null || readDataPacket.Language.Id is null || readDataPacket.Language.Id < 1 || string.IsNullOrEmpty(readDataPacket.Language.Code))
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            // tier 2, dependent on tier 1
-            readDataPacket.BookUserStats = BookUserStatApi.BookUserStatsRead(context, (int)readDataPacket.Book.Id, (int)readDataPacket.LoggedInUser.Id);
-            readDataPacket.CurrentPageUser = PageUserApi.PageUserReadBookmarkedOrFirst(context, (int)readDataPacket.BookUser.Id);
-            readDataPacket.LanguageFromCode = LanguageCodeApi.LanguageCodeReadByCode(context, (string)readDataPacket.Language.Code);
-
-
-
-            // create the page user if it hasn't been created already
-            if (readDataPacket.CurrentPageUser is null)
-            {
-                // but first need to pull the page
-                readDataPacket.CurrentPage = PageApi.PageReadFirstByBookId(context, bookId);
-                if (readDataPacket.CurrentPage is null || readDataPacket.CurrentPage.Id is null || readDataPacket.CurrentPage.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return null;
-                }
-                readDataPacket.CurrentPageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (int)readDataPacket.CurrentPage.Id, (int)readDataPacket.LoggedInUser.Id);
-            }
-            else
-            {
-                // just pull the current page
-                if (readDataPacket.CurrentPageUser.PageId is null || readDataPacket.CurrentPageUser.PageId < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return null;
-                }
-                readDataPacket.CurrentPage = PageApi.PageReadById(context, (int)readDataPacket.CurrentPageUser.PageId);
-            }
-            if (readDataPacket.CurrentPage is null || readDataPacket.CurrentPage.Id is null || readDataPacket.CurrentPage.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-
-            // tier 3, dependent on tier 2
-            var resetDataPacket = OrchestrateResetReadDataForNewPage(
-                context, readDataPacket, (int)readDataPacket.CurrentPage.Id);
-            if (resetDataPacket is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            return resetDataPacket;
-
-        }
-        public static async Task<ReadDataPacket?> OrchestrateReadDataInitAsync(
-            IdiomaticaContext context, UserService userService, int bookId)
-        {
-            return await Task<ReadDataPacket?>.Run(() => 
-            { 
-                return OrchestrateReadDataInit(context, userService, bookId); 
-            });
-        }
-        public static ReadDataPacket? OrchestrateClearPageAndMove(IdiomaticaContext context, ReadDataPacket readDataPacket, int targetPageNum)
-        {
-            ReadDataPacket? outPacket = readDataPacket;
-            if (readDataPacket.CurrentPageUser is null || readDataPacket.CurrentPageUser.Id is null || readDataPacket.CurrentPageUser.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            // update all unknowns to well known
-            PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)readDataPacket.CurrentPageUser.Id);
-            // now move forward, if there's another page
-            if (targetPageNum <= readDataPacket.BookTotalPageCount) // remember pages are 1-indexed
-            {
-                if(readDataPacket.Book is null || readDataPacket.Book.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return null;
-                }
-                outPacket = OrchestrateMovePage(context, readDataPacket, (int)readDataPacket.Book.Id, targetPageNum);
-                if (outPacket is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return null;
-                }
-            }
-            else
-            {
-                // mark the previous page as read because you didn't do it in the PageMove function
-                PageUserApi.PageUserMarkAsRead(context, (int)readDataPacket.CurrentPageUser.Id);
-                // refresh the word user cache
-                if(outPacket is null || outPacket.CurrentPageUser is null || outPacket.CurrentPageUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return null;
-                }
-                outPacket = OrchestrateResetReadDataForNewPage(
-                    context, readDataPacket, (int)outPacket.CurrentPageUser.Id);
-            }
-            return outPacket;
-        }
-        public static async Task<ReadDataPacket?> OrchestrateClearPageAndMoveAsync(
-            IdiomaticaContext context, ReadDataPacket readDataPacket, int targetPageNum)
-        {
-            return await Task<ReadDataPacket?>.Run(() =>
-            {
-                return OrchestrateClearPageAndMove(context, readDataPacket, targetPageNum);
-            });
-        }
-        public static Page? PageReadById(IdiomaticaContext context, int pageId)
-        {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.PageByIdRead(pageId, context);
-        }
-        public static async Task<Page?> PageReadByIdAsync(IdiomaticaContext context, int pageId)
-        {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.PageByIdReadAsync(pageId, context);
-        }
-        public static Page? PageReadFirstByBookId(IdiomaticaContext context, int bookId)
-        {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.PageByOrdinalAndBookIdRead((1, bookId), context);
-        }
-        public static async Task<Page?> PageReadFirstByBookIdAsync(IdiomaticaContext context, int bookId)
-        {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.PageByOrdinalAndBookIdReadAsync((1, bookId), context);
-        }
-        public static Page? PageReadByOrdinalAndBookId(IdiomaticaContext context, int ordinal, int bookId)
-        {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            if (ordinal < 1) ErrorHandler.LogAndThrow();
-            return DataCache.PageByOrdinalAndBookIdRead((ordinal, bookId), context);
-        }
-        public static async Task<Page?> PageReadByOrdinalAndBookIdAsync(
-            IdiomaticaContext context, int ordinal, int bookId)
-        {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.PageByOrdinalAndBookIdReadAsync((ordinal, bookId), context);
-        }
-        public static Page? CreatePageFromPageSplit(
+        public static Page? PageCreateFromPageSplit(
             IdiomaticaContext context, int ordinal, string text,
             int bookId, int languageId)
         {
@@ -390,19 +46,59 @@ namespace Logic.Services.API
                 return null;
             }
             // create paragraphs
-            newPage.Paragraphs = ParagraphApi.CreateParagraphsFromPage(
+            newPage.Paragraphs = ParagraphApi.ParagraphsCreateFromPage(
                 context, (int)newPage.Id, languageId);
             return newPage;
         }
-        public static async Task<Page?> CreatePageFromPageSplitAsync(
+        public static async Task<Page?> PageCreateFromPageSplitAsync(
             IdiomaticaContext context, int ordinal, string text,
             int bookId, int languageId)
         {
             return await Task<Page?>.Run(() =>
             {
-                return CreatePageFromPageSplit(context, ordinal, text, bookId, languageId);
+                return PageCreateFromPageSplit(context, ordinal, text, bookId, languageId);
             });
         }
+
+
+        public static Page? PageReadById(IdiomaticaContext context, int pageId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.PageByIdRead(pageId, context);
+        }
+        public static async Task<Page?> PageReadByIdAsync(IdiomaticaContext context, int pageId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.PageByIdReadAsync(pageId, context);
+        }
+
+
+        public static Page? PageReadByOrdinalAndBookId(IdiomaticaContext context, int ordinal, int bookId)
+        {
+            if (bookId < 1) ErrorHandler.LogAndThrow();
+            if (ordinal < 1) ErrorHandler.LogAndThrow();
+            return DataCache.PageByOrdinalAndBookIdRead((ordinal, bookId), context);
+        }
+        public static async Task<Page?> PageReadByOrdinalAndBookIdAsync(
+            IdiomaticaContext context, int ordinal, int bookId)
+        {
+            if (bookId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.PageByOrdinalAndBookIdReadAsync((ordinal, bookId), context);
+        }
+
+
+        public static Page? PageReadFirstByBookId(IdiomaticaContext context, int bookId)
+        {
+            if (bookId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.PageByOrdinalAndBookIdRead((1, bookId), context);
+        }
+        public static async Task<Page?> PageReadFirstByBookIdAsync(IdiomaticaContext context, int bookId)
+        {
+            if (bookId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.PageByOrdinalAndBookIdReadAsync((1, bookId), context);
+        }
+
+
         /// <summary>
         ///  Used to take a string array (paragraph splits) made from the 
         ///  string provided in the book creation form and combine them into 
@@ -410,7 +106,7 @@ namespace Logic.Services.API
         /// </summary>
         /// <param name="paragraphSplits"></param>
         /// <returns></returns>
-        public static List<(int pageNum, string pageText)> CreatePageSplitsFromParagraphSplits(
+        public static List<(int pageNum, string pageText)> PageSplitsCreateFromParagraphSplits(
             string[] paragraphSplits)
         {
             const int _targetCharCountPerPage = 1378;// this was arrived at by DB query after conversion
@@ -465,12 +161,12 @@ namespace Logic.Services.API
             }
             return pageSplits;
         }
-        public static async Task<List<(int pageNum, string pageText)>> CreatePageSplitsFromParagraphSplitsAsync(
+        public static async Task<List<(int pageNum, string pageText)>> PageSplitsCreateFromParagraphSplitsAsync(
             string[] paragraphSplits)
         {
             return await Task<List<(int pageNum, string pageText)>>.Run(() =>
             {
-                return CreatePageSplitsFromParagraphSplits(paragraphSplits);
+                return PageSplitsCreateFromParagraphSplits(paragraphSplits);
             });
         }
     }

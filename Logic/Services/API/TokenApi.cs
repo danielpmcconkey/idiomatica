@@ -9,22 +9,13 @@ using Logic.Telemetry;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using DeepL;
 using static System.Net.Mime.MediaTypeNames;
+using System.Net;
 
 namespace Logic.Services.API
 {
     public static class TokenApi
     {
-        public static List<Token>? TokensReadByPageId(IdiomaticaContext context, int pageId)
-        {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.TokensByPageIdRead(pageId, context);
-        }
-        public static async Task<List<Token>?> TokensReadByPageIdAsync(IdiomaticaContext context, int pageId)
-        {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.TokensByPageIdReadAsync(pageId, context);
-        }
-        public static Token? CreateToken(IdiomaticaContext context,
+        public static Token? TokenCreate(IdiomaticaContext context,
            string display, int sentenceId, int ordinal, int wordId)
         {
             var token = new Token()
@@ -42,73 +33,20 @@ namespace Logic.Services.API
             }
             return token;
         }
-        public static List<Token> CreateTokensFromSentence(IdiomaticaContext context,
-            int sentenceId, int languageId)
+        public static async Task<Token?> TokenCreateAsync(IdiomaticaContext context,
+           string display, int sentenceId, int ordinal, int wordId)
         {
-            if (sentenceId < 1) ErrorHandler.LogAndThrow();
-            var sentence = DataCache.SentenceByIdRead(sentenceId, context);
-            if (sentence == null || string.IsNullOrEmpty(sentence.Text))
+            return await Task<Token?>.Run(() =>
             {
-                ErrorHandler.LogAndThrow();
-                return new List<Token>();
-            }
-
-            // check if any already exist. there shouldn't be any but whateves
-            DataCache.TokenBySentenceIdDelete(sentenceId, context);
-
-            var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null ||
-                language.Id is null or 0 ||
-                string.IsNullOrEmpty(language.Code))
-            {
-                ErrorHandler.LogAndThrow();
-                return new List<Token>();
-            }
-
-            // create the words first
-            List<(Word? word, int ordinal)> words = WordApi.CreateOrderedWordsFromSentenceId(
-                context, languageId, sentenceId);
-
-            if (words.Count < 1) return new List<Token>();
-
-            // now make the tokens
-            List<Token> tokens = [];
-            foreach (var x in words)
-            {
-                if (x.word is null || x.word.Id is null || x.word.Id < 1 || x.word.Text is null) continue;
-                Token? newToken = CreateToken(
-                    context,
-                    $"{x.word.Text} ", // display; add the space that you previously took out
-                    sentenceId,
-                    x.ordinal,
-                    (int)x.word.Id
-                    );
-                if(newToken is null || newToken.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return [];
-                }
-                tokens.Add(newToken);
-            }
-            return tokens;
-        }
-        public static async Task<List<Token>> CreateTokensFromSentenceAsync(IdiomaticaContext context,
-            int sentenceId, int languageId)
-        {
-            return await Task<List<Token>>.Run(() =>
-            {
-                return CreateTokensFromSentence(context, sentenceId, languageId);
+                return TokenCreate(context, display, sentenceId, ordinal, wordId);
             });
         }
-        /// <summary>
-        /// Returns the list of tokens plus child word
-        /// </summary>
-        public static async Task<List<Token>> TokensAndWordsReadBySentenceIdAsync(
-            IdiomaticaContext context, int sentenceId)
-        {
-            if (sentenceId < 1) ErrorHandler.LogAndThrow();
 
-            return await DataCache.TokensAndWordsBySentenceIdReadAsync(sentenceId, context);
+
+        public static (Token? t, WordUser? wu) TokenGetChildObjects(
+            IdiomaticaContext context, int tokenId, int languageUserId)
+        {
+            return TokenGetChildObjectsAsync(context, tokenId, languageUserId).Result;
         }
         public static async Task<(Token? t, WordUser? wu)> TokenGetChildObjectsAsync(
             IdiomaticaContext context, int tokenId, int languageUserId)
@@ -149,6 +87,97 @@ namespace Logic.Services.API
                     (int)languageUser.Id, string.Empty, AvailableWordUserStatus.UNKNOWN);
             }
             return (t, wu);
+        }
+
+
+        /// <summary>
+        /// Returns the list of tokens plus child word
+        /// </summary>
+        public static async Task<List<Token>> TokensAndWordsReadBySentenceIdAsync(
+            IdiomaticaContext context, int sentenceId)
+        {
+            if (sentenceId < 1) ErrorHandler.LogAndThrow();
+
+            return await DataCache.TokensAndWordsBySentenceIdReadAsync(sentenceId, context);
+        }
+        public static List<Token> TokensAndWordsReadBySentenceId(
+            IdiomaticaContext context, int sentenceId)
+        {
+            return TokensAndWordsReadBySentenceIdAsync(context, sentenceId).Result;
+        }
+
+
+        public static List<Token> TokensCreateFromSentence(IdiomaticaContext context,
+            int sentenceId, int languageId)
+        {
+            if (sentenceId < 1) ErrorHandler.LogAndThrow();
+            var sentence = DataCache.SentenceByIdRead(sentenceId, context);
+            if (sentence == null || string.IsNullOrEmpty(sentence.Text))
+            {
+                ErrorHandler.LogAndThrow();
+                return new List<Token>();
+            }
+
+            // check if any already exist. there shouldn't be any but whateves
+            DataCache.TokenBySentenceIdDelete(sentenceId, context);
+
+            var language = DataCache.LanguageByIdRead(languageId, context);
+            if (language is null ||
+                language.Id is null or 0 ||
+                string.IsNullOrEmpty(language.Code))
+            {
+                ErrorHandler.LogAndThrow();
+                return new List<Token>();
+            }
+
+            // create the words first
+            List<(Word? word, int ordinal)> words = WordApi.WordsCreateOrderedFromSentenceId(
+                context, languageId, sentenceId);
+
+            if (words.Count < 1) return new List<Token>();
+
+            // now make the tokens
+            List<Token> tokens = [];
+            foreach (var x in words)
+            {
+                if (x.word is null || x.word.Id is null || x.word.Id < 1 || x.word.Text is null) continue;
+                Token? newToken = TokenCreate(
+                    context,
+                    $"{x.word.Text} ", // display; add the space that you previously took out
+                    sentenceId,
+                    x.ordinal,
+                    (int)x.word.Id
+                    );
+                if(newToken is null || newToken.Id is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return [];
+                }
+                tokens.Add(newToken);
+            }
+            return tokens;
+        }
+        public static async Task<List<Token>> TokensCreateFromSentenceAsync(
+            IdiomaticaContext context, int sentenceId, int languageId)
+        {
+            return await Task<List<Token>>.Run(() =>
+            {
+                return TokensCreateFromSentence(context, sentenceId, languageId);
+            });
+        }
+
+
+        public static List<Token>? TokensReadByPageId(
+            IdiomaticaContext context, int pageId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.TokensByPageIdRead(pageId, context);
+        }
+        public static async Task<List<Token>?> TokensReadByPageIdAsync(
+            IdiomaticaContext context, int pageId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.TokensByPageIdReadAsync(pageId, context);
         }
     }
 }

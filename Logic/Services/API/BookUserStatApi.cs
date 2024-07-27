@@ -28,6 +28,8 @@ namespace Logic.Services.API
             return await DataCache.BookUserStatsByBookIdAndUserIdReadAsync(
                     (bookId, userId), context);
         }
+
+
         public static void BookUserStatsUpdateByBookUserId(IdiomaticaContext context, int bookUserId)
         {
             var bookUser = DataCache.BookUserByIdRead(bookUserId, context);

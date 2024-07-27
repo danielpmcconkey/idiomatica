@@ -7,22 +7,40 @@ using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
 using DeepL;
+using System.Net;
 
 namespace Logic.Services.API
 {
     public static class SentenceApi
     {
-        public static List<Sentence>? SentencesReadByPageId(IdiomaticaContext context, int pageId)
+        public static string[] PotentialSentencesSplitFromText(
+            IdiomaticaContext context, string text, int languageId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.SentencesByPageIdRead(pageId, context);
+            if (languageId < 1) ErrorHandler.LogAndThrow();
+            if (string.IsNullOrEmpty(text)) ErrorHandler.LogAndThrow();
+
+            var language = DataCache.LanguageByIdRead(languageId, context);
+            if (language is null ||
+                language.Id is null or 0 ||
+                string.IsNullOrEmpty(language.Code))
+            {
+                ErrorHandler.LogAndThrow();
+                return [];
+            }
+            var parser = LanguageParser.Factory.GetLanguageParser(language);
+            return parser.SegmentTextBySentences(text);
         }
-        public static async Task<List<Sentence>?> SentencesReadByPageIdAsync(IdiomaticaContext context, int pageId)
+        public static async Task<string[]> PotentialSentencesSplitFromTextAsync(
+            IdiomaticaContext context, string text, int languageId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.SentencesByPageIdReadAsync(pageId, context);
+            return await Task<string[]>.Run(() =>
+            {
+                return PotentialSentencesSplitFromText(context, text, languageId);
+            });
         }
-        public static Sentence? CreateSentence(
+
+
+        public static Sentence? SentenceCreate(
             IdiomaticaContext context, string text, int languageId, int ordinal,
             int paragraphId)
         {
@@ -42,35 +60,30 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow(2280);
                 return null;
             }
-            newSentence.Tokens = TokenApi.CreateTokensFromSentence(context,
+            newSentence.Tokens = TokenApi.TokensCreateFromSentence(context,
                 (int)newSentence.Id, languageId);
             return newSentence;
         }
-        public static async Task<Sentence?> CreateSentenceAsync(
+        public static async Task<Sentence?> SentenceCreateAsync(
             IdiomaticaContext context, string text, int languageId, int ordinal,
             int paragraphId)
         {
             return await Task<Sentence?>.Run(() =>
             {
-                return CreateSentence(context, text, languageId, ordinal, paragraphId);
+                return SentenceCreate(context, text, languageId, ordinal, paragraphId);
             });
         }
-        public static string[] SplitTextToPotentialSentences(
-            IdiomaticaContext context, string text, int languageId)
-        {
-            if (languageId < 1) ErrorHandler.LogAndThrow();
-            if (string.IsNullOrEmpty(text)) ErrorHandler.LogAndThrow();
 
-            var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null ||
-                language.Id is null or 0 ||
-                string.IsNullOrEmpty(language.Code))
-            {
-                ErrorHandler.LogAndThrow();
-                return [];
-            }
-            var parser = LanguageParser.Factory.GetLanguageParser(language);
-            return parser.SegmentTextBySentences(text);
+
+        public static List<Sentence>? SentencesReadByPageId(IdiomaticaContext context, int pageId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.SentencesByPageIdRead(pageId, context);
+        }
+        public static async Task<List<Sentence>?> SentencesReadByPageIdAsync(IdiomaticaContext context, int pageId)
+        {
+            if (pageId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.SentencesByPageIdReadAsync(pageId, context);
         }
         
     }
