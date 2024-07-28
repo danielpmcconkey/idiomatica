@@ -68,9 +68,9 @@ namespace Model.DAL
                 return LanguageById[key];
             }
             // read DB
-            var value = await context.Languages
+            var value = context.Languages
                 .Where(l => l.Id == key)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
 
             if (value is null || string.IsNullOrEmpty(value.Code)) return null;
             // write to cache

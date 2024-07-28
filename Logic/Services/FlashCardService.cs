@@ -380,7 +380,7 @@ namespace Logic.Services
 
             // get word users that don't already have a flash card
             // ordered by recent status change
-            var wordUsers = await (
+            var wordUsers = (
                         from wu in context.WordUsers
                         join w in context.Words on wu.WordId equals w.Id
                         join fc in context.FlashCards on wu.Id equals fc.WordUserId into grouping
@@ -399,7 +399,7 @@ namespace Logic.Services
                     )
                 .OrderByDescending(x => x.StatusChanged)
                 .Take(NumNewCardsInput)
-                .ToListAsync();
+                .ToList();
 
 
 

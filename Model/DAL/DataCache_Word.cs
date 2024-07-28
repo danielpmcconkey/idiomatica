@@ -86,32 +86,36 @@ namespace Model.DAL
         public static List<Word> WordsByBookIdRead(
             int key, IdiomaticaContext context)
         {
-            return WordsByBookIdReadAsync(key, context).Result;
-        }
-        public static async Task<List<Word>> WordsByBookIdReadAsync(
-            int key, IdiomaticaContext context)
-        {
             // check cache
             if (WordsByBookId.ContainsKey(key))
             {
                 return WordsByBookId[key];
             }
             // read DB
-            var value = await (from b in context.Books
+            var value = (from b in context.Books
                          join p in context.Pages on b.Id equals p.BookId
                          join pp in context.Paragraphs on p.Id equals pp.PageId
                          join s in context.Sentences on pp.Id equals s.ParagraphId
                          join t in context.Tokens on s.Id equals t.SentenceId
                          join w in context.Words on t.WordId equals w.Id
                          where (b.Id == key)
-                         select w).Distinct().ToListAsync();
-            
-            
+                         select w).Distinct().ToList();
+
+
             // write to cache
             WordsByBookId[key] = value;
             return value;
         }
-        public static async Task<Dictionary<string, Word>> WordsDictByBookIdReadAsync(
+        public static async Task<List<Word>> WordsByBookIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            return await Task<List<Word>>.Run(() =>
+            {
+                return WordsByBookIdRead(key, context);
+            });
+        }
+
+        public static Dictionary<string, Word> WordsDictByBookIdRead(
             int key, IdiomaticaContext context)
         {
             // check cache
@@ -141,6 +145,16 @@ namespace Model.DAL
             WordsDictByBookId[key] = value;
             return value;
         }
+        public static async Task<Dictionary<string, Word>> WordsDictByBookIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            return await Task<Dictionary<string, Word>>.Run(() =>
+            {
+                return WordsDictByBookIdRead(key, context);
+            });
+        }
+
+
         public static Dictionary<string, Word> WordsDictByPageIdRead(
             int key, IdiomaticaContext context)
         {
@@ -181,7 +195,7 @@ namespace Model.DAL
         }
 
 
-        public static async Task<List<Word>> WordsCommon1000ByLanguageIdReadAsync(
+        public static List<Word> WordsCommon1000ByLanguageIdReadAsync(
             int key, IdiomaticaContext context)
         {
             // check cache
@@ -216,10 +230,17 @@ namespace Model.DAL
             // write the list to cache
             WordsCommon1000ByLanguageId[key] = value;
             // also write each word to cache
-            foreach (var word in value) { WordById[(int)word.Id] = word; }
+            foreach (var word in value)
+            {
+                if (word is null || word.Id is null) continue;
+                WordById[(int)word.Id] = word;
+            }
             return value;
         }
-        public static async Task<List<Word>> WordsAndTokensAndSentencesAndParagraphsByWordIdReadAsync(int key, IdiomaticaContext context)
+
+
+        public static List<Word> WordsAndTokensAndSentencesAndParagraphsByWordIdRead(
+            int key, IdiomaticaContext context)
         {
             // check cache
             if (WordsAndTokensAndSentencesAndParagraphsByWordId.ContainsKey(key))
@@ -239,6 +260,16 @@ namespace Model.DAL
             WordsAndTokensAndSentencesAndParagraphsByWordId[key] = value;
             return value;
         }
+        public static async Task<List<Word>> WordsAndTokensAndSentencesAndParagraphsByWordIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            return await Task<List<Word>>.Run(() =>
+            {
+                return WordsAndTokensAndSentencesAndParagraphsByWordIdRead(key, context);
+            });
+        }
+
+
         #endregion
 
         #region create

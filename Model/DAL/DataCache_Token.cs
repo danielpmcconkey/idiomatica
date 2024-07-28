@@ -144,11 +144,11 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.Tokens
+            var value = context.Tokens
                 .Include(x => x.Word)
                 .Where(x => x.SentenceId == key)
                 .OrderBy(x => x.Ordinal)
-                .ToListAsync();
+                .ToList();
             // write to cache
             TokensAndWordsBySentenceId[key] = value;
             TokensBySentenceId[key] = value;

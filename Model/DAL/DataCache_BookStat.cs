@@ -52,8 +52,8 @@ namespace Model.DAL
                 return BookStatsByBookId[key];
             }
             // read DB
-            var value = await context.BookStats
-                .Where(x => x.BookId == key).ToListAsync();
+            var value = context.BookStats
+                .Where(x => x.BookId == key).ToList();
             if (value == null) return null;
             // write to cache
             BookStatsByBookId[key] = value;

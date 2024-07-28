@@ -40,7 +40,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.Pages.Where(x => x.Id == key).FirstOrDefaultAsync();
+            var value = context.Pages.Where(x => x.Id == key).FirstOrDefault();
             if (value == null) return null;
             // write to cache
             PageById[key] = value;
@@ -78,31 +78,33 @@ namespace Model.DAL
         public static List<Page> PagesByBookIdRead(
             int key, IdiomaticaContext context)
         {
-            var task = PagesByBookIdReadAsync(key, context);
-            return task.Result;
-        }        
-        public static async Task<List<Page>> PagesByBookIdReadAsync(
-            int key, IdiomaticaContext context)
-        {
             // check cache
             if (PagesByBookId.ContainsKey(key))
             {
                 return PagesByBookId[key];
             }
             // read DB
-            var value = await context.Pages.Where(x => x.BookId == key).OrderBy(x => x.Ordinal)
-                .ToListAsync();
+            var value = context.Pages.Where(x => x.BookId == key).OrderBy(x => x.Ordinal)
+                .ToList();
 
             // write to cache
             PagesByBookId[key] = value;
             // write each item to cache
-            foreach (var item in value) 
-            { 
-                if(item is null || item.Id is null) continue;
-                PageById[(int)item.Id] = item; 
+            foreach (var item in value)
+            {
+                if (item is null || item.Id is null) continue;
+                PageById[(int)item.Id] = item;
             }
 
             return value;
+        }        
+        public static async Task<List<Page>> PagesByBookIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            return await Task<List<Page>>.Run(() =>
+            {
+                return PagesByBookIdRead(key, context);
+            });
         }
         #endregion
 

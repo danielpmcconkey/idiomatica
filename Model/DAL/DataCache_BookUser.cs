@@ -85,12 +85,6 @@ namespace Model.DAL
         public static BookUser? BookUserByBookIdAndUserIdRead(
             (int bookId, int userId) key, IdiomaticaContext context)
         {
-            var task = BookUserByBookIdAndUserIdReadAsync(key, context);
-            return task.Result;
-        }
-        public static async Task<BookUser?> BookUserByBookIdAndUserIdReadAsync(
-            (int bookId, int userId) key, IdiomaticaContext context)
-        {
             // check cache
             if (BookUserByBookIdAndUserId.ContainsKey(key))
             {
@@ -98,16 +92,24 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = await context.BookUsers
+            var value = context.BookUsers
                 .Where(x => x.LanguageUser != null &&
                     x.LanguageUser.UserId == key.userId &&
                     x.BookId == key.bookId)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
             if (value is null || value.Id is null) return null;
             // write to cache
             BookUserByBookIdAndUserId[key] = value;
             BookUserById[(int)value.Id] = value;
             return value;
+        }
+        public static async Task<BookUser?> BookUserByBookIdAndUserIdReadAsync(
+            (int bookId, int userId) key, IdiomaticaContext context)
+        {
+            return await Task<BookUser?>.Run(() =>
+            {
+                return BookUserByBookIdAndUserIdRead(key, context);
+            });
         }
         #endregion
 
