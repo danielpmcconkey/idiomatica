@@ -153,6 +153,7 @@ namespace Logic.Services.API
                     ErrorHandler.LogAndThrow();
                     return [];
                 }
+                newToken.Word = x.word;
                 tokens.Add(newToken);
             }
             return tokens;

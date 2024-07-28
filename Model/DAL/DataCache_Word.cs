@@ -34,6 +34,8 @@ namespace Model.DAL
             if (value == null) return null;
             // write to cache
             WordById[key] = value;
+            if (value.Text is null || value.LanguageId is null) return value;
+            WordByLanguageIdAndTextLower[((int)value.LanguageId, value.Text)] = value;
             return value;
         }
         public static async Task<Word?> WordByIdReadAsync(int key, IdiomaticaContext context)
@@ -42,7 +44,9 @@ namespace Model.DAL
             {
                 return WordByIdRead(key, context);
             });
-        }
+        }        
+
+        
         public static Word? WordByLanguageIdAndTextLowerRead((int languageId, string textLower) key, IdiomaticaContext context)
         {
             // check cache
@@ -61,7 +65,7 @@ namespace Model.DAL
             WordById[(int)value.Id] = value;
             return value;
         }
-        public static async Task<List<Word>> WordsBySentenceIdReadAsync(
+        public static List<Word> WordsBySentenceIdRead(
             int key, IdiomaticaContext context)
         {
             // check cache

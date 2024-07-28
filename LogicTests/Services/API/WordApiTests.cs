@@ -538,5 +538,17 @@ namespace Logic.Services.API.Tests
         {
             Assert.Fail();
         }
+
+        [TestMethod()]
+        public void WordReadByLanguageIdAndTextTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void WordReadByLanguageIdAndTextAsyncTest()
+        {
+            Assert.Fail();
+        }
     }
 }

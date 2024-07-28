@@ -55,6 +55,23 @@ namespace Logic.Services.API
         }
 
 
+        public static Word? WordReadByLanguageIdAndText(
+            IdiomaticaContext context, int languageId, string text)
+        {
+            if (string.IsNullOrEmpty(text)) ErrorHandler.LogAndThrow();
+            if (languageId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.WordByLanguageIdAndTextLowerRead((languageId, text), context);
+        }
+        public static async Task<Word?> WordReadByLanguageIdAndTextAsync(
+            IdiomaticaContext context, int languageId, string text)
+        {
+            return await Task<Word?>.Run(() =>
+            {
+                return WordReadByLanguageIdAndText(context, languageId, text);
+            });
+        }
+
+
         public static List<(Word? word, int ordinal)> WordsCreateOrderedFromSentenceId(
             IdiomaticaContext context, int languageId, int sentenceId)
         {
