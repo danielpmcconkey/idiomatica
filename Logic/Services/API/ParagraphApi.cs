@@ -94,7 +94,7 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow();
                 return string.Empty;
             }
-            return String.Join(" ", sentences);
+            return String.Join(" ", sentenceTexts);
         }
 
 

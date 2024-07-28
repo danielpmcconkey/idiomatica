@@ -14,6 +14,50 @@ namespace Model.DAL
         private static ConcurrentDictionary<int, ParagraphTranslation> ParagraphTranslationById = new ConcurrentDictionary<int, ParagraphTranslation>();
         private static ConcurrentDictionary<int, List<ParagraphTranslation>> ParagraphTranslationsByParagraphId = new ConcurrentDictionary<int, List<ParagraphTranslation>>();
 
+        #region create
+
+
+        public static ParagraphTranslation? ParagraphTranslationCreate(
+            ParagraphTranslation paragraphTranslation, IdiomaticaContext context)
+        {
+            if (paragraphTranslation.ParagraphId is null) 
+                throw new ArgumentNullException(nameof(paragraphTranslation.ParagraphId));
+
+            Guid guid = Guid.NewGuid();
+            int numRows = context.Database.ExecuteSql($"""
+                        
+                INSERT INTO [Idioma].[ParagraphTranslation]
+                      ([ParagraphId]
+                      ,[LanguageCode]
+                      ,[TranslationText]
+                      ,[UniqueKey])
+                VALUES
+                      ({paragraphTranslation.ParagraphId}
+                      ,{paragraphTranslation.Code}
+                      ,{paragraphTranslation.TranslationText}
+                      ,{guid})
+        
+                """);
+            if (numRows < 1) throw new InvalidDataException("creating ParagraphTranslation affected 0 rows");
+            var newEntity = context.ParagraphTranslations.Where(x => x.UniqueKey == guid).FirstOrDefault();
+            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            {
+                throw new InvalidDataException("newEntity is null in ParagraphTranslationCreate");
+            }
+
+
+            // add it to cache
+            ParagraphTranslationUpdateCache(newEntity);
+
+            return newEntity;
+        }
+        public static async Task<ParagraphTranslation?> ParagraphTranslationCreateAsync(ParagraphTranslation value, IdiomaticaContext context)
+        {
+            return await Task.Run(() => { return ParagraphTranslationCreate(value, context); });
+        }
+
+
+        #endregion
 
         #region read
         public static async Task<ParagraphTranslation> ParagraphTranslationByIdReadAsync(int key, IdiomaticaContext context)
@@ -52,51 +96,27 @@ namespace Model.DAL
         }
         #endregion
 
-        #region create
-
-
-        public static ParagraphTranslation? ParagraphTranslationCreate(
-            ParagraphTranslation paragraphTranslation, IdiomaticaContext context)
+        #region delete
+        public static void ParagraphTranslationDeleteByParagraphIdAndLanguageCode(
+            (int paragraphId, string code) key, IdiomaticaContext context)
         {
-            if (paragraphTranslation.ParagraphId is null) 
-                throw new ArgumentNullException(nameof(paragraphTranslation.ParagraphId));
-
-            Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
-                        
-                INSERT INTO [Idioma].[ParagraphTranslation]
-                      ([ParagraphId]
-                      ,[LanguageCode]
-                      ,[TranslationText]
-                      ,[UniqueKey])
-                VALUES
-                      ({paragraphTranslation.ParagraphId}
-                      ,{paragraphTranslation.LanguageCode}
-                      ,{paragraphTranslation.TranslationText}
-                      ,{guid})
-        
+                delete from [Idioma].[ParagraphTranslation]
+                where [ParagraphId] = {key.paragraphId}
+                and [LanguageCode] = {key.code}
                 """);
-            if (numRows < 1) throw new InvalidDataException("creating ParagraphTranslation affected 0 rows");
-            var newEntity = context.ParagraphTranslations.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
-            {
-                throw new InvalidDataException("newEntity is null in ParagraphTranslationCreate");
-            }
-
-
-            // add it to cache
-            ParagraphTranslationUpdateCache(newEntity);
-
-            return newEntity;
         }
-        public static async Task<ParagraphTranslation?> ParagraphTranslationCreateAsync(ParagraphTranslation value, IdiomaticaContext context)
+        public static async Task ParagraphTranslationDeleteByParagraphIdAndLanguageCodeAsync(
+            (int paragraphId, string code) key, IdiomaticaContext context)
         {
-            return await Task.Run(() => { return ParagraphTranslationCreate(value, context); });
+            await Task.Run(() =>
+            {
+                ParagraphTranslationDeleteByParagraphIdAndLanguageCode(key, context);
+            });
         }
-
-        
         #endregion
 
+        #region cache
         private static void ParagraphTranslationUpdateCache(ParagraphTranslation value)
         {
             if (value.Id is null) return;
@@ -117,5 +137,7 @@ namespace Model.DAL
                 }
             }
         }
+        #endregion
+
     }
 }

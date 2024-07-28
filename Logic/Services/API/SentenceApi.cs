@@ -85,6 +85,19 @@ namespace Logic.Services.API
             if (pageId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.SentencesByPageIdReadAsync(pageId, context);
         }
-        
+
+
+        public static List<Sentence>? SentencesReadByParagraphId(IdiomaticaContext context, int paragraphId)
+        {
+            if (paragraphId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.SentencesByParagraphIdRead(paragraphId, context);
+        }
+        public static async Task<List<Sentence>?> SentencesReadByParagraphIdAsync(
+            IdiomaticaContext context, int paragraphId)
+        {
+            if (paragraphId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.SentencesByParagraphIdReadAsync(paragraphId, context);
+        }
+
     }
 }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -39,6 +40,8 @@ namespace Model.DAL
                 return SentenceByIdRead(key, context);
             });
         }
+
+
         public static List<Sentence> SentencesByPageIdRead(
             int key, IdiomaticaContext context)
         {
@@ -70,7 +73,9 @@ namespace Model.DAL
                 return SentencesByPageIdRead(key, context);
             });
         }
-        public static async Task<List<Sentence>> SentencesByParagraphIdReadAsync(int key, IdiomaticaContext context)
+
+
+        public static List<Sentence> SentencesByParagraphIdRead(int key, IdiomaticaContext context)
         {
             // check cache
             if (SentencesByParagraphId.ContainsKey(key))
@@ -85,6 +90,13 @@ namespace Model.DAL
             // write to cache
             SentencesByParagraphId[key] = value;
             return value;
+        }
+        public static async Task<List<Sentence>> SentencesByParagraphIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<List<Sentence>>.Run(() =>
+            {
+                return SentencesByParagraphIdRead(key, context);
+            });
         }
 
 
