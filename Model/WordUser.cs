@@ -28,5 +28,7 @@ namespace Model
         public AvailableWordUserStatus? Status { get; set; }
         public DateTime? Created { get; set; } = DateTime.Now;
         public DateTime? StatusChanged { get; set; } = DateTime.Now;
+        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
+
     }
 }

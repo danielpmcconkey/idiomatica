@@ -1,8 +1,8 @@
 ﻿@page "/Book/{bookid:int}/Read"
 @rendermode InteractiveServer
-@inject BookService BookService;
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
+@using Logic.Services.API;
 
 <style>
     span.statusUNKNOWN {
@@ -84,13 +84,15 @@
         }
         else
         {
-            <PageTitle>@BookService.BookTitle</PageTitle>
-            <h3>@BookService.BookTitle</h3>
-        
+            <PageTitle>@ReadDataPacket.BookTitle</PageTitle>
+            <h3>@ReadDataPacket.BookTitle</h3>
 
-            <ModalWord @ref="_wModal" Parent="this" BookService="BookService" />
 
-            <ModalParagraph @ref="_ppModal" BookService="BookService" />
+            <ModalWord @ref="_wModal"
+                       Parent="this"
+                       ReadDataPacket="ReadDataPacket" />
+
+            <ModalParagraph @ref="_ppModal" LanguageFromCode="ReadDataPacket.LanguageFromCode" LanguageToCode="ReadDataPacket.LanguageToCode" />
 
 
 
@@ -98,24 +100,28 @@
 
             <div class="container px-4">
 
-                <PageTurner BookService="BookService"
-                            OnMovePageAsync="OnMovePageAsync"
-                            OnClearPageAsync="OnClearPageAsync" />
+                <PageTurner OnMovePageAsync="OnMovePageAsync"
+                            OnClearPageAsync="OnClearPageAsync"
+                            BookCurrentPageNum="ReadDataPacket.BookCurrentPageNum"
+                            BookTotalPageCount="ReadDataPacket.BookTotalPageCount" />
 
-                
-                @foreach (var paragraph in BookService.Paragraphs)
+                @if(ReadDataPacket is not null && ReadDataPacket.Paragraphs is not null)
                 {
-                    <hr />
-                    <ParagraphView BookService="BookService"
-                        ParagraphAndChildren="paragraph"
-                        OnShowWordModal="OnShowWordModal"
-                        OnShowPpModal="OnShowPpModal" />
-                }
-                
+                    @foreach (var paragraph in ReadDataPacket.Paragraphs)
+                    {
+                        <hr />
+                        <ParagraphView 
+                            ParagraphAndChildren="paragraph"
+                            OnShowWordModal="OnShowWordModal"
+                            OnShowPpModal="OnShowPpModal"
+                            ReadDataPacket="ReadDataPacket" />
+                    }
+                }              
                 <hr />
-                <PageTurner BookService="BookService"
-                            OnMovePageAsync="OnMovePageAsync"
-                            OnClearPageAsync="OnClearPageAsync" />
+                <PageTurner OnMovePageAsync="OnMovePageAsync"
+                            OnClearPageAsync="OnClearPageAsync"
+                            BookCurrentPageNum="ReadDataPacket.BookCurrentPageNum"
+                            BookTotalPageCount="ReadDataPacket.BookTotalPageCount" />
             </div>
         }
     </Authorized>
@@ -130,6 +136,7 @@
     #region parameters
     [Parameter]
     public int BookId { get; set; }
+
     #endregion
 
     #region page loading stuff
@@ -137,8 +144,11 @@
     private ModalWord _wModal = default!;
     private ModalParagraph _ppModal = default!;
     private bool _isLoading = true;
-
+    private bool _isDataInitRead = false;
+    const int LoadingDelayMiliseconds = 500;
     #endregion
+
+    ReadDataPacket ReadDataPacket = new();
 
 
 
@@ -149,12 +159,13 @@
         try
         {
 
-            if (BookService.IsDataInitRead == false) 
+            if (_isDataInitRead == false)
             {
                 _isLoading = true;
-                var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
-                var context = await DbContextFactory.CreateDbContextAsync();
-                await BookService.InitDataRead(context, UserService, BookId);
+                // set up a delay to ensure that UI components refresh
+                var t_delay = Task.Delay(LoadingDelayMiliseconds);
+                // run the whole InitData method in an async process to not tie up the UI thread
+                await Task.Run(() => InitData());
                 await t_delay;
                 _isLoading = false;
             }
@@ -177,6 +188,22 @@
             StateHasChanged();
             return;
         }
+    }
+    private void InitData()
+    {
+        var context = DbContextFactory.CreateDbContext();
+
+        var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(context, UserService, BookId);
+        if(readDataPacket is null)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        ReadDataPacket = readDataPacket;
+
+        // fin
+
+        _isDataInitRead = true;
     }
 
     #region methods exposed to other elements
@@ -216,9 +243,9 @@
             // force a delay of at least N miliseconds. this forces the screen
             // to re-draw the paragraphs. Otherwise, you get the old paragraphs
             // on the new page.
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync(); 
-            await BookService.PageMove(context, targetPageNum);
+            await Task.Run(() => PageMove(context, targetPageNum));
             await t_delay;
             _isLoading = false;
 
@@ -252,7 +279,16 @@
             // on the new page.
             var t_delay = Task.Delay(1000); 
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.PageUserClearPageAndMove(context, targetPageNum);
+            var newReadDataPacket = await Task.Run(() =>
+            {
+                return OrchestrationApi.OrchestrateClearPageAndMove(context, ReadDataPacket, targetPageNum);
+            });
+            if (newReadDataPacket is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            ReadDataPacket = newReadDataPacket;
             await t_delay;
             _isLoading = false;
         }
@@ -276,5 +312,19 @@
         }
     }
     public void RefreshState() { StateHasChanged(); }
+    private void PageMove(IdiomaticaContext context, int targetPageNum)
+    {
+        _isDataInitRead = false;
+
+        var newReadDataPacket = OrchestrationApi.OrchestrateMovePage(context, ReadDataPacket, BookId, targetPageNum);
+        if (newReadDataPacket is null)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        ReadDataPacket = newReadDataPacket;
+        _isDataInitRead = true;
+    }
+    
     #endregion
 }

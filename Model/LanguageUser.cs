@@ -25,5 +25,7 @@ namespace Model
         #endregion
 
         public int? TotalWordsRead { get; set; } = 0;
+        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
+
     }
 }

@@ -1,8 +1,8 @@
 ﻿@page "/ModalWord"
+@using Logic.Services.API
 @rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
-@inject ErrorHandler ErrorHandler;
 
 <Modal @ref="modal" Title="@_title" Size="ModalSize.Large">
     <BodyTemplate>
@@ -68,7 +68,7 @@
     [Parameter]
     public Read? Parent { get; set; }
     [Parameter]
-    public BookService BookService { get; set; }
+    public ReadDataPacket ReadDataPacket { get; set; } = new();
 
     private Modal modal = default!;
     private Token? _token = null;
@@ -88,27 +88,44 @@
         {
             var context = await DbContextFactory.CreateDbContextAsync();
 
-            if(thisToken == null || thisToken.Id == null || thisToken.Id < 1)
+            if (thisToken == null || thisToken.Id == null || thisToken.Id < 1)
             {
-                ErrorHandler.LogAndThrow(1390);
+                ErrorHandler.LogAndThrow();
                 return;
             }
-            var tokenAndChildren = await BookService.TokenGetChildObjects(context, thisToken);
-            _token = tokenAndChildren.t;
-            _wordUser = tokenAndChildren.wu;
-            _word = _token.Word;
-            if (_token.Word == null || _token.Word.Id == null || _token.Word.Id < 1)
+            if (thisToken.WordId == null || thisToken.WordId < 1)
             {
-                ErrorHandler.LogAndThrow(2420);
+                ErrorHandler.LogAndThrow();
                 return;
             }
+            _word = WordApi.WordGetById(context, (int)thisToken.WordId);
+            if (_word == null || _word.Id is null || _word.Id < 1 || _word.TextLowerCase is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            if (ReadDataPacket == null || ReadDataPacket.AllWordUsersInPage is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            if (!ReadDataPacket.AllWordUsersInPage.ContainsKey(_word.TextLowerCase))
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            _wordUser = ReadDataPacket.AllWordUsersInPage[_word.TextLowerCase];
+            _token = thisToken;
+            _token.Word = _word;
+            
             if (_wordUser == null || _wordUser.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2430);
                 return;
             }
+            _wordUser.Status = _wordUser.Status is null ? AvailableWordUserStatus.UNKNOWN : _wordUser.Status;
 
-            _title = _word.TextLowerCase;
+            _title = (_word is null) ? "" : _word.TextLowerCase;
             _translation = _wordUser.Translation;
             _selectedStatus = UserService.GetUILabel($"statusLabel{(int)_wordUser.Status}");
             await modal.ShowAsync();
@@ -123,7 +140,7 @@
     }
     private string GetTokenClassSelected(int statusToCheck)
     {
-        if (_wordUser is null) return "unselectedWordStatus";
+        if (_wordUser is null || _wordUser.Status is null) return "unselectedWordStatus";
         if ((int)_wordUser.Status == statusToCheck) return "selectedWordStatus";
         return "unselectedWordStatus";
     }
@@ -136,10 +153,23 @@
     {
         try
         {
+            if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            if (_wordUser.Status is null)
+            {
+                _wordUser.Status = AvailableWordUserStatus.UNKNOWN;
+            }
+            if (_wordUser.Translation is null)
+            {
+                _wordUser.Translation = string.Empty;
+            }
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.WordUserSaveModalDataAsync(
+            await WordUserApi.WordUserUpdateAsync(
                 context, (int)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
-            Parent.RefreshState();
+            if (Parent is not null) Parent.RefreshState();
             await modal.HideAsync();
         }
         catch
@@ -170,5 +200,6 @@
         if (status == AvailableWordUserStatus.IGNORED) return "statusIGNORED";
         return "statusUNKNOWN";
     }
+    
 
 }

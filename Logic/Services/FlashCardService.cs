@@ -21,8 +21,6 @@ namespace Logic.Services
         private User? _loggedInUser = null;
         private UserService _userService;
         private Model.LanguageCode? _uiLanguageCode;
-        private ErrorHandler _errorHandler;
-        private DeepLService _deepLService;
         private LanguageUser _languageUserLearning;
         public const int LoadingDelayMiliseconds = 500;
 
@@ -92,11 +90,9 @@ namespace Logic.Services
 
 
         #region init functions
-        public FlashCardService(ErrorHandler errorHandler, DeepLService deepLService, UserService userService)
+        public FlashCardService(UserService userService)
         {
             _userService = userService;
-            _errorHandler = errorHandler;
-            _deepLService = deepLService;
 
         }
         public async Task InitDataAsync(IdiomaticaContext context)
@@ -131,7 +127,7 @@ namespace Logic.Services
         {
             if (userId < 1)
             {
-                _errorHandler.LogAndThrow(1190);
+                ErrorHandler.LogAndThrow(1190);
             }
             return await DataCache.LanguageUsersAndLanguageByUserIdReadAsync(userId, context);
         }
@@ -215,7 +211,7 @@ namespace Logic.Services
         {
             if (_uiLanguageCode == null || _uiLanguageCode.Code == null)
             {
-                _errorHandler.LogAndThrow(2490);
+                ErrorHandler.LogAndThrow(2490);
                 return null;
             }
             FlashCard? card = new FlashCard();
@@ -223,7 +219,7 @@ namespace Logic.Services
             
             if (wordUser == null || wordUser.Id < 1)
             {
-                _errorHandler.LogAndThrow(5110);
+                ErrorHandler.LogAndThrow(5110);
                 return null;
             }
             card.WordUser = wordUser;
@@ -233,12 +229,12 @@ namespace Logic.Services
             await DataCache.FlashCardCreateAsync(card, context);
             if (card.Id == null || card.Id < 1)
             {
-                _errorHandler.LogAndThrow(2120);
+                ErrorHandler.LogAndThrow(2120);
                 return null;
             }
             if (wordUser.WordId == null || wordUser.WordId < 1)
             {
-                _errorHandler.LogAndThrow(2460);
+                ErrorHandler.LogAndThrow(2460);
                 return null;
             }
             List<Word> wordUsages = await DataCache.WordsAndTokensAndSentencesAndParagraphsByWordIdReadAsync(
@@ -250,13 +246,13 @@ namespace Logic.Services
                 {
                     if (token.Sentence == null)
                     {
-                        _errorHandler.LogAndThrow(2470);
+                        ErrorHandler.LogAndThrow(2470);
                         return null;
                     }
                     var sentence = token.Sentence;
                     if (sentence.Paragraph == null || sentence.Paragraph.Id == null)
                     {
-                        _errorHandler.LogAndThrow(2480);
+                        ErrorHandler.LogAndThrow(2480);
                         return null;
                     }
                     var paragraph = sentence.Paragraph;
@@ -291,14 +287,14 @@ namespace Logic.Services
                             || wordUser.LanguageUser.Language == null
                             || wordUser.LanguageUser.Language.Code == null)
                         {
-                            _errorHandler.LogAndThrow(2500);
+                            ErrorHandler.LogAndThrow(2500);
                             return null;
                         }
                         // create it
                         string input = ParagraphGetFullText(paragraph);
                         string toLang = _uiLanguageCode.Code;
                         string fromLang = wordUser.LanguageUser.Language.Code;
-                        string translation = _deepLService.Translate(input, fromLang, toLang);
+                        string translation = DeepLService.Translate(input, fromLang, toLang);
                         ppts = new ParagraphTranslation()
                         {
                             ParagraphId = (int)paragraph.Id,
@@ -351,13 +347,13 @@ namespace Logic.Services
         {
             if (CurrentCard == null || CurrentCard.Id == null)
             {
-                _errorHandler.LogAndThrow(2510);
+                ErrorHandler.LogAndThrow(2510);
                 return;
             }
             var card = await DataCache.FlashCardByIdReadAsync((int)CurrentCard.Id, context);
             if (card == null)
             {
-                _errorHandler.LogAndThrow(2160);
+                ErrorHandler.LogAndThrow(2160);
                 return;
             }
             card.NextReview = CurrentCard.NextReview;
@@ -372,19 +368,19 @@ namespace Logic.Services
             }
             if (_languageUserLearning == null)
             {
-                _errorHandler.LogAndThrow(1170);
+                ErrorHandler.LogAndThrow(1170);
                 return new List<FlashCard>();
             }
             if (_languageUserLearning.Id == null || _languageUserLearning.Id < 1)
             {
-                _errorHandler.LogAndThrow(1180);
+                ErrorHandler.LogAndThrow(1180);
                 return new List<FlashCard>();
             }
             List<FlashCard> cards = new List<FlashCard>();
 
             // get word users that don't already have a flash card
             // ordered by recent status change
-            var wordUsers = await (
+            var wordUsers = (
                         from wu in context.WordUsers
                         join w in context.Words on wu.WordId equals w.Id
                         join fc in context.FlashCards on wu.Id equals fc.WordUserId into grouping
@@ -403,7 +399,7 @@ namespace Logic.Services
                     )
                 .OrderByDescending(x => x.StatusChanged)
                 .Take(NumNewCardsInput)
-                .ToListAsync();
+                .ToList();
 
 
 
@@ -422,12 +418,12 @@ namespace Logic.Services
             }
             if (_languageUserLearning == null)
             {
-                _errorHandler.LogAndThrow(1170);
+                ErrorHandler.LogAndThrow(1170);
                 return new List<FlashCard>();
             }
             if (_languageUserLearning.Id == null || _languageUserLearning.Id < 1)
             {
-                _errorHandler.LogAndThrow(1180);
+                ErrorHandler.LogAndThrow(1180);
                 return new List<FlashCard>();
             }
 
@@ -450,7 +446,7 @@ namespace Logic.Services
             await DataCache.FlashCardAttemptCreateAsync(attempt, context);
             if (attempt.Id == null || attempt.Id < 1)
             {
-                _errorHandler.LogAndThrow(2520);
+                ErrorHandler.LogAndThrow(2520);
                 return -1;
             }
             return (int)attempt.Id;

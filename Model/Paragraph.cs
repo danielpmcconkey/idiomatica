@@ -14,7 +14,7 @@ namespace Model
         public int? Id { get; set; }
 
         #region relationships
-        public List<Sentence> Sentences { get; set; } = new List<Sentence>();
+        public List<Sentence>? Sentences { get; set; }
         public int? PageId { get; set; }
         public Page? Page { get; set; }
 
@@ -25,5 +25,7 @@ namespace Model
         #endregion
 
         public int? Ordinal { get; set; }
+        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
+
     }
 }

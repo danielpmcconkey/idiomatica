@@ -3,7 +3,7 @@
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 @inject ILogger<IdiomaticaLogger> Logger;
-@inject ErrorHandler ErrorHandler;
+@using Logic.Services.API
 
 
 
@@ -13,9 +13,16 @@
             <div class="container">
                 <div class="row">
                     <div class="col-1">
-                        @if (OnFormatIsComplete(Row.IsComplete))
+                        @if (_isLoading)
                         {
-                            <span class="completedMarker">&#x2713;</span>
+                            <Button Color="ButtonColor.Primary" Size="Size.Small" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+                        }
+                        else
+                        {
+                            @if (OnFormatIsComplete(Row.IsComplete))
+                            {
+                                <span class="completedMarker">&#x2713;</span>
+                            }
                         }
                     </div>
                     <div class="col-6">
@@ -100,23 +107,51 @@
                 </div>
                 <div class="col">
                     <p class="fs-6 mb-0">@UserService.GetUILabel("bookListTotalWordCountColumnHead")</p>
-                    <p class="fs-5 mt-0">@OnFormatCount(Row.TotalWordCount)</p>
+                    <p class="fs-5 mt-0">
+                        
+                        @if (_isLoading)
+                        {
+                            <Button Color="ButtonColor.Primary" Size="Size.Small" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+                        }
+                        else
+                        {
+                            @OnFormatCount(Row.TotalWordCount)
+                        }
+                    </p>
                 </div>
                 <div class="col">
                     <p class="fs-6 mb-0">@UserService.GetUILabel("bookListDistinctWordCountColumnHead")</p>
-                    <p class="fs-5 mt-0">@OnFormatCount(Row.DistinctWordCount)</p>
+                    <p class="fs-5 mt-0">
+
+                        @if (_isLoading)
+                        {
+                            <Button Color="ButtonColor.Primary" Size="Size.Small" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+                        }
+                        else
+                        {
+                            @OnFormatCount(Row.DistinctWordCount)
+                        }                        
+                    </p>
                 </div>
                 <div class="col">
                     <p class="fs-6 mb-0">@UserService.GetUILabel("bookListDistinctKnownPercentColumnHead")</p>
-                    <p class="fs-5 mt-0">@OnFormatPercent(Row.DistinctKnownPercent)</p>
+                    <p class="fs-5 mt-0">
+                        @if (_isLoading)
+                        {
+                            <Button Color="ButtonColor.Primary" Size="Size.Small" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+                        }
+                        else
+                        {
+                            @OnFormatPercent(Row.DistinctKnownPercent)
+                        }
+                    </p>
                 </div>
             </div>
         
         </div>
         <div class="card-footer">
             <div class="container">
-                @* <BookTagsRow /> *@
-                <BookTagsRow BookService="@BookService" BookId="@Row.BookId" />
+                <BookTagsRow BookId="@Row.BookId" />
             </div>
             
         </div>
@@ -129,20 +164,20 @@
 
 @code {
     [Parameter]
-    public BookService BookService { get; set; }// = new BookService(Logger);
-    [Parameter]
     public BookListRow Row { get; set; } = new BookListRow();
     [Parameter]
     public EventCallback<int> OnArchiveAsync { get; set; }
     [Parameter]
     public EventCallback<int> OnAddAsync { get; set; }
-    
+
 
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
-    
-    
+    const int LoadingDelayMiliseconds = 500;
+
+
     private int? _bookId;
+    private User? _loggedInUser = null;
 
 
     protected override async Task OnInitializedAsync()
@@ -150,9 +185,11 @@
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            _loggedInUser = await UserService.GetLoggedInUserAsync(context);
             _bookId = Row.BookId;
-            
+
             await t_delay;
             _isLoading = false;
         }
@@ -354,14 +391,40 @@
             return false;
         }
     }
+    private void RefreshStats()
+    {
+        if (_bookId is null || _bookId < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        var context = DbContextFactory.CreateDbContext();
+        var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
+            context, (int)_bookId, (int)_loggedInUser.Id);
+        if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (int)bookUser.Id);
+        // re-load the row
+        var newRow = BookApi.BookListRowByBookIdAndUserIdRead(context, (int)_bookId, (int)_loggedInUser.Id);
+        if (newRow is not null) Row = newRow;
+    }
     private async Task OnClickRefresh()
     {
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
-            var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.BookUserUpdateStats(context, _bookId);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
+
+            await Task.Run(() => RefreshStats());
+
             await t_delay;
             _isLoading = false;
         }

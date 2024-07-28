@@ -23,5 +23,7 @@ namespace Model
         public int? Ordinal { get; set; }
         [Column(TypeName = "TEXT")]
         public string? Text { get; set; }
+        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
+
     }
 }

@@ -1,9 +1,7 @@
 ﻿@page "/FeatureTest"
 @rendermode InteractiveServer
-@inject BookService BookService;
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
-@inject NullHandler _nullHandler;
 
 <h3>FeatureTest</h3>
 
@@ -25,7 +23,6 @@
             //     bookUser.LanguageUser = await DataCache.LanguageUserByIdReadAsync(
             //         (int)bookUser.LanguageUserId, context);
             // }
-            context.SaveChanges();
         }
         catch (Exception ex)
         {

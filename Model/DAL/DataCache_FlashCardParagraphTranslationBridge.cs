@@ -35,19 +35,41 @@ namespace Model.DAL
         #endregion
 
         #region create
-        public static async Task<bool> FlashCardParagraphTranslationBridgeCreateAsync(FlashCardParagraphTranslationBridge value, IdiomaticaContext context)
-        {
-            context.FlashCardParagraphTranslationBridges.Add(value);
-            context.SaveChanges();
-            if (value.Id == null || value.Id == 0)
-            {
-                return false;
-            }
-            // write to the ID cache
-            FlashCardParagraphTranslationBridgeById[(int)value.Id] = value;
 
-                
-            return true;
+        public static FlashCardParagraphTranslationBridge? FlashCardParagraphTranslationBridgeCreate(
+            FlashCardParagraphTranslationBridge fcptb, IdiomaticaContext context)
+        {
+            if (fcptb.FlashCardId is null) throw new ArgumentNullException(nameof(fcptb.FlashCardId));
+            if (fcptb.ParagraphTranslationId is null) throw new ArgumentNullException(nameof(fcptb.ParagraphTranslationId));
+
+            Guid guid = Guid.NewGuid();
+            int numRows = context.Database.ExecuteSql($"""
+                INSERT INTO [Idioma].[FlashCardParagraphTranslationBridge]
+                           ([FlashCardId]
+                           ,[ParagraphTranslationId]
+                           ,[UniqueKey])
+                     VALUES
+                           ({fcptb.FlashCardId}
+                           ,{fcptb.ParagraphTranslationId}
+                           ,{guid})
+        
+                """);
+            if (numRows < 1) throw new InvalidDataException("creating FlashCardParagraphTranslationBridge affected 0 rows");
+            var newEntity = context.FlashCardParagraphTranslationBridges.Where(x => x.UniqueKey == guid).FirstOrDefault();
+            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            {
+                throw new InvalidDataException("newEntity is null in FlashCardParagraphTranslationBridgeCreate");
+            }
+
+            // add it to cache
+            FlashCardParagraphTranslationBridgeById[(int)newEntity.Id] = newEntity;
+
+            return newEntity;
+        }
+        public static async Task<FlashCardParagraphTranslationBridge?> FlashCardParagraphTranslationBridgeCreateAsync(
+            FlashCardParagraphTranslationBridge value, IdiomaticaContext context)
+        {
+            return await Task.Run(() => { return FlashCardParagraphTranslationBridgeCreate(value, context); });
         }
         #endregion
     }

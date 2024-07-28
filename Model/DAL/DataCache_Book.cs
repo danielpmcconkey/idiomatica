@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,11 @@ namespace Model.DAL
 
 
         #region read
+        public static Book? BookByIdRead(int key, IdiomaticaContext context)
+        {
+            var task = BookByIdReadAsync(key, context);
+            return task.Result;
+        }
         public static async Task<Book?> BookByIdReadAsync(int key, IdiomaticaContext context)
         {
             // check cache
@@ -33,16 +39,36 @@ namespace Model.DAL
         #endregion
 
         #region create
-        public static async Task<bool> BookCreateAsync(Book value, IdiomaticaContext context)
+        public static Book? BookCreate(Book book, IdiomaticaContext context)
         {
-            context.Books.Add(value);
-            context.SaveChanges();
-            if(value.Id == null || value.Id == 0) 
-            {
-                return false;
-            }
-            BookById[(int)value.Id] = value;
-            return true;
+            var guid = Guid.NewGuid();
+            int numRows = context.Database.ExecuteSql($"""
+                                
+                INSERT INTO [Idioma].[Book]
+                           ([LanguageId]
+                           ,[Title]
+                           ,[SourceURI]
+                           ,[AudioFilename]
+                           ,[UniqueKey])
+                     VALUES
+                           ({book.LanguageId}
+                           ,{book.Title}
+                           ,{book.SourceURI}
+                           ,{book.AudioFilename}
+                           ,{guid});
+                """);
+            if (numRows < 1) throw new InvalidDataException("Book create affected 0 rows");
+            // now read it into context
+            var newBook = context.Books.Where(x => x.UniqueKey == guid).FirstOrDefault();
+            if (newBook is null || newBook.Id is null || newBook.Id < 1) 
+                throw new InvalidDataException("Reading new book after creation returned null");
+            
+            BookById[(int)newBook.Id] = newBook;
+            return newBook;
+        }
+        public static async Task<Book?> BookCreateAsync(Book value, IdiomaticaContext context)
+        {
+            return await Task.Run(() => { return BookCreate(value, context); });
         }
         #endregion
 

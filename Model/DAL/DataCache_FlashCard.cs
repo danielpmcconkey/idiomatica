@@ -16,17 +16,46 @@ namespace Model.DAL
 
 
         #region create
-        public static async Task<bool> FlashCardCreateAsync(FlashCard value, IdiomaticaContext context)
+
+        public static FlashCard? FlashCardCreate(FlashCard flashCard, IdiomaticaContext context)
         {
-            context.FlashCards.Add(value);
-            await context.SaveChangesAsync();
-            if (value.Id == null || value.Id == 0)
+            if (flashCard.WordUserId is null) throw new ArgumentNullException(nameof(flashCard.WordUserId));
+            
+            Guid guid = Guid.NewGuid();
+            int numRows = context.Database.ExecuteSql($"""
+                        
+                INSERT INTO [Idioma].[FlashCard]
+                      ([WordUserId]
+                      ,[Status]
+                      ,[NextReview]
+                      ,[UniqueKey])
+                VALUES
+                      ({flashCard.WordUserId}
+                      ,{flashCard.Status}
+                      ,{flashCard.NextReview}
+                      ,{guid})
+        
+                """);
+            if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
+            var newEntity = context.FlashCards.Where(x => x.UniqueKey == guid).FirstOrDefault();
+            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
             {
-                return false;
+                throw new InvalidDataException("newEntity is null in FlashCardCreate");
             }
-            FlashCardById[(int)value.Id] = value;
-            return true;
+
+
+            // add it to cache
+            FlashCardById[(int)newEntity.Id] = newEntity; ;
+
+            return newEntity;
         }
+        public static async Task<FlashCard?> FlashCardCreateAsync(FlashCard value, IdiomaticaContext context)
+        {
+            return await Task.Run(() => { return FlashCardCreate(value, context); });
+        }
+
+
+        
         #endregion
 
         #region read
@@ -94,7 +123,7 @@ namespace Model.DAL
             FlashCardsActiveAndFullRelationshipsByLanguageUserId[key] = value;
             foreach (var f in value)
             {
-                await FlashCardUpdateAllCachesAsync(f, key);
+                FlashCardUpdateAllCaches(f, key);
             }
             return value;
         }
@@ -102,22 +131,41 @@ namespace Model.DAL
         #endregion
 
         #region update
-        public static async Task FlashCardUpdateAsync(FlashCard value, IdiomaticaContext context)
+
+        public static void FlashCardUpdate(FlashCard flashCard, IdiomaticaContext context)
         {
-            if (value.Id == null || value.Id < 1) throw new ArgumentException("ID cannot be null or 0 when updating");
+            if (flashCard.Id == null || flashCard.Id < 1)
+                throw new ArgumentException("ID cannot be null or 0 when updating FlashCard");
 
-            var valueFromDb = context.FlashCards.Where(pu => pu.Id == value.Id).FirstOrDefault();
-            if (valueFromDb == null) throw new InvalidDataException("Value does not exist in the DB to update");
-
-            valueFromDb.NextReview = value.NextReview;
-            valueFromDb.WordUserId = value.WordUserId;
-            valueFromDb.Status = value.Status;
-            await context.SaveChangesAsync();
-
-            await FlashCardUpdateAllCachesAsync(value);
+            int numRows = context.Database.ExecuteSql($"""
+                        UPDATE [Idioma].[FlashCard]
+                        SET [WordUserId] = {flashCard.WordUserId}
+                           ,[Status] = {flashCard.Status}
+                           ,[NextReview] = {flashCard.NextReview}
+                           ,[UniqueKey] = {flashCard.UniqueKey}
+                        where Id = {flashCard.Id}
+                        ;
+                        """);
+            if (numRows < 1)
+            {
+                throw new InvalidDataException("FlashCard update affected 0 rows");
+            };
+            // now update the cache
+            FlashCardUpdateAllCaches(flashCard);
 
             return;
         }
+        public static async Task FlashCardUpdateAsync(FlashCard value, IdiomaticaContext context)
+        {
+            await Task.Run(() =>
+            {
+                FlashCardUpdate(value, context);
+            });
+        }
+
+
+
+        
         #endregion
 
         private static bool doesFlashCardListContainId(List<FlashCard> list, int key)
@@ -134,8 +182,10 @@ namespace Model.DAL
             }
             return newList;
         }
-        private static async Task FlashCardUpdateAllCachesAsync(FlashCard value, (int languageUserId, int take)? keyLanguageUser = null)
+        private static void FlashCardUpdateAllCaches(FlashCard value, (int languageUserId, int take)? keyLanguageUser = null)
         {
+            if (value.Id is null) throw new ArgumentNullException(nameof(value));
+
             FlashCardById[(int)value.Id] = value;
 
             // FlashCardAndFullRelationshipsById

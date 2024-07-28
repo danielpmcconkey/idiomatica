@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Logic.Services;
+using Microsoft.EntityFrameworkCore;
 using Model;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,7 @@ namespace TestsBench
             var context = CommonFunctions.CreateContext();
             //var userService = CommonFunctions.CreateUserService();
             //var user = CommonFunctions.CreateNewTestUser(userService);
-            var deepL = CommonFunctions.CreateDeepLService();
+            
 
             var input = "—Aunque pudiera, no lo haría. " +
                 "Las cicatrices pueden ser útiles. " +
@@ -30,7 +31,7 @@ namespace TestsBench
             try
             {
                 // act
-                var actual = deepL.Translate(input, sourceCode, targetCode);
+                var actual = DeepLService.Translate(input, sourceCode, targetCode);
                 // assert
                 Assert.Equal(expected, actual);
             }

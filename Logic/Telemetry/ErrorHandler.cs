@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Logic.Telemetry
 {
-    public class ErrorHandler
+    public static class ErrorHandler
     {
-        private ILogger<IdiomaticaLogger> _logger;
+        //private static ILogger<IdiomaticaLogger> _logger;
 
-        public ErrorHandler(ILogger<IdiomaticaLogger> logger) => _logger = logger;
+        //public ErrorHandler(ILogger<IdiomaticaLogger> logger) => _logger = logger;
 
-        private  Dictionary<int, string> _errorCodes = new Dictionary<int, string>()
+        private static Dictionary<int, string> _errorCodes = new Dictionary<int, string>()
         {
             // 1000 errors are invalid arguments
 
@@ -183,7 +183,7 @@ namespace Logic.Telemetry
             { 3180, "" },
             { 3190, "" },
         };
-        public void LogAndThrow(
+        public static void LogAndThrow(
             [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
             [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
@@ -191,36 +191,36 @@ namespace Logic.Telemetry
             LogError(memberName, sourceFilePath, sourceLineNumber, [], null);
             ThrowError(memberName, sourceFilePath, sourceLineNumber);
         }
-        public void LogAndThrow(int code)
+        public static void LogAndThrow(int code)
         {
             LogError(code, [], null);
             ThrowError(code);
         }
-        public void LogAndThrow(int code, string[] args)
+        public static void LogAndThrow(int code, string[] args)
         {
             LogError(code, args, null);
             ThrowError(code);
         }
-        public void LogAndThrow(int code, string[] args, Exception ex)
+        public static void LogAndThrow(int code, string[] args, Exception ex)
         {
             LogError(code, args, ex);
             ThrowError(code);
         }
-        private void LogError(int code, string[] args, Exception ex)
+        private static void LogError(int code, string[] args, Exception ex)
         {
             // todo: log errors
         }
-        private void LogError(string memberName, string sourceFilePath, int sourceLineNumber, string[] args, Exception ex)
+        private static void LogError(string memberName, string sourceFilePath, int sourceLineNumber, string[] args, Exception ex)
         {
             // todo: log errors
         }
-        private void ThrowError(int code)
+        private static void ThrowError(int code)
         {
             var errorCode = _errorCodes[code];
             var ex = new IdiomaticaException() { code = code };
             throw ex;
         }
-        private void ThrowError(string memberName, string sourceFilePath, int sourceLineNumber)
+        private static void ThrowError(string memberName, string sourceFilePath, int sourceLineNumber)
         {
 
             var ex = new IdiomaticaException()

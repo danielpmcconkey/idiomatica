@@ -15,17 +15,46 @@ namespace Model.DAL
 
 
         #region create
-        public static async Task<bool> FlashCardAttemptCreateAsync(FlashCardAttempt value, IdiomaticaContext context)
+
+
+        public static FlashCardAttempt? FlashCardAttemptCreate(FlashCardAttempt flashCardAttempt, IdiomaticaContext context)
         {
-            context.FlashCardAttempts.Add(value);
-            await context.SaveChangesAsync();
-            if (value.Id == null || value.Id == 0)
+            if (flashCardAttempt.FlashCardId is null) throw new ArgumentNullException(nameof(flashCardAttempt.FlashCardId));
+            
+            Guid guid = Guid.NewGuid();
+            int numRows = context.Database.ExecuteSql($"""
+                        
+                INSERT INTO [Idioma].[FlashCardAttempt]
+                      ([FlashCardId]
+                      ,[Status]
+                      ,[AttemptedWhen]
+                      ,[UniqueKey])
+                VALUES
+                      ({flashCardAttempt.FlashCardId}
+                      ,{flashCardAttempt.Status}
+                      ,{flashCardAttempt.AttemptedWhen}
+                      ,{guid})
+        
+                """);
+            if (numRows < 1) throw new InvalidDataException("creating FlashCardAttempt affected 0 rows");
+            var newEntity = context.FlashCardAttempts.Where(x => x.UniqueKey == guid).FirstOrDefault();
+            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
             {
-                return false;
+                throw new InvalidDataException("newEntity is null in FlashCardAttemptCreate");
             }
-            FlashCardAttemptById[(int)value.Id] = value;
-            return true;
+
+
+            // add it to cache
+            FlashCardAttemptById[(int)newEntity.Id] = newEntity;
+
+            return newEntity;
         }
+        public static async Task<FlashCardAttempt?> FlashCardAttemptCreateAsync(FlashCardAttempt value, IdiomaticaContext context)
+        {
+            return await Task.Run(() => { return FlashCardAttemptCreate(value, context); });
+        }
+
+        
         #endregion
 
         #region read

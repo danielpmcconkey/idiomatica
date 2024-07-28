@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Model;
 using Logic.UILabels;
 using Polly;
+using Logic.Telemetry;
 
 namespace Logic.Services
 {
@@ -40,8 +41,18 @@ namespace Logic.Services
         /// </summary>
         public void SetLoggedInUserForTestBench(User loggedInUser, IdiomaticaContext context)
         {
+            if (loggedInUser is null || loggedInUser.Code is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
             _loggedInUser = loggedInUser;
-            _uiLanguageCode = DataCache.LanguageCodeByCodeReadAsync(_loggedInUser.Code, context).Result;
+            _uiLanguageCode = DataCache.LanguageCodeByCodeRead(_loggedInUser.Code, context);
+            if (_uiLanguageCode is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
             _uiLabels = UILabels.Factory.GetUILabels(_uiLanguageCode.LanguageCodeEnum);
             _loggedInUserOverride = true;
         }
@@ -64,9 +75,9 @@ namespace Logic.Services
             if (_loggedInUserOverride) return _loggedInUser;
 #endif
             _loggedInUserClaimsPrincipal = await GetAppUserClaimsPrincipalAsync();
-            return await processUserFromClaimPrincipal(context);
+            return ProcessUserFromClaimPrincipal(context);
         }
-        private async Task<User?> processUserFromClaimPrincipal(IdiomaticaContext context)
+        private User? ProcessUserFromClaimPrincipal(IdiomaticaContext context)
         {
             if (_loggedInUserClaimsPrincipal == null) return null;
             if (_loggedInUserClaimsPrincipal.Identity is null) return null;
@@ -76,11 +87,11 @@ namespace Logic.Services
             if (appUserId == null) return null;
             //Console.WriteLine($"appUserId = {appUserId}");
            
-            var matchingUser = await DataCache.UserByApplicationUserIdReadAsync(appUserId, context);
+            var matchingUser = DataCache.UserByApplicationUserIdRead(appUserId, context);
             if (matchingUser != null)
             {
                 _loggedInUser = matchingUser;
-                _uiLanguageCode = await DataCache.LanguageCodeByCodeReadAsync(_loggedInUser.Code, context);
+                _uiLanguageCode = DataCache.LanguageCodeByCodeRead(_loggedInUser.Code, context);
                 _uiLabels = UILabels.Factory.GetUILabels(_uiLanguageCode.LanguageCodeEnum);
                 return _loggedInUser;
             }

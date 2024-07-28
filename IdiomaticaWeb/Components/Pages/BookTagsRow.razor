@@ -1,8 +1,8 @@
-﻿@rendermode InteractiveServer
+﻿@using Logic.Services.API
+@rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 @inject ILogger<IdiomaticaLogger> Logger;
-@inject ErrorHandler ErrorHandler;
 
 
 @if (_isLoading)
@@ -16,7 +16,7 @@ else
 
             @foreach (var tag in _tags)
             {
-                <TagBadge BookService="BookService" BookId="BookId" BookTag="tag" OnRefreshRowAsync="RefreshTags" />
+                <TagBadge BookId="BookId" BookTag="tag" OnRefreshRowAsync="RefreshTags" />
             }
 
         </div>
@@ -36,30 +36,33 @@ else
 }
 @code {
     [Parameter]
-    public BookService BookService { get; set; }
-    [Parameter]
     public int? BookId { get; set; }
     private List<BookTag> _tags = new List<BookTag>();
     private string? _addTagInput;
     private User? _loggedInUser;
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
+    const int LoadingDelayMiliseconds = 500;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
 
             var context = await DbContextFactory.CreateDbContextAsync();
             _loggedInUser = await UserService.GetLoggedInUserAsync(context);
-            if (_loggedInUser == null)
+            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2450);
                 return;
             }
-            _tags = await BookService.BookTagsGetByBookIdAndUserId(context, (int)BookId, _loggedInUser.Id);
+            if (BookId is not null)
+            {
+                _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (int)BookId, (int)_loggedInUser.Id);
+            }
+            
             await t_delay;
             _isLoading = false;
         }
@@ -87,9 +90,18 @@ else
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            _tags = await BookService.BookTagsGetByBookIdAndUserId(context, (int)BookId, _loggedInUser.Id);
+            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            if (BookId is not null)
+            {
+                _tags = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(
+                    context, (int)BookId, (int)_loggedInUser.Id);
+            }
             await t_delay;
             _isLoading = false;
         }
@@ -112,10 +124,20 @@ else
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(BookService.LoadingDelayMiliseconds);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            await BookService.BookTagAdd(context, BookId, _loggedInUser.Id, sanitized);
-            _tags = await BookService.BookTagsGetByBookIdAndUserId(context, (int)BookId, _loggedInUser.Id);
+            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            if (BookId is null || BookId < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            BookTagApi.BookTagAdd(context, (int)BookId, (int)_loggedInUser.Id, sanitized);
+            _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (int)BookId, (int)_loggedInUser.Id);
             await t_delay;
             _isLoading = false;
         }
