@@ -235,11 +235,7 @@ namespace Logic.Services.API.Tests
             var context = CommonFunctions.CreateContext();
             using var transaction = await context.Database.BeginTransactionAsync();
 
-
             int bookId = 6;
-            //var firstPage = await PageApi.PageReadFirstByBookIdAsync(context, bookId);
-            //var firstPageId = firstPage is null ? 0 : firstPage.Id is null ? 0 : (int)firstPage.Id;
-
 
             try
             {
@@ -251,11 +247,11 @@ namespace Logic.Services.API.Tests
                     ErrorHandler.LogAndThrow();
                     return;
                 }
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
                 // act
-                var bookUser = BookUserApi.BookUserCreate(context, bookId, (int)user.Id);
+                var bookUser = await BookUserApi.BookUserCreateAsync(context, bookId, (int)user.Id);
                 // assert
 
                 Assert.IsNotNull(bookUser);

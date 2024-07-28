@@ -42,13 +42,13 @@ namespace Model.DAL
                       ,[Created]
                       ,[StatusChanged]
                       ,[UniqueKey])
-                VALUES
-                      (<WordId, int,>
-                      ,<LanguageUserId, int,>
-                      ,<Translation, nvarchar(2000),>
-                      ,<Status, int,>
-                      ,<Created, datetime2(7),>
-                      ,<StatusChanged, datetime2(7),>
+                VALUES (
+                      {wordUser.WordId}
+                      ,{wordUser.LanguageUserId}
+                      ,{wordUser.Translation}
+                      ,{wordUser.Status}
+                      ,{wordUser.Created}
+                      ,{wordUser.StatusChanged}
                       ,{guid})
         
                 """);
@@ -69,14 +69,14 @@ namespace Model.DAL
         {
             return await Task.Run(() => { return WordUserCreate(value, context); });
         }
-        
+
         public static void WordUsersCreateAllForBookIdAndUserId(
             (int bookId, int userId) key, IdiomaticaContext context)
         {
             if (key.bookId < 1) return;
             if (key.userId < 1) return;
 
-            
+
 
             // add all the worduser objects that might not exist
             context.Database.ExecuteSql($"""
@@ -110,20 +110,21 @@ namespace Model.DAL
                 """);
 
             // now, to write the cache pull the wordusers
-            var groups =  from p in context.Pages
-                          join b in context.Books on p.BookId equals b.Id
-                          join l in context.Languages on b.LanguageId equals l.Id
-                          join lu in context.LanguageUsers on l.Id equals lu.LanguageId
-                          join pp in context.Paragraphs on p.Id equals pp.PageId
-                          join s in context.Sentences on pp.Id equals s.ParagraphId
-                          join t in context.Tokens on s.Id equals t.SentenceId
-                          join w in context.Words on t.WordId equals w.Id
-                          join wu in context.WordUsers on w.Id equals wu.WordId
-                          where wu.LanguageUserId == lu.Id
-                          && lu.UserId == key.userId
-                          && b.Id == key.bookId
-                          select new { page = p, word = w, wordUser = wu };
-                
+
+            var groups = from p in context.Pages
+                         join b in context.Books on p.BookId equals b.Id
+                         join l in context.Languages on b.LanguageId equals l.Id
+                         join lu in context.LanguageUsers on l.Id equals lu.LanguageId
+                         join pp in context.Paragraphs on p.Id equals pp.PageId
+                         join s in context.Sentences on pp.Id equals s.ParagraphId
+                         join t in context.Tokens on s.Id equals t.SentenceId
+                         join w in context.Words on t.WordId equals w.Id
+                         join wu in context.WordUsers on w.Id equals wu.WordId
+                         where wu.LanguageUserId == lu.Id
+                         && lu.UserId == key.userId
+                         && b.Id == key.bookId
+                         select new { page = p, word = w, wordUser = wu };
+
 
             foreach (var g in groups)
             {
@@ -131,7 +132,7 @@ namespace Model.DAL
                 if (g.page is null || g.page.Id is null) continue;
                 if (g.wordUser is null || g.wordUser.Id is null) continue;
                 (int pageId, int userId) cacheKey = ((int)g.page.Id, key.userId);
-                
+
                 try
                 {
                     if (WordUsersDictByPageIdAndUserId.ContainsKey((cacheKey.pageId, cacheKey.userId)) == false)
@@ -151,6 +152,15 @@ namespace Model.DAL
                     throw;
                 }
             }
+
+        }
+        public static async Task WordUsersCreateAllForBookIdAndUserIdAsync(
+            (int bookId, int userId) key, IdiomaticaContext context)
+        {
+            await Task.Run(() =>
+            {
+                WordUsersCreateAllForBookIdAndUserId(key, context);
+            });
         }
         #endregion
 

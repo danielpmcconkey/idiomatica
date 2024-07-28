@@ -47,6 +47,19 @@ namespace Logic.Services.API
             return wu;
         }
 
+        public static WordUser? WordUserReadById(
+            IdiomaticaContext context, int wordUserId)
+        {
+            if (wordUserId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.WordUserByIdRead(wordUserId, context);
+        }
+        public static async Task<WordUser?> WordUserReadByIdAsync(
+            IdiomaticaContext context, int wordUserId)
+        {
+            if (wordUserId < 1) ErrorHandler.LogAndThrow();
+            return await DataCache.WordUserByIdReadAsync(wordUserId, context);
+        }
+
 
         public static void WordUsersCreateAllForBookIdAndUserId(
             IdiomaticaContext context, int bookId, int userId)
@@ -58,10 +71,9 @@ namespace Logic.Services.API
         public static async Task WordUsersCreateAllForBookIdAndUserIdAsync(
             IdiomaticaContext context, int bookId, int userId)
         {
-            await Task.Run(() =>
-            {
-                return WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, userId);
-            });
+            if (bookId < 1) ErrorHandler.LogAndThrow();
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            await DataCache.WordUsersCreateAllForBookIdAndUserIdAsync((bookId, userId), context);
         }
 
 
