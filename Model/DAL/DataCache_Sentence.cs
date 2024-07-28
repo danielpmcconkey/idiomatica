@@ -54,7 +54,7 @@ namespace Model.DAL
             var value = (from p in context.Pages
                          join pp in context.Paragraphs on p.Id equals pp.PageId
                          join s in context.Sentences on pp.Id equals s.ParagraphId
-                         orderby s.Ordinal
+                         orderby pp.Ordinal, s.Ordinal
                          where (p.Id == key)
                          select s
 

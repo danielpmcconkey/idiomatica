@@ -254,17 +254,19 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void SentencesReadByPageIdTest()
         {
-            // assemble
             var context = CommonFunctions.CreateContext();
             using var transaction = context.Database.BeginTransaction();
+            int pageId = 3;
+            int expectedCount = 36;
+            string expectedText = "Julia es mi hermana y vivimos en la misma casa en Londres.";
 
             try
             {
-                // act
-
-
-                // assert
-                Assert.Fail();
+                var sentences = SentenceApi.SentencesReadByPageId(context, pageId);
+                Assert.IsNotNull(sentences);
+                Assert.AreEqual(expectedCount, sentences.Count);
+                var targetSentence = sentences[11];
+                Assert.AreEqual(expectedText, targetSentence.Text);
             }
             finally
             {
@@ -275,25 +277,23 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task SentencesReadByPageIdAsyncTest()
         {
-            // assemble
             var context = CommonFunctions.CreateContext();
             using var transaction = await context.Database.BeginTransactionAsync();
-
-
-
+            int pageId = 3;
+            int expectedCount = 36;
+            string expectedText = "Julia es mi hermana y vivimos en la misma casa en Londres.";
 
             try
             {
-                // act
-
-
-                // assert
-                Assert.Fail();
+                var sentences = await SentenceApi.SentencesReadByPageIdAsync(context, pageId);
+                Assert.IsNotNull(sentences);
+                Assert.AreEqual(expectedCount, sentences.Count);
+                var targetSentence = sentences[11];
+                Assert.AreEqual(expectedText, targetSentence.Text);
             }
             finally
             {
                 // clean-up
-
                 await transaction.RollbackAsync();
             }
         }
@@ -302,17 +302,53 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void SentencesReadByParagraphIdTest()
         {
-            Assert.Fail();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+            int paragraphId = 9114;
+            int expectedCount = 8;
+            int sentenceOrdinal = 2;
+            string expectedText = "Julia es mi hermana y vivimos en la misma casa en Londres.";
+
+            try
+            {
+                var sentences = SentenceApi.SentencesReadByParagraphId(context, paragraphId);
+                Assert.IsNotNull(sentences);
+                Assert.AreEqual(expectedCount, sentences.Count);
+                var targetSentence = sentences.Where(x => x.Ordinal == sentenceOrdinal).FirstOrDefault();
+                Assert.IsNotNull(targetSentence);
+                Assert.AreEqual(expectedText, targetSentence.Text);
+            }
+            finally
+            {
+                // clean-up
+                transaction.Rollback();
+            }
         }
 
         [TestMethod()]
         public async Task SentencesReadByParagraphIdAsyncTest()
         {
-            Assert.Fail();
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            int paragraphId = 9114;
+            int expectedCount = 8;
+            int sentenceOrdinal = 2;
+            string expectedText = "Julia es mi hermana y vivimos en la misma casa en Londres.";
+
+            try
+            {
+                var sentences = await SentenceApi.SentencesReadByParagraphIdAsync(context, paragraphId);
+                Assert.IsNotNull(sentences);
+                Assert.AreEqual(expectedCount, sentences.Count);
+                var targetSentence = sentences.Where(x => x.Ordinal == sentenceOrdinal).FirstOrDefault();
+                Assert.IsNotNull(targetSentence);
+                Assert.AreEqual(expectedText, targetSentence.Text);
+            }
+            finally
+            {
+                // clean-up
+                await transaction.RollbackAsync();
+            }
         }
-
-
-
-
     }
 }
