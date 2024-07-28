@@ -139,7 +139,6 @@
             return;
         }
         BookTagApi.BookTagRemove(context, (int)BookId, (int)_loggedInUser.Id, BookTag.Tag);
-        OnRefreshRowAsync.InvokeAsync();
     }
     private async Task OnDownVote()
     {
@@ -148,6 +147,7 @@
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             await Task.Run(() => DownVote());
+            await OnRefreshRowAsync.InvokeAsync();
             await t_delay;
             _isLoading = false;
         }
