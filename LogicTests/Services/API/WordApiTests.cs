@@ -16,6 +16,248 @@ namespace Logic.Services.API.Tests
     public class WordApiTests
     {
         [TestMethod()]
+        public void WordCreateTest()
+        {
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            int languageId = 2;
+            string guid = Guid.NewGuid().ToString();
+            string text = guid.ToLower();
+            string romanization = guid;
+
+            try
+            {
+                // act
+                var newWord = WordApi.WordCreate(context, languageId, text, romanization);
+
+
+                // assert
+                Assert.IsNotNull(newWord);
+                Assert.IsNotNull(newWord.Id);
+                Assert.AreEqual(text, newWord.TextLowerCase, text);
+                Assert.AreEqual(romanization, newWord.Romanization);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
+            }
+        }
+        [TestMethod()]
+        public async Task WordCreateAsyncTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+
+            int languageId = 2;
+            string guid = Guid.NewGuid().ToString();
+            string text = guid.ToLower();
+            string romanization = guid;
+
+            try
+            {
+                // act
+                var newWord = await WordApi.WordCreateAsync(context, languageId, text, romanization);
+
+                // assert
+                Assert.IsNotNull(newWord);
+                Assert.IsNotNull(newWord.Id);
+                Assert.AreEqual(text, newWord.TextLowerCase, text);
+                Assert.AreEqual(romanization, newWord.Romanization);
+            }
+            finally
+            {
+                // clean-up
+
+                await transaction.RollbackAsync();
+            }
+        }
+
+
+        [TestMethod()]
+        public void WordGetByIdTest()
+        {
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            int wordId = 35;
+            string expectedText = "cuerpo";
+            int expectedLanguageId = 1;
+
+            try
+            {
+                var word = WordApi.WordGetById(context, wordId);
+
+                Assert.IsNotNull(word);
+                Assert.AreEqual(wordId, word.Id);
+                Assert.AreEqual(expectedText, word.TextLowerCase);
+                Assert.AreEqual(expectedLanguageId, word.LanguageId);
+            }
+            finally
+            {
+                // clean-up
+                transaction.Rollback();
+            }
+        }
+        [TestMethod()]
+        public async Task WordGetByIdAsyncTest()
+        {
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+
+            int wordId = 35;
+            string expectedText = "cuerpo";
+            int expectedLanguageId = 1;
+
+            try
+            {
+                var word = await WordApi.WordGetByIdAsync(context, wordId);
+
+                Assert.IsNotNull(word);
+                Assert.AreEqual(wordId, word.Id);
+                Assert.AreEqual(expectedText, word.TextLowerCase);
+                Assert.AreEqual(expectedLanguageId, word.LanguageId);
+            }
+            finally
+            {
+                // clean-up
+                await transaction.RollbackAsync();
+            }
+        }
+
+
+        [TestMethod()]
+        public void WordReadByLanguageIdAndTextTest()
+        {
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+
+            int expectedWordId = 35;
+            string text = "cuerpo";
+            int languageId = 1;
+
+            try
+            {
+                var word = WordApi.WordReadByLanguageIdAndText(context, languageId, text);
+
+                Assert.IsNotNull(word);
+                Assert.AreEqual(expectedWordId, word.Id);
+            }
+            finally
+            {
+                // clean-up
+                transaction.Rollback();
+            }
+        }
+        [TestMethod()]
+        public async Task WordReadByLanguageIdAndTextAsyncTest()
+        {
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+
+            int expectedWordId = 35;
+            string text = "cuerpo";
+            int languageId = 1;
+
+            try
+            {
+                var word = await WordApi.WordReadByLanguageIdAndTextAsync(context, languageId, text);
+
+                Assert.IsNotNull(word);
+                Assert.AreEqual(expectedWordId, word.Id);
+            }
+            finally
+            {
+                // clean-up
+                await transaction.RollbackAsync();
+            }
+        }
+
+
+        [TestMethod()]
+        public void WordsCreateOrderedFromSentenceIdTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = context.Database.BeginTransaction();
+            int sentenceId = 13956;
+            int languageId = 1;
+            int expectedCount = 18;
+            int wordOrdinalToCheck = 15;
+            string expectedWord = "impacto";
+
+
+
+            try
+            {
+                // act
+                var wordOrderPair = WordApi.WordsCreateOrderedFromSentenceId(
+                    context, languageId, sentenceId);
+                int actualCount = wordOrderPair.Count;
+                var checkedWord = wordOrderPair.Where(x => x.ordinal == wordOrdinalToCheck).FirstOrDefault();
+                if (checkedWord.word is null || checkedWord.word.TextLowerCase is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                string actualWord = checkedWord.word.TextLowerCase;
+
+                // assert
+                Assert.AreEqual(expectedCount, actualCount);
+                Assert.AreEqual(expectedWord, actualWord);
+            }
+            finally
+            {
+                // clean-up
+
+                transaction.Rollback();
+            }
+        }
+        [TestMethod()]
+        public async Task WordsCreateOrderedFromSentenceIdAsyncTest()
+        {
+            // assemble
+            var context = CommonFunctions.CreateContext();
+            using var transaction = await context.Database.BeginTransactionAsync();
+            int sentenceId = 13956;
+            int languageId = 1;
+            int expectedCount = 18;
+            int wordOrdinalToCheck = 15;
+            string expectedWord = "impacto";
+
+
+
+            try
+            {
+                // act
+                var wordOrderPair = await WordApi.WordsCreateOrderedFromSentenceIdAsync(
+                    context, languageId, sentenceId);
+                int actualCount = wordOrderPair.Count;
+                var checkedWord = wordOrderPair.Where(x => x.ordinal == wordOrdinalToCheck).FirstOrDefault();
+                if (checkedWord.word is null || checkedWord.word.TextLowerCase is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return;
+                }
+                string actualWord = checkedWord.word.TextLowerCase;
+
+                // assert
+                Assert.AreEqual(expectedCount, actualCount);
+                Assert.AreEqual(expectedWord, actualWord);
+            }
+            finally
+            {
+                // clean-up
+
+                await transaction.RollbackAsync();
+            }
+        }
+
+
+        [TestMethod()]
         public void WordsDictReadByPageIdTest()
         {
             // assemble
@@ -56,7 +298,6 @@ namespace Logic.Services.API.Tests
                 transaction.Rollback();
             }
         }
-
         [TestMethod()]
         public async Task WordsDictReadByPageIdAsyncTest()
         {
@@ -99,147 +340,6 @@ namespace Logic.Services.API.Tests
             }
         }
 
-        [TestMethod()]
-        public void CreateWordTest()
-        {
-            var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
-
-            int languageId = 2;
-            string guid = Guid.NewGuid().ToString();
-            string text = guid.ToLower();
-            string romanization = guid;
-
-            try
-            {
-                // act
-                var newWord = WordApi.WordCreate(context, languageId, text, romanization);
-
-
-                // assert
-                Assert.IsNotNull(newWord);
-                Assert.IsNotNull(newWord.Id);
-                Assert.AreEqual(text, newWord.TextLowerCase, text);
-                Assert.AreEqual(romanization, newWord.Romanization);
-            }
-            finally
-            {
-                // clean-up
-
-                transaction.Rollback();
-            }
-        }
-
-        [TestMethod()]
-        public async Task CreateWordAsyncTest()
-        {
-            // assemble
-            var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-
-            int languageId = 2;
-            string guid = Guid.NewGuid().ToString();
-            string text = guid.ToLower();
-            string romanization = guid;
-
-            try
-            {
-                // act
-                var newWord = await WordApi.WordCreateAsync(context, languageId, text, romanization);
-
-                // assert
-                Assert.IsNotNull(newWord);
-                Assert.IsNotNull(newWord.Id);
-                Assert.AreEqual(text, newWord.TextLowerCase, text);
-                Assert.AreEqual(romanization, newWord.Romanization);
-            }
-            finally
-            {
-                // clean-up
-
-                await transaction.RollbackAsync();
-            }
-        }
-
-        [TestMethod()]
-        public void CreateOrderedWordsFromSentenceIdTest()
-        {
-            // assemble
-            var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
-            int sentenceId = 13956;
-            int languageId = 1;
-            int expectedCount = 18;
-            int wordOrdinalToCheck = 15;
-            string expectedWord = "impacto";
-
-
-
-            try
-            {
-                // act
-                var wordOrderPair = WordApi.WordsCreateOrderedFromSentenceId(
-                    context, languageId, sentenceId);
-                int actualCount = wordOrderPair.Count;
-                var checkedWord = wordOrderPair.Where(x => x.ordinal == wordOrdinalToCheck).FirstOrDefault();
-                if (checkedWord.word is null || checkedWord.word.TextLowerCase is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                string actualWord = checkedWord.word.TextLowerCase;
-
-                // assert
-                Assert.AreEqual(expectedCount, actualCount);
-                Assert.AreEqual(expectedWord, actualWord);
-            }
-            finally
-            {
-                // clean-up
-
-                transaction.Rollback();
-            }
-        }
-
-        [TestMethod()]
-        public async Task CreateOrderedWordsFromSentenceIdAsyncTest()
-        {
-            // assemble
-            var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-            int sentenceId = 13956;
-            int languageId = 1;
-            int expectedCount = 18;
-            int wordOrdinalToCheck = 15;
-            string expectedWord = "impacto";
-
-
-
-            try
-            {
-                // act
-                var wordOrderPair = await WordApi.WordsCreateOrderedFromSentenceIdAsync(
-                    context, languageId, sentenceId);
-                int actualCount = wordOrderPair.Count;
-                var checkedWord = wordOrderPair.Where(x => x.ordinal == wordOrdinalToCheck).FirstOrDefault();
-                if (checkedWord.word is null || checkedWord.word.TextLowerCase is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                string actualWord = checkedWord.word.TextLowerCase;
-
-                // assert
-                Assert.AreEqual(expectedCount, actualCount);
-                Assert.AreEqual(expectedWord, actualWord);
-            }
-            finally
-            {
-                // clean-up
-
-                await transaction.RollbackAsync();
-            }
-        }
 
         [TestMethod()]
         public void WordsGetListOfReadCountTest()
@@ -375,7 +475,6 @@ namespace Logic.Services.API.Tests
                 transaction.Rollback();
             }
         }
-
         [TestMethod()]
         public async Task WordsGetListOfReadCountAsyncTest()
         {
@@ -511,44 +610,6 @@ namespace Logic.Services.API.Tests
             }
         }
 
-        [TestMethod()]
-        public void WordGetByIdTest()
-        {
-            // assemble
-            var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
 
-            try
-            {
-                // act
-
-
-                // assert
-                Assert.Fail();
-            }
-            finally
-            {
-                // clean-up
-                transaction.Rollback();
-            }
-        }
-
-        [TestMethod()]
-        public void WordGetByIdAsyncTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void WordReadByLanguageIdAndTextTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void WordReadByLanguageIdAndTextAsyncTest()
-        {
-            Assert.Fail();
-        }
     }
 }
