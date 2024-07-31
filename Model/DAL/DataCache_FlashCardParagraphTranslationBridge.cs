@@ -12,9 +12,28 @@ namespace Model.DAL
     public static partial class DataCache
     {
         private static ConcurrentDictionary<int, FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridgeById = new ConcurrentDictionary<int, FlashCardParagraphTranslationBridge>();
-            
+        private static ConcurrentDictionary<(int flashCardId, string uiCode), List<FlashCardParagraphTranslationBridge>>
+            FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode = new();
 
         #region read
+        public static List<FlashCardParagraphTranslationBridge>?
+            FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCodeRead(
+            (int flashCardId, string uiCode) key, IdiomaticaContext context)
+        {
+            // check cache
+            if (FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode.ContainsKey(key))
+            {
+                return FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode[key];
+            }
+
+            // read DB
+            var bridges = (from fcptb in context.FlashCardParagraphTranslationBridges
+                          join pt in context.ParagraphTranslations on fcptb.ParagraphTranslationId equals pt.Id
+                          where pt.Code == key.uiCode && fcptb.FlashCardId == key.flashCardId
+                          select fcptb).ToList();
+            FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode[key] = bridges;
+            return bridges;
+        }
         public static async Task<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridgeByIdReadAsync(int key, IdiomaticaContext context)
         {
             // check cache

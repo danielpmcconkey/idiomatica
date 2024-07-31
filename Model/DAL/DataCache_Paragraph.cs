@@ -15,7 +15,7 @@ namespace Model.DAL
 
 
         #region read
-        public static async Task<Paragraph> ParagraphByIdReadAsync(int key, IdiomaticaContext context)
+        public static Paragraph? ParagraphByIdRead(int key, IdiomaticaContext context)
         {
             // check cache
             if (ParagraphById.ContainsKey(key))
@@ -30,6 +30,13 @@ namespace Model.DAL
             // write to cache
             ParagraphById[key] = value;
             return value;
+        }
+        public static async Task<Paragraph?> ParagraphByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<Paragraph?>.Run(() =>
+            {
+                return ParagraphByIdRead(key, context);
+            });
         }
         public static List<Paragraph> ParagraphsByPageIdRead(
             int key, IdiomaticaContext context)

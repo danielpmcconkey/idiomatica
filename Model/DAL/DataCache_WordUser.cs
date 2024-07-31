@@ -189,8 +189,8 @@ namespace Model.DAL
             });
         }
 
-
-        public static async Task<WordUser> WordUserAndLanguageUserAndLanguageByIdReadAsync(int key, IdiomaticaContext context)
+        public static WordUser? WordUserAndLanguageUserAndLanguageByIdRead(
+            int key, IdiomaticaContext context)
         {
             // check cache
             if (WordUserAndLanguageUserAndLanguageById.ContainsKey(key))
@@ -201,7 +201,7 @@ namespace Model.DAL
             // read DB
             var value = context.WordUsers
                 .Where(x => x.Id == key)
-                .Include(x => x.LanguageUser).ThenInclude(x=> x.Language)
+                .Include(x => x.LanguageUser).ThenInclude(x => x.Language)
                 .FirstOrDefault();
 
             if (value == null) return null;
@@ -209,6 +209,16 @@ namespace Model.DAL
             WordUserAndLanguageUserAndLanguageById[key] = value;
             return value;
         }
+        public static async Task<WordUser?> WordUserAndLanguageUserAndLanguageByIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            return await Task<WordUser?>.Run(() =>
+            {
+                return WordUserAndLanguageUserAndLanguageByIdRead(key, context);
+            });
+        }
+
+
         public static async Task<WordUser?> WordUserByWordIdAndUserIdReadAsync(
             (int wordId, int userId) key, IdiomaticaContext context)
         {

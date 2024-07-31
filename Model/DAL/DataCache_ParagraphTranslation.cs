@@ -60,7 +60,7 @@ namespace Model.DAL
         #endregion
 
         #region read
-        public static async Task<ParagraphTranslation> ParagraphTranslationByIdReadAsync(int key, IdiomaticaContext context)
+        public static ParagraphTranslation? ParagraphTranslationByIdRead(int key, IdiomaticaContext context)
         {
             // check cache
             if (ParagraphTranslationById.ContainsKey(key))
@@ -76,7 +76,7 @@ namespace Model.DAL
             ParagraphTranslationById[key] = value;
             return value;
         }
-        public static async Task<List<ParagraphTranslation>> ParagraphTranslationsByParargraphIdReadAsync(
+        public static List<ParagraphTranslation> ParagraphTranslationsByParargraphIdRead(
             int key, IdiomaticaContext context)
         {
             // check cache
@@ -93,6 +93,14 @@ namespace Model.DAL
             foreach (var item in value) { ParagraphTranslationById[(int)item.Id] = item; }
 
             return value;
+        }
+        public static async Task<List<ParagraphTranslation>> ParagraphTranslationsByParargraphIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            return await Task<List<ParagraphTranslation>>.Run(() =>
+            {
+                return ParagraphTranslationsByParargraphIdRead(key, context);
+            });
         }
         #endregion
 

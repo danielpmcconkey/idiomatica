@@ -12,7 +12,7 @@ namespace Model.DAL
     {
         private static ConcurrentDictionary<int, FlashCard?> FlashCardById = new ConcurrentDictionary<int, FlashCard?>();
         private static ConcurrentDictionary<int, FlashCard?> FlashCardAndFullRelationshipsById = new ConcurrentDictionary<int, FlashCard?>();
-        private static ConcurrentDictionary<(int languageUserId, int take), List<FlashCard>> FlashCardsActiveAndFullRelationshipsByLanguageUserId = new ConcurrentDictionary<(int languageUserId, int take), List<FlashCard>>();
+        private static ConcurrentDictionary<(int languageUserId, int take), List<FlashCard>> FlashCardsActiveAndFullRelationshipsByLanguageUserId = new ();
 
 
         #region create
@@ -59,7 +59,7 @@ namespace Model.DAL
         #endregion
 
         #region read
-        public static async Task<FlashCard?> FlashCardByIdReadAsync(int key, IdiomaticaContext context)
+        public static FlashCard? FlashCardByIdRead(int key, IdiomaticaContext context)
         {
             // check cache
             if (FlashCardById.ContainsKey(key))
@@ -73,6 +73,13 @@ namespace Model.DAL
             // write to cache
             FlashCardById[key] = value;
             return value;
+        }
+        public static async Task<FlashCard?> FlashCardByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<FlashCard?>.Run(() =>
+            {
+                return FlashCardByIdRead(key, context);
+            });
         }
         public static async Task<FlashCard?> FlashCardAndFullRelationshipsByIdReadAsync(int key, IdiomaticaContext context)
         {
@@ -97,7 +104,7 @@ namespace Model.DAL
             FlashCardById[key] = value;
             return value;
         }
-        public static async Task<List<FlashCard>> FlashCardsActiveAndFullRelationshipsByLanguageUserIdReadAsync(
+        public static List<FlashCard>? FlashCardsActiveAndFullRelationshipsByLanguageUserIdRead(
             (int languageUserId, int take) key, IdiomaticaContext context)
         {
             // check cache
@@ -108,17 +115,21 @@ namespace Model.DAL
 
             // read DB
             var value = context.FlashCards
-                .Where(fc => fc.WordUser.LanguageUserId == key.languageUserId
-                    && fc.Status == AvailableFlashCardStatus.ACTIVE)
+                .Where(
+                       fc => fc.WordUser != null 
+                    && fc.WordUser.LanguageUserId == key.languageUserId
+                    && fc.Status == AvailableFlashCardStatus.ACTIVE
+                    )
                 .Include(fc => fc.WordUser).ThenInclude(wu => wu.Word)
                 .Include(fc => fc.Attempts)
                 .Include(fc => fc.FlashCardParagraphTranslationBridges)
                     .ThenInclude(fcptb => fcptb.ParagraphTranslation)
-                        .ThenInclude(pt => pt.Paragraph).ThenInclude(pp => pp.Sentences)
+                        .ThenInclude(pt => pt.Paragraph)
+                            .ThenInclude(pp => pp.Sentences)
                 .OrderBy(fc => fc.NextReview)
                 .Take(key.take)
                 .ToList();
-            if (value == null) return new List<FlashCard>();
+            if (value is null) return value;
             // write to cache
             FlashCardsActiveAndFullRelationshipsByLanguageUserId[key] = value;
             foreach (var f in value)

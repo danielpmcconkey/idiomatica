@@ -125,7 +125,7 @@ namespace Logic.Services.API.Tests
                     ErrorHandler.LogAndThrow();
                     return;
                 }
-                
+
 
                 // create an empty book
                 Book? book = new()
@@ -158,13 +158,13 @@ namespace Logic.Services.API.Tests
                 // create the paragraph splits
                 var paragraphSplits = await ParagraphApi.PotentialParagraphsSplitFromTextAsync(
                    context, TestConstants.NewPageText, TestConstants.NewBookLanguageCode);
-                if(paragraphSplits is null || paragraphSplits.Length < 1)
+                if (paragraphSplits is null || paragraphSplits.Length < 1)
                 {
-                    ErrorHandler.LogAndThrow(); 
-                    return; 
+                    ErrorHandler.LogAndThrow();
+                    return;
                 }
                 var fifthSplit = paragraphSplits[4];
-                if(string.IsNullOrEmpty(fifthSplit))
+                if (string.IsNullOrEmpty(fifthSplit))
                 {
                     ErrorHandler.LogAndThrow();
                     return;
@@ -197,6 +197,18 @@ namespace Logic.Services.API.Tests
                 // clean-up
                 await transaction.RollbackAsync();
             }
+        }
+
+
+        [TestMethod()]
+        public void ParagraphExamplePullRandomByFlashCardIdTest()
+        {
+            Assert.Fail();
+        }
+        [TestMethod()]
+        public void ParagraphExamplePullRandomByFlashCardIdAsyncTest()
+        {
+            Assert.Fail();
         }
 
 
@@ -391,11 +403,11 @@ namespace Logic.Services.API.Tests
                     ErrorHandler.LogAndThrow();
                     return;
                 }
-                
+
 
 
                 // assert
-               
+
                 var thirdSentence = fifthParagraph.Sentences.Where(s => s.Ordinal == 2).FirstOrDefault();
                 Assert.IsNotNull(thirdSentence);
                 Assert.IsNotNull(thirdSentence.Text);
@@ -537,7 +549,7 @@ namespace Logic.Services.API.Tests
                 string actualTranslation = result.output;
 
                 // assert
-                                
+
                 Assert.AreEqual(expectedInput, actualInput);
                 Assert.AreEqual(expectedTranslation, actualTranslation);
             }
@@ -707,6 +719,6 @@ namespace Logic.Services.API.Tests
             }
         }
 
-
+        
     }
 }

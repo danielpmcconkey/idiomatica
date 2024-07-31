@@ -1,6 +1,7 @@
 ﻿@rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
+@using Logic.Services.API;
 
     
 <style>
@@ -18,8 +19,8 @@
 
 <Card Class="@CardCss">
     <CardBody>
-        <CardTitle>@FlashCardService.CardTitle</CardTitle>
-        <CardText>@FlashCardService.ExampleParagraph</CardText>
+        <CardTitle>@CardTitle</CardTitle>
+        <CardText>@ExampleParagraph</CardText>
         @if(_isAnswerVisible == false)
         {
             <Button Color="ButtonColor.Primary" Type="ButtonType.Button" @onclick="OnShowAnswerClick">
@@ -38,8 +39,8 @@
         else
         {
             <CardBody>
-                <CardTitle>@FlashCardService.CardTranslation</CardTitle>
-                <CardText>@FlashCardService.ParagraphTranslation</CardText>
+                <CardTitle></CardTitle>
+                <CardText>@ParagraphTranslation</CardText>
             </CardBody>
         }
             
@@ -85,26 +86,52 @@
 
 
 @code {
-    [Parameter] public FlashCardService FlashCardService { get; set; }
+    [Parameter] public FlashCardDataPacket? FlashCardDataPacket { get; set; }
+    [Parameter] public string? UiLanguageCode { get; set; }
     [Parameter] public string? CardCss { get; set; }
+    [Parameter] public EventCallback<int> ResetFormFunction { get; set; }
 
-
-
+    public string? ExampleParagraph { get; set; } = null;
+    public string? ParagraphTranslation { get; set; } = null;
+    public string? CardTitle { get; set; } = null;
+    public string? CardTranslation { get; set; } = null;
 
 
     private bool _isLoading = false;
     private bool _isAnswerVisible = false;
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
-    
+    private int LoadingDelayMiliseconds = 500;
 
+    public void ResetCardProperties()
+    {
+        CardTitle = null;
+        CardTranslation = null;
+        ExampleParagraph = null;
+        ParagraphTranslation = null;
+
+        if (FlashCardDataPacket is null) return;
+        if (FlashCardDataPacket.CurrentCard is null || FlashCardDataPacket.CurrentCard.Id is null) return;
+        if (UiLanguageCode is null) return;
+
+        var context = DbContextFactory.CreateDbContext();
+        var ppExample = ParagraphApi.ParagraphExamplePullRandomByFlashCardId(
+            context, (int)FlashCardDataPacket.CurrentCard.Id, UiLanguageCode);
+        ExampleParagraph = ppExample.example;
+        ParagraphTranslation = ppExample.translation;
+
+        if (FlashCardDataPacket.CurrentCard.WordUser is null) return;
+        if (FlashCardDataPacket.CurrentCard.WordUser.Word is null) return;
+        CardTitle = FlashCardDataPacket.CurrentCard.WordUser.Word.TextLowerCase;
+
+        if (FlashCardDataPacket.CurrentCard.WordUser.Translation is null) return;
+        CardTranslation = FlashCardDataPacket.CurrentCard.WordUser.Translation;
+    }
     private async Task OnShowAnswerClick()
     {
-        
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(FlashCardService.LoadingDelayMiliseconds);
-            var context = await DbContextFactory.CreateDbContextAsync();
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
             _isAnswerVisible = true;
             await t_delay;
             _isLoading = false;
@@ -124,16 +151,34 @@
             StateHasChanged();
         }
     }
-    
+    private void ProcessAndAdvance(AvailableFlashCardAttemptStatus previousCardsStatus)
+    {
+        var context = DbContextFactory.CreateDbContext();
+        FlashCardDataPacket = OrchestrationApi.OrchestrateFlashCardDispositionAndAdvance(
+            context, FlashCardDataPacket, previousCardsStatus);
+        if (FlashCardDataPacket is null)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        if (FlashCardDataPacket.CurrentCardPosition >= FlashCardDataPacket.Deck.Count)
+        {
+            ResetFormFunction.InvokeAsync();
+            return;
+        }
+        ResetCardProperties();
+    }
     public async Task OnNextCardClickAsync(AvailableFlashCardAttemptStatus previousCardsStatus)
     {
         try
         {
             _isLoading = true;
-            var t_delay = Task.Delay(FlashCardService.LoadingDelayMiliseconds);
-            var context = await DbContextFactory.CreateDbContextAsync();
-            await FlashCardService.DeckAdvanceCardAsync(context, previousCardsStatus);
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
+            var t_process = Task.Run(() => ProcessAndAdvance(previousCardsStatus));
+
+
             _isAnswerVisible = false;
+            await t_process;
             await t_delay;
             _isLoading = false;
         }

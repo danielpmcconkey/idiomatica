@@ -156,6 +156,16 @@ namespace Logic.Services.API.Tests
             }
         }
 
+        [TestMethod()]
+        public void LanguageCodeUserInterfacePreferenceReadByUserIdTest()
+        {
+            Assert.Fail();
+        }
 
+        [TestMethod()]
+        public void LanguageCodeUserInterfacePreferenceReadByUserIdAsyncTest()
+        {
+            Assert.Fail();
+        }
     }
 }

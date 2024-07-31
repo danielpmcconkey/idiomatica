@@ -199,7 +199,7 @@ namespace Logic.Services.API.Tests
             }
         }
 
-        
+
         [TestMethod()]
         public void OrchestrateClearPageAndMoveTest()
         {
@@ -407,6 +407,30 @@ namespace Logic.Services.API.Tests
 
                 await transaction.RollbackAsync();
             }
+        }
+
+
+        [TestMethod()]
+        public void OrchestrateFlashCardDispositionAndAdvanceTest()
+        {
+            Assert.Fail();
+        }
+        [TestMethod()]
+        public void OrchestrateFlashCardDispositionAndAdvanceAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+
+        [TestMethod()]
+        public void OrchestrateFlashCardDeckCreationTest()
+        {
+            Assert.Fail();
+        }
+        [TestMethod()]
+        public void OrchestrateFlashCardDeckCreationAsyncTest()
+        {
+            Assert.Fail();
         }
 
 
