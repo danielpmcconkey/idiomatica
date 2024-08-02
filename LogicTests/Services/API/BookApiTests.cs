@@ -78,7 +78,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpBook(bookId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -221,7 +221,7 @@ namespace Logic.Services.API.Tests
             {
                 // clean-up
                 CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 

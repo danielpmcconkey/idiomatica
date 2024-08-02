@@ -63,7 +63,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
@@ -84,8 +84,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -150,7 +150,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 int bookUserId = createResult.bookUserId;
@@ -159,7 +159,7 @@ namespace Logic.Services.API.Tests
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
                 if(language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                var languageUser = LanguageUserApi.LanguageUserGet(context, (int)language.Id, userId);
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (int)language.Id, userId);
                 if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the page 1 page user
@@ -184,8 +184,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -277,7 +277,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 int bookUserId = createResult.bookUserId;
@@ -286,7 +286,7 @@ namespace Logic.Services.API.Tests
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
                 if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                var languageUser = LanguageUserApi.LanguageUserGet(context, (int)language.Id, userId);
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (int)language.Id, userId);
                 if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the page 1 page user
@@ -336,8 +336,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -408,7 +408,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 int bookUserId = createResult.bookUserId;
@@ -417,7 +417,7 @@ namespace Logic.Services.API.Tests
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
                 if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                var languageUser = LanguageUserApi.LanguageUserGet(context, (int)language.Id, userId);
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (int)language.Id, userId);
                 if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the page 2 page user
@@ -448,8 +448,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -551,7 +551,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
@@ -559,7 +559,7 @@ namespace Logic.Services.API.Tests
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
                 if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                var languageUser = LanguageUserApi.LanguageUserGet(context, (int)language.Id, userId);
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (int)language.Id, userId);
                 if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // get the page Id
@@ -577,7 +577,7 @@ namespace Logic.Services.API.Tests
                 await PageUserApi.PageUserUpdateReadDateAsync(context, (int)pageUserBefore.Id, DateTime.Now);
 
                 // now read it back
-                var pageUserAfter = PageUserApi.PageUserReadByPageIdAndLanguageUserId(
+                var pageUserAfter = await PageUserApi.PageUserReadByPageIdAndLanguageUserIdAsync(
                     context, (int)page.Id, (int)languageUser.Id);
 
                 Assert.IsNotNull(pageUserAfter);
@@ -588,8 +588,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -680,7 +680,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 int bookUserId = createResult.bookUserId;
@@ -689,7 +689,7 @@ namespace Logic.Services.API.Tests
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
                 if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                var languageUser = LanguageUserApi.LanguageUserGet(context, (int)language.Id, userId);
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (int)language.Id, userId);
                 if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
 
@@ -738,8 +738,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
     }

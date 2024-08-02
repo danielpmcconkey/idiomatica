@@ -17,6 +17,7 @@ using System.Security.Claims;
 using Logic.Services.API;
 using Logic.Telemetry;
 using System.Net;
+using Logic;
 
 namespace LogicTests
 {
@@ -103,9 +104,17 @@ namespace LogicTests
         {
             BookApi.BookAndAllChildrenDelete(context, bookId);
         }
+        internal static async Task CleanUpBookAsync(int bookId, IdiomaticaContext context)
+        {
+            await BookApi.BookAndAllChildrenDeleteAsync(context, bookId);
+        }
         internal static void CleanUpUser(int userId, IdiomaticaContext context)
         {
             UserApi.UserAndAllChildrenDelete(context, userId);
+        }
+        internal static async Task CleanUpUserAsync(int userId, IdiomaticaContext context)
+        {
+            await UserApi.UserAndAllChildrenDeleteAsync(context, userId);
         }
         #endregion
 
@@ -122,6 +131,20 @@ namespace LogicTests
             if (book is null || book.Id is null || book.Id < 1) { ErrorHandler.LogAndThrow(); return null; }
             return book;
         }
+        internal static async Task <Book?> CreateBookAsync(IdiomaticaContext context, int userId)
+        {
+            Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
+                context,
+                userId,
+                TestConstants.NewBookTitle,
+                TestConstants.NewBookLanguageCode,
+                TestConstants.NewBookUrl,
+                TestConstants.NewBookText);
+            if (book is null || book.Id is null || book.Id < 1) { ErrorHandler.LogAndThrow(); return null; }
+            return book;
+        }
+
+
         internal static (int userId, int bookId, int bookUserId) CreateUserAndBookAndBookUser(
             IdiomaticaContext context, UserService userService)
         {
@@ -131,7 +154,7 @@ namespace LogicTests
 
             var user = CreateNewTestUser(userService, context);
 
-            if (user is null || user.Id is null || user.Id < 1) 
+            if (user is null || user.Id is null || user.Id < 1)
             { ErrorHandler.LogAndThrow(); return (userId, bookId, bookUserId); }
             userId = (int)user.Id;
             var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
@@ -139,17 +162,25 @@ namespace LogicTests
 
 
             Book? book = CreateBook(context, (int)user.Id);
-            if (book is null || book.Id is null || book.Id < 1) 
-                { ErrorHandler.LogAndThrow(); return (userId, bookId, bookUserId); }
+            if (book is null || book.Id is null || book.Id < 1)
+            { ErrorHandler.LogAndThrow(); return (userId, bookId, bookUserId); }
             bookId = (int)book.Id;
 
             var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
                 context, (int)book.Id, (int)user.Id);
             if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-                { ErrorHandler.LogAndThrow(); return (userId, bookId, bookUserId); }
+            { ErrorHandler.LogAndThrow(); return (userId, bookId, bookUserId); }
             bookUserId = (int)bookUser.Id;
 
             return (userId, bookId, bookUserId);
+        }
+        internal static async Task<(int userId, int bookId, int bookUserId)> CreateUserAndBookAndBookUserAsync(
+            IdiomaticaContext context, UserService userService)
+        {
+            return await Task<(int userId, int bookId, int bookUserId)>.Run(() =>
+            {
+                return CreateUserAndBookAndBookUser(context, userService);
+            });
         }
         #endregion
 
