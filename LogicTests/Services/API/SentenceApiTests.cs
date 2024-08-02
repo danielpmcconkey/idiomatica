@@ -19,69 +19,40 @@ namespace Logic.Services.API.Tests
         public void PotentialSentencesSplitFromTextTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
-
             string expectedValue = "Los niños iban a jugar al jardín del gigante.";
 
-            try
-            {
-                var language = LanguageApi.LanguageReadByCode(
-                    context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.Id is null || language.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+            var language = LanguageApi.LanguageReadByCode(
+                context, TestConstants.NewBookLanguageCode);
+            if (language is null || language.Id is null || language.Id < 1)
+            { ErrorHandler.LogAndThrow(); return; }
 
-                var potentialSentences = SentenceApi.PotentialSentencesSplitFromText(
-                    context, TestConstants.NewPageText, (int)language.Id);
+            var potentialSentences = SentenceApi.PotentialSentencesSplitFromText(
+                context, TestConstants.NewPageText, (int)language.Id);
 
-                Assert.AreEqual(expectedValue, potentialSentences[5]);
-
-            }
-            finally
-            {
-                // clean-up
-                transaction.Rollback();
-            }
+            Assert.AreEqual(expectedValue, potentialSentences[5]);
         }
         [TestMethod()]
         public async Task PotentialSentencesSplitFromTextAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-            
             string expectedValue = "Los niños iban a jugar al jardín del gigante.";
+            var language = await LanguageApi.LanguageReadByCodeAsync(
+                context, TestConstants.NewBookLanguageCode);
+            if (language is null || language.Id is null || language.Id < 1)
+                { ErrorHandler.LogAndThrow(); return; }
 
-            try
-            {
-                var language = await LanguageApi.LanguageReadByCodeAsync(
-                    context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.Id is null || language.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+            var potentialSentences = await SentenceApi.PotentialSentencesSplitFromTextAsync(
+                context, TestConstants.NewPageText, (int)language.Id);
 
-                var potentialSentences = await SentenceApi.PotentialSentencesSplitFromTextAsync(
-                    context, TestConstants.NewPageText, (int)language.Id);
-
-                Assert.AreEqual(expectedValue, potentialSentences[5]);
-                
-            }
-            finally
-            {
-                // clean-up
-                await transaction.RollbackAsync();
-            }
+            Assert.AreEqual(expectedValue, potentialSentences[5]);
         }
 
 
         [TestMethod()]
         public void SentenceCreateTest()
         {
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             string sentence1 = "Cada tarde, después de la escuela.";
             string sentence2 = "Los niños iban a jugar al jardín del gigante.";
 
@@ -90,10 +61,8 @@ namespace Logic.Services.API.Tests
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
                 if (language is null || language.Id is null || language.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+
                 // create an empty book
                 Book? book = new()
                 {
@@ -103,10 +72,9 @@ namespace Logic.Services.API.Tests
                 };
                 book = DataCache.BookCreate(book, context);
                 if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                bookId = (int)book.Id;
+
                 // create an empty page
                 Page? page = new()
                 {
@@ -117,10 +85,8 @@ namespace Logic.Services.API.Tests
                 };
                 page = DataCache.PageCreate(page, context);
                 if (page is null || page.Id is null || page.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
@@ -130,10 +96,7 @@ namespace Logic.Services.API.Tests
                 };
                 paragraph = DataCache.ParagraphCreate(paragraph, context);
                 if (paragraph is null || paragraph.Id is null || paragraph.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 // create two sentences
                 var sentence1created = SentenceApi.SentenceCreate(
                     context, sentence1, (int)language.Id, 0, (int)paragraph.Id);
@@ -143,16 +106,10 @@ namespace Logic.Services.API.Tests
                 var sentencesRead = SentenceApi.SentencesReadByParagraphId(
                     context, (int)paragraph.Id);
                 if (sentencesRead is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 var secondSentenceRead = sentencesRead.Where(x => x.Ordinal == 1).FirstOrDefault();
                 if (secondSentenceRead is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
 
                 Assert.AreEqual(sentence2, secondSentenceRead.Text);
 
@@ -160,14 +117,14 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task SentenceCreateAsyncTest()
         {
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             string sentence1 = "Cada tarde, después de la escuela.";
             string sentence2 = "Los niños iban a jugar al jardín del gigante.";
 
@@ -176,10 +133,7 @@ namespace Logic.Services.API.Tests
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
                 if (language is null || language.Id is null || language.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 // create an empty book
                 Book? book = new()
                 {
@@ -189,10 +143,9 @@ namespace Logic.Services.API.Tests
                 };
                 book = DataCache.BookCreate(book, context);
                 if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                bookId = (int)book.Id;
+
                 // create an empty page
                 Page? page = new()
                 {
@@ -203,10 +156,7 @@ namespace Logic.Services.API.Tests
                 };
                 page = DataCache.PageCreate(page, context);
                 if (page is null || page.Id is null || page.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
@@ -216,10 +166,7 @@ namespace Logic.Services.API.Tests
                 };
                 paragraph = DataCache.ParagraphCreate(paragraph, context);
                 if (paragraph is null || paragraph.Id is null || paragraph.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 // create two sentences
                 var sentence1created = await SentenceApi.SentenceCreateAsync(
                     context, sentence1, (int)language.Id, 0, (int)paragraph.Id);
@@ -229,24 +176,17 @@ namespace Logic.Services.API.Tests
                 var sentencesRead = await SentenceApi.SentencesReadByParagraphIdAsync(
                     context, (int)paragraph.Id);
                 if(sentencesRead is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 var secondSentenceRead = sentencesRead.Where(x => x.Ordinal == 1).FirstOrDefault();
                 if (secondSentenceRead is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
 
                 Assert.AreEqual(sentence2, secondSentenceRead.Text);
-
             }
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
 
@@ -255,47 +195,30 @@ namespace Logic.Services.API.Tests
         public void SentencesReadByPageIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int pageId = 3;
             int expectedCount = 36;
             string expectedText = "Julia es mi hermana y vivimos en la misma casa en Londres.";
 
-            try
-            {
-                var sentences = SentenceApi.SentencesReadByPageId(context, pageId);
-                Assert.IsNotNull(sentences);
-                Assert.AreEqual(expectedCount, sentences.Count);
-                var targetSentence = sentences[11];
-                Assert.AreEqual(expectedText, targetSentence.Text);
-            }
-            finally
-            {
-                // clean-up
-                transaction.Rollback();
-            }
+            
+            var sentences = SentenceApi.SentencesReadByPageId(context, pageId);
+            Assert.IsNotNull(sentences);
+            Assert.AreEqual(expectedCount, sentences.Count);
+            var targetSentence = sentences[11];
+            Assert.AreEqual(expectedText, targetSentence.Text);
+            
         }
         [TestMethod()]
         public async Task SentencesReadByPageIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int pageId = 3;
             int expectedCount = 36;
             string expectedText = "Julia es mi hermana y vivimos en la misma casa en Londres.";
-
-            try
-            {
-                var sentences = await SentenceApi.SentencesReadByPageIdAsync(context, pageId);
-                Assert.IsNotNull(sentences);
-                Assert.AreEqual(expectedCount, sentences.Count);
-                var targetSentence = sentences[11];
-                Assert.AreEqual(expectedText, targetSentence.Text);
-            }
-            finally
-            {
-                // clean-up
-                await transaction.RollbackAsync();
-            }
+            var sentences = await SentenceApi.SentencesReadByPageIdAsync(context, pageId);
+            Assert.IsNotNull(sentences);
+            Assert.AreEqual(expectedCount, sentences.Count);
+            var targetSentence = sentences[11];
+            Assert.AreEqual(expectedText, targetSentence.Text);
         }
 
 
@@ -303,52 +226,33 @@ namespace Logic.Services.API.Tests
         public void SentencesReadByParagraphIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int paragraphId = 9114;
             int expectedCount = 8;
             int sentenceOrdinal = 2;
             string expectedText = "Julia es mi hermana y vivimos en la misma casa en Londres.";
-
-            try
-            {
-                var sentences = SentenceApi.SentencesReadByParagraphId(context, paragraphId);
-                Assert.IsNotNull(sentences);
-                Assert.AreEqual(expectedCount, sentences.Count);
-                var targetSentence = sentences.Where(x => x.Ordinal == sentenceOrdinal).FirstOrDefault();
-                Assert.IsNotNull(targetSentence);
-                Assert.AreEqual(expectedText, targetSentence.Text);
-            }
-            finally
-            {
-                // clean-up
-                transaction.Rollback();
-            }
+            var sentences = SentenceApi.SentencesReadByParagraphId(context, paragraphId);
+            Assert.IsNotNull(sentences);
+            Assert.AreEqual(expectedCount, sentences.Count);
+            var targetSentence = sentences.Where(x => x.Ordinal == sentenceOrdinal).FirstOrDefault();
+            Assert.IsNotNull(targetSentence);
+            Assert.AreEqual(expectedText, targetSentence.Text);
         }
 
         [TestMethod()]
         public async Task SentencesReadByParagraphIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int paragraphId = 9114;
             int expectedCount = 8;
             int sentenceOrdinal = 2;
             string expectedText = "Julia es mi hermana y vivimos en la misma casa en Londres.";
 
-            try
-            {
-                var sentences = await SentenceApi.SentencesReadByParagraphIdAsync(context, paragraphId);
-                Assert.IsNotNull(sentences);
-                Assert.AreEqual(expectedCount, sentences.Count);
-                var targetSentence = sentences.Where(x => x.Ordinal == sentenceOrdinal).FirstOrDefault();
-                Assert.IsNotNull(targetSentence);
-                Assert.AreEqual(expectedText, targetSentence.Text);
-            }
-            finally
-            {
-                // clean-up
-                await transaction.RollbackAsync();
-            }
+            var sentences = await SentenceApi.SentencesReadByParagraphIdAsync(context, paragraphId);
+            Assert.IsNotNull(sentences);
+            Assert.AreEqual(expectedCount, sentences.Count);
+            var targetSentence = sentences.Where(x => x.Ordinal == sentenceOrdinal).FirstOrDefault();
+            Assert.IsNotNull(targetSentence);
+            Assert.AreEqual(expectedText, targetSentence.Text);
         }
     }
 }

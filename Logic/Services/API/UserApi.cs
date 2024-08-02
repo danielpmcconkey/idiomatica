@@ -11,17 +11,17 @@ namespace Logic.Services.API
 {
     public static class UserApi
     {
-        //public static Word? WordGetById(IdiomaticaContext context, int wordId)
-        //{
-        //    if (wordId < 1) ErrorHandler.LogAndThrow();
-        //    return DataCache.WordByIdRead(wordId, context);
-        //}
-        //public static async Task<Word?> WordGetByIdAsync(IdiomaticaContext context, int wordId)
-        //{
-        //    return await Task<Word?>.Run(() =>
-        //    {
-        //        return WordGetById(context, wordId);
-        //    });
-        //}
+        public static void UserAndAllChildrenDelete(IdiomaticaContext context, int userId)
+        {
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            DataCache.UserAndAllChildrenDelete(userId, context);
+        }
+        public static async Task UserAndAllChildrenDeleteAsync(IdiomaticaContext context, int userId)
+        {
+            await Task.Run(() =>
+            {
+                UserAndAllChildrenDelete(context, userId);
+            });
+        }
     }
 }

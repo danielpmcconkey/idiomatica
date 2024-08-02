@@ -18,8 +18,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void TokenCreateTest()
         {
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             string sentenceText = "Cada tarde, después de la escuela.";
             string wordText = "cada";
             string wordDisplay = "Cada";
@@ -39,6 +39,7 @@ namespace Logic.Services.API.Tests
                 };
                 book = DataCache.BookCreate(book, context);
                 Assert.IsNotNull(book); Assert.IsNotNull(book.Id);
+                bookId = (int)book.Id;
 
                 // create an empty page
                 Page? page = new()
@@ -87,14 +88,14 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task TokenCreateAsyncTest()
         {
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             string sentenceText = "Cada tarde, después de la escuela.";
             string wordText = "cada";
             string wordDisplay = "Cada";
@@ -114,6 +115,7 @@ namespace Logic.Services.API.Tests
                 };
                 book = await DataCache.BookCreateAsync(book, context);
                 Assert.IsNotNull(book); Assert.IsNotNull(book.Id);
+                bookId = (int)book.Id;
                 
                 // create an empty page
                 Page? page = new()
@@ -162,7 +164,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
 
@@ -171,53 +173,36 @@ namespace Logic.Services.API.Tests
         public void TokenGetChildObjectsTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int tokenId = 4361;
             int languageUserId = 1;
             string expectedWordText = "mido";
             int expectedWordUserId = 1;
 
-            try
-            {
-                var tokenAndChildren = TokenApi.TokenGetChildObjects(
-                    context, tokenId, languageUserId);
-                Assert.IsNotNull(tokenAndChildren.t);
-                Assert.IsNotNull(tokenAndChildren.t.Word);
-                Assert.AreEqual(expectedWordText, tokenAndChildren.t.Word.Text);
-                Assert.IsNotNull(tokenAndChildren.wu);
-                Assert.AreEqual(expectedWordUserId, tokenAndChildren.wu.Id);
-            }
-            finally
-            {
-                // clean-up
-                transaction.Rollback();
-            }
+            var tokenAndChildren = TokenApi.TokenGetChildObjects(
+                context, tokenId, languageUserId);
+
+            Assert.IsNotNull(tokenAndChildren.t);
+            Assert.IsNotNull(tokenAndChildren.t.Word);
+            Assert.AreEqual(expectedWordText, tokenAndChildren.t.Word.Text);
+            Assert.IsNotNull(tokenAndChildren.wu);
+            Assert.AreEqual(expectedWordUserId, tokenAndChildren.wu.Id);
         }
         [TestMethod()]
         public async Task TokenGetChildObjectsAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int tokenId = 4361;
             int languageUserId = 1;
             string expectedWordText = "mido";
             int expectedWordUserId = 1;
 
-            try
-            {
-                var tokenAndChildren = await TokenApi.TokenGetChildObjectsAsync(
-                    context, tokenId, languageUserId);
-                Assert.IsNotNull(tokenAndChildren.t);
-                Assert.IsNotNull(tokenAndChildren.t.Word);
-                Assert.AreEqual(expectedWordText, tokenAndChildren.t.Word.Text);
-                Assert.IsNotNull(tokenAndChildren.wu);
-                Assert.AreEqual(expectedWordUserId, tokenAndChildren.wu.Id);
-            }
-            finally
-            {
-                // clean-up
-                await transaction.RollbackAsync();
-            }
+            var tokenAndChildren = await TokenApi.TokenGetChildObjectsAsync(
+                context, tokenId, languageUserId);
+            Assert.IsNotNull(tokenAndChildren.t);
+            Assert.IsNotNull(tokenAndChildren.t.Word);
+            Assert.AreEqual(expectedWordText, tokenAndChildren.t.Word.Text);
+            Assert.IsNotNull(tokenAndChildren.wu);
+            Assert.AreEqual(expectedWordUserId, tokenAndChildren.wu.Id);
         }
 
 
@@ -225,61 +210,43 @@ namespace Logic.Services.API.Tests
         public void TokensAndWordsReadBySentenceIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int sentenceId = 14187;
             int expectedCount = 14;
             string expectedText = "metros";
 
-            try
-            {
-                var tokens = TokenApi.TokensAndWordsReadBySentenceId(
-                    context, sentenceId);
-                Assert.IsNotNull(tokens);
-                Assert.AreEqual(expectedCount, tokens.Count);
-                var fifthToken = tokens.Where(x => x.Ordinal == 4).FirstOrDefault();
-                Assert.IsNotNull(fifthToken);
-                Assert.IsNotNull(fifthToken.Word);
-                Assert.AreEqual(expectedText, fifthToken.Word.Text);
-            }
-            finally
-            {
-                // clean-up
-                transaction.Rollback();
-            }
+            var tokens = TokenApi.TokensAndWordsReadBySentenceId(
+                context, sentenceId);
+            Assert.IsNotNull(tokens);
+            Assert.AreEqual(expectedCount, tokens.Count);
+            var fifthToken = tokens.Where(x => x.Ordinal == 4).FirstOrDefault();
+            Assert.IsNotNull(fifthToken);
+            Assert.IsNotNull(fifthToken.Word);
+            Assert.AreEqual(expectedText, fifthToken.Word.Text);
         }
         [TestMethod()]
         public async Task TokensAndWordsReadBySentenceIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int sentenceId = 14187;
             int expectedCount = 14;
             string expectedText = "metros";
 
-            try
-            {
-                var tokens = await TokenApi.TokensAndWordsReadBySentenceIdAsync(
-                    context, sentenceId);
-                Assert.IsNotNull(tokens);
-                Assert.AreEqual(expectedCount, tokens.Count);
-                var fifthToken = tokens.Where(x => x.Ordinal == 4).FirstOrDefault();
-                Assert.IsNotNull(fifthToken);
-                Assert.IsNotNull(fifthToken.Word);
-                Assert.AreEqual(expectedText, fifthToken.Word.Text);
-            }
-            finally
-            {
-                // clean-up
-                await transaction.RollbackAsync();
-            }
+            var tokens = await TokenApi.TokensAndWordsReadBySentenceIdAsync(
+                context, sentenceId);
+            Assert.IsNotNull(tokens);
+            Assert.AreEqual(expectedCount, tokens.Count);
+            var fifthToken = tokens.Where(x => x.Ordinal == 4).FirstOrDefault();
+            Assert.IsNotNull(fifthToken);
+            Assert.IsNotNull(fifthToken.Word);
+            Assert.AreEqual(expectedText, fifthToken.Word.Text);
         }
 
 
         [TestMethod()]
         public void TokensCreateFromSentenceTest()
         {
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             string sentenceText = "Cada tarde, después de la escuela.";
             int expectedCount = 6;
             string expectedWordText = "después";
@@ -300,6 +267,7 @@ namespace Logic.Services.API.Tests
                 };
                 book = DataCache.BookCreate(book, context);
                 Assert.IsNotNull(book); Assert.IsNotNull(book.Id);
+                bookId = (int)book.Id;
 
                 // create an empty page
                 Page? page = new()
@@ -350,14 +318,14 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task TokensCreateFromSentenceAsyncTest()
         {
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             string sentenceText = "Cada tarde, después de la escuela.";
             int expectedCount = 6;
             string expectedWordText = "después";
@@ -378,6 +346,7 @@ namespace Logic.Services.API.Tests
                 };
                 book = await DataCache.BookCreateAsync(book, context);
                 Assert.IsNotNull(book); Assert.IsNotNull(book.Id);
+                bookId = (int)book.Id;
 
                 // create an empty page
                 Page? page = new()
@@ -428,7 +397,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
 
@@ -437,60 +406,39 @@ namespace Logic.Services.API.Tests
         public void TokensReadByPageIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int pageId = 3;
             int sentenceId = 14181;
             int tokenOrdinal = 11;
             int expectedCount = 247;
             string expectedDisplay = "Londres. ";
 
-            try
-            {
-                var tokens = TokenApi.TokensReadByPageId(context, pageId);
-                Assert.IsNotNull(tokens);
-                Assert.AreEqual(expectedCount, tokens.Count);
-                var targetToken = tokens
-                    .Where(x => x.SentenceId == sentenceId && x.Ordinal == tokenOrdinal)
-                    .FirstOrDefault();
-                Assert.IsNotNull(targetToken);
-                Assert.AreEqual(expectedDisplay, targetToken.Display);
-            }
-            finally
-            {
-                // clean-up
-                transaction.Rollback();
-            }
+            var tokens = TokenApi.TokensReadByPageId(context, pageId);
+            Assert.IsNotNull(tokens);
+            Assert.AreEqual(expectedCount, tokens.Count);
+            var targetToken = tokens
+                .Where(x => x.SentenceId == sentenceId && x.Ordinal == tokenOrdinal)
+                .FirstOrDefault();
+            Assert.IsNotNull(targetToken);
+            Assert.AreEqual(expectedDisplay, targetToken.Display);
         }
         [TestMethod()]
         public async Task TokensReadByPageIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int pageId = 3;
             int sentenceId = 14181;
             int tokenOrdinal = 11;
             int expectedCount = 247;
             string expectedDisplay = "Londres. ";
 
-            try
-            {
-                var tokens = await TokenApi.TokensReadByPageIdAsync(context, pageId);
-                Assert.IsNotNull(tokens);
-                Assert.AreEqual(expectedCount, tokens.Count);
-                var targetToken = tokens
-                    .Where(x => x.SentenceId == sentenceId && x.Ordinal == tokenOrdinal)
-                    .FirstOrDefault();
-                Assert.IsNotNull(targetToken);
-                Assert.AreEqual(expectedDisplay, targetToken.Display);
-            }
-            finally
-            {
-                // clean-up
-                await transaction.RollbackAsync();
-            }
+            var tokens = await TokenApi.TokensReadByPageIdAsync(context, pageId);
+            Assert.IsNotNull(tokens);
+            Assert.AreEqual(expectedCount, tokens.Count);
+            var targetToken = tokens
+                .Where(x => x.SentenceId == sentenceId && x.Ordinal == tokenOrdinal)
+                .FirstOrDefault();
+            Assert.IsNotNull(targetToken);
+            Assert.AreEqual(expectedDisplay, targetToken.Display);
         }
-
-
-
     }
 }

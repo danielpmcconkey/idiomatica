@@ -76,5 +76,108 @@ namespace Model.DAL
             UserByApplicationUserId[key] = value;
             return value;
         }
+
+        public static void UserAndAllChildrenDelete(int userId, IdiomaticaContext context)
+        {
+            if (userId < 1) throw new ArgumentException(nameof(userId));
+
+            Guid guid = Guid.NewGuid();
+            context.Database.ExecuteSql($"""
+
+                delete us
+                from [Idioma].[User] u
+                left join [Idioma].[UserSetting] us on u.Id = us.UserId
+                where u.Id = {userId};
+
+                delete fcptb
+                from [Idioma].[User] u
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserId
+                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserId
+                left join [Idioma].[BookUserStat] bus on lu.Id = bus.LanguageUserId
+                left join [Idioma].[FlashCard] fc on wu.Id = fc.WordUserId
+                left join [Idioma].[FlashCardAttempt] fca on fc.Id = fca.FlashCardId
+                left join [Idioma].[FlashCardParagraphTranslationBridge] fcptb on fc.Id = fcptb.FlashCardId
+                where u.Id = {userId};
+
+                delete fca
+                from [Idioma].[User] u
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserId
+                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserId
+                left join [Idioma].[BookUserStat] bus on lu.Id = bus.LanguageUserId
+                left join [Idioma].[FlashCard] fc on wu.Id = fc.WordUserId
+                left join [Idioma].[FlashCardAttempt] fca on fc.Id = fca.FlashCardId
+                where u.Id = {userId};
+
+                delete fc
+                from [Idioma].[User] u
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserId
+                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserId
+                left join [Idioma].[BookUserStat] bus on lu.Id = bus.LanguageUserId
+                left join [Idioma].[FlashCard] fc on wu.Id = fc.WordUserId
+                where u.Id = {userId};
+
+                delete bus
+                from [Idioma].[User] u
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserId
+                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserId
+                left join [Idioma].[BookUserStat] bus on lu.Id = bus.LanguageUserId
+                where u.Id = {userId};
+
+                delete pu
+                from [Idioma].[User] u
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserId
+                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserId
+                where u.Id = {userId};
+
+                delete bu
+                from [Idioma].[User] u
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserId
+                where u.Id = {userId};
+
+                delete wu
+                from [Idioma].[User] u
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                where u.Id = {userId};
+
+                delete lu
+                from [Idioma].[User] u
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                where u.Id = {userId};
+
+                delete u
+                from [Idioma].[User] u
+                where u.Id = {userId};
+        
+                """);
+
+
+
+            // delete caches
+            var listCachedUsers = UserByApplicationUserId.Where(x => x.Value.Id == userId).ToList();
+            foreach (var cachedEntry in listCachedUsers)
+                UserByApplicationUserId.Remove(cachedEntry.Key, out User? deletedValue);
+
+            var listCachedLanguageUsers = LanguageUserById.Where(x => x.Value.Id == userId).ToList();
+            foreach (var cachedEntry in listCachedLanguageUsers)
+                LanguageUserById.Remove(cachedEntry.Key, out LanguageUser? deletedValue);
+
+            var listCachedLanguageUsers2 = LanguageUserByLanguageIdAndUserId.Where(x => x.Value.Id == userId).ToList();
+            foreach (var cachedEntry in listCachedLanguageUsers2)
+                LanguageUserByLanguageIdAndUserId.Remove(cachedEntry.Key, out LanguageUser? deletedValue);
+
+        }
     }
 }

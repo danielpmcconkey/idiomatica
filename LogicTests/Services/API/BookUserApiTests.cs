@@ -18,13 +18,12 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookUserArchiveTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId1 = 0;
+            int bookId2 = 0;
+            int bookId3 = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
 
-            int bookId1 = 6;
-            int bookId2 = 7;
-            int bookId3 = 8;
             int expectedCountBefore = 3;
             int expectedCountAfter = 2;
 
@@ -32,17 +31,30 @@ namespace Logic.Services.API.Tests
             {
                 var originalPacket = new BookListDataPacket(context, false);
 
+                // create the user and the three books
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
-                // act
+                Book? book1 = CommonFunctions.CreateBook(context, (int)user.Id);
+                if (book1 is null || book1.Id is null || book1.Id < 1)
+                { ErrorHandler.LogAndThrow(); return; }
+                bookId1 = (int)book1.Id;
+
+                Book? book2 = CommonFunctions.CreateBook(context, (int)user.Id);
+                if (book2 is null || book2.Id is null || book2.Id < 2)
+                { ErrorHandler.LogAndThrow(); return; }
+                bookId2 = (int)book2.Id;
+
+                Book? book3 = CommonFunctions.CreateBook(context, (int)user.Id);
+                if (book3 is null || book3.Id is null || book3.Id < 3)
+                { ErrorHandler.LogAndThrow(); return; }
+                bookId3 = (int)book3.Id;
+
                 var bookUser1 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookId1, (int)user.Id);
                 var bookUser2 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
@@ -57,7 +69,6 @@ namespace Logic.Services.API.Tests
                 var newPacketAfter = BookApi.BookListRead(context, (int)user.Id, originalPacket);
                 int actualCountAfter = newPacketAfter is null ? 0 :
                     newPacketAfter.BookListRows is null ? 0 : newPacketAfter.BookListRows.Count;
-                // assert
 
                 Assert.AreEqual(expectedCountBefore, actualCountBefore);
                 Assert.AreEqual(expectedCountAfter, actualCountAfter);
@@ -66,20 +77,21 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId1, context);
+                CommonFunctions.CleanUpBook(bookId2, context);
+                CommonFunctions.CleanUpBook(bookId3, context);
             }
         }
         [TestMethod()]
         public async Task BookUserArchiveAsyncTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId1 = 0;
+            int bookId2 = 0;
+            int bookId3 = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-
-            int bookId1 = 6;
-            int bookId2 = 7;
-            int bookId3 = 8;
+            
             int expectedCountBefore = 3;
             int expectedCountAfter = 2;
 
@@ -87,17 +99,30 @@ namespace Logic.Services.API.Tests
             {
                 var originalPacket = new BookListDataPacket(context, false);
 
+                // create the user and the three books
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
+                
+                Book? book1 = CommonFunctions.CreateBook(context, (int)user.Id);
+                if (book1 is null || book1.Id is null || book1.Id < 1)
+                { ErrorHandler.LogAndThrow(); return; }
+                bookId1 = (int)book1.Id;
+               
+                Book? book2 = CommonFunctions.CreateBook(context, (int)user.Id);
+                if (book2 is null || book2.Id is null || book2.Id < 2)
+                { ErrorHandler.LogAndThrow(); return; }
+                bookId2 = (int)book2.Id;
+                
+                Book? book3 = CommonFunctions.CreateBook(context, (int)user.Id);
+                if (book3 is null || book3.Id is null || book3.Id < 3)
+                { ErrorHandler.LogAndThrow(); return; }
+                bookId3 = (int)book3.Id;
 
-                // act
                 var bookUser1 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookId1, (int)user.Id);
                 var bookUser2 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
@@ -112,8 +137,7 @@ namespace Logic.Services.API.Tests
                 var newPacketAfter = await BookApi.BookListReadAsync(context, (int)user.Id, originalPacket);
                 int actualCountAfter = newPacketAfter is null ? 0 :
                     newPacketAfter.BookListRows is null ? 0 : newPacketAfter.BookListRows.Count;
-                // assert
-
+                
                 Assert.AreEqual(expectedCountBefore, actualCountBefore);
                 Assert.AreEqual(expectedCountAfter, actualCountAfter);
 
@@ -121,8 +145,10 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId1, context);
+                CommonFunctions.CleanUpBook(bookId2, context);
+                CommonFunctions.CleanUpBook(bookId3, context);
             }
         }
 
@@ -130,20 +156,30 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookUserByBookIdAndUserIdReadTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
-            // try to pick a book where the book ID, user ID, language user ID, and book user ID are all different
-            int bookId = 7;
-            int userId = 11;
-            int expectedId = 114;
-            int expectedLanguageUserId = 10;
+            int languageId = 1;
+
 
             try
             {
-                // act
+                // create the user and book
+                var userService = CommonFunctions.CreateUserService();
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
+                int expectedId = createResult.bookUserId;
+                // grab the expected language user ID
+                var lu = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(context, userId);
+                if (lu is null || lu.Count < 1) { ErrorHandler.LogAndThrow(); return; }
+                var l = lu.Where(x => x.LanguageId == languageId).FirstOrDefault();
+                if (l is null || l.Id is null || l.Id < 1) { ErrorHandler.LogAndThrow(); return; }
+                int expectedLanguageUserId = (int)l.Id;
+
+                // now test the bookUser read
                 var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(context, bookId, userId);
-                // assert
+
                 Assert.IsNotNull(bookUser);
                 Assert.AreEqual(bookId, bookUser.BookId);
                 Assert.AreEqual(expectedId, bookUser.Id);
@@ -152,27 +188,37 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task BookUserByBookIdAndUserIdReadAsyncTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-            // try to pick a book where the book ID, user ID, language user ID, and book user ID are all different
-            int bookId = 7;
-            int userId = 11;
-            int expectedId = 114;
-            int expectedLanguageUserId = 10;
+            int languageId = 1;
+            
 
             try
             {
-                // act
+                // create the user and book
+                var userService = CommonFunctions.CreateUserService();
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
+                int expectedId = createResult.bookUserId;
+                // grab the expected language user ID
+                var lu = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(context, userId);
+                if (lu is null || lu.Count < 1) { ErrorHandler.LogAndThrow(); return; }
+                var l = lu.Where(x => x.LanguageId == languageId).FirstOrDefault();
+                if (l is null || l.Id is null || l.Id < 1) { ErrorHandler.LogAndThrow(); return; }
+                int expectedLanguageUserId = (int)l.Id;
+
+                // now test the bookUser read
                 var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(context, bookId, userId);
-                // assert
+                
                 Assert.IsNotNull(bookUser);
                 Assert.AreEqual(bookId, bookUser.BookId);
                 Assert.AreEqual(expectedId, bookUser.Id);
@@ -181,8 +227,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
 
@@ -190,31 +236,31 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookUserCreateTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
-
-
-            int bookId = 6;
-            //var firstPage = PageApi.PageReadFirstByBookId(context, bookId);
-            //var firstPageId = firstPage is null ? 0 : firstPage.Id is null ? 0 : (int)firstPage.Id;
-
 
             try
             {
+                // create the user
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create the languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
+                // create the book
+                var book = CommonFunctions.CreateBook(context, userId);
+                if (book is null || book.Id is null || book.Id < 1)
+                { ErrorHandler.LogAndThrow(); return; }
+                bookId = (int)book.Id;
+
                 // act
-                var bookUser = BookUserApi.BookUserCreate(context, bookId, (int)user.Id);
+                var bookUser = BookUserApi.BookUserCreate(context, bookId, userId);
                 // assert
 
                 Assert.IsNotNull(bookUser);
@@ -224,35 +270,39 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task BookUserCreateAsyncTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-
-            int bookId = 6;
 
             try
             {
+                // create the user
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create the languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
-                // act
-                var bookUser = await BookUserApi.BookUserCreateAsync(context, bookId, (int)user.Id);
-                // assert
+                // create the book
+                var book = CommonFunctions.CreateBook(context, userId);
+                if (book is null || book.Id is null || book.Id < 1)
+                { ErrorHandler.LogAndThrow(); return; }
+                bookId = (int)book.Id;
+
+                
+                var bookUser = await BookUserApi.BookUserCreateAsync(context, bookId, userId);
+                
 
                 Assert.IsNotNull(bookUser);
                 Assert.AreEqual(bookId, bookUser.BookId);
@@ -261,8 +311,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
 
@@ -270,43 +320,46 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookUserUpdateBookmarkTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
-
-            int bookId = 6;
-            int secondPageId = 67;
-
 
             try
             {
+                // create the user
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-
-
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create the languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
+                // create the book
+                var book = CommonFunctions.CreateBook(context, userId);
+                if (book is null || book.Id is null || book.Id < 1)
+                { ErrorHandler.LogAndThrow(); return; }
+                bookId = (int)book.Id;
 
-                // act
+                // find the second page's ID
+                var secondPage = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+                if (secondPage is null || secondPage.Id is null || secondPage.Id < 1)
+                { ErrorHandler.LogAndThrow(); return; }
+                int secondPageId = (int)secondPage.Id;
+
+                // create the bookUser
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                 context, bookId, (int)user.Id);
                 if (bookUser is null || bookUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 BookUserApi.BookUserUpdateBookmark(context, (int)bookUser.Id, secondPageId);
                 var secondBookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
                     context, bookId, (int)user.Id);
                 int newBookmark = secondBookUser is null ? 0 :
                     secondBookUser.CurrentPageID is null ? 0 : (int)secondBookUser.CurrentPageID;
-                // assert
+
 
                 Assert.IsNotNull(bookUser);
                 Assert.IsNotNull(bookUser.Id);
@@ -317,50 +370,53 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task BookUserUpdateBookmarkAsyncTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-
-            int bookId = 6;
-            int secondPageId = 67;
-
 
             try
             {
+                // create the user
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-
-
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
+                // create the book
+                var book = CommonFunctions.CreateBook(context, userId);
+                if (book is null || book.Id is null || book.Id < 1)
+                { ErrorHandler.LogAndThrow(); return; }
+                bookId = (int)book.Id;
 
-                // act
+                // find the second page's ID
+                var secondPage = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+                if (secondPage is null || secondPage.Id is null || secondPage.Id < 1)
+                { ErrorHandler.LogAndThrow(); return; }
+                int secondPageId = (int)secondPage.Id;
+
+                // create the bookUser
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                 context, bookId, (int)user.Id);
                 if (bookUser is null || bookUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 await BookUserApi.BookUserUpdateBookmarkAsync(context, (int)bookUser.Id, secondPageId);
                 var secondBookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(
                     context, bookId, (int)user.Id);
                 int newBookmark = secondBookUser is null ? 0 :
                     secondBookUser.CurrentPageID is null ? 0 : (int)secondBookUser.CurrentPageID;
-                // assert
+                
 
                 Assert.IsNotNull(bookUser);
                 Assert.IsNotNull(bookUser.Id);
@@ -371,8 +427,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
 

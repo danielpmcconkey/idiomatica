@@ -83,6 +83,18 @@ namespace Logic.Services.API
             });
         }
 
+        public static void BookAndAllChildrenDelete(IdiomaticaContext context, int bookId)
+        {
+            DataCache.BookAndAllChildrenDelete(bookId, context);
+        }
+        public static async Task BookAndAllChildrenDeleteAsync(IdiomaticaContext context, int bookId)
+        {
+            await Task.Run(() =>
+            {
+                BookAndAllChildrenDelete(context, bookId);
+            });
+        }
+
 
         public static Book? BookRead(IdiomaticaContext context, int bookId)
         {

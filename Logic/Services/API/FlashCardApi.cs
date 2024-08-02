@@ -133,6 +133,18 @@ namespace Logic.Services.API
         }
 
 
+        public static FlashCard? FlashCardReadById(
+           IdiomaticaContext context, int Id)
+        {
+            return DataCache.FlashCardByIdRead(Id, context);
+        }
+        public static async Task<FlashCard?> FlashCardReadByIdAsync(
+           IdiomaticaContext context, int Id)
+        {
+            return await DataCache.FlashCardByIdReadAsync(Id, context);
+        }
+
+
         public static List<FlashCard>? FlashCardsCreate(
             IdiomaticaContext context, int languageUserId, int numCards, string uiLanguageCode)
         {

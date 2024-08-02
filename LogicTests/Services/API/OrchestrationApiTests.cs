@@ -17,8 +17,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void OrchestrateBookCreationAndSubProcessesTest()
         {
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
 
             /*
              * this is supposed to create the book, the book stats, and the 
@@ -29,22 +30,20 @@ namespace Logic.Services.API.Tests
             string totalWordCountExpected = "784";
             string distinctWordCountExpected = "241";
 
-
-
             try
             {
+                // create the user
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
 
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
-                // act
+                // create the book
                 Book? book = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
                     context,
                     (int)user.Id,
@@ -53,39 +52,29 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText);
                 if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                bookId = (int)book.Id;
+
                 // read the book stats
                 var totalPagesStat = book.BookStats
                     .Where(x => x.Key != null && x.Key == AvailableBookStat.TOTALPAGES)
                     .FirstOrDefault();
                 if (totalPagesStat is null || totalPagesStat.Value is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 string totalPagesActual = totalPagesStat.Value;
 
                 var totalWordsStat = book.BookStats
                     .Where(x => x.Key != null && x.Key == AvailableBookStat.TOTALWORDCOUNT)
                     .FirstOrDefault();
                 if (totalWordsStat is null || totalWordsStat.Value is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 string totalWordCountActual = totalWordsStat.Value;
 
                 var distinctWordsStat = book.BookStats
                     .Where(x => x.Key != null && x.Key == AvailableBookStat.DISTINCTWORDCOUNT)
                     .FirstOrDefault();
                 if (distinctWordsStat is null || distinctWordsStat.Value is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 string distinctWordCountActual = distinctWordsStat.Value;
 
                 // pull the book user
@@ -102,15 +91,16 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task OrchestrateBookCreationAndSubProcessesAsyncTest()
         {
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
 
             /*
              * this is supposed to create the book, the book stats, and the 
@@ -121,22 +111,20 @@ namespace Logic.Services.API.Tests
             string totalWordCountExpected = "784";
             string distinctWordCountExpected = "241";
 
-
-
             try
             {
+                // create the user
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
 
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
-                // act
+                // create the book
                 Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
                     context,
                     (int)user.Id,
@@ -145,39 +133,29 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText);
                 if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                bookId = (int)book.Id;
+
                 // read the book stats
                 var totalPagesStat = book.BookStats
                     .Where(x => x.Key != null && x.Key == AvailableBookStat.TOTALPAGES)
                     .FirstOrDefault();
                 if (totalPagesStat is null || totalPagesStat.Value is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 string totalPagesActual = totalPagesStat.Value;
 
                 var totalWordsStat = book.BookStats
                     .Where(x => x.Key != null && x.Key == AvailableBookStat.TOTALWORDCOUNT)
                     .FirstOrDefault();
                 if (totalWordsStat is null || totalWordsStat.Value is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 string totalWordCountActual = totalWordsStat.Value;
 
                 var distinctWordsStat = book.BookStats
                     .Where(x => x.Key != null && x.Key == AvailableBookStat.DISTINCTWORDCOUNT)
                     .FirstOrDefault();
                 if (distinctWordsStat is null || distinctWordsStat.Value is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 string distinctWordCountActual = distinctWordsStat.Value;
 
                 // pull the book user
@@ -194,8 +172,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
 
@@ -203,9 +181,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void OrchestrateClearPageAndMoveTest()
         {
-            // assemble
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int bookId = 2;
             int languageId = 1;
             int wordCount = 134;
@@ -220,40 +197,29 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
-                // act
+
                 var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
                     readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
                     readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
                     readDataPacket.LanguageUser.Id is null || readDataPacket.CurrentPageUser.PageId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
 
                 // check the word and its status
                 WordUser? foundUserBefore = null;
                 if (!readDataPacket.AllWordUsersInPage.TryGetValue(wordToLookUp, out foundUserBefore))
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 if (foundUserBefore is null || foundUserBefore.Status is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 var statusBeforeActual = foundUserBefore.Status;
 
                 // pull the current page ID before moving so you can later look up its wordUsers
-
                 int origPageId = (int)readDataPacket.CurrentPageUser.PageId;
 
                 // clear the unknown words and move to the new page
@@ -262,33 +228,19 @@ namespace Logic.Services.API.Tests
                     newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
                     newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
 
                 // pull the previous page's wordUser list
                 var priorPageWordDict = WordUserApi.WordUsersDictByPageIdAndUserIdRead(context, origPageId, (int)user.Id);
                 if (priorPageWordDict is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 WordUser? foundUserAfter = null;
                 if (!priorPageWordDict.TryGetValue(wordToLookUp, out foundUserAfter))
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 if (foundUserAfter is null || foundUserAfter.Status is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 var statusAfterActual = foundUserAfter.Status;
 
-
-                // assert
                 Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
                 Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
@@ -300,16 +252,14 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
         [TestMethod()]
         public async Task OrchestrateClearPageAndMoveAsyncTest()
         {
-            // assemble
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int bookId = 2;
             int languageId = 1;
             int wordCount = 134;
@@ -324,40 +274,29 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, languageId, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
-                // act
+                
                 var readDataPacket = await OrchestrationApi.OrchestrateReadDataInitAsync(context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
                     readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
                     readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
                     readDataPacket.LanguageUser.Id is null || readDataPacket.CurrentPageUser.PageId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
 
                 // check the word and its status
                 WordUser? foundUserBefore = null;
                 if (!readDataPacket.AllWordUsersInPage.TryGetValue(wordToLookUp, out foundUserBefore))
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 if (foundUserBefore is null || foundUserBefore.Status is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 var statusBeforeActual = foundUserBefore.Status;
 
                 // pull the current page ID before moving so you can later look up its wordUsers
-
                 int origPageId = (int)readDataPacket.CurrentPageUser.PageId;
 
                 // clear the unknown words and move to the new page
@@ -366,33 +305,19 @@ namespace Logic.Services.API.Tests
                     newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
                     newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
 
                 // pull the previous page's wordUser list
                 var priorPageWordDict = await WordUserApi.WordUsersDictByPageIdAndUserIdReadAsync(context, origPageId, (int)user.Id);
                 if (priorPageWordDict is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 WordUser? foundUserAfter = null;
                 if (!priorPageWordDict.TryGetValue(wordToLookUp, out foundUserAfter))
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 if (foundUserAfter is null || foundUserAfter.Status is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 var statusAfterActual = foundUserAfter.Status;
 
-
-                // assert
                 Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
                 Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
@@ -404,8 +329,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
 
@@ -437,9 +361,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void OrchestrateMovePageTest()
         {
-            // assemble
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int bookId = 2;
             int languageId = 1;
             int wordCount = 134;
@@ -448,42 +371,35 @@ namespace Logic.Services.API.Tests
 
             try
             {
+                // create the user
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create the languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
-                // act
+
+                // go through ReadDataInit as if we were reading the book
                 var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
                     readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
                     readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
                     readDataPacket.LanguageUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
 
-
-
-                //finally, we get to reset the data
+                // move the page per orchestration API
                 var newReadDataPacket = OrchestrationApi.OrchestrateMovePage(context, readDataPacket, bookId, 2);
                 if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
                     newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
                     newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
 
 
-                // assert
                 Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
                 Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
@@ -493,16 +409,14 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
         [TestMethod()]
         public async Task OrchestrateMovePageAsyncTest()
         {
-            // assemble
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int bookId = 2;
             int languageId = 1;
             int wordCount = 134;
@@ -511,42 +425,35 @@ namespace Logic.Services.API.Tests
 
             try
             {
+                // create the user
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create the languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, languageId, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
-                // act
+                
+                // go through ReadDataInit as if we were reading the book
                 var readDataPacket = await OrchestrationApi.OrchestrateReadDataInitAsync(context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
                     readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
                     readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
                     readDataPacket.LanguageUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
 
-
-
-                //finally, we get to reset the data
+                // move the page per orchestration API
                 var newReadDataPacket = await OrchestrationApi.OrchestrateMovePageAsync(context, readDataPacket, bookId, 2);
                 if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
                     newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
                     newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
 
 
-                // assert
                 Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
                 Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
@@ -556,7 +463,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
 
@@ -564,9 +471,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void OrchestrateReadDataInitTest()
         {
-            // assemble
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int bookId = 2;
             int languageId = 1;
             int wordCount = 135;
@@ -576,28 +482,28 @@ namespace Logic.Services.API.Tests
 
             try
             {
+                // create user
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
+                { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create languageUser
+                var languageUser = LanguageUserApi.LanguageUserCreate(
+                    context, languageId, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
-                // act
-                var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(context, userService, bookId);
+
+                // simulate read data init
+                var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(
+                    context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
                     readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
                     readDataPacket.BookUserStats is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
 
 
-                // assert
                 Assert.IsTrue(readDataPacket.BookCurrentPageNum == 1);
                 Assert.IsNotNull(readDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, readDataPacket.AllWordsInPage.Count);
@@ -608,16 +514,14 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
         [TestMethod()]
         public async Task OrchestrateReadDataInitAsyncTest()
         {
-            // assemble
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int bookId = 2;
             int languageId = 1;
             int wordCount = 135;
@@ -627,30 +531,28 @@ namespace Logic.Services.API.Tests
 
             try
             {
+                // create user
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
                     context, languageId, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
-                // act
+                
+                // simulate read data init
                 var readDataPacket = await OrchestrationApi.OrchestrateReadDataInitAsync(
                     context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
                     readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
                     readDataPacket.BookUserStats is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
 
 
-                // assert
                 Assert.IsTrue(readDataPacket.BookCurrentPageNum == 1);
                 Assert.IsNotNull(readDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, readDataPacket.AllWordsInPage.Count);
@@ -661,8 +563,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
 
@@ -670,9 +571,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void OrchestrateResetReadDataForNewPageTest()
         {
-            // assemble
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int bookId = 2;
             int languageId = 1;
             int wordCount = 134;
@@ -681,26 +581,27 @@ namespace Logic.Services.API.Tests
 
             try
             {
+                // create the user
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
+                { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create the languageUser
+                var languageUser = LanguageUserApi.LanguageUserCreate(
+                    context, languageId, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
-                // act
-                var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(context, userService, bookId);
+
+                // simulate the read init
+                var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(
+                    context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
                     readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
                     readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
                     readDataPacket.LanguageUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
 
                 // now pretend to move the page forward and reset
                 int targetPageNum = 2;
@@ -710,22 +611,17 @@ namespace Logic.Services.API.Tests
                 // create the new page user
 
                 // but first need to pull the page
-                readDataPacket.CurrentPage = PageApi.PageReadByOrdinalAndBookId(context, targetPageNum, bookId);
+                readDataPacket.CurrentPage = PageApi.PageReadByOrdinalAndBookId(
+                    context, targetPageNum, bookId);
                 if (readDataPacket.CurrentPage is null || readDataPacket.CurrentPage.Id is null ||
                     readDataPacket.CurrentPage.Id < 1 || readDataPacket.LoggedInUser is null ||
                     readDataPacket.LoggedInUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 readDataPacket.CurrentPageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
                     context, (int)readDataPacket.CurrentPage.Id, (int)readDataPacket.LoggedInUser.Id);
 
                 if (readDataPacket.CurrentPageUser is null || readDataPacket.CurrentPageUser.PageId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
 
                 //finally, we get to reset the data
                 var newReadDataPacket = OrchestrationApi.OrchestrateResetReadDataForNewPage(
@@ -734,13 +630,9 @@ namespace Logic.Services.API.Tests
                     newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
                     newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
 
 
-                // assert
                 Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
                 Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
@@ -750,17 +642,14 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
         [TestMethod()]
         public async Task OrchestrateResetReadDataForNewPageAsyncTest()
         {
-            // assemble
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync
-                ();
             int bookId = 2;
             int languageId = 1;
             int wordCount = 134;
@@ -769,17 +658,19 @@ namespace Logic.Services.API.Tests
 
             try
             {
+                // create the user
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create the languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
                     context, languageId, (int)user.Id);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
-                // act
+                
+                // simulate the read init
                 var readDataPacket = await OrchestrationApi.OrchestrateReadDataInitAsync(
                     context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
@@ -787,10 +678,7 @@ namespace Logic.Services.API.Tests
                     readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
                     readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
                     readDataPacket.LanguageUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
 
                 // now pretend to move the page forward and reset
                 int targetPageNum = 2;
@@ -805,18 +693,12 @@ namespace Logic.Services.API.Tests
                 if (readDataPacket.CurrentPage is null || readDataPacket.CurrentPage.Id is null ||
                     readDataPacket.CurrentPage.Id < 1 || readDataPacket.LoggedInUser is null ||
                     readDataPacket.LoggedInUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 readDataPacket.CurrentPageUser = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
                     context, (int)readDataPacket.CurrentPage.Id, (int)readDataPacket.LoggedInUser.Id);
 
                 if (readDataPacket.CurrentPageUser is null || readDataPacket.CurrentPageUser.PageId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
 
                 //finally, we get to reset the data
                 var newReadDataPacket = await OrchestrationApi.OrchestrateResetReadDataForNewPageAsync(
@@ -825,13 +707,9 @@ namespace Logic.Services.API.Tests
                     newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
                     newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
 
 
-                // assert
                 Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
                 Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
@@ -841,7 +719,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
     }

@@ -62,17 +62,18 @@ namespace Model.DAL
             if (fcptb.ParagraphTranslationId is null) throw new ArgumentNullException(nameof(fcptb.ParagraphTranslationId));
 
             Guid guid = Guid.NewGuid();
+            
             int numRows = context.Database.ExecuteSql($"""
-                INSERT INTO [Idioma].[FlashCardParagraphTranslationBridge]
-                           ([FlashCardId]
-                           ,[ParagraphTranslationId]
-                           ,[UniqueKey])
-                     VALUES
-                           ({fcptb.FlashCardId}
-                           ,{fcptb.ParagraphTranslationId}
-                           ,{guid})
-        
-                """);
+            INSERT INTO [Idioma].[FlashCardParagraphTranslationBridge]
+                        ([FlashCardId]
+                        ,[ParagraphTranslationId]
+                        ,[UniqueKey])
+                    VALUES
+                        ({fcptb.FlashCardId}
+                        ,{fcptb.ParagraphTranslationId}
+                        ,{guid})
+            """);
+            
             if (numRows < 1) throw new InvalidDataException("creating FlashCardParagraphTranslationBridge affected 0 rows");
             var newEntity = context.FlashCardParagraphTranslationBridges.Where(x => x.UniqueKey == guid).FirstOrDefault();
             if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
