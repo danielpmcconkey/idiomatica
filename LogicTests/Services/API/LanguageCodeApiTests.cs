@@ -97,13 +97,59 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void LanguageCodeUserInterfacePreferenceReadByUserIdTest()
         {
-            Assert.Fail();
+            int userId = 0;
+            var context = CommonFunctions.CreateContext();
+            string code = "HU";
+            string expectedName = "Hungarian";
+            var applicationUserId = Guid.NewGuid().ToString();
+            var name = "Auto gen tester 3";
+
+            try
+            {
+                // create the user
+                var user = UserApi.UserCreate(applicationUserId, name, code, context);
+                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                var languageCode = LanguageCodeApi.LanguageCodeUserInterfacePreferenceReadByUserId(
+                    context, userId);
+                if (languageCode is null) { ErrorHandler.LogAndThrow(); return; }
+
+                Assert.AreEqual(expectedName, languageCode.LanguageName);
+            }
+            finally
+            {
+                CommonFunctions.CleanUpUser(userId, context);
+            }
         }
 
         [TestMethod()]
-        public void LanguageCodeUserInterfacePreferenceReadByUserIdAsyncTest()
+        public async Task LanguageCodeUserInterfacePreferenceReadByUserIdAsyncTest()
         {
-            Assert.Fail();
+            int userId = 0;
+            var context = CommonFunctions.CreateContext();
+            string code = "HU";
+            string expectedName = "Hungarian";
+            var applicationUserId = Guid.NewGuid().ToString();
+            var name = "Auto gen tester 3";
+
+            try
+            {
+                // create the user
+                var user = await UserApi.UserCreateAsync(applicationUserId, name, code, context);
+                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                var languageCode = await LanguageCodeApi.LanguageCodeUserInterfacePreferenceReadByUserIdAsync(
+                    context, userId);
+                if (languageCode is null) { ErrorHandler.LogAndThrow(); return; }
+
+                Assert.AreEqual(expectedName, languageCode.LanguageName);
+            }
+            finally
+            {
+                CommonFunctions.CleanUpUser(userId, context);
+            }
         }
     }
 }

@@ -68,29 +68,7 @@ namespace LogicTests
             optionsBuilder.UseSqlServer(connectionstring);
             return new IdiomaticaContext(optionsBuilder.Options);
         }
-        internal static User? CreateNewTestUser(UserService userService, IdiomaticaContext context)
-        {
-            var user = new User()
-            {
-                ApplicationUserId = Guid.NewGuid().ToString(),
-                Name = "Auto gen tester",
-                Code = "En-US"
-            };
-            user = DataCache.UserCreate(user, context);
-            if (user is null || user.Id is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            context.Users.Add(user);
-            
-
-#if DEBUG
-            SetLoggedInUser(user, userService, context);
-#endif
-
-            return user;
-        }
+        
 #if DEBUG
         internal static void SetLoggedInUser(Model.User user, UserService userService, IdiomaticaContext context)
         {
@@ -180,6 +158,32 @@ namespace LogicTests
             return await Task<(int userId, int bookId, int bookUserId)>.Run(() =>
             {
                 return CreateUserAndBookAndBookUser(context, userService);
+            });
+        }
+
+        internal static User? CreateNewTestUser(UserService userService, IdiomaticaContext context)
+        {
+            var applicationUserId = Guid.NewGuid().ToString();
+            var name = "Auto gen tester 2";
+            var code = "En-US";
+            var user = UserApi.UserCreate(applicationUserId, name, code, context);
+            if (user is null || user.Id is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return null;
+            }
+            context.Users.Add(user);
+#if DEBUG
+            SetLoggedInUser(user, userService, context);
+#endif
+            return user;
+        }
+        internal static async Task<User?> CreateNewTestUserAsync(
+            UserService userService, IdiomaticaContext context)
+        {
+            return await Task<User?>.Run(() =>
+            {
+                return CreateNewTestUser(userService, context);
             });
         }
         #endregion
