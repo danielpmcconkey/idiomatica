@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Logic.Telemetry;
 using DeepL;
 using static System.Net.Mime.MediaTypeNames;
+using System.Net;
 
 namespace Logic.Services.API
 {
@@ -69,6 +70,51 @@ namespace Logic.Services.API
             return await Task<Paragraph?>.Run(() =>
             {
                 return ParagraphCreateFromSplit(context, splitText, pageId, ordinal, languageId);
+            });
+        }
+
+        /// <summary>
+        ///  chooses a random ParagraphTranslationBridge from a card, translated to the user's UI preferred language
+        /// </summary>
+        public static (string example, string translation) ParagraphExamplePullRandomByFlashCardId(
+            IdiomaticaContext context, int flashCardId, string uiLanguageCode)
+        {
+            var example = string.Empty;
+            var translation = string.Empty;
+            
+            // pull all bridges for this card with this language code
+            var bridges = DataCache
+                .FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCodeRead(
+                    (flashCardId, uiLanguageCode), context);
+            if (bridges is null || bridges.Count == 0) return (example, translation);
+            
+            // select a random bridge
+            Random rng = new ();
+            int position = rng.Next(0, bridges.Count);
+            var bridge = bridges[position];
+
+            // pull the paragraphtranslation
+            if (bridge.ParagraphTranslationId is null) return (example, translation);
+            var paragraphTranslation = DataCache.ParagraphTranslationByIdRead(
+                (int)bridge.ParagraphTranslationId, context);
+            if (paragraphTranslation is null || paragraphTranslation.TranslationText is null) 
+                return (example, translation);
+            translation = paragraphTranslation.TranslationText;
+
+            // pull the orig text
+            if (paragraphTranslation.ParagraphId is null) return (example, translation);
+            var paragraph = DataCache.ParagraphByIdRead((int)paragraphTranslation.ParagraphId, context);
+            if (paragraph is null || paragraph.Id is null) return (example, translation);
+            example = ParagraphApi.ParagraphReadAllText(context, (int) paragraph.Id);
+
+            return (example, translation);
+        }
+        public static async Task<(string example, string translation)> ParagraphExamplePullRandomByFlashCardIdAsync(
+            IdiomaticaContext context, int flashCardId, string uiLanguageCode)
+        {
+            return await Task<(string example, string translation)>.Run(() =>
+            {
+                return ParagraphExamplePullRandomByFlashCardId(context, flashCardId, uiLanguageCode);
             });
         }
 

@@ -9,6 +9,7 @@ using LogicTests;
 using Logic.Telemetry;
 using Model;
 using System.Net;
+using k8s.KubeConfigModels;
 
 namespace Logic.Services.API.Tests
 {
@@ -18,51 +19,26 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserCreateForPageIdAndUserIdTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             var startDateTime = DateTime.Now;
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
 
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // create the book
-                Book? book = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
-                    context,
-                    (int)user.Id,
-                    TestConstants.NewBookTitle,
-                    TestConstants.NewBookLanguageCode,
-                    TestConstants.NewBookUrl,
-                    TestConstants.NewBookText);
-                if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // get the page Id
-                var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+                // get the second page of the book
+                var page = context.Pages.Where(x => x.BookId == bookId && x.Ordinal == 1).FirstOrDefault();
                 if (page is null || page.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+
+                // create the pageUser
                 var pageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (int)page.Id, (int)user.Id);
+                    context, (int)page.Id, userId);
 
                 // assert
                 Assert.IsNotNull(pageUser);
@@ -72,57 +48,33 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task PageUserCreateForPageIdAndUserIdAsyncTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             var startDateTime = DateTime.Now;
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
 
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // create the book
-                Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
-                    context,
-                    (int)user.Id,
-                    TestConstants.NewBookTitle,
-                    TestConstants.NewBookLanguageCode,
-                    TestConstants.NewBookUrl,
-                    TestConstants.NewBookText);
-                if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // get the page Id
-                var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+                // get the second page of the book
+                var page = context.Pages.Where(x => x.BookId == bookId && x.Ordinal == 1).FirstOrDefault();
                 if (page is null || page.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                
+                // create the pageUser
                 var pageUser = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, (int)page.Id, (int)user.Id);
+                    context, (int)page.Id, userId);
 
                 // assert
                 Assert.IsNotNull(pageUser);
@@ -132,7 +84,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -140,173 +93,99 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserMarkAsReadTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             var startDateTime = DateTime.Now;
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
+                int bookUserId = createResult.bookUserId;
 
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                // pull the languageUser
+                var language = LanguageApi.LanguageReadByCode(
+                    context, TestConstants.NewBookLanguageCode);
+                if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                var languageUser = LanguageUserApi.LanguageUserGet(context, (int)language.Id, userId);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
-                // create the book
-                Book? book = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
-                    context,
-                    (int)user.Id,
-                    TestConstants.NewBookTitle,
-                    TestConstants.NewBookLanguageCode,
-                    TestConstants.NewBookUrl,
-                    TestConstants.NewBookText);
-                if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // create the  bookUser
-                var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(context, (int)book.Id, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-                {
-                    // still null, something went wrong
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-
-                // create the page 1 and 2 page users first, because the read call doesn't
-                var page1 = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+                // create the page 1 page user
+                var page1 = PageApi.PageReadByOrdinalAndBookId(context, 1, bookId);
                 if (page1 is null || page1.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 int page1Id = (int)page1.Id;
                 var pageUserBefore = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, page1Id, (int)user.Id);
+                    context, page1Id, userId);
                 if (pageUserBefore is null || pageUserBefore.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                // act
+                { ErrorHandler.LogAndThrow(); return; }
+
                 PageUserApi.PageUserMarkAsRead(context, (int)pageUserBefore.Id);
                 var pageUserAfter = PageUserApi.PageUserReadByPageIdAndLanguageUserId(
                     context, page1Id, (int)languageUser.Id);
                 if (pageUserAfter is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
 
-
-
-                // assert
                 Assert.IsNotNull(pageUserAfter.ReadDate);
                 Assert.IsTrue(startDateTime <= pageUserAfter.ReadDate);
             }
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task PageUserMarkAsReadAsyncTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             var startDateTime = DateTime.Now;
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
+                int bookUserId = createResult.bookUserId;
 
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                // pull the languageUser
+                var language = await LanguageApi.LanguageReadByCodeAsync(
+                    context, TestConstants.NewBookLanguageCode);
+                if(language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (int)language.Id, userId);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
-                // create the book
-                Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
-                    context,
-                    (int)user.Id,
-                    TestConstants.NewBookTitle,
-                    TestConstants.NewBookLanguageCode,
-                    TestConstants.NewBookUrl,
-                    TestConstants.NewBookText);
-                if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // create the  bookUser
-                var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(context, (int)book.Id, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-                {
-                    // still null, something went wrong
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-
-                // create the page 1 and 2 page users first, because the read call doesn't
-                var page1 = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+                // create the page 1 page user
+                var page1 = await PageApi.PageReadByOrdinalAndBookIdAsync(context, 1, bookId);
                 if (page1 is null || page1.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 int page1Id = (int)page1.Id;
                 var pageUserBefore = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, page1Id, (int)user.Id);
+                    context, page1Id, userId);
                 if (pageUserBefore is null || pageUserBefore.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                // act
+                    { ErrorHandler.LogAndThrow(); return; }
+                
                 await PageUserApi.PageUserMarkAsReadAsync(context, (int)pageUserBefore.Id);
                 var pageUserAfter = await PageUserApi.PageUserReadByPageIdAndLanguageUserIdAsync(
                     context, page1Id, (int)languageUser.Id);
                 if (pageUserAfter is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
 
-
-
-                // assert
                 Assert.IsNotNull(pageUserAfter.ReadDate);
                 Assert.IsTrue(startDateTime <= pageUserAfter.ReadDate);
             }
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -314,227 +193,151 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserReadBookmarkedOrFirstTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int ordinalBeforeExpected = 1;
             int ordinalAfterExpected = 2;
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
+                int bookUserId = createResult.bookUserId;
 
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // pull the languageUser
+                var language = LanguageApi.LanguageReadByCode(
+                    context, TestConstants.NewBookLanguageCode);
+                if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                var languageUser = LanguageUserApi.LanguageUserGet(context, (int)language.Id, userId);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
-                // create the book
-                Book? book = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
-                    context,
-                    (int)user.Id,
-                    TestConstants.NewBookTitle,
-                    TestConstants.NewBookLanguageCode,
-                    TestConstants.NewBookUrl,
-                    TestConstants.NewBookText);
-                if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // create the  bookUser
-                var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(context, (int)book.Id, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-                {
-                    // still null, something went wrong
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-
-                // create the page 1 and 2 page users first, because the read call doesn't
-                var page1 = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
-                var page2 = book.Pages.Where(x => x.Ordinal == 2).FirstOrDefault();
-                if (page1 is null || page1.Id is null || page2 is null || page2.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                // create the page 1 page user
+                var page1 = PageApi.PageReadByOrdinalAndBookId(context, 1, bookId);
+                if (page1 is null || page1.Id is null)
+                { ErrorHandler.LogAndThrow(); return; }
                 int page1Id = (int)page1.Id;
                 var pageUser1 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, page1Id, (int)user.Id);
+                    context, page1Id, userId);
 
+                // create the page 2 page user
+                var page2 = PageApi.PageReadByOrdinalAndBookId(context, 2, bookId);
+                if (page2 is null || page2.Id is null)
+                { ErrorHandler.LogAndThrow(); return; }
                 int page2Id = (int)page2.Id;
                 var pageUser2 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, page2Id, (int)user.Id);
+                    context, page2Id, userId);
 
-
-                // act
                 // make the call before every doing anything
-                var pageUserBefore = PageUserApi.PageUserReadBookmarkedOrFirst(context, (int)bookUser.Id);
+                var pageUserBefore = PageUserApi.PageUserReadBookmarkedOrFirst(
+                    context, bookUserId);
                 if (pageUserBefore is null || pageUserBefore.PageId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 // pull the page object associated to the pageUser
                 var pageBefore = PageApi.PageReadById(context, (int)pageUserBefore.PageId);
                 if (pageBefore is null || pageBefore.Ordinal is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 int ordinalBeforeActual = (int)pageBefore.Ordinal;
 
                 // update the bookmark as if we moved the page
-                BookUserApi.BookUserUpdateBookmark(context, (int)bookUser.Id, page2Id);
+                BookUserApi.BookUserUpdateBookmark(context, bookUserId, page2Id);
 
                 // now pull the page User again
-                var pageUserAfter = PageUserApi.PageUserReadBookmarkedOrFirst(context, (int)bookUser.Id);
+                var pageUserAfter = PageUserApi.PageUserReadBookmarkedOrFirst(
+                    context, bookUserId);
                 if (pageUserAfter is null || pageUserAfter.PageId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 // pull the page object associated to the pageUser
                 var pageAfter = PageApi.PageReadById(context, (int)pageUserAfter.PageId);
                 if (pageAfter is null || pageAfter.Ordinal is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 int ordinalAfterActual = (int)pageAfter.Ordinal;
 
-
-
-                // assert
                 Assert.AreEqual(ordinalBeforeExpected, ordinalBeforeActual);
                 Assert.AreEqual(ordinalAfterExpected, ordinalAfterActual);
             }
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task PageUserReadBookmarkedOrFirstAsyncTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int ordinalBeforeExpected = 1;
             int ordinalAfterExpected = 2;
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
+                int bookUserId = createResult.bookUserId;
 
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, 1, (int)user.Id);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // pull the languageUser
+                var language = await LanguageApi.LanguageReadByCodeAsync(
+                    context, TestConstants.NewBookLanguageCode);
+                if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (int)language.Id, userId);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
-                // create the book
-                Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
-                    context,
-                    (int)user.Id,
-                    TestConstants.NewBookTitle,
-                    TestConstants.NewBookLanguageCode,
-                    TestConstants.NewBookUrl,
-                    TestConstants.NewBookText);
-                if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // create the  bookUser
-                var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(
-                    context, (int)book.Id, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-                {
-                    // still null, something went wrong
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-
-                // create the page 1 and 2 page users first, because the read call doesn't
-                var page1 = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
-                var page2 = book.Pages.Where(x => x.Ordinal == 2).FirstOrDefault();
-                if (page1 is null || page1.Id is null || page2 is null || page2.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                // create the page 1 page user
+                var page1 = await PageApi.PageReadByOrdinalAndBookIdAsync(context, 1, bookId);
+                if (page1 is null || page1.Id is null)
+                { ErrorHandler.LogAndThrow(); return; }
                 int page1Id = (int)page1.Id;
                 var pageUser1 = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, page1Id, (int)user.Id);
+                    context, page1Id, userId);
 
+                // create the page 2 page user
+                var page2 = await PageApi.PageReadByOrdinalAndBookIdAsync(context, 2, bookId);
+                if (page2 is null || page2.Id is null)
+                { ErrorHandler.LogAndThrow(); return; }
                 int page2Id = (int)page2.Id;
                 var pageUser2 = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, page2Id, (int)user.Id);
+                    context, page2Id, userId);
 
-
-                // act
                 // make the call before every doing anything
                 var pageUserBefore = await PageUserApi.PageUserReadBookmarkedOrFirstAsync(
-                    context, (int)bookUser.Id);
+                    context, bookUserId);
                 if (pageUserBefore is null || pageUserBefore.PageId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 // pull the page object associated to the pageUser
                 var pageBefore = await PageApi.PageReadByIdAsync(context, (int)pageUserBefore.PageId);
                 if (pageBefore is null || pageBefore.Ordinal is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 int ordinalBeforeActual = (int)pageBefore.Ordinal;
 
                 // update the bookmark as if we moved the page
-                await BookUserApi.BookUserUpdateBookmarkAsync(context, (int)bookUser.Id, page2Id);
+                await BookUserApi.BookUserUpdateBookmarkAsync(context, bookUserId, page2Id);
 
                 // now pull the page User again
                 var pageUserAfter = await PageUserApi.PageUserReadBookmarkedOrFirstAsync(
-                    context, (int)bookUser.Id);
+                    context, bookUserId);
                 if (pageUserAfter is null || pageUserAfter.PageId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 // pull the page object associated to the pageUser
                 var pageAfter = await PageApi.PageReadByIdAsync(context, (int)pageUserAfter.PageId);
                 if (pageAfter is null || pageAfter.Ordinal is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 int ordinalAfterActual = (int)pageAfter.Ordinal;
 
-
-
-                // assert
                 Assert.AreEqual(ordinalBeforeExpected, ordinalBeforeActual);
                 Assert.AreEqual(ordinalAfterExpected, ordinalAfterActual);
             }
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -542,223 +345,111 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserReadByOrderWithinBookTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
-            int ordinalBeforeExpected = 1;
-            int ordinalAfterExpected = 2;
+            int ordinalExpected = 2;
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
+                int bookUserId = createResult.bookUserId;
 
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // pull the languageUser
+                var language = LanguageApi.LanguageReadByCode(
+                    context, TestConstants.NewBookLanguageCode);
+                if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                var languageUser = LanguageUserApi.LanguageUserGet(context, (int)language.Id, userId);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
-                // create the book
-                Book? book = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
-                    context,
-                    (int)user.Id,
-                    TestConstants.NewBookTitle,
-                    TestConstants.NewBookLanguageCode,
-                    TestConstants.NewBookUrl,
-                    TestConstants.NewBookText);
-                if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // create the  bookUser
-                var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(context, (int)book.Id, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-                {
-                    // still null, something went wrong
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-
-                // create the page 1 and 2 page users first, because the read call doesn't
-                var page1 = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
-                var page2 = book.Pages.Where(x => x.Ordinal == 2).FirstOrDefault();
-                if (page1 is null || page1.Id is null || page2 is null || page2.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                int page1Id = (int)page1.Id;
-                var pageUser1 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, page1Id, (int)user.Id);
-
+                // create the page 2 page user
+                var page2 = PageApi.PageReadByOrdinalAndBookId(context, 2, bookId);
+                if (page2 is null || page2.Id is null)
+                { ErrorHandler.LogAndThrow(); return; }
                 int page2Id = (int)page2.Id;
-                var pageUser2 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, page2Id, (int)user.Id);
+                var pageUserCreated = PageUserApi.PageUserCreateForPageIdAndUserId(
+                    context, page2Id, userId);
+                if (pageUserCreated is null || pageUserCreated.PageId is null)
+                { ErrorHandler.LogAndThrow(); return; }
 
+                // now pull the pageUser from the DB
+                var pageUserRead = PageUserApi.PageUserReadByOrderWithinBook(
+                    context, (int)languageUser.Id, 2, bookId);
+                if (pageUserRead is null || pageUserRead.PageId is null)
+                { ErrorHandler.LogAndThrow(); return; }
 
-                // act
-                // make the call before every doing anything
-                var pageUserBefore = PageUserApi.PageUserReadBookmarkedOrFirst(context, (int)bookUser.Id);
-                if (pageUserBefore is null || pageUserBefore.PageId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                // pull the page object associated to the pageUser
-                var pageBefore = PageApi.PageReadById(context, (int)pageUserBefore.PageId);
-                if (pageBefore is null || pageBefore.Ordinal is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                int ordinalBeforeActual = (int)pageBefore.Ordinal;
-
-                // update the bookmark as if we moved the page
-                BookUserApi.BookUserUpdateBookmark(context, (int)bookUser.Id, page2Id);
-
-                // now pull the page User again
-                var pageUserAfter = PageUserApi.PageUserReadBookmarkedOrFirst(context, (int)bookUser.Id);
-                if (pageUserAfter is null || pageUserAfter.PageId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                // pull the page object associated to the pageUser
-                var pageAfter = PageApi.PageReadById(context, (int)pageUserAfter.PageId);
+                // pull the page object associated to the pageUser you just pulled
+                var pageAfter = PageApi.PageReadById(context, (int)pageUserRead.PageId);
                 if (pageAfter is null || pageAfter.Ordinal is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                int ordinalAfterActual = (int)pageAfter.Ordinal;
-
-
+                { ErrorHandler.LogAndThrow(); return; }
+                int ordinalActual = (int)pageAfter.Ordinal;
 
                 // assert
-                Assert.AreEqual(ordinalBeforeExpected, ordinalBeforeActual);
-                Assert.AreEqual(ordinalAfterExpected, ordinalAfterActual);
+                Assert.AreEqual(ordinalExpected, ordinalActual);
             }
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task PageUserReadByOrderWithinBookAsyncTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-            int ordinalBeforeExpected = 1;
-            int ordinalAfterExpected = 2;
+            int ordinalExpected = 2;
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
+                int bookUserId = createResult.bookUserId;
 
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // pull the languageUser
+                var language = await LanguageApi.LanguageReadByCodeAsync(
+                    context, TestConstants.NewBookLanguageCode);
+                if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (int)language.Id, userId);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
-                // create the book
-                Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
-                    context,
-                    (int)user.Id,
-                    TestConstants.NewBookTitle,
-                    TestConstants.NewBookLanguageCode,
-                    TestConstants.NewBookUrl,
-                    TestConstants.NewBookText);
-                if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // create the  bookUser
-                var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(context, (int)book.Id, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-                {
-                    // still null, something went wrong
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-
-                // create the page 1 and 2 page users first, because the read call doesn't
-                var page1 = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
-                var page2 = book.Pages.Where(x => x.Ordinal == 2).FirstOrDefault();
-                if (page1 is null || page1.Id is null || page2 is null || page2.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                int page1Id = (int)page1.Id;
-                var pageUser1 = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, page1Id, (int)user.Id);
-
+                // create the page 2 page user
+                var page2 = await PageApi.PageReadByOrdinalAndBookIdAsync(context, 2, bookId);
+                if (page2 is null || page2.Id is null)
+                    { ErrorHandler.LogAndThrow(); return; }
                 int page2Id = (int)page2.Id;
-                var pageUser2 = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, page2Id, (int)user.Id);
+                var pageUserCreated = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
+                    context, page2Id, userId);
+                if (pageUserCreated is null || pageUserCreated.PageId is null)
+                    { ErrorHandler.LogAndThrow(); return; }
 
-
-                // act
-                // make the call before every doing anything
-                var pageUserBefore = await PageUserApi.PageUserReadBookmarkedOrFirstAsync(context, (int)bookUser.Id);
-                if (pageUserBefore is null || pageUserBefore.PageId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                // pull the page object associated to the pageUser
-                var pageBefore = await PageApi.PageReadByIdAsync(context, (int)pageUserBefore.PageId);
-                if (pageBefore is null || pageBefore.Ordinal is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                int ordinalBeforeActual = (int)pageBefore.Ordinal;
-
-                // update the bookmark as if we moved the page
-                await BookUserApi.BookUserUpdateBookmarkAsync(context, (int)bookUser.Id, page2Id);
-
-                // now pull the page User again
-                var pageUserAfter = await PageUserApi.PageUserReadBookmarkedOrFirstAsync(context, (int)bookUser.Id);
-                if (pageUserAfter is null || pageUserAfter.PageId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                // pull the page object associated to the pageUser
-                var pageAfter = await PageApi.PageReadByIdAsync(context, (int)pageUserAfter.PageId);
+                // now pull the pageUser from the DB
+                var pageUserRead = await PageUserApi.PageUserReadByOrderWithinBookAsync(
+                    context, (int)languageUser.Id, 2, bookId);
+                if (pageUserRead is null || pageUserRead.PageId is null)
+                    { ErrorHandler.LogAndThrow(); return; }
+                
+                // pull the page object associated to the pageUser you just pulled
+                var pageAfter = await PageApi.PageReadByIdAsync(context, (int)pageUserRead.PageId);
                 if (pageAfter is null || pageAfter.Ordinal is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                int ordinalAfterActual = (int)pageAfter.Ordinal;
-
-
+                    { ErrorHandler.LogAndThrow(); return; }
+                int ordinalActual = (int)pageAfter.Ordinal;
 
                 // assert
-                Assert.AreEqual(ordinalBeforeExpected, ordinalBeforeActual);
-                Assert.AreEqual(ordinalAfterExpected, ordinalAfterActual);
+                Assert.AreEqual(ordinalExpected, ordinalActual);
             }
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -766,125 +457,77 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserReadByPageIdAndLanguageUserIdTest()
         {
-            // assemble
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int languageUserId = 3;
             int pageId = 79;
             int pageUserIdExpected = 590;
 
-            try
-            {
-                // act
-                var pageUser = PageUserApi.PageUserReadByPageIdAndLanguageUserId(
+            var pageUser = PageUserApi.PageUserReadByPageIdAndLanguageUserId(
                     context, pageId, languageUserId);
 
-                // assert
-                Assert.IsNotNull(pageUser);
-                Assert.IsNotNull(pageUser.Id);
-                Assert.AreEqual(pageId, pageUser.PageId);
-                Assert.AreEqual(pageUserIdExpected, pageUser.Id);
-            }
-            finally
-            {
-                // clean-up
-                transaction.Rollback();
-            }
+            Assert.IsNotNull(pageUser);
+            Assert.IsNotNull(pageUser.Id);
+            Assert.AreEqual(pageId, pageUser.PageId);
+            Assert.AreEqual(pageUserIdExpected, pageUser.Id);
         }
         [TestMethod()]
         public async Task PageUserReadByPageIdAndLanguageUserIdAsyncTest()
         {
-            // assemble
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int languageUserId = 3;
             int pageId = 79;
             int pageUserIdExpected = 590;
 
-            try
-            {
-                // act
-                var pageUser = await PageUserApi.PageUserReadByPageIdAndLanguageUserIdAsync(
+            var pageUser = await PageUserApi.PageUserReadByPageIdAndLanguageUserIdAsync(
                     context, pageId, languageUserId);
 
-                // assert
-                Assert.IsNotNull(pageUser);
-                Assert.IsNotNull(pageUser.Id);
-                Assert.AreEqual(pageId, pageUser.PageId);
-                Assert.AreEqual(pageUserIdExpected, pageUser.Id);
-            }
-            finally
-            {
-                // clean-up
-                await transaction.RollbackAsync();
-            }
+            Assert.IsNotNull(pageUser);
+            Assert.IsNotNull(pageUser.Id);
+            Assert.AreEqual(pageId, pageUser.PageId);
+            Assert.AreEqual(pageUserIdExpected, pageUser.Id);
         }
 
 
         [TestMethod()]
         public void PageUserUpdateReadDateTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             var startDateTime = DateTime.Now;
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
 
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // create the book
-                Book? book = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
-                    context,
-                    (int)user.Id,
-                    TestConstants.NewBookTitle,
-                    TestConstants.NewBookLanguageCode,
-                    TestConstants.NewBookUrl,
-                    TestConstants.NewBookText);
-                if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                // pull the languageUser
+                var language = LanguageApi.LanguageReadByCode(
+                    context, TestConstants.NewBookLanguageCode);
+                if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                var languageUser = LanguageUserApi.LanguageUserGet(context, (int)language.Id, userId);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // get the page Id
-                var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+                var page = PageApi.PageReadByOrdinalAndBookId(context, 1, bookId);
                 if (page is null || page.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
+
+                // pull the page User
                 var pageUserBefore = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (int)page.Id, (int)user.Id);
-
+                    context, (int)page.Id, userId);
                 if (pageUserBefore is null || pageUserBefore.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
 
-                // act
-
+                // now update the read date
                 PageUserApi.PageUserUpdateReadDate(context, (int)pageUserBefore.Id, DateTime.Now);
 
                 // now read it back
                 var pageUserAfter = PageUserApi.PageUserReadByPageIdAndLanguageUserId(
                     context, (int)page.Id, (int)languageUser.Id);
 
-                // assert
                 Assert.IsNotNull(pageUserAfter);
                 Assert.IsNotNull(pageUserAfter.Id);
                 Assert.IsNotNull(pageUserAfter.ReadDate);
@@ -893,73 +536,50 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task PageUserUpdateReadDateAsyncTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             var startDateTime = DateTime.Now;
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
 
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // create the book
-                Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
-                    context,
-                    (int)user.Id,
-                    TestConstants.NewBookTitle,
-                    TestConstants.NewBookLanguageCode,
-                    TestConstants.NewBookUrl,
-                    TestConstants.NewBookText);
-                if (book is null || book.Id is null || book.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                // pull the languageUser
+                var language = await LanguageApi.LanguageReadByCodeAsync(
+                    context, TestConstants.NewBookLanguageCode);
+                if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (int)language.Id, userId);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // get the page Id
-                var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+                var page = await PageApi.PageReadByOrdinalAndBookIdAsync(context, 1, bookId);
                 if (page is null || page.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
+                
+                // pull the page User
                 var pageUserBefore = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, (int)page.Id, (int)user.Id);
-
+                    context, (int)page.Id, userId);
                 if (pageUserBefore is null || pageUserBefore.Id is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
 
-                // act
-
+                // now update the read date
                 await PageUserApi.PageUserUpdateReadDateAsync(context, (int)pageUserBefore.Id, DateTime.Now);
 
                 // now read it back
-                var pageUserAfter = PageUserApi.PageUserReadByPageIdAndLanguageUserId(
+                var pageUserAfter = await PageUserApi.PageUserReadByPageIdAndLanguageUserIdAsync(
                     context, (int)page.Id, (int)languageUser.Id);
 
-                // assert
                 Assert.IsNotNull(pageUserAfter);
                 Assert.IsNotNull(pageUserAfter.Id);
                 Assert.IsNotNull(pageUserAfter.ReadDate);
@@ -968,7 +588,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -976,40 +597,32 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserUpdateUnknowWordsToWellKnownTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
-            decimal expectedWordCount = 3046.0M;
-            decimal expectedDistinctKnowPercent = 0.18M;
+            decimal expectedWordCount = 784.0M;
+            decimal expectedDistinctKnowPercent = 0.51M;
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
-                int bookId = 6;
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
+                int bookUserId = createResult.bookUserId;
+
+                // pull the languageUser
+                var language = LanguageApi.LanguageReadByCode(
+                    context, TestConstants.NewBookLanguageCode);
+                if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                var languageUser = LanguageUserApi.LanguageUserGet(context, (int)language.Id, userId);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
 
                 var originalPacket = new BookListDataPacket(context, false);
 
-                // act
-                var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.LanguageUserId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
                 // carry on with the test
-                var bookUserStats = BookUserStatApi.BookUserStatsRead(context, bookId, (int)user.Id);
-                // checking total word count here because we already tested progress
-                // it's good to mix these up so we eventually get coverage
+                var bookUserStats = BookUserStatApi.BookUserStatsRead(context, bookId, userId);
                 BookUserStat? totalWordCountStat = bookUserStats is null ? null :
                     bookUserStats.Where(x => x.Key == AvailableBookUserStat.TOTALWORDCOUNT).FirstOrDefault();
                 decimal actualWordCount = totalWordCountStat is null ? 0 :
@@ -1018,17 +631,11 @@ namespace Logic.Services.API.Tests
                 // now move the page forward a couple of times as if we're reading it
                 var firstPage = PageApi.PageReadFirstByBookId(context, bookId);
                 if (firstPage is null || firstPage.Id is null || firstPage.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 var pageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (int)firstPage.Id, (int)user.Id);
+                    context, (int)firstPage.Id, userId);
                 if (pageUser is null || pageUser.Id is null || pageUser.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
 
 
                 // update all unknowns to well known
@@ -1037,68 +644,59 @@ namespace Logic.Services.API.Tests
                 PageUserApi.PageUserMarkAsRead(context, (int)pageUser.Id);
                 // now move forward to page 2
                 var newPageUser = PageUserApi.PageUserReadByOrderWithinBook(
-                    context, (int)bookUser.LanguageUserId, 2, bookId);
+                    context, (int)languageUser.Id, 2, bookId);
 
                 // now we need to regen the stats
-                BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (int)bookUser.Id);
+                BookUserStatApi.BookUserStatsUpdateByBookUserId(context, bookUserId);
                 // finally, re-pull the stats
-                var newStats = BookUserStatApi.BookUserStatsRead(context, bookId, (int)user.Id);
+                var newStats = BookUserStatApi.BookUserStatsRead(context, bookId, userId);
                 BookUserStat? distinctKnownPercentStat = newStats is null ? null :
                     newStats.Where(x => x.Key == AvailableBookUserStat.DISTINCTKNOWNPERCENT).FirstOrDefault();
                 if (distinctKnownPercentStat is null || distinctKnownPercentStat.ValueNumeric is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                { ErrorHandler.LogAndThrow(); return; }
                 decimal actualDistinctKnown = Math.Round((decimal)distinctKnownPercentStat.ValueNumeric, 2);
 
                 // assert
+                // this will fail because we're no longer using book 6
                 Assert.AreEqual(expectedWordCount, actualWordCount);
                 Assert.AreEqual(expectedDistinctKnowPercent, actualDistinctKnown);
             }
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task PageUserUpdateUnknowWordsToWellKnownAsyncTest()
         {
-            // assemble
+            int userId = 0;
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-            decimal expectedWordCount = 3046.0M;
-            decimal expectedDistinctKnowPercent = 0.18M;
+            decimal expectedWordCount = 784.0M;
+            decimal expectedDistinctKnowPercent = 0.51M;
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
-                int bookId = 6;
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
+                userId = createResult.userId;
+                bookId = createResult.bookId;
+                int bookUserId = createResult.bookUserId;
+
+                // pull the languageUser
+                var language = await LanguageApi.LanguageReadByCodeAsync(
+                    context, TestConstants.NewBookLanguageCode);
+                if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (int)language.Id, userId);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
 
 
                 var originalPacket = new BookListDataPacket(context, false);
-
-                // act
-                var bookUser = await OrchestrationApi.OrchestrateBookUserCreationAndSubProcessesAsync(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.LanguageUserId is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                
                 // carry on with the test
-                var bookUserStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (int)user.Id);
-                // checking total word count here because we already tested progress
-                // it's good to mix these up so we eventually get coverage
+                var bookUserStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, userId);
                 BookUserStat? totalWordCountStat = bookUserStats is null ? null :
                     bookUserStats.Where(x => x.Key == AvailableBookUserStat.TOTALWORDCOUNT).FirstOrDefault();
                 decimal actualWordCount = totalWordCountStat is null ? 0 :
@@ -1107,17 +705,11 @@ namespace Logic.Services.API.Tests
                 // now move the page forward a couple of times as if we're reading it
                 var firstPage = await PageApi.PageReadFirstByBookIdAsync(context, bookId);
                 if (firstPage is null || firstPage.Id is null || firstPage.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 var pageUser = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, (int)firstPage.Id, (int)user.Id);
+                    context, (int)firstPage.Id, userId);
                 if (pageUser is null || pageUser.Id is null || pageUser.Id < 1)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
 
 
                 // update all unknowns to well known
@@ -1126,29 +718,28 @@ namespace Logic.Services.API.Tests
                 await PageUserApi.PageUserMarkAsReadAsync(context, (int)pageUser.Id);
                 // now move forward to page 2
                 var newPageUser = await PageUserApi.PageUserReadByOrderWithinBookAsync(
-                    context, (int)bookUser.LanguageUserId, 2, bookId);
+                    context, (int)languageUser.Id, 2, bookId);
 
                 // now we need to regen the stats
-                await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, (int)bookUser.Id);
+                await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, bookUserId);
                 // finally, re-pull the stats
-                var newStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (int)user.Id);
+                var newStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, userId);
                 BookUserStat? distinctKnownPercentStat = newStats is null ? null :
                     newStats.Where(x => x.Key == AvailableBookUserStat.DISTINCTKNOWNPERCENT).FirstOrDefault();
                 if (distinctKnownPercentStat is null || distinctKnownPercentStat.ValueNumeric is null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                    { ErrorHandler.LogAndThrow(); return; }
                 decimal actualDistinctKnown = Math.Round((decimal)distinctKnownPercentStat.ValueNumeric, 2);
 
                 // assert
+                // this will fail because we're no longer using book 6
                 Assert.AreEqual(expectedWordCount, actualWordCount);
                 Assert.AreEqual(expectedDistinctKnowPercent, actualDistinctKnown);
             }
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+                await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
     }

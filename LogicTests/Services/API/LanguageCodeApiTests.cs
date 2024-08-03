@@ -20,142 +20,136 @@ namespace Logic.Services.API.Tests
         {
 
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
 
             Expression<Func<LanguageCode, bool>> filter1 = (x => x.IsImplementedForLearning == true);
             Expression<Func<LanguageCode, bool>> filter2 = (x => x.IsImplementedForUI == true);
             Expression<Func<LanguageCode, bool>> filter3 = (x => x.IsImplementedForTranslation == true);
 
+            var languageOptions1 = LanguageCodeApi.LanguageCodeOptionsRead(context, filter1);
+            var languageOptions2 = LanguageCodeApi.LanguageCodeOptionsRead(context, filter2);
+            var languageOptions3 = LanguageCodeApi.LanguageCodeOptionsRead(context, filter3);
 
-            try
-            {
-                // act
-                var languageOptions1 = LanguageCodeApi.LanguageCodeOptionsRead(context, filter1);
-                var languageOptions2 = LanguageCodeApi.LanguageCodeOptionsRead(context, filter2);
-                var languageOptions3 = LanguageCodeApi.LanguageCodeOptionsRead(context, filter3);
+            var spanishFrom1 = languageOptions1["ES"];
+            var englishFrom2 = languageOptions2["EN-US"];
+            var englishFrom3 = languageOptions3["EN-US"];
 
-                var spanishFrom1 = languageOptions1["ES"];
-                var englishFrom2 = languageOptions2["EN-US"];
-                var englishFrom3 = languageOptions3["EN-US"];
-
-                // assert
-                Assert.IsNotNull(spanishFrom1);
-                Assert.IsNotNull(englishFrom2);
-                Assert.IsNotNull(englishFrom3);
-                Assert.AreEqual("Spanish", spanishFrom1.LanguageName);
-                Assert.AreEqual("English (American)", englishFrom2.LanguageName);
-                Assert.AreEqual("English (American)", englishFrom3.LanguageName);
-            }
-            finally
-            {
-                // clean-up
-
-                transaction.Rollback();
-            }
+            Assert.IsNotNull(spanishFrom1);
+            Assert.IsNotNull(englishFrom2);
+            Assert.IsNotNull(englishFrom3);
+            Assert.AreEqual("Spanish", spanishFrom1.LanguageName);
+            Assert.AreEqual("English (American)", englishFrom2.LanguageName);
+            Assert.AreEqual("English (American)", englishFrom3.LanguageName);
         }
         [TestMethod()]
         public async Task LanguageCodeOptionsReadAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-
+            
             Expression<Func<LanguageCode, bool>> filter1 = (x => x.IsImplementedForLearning == true);
             Expression<Func<LanguageCode, bool>> filter2 = (x => x.IsImplementedForUI == true);
             Expression<Func<LanguageCode, bool>> filter3 = (x => x.IsImplementedForTranslation == true);
 
+            var languageOptions1 = await LanguageCodeApi.LanguageCodeOptionsReadAsync(context, filter1);
+            var languageOptions2 = await LanguageCodeApi.LanguageCodeOptionsReadAsync(context, filter2);
+            var languageOptions3 = await LanguageCodeApi.LanguageCodeOptionsReadAsync(context, filter3);
 
-            try
-            {
-                // act
-                var languageOptions1 = await LanguageCodeApi.LanguageCodeOptionsReadAsync(context, filter1);
-                var languageOptions2 = await LanguageCodeApi.LanguageCodeOptionsReadAsync(context, filter2);
-                var languageOptions3 = await LanguageCodeApi.LanguageCodeOptionsReadAsync(context, filter3);
+            var spanishFrom1 = languageOptions1["ES"];
+            var englishFrom2 = languageOptions2["EN-US"];
+            var englishFrom3 = languageOptions3["EN-US"];
 
-                var spanishFrom1 = languageOptions1["ES"];
-                var englishFrom2 = languageOptions2["EN-US"];
-                var englishFrom3 = languageOptions3["EN-US"];
-
-                // assert
-                Assert.IsNotNull(spanishFrom1);
-                Assert.IsNotNull(englishFrom2);
-                Assert.IsNotNull(englishFrom3);
-                Assert.AreEqual("Spanish", spanishFrom1.LanguageName);
-                Assert.AreEqual("English (American)", englishFrom2.LanguageName);
-                Assert.AreEqual("English (American)", englishFrom3.LanguageName);
-            }
-            finally
-            {
-                // clean-up
-
-                await transaction.RollbackAsync();
-            }
+            Assert.IsNotNull(spanishFrom1);
+            Assert.IsNotNull(englishFrom2);
+            Assert.IsNotNull(englishFrom3);
+            Assert.AreEqual("Spanish", spanishFrom1.LanguageName);
+            Assert.AreEqual("English (American)", englishFrom2.LanguageName);
+            Assert.AreEqual("English (American)", englishFrom3.LanguageName);
         }
 
 
         [TestMethod()]
         public void LanguageCodeReadByCodeTest()
         {
-            // assemble
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
-
             string code = "HU";
             string expectedName = "Hungarian";
 
+            var languageCode = LanguageCodeApi.LanguageCodeReadByCode(context, code);
+            if (languageCode == null)
+            { ErrorHandler.LogAndThrow(); return; }
 
-            try
-            {
-                // act
-                var languageCode = LanguageCodeApi.LanguageCodeReadByCode(context, code);
-                if (languageCode == null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
-
-                // assert
-                Assert.AreEqual(expectedName, languageCode.LanguageName);
-            }
-            finally
-            {
-                // clean-up
-
-                transaction.Rollback();
-            }
+            Assert.AreEqual(expectedName, languageCode.LanguageName);
         }
 
         [TestMethod()]
         public async Task LanguageCodeReadByCodeAsyncTest()
         {
-            // assemble
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
-
             string code = "HU";
             string expectedName = "Hungarian";
+            
+            var languageCode = await LanguageCodeApi.LanguageCodeReadByCodeAsync(context, code);
+            if (languageCode == null)
+                { ErrorHandler.LogAndThrow(); return; }
 
+            Assert.AreEqual(expectedName, languageCode.LanguageName);
+        }
+
+        [TestMethod()]
+        public void LanguageCodeUserInterfacePreferenceReadByUserIdTest()
+        {
+            int userId = 0;
+            var context = CommonFunctions.CreateContext();
+            string code = "HU";
+            string expectedName = "Hungarian";
+            var applicationUserId = Guid.NewGuid().ToString();
+            var name = "Auto gen tester 3";
 
             try
             {
-                // act
-                var languageCode = await LanguageCodeApi.LanguageCodeReadByCodeAsync(context, code);
-                if (languageCode == null)
-                {
-                    ErrorHandler.LogAndThrow();
-                    return;
-                }
+                // create the user
+                var user = UserApi.UserCreate(applicationUserId, name, code, context);
+                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
 
-                // assert
+                var languageCode = LanguageCodeApi.LanguageCodeUserInterfacePreferenceReadByUserId(
+                    context, userId);
+                if (languageCode is null) { ErrorHandler.LogAndThrow(); return; }
+
                 Assert.AreEqual(expectedName, languageCode.LanguageName);
             }
             finally
             {
-                // clean-up
-
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
 
+        [TestMethod()]
+        public async Task LanguageCodeUserInterfacePreferenceReadByUserIdAsyncTest()
+        {
+            int userId = 0;
+            var context = CommonFunctions.CreateContext();
+            string code = "HU";
+            string expectedName = "Hungarian";
+            var applicationUserId = Guid.NewGuid().ToString();
+            var name = "Auto gen tester 3";
 
+            try
+            {
+                // create the user
+                var user = await UserApi.UserCreateAsync(applicationUserId, name, code, context);
+                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                var languageCode = await LanguageCodeApi.LanguageCodeUserInterfacePreferenceReadByUserIdAsync(
+                    context, userId);
+                if (languageCode is null) { ErrorHandler.LogAndThrow(); return; }
+
+                Assert.AreEqual(expectedName, languageCode.LanguageName);
+            }
+            finally
+            {
+                CommonFunctions.CleanUpUser(userId, context);
+            }
+        }
     }
 }

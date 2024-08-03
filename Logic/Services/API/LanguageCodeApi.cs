@@ -52,5 +52,25 @@ namespace Logic.Services.API
             });
 
         }
+
+        public static LanguageCode? LanguageCodeUserInterfacePreferenceReadByUserId(
+            IdiomaticaContext context, int userId)
+        {
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            var languageCode = DataCache.LanguageCodeUserInterfacePreferenceByUserIdRead(userId, context);
+            if (languageCode is null)
+            {
+                return LanguageCodeReadByCode(context, "EN-US");
+            }
+            return languageCode;
+        }
+        public static async Task<LanguageCode?> LanguageCodeUserInterfacePreferenceReadByUserIdAsync(
+            IdiomaticaContext context, int userId)
+        {
+            return await Task<LanguageCode?>.Run(() =>
+            {
+                return LanguageCodeUserInterfacePreferenceReadByUserId(context, userId);
+            });
+        }
     }
 }

@@ -16,6 +16,8 @@ using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using Logic.Services.API;
 using Logic.Telemetry;
+using System.Net;
+using Logic;
 
 namespace LogicTests
 {
@@ -66,35 +68,124 @@ namespace LogicTests
             optionsBuilder.UseSqlServer(connectionstring);
             return new IdiomaticaContext(optionsBuilder.Options);
         }
+        
+#if DEBUG
+        internal static void SetLoggedInUser(Model.User user, UserService userService, IdiomaticaContext context)
+        {
+            userService.SetLoggedInUserForTestBench(user, context);
+        }
+#endif
+        #endregion
+
+        #region cleanup functions
+        internal static void CleanUpBook(int bookId, IdiomaticaContext context)
+        {
+            BookApi.BookAndAllChildrenDelete(context, bookId);
+        }
+        internal static async Task CleanUpBookAsync(int bookId, IdiomaticaContext context)
+        {
+            await BookApi.BookAndAllChildrenDeleteAsync(context, bookId);
+        }
+        internal static void CleanUpUser(int userId, IdiomaticaContext context)
+        {
+            UserApi.UserAndAllChildrenDelete(context, userId);
+        }
+        internal static async Task CleanUpUserAsync(int userId, IdiomaticaContext context)
+        {
+            await UserApi.UserAndAllChildrenDeleteAsync(context, userId);
+        }
+        #endregion
+
+        #region object create functions
+        internal static Book? CreateBook(IdiomaticaContext context, int userId)
+        {
+            Book? book = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
+                context,
+                userId,
+                TestConstants.NewBookTitle,
+                TestConstants.NewBookLanguageCode,
+                TestConstants.NewBookUrl,
+                TestConstants.NewBookText);
+            if (book is null || book.Id is null || book.Id < 1) { ErrorHandler.LogAndThrow(); return null; }
+            return book;
+        }
+        internal static async Task <Book?> CreateBookAsync(IdiomaticaContext context, int userId)
+        {
+            Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
+                context,
+                userId,
+                TestConstants.NewBookTitle,
+                TestConstants.NewBookLanguageCode,
+                TestConstants.NewBookUrl,
+                TestConstants.NewBookText);
+            if (book is null || book.Id is null || book.Id < 1) { ErrorHandler.LogAndThrow(); return null; }
+            return book;
+        }
+
+
+        internal static (int userId, int bookId, int bookUserId) CreateUserAndBookAndBookUser(
+            IdiomaticaContext context, UserService userService)
+        {
+            int userId = 0;
+            int bookId = 0;
+            int bookUserId = 0;
+
+            var user = CreateNewTestUser(userService, context);
+
+            if (user is null || user.Id is null || user.Id < 1)
+            { ErrorHandler.LogAndThrow(); return (userId, bookId, bookUserId); }
+            userId = (int)user.Id;
+            var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+            if (languageUser is null) ErrorHandler.LogAndThrow();
+
+
+            Book? book = CreateBook(context, (int)user.Id);
+            if (book is null || book.Id is null || book.Id < 1)
+            { ErrorHandler.LogAndThrow(); return (userId, bookId, bookUserId); }
+            bookId = (int)book.Id;
+
+            var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
+                context, (int)book.Id, (int)user.Id);
+            if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+            { ErrorHandler.LogAndThrow(); return (userId, bookId, bookUserId); }
+            bookUserId = (int)bookUser.Id;
+
+            return (userId, bookId, bookUserId);
+        }
+        internal static async Task<(int userId, int bookId, int bookUserId)> CreateUserAndBookAndBookUserAsync(
+            IdiomaticaContext context, UserService userService)
+        {
+            return await Task<(int userId, int bookId, int bookUserId)>.Run(() =>
+            {
+                return CreateUserAndBookAndBookUser(context, userService);
+            });
+        }
+
         internal static User? CreateNewTestUser(UserService userService, IdiomaticaContext context)
         {
-            var user = new User()
-            {
-                ApplicationUserId = Guid.NewGuid().ToString(),
-                Name = "Auto gen tester",
-                Code = "En-US"
-            };
-            user = DataCache.UserCreate(user, context);
+            var applicationUserId = Guid.NewGuid().ToString();
+            var name = "Auto gen tester 2";
+            var code = "En-US";
+            var user = UserApi.UserCreate(applicationUserId, name, code, context);
             if (user is null || user.Id is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
             }
             context.Users.Add(user);
-            
-
 #if DEBUG
             SetLoggedInUser(user, userService, context);
 #endif
-
             return user;
         }
-#if DEBUG
-        internal static void SetLoggedInUser(User user, UserService userService, IdiomaticaContext context)
+        internal static async Task<User?> CreateNewTestUserAsync(
+            UserService userService, IdiomaticaContext context)
         {
-            userService.SetLoggedInUserForTestBench(user, context);
+            return await Task<User?>.Run(() =>
+            {
+                return CreateNewTestUser(userService, context);
+            });
         }
-#endif
         #endregion
 
     }

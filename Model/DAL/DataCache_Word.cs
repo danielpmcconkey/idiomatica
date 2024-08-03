@@ -11,7 +11,7 @@ namespace Model.DAL
     public static partial class DataCache
     {
         private static ConcurrentDictionary<int, List<Word>> WordsCommon1000ByLanguageId = new ConcurrentDictionary<int, List<Word>>();
-        private static ConcurrentDictionary<int, Word> WordById = new ConcurrentDictionary<int, Word>();
+        private static ConcurrentDictionary<int, Word?> WordById = new ConcurrentDictionary<int, Word?>();
         private static ConcurrentDictionary<(int languageId, string textLower), Word> WordByLanguageIdAndTextLower = new ConcurrentDictionary<(int languageId, string textLower), Word>();
         private static ConcurrentDictionary<int, List<Word>> WordsBySentenceId = new ConcurrentDictionary<int, List<Word>>();
         private static ConcurrentDictionary<int, List<Word>> WordsByBookId = new ConcurrentDictionary<int, List<Word>>();
@@ -315,7 +315,22 @@ namespace Model.DAL
         {
             return await Task.Run(() => { return WordCreate(value, context); });
         }
-       
+
+        #endregion
+
+        #region delete
+
+        public static void WordDeleteById(int wordId, IdiomaticaContext context)
+        {
+            context.Database.ExecuteSql($"""
+                        
+                delete from [Idioma].[Word]
+                where Id = {wordId}
+                """);
+            // delete it from cache
+            WordById[wordId] = null;
+        }
+
         #endregion
 
     }

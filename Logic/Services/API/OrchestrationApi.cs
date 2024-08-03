@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net;
+using k8s.KubeConfigModels;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Logic.Services.API
 {
@@ -127,6 +129,118 @@ namespace Logic.Services.API
             return await Task<ReadDataPacket?>.Run(() =>
             {
                 return OrchestrateClearPageAndMove(context, readDataPacket, targetPageNum);
+            });
+        }
+
+        /// <summary>
+        ///  take the result of the last card, update the last card, and move the next card to the top
+        /// </summary>
+        public static FlashCardDataPacket? OrchestrateFlashCardDispositionAndAdvance(
+            IdiomaticaContext context, FlashCardDataPacket? dataPacket, AvailableFlashCardAttemptStatus previousCardsStatus)
+        {
+            if (dataPacket is null || dataPacket.CurrentCard is null || 
+                dataPacket.CurrentCard.Id is null || dataPacket.CurrentCard.WordUserId is null)
+                { ErrorHandler.LogAndThrow(); return null; }
+
+            // create the attempt object
+            var attempt = FlashCardAttemptApi.FlashCardAttemptCreate(
+                context, (int)dataPacket.CurrentCard.Id, previousCardsStatus);
+
+            // update the current card
+            DateTime nextReview = DateTime.Now;
+            AvailableFlashCardStatus newStatus = AvailableFlashCardStatus.ACTIVE;
+            switch (previousCardsStatus)
+            {
+                default:
+                case AvailableFlashCardAttemptStatus.GOOD:
+                    nextReview = DateTime.Now.AddDays(1);
+                    break;
+                case AvailableFlashCardAttemptStatus.WRONG:
+                    nextReview = DateTime.Now.AddMinutes(5);
+                    break;
+                case AvailableFlashCardAttemptStatus.HARD:
+                    nextReview = DateTime.Now.AddHours(1);
+                    break;
+                case AvailableFlashCardAttemptStatus.EASY:
+                    nextReview = DateTime.Now.AddDays(5);
+                    break;
+                case AvailableFlashCardAttemptStatus.STOP:
+                    newStatus = AvailableFlashCardStatus.DONTUSE;
+                    nextReview = DateTime.Now.AddYears(5);
+                    break;
+            }
+            var card = FlashCardApi.FlashCardUpdate(
+                context, (int)dataPacket.CurrentCard.Id, (int)dataPacket.CurrentCard.WordUserId,
+                newStatus, nextReview, dataPacket.CurrentCard.UniqueKey);
+
+            // advance the deck
+            dataPacket.CurrentCardPosition++;
+            if (dataPacket.CurrentCardPosition < dataPacket.Deck.Count)
+            {
+                dataPacket.CurrentCard = dataPacket.Deck[dataPacket.CurrentCardPosition];
+            }
+
+            return dataPacket;
+        }
+        public static async Task<FlashCardDataPacket?> OrchestrateFlashCardDispositionAndAdvanceAsync(
+            IdiomaticaContext context, FlashCardDataPacket? dataPacket, AvailableFlashCardAttemptStatus previousCardsStatus)
+        {
+            return await Task<FlashCardDataPacket?>.Run(() =>
+            {
+                return OrchestrateFlashCardDispositionAndAdvance(context, dataPacket, previousCardsStatus);
+            });
+        }
+
+
+        public static FlashCardDataPacket? OrchestrateFlashCardDeckCreation(
+            IdiomaticaContext context, int userId, string learningLanguageCode, int numNew, int numReview)
+        {
+            if (userId < 1) { ErrorHandler.LogAndThrow(); return null; }
+            if (string.IsNullOrEmpty(learningLanguageCode)) { ErrorHandler.LogAndThrow(); return null; }
+            if (numNew < 0) { ErrorHandler.LogAndThrow(); return null; }
+            if (numReview < 0) { ErrorHandler.LogAndThrow(); return null; }
+
+            FlashCardDataPacket newDataPacket = new ();
+            newDataPacket.LearningLanguageCode = learningLanguageCode;
+            var uiLanguageCode = LanguageCodeApi
+                .LanguageCodeUserInterfacePreferenceReadByUserId(context, userId);
+            if (uiLanguageCode is null || uiLanguageCode.Code is null) 
+                { ErrorHandler.LogAndThrow(); return null; }
+            newDataPacket.UILanguageCode = uiLanguageCode.Code;
+
+            // pull the LanguageUserId
+            var language = DataCache.LanguageByCodeRead(learningLanguageCode, context);
+            if (language is null || language.Id is null) { ErrorHandler.LogAndThrow(); return null; }
+            var languageUser = DataCache.LanguageUserByLanguageIdAndUserIdRead(((int)language.Id, userId), context);
+            if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return null; }
+
+            // create / pull the cards and add them to the deck
+            var oldCards = FlashCardApi.FlashCardsFetchByNextReviewDateByLanguageUser(
+                context, (int)languageUser.Id, numReview);
+            var newCards = FlashCardApi.FlashCardsCreate(
+                context, (int)languageUser.Id, numNew, uiLanguageCode.Code);
+            if (oldCards is not null && oldCards.Count > 0) 
+                newDataPacket.Deck.AddRange(oldCards);
+            if (newCards is not null && newCards.Count > 0) 
+                newDataPacket.Deck.AddRange(newCards);
+           
+            // shuffle it
+            newDataPacket.Deck = FlashCardApi.FlashCardDeckShuffle(newDataPacket.Deck);
+            
+            // initialize some deck properties
+            newDataPacket.CardCount = newDataPacket.Deck.Count;
+            newDataPacket.CurrentCardPosition = 0;
+            newDataPacket.CurrentCard = newDataPacket.Deck[0];
+            
+
+            return newDataPacket;
+        }
+        public static async Task<FlashCardDataPacket?> OrchestrateFlashCardDeckCreationAsync(
+            IdiomaticaContext context, int userId, string learningLanguageCode, int numNew, int numReview)
+        {
+            return await Task<FlashCardDataPacket?>.Run(() =>
+            {
+                return OrchestrateFlashCardDeckCreation(context, userId, learningLanguageCode, numNew, numReview);
             });
         }
 

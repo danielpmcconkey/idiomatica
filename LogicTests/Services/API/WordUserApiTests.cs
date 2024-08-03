@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using LogicTests;
 using Logic.Telemetry;
 using Model;
+using k8s.KubeConfigModels;
 
 namespace Logic.Services.API.Tests
 {
@@ -17,8 +18,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordUserCreateTest()
         {
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int languageId = 1;
             int wordId = 39;
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
@@ -28,6 +29,7 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
+                userId = (int)user.Id;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(
                     context, languageId, (int)user.Id);
@@ -41,14 +43,14 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
         [TestMethod()]
         public async Task WordUserCreateAsyncTest()
         {
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int languageId = 1;
             int wordId = 39;
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
@@ -58,6 +60,7 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
+                userId = (int)user.Id;
 
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
                     context, languageId, (int)user.Id);
@@ -71,7 +74,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
 
@@ -79,8 +82,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordUsersCreateAllForBookIdAndUserIdTest()
         {
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int bookId = 6;
             int pageId = 66;
             int expectedCount = 149;
@@ -91,6 +94,8 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
+                userId = (int)user.Id;
+
                 // create the languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
@@ -105,14 +110,14 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
         [TestMethod()]
         public async Task WordUsersCreateAllForBookIdAndUserIdAsyncTest()
         {
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int bookId = 6;
             int pageId = 66;
             int expectedCount = 149;
@@ -123,6 +128,8 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
+                userId = (int)user.Id;
+
                 // create the languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
@@ -137,7 +144,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
 
@@ -145,8 +152,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordUsersDictByPageIdAndUserIdReadTest()
         {
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int bookId = 6;
             int pageId = 66;
             int expectedCount = 149;
@@ -158,11 +165,15 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
+                userId = (int)user.Id;
+
                 // create the languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+
                 // create the wordUsers
                 WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, (int)user.Id);
+
                 // now read them back for one of the pages
                 var dict = WordUserApi.WordUsersDictByPageIdAndUserIdRead(
                     context, pageId, (int)user.Id);
@@ -175,14 +186,14 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
         [TestMethod()]
         public async Task WordUsersDictByPageIdAndUserIdReadAsyncTest()
         {
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int bookId = 6;
             int pageId = 66;
             int expectedCount = 149;
@@ -194,11 +205,15 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
+                userId = (int)user.Id;
+
                 // create the languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+
                 // create the wordUsers
                 await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, (int)user.Id);
+                
                 // now read them back for one of the pages
                 var dict = await WordUserApi.WordUsersDictByPageIdAndUserIdReadAsync(
                     context, pageId, (int)user.Id);
@@ -211,7 +226,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
 
@@ -219,8 +234,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordUserUpdateTest()
         {
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int languageId = 1;
             int wordId = 39;
             AvailableWordUserStatus statusBefore = AvailableWordUserStatus.UNKNOWN;
@@ -232,6 +247,7 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
+                userId = (int)user.Id;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(
                     context, languageId, (int)user.Id);
@@ -253,14 +269,14 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                transaction.Rollback();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
         [TestMethod()]
         public async Task WordUserUpdateAsyncTest()
         {
+            int userId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int languageId = 1;
             int wordId = 39;
             AvailableWordUserStatus statusBefore = AvailableWordUserStatus.UNKNOWN;
@@ -272,6 +288,7 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
+                userId = (int)user.Id;
 
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
                     context, languageId, (int)user.Id);
@@ -293,7 +310,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpUser(userId, context);
             }
         }
 
@@ -302,45 +319,27 @@ namespace Logic.Services.API.Tests
         public void WordUserReadByIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int wordUserId = 1545;
             AvailableWordUserStatus status = AvailableWordUserStatus.LEARNED;
             string translation = "they were living (imperfect)";
-
-            try
-            {
-                var wordUser = WordUserApi.WordUserReadById(context, wordUserId);
-                Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
-                Assert.AreEqual(status, wordUser.Status);
-                Assert.AreEqual(translation, wordUser.Translation);
-            }
-            finally
-            {
-                // clean-up
-                transaction.Rollback();
-            }
+            
+            var wordUser = WordUserApi.WordUserReadById(context, wordUserId);
+            Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
+            Assert.AreEqual(status, wordUser.Status);
+            Assert.AreEqual(translation, wordUser.Translation);
         }
         [TestMethod()]
         public async Task WordUserReadByIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int wordUserId = 1545;
             AvailableWordUserStatus status = AvailableWordUserStatus.LEARNED;
             string translation = "they were living (imperfect)";
 
-            try
-            {
-                var wordUser = await WordUserApi.WordUserReadByIdAsync(context, wordUserId);
-                Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
-                Assert.AreEqual(status, wordUser.Status);
-                Assert.AreEqual(translation, wordUser.Translation);
-            }
-            finally
-            {
-                // clean-up
-                await transaction.RollbackAsync();
-            }
+            var wordUser = await WordUserApi.WordUserReadByIdAsync(context, wordUserId);
+            Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
+            Assert.AreEqual(status, wordUser.Status);
+            Assert.AreEqual(translation, wordUser.Translation);
         }
     }
 }

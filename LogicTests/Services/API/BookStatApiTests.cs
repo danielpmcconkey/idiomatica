@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LogicTests;
+using Logic.Telemetry;
 
 namespace Logic.Services.API.Tests
 {
@@ -15,15 +16,12 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookStatsCreateAndSaveTest()
         {
-            // assemble
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = context.Database.BeginTransaction();
             int expectedPageCount = 3;
 
             try
             {
-                // act
-
                 var newBook = BookApi.BookCreateAndSave(
                     context,
                     TestConstants.NewBookTitle,
@@ -31,34 +29,30 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                int newId = (newBook is not null) ? (newBook.Id is not null) ? (int)newBook.Id : 0 : 0;
+                if (newBook is null || newBook.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                bookId = (int)newBook.Id; 
 
-                BookStatApi.BookStatsCreateAndSave(context, newId);
+                BookStatApi.BookStatsCreateAndSave(context, bookId);
 
-                // assert
-                int actualPageCount = BookApi.BookReadPageCount(context, newId);
-                // assert
+                int actualPageCount = BookApi.BookReadPageCount(context, bookId);
+                
                 Assert.AreEqual(expectedPageCount, actualPageCount);
             }
             finally
             {
                 // clean-up
-
-                transaction.Rollback();
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task BookStatsCreateAndSaveAsyncTest()
         {
-            // assemble
+            int bookId = 0;
             var context = CommonFunctions.CreateContext();
-            using var transaction = await context.Database.BeginTransactionAsync();
             int expectedPageCount = 3;
 
             try
             {
-                // act
-
                 var newBook = await BookApi.BookCreateAndSaveAsync(
                     context,
                     TestConstants.NewBookTitle,
@@ -66,20 +60,19 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                int newId = (newBook is not null) ? (newBook.Id is not null) ? (int)newBook.Id : 0 : 0;
+                if (newBook is null || newBook.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                bookId = (int)newBook.Id;
 
-                await BookStatApi.BookStatsCreateAndSaveAsync(context, newId);
+                await BookStatApi.BookStatsCreateAndSaveAsync(context, bookId);
 
-                // assert
-                int actualPageCount = await BookApi.BookReadPageCountAsync(context, newId);
-                // assert
+                int actualPageCount = await BookApi.BookReadPageCountAsync(context, bookId);
+                
                 Assert.AreEqual(expectedPageCount, actualPageCount);
             }
             finally
             {
                 // clean-up
-
-                await transaction.RollbackAsync();
+                CommonFunctions.CleanUpBook(bookId, context);
             }
         }
     }
