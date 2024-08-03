@@ -25,60 +25,109 @@
         @if (IsDeckDefined == false)
         {
             <form method="post" @onsubmit="OnGetCardsClickAsync" @formname="GetCardsForm">
-                <div class="mb-3">
-                    <label class="form-label"
-                           for="LanguageInput">
-                        @UserService.GetUILabel("fcLanguage")
-                    </label>
-                    <InputSelect id="LanguageInput"
-                                 class="@_languageInputCss"
-                                 @bind-Value="LanguageInput">
-                        <option value="" selected disabled>@UserService.GetUILabel("fcSelectLanguage")</option>
-                        @foreach (var (key, value) in LanguageOptions)
-                        {
-                            @if(value is not null && value.Language is not null && value.Language.Name is not null)
+                @if (_isLoading)
+                {
+                    <div>
+                        <Button Color="ButtonColor.Primary"
+                                Loading="true"
+                                LoadingText="@UserService.GetUILabel("fcLoading")" />
+                    </div>
+                    
+                }
+                else
+                {
+                    <div class="mb-3">
+                        <label class="form-label"
+                               for="LanguageInput">
+                            @UserService.GetUILabel("fcLanguage")
+                        </label>
+                        <InputSelect id="LanguageInput"
+                                     class="@_languageInputCss"
+                                     @bind-Value="LanguageInput">
+                            <option value="" selected disabled>@UserService.GetUILabel("fcSelectLanguage")</option>
+                            @foreach (var (key, value) in LanguageOptions)
                             {
-                                <option value="@key">@value.Language.Name</option>
+                                @if (value is not null && value.LanguageName is not null)
+                                {
+                                    <option value="@key">@value.LanguageName</option>
+                                }
+
                             }
-                            
-                        }
-                    </InputSelect>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label"
-                           for="numNewCardsInput">
-                        @UserService.GetUILabel("fcNumNewCardsLabel")
-                    </label>
-                    <InputSelect id="numNewCardsInput"
-                                 class="@_numNewCardsInputCss"
-                                 @bind-Value="NumNewCardsInput">
-                        @foreach (var value in NumNewCardOptions)
-                        {
-                            <option value="@value">@value</option>
-                        }
-                    </InputSelect>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label"
-                           for="numOldCardsInput">
-                        @UserService.GetUILabel("fcNumOldCardsLabel")
-                    </label>
-                    <InputSelect id="numOldCardsInput"
-                                 class="@_numOldCardsInputCss"
-                                 @bind-Value="NumOldCardsInput">
-                        @foreach (var value in NumOldCardOptions)
-                        {
-                            <option value="@value">@value</option>
-                        }
-                    </InputSelect>
-                </div>
-                <div>
-                    <button type="submit" disabled="@_isFormInValid"
-                            class="btn btn-primary">
-                        @UserService.GetUILabel("fcCreateDeck")
-                    </button>
+                        </InputSelect>
+                    </div>
+                }
+                @if (_isLoading)
+                {
+                    <div>
+                        <Button Color="ButtonColor.Primary"
+                                Loading="true"
+                                LoadingText="@UserService.GetUILabel("fcLoading")" />
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-3">
+                        <label class="form-label"
+                               for="numNewCardsInput">
+                            @UserService.GetUILabel("fcNumNewCardsLabel")
+                        </label>
+                        <InputSelect id="numNewCardsInput"
+                                     class="@_numNewCardsInputCss"
+                                     @bind-Value="NumNewCardsInput">
+                            @foreach (var value in NumNewCardOptions)
+                            {
+                                <option value="@value">@value</option>
+                            }
+                        </InputSelect>
+                    </div>
+                }
                 
-                </div>
+                
+                @if (_isLoading)
+                {
+                    <div>
+                        <Button Color="ButtonColor.Primary"
+                                Loading="true"
+                                LoadingText="@UserService.GetUILabel("fcLoading")" />
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-3">
+                        <label class="form-label"
+                               for="numOldCardsInput">
+                            @UserService.GetUILabel("fcNumOldCardsLabel")
+                        </label>
+                        <InputSelect id="numOldCardsInput"
+                                     class="@_numOldCardsInputCss"
+                                     @bind-Value="NumOldCardsInput">
+                            @foreach (var value in NumOldCardOptions)
+                            {
+                                <option value="@value">@value</option>
+                            }
+                        </InputSelect>
+                    </div>
+                }
+
+                @if (_isLoading)
+                {
+                    <div>
+                        <Button Color="ButtonColor.Primary"
+                                Loading="true"
+                                LoadingText="@UserService.GetUILabel("fcLoading")" />
+                    </div>
+                }
+                else
+                {
+                    <div>
+                        <button type="submit" disabled="@_isFormInValid"
+                                class="btn btn-primary">
+                            @UserService.GetUILabel("fcCreateDeck")
+                        </button>
+
+                    </div>
+                }
+
             </form>
         }
         
@@ -86,7 +135,7 @@
             FlashCardDataPacket="@FlashCardDataPacket"
             CardCss="@_cardCss"
             UiLanguageCode="@UiLanguageCode"
-            ResetFormFunction="@RebuildDeckFormAsync" />
+            ResetFormFunction="RebuildDeckForm" />
         
 
         
@@ -166,13 +215,15 @@
 
     #endregion
 
-    public async Task RebuildDeckFormAsync()
+    public async Task RebuildDeckForm()
     {
         await Task.Run(() =>
         {
             IsDeckDefined = false;
             IsDeckComplete = true;
+            _shouldHideCard = true;
         });
+        StateHasChanged();
     }
 
     protected override async Task OnInitializedAsync()
@@ -212,7 +263,6 @@
     private void InitData(IdiomaticaContext context)
     {
         LoggedInUser = UserService.GetLoggedInUser(context);
-        FlashCardDataPacket = new();
         LanguageOptions = LanguageCodeApi.LanguageCodeOptionsRead(context,
                 (x => x.IsImplementedForLearning == true));
         UiLanguageCode = UserService.GetUiLanguageCode().Code;
@@ -240,13 +290,14 @@
         {
             if (LoggedInUser is null || LoggedInUser.Id is null) return;
             if (string.IsNullOrEmpty(LanguageInput)) return;
-            if (NumNewCardsInput is null || NumNewCardsInput < 0) return;
-            if (NumOldCardsInput is null || NumOldCardsInput < 0) return;
+            if (NumNewCardsInput is null) NumNewCardsInput = 0;
+            if (NumOldCardsInput is null) NumOldCardsInput = 0;
 
-            OrchestrationApi.OrchestrateFlashCardDeckCreation(
+            FlashCardDataPacket = OrchestrationApi.OrchestrateFlashCardDeckCreation(
                 context, (int)LoggedInUser.Id, LanguageInput, (int)NumNewCardsInput, (int)NumOldCardsInput);
 
             IsDeckDefined = true;
+            IsDeckComplete = false;
 
             transaction.Commit();
         }
@@ -261,11 +312,11 @@
         {
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
-            var t_create = Task.Run(() => CreateDeck());
-            var t_reset = Task.Run(() => FlashCardView.ResetCardProperties());
+            await Task.Run(() => CreateDeck());
+            StateHasChanged(); // this seems to "reset" the FlashCardView's data packet
+            await Task.Run(() => FlashCardView.ResetCardProperties());
             _shouldHideCard = false;
             await t_delay;
-            await t_create;
             _isLoading = false;
         }
         catch (IdiomaticaException ex)

@@ -39,7 +39,7 @@
         else
         {
             <CardBody>
-                <CardTitle></CardTitle>
+                <CardTitle>@CardTranslation</CardTitle>
                 <CardText>@ParagraphTranslation</CardText>
             </CardBody>
         }
@@ -121,7 +121,7 @@
 
         if (FlashCardDataPacket.CurrentCard.WordUser is null) return;
         if (FlashCardDataPacket.CurrentCard.WordUser.Word is null) return;
-        CardTitle = FlashCardDataPacket.CurrentCard.WordUser.Word.TextLowerCase;
+        CardTitle = $"{FlashCardDataPacket.CurrentCard.Id}: {FlashCardDataPacket.CurrentCard.WordUser.Word.TextLowerCase}";
 
         if (FlashCardDataPacket.CurrentCard.WordUser.Translation is null) return;
         CardTranslation = FlashCardDataPacket.CurrentCard.WordUser.Translation;
@@ -161,11 +161,7 @@
             ErrorHandler.LogAndThrow();
             return;
         }
-        if (FlashCardDataPacket.CurrentCardPosition >= FlashCardDataPacket.Deck.Count)
-        {
-            ResetFormFunction.InvokeAsync();
-            return;
-        }
+        
         ResetCardProperties();
     }
     public async Task OnNextCardClickAsync(AvailableFlashCardAttemptStatus previousCardsStatus)
@@ -174,11 +170,15 @@
         {
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
-            var t_process = Task.Run(() => ProcessAndAdvance(previousCardsStatus));
+            await Task.Run(() => ProcessAndAdvance(previousCardsStatus));
+            if (FlashCardDataPacket is not null && 
+                FlashCardDataPacket.CurrentCardPosition >= FlashCardDataPacket.Deck.Count)
+            {
+                await ResetFormFunction.InvokeAsync();
+            }
 
 
             _isAnswerVisible = false;
-            await t_process;
             await t_delay;
             _isLoading = false;
         }

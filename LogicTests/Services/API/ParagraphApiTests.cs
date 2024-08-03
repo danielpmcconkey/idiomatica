@@ -166,7 +166,7 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
 
-            int flashCardId = 29;
+            int flashCardId = 400;
             string uiLangugaeCode = "EN-US";
             int numTries = 5;
             HashSet<string> examples = new();
@@ -209,7 +209,7 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
 
-            int flashCardId = 29;
+            int flashCardId = 400;
             string uiLangugaeCode = "EN-US";
             int numTries = 5;
             HashSet<string> examples = new();

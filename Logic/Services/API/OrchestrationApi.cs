@@ -175,7 +175,7 @@ namespace Logic.Services.API
 
             // advance the deck
             dataPacket.CurrentCardPosition++;
-            if (dataPacket.CurrentCardPosition < dataPacket.Deck.Count - 1)
+            if (dataPacket.CurrentCardPosition < dataPacket.Deck.Count)
             {
                 dataPacket.CurrentCard = dataPacket.Deck[dataPacket.CurrentCardPosition];
             }
