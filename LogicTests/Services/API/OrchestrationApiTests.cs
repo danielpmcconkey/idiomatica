@@ -337,24 +337,326 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void OrchestrateFlashCardDispositionAndAdvanceTest()
         {
-            Assert.Fail();
+            int userId = 0;
+            var context = CommonFunctions.CreateContext();
+            int bookId = 1;
+            int numNew = 4;
+            int numOld = 3;
+            string learningLanguageCode = "ES";
+            var attemptStatus = AvailableFlashCardAttemptStatus.EASY;
+            var startTime = DateTime.Now;
+
+            try
+            {
+                // create the user
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create a languageUser
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                int languageUserId = (int)languageUser.Id;
+
+                // craete a bookUser
+                var bookUser = BookUserApi.BookUserCreate(
+                    context, bookId, (int)user.Id);
+                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                { ErrorHandler.LogAndThrow(); }
+
+                // create wordUsers
+                WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
+                //WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
+
+                // need to update the wordUsers' status so they show up on flash cardS
+                var wordUsers = context.WordUsers.Where(x => x.LanguageUserId == languageUser.Id).Take(10).ToList();
+                foreach (var wordUser in wordUsers)
+                {
+                    if (wordUser.Id is null) continue;
+                    WordUserApi.WordUserUpdate(
+                        context, (int)wordUser.Id, AvailableWordUserStatus.LEARNING3, "test");
+                }
+
+                // create deck 1
+                var dataPacket1 = OrchestrationApi.OrchestrateFlashCardDeckCreation(
+                    context, userId, learningLanguageCode, numNew, numOld);
+
+                Assert.IsNotNull(dataPacket1);
+                Assert.IsNotNull(dataPacket1.Deck);
+                Assert.IsTrue(dataPacket1.CardCount == numNew); // there are no review cards yet
+                Assert.IsNotNull(dataPacket1.CurrentCard);
+                Assert.IsNotNull(dataPacket1.CurrentCard.Id);
+
+                int firstCardId = (int)dataPacket1.CurrentCard.Id;
+
+                // disposition the current card and advance
+                var dataPacket2 = OrchestrationApi.OrchestrateFlashCardDispositionAndAdvance(
+                    context, dataPacket1, attemptStatus);
+
+                Assert.IsNotNull(dataPacket2);
+                Assert.IsNotNull(dataPacket2.Deck);
+                Assert.IsNotNull(dataPacket2.CurrentCard);
+                Assert.IsNotNull(dataPacket2.CurrentCard.Id);
+
+                int secondCardId = (int)dataPacket2.CurrentCard.Id;
+
+                Assert.AreNotEqual(firstCardId, secondCardId);
+
+                // pull card1 from the DB
+                var firstCardRead = FlashCardApi.FlashCardReadById(context, firstCardId);
+                // pull the attempt
+                var attempt = context.FlashCardAttempts.Where(x => x.FlashCardId == firstCardId).FirstOrDefault();
+
+                Assert.IsNotNull(firstCardRead);
+                Assert.IsNotNull(firstCardRead.Status);
+                Assert.IsNotNull(firstCardRead.NextReview);
+                Assert.IsTrue(firstCardRead.NextReview > startTime);
+                Assert.IsNotNull(attempt);
+                Assert.IsNotNull(attempt.Status);
+                Assert.AreEqual(attemptStatus, attempt.Status);
+
+            }
+            finally
+            {
+                CommonFunctions.CleanUpUser(userId, context);
+            }
         }
         [TestMethod()]
-        public void OrchestrateFlashCardDispositionAndAdvanceAsyncTest()
+        public async Task OrchestrateFlashCardDispositionAndAdvanceAsyncTest()
         {
-            Assert.Fail();
+            int userId = 0;
+            var context = CommonFunctions.CreateContext();
+            int bookId = 1;
+            int numNew = 4;
+            int numOld = 3;
+            string learningLanguageCode = "ES";
+            var attemptStatus = AvailableFlashCardAttemptStatus.EASY;
+            var startTime = DateTime.Now;
+
+            try
+            {
+                // create the user
+                var userService = CommonFunctions.CreateUserService();
+                var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
+                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create a languageUser
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                int languageUserId = (int)languageUser.Id;
+
+                // craete a bookUser
+                var bookUser = BookUserApi.BookUserCreate(
+                    context, bookId, (int)user.Id);
+                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                { ErrorHandler.LogAndThrow(); }
+
+                // create wordUsers
+                await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, userId);
+                //WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
+
+                // need to update the wordUsers' status so they show up on flash cardS
+                var wordUsers = context.WordUsers.Where(x => x.LanguageUserId == languageUser.Id).Take(10).ToList();
+                foreach (var wordUser in wordUsers)
+                {
+                    if (wordUser.Id is null) continue;
+                    await WordUserApi.WordUserUpdateAsync(
+                        context, (int)wordUser.Id, AvailableWordUserStatus.LEARNING3, "test");
+                }
+
+                // create deck 1
+                var dataPacket1 = await OrchestrationApi.OrchestrateFlashCardDeckCreationAsync(
+                    context, userId, learningLanguageCode, numNew, numOld);
+
+                Assert.IsNotNull(dataPacket1);
+                Assert.IsNotNull(dataPacket1.Deck);
+                Assert.IsTrue(dataPacket1.CardCount == numNew); // there are no review cards yet
+                Assert.IsNotNull(dataPacket1.CurrentCard);
+                Assert.IsNotNull(dataPacket1.CurrentCard.Id);
+
+                int firstCardId = (int)dataPacket1.CurrentCard.Id;
+
+                // disposition the current card and advance
+                var dataPacket2 = await OrchestrationApi.OrchestrateFlashCardDispositionAndAdvanceAsync(
+                    context, dataPacket1, attemptStatus);
+
+                Assert.IsNotNull(dataPacket2);
+                Assert.IsNotNull(dataPacket2.Deck);
+                Assert.IsNotNull(dataPacket2.CurrentCard);
+                Assert.IsNotNull(dataPacket2.CurrentCard.Id);
+
+                int secondCardId = (int)dataPacket2.CurrentCard.Id;
+
+                Assert.AreNotEqual(firstCardId, secondCardId);
+
+                // pull card1 from the DB
+                var firstCardRead = await FlashCardApi.FlashCardReadByIdAsync(context, firstCardId);
+                // pull the attempt
+                var attempt = context.FlashCardAttempts.Where(x => x.FlashCardId == firstCardId).FirstOrDefault();
+
+                Assert.IsNotNull(firstCardRead);
+                Assert.IsNotNull(firstCardRead.Status);
+                Assert.IsNotNull(firstCardRead.NextReview);
+                Assert.IsTrue(firstCardRead.NextReview > startTime);
+                Assert.IsNotNull(attempt);
+                Assert.IsNotNull(attempt.Status);
+                Assert.AreEqual(attemptStatus, attempt.Status);
+
+            }
+            finally
+            {
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+            }
         }
 
 
         [TestMethod()]
         public void OrchestrateFlashCardDeckCreationTest()
         {
-            Assert.Fail();
+            int userId = 0;
+            var context = CommonFunctions.CreateContext();
+            int bookId = 1;
+            int numNew = 4;
+            int numOld = 3;
+            string learningLanguageCode = "ES";
+
+            try
+            {
+                // create the user
+                var userService = CommonFunctions.CreateUserService();
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create a languageUser
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                int languageUserId = (int)languageUser.Id;
+
+                // craete a bookUser
+                var bookUser = BookUserApi.BookUserCreate(
+                    context, bookId, (int)user.Id);
+                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                { ErrorHandler.LogAndThrow(); }
+
+                // create wordUsers
+                WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
+                //WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
+
+                // need to update the wordUsers' status so they show up on flash cardS
+                var wordUsers = context.WordUsers.Where(x => x.LanguageUserId == languageUser.Id).Take(10).ToList();
+                foreach (var wordUser in wordUsers)
+                {
+                    if (wordUser.Id is null) continue;
+                    WordUserApi.WordUserUpdate(
+                        context, (int)wordUser.Id, AvailableWordUserStatus.LEARNING3, "test");
+                }
+
+                // create deck 1
+                var dataPacket1 = OrchestrationApi.OrchestrateFlashCardDeckCreation(
+                    context, userId, learningLanguageCode, numNew, numOld);
+
+                Assert.IsNotNull(dataPacket1);
+                Assert.IsNotNull(dataPacket1.Deck);
+                Assert.IsTrue(dataPacket1.CardCount == numNew); // there are no review cards yet
+                Assert.IsNotNull(dataPacket1.CurrentCard);
+                Assert.IsNotNull(dataPacket1.CurrentCard.Id);
+
+                // disposition the current card as stop
+                dataPacket1 = OrchestrationApi.OrchestrateFlashCardDispositionAndAdvance(
+                    context, dataPacket1, AvailableFlashCardAttemptStatus.STOP);
+                // disposition the next card as stop
+                dataPacket1 = OrchestrationApi.OrchestrateFlashCardDispositionAndAdvance(
+                    context, dataPacket1, AvailableFlashCardAttemptStatus.STOP);
+
+                // create deck 2
+                var dataPacket2 = OrchestrationApi.OrchestrateFlashCardDeckCreation(
+                    context, userId, learningLanguageCode, numNew, numOld);
+
+                Assert.IsNotNull(dataPacket2);
+                Assert.IsNotNull(dataPacket2.Deck);
+                Assert.IsTrue(dataPacket2.CardCount == numNew + numOld - 1); // 4 new cards + 3 old cards, but there are only 2 old cards left that aren't stopped
+                Assert.IsNotNull(dataPacket2.CurrentCard);
+            }
+            finally
+            {
+                CommonFunctions.CleanUpUser(userId, context);
+            }
         }
         [TestMethod()]
-        public void OrchestrateFlashCardDeckCreationAsyncTest()
+        public async Task OrchestrateFlashCardDeckCreationAsyncTest()
         {
-            Assert.Fail();
+            int userId = 0;
+            var context = CommonFunctions.CreateContext();
+            int bookId = 1;
+            int numNew = 4;
+            int numOld = 3;
+            string learningLanguageCode = "ES";
+
+            try
+            {
+                // create the user
+                var userService = CommonFunctions.CreateUserService();
+                var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
+                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (int)user.Id;
+
+                // create a languageUser
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
+                int languageUserId = (int)languageUser.Id;
+
+                // craete a bookUser
+                var bookUser = BookUserApi.BookUserCreate(
+                    context, bookId, (int)user.Id);
+                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                { ErrorHandler.LogAndThrow(); }
+
+                // create wordUsers
+                await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, userId);
+                //WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
+
+                // need to update the wordUsers' status so they show up on flash cardS
+                var wordUsers = context.WordUsers.Where(x => x.LanguageUserId == languageUser.Id).Take(10).ToList();
+                foreach (var wordUser in wordUsers)
+                {
+                    if (wordUser.Id is null) continue;
+                    await WordUserApi.WordUserUpdateAsync(
+                        context, (int)wordUser.Id, AvailableWordUserStatus.LEARNING3, "test");
+                }
+
+                // create deck 1
+                var dataPacket1 = await OrchestrationApi.OrchestrateFlashCardDeckCreationAsync(
+                    context, userId, learningLanguageCode, numNew, numOld);
+
+                Assert.IsNotNull(dataPacket1);
+                Assert.IsNotNull(dataPacket1.Deck);
+                Assert.IsTrue(dataPacket1.CardCount == numNew); // there are no review cards yet
+                Assert.IsNotNull(dataPacket1.CurrentCard);
+                Assert.IsNotNull(dataPacket1.CurrentCard.Id);
+
+                // disposition the current card as stop
+                dataPacket1 = await OrchestrationApi.OrchestrateFlashCardDispositionAndAdvanceAsync(
+                    context, dataPacket1, AvailableFlashCardAttemptStatus.STOP);
+                // disposition the next card as stop
+                dataPacket1 = await OrchestrationApi.OrchestrateFlashCardDispositionAndAdvanceAsync(
+                    context, dataPacket1, AvailableFlashCardAttemptStatus.STOP);
+
+                // create deck 2
+                var dataPacket2 = await OrchestrationApi.OrchestrateFlashCardDeckCreationAsync(
+                    context, userId, learningLanguageCode, numNew, numOld);
+
+                Assert.IsNotNull(dataPacket2);
+                Assert.IsNotNull(dataPacket2.Deck);
+                Assert.IsTrue(dataPacket2.CardCount == numNew + numOld - 1); // 4 new cards + 3 old cards, but there are only 2 old cards left that aren't stopped
+                Assert.IsNotNull(dataPacket2.CurrentCard);
+            }
+            finally
+            {
+                await CommonFunctions.CleanUpUserAsync(userId, context);
+            }
         }
 
 

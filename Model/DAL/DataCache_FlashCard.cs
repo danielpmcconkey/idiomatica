@@ -12,7 +12,7 @@ namespace Model.DAL
     {
         private static ConcurrentDictionary<int, FlashCard?> FlashCardById = new ConcurrentDictionary<int, FlashCard?>();
         private static ConcurrentDictionary<int, FlashCard?> FlashCardAndFullRelationshipsById = new ConcurrentDictionary<int, FlashCard?>();
-        private static ConcurrentDictionary<(int languageUserId, int take), List<FlashCard>> FlashCardsActiveAndFullRelationshipsByLanguageUserId = new ();
+        //private static ConcurrentDictionary<(int languageUserId, int take), List<FlashCard>> FlashCardsActiveAndFullRelationshipsByLanguageUserId = new ();
 
 
         #region create
@@ -107,11 +107,13 @@ namespace Model.DAL
         public static List<FlashCard>? FlashCardsActiveAndFullRelationshipsByLanguageUserIdRead(
             (int languageUserId, int take) key, IdiomaticaContext context)
         {
-            // check cache
-            if (FlashCardsActiveAndFullRelationshipsByLanguageUserId.ContainsKey(key))
-            {
-                return FlashCardsActiveAndFullRelationshipsByLanguageUserId[key];
-            }
+            // don't check cache here. The statuses change and new cards get
+            // created for the first time while this cache thinks there's a
+            // null for the deck
+            //if (FlashCardsActiveAndFullRelationshipsByLanguageUserId.ContainsKey(key))
+            //{
+            //    return FlashCardsActiveAndFullRelationshipsByLanguageUserId[key];
+            //}
 
             // read DB
             var value = context.FlashCards
@@ -131,7 +133,7 @@ namespace Model.DAL
                 .ToList();
             if (value is null) return value;
             // write to cache
-            FlashCardsActiveAndFullRelationshipsByLanguageUserId[key] = value;
+            //FlashCardsActiveAndFullRelationshipsByLanguageUserId[key] = value;
             foreach (var f in value)
             {
                 FlashCardUpdateAllCaches(f, key);
@@ -208,18 +210,18 @@ namespace Model.DAL
                 cachedFull.WordUserId = value.WordUserId;
                 cachedFull.Status = value.Status;
             }
-            if(keyLanguageUser != null)
-            {
-                // FlashCardsActiveAndFullRelationshipsByLanguageUserId
-                var cachedList2 = FlashCardsActiveAndFullRelationshipsByLanguageUserId
-                    .Where(x => doesFlashCardListContainId(x.Value, (int)value.Id)).ToArray();
-                for (int i = 0; i < cachedList2.Length; i++)
-                {
-                    var item = cachedList2[i];
-                    var newList = FlashCardsListGetUpdated(item.Value, value);
-                    FlashCardsActiveAndFullRelationshipsByLanguageUserId[item.Key] = newList;
-                }
-            }
+            //if(keyLanguageUser != null)
+            //{
+            //    // FlashCardsActiveAndFullRelationshipsByLanguageUserId
+            //    var cachedList2 = FlashCardsActiveAndFullRelationshipsByLanguageUserId
+            //        .Where(x => doesFlashCardListContainId(x.Value, (int)value.Id)).ToArray();
+            //    for (int i = 0; i < cachedList2.Length; i++)
+            //    {
+            //        var item = cachedList2[i];
+            //        var newList = FlashCardsListGetUpdated(item.Value, value);
+            //        FlashCardsActiveAndFullRelationshipsByLanguageUserId[item.Key] = newList;
+            //    }
+            //}
             return;
         }
     }
