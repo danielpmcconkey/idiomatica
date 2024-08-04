@@ -33,7 +33,7 @@
         else
         {
                 <div class="row">
-                    @if (BookListDataPacket.BookListRows is not null && BookListDataPacket.BookListRows.Count > 0)
+                    @if (BookListDataPacket.BookListRows is not null && BookListDataPacket.BookListRows.Count < 1)
                     {
                         <p>
                             @UserService.GetUILabel("bookListNoBookNotice")
