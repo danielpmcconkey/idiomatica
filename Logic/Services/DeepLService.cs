@@ -27,15 +27,14 @@ namespace Logic.Services
                 return string.Empty;
             }
             var translator = new Translator(authKey);
-
 #if DEBUG
             return "This is a stubbed result";
 #else
 
-            var translatedText = await translator.TranslateTextAsync(
+            var translatedText = translator.TranslateTextAsync(
                     input,
                     sourceLanguageCode,
-                    targetLanguageCode);
+                    targetLanguageCode).Result;
             return translatedText.ToString();
 #endif
         }
