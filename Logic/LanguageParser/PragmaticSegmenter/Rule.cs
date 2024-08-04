@@ -5,9 +5,9 @@
     internal class Rule
     {
         public static readonly Rule Empty = new Rule();
-        private readonly Regex regex;
+        private readonly Regex? regex;
         
-        public string Replacement { get; }
+        public string Replacement { get; } = string.Empty;
 
         private Rule()
         {
@@ -27,7 +27,7 @@
 
         public string Apply(string input)
         {
-            if(input == null || regex == null)
+            if(regex == null)
             {
                 return input;
             }

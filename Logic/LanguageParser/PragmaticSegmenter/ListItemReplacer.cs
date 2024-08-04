@@ -420,7 +420,7 @@
             return false;
         }
 
-        private static string GetRubyIndexed(IReadOnlyList<string> list, int index)
+        private static string? GetRubyIndexed(IReadOnlyList<string> list, int index)
         {
             if (index < 0)
             {

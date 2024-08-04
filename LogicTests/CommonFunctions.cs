@@ -41,7 +41,6 @@ namespace LogicTests
                 //.AddScoped<IdentityRedirectManager>()
                 .AddScoped<AuthenticationStateProvider, RevalidatingProviderForUnitTesting>()
                 .AddTransient<UserService>()
-                .AddTransient<FlashCardService>()
                 //.AddDbContext<IdiomaticaContext>(options => {
                 //    options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("IdiomaticaWeb"));
                 //    })
@@ -49,13 +48,10 @@ namespace LogicTests
         }
 
 
-        internal static FlashCardService CreateFlashCardService()
+        
+        internal static UserService? CreateUserService()
         {
-            return _serviceProvider.GetService<FlashCardService>();
-        }
-        internal static UserService CreateUserService()
-        {
-            //return new UserService(null);
+            if(_serviceProvider is null) { ErrorHandler.LogAndThrow(); return null; }
             return _serviceProvider.GetService<UserService>();
         }
         internal static IdiomaticaContext CreateContext()
@@ -197,13 +193,16 @@ namespace LogicTests
     {
         protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         protected override async Task<bool> ValidateAuthenticationStateAsync(
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             AuthenticationState authenticationState, CancellationToken cancellationToken)
         {
             return true;
         }
-
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         private async Task<bool> ValidateSecurityStampAsync(UserManager<ApplicationUser> userManager, ClaimsPrincipal principal)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             return true;
         }

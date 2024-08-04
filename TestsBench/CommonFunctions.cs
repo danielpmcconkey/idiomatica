@@ -34,7 +34,6 @@ namespace TestsBench
                 //.AddScoped<IdentityRedirectManager>()
                 .AddScoped<AuthenticationStateProvider, RevalidatingProviderForUnitTesting>()
                 .AddTransient<UserService>()
-                .AddTransient<FlashCardService>()
                 //.AddDbContext<IdiomaticaContext>(options => {
                 //    options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("IdiomaticaWeb"));
                 //    })
@@ -42,11 +41,8 @@ namespace TestsBench
         }
         
         
-        internal static FlashCardService CreateFlashCardService()
-        {
-            return _serviceProvider.GetService<FlashCardService>();
-        }
-        internal static UserService CreateUserService()
+        
+        internal static UserService? CreateUserService()
         {
             //return new UserService(null);
             return _serviceProvider.GetService<UserService>();

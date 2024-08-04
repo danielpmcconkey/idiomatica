@@ -254,7 +254,9 @@ namespace Model.DAL
                     .HasDatabaseName("UserNameIndex")
                     .HasFilter("[NormalizedUserName] IS NOT NULL");
 
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetUsers", (string)null);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -281,7 +283,9 @@ namespace Model.DAL
                     .HasDatabaseName("RoleNameIndex")
                     .HasFilter("[NormalizedName] IS NOT NULL");
 
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetRoles", (string)null);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -306,7 +310,9 @@ namespace Model.DAL
 
                 b.HasIndex("RoleId");
 
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetRoleClaims", (string)null);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -331,7 +337,9 @@ namespace Model.DAL
 
                 b.HasIndex("UserId");
 
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetUserClaims", (string)null);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -353,7 +361,9 @@ namespace Model.DAL
 
                 b.HasIndex("UserId");
 
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetUserLogins", (string)null);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -368,7 +378,9 @@ namespace Model.DAL
 
                 b.HasIndex("RoleId");
 
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetUserRoles", (string)null);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -387,7 +399,9 @@ namespace Model.DAL
 
                 b.HasKey("UserId", "LoginProvider", "Name");
 
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetUserTokens", (string)null);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

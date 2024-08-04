@@ -19,9 +19,12 @@ namespace Logic.Services.API
             string? url, string text)
         {
             // sanitize and validate input
-            var titleT = NullHandler.ThrowIfNullOrEmptyString(title.Trim());
-            var languageCodeT = NullHandler.ThrowIfNullOrEmptyString(languageCode.Trim());
+            var titleT = title.Trim();
+            var languageCodeT = languageCode.Trim();
             var urlT = url == null ? "" : url.Trim();
+
+            if (titleT == string.Empty) { ErrorHandler.LogAndThrow(); return null; }
+            if (languageCodeT == string.Empty) { ErrorHandler.LogAndThrow(); return null; }
 
 
             // pull language from the db
@@ -37,7 +40,7 @@ namespace Logic.Services.API
 
 
             // add the book to the DB so you can save pages using its ID
-            Book? book = new Book()
+            Book? book = new ()
             {
                 Title = titleT,
                 SourceURI = urlT,

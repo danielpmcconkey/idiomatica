@@ -27,6 +27,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
                 userId = (int)user.Id;
@@ -58,6 +59,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
                 userId = (int)user.Id;
@@ -92,6 +94,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
                 userId = (int)user.Id;
@@ -126,6 +129,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
                 userId = (int)user.Id;
@@ -163,6 +167,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
                 userId = (int)user.Id;
@@ -203,6 +208,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
                 userId = (int)user.Id;
@@ -245,6 +251,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
                 userId = (int)user.Id;
@@ -286,6 +293,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
                 userId = (int)user.Id;

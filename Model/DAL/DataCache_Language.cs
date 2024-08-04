@@ -62,21 +62,10 @@ namespace Model.DAL
         }
         public static async Task<Language?> LanguageByIdReadAsync(int key, IdiomaticaContext context)
         {
-            // check cache
-            if (LanguageById.ContainsKey(key))
+            return await Task<Language?>.Run(() =>
             {
-                return LanguageById[key];
-            }
-            // read DB
-            var value = context.Languages
-                .Where(l => l.Id == key)
-                .FirstOrDefault();
-
-            if (value is null || string.IsNullOrEmpty(value.Code)) return null;
-            // write to cache
-            LanguageById[key] = value;
-            LanguageByCode[value.Code] = value;
-            return value;
+                return LanguageByIdRead(key, context);
+            });
         }
         #endregion
 

@@ -28,6 +28,7 @@ namespace Logic.Services.API
                 return [];
             }
             var parser = LanguageParser.Factory.GetLanguageParser(language);
+            if(parser is null) { ErrorHandler.LogAndThrow(); return []; }
             return parser.SegmentTextBySentences(text);
         }
         public static async Task<string[]> PotentialSentencesSplitFromTextAsync(

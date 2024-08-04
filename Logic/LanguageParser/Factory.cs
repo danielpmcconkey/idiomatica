@@ -1,4 +1,5 @@
-﻿using Model;
+﻿using Logic.Telemetry;
+using Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,12 @@ namespace Logic.LanguageParser
 {
     internal static class Factory
     {
-        internal static ILanguageParser GetLanguageParser(LanguageUser languageUser)
+        internal static ILanguageParser? GetLanguageParser(LanguageUser languageUser)
         {
+            if(languageUser.Language is null) { ErrorHandler.LogAndThrow(); return null; }
             return GetLanguageParser(languageUser.Language);
         }
-        internal static ILanguageParser GetLanguageParser(Language language)
+        internal static ILanguageParser? GetLanguageParser(Language language)
         {
             if (language.ParserType == "spacedel")
             {

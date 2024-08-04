@@ -63,10 +63,6 @@ namespace Model.DAL
         #region read
         public static PageUser? PageUserByIdRead(int key, IdiomaticaContext context)
         {
-            return PageUserByIdReadAsync(key, context).Result;
-        }
-        public static async Task<PageUser?> PageUserByIdReadAsync(int key, IdiomaticaContext context)
-        {
             // check cache
             if (PageUserById.ContainsKey(key))
             {
@@ -80,6 +76,13 @@ namespace Model.DAL
             // now update the cache
             PageUserUpdateAllCaches(value);
             return value;
+        }
+        public static async Task<PageUser?> PageUserByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<PageUser?>.Run(() =>
+            {
+                return PageUserByIdRead(key, context);
+            });
         }
         public static PageUser? PageUserByLanguageUserIdOrdinalAndBookIdRead(
             (int languageUserId, int ordinal, int bookId) key, IdiomaticaContext context)

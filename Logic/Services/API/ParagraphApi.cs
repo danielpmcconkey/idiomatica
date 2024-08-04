@@ -54,7 +54,8 @@ namespace Logic.Services.API
                 // the EFCore context is already appending the sentence to
                 // the paragraph when it creates the sentence with that
                 // paragraph ID. so only add it if not there already
-                if (paragraph.Sentences.Where(x => x.Id == sentence.Id).FirstOrDefault() is null)
+                if (paragraph.Sentences is null) paragraph.Sentences = [];
+                else if (paragraph.Sentences.Where(x => x.Id == sentence.Id).FirstOrDefault() is null)
                 {
                     paragraph.Sentences.Add(sentence);
                 }
@@ -267,11 +268,13 @@ namespace Logic.Services.API
         public static string[] PotentialParagraphsSplitFromText(
             IdiomaticaContext context, string text, string languageCode)
         {
-            var textDenulled = NullHandler.ThrowIfNullOrEmptyString(text.Trim().Replace('\u00A0', ' '));
-            var lcDenulled = NullHandler.ThrowIfNullOrEmptyString(languageCode);
+            if (string.IsNullOrEmpty(text)) { ErrorHandler.LogAndThrow(); return []; }
+            if (string.IsNullOrEmpty(languageCode)) { ErrorHandler.LogAndThrow(); return []; }
+            var textSanitized = text.Trim().Replace('\u00A0', ' ');
+            
 
             // pull language from the db
-            var language = DataCache.LanguageByCodeRead(lcDenulled, context);
+            var language = DataCache.LanguageByCodeRead(languageCode, context);
             if (language is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -280,8 +283,11 @@ namespace Logic.Services.API
 
             // divide text into paragraphs
             var parser = LanguageParser.Factory.GetLanguageParser(language);
-            var paragraphSplitsRaw = parser.SegmentTextByParagraphs(textDenulled);
-            return NullHandler.ThrowIfNullOrEmptyArray(paragraphSplitsRaw);
+            if (parser is null) { ErrorHandler.LogAndThrow(); return []; }
+            var paragraphSplitsRaw = parser.SegmentTextByParagraphs(textSanitized);
+            if(paragraphSplitsRaw is null || paragraphSplitsRaw.Length < 1)
+                {  ErrorHandler.LogAndThrow(); return []; }
+            return paragraphSplitsRaw;
         }
         public static async Task<string[]> PotentialParagraphsSplitFromTextAsync(
             IdiomaticaContext context, string text, string languageCode)

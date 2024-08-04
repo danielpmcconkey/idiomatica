@@ -33,6 +33,7 @@ namespace Logic.Services.API.Tests
 
                 // create the user and the three books
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
                 { ErrorHandler.LogAndThrow(); return; }
@@ -101,6 +102,7 @@ namespace Logic.Services.API.Tests
 
                 // create the user and the three books
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
                 { ErrorHandler.LogAndThrow(); return; }
@@ -166,6 +168,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user and book
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
@@ -205,6 +208,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user and book
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
@@ -244,6 +248,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
                 { ErrorHandler.LogAndThrow(); return; }
@@ -285,6 +290,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
                 { ErrorHandler.LogAndThrow(); return; }
@@ -328,6 +334,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
                 { ErrorHandler.LogAndThrow(); return; }
@@ -385,6 +392,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null || user.Id < 1)
                 { ErrorHandler.LogAndThrow(); return; }

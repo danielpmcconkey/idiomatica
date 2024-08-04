@@ -8,13 +8,16 @@
     <BodyTemplate>
         <div>
             <label for="inputTranslation" class="form-label">Translation</label>
-            <textarea rows="4"
-                        cols="150"
-                        class="form-control"
-                        id="inputTranslation"
-                        @bind="_wordUser.Translation"
-                        @bind:event="oninput">
-                        </textarea>
+            @if(_wordUser is not null)
+            {
+                <textarea rows="4"
+                          cols="150"
+                          class="form-control"
+                          id="inputTranslation"
+                          @bind="_wordUser.Translation"
+                          @bind:event="oninput">
+                 </textarea>
+            }
         </div>
         <div>
             <label class="form-label">Word status</label><br />

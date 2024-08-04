@@ -12,6 +12,7 @@
         {
             var context = DbContextFactory.CreateDbContext();
             BookUser? bookUser = context.BookUsers.Where(x => x.LanguageUserId == 1).FirstOrDefault();
+            if (bookUser is null || bookUser.LanguageUserId is null) return;
             var languageUser = await DataCache.LanguageUserByIdReadAsync(
                      (int)bookUser.LanguageUserId, context);
             bookUser.LanguageUser = languageUser;

@@ -18,7 +18,12 @@ namespace Logic.Telemetry
             Func<LoggerConfiguration> getCurrentConfig) =>
             (this.name, this.getCurrentConfig) = (name, getCurrentConfig);
 
-        public IDisposable BeginScope<TState>(TState state) => default!;
+#pragma warning disable CS8633 // Nullability in constraints for type parameter doesn't match the constraints for type parameter in implicitly implemented interface method'.
+        public IDisposable BeginScope<TState>(TState state)
+#pragma warning restore CS8633 // Nullability in constraints for type parameter doesn't match the constraints for type parameter in implicitly implemented interface method'.
+        {
+            return default!;
+        }
 
         public bool IsEnabled(LogLevel logLevel) =>
             getCurrentConfig().LogLevels.ContainsKey(logLevel);

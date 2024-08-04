@@ -26,6 +26,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (int)user.Id;
@@ -78,6 +79,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
                 if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (int)user.Id;

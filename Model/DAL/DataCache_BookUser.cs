@@ -64,23 +64,26 @@ namespace Model.DAL
         #region read
         public static BookUser? BookUserByIdRead(int key, IdiomaticaContext context)
         {
-            return BookUserByIdReadAsync(key, context).Result;
-        }
-        public static async Task<BookUser?> BookUserByIdReadAsync(int key, IdiomaticaContext context)
-        {
             // check cache
-            if (BookUserById.ContainsKey(key))
+            if (BookUserById.TryGetValue(key, out BookUser? value))
             {
-                return BookUserById[key];
+                return value;
             }
 
             // read DB
-            var value = context.BookUsers.Where(x => x.Id == key)
+            value = context.BookUsers.Where(x => x.Id == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
             BookUserById[key] = value;
             return value;
+        }
+        public static async Task<BookUser?> BookUserByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<BookUser?>.Run(() =>
+            {
+                return BookUserByIdRead(key, context);
+            });
         }
         public static BookUser? BookUserByBookIdAndUserIdRead(
             (int bookId, int userId) key, IdiomaticaContext context)

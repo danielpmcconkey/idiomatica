@@ -54,30 +54,37 @@ namespace Model.DAL
             return await Task.Run(() => { return FlashCardAttemptCreate(value, context); });
         }
 
-        
+
         #endregion
 
         #region read
-        public static async Task<FlashCardAttempt?> FlashCardAttemptByIdReadAsync(int key, IdiomaticaContext context)
+        public static FlashCardAttempt? FlashCardAttemptByIdRead(int key, IdiomaticaContext context)
         {
             // check cache
-            if (FlashCardAttemptById.ContainsKey(key))
+            if (FlashCardAttemptById.TryGetValue(key, out FlashCardAttempt? value))
             {
-                return FlashCardAttemptById[key];
+                return value;
             }
 
             // read DB
-            var value = context.FlashCardAttempts.Where(x => x.FlashCardId == key).FirstOrDefault();
+            value = context.FlashCardAttempts.Where(x => x.FlashCardId == key).FirstOrDefault();
             if (value == null) return null;
             // write to cache
             FlashCardAttemptById[key] = value;
             return value;
         }
+        public static async Task<FlashCardAttempt?> FlashCardAttemptByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<FlashCardAttempt>.Run(() =>
+            {
+                return FlashCardAttemptByIdRead(key, context);
+            });
+        }
 
         #endregion
 
         #region update
-        
+
         #endregion
 
     }

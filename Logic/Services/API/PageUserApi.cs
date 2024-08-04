@@ -179,7 +179,7 @@ namespace Logic.Services.API
             IdiomaticaContext context, int id, DateTime readDate)
         {
             var pu = DataCache.PageUserByIdRead(id, context);
-
+            if (pu is null) { ErrorHandler.LogAndThrow(); return; }
             pu.ReadDate = readDate;
             DataCache.PageUserUpdate(pu, context);
             return;
@@ -188,7 +188,7 @@ namespace Logic.Services.API
             IdiomaticaContext context, int id, DateTime readDate)
         {
             var pu = await DataCache.PageUserByIdReadAsync(id, context);
-
+            if (pu is null) { ErrorHandler.LogAndThrow(); return; }
             pu.ReadDate = readDate;
             await DataCache.PageUserUpdateAsync(pu, context);
             return;

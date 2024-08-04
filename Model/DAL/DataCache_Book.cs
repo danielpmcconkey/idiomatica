@@ -16,11 +16,6 @@ namespace Model.DAL
         #region read
         public static Book? BookByIdRead(int key, IdiomaticaContext context)
         {
-            var task = BookByIdReadAsync(key, context);
-            return task.Result;
-        }
-        public static async Task<Book?> BookByIdReadAsync(int key, IdiomaticaContext context)
-        {
             // check cache
             if (BookById.ContainsKey(key))
             {
@@ -34,6 +29,13 @@ namespace Model.DAL
             // write to cache
             BookById[key] = value;
             return value;
+        }
+        public static async Task<Book?> BookByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<Book?>.Run(() =>
+            {
+                return BookByIdRead(key, context);
+            });
         }
 
         #endregion

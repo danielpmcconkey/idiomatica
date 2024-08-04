@@ -59,11 +59,6 @@ namespace Model.DAL
         public static LanguageUser? LanguageUserByIdRead(
             int key, IdiomaticaContext context)
         {
-            return LanguageUserByIdReadAsync(key, context).Result;
-        }
-        public static async Task<LanguageUser?> LanguageUserByIdReadAsync(
-            int key, IdiomaticaContext context)
-        {
             // check cache
             if (LanguageUserById.ContainsKey(key))
             {
@@ -79,13 +74,15 @@ namespace Model.DAL
             LanguageUserById[key] = value;
             return value;
         }
-        public static LanguageUser? LanguageUserByLanguageIdAndUserIdRead(
-            (int languageId, int userId) key, IdiomaticaContext context)
+        public static async Task<LanguageUser?> LanguageUserByIdReadAsync(
+            int key, IdiomaticaContext context)
         {
-            var task = LanguageUserByLanguageIdAndUserIdReadAsync(key, context);
-            return task.Result;
+            return await Task<LanguageUser?>.Run(() =>
+            {
+                return LanguageUserByIdRead(key, context);
+            });
         }
-        public static async Task<LanguageUser?> LanguageUserByLanguageIdAndUserIdReadAsync(
+        public static LanguageUser? LanguageUserByLanguageIdAndUserIdRead(
             (int languageId, int userId) key, IdiomaticaContext context)
         {
             // check cache
@@ -102,6 +99,14 @@ namespace Model.DAL
             // write to cache
             LanguageUserByLanguageIdAndUserId[key] = value;
             return value;
+        }
+        public static async Task<LanguageUser?> LanguageUserByLanguageIdAndUserIdReadAsync(
+            (int languageId, int userId) key, IdiomaticaContext context)
+        {
+            return await Task<LanguageUser?>.Run(() =>
+            {
+                return LanguageUserByLanguageIdAndUserIdRead(key, context);
+            });
         }        
         public static List<LanguageUser>? LanguageUsersAndLanguageByUserIdRead(
             int key, IdiomaticaContext context)

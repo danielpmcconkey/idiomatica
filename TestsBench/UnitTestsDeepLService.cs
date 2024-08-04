@@ -12,7 +12,7 @@ namespace TestsBench
     public class UnitTestsDeepLService
     {
         [Fact]
-        public async Task DeepLTranslatesAllSentencesInAParagraph()
+        public void DeepLTranslatesAllSentencesInAParagraph()
         {
             // arrange
             var context = CommonFunctions.CreateContext();

@@ -41,11 +41,6 @@ namespace Model.DAL
         public static List<BookStat>? BookStatsByBookIdRead(
             int key, IdiomaticaContext context)
         {
-            return BookStatsByBookIdReadAsync(key, context).Result;
-        }
-        public static async Task<List<BookStat>?> BookStatsByBookIdReadAsync(
-            int key, IdiomaticaContext context)
-        {
             // check cache
             if (BookStatsByBookId.ContainsKey(key))
             {
@@ -58,6 +53,14 @@ namespace Model.DAL
             // write to cache
             BookStatsByBookId[key] = value;
             return value;
+        }
+        public static async Task<List<BookStat>?> BookStatsByBookIdReadAsync(
+            int key, IdiomaticaContext context)
+        {
+            return await Task<List<BookStat>?>.Run(() =>
+            {
+                return BookStatsByBookIdRead(key, context);
+            });
         }
     }
 }

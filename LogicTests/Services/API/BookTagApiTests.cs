@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LogicTests;
+using Logic.Telemetry;
 
 namespace Logic.Services.API.Tests
 {
@@ -24,6 +25,7 @@ namespace Logic.Services.API.Tests
             {
 
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
@@ -60,6 +62,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
@@ -99,6 +102,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
@@ -146,6 +150,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;

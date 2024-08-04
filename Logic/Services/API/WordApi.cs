@@ -96,6 +96,7 @@ namespace Logic.Services.API
             }
 
             var parser = LanguageParser.Factory.GetLanguageParser(language);
+            if (parser is null) { ErrorHandler.LogAndThrow(); return []; }
             var wordsSplits = parser.SegmentTextByWordsKeepingPunctuation(sentence.Text);
             if (wordsSplits is null || wordsSplits.Length == 0)
                 return new List<(Word? word, int ordinal)>();

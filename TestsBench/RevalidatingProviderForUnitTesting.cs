@@ -27,13 +27,17 @@ namespace TestsBench
     {
         protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         protected override async Task<bool> ValidateAuthenticationStateAsync(
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             AuthenticationState authenticationState, CancellationToken cancellationToken)
         {
             return true;
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         private async Task<bool> ValidateSecurityStampAsync(UserManager<ApplicationUser> userManager, ClaimsPrincipal principal)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             return true;
         }

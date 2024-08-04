@@ -91,7 +91,9 @@ namespace Logic.Services
             if (matchingUser != null)
             {
                 _loggedInUser = matchingUser;
+                if(_loggedInUser.Code is null) { ErrorHandler.LogAndThrow(); return null; }
                 _uiLanguageCode = DataCache.LanguageCodeByCodeRead(_loggedInUser.Code, context);
+                if (_uiLanguageCode is null) { ErrorHandler.LogAndThrow(); return null; }
                 _uiLabels = UILabels.Factory.GetUILabels(_uiLanguageCode.LanguageCodeEnum);
                 return _loggedInUser;
             }
@@ -112,7 +114,7 @@ namespace Logic.Services
         {
             return _uiLabels.GetLabelF(name, args);
         }
-        public LanguageCode GetUiLanguageCode()
+        public LanguageCode? GetUiLanguageCode()
         {
             return _uiLanguageCode;
         }

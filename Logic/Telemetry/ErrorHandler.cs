@@ -201,16 +201,17 @@ namespace Logic.Telemetry
             LogError(code, args, null);
             ThrowError(code);
         }
-        public static void LogAndThrow(int code, string[] args, Exception ex)
+        public static void LogAndThrow(int code, string[] args, Exception? ex)
         {
             LogError(code, args, ex);
             ThrowError(code);
         }
-        private static void LogError(int code, string[] args, Exception ex)
+        private static void LogError(int code, string[] args, Exception? ex)
         {
             // todo: log errors
         }
-        private static void LogError(string memberName, string sourceFilePath, int sourceLineNumber, string[] args, Exception ex)
+        private static void LogError(
+            string memberName, string sourceFilePath, int sourceLineNumber, string[] args, Exception? ex)
         {
             // todo: log errors
         }

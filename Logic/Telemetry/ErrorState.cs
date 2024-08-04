@@ -12,11 +12,11 @@ namespace Logic.Telemetry
     /// </summary>
     public class ErrorState
     {
-        public bool isError;
-        public string errorMessage;
-        public int code;
-        public string memberName;
-        public string sourceFilePath;
-        public int sourceLineNumber;
+        public bool isError = false;
+        public string? errorMessage;
+        public int? code;
+        public string? memberName;
+        public string? sourceFilePath;
+        public int? sourceLineNumber;
     }
 }
