@@ -265,7 +265,9 @@
         LoggedInUser = UserService.GetLoggedInUser(context);
         LanguageOptions = LanguageCodeApi.LanguageCodeOptionsRead(context,
                 (x => x.IsImplementedForLearning == true));
-        UiLanguageCode = UserService.GetUiLanguageCode().Code;
+        var lcObject = UserService.GetUiLanguageCode();
+        if(lcObject is null || lcObject.Code is null) { ErrorHandler.LogAndThrow(); return; }
+        UiLanguageCode = lcObject.Code;
         if (NumNewCardOptions.Count == 0)
         {
             for (int i = 0; i <= MaxNewCardsNew; i += 5)

@@ -76,6 +76,9 @@ else
             return;
         }
         var context = await DbContextFactory.CreateDbContextAsync();
+
+        if (ParagraphAndChildren.Sentences is null) return;
+
         _sentences = ParagraphAndChildren.Sentences.OrderBy(s => s.Ordinal).ToList();
         foreach( var sentence in _sentences)
         {

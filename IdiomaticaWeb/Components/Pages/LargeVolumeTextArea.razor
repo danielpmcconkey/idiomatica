@@ -49,7 +49,7 @@
 
     const int maxLengthPerChildInput = 14000; // this is my trial-and-error testing value.
     private ElementReference largeTextArea;
-    private string _entryElementId;
+    private string? _entryElementId;
 
     private ElementReference _ppSplitResults;
     private ElementReference _ita0;
@@ -71,11 +71,11 @@
     //         return "form-control is-valid";
     //     }
     // }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnAfterRender(bool firstRender)
     {
         _isRendered = true;
     }
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         try
         {

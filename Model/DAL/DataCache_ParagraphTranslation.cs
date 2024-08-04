@@ -90,7 +90,11 @@ namespace Model.DAL
             // write to cache
             ParagraphTranslationsByParagraphId[key] = value;
             // write each item to cache
-            foreach (var item in value) { ParagraphTranslationById[(int)item.Id] = item; }
+            foreach (var item in value)
+            {
+                if (item.Id is null) continue;
+                ParagraphTranslationById[(int)item.Id] = item;
+            }
 
             return value;
         }

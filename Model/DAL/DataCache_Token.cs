@@ -61,7 +61,7 @@ namespace Model.DAL
         #endregion
 
         #region read
-        public static async Task<Token?> TokenByIdReadAsync(int key, IdiomaticaContext context)
+        public static Token? TokenByIdRead(int key, IdiomaticaContext context)
         {
             // check cache
             if (TokenById.ContainsKey(key))
@@ -76,6 +76,13 @@ namespace Model.DAL
             // write to cache
             TokenById[key] = value;
             return value;
+        }
+        public static async Task<Token?> TokenByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<Token?>.Run(() =>
+            {
+                return TokenByIdRead(key, context);
+            });
         }
         public static List<Token> TokensByPageIdRead(
             int key, IdiomaticaContext context)
@@ -135,7 +142,7 @@ namespace Model.DAL
                 return TokensBySentenceIdRead(key, context);
             });
         }
-        public static async Task<List<Token>> TokensAndWordsBySentenceIdReadAsync(int key, IdiomaticaContext context)
+        public static List<Token> TokensAndWordsBySentenceIdRead(int key, IdiomaticaContext context)
         {
             // check cache
             if (TokensAndWordsBySentenceId.ContainsKey(key))
@@ -152,12 +159,19 @@ namespace Model.DAL
             // write to cache
             TokensAndWordsBySentenceId[key] = value;
             TokensBySentenceId[key] = value;
-            foreach(var t in value)
+            foreach (var t in value)
             {
-                if(t.Id is null || t.Id < 1) continue;
+                if (t.Id is null || t.Id < 1) continue;
                 TokenById[(int)t.Id] = t;
             }
             return value;
+        }
+        public static async Task<List<Token>> TokensAndWordsBySentenceIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<List<Token>>.Run(() =>
+            {
+                return TokensAndWordsBySentenceIdRead(key, context);
+            });
         }
         #endregion
 

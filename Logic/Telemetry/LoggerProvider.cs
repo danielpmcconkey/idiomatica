@@ -14,7 +14,7 @@ namespace Logic.Telemetry
     [ProviderAlias("IdiomaticaLog")]
     public sealed class LoggerProvider : ILoggerProvider
     {
-        private readonly IDisposable onChangeToken;
+        private readonly IDisposable? onChangeToken;
         private LoggerConfiguration config;
         private readonly ConcurrentDictionary<string, IdiomaticaLogger> loggers =
             new(StringComparer.OrdinalIgnoreCase);
@@ -34,7 +34,7 @@ namespace Logic.Telemetry
         public void Dispose()
         {
             loggers.Clear();
-            onChangeToken.Dispose();
+            onChangeToken?.Dispose();
         }
     }
 }

@@ -81,28 +81,39 @@ namespace Model.DAL
                 return FlashCardByIdRead(key, context);
             });
         }
-        public static async Task<FlashCard?> FlashCardAndFullRelationshipsByIdReadAsync(int key, IdiomaticaContext context)
+
+        public static FlashCard? FlashCardAndFullRelationshipsByIdRead(int key, IdiomaticaContext context)
         {
             // check cache
-            if (FlashCardAndFullRelationshipsById.ContainsKey(key))
+            if (FlashCardAndFullRelationshipsById.TryGetValue(key, out FlashCard? value))
             {
-                return FlashCardAndFullRelationshipsById[key];
+                return value;
             }
 
             // read DB
-            var value = context.FlashCards.Where(x => x.Id == key)
-                .Include(fc => fc.WordUser).ThenInclude(wu => wu.Word)
+            value = context.FlashCards.Where(x => x.Id == key)
+                .Include(fc => fc.WordUser)
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                    .ThenInclude(wu => wu.Word)
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 .Include(fc => fc.Attempts)
                 .Include(fc => fc.FlashCardParagraphTranslationBridges)
                     .ThenInclude(fcptb => fcptb.ParagraphTranslation)
-#nullable disable
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                         .ThenInclude(pt => pt.Paragraph).ThenInclude(pp => pp.Sentences)
-#nullable restore
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
             FlashCardById[key] = value;
             return value;
+        }
+        public static async Task<FlashCard?> FlashCardAndFullRelationshipsByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<FlashCard?>.Run(() =>
+            {
+                return FlashCardAndFullRelationshipsByIdRead(key, context);
+            });
         }
         public static List<FlashCard>? FlashCardsActiveAndFullRelationshipsByLanguageUserIdRead(
             (int languageUserId, int take) key, IdiomaticaContext context)
@@ -122,12 +133,17 @@ namespace Model.DAL
                     && fc.WordUser.LanguageUserId == key.languageUserId
                     && fc.Status == AvailableFlashCardStatus.ACTIVE
                     )
-                .Include(fc => fc.WordUser).ThenInclude(wu => wu.Word)
+                .Include(fc => fc.WordUser)
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                    .ThenInclude(wu => wu.Word)
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 .Include(fc => fc.Attempts)
                 .Include(fc => fc.FlashCardParagraphTranslationBridges)
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                     .ThenInclude(fcptb => fcptb.ParagraphTranslation)
                         .ThenInclude(pt => pt.Paragraph)
                             .ThenInclude(pp => pp.Sentences)
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 .OrderBy(fc => fc.NextReview)
                 .Take(key.take)
                 .ToList();

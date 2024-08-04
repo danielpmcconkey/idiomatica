@@ -123,15 +123,15 @@
         get { return $"/Book/{_newBookId}/Read/"; }
     }
 
-    private Button _saveButton;
+    private Button _saveButton = default!;
     private bool _isSaving = false;
-    private LargeVolumeTextArea _largeVolumeTextArea;
+    private LargeVolumeTextArea _largeVolumeTextArea = default!;
 
-    private string _titleInput;
+    private string? _titleInput;
     private string? _sourceURIInput;
     //private string _textInput { get { return _largeVolumeTextArea.TextValue; } }
-    private string _languageCodeInput;
-    private Alert successAlert;
+    private string? _languageCodeInput;
+    private Alert successAlert = default!;
 
     private string _titleInputCss { get
         {
@@ -177,6 +177,13 @@
     }
     private async Task OnSaveClickAsync()
     {
+        if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            { ErrorHandler.LogAndThrow(); return; }
+        if (string.IsNullOrEmpty(_titleInput))
+            { ErrorHandler.LogAndThrow(); return; }
+        if (string.IsNullOrEmpty(_languageCodeInput))
+            { ErrorHandler.LogAndThrow(); return; }
+
         _isSaving = true;
         var context = await DbContextFactory.CreateDbContextAsync();
         try
@@ -185,11 +192,7 @@
 
             string textInput = await _largeVolumeTextArea.GetTextValue();
 
-            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return;
-            }
+            
             Book? book = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
                 context, (int)_loggedInUser.Id, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
             if (book is null || book.Id is null || book.Id < 1)

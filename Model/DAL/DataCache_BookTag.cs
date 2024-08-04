@@ -160,7 +160,7 @@ namespace Model.DAL
         {
             if (t.BookId == null || t.UserId == null || t.Id == null) return;
             // is there an existing cache
-            List<BookTag> existingList = null;
+            List<BookTag>? existingList;
             if (!BookTagsByBookId.TryGetValue((int)t.BookId, out existingList))
             {
                 // I don't think we should ever get here, but better to be safe than sorry

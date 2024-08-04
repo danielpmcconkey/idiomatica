@@ -2,14 +2,23 @@
 using Logic.Telemetry;
 using Microsoft.Extensions.Logging;
 using Model;
+using System.Net;
 
 namespace Logic.Services
 {
     public static class DeepLService
     {
-        
         public static async Task<string> TranslateAsync (
             string input, string sourceLanguageCode, string targetLanguageCode) 
+        {
+            return await Task<string?>.Run(() =>
+            {
+                return Translate(input, sourceLanguageCode, targetLanguageCode);
+            });
+        }
+
+        public static string Translate(
+            string input, string sourceLanguageCode, string targetLanguageCode)
         {
             var authKey = Environment.GetEnvironmentVariable("DeepLApiKey");
             if (string.IsNullOrEmpty(authKey))
@@ -29,12 +38,6 @@ namespace Logic.Services
                     targetLanguageCode);
             return translatedText.ToString();
 #endif
-        }
-
-        public static string Translate(
-            string input, string sourceLanguageCode, string targetLanguageCode)
-        {
-            return TranslateAsync(input, sourceLanguageCode, targetLanguageCode).Result;
         }
 
     }

@@ -25,12 +25,11 @@
 
 
 @code {
-
     // this class has to be bullet proof. Don't throw exceptions from within it
     [Parameter]
-    public ErrorState ErrorState { get; set; }
+    public ErrorState ErrorState { get; set; } = default!;
 
-    private Alert _errorAlert;
+    private Alert _errorAlert = default!;
 
     private async Task CloseErrorAlert() {
         try
@@ -38,7 +37,8 @@
             ErrorState.isError = false;
             ErrorState.errorMessage = "";
             ErrorState.code = 0;
-            await _errorAlert?.CloseAsync();
+            if(_errorAlert is not null)
+                await _errorAlert.CloseAsync();
         }
         catch (Exception)
         {

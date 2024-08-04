@@ -32,7 +32,6 @@ builder.Services.AddAuthentication(options =>
 })
     .AddIdentityCookies();
 
-builder.Services.AddTransient<FlashCardService>();
 builder.Services.AddTransient<UserService>();
 
 var connection = String.Empty;

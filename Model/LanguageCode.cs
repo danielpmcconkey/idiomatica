@@ -67,8 +67,9 @@ namespace Model
         {
             get
             {
-                string enumName = Code.Replace('-', '_');
                 AvailableLanguageCodes outVal = AvailableLanguageCodes.EN_US;
+                if (Code is null) return outVal;
+                string enumName = Code.Replace('-', '_');
                 Enum.TryParse<AvailableLanguageCodes>(enumName, out outVal);
                 return outVal;
             }

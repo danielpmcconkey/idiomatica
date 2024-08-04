@@ -85,6 +85,8 @@ namespace Logic.Services.API
                         ppts = DataCache.ParagraphTranslationCreate(ppts, context);
                     }
 
+                    if (ppts is null || ppts.Id is null) { ErrorHandler.LogAndThrow(); return null; }
+
                     // now bridge it to the flash card
                     FlashCardParagraphTranslationBridge? fcptb = new ()
                     {

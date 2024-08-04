@@ -34,7 +34,9 @@ namespace Model.DAL
             FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode[key] = bridges;
             return bridges;
         }
-        public static async Task<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridgeByIdReadAsync(int key, IdiomaticaContext context)
+
+        public static FlashCardParagraphTranslationBridge? FlashCardParagraphTranslationBridgeByIdRead(
+            int key, IdiomaticaContext context)
         {
             // check cache
             if (FlashCardParagraphTranslationBridgeById.ContainsKey(key))
@@ -50,6 +52,14 @@ namespace Model.DAL
             // write to cache
             FlashCardParagraphTranslationBridgeById[key] = value;
             return value;
+        }
+        public static async Task<FlashCardParagraphTranslationBridge?> 
+            FlashCardParagraphTranslationBridgeByIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<FlashCardParagraphTranslationBridge?>.Run(() =>
+            {
+                return FlashCardParagraphTranslationBridgeByIdRead(key, context);
+            });
         }
         #endregion
 

@@ -100,10 +100,14 @@
 
             <div class="container px-4">
 
-                <PageTurner OnMovePageAsync="OnMovePageAsync"
-                            OnClearPageAsync="OnClearPageAsync"
-                            BookCurrentPageNum="ReadDataPacket.BookCurrentPageNum"
-                            BookTotalPageCount="ReadDataPacket.BookTotalPageCount" />
+                @if (ReadDataPacket is not null)
+                {
+                    <PageTurner OnMovePageAsync="OnMovePageAsync"
+                                OnClearPageAsync="OnClearPageAsync"
+                                BookCurrentPageNum="ReadDataPacket.BookCurrentPageNum"
+                                BookTotalPageCount="ReadDataPacket.BookTotalPageCount" />
+                }
+                <hr />
 
                 @if(ReadDataPacket is not null && ReadDataPacket.Paragraphs is not null)
                 {
@@ -118,10 +122,14 @@
                     }
                 }              
                 <hr />
-                <PageTurner OnMovePageAsync="OnMovePageAsync"
-                            OnClearPageAsync="OnClearPageAsync"
-                            BookCurrentPageNum="ReadDataPacket.BookCurrentPageNum"
-                            BookTotalPageCount="ReadDataPacket.BookTotalPageCount" />
+                @if (ReadDataPacket is not null)
+                {
+                    <PageTurner OnMovePageAsync="OnMovePageAsync"
+                                OnClearPageAsync="OnClearPageAsync"
+                                BookCurrentPageNum="ReadDataPacket.BookCurrentPageNum"
+                                BookTotalPageCount="ReadDataPacket.BookTotalPageCount" />
+                }
+                
             </div>
         }
     </Authorized>

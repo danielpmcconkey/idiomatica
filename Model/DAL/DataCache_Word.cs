@@ -136,6 +136,7 @@ namespace Model.DAL
             var value = new Dictionary<string, Word>();
             foreach (var g in groups)
             {
+                if (g.word is null || g.word.TextLowerCase is null || g.word.Id is null) continue;
                 value[g.word.TextLowerCase] = g.word;
                 // add it to the word cache
                 WordById[(int)g.word.Id] = g.word;
@@ -252,10 +253,12 @@ namespace Model.DAL
             var value = context.Words
                 .Where(w => w.Id == key)
                 .Include(w => w.Tokens)
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                     .ThenInclude(t => t.Sentence)
                     .ThenInclude(s => s.Paragraph)
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 .ToList();
-            if (value == null) return null;
+            if (value == null) return [];
             // write to cache
             WordsAndTokensAndSentencesAndParagraphsByWordId[key] = value;
             return value;

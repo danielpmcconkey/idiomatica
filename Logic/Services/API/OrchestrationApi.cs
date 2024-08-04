@@ -497,20 +497,21 @@ namespace Logic.Services.API
 
             foreach (var p in readDataPacket.Paragraphs)
             {
-                p.Sentences = NullHandler.ThrowIfNullOrEmptyList<Sentence>(readDataPacket.Sentences)
+                if (readDataPacket.Sentences is null || readDataPacket.Sentences.Count < 1) continue;
+                p.Sentences = [.. readDataPacket.Sentences
                     .Where(s => s.ParagraphId == p.Id)
-                    .OrderBy(s => s.Ordinal)
-                    .ToList();
+                    .OrderBy(s => s.Ordinal)];
+
                 foreach (var s in p.Sentences)
                 {
-                    s.Tokens = NullHandler.ThrowIfNullOrEmptyList<Token>(readDataPacket.Tokens)
+                    if (readDataPacket.Tokens is null || readDataPacket.Tokens.Count < 1) continue;
+                    s.Tokens = [.. readDataPacket.Tokens
                         .Where(t => t.SentenceId == s.Id)
-                        .OrderBy(t => t.Ordinal)
-                        .ToList();
+                        .OrderBy(t => t.Ordinal)];
 
                     foreach (var t in s.Tokens)
                     {
-                        var wordEntry = NullHandler.ThrowIfNullOrEmptyDict(readDataPacket.AllWordsInPage)
+                        var wordEntry = readDataPacket.AllWordsInPage
                             .Where(w => w.Value.Id == t.WordId)
                             .FirstOrDefault();
                         if (wordEntry.Value != null)

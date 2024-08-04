@@ -24,8 +24,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.Pages.Where(x => x.Id == key)
-                .FirstOrDefault();
+            var value = context.Pages.Where(x => x.Id == key).FirstOrDefault();
             if (value == null) return null;
             // write to cache
             PageById[key] = value;
@@ -33,18 +32,10 @@ namespace Model.DAL
         }
         public static async Task<Page?> PageByIdReadAsync(int key, IdiomaticaContext context)
         {
-            // check cache
-            if (PageById.ContainsKey(key))
+            return await Task<Page?>.Run(() =>
             {
-                return PageById[key];
-            }
-
-            // read DB
-            var value = context.Pages.Where(x => x.Id == key).FirstOrDefault();
-            if (value == null) return null;
-            // write to cache
-            PageById[key] = value;
-            return value;
+                return PageByIdRead(key, context);
+            });
         }
         public static Page? PageByOrdinalAndBookIdRead(
             (int ordinal, int bookId) key, IdiomaticaContext context)

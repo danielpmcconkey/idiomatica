@@ -13,13 +13,13 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, WordUser> WordUserById = new ConcurrentDictionary<int, WordUser>();
-        private static ConcurrentDictionary<int, WordUser> WordUserAndLanguageUserAndLanguageById = new ConcurrentDictionary<int, WordUser>();
-        private static ConcurrentDictionary<(int wordId, int userId), WordUser> WordUserByWordIdAndUserId = new ConcurrentDictionary<(int wordId, int userId), WordUser>();
-        private static ConcurrentDictionary<(int bookId, int uselanguageUserIdrId), List<WordUser>> WordUsersByBookIdAndLanguageUserId = new ConcurrentDictionary<(int bookId, int languageUserId), List<WordUser>>();
-        private static ConcurrentDictionary<(int bookId, int userId), Dictionary<string, WordUser>> WordUsersDictByBookIdAndUserId = new ConcurrentDictionary<(int bookId, int userId), Dictionary<string, WordUser>>();
-        private static ConcurrentDictionary<(int pageId, int userId), Dictionary<string, WordUser>> WordUsersDictByPageIdAndUserId = new ConcurrentDictionary<(int pageId, int userId), Dictionary<string, WordUser>>();
-        private static ConcurrentDictionary<(int userId, int languageId), List<WordUser>> WordUsersByUserIdAndLanguageId = new ConcurrentDictionary<(int userId, int languageId), List<WordUser>>();
+        private static ConcurrentDictionary<int, WordUser> WordUserById = new ();
+        private static ConcurrentDictionary<int, WordUser> WordUserAndLanguageUserAndLanguageById = new ();
+        private static ConcurrentDictionary<(int wordId, int userId), WordUser> WordUserByWordIdAndUserId = new ();
+        private static ConcurrentDictionary<(int bookId, int uselanguageUserIdrId), List<WordUser>> WordUsersByBookIdAndLanguageUserId = new ();
+        private static ConcurrentDictionary<(int bookId, int userId), Dictionary<string, WordUser>> WordUsersDictByBookIdAndUserId = new ();
+        private static ConcurrentDictionary<(int pageId, int userId), Dictionary<string, WordUser>> WordUsersDictByPageIdAndUserId = new ();
+        private static ConcurrentDictionary<(int userId, int languageId), List<WordUser>> WordUsersByUserIdAndLanguageId = new ();
 
 
         #region create
@@ -27,9 +27,23 @@ namespace Model.DAL
 
         public static WordUser? WordUserCreate(WordUser wordUser, IdiomaticaContext context)
         {
-            if (wordUser.WordId is null) throw new ArgumentNullException(nameof(wordUser.WordId));
-            if (wordUser.LanguageUserId is null) throw new ArgumentNullException(nameof(wordUser.LanguageUserId));
-            if (wordUser.Status is null) throw new ArgumentNullException(nameof(wordUser.Status));
+            if (wordUser.WordId is null)
+            {
+                var ex = new InvalidDataException(nameof(wordUser.WordId));
+                throw ex;
+            }
+
+            if (wordUser.LanguageUserId is null)
+            {
+                var ex = new InvalidDataException(nameof(wordUser.LanguageUserId));
+                throw ex;
+            }
+
+            if (wordUser.Status is null)
+            {
+                var ex = new InvalidDataException(nameof(wordUser.Status));
+                throw ex;
+            }
 
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
@@ -131,16 +145,16 @@ namespace Model.DAL
                 if (g.word is null || g.word.TextLowerCase is null) continue;
                 if (g.page is null || g.page.Id is null) continue;
                 if (g.wordUser is null || g.wordUser.Id is null) continue;
-                (int pageId, int userId) cacheKey = ((int)g.page.Id, key.userId);
+                (int pageId, int userId) = ((int)g.page.Id, key.userId);
 
                 try
                 {
-                    if (WordUsersDictByPageIdAndUserId.ContainsKey((cacheKey.pageId, cacheKey.userId)) == false)
+                    if (WordUsersDictByPageIdAndUserId.ContainsKey((pageId, userId)) == false)
                     {
                         // create the dict before you mess with it
-                        WordUsersDictByPageIdAndUserId[(cacheKey.pageId, cacheKey.userId)] = [];
+                        WordUsersDictByPageIdAndUserId[(pageId, userId)] = [];
                     }
-                    var wordUsersDict = WordUsersDictByPageIdAndUserId[(cacheKey.pageId, cacheKey.userId)];
+                    var wordUsersDict = WordUsersDictByPageIdAndUserId[(pageId, userId)];
                     if (wordUsersDict != null)
                     {
                         wordUsersDict[g.word.TextLowerCase] = g.wordUser;
@@ -168,13 +182,13 @@ namespace Model.DAL
         public static WordUser? WordUserByIdRead(int key, IdiomaticaContext context)
         {
             // check cache
-            if (WordUserById.ContainsKey(key))
+            if (WordUserById.TryGetValue(key, out WordUser? value))
             {
-                return WordUserById[key];
+                return value;
             }
 
             // read DB
-            var value = context.WordUsers.Where(x => x.Id == key).FirstOrDefault();
+            value = context.WordUsers.Where(x => x.Id == key).FirstOrDefault();
 
             if (value == null) return null;
             // write to cache
@@ -201,7 +215,10 @@ namespace Model.DAL
             // read DB
             var value = context.WordUsers
                 .Where(x => x.Id == key)
-                .Include(x => x.LanguageUser).ThenInclude(x => x.Language)
+                .Include(x => x.LanguageUser)
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                .ThenInclude(x => x.Language)
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 .FirstOrDefault();
 
             if (value == null) return null;
@@ -219,64 +236,78 @@ namespace Model.DAL
         }
 
 
-        public static async Task<WordUser?> WordUserByWordIdAndUserIdReadAsync(
+        public static WordUser? WordUserByWordIdAndUserIdRead(
             (int wordId, int userId) key, IdiomaticaContext context)
         {
             // check cache
-            if (WordUserByWordIdAndUserId.ContainsKey(key))
+            if (WordUserByWordIdAndUserId.TryGetValue(key, out WordUser? value))
             {
-                return WordUserByWordIdAndUserId[key];
+                return value;
             }
 
             // read DB
-            var value = context.WordUsers
-                .Where(x => x.WordId == key.wordId && x.LanguageUser.UserId == key.userId)
+            value = context.WordUsers
+                .Where(x => x.WordId == key.wordId &&
+                x.LanguageUser != null &&
+                x.LanguageUser.UserId == key.userId)
                 .FirstOrDefault();
             if (value == null) { return null; }
             // write to cache
             WordUserByWordIdAndUserId[key] = value;
             // also write each worduser to cache
+            if (value.Id is null) { return value; }
             WordUserById[(int)value.Id] = value;
             return value;
+        }
+        public static async Task<WordUser?> WordUserByWordIdAndUserIdReadAsync(
+            (int wordId, int userId) key, IdiomaticaContext context)
+        {
+            return await Task<WordUser?>.Run(() =>
+            {
+                return WordUserByWordIdAndUserIdRead(key, context);
+            });
         }
         public static List<WordUser> WordUsersByBookIdAndLanguageUserIdRead(
            (int bookId, int languageUserId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
         {
-            return WordUsersByBookIdAndLanguageUserIdReadAsync(key, context, shouldOverrideCache).Result;
-        }
-        public static async Task<List<WordUser>> WordUsersByBookIdAndLanguageUserIdReadAsync(
-           (int bookId, int languageUserId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
-        {
             // check cache
-            if (!shouldOverrideCache && WordUsersByBookIdAndLanguageUserId.ContainsKey(key))
+            if (!shouldOverrideCache && WordUsersByBookIdAndLanguageUserId.TryGetValue(key, out List<WordUser>? value))
             {
-                return WordUsersByBookIdAndLanguageUserId[key];
+                return value;
             }
             // read DB
-            var value = (from b in context.Books
-                          join p in context.Pages on b.Id equals p.BookId
-                          join pp in context.Paragraphs on p.Id equals pp.PageId
-                          join s in context.Sentences on pp.Id equals s.ParagraphId
-                          join t in context.Tokens on s.Id equals t.SentenceId
-                          join w in context.Words on t.WordId equals w.Id
-                          join wu in context.WordUsers on w.Id equals wu.WordId
+            value = [.. (from b in context.Books
+                         join p in context.Pages on b.Id equals p.BookId
+                         join pp in context.Paragraphs on p.Id equals pp.PageId
+                         join s in context.Sentences on pp.Id equals s.ParagraphId
+                         join t in context.Tokens on s.Id equals t.SentenceId
+                         join w in context.Words on t.WordId equals w.Id
+                         join wu in context.WordUsers on w.Id equals wu.WordId
                          where (b.Id == key.bookId && wu.LanguageUserId == key.languageUserId)
-                          select wu)
-                .Distinct()
-                .ToList();
-            
+                         select wu)
+                .Distinct()];
+
 
             // write to cache
             WordUsersByBookIdAndLanguageUserId[key] = value;
             return value;
         }
-        public static async Task<Dictionary<string, WordUser>> WordUsersDictByBookIdAndUserIdReadAsync(
+        public static async Task<List<WordUser>> WordUsersByBookIdAndLanguageUserIdReadAsync(
+           (int bookId, int languageUserId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+        {
+            return await Task<List<WordUser>>.Run(() =>
+            {
+                return WordUsersByBookIdAndLanguageUserIdRead(key, context, shouldOverrideCache);
+            });
+        }
+
+        public static Dictionary<string, WordUser> WordUsersDictByBookIdAndUserIdRead(
            (int bookId, int userId) key, IdiomaticaContext context)
         {
             // check cache
-            if (WordUsersDictByBookIdAndUserId.ContainsKey(key))
+            if (WordUsersDictByBookIdAndUserId.TryGetValue(key, out Dictionary<string, WordUser>? value))
             {
-                return WordUsersDictByBookIdAndUserId[key];
+                return value;
             }
             // read DB
             var groups = (from b in context.Books
@@ -286,12 +317,16 @@ namespace Model.DAL
                           join t in context.Tokens on s.Id equals t.SentenceId
                           join w in context.Words on t.WordId equals w.Id
                           join wu in context.WordUsers on w.Id equals wu.Id
-                          where (b.Id == key.bookId && wu.LanguageUser.UserId == key.userId)
+                          where (b.Id == key.bookId &&
+                            wu.LanguageUser != null &&
+                            wu.LanguageUser.UserId == key.userId)
                           select new { word = w, wordUser = wu }).Distinct()
                 .ToList();
-            var value = new Dictionary<string, WordUser>();
+            value = [];
             foreach (var g in groups)
             {
+                if (g.word is null || g.word.TextLowerCase is null || g.wordUser is null || g.wordUser.Id is null)
+                    continue;
                 string wordText = g.word.TextLowerCase;// g.wordWordUser.word.TextLowerCase;
                 WordUser wordUser = g.wordUser;
                 int wordUserId = (int)g.wordUser.Id;
@@ -304,6 +339,16 @@ namespace Model.DAL
             WordUsersDictByBookIdAndUserId[key] = value;
             return value;
         }
+        public static async Task<Dictionary<string, WordUser>> WordUsersDictByBookIdAndUserIdReadAsync(
+           (int bookId, int userId) key, IdiomaticaContext context)
+        {
+            return await Task<Dictionary<string, WordUser>>.Run(() =>
+            {
+                return WordUsersDictByBookIdAndUserIdRead(key, context);
+            });
+        }
+
+
         public static Dictionary<string, WordUser>? WordUsersDictByPageIdAndUserIdRead(
             (int pageId, int userId) key, IdiomaticaContext context, bool shouldOverwriteCache = false)
         {
@@ -311,9 +356,10 @@ namespace Model.DAL
             if (key.userId < 1) return null;
             
             // check cache
-            if (WordUsersDictByPageIdAndUserId.ContainsKey(key) && shouldOverwriteCache == false)
+            if (WordUsersDictByPageIdAndUserId.TryGetValue(key, out Dictionary<string, WordUser>? value) 
+                && shouldOverwriteCache == false)
             {
-                return WordUsersDictByPageIdAndUserId[key];
+                return value;
             }
 
             // add all the worduser objects that might not exist
@@ -365,7 +411,7 @@ namespace Model.DAL
                 .Distinct()
                 .ToList();
 
-            Dictionary<string, WordUser> value = [];
+            value = [];
             foreach (var g in groups)
             {
                 if (g.word.TextLowerCase is null) continue;
@@ -381,27 +427,41 @@ namespace Model.DAL
         {
             return await Task<Dictionary<string, WordUser>?>.Run(() =>
             {
-                return WordUsersDictByPageIdAndUserIdRead(key, context);
+                return WordUsersDictByPageIdAndUserIdRead(key, context, shouldOverwriteCache);
             });
+        }
+        public static List<WordUser> WordUsersByUserIdAndLanguageIdRead(
+            (int userId, int languageId) key, IdiomaticaContext context)
+        {
+            // check cache
+            if ( WordUsersByUserIdAndLanguageId.TryGetValue(key, out List<WordUser>? value))
+            {
+                return value;
+            }
+
+            // read DB
+            value = [.. context.WordUsers
+                .Where(x => x.LanguageUser != null &&
+                    x.LanguageUser.UserId == key.userId &&
+                    x.LanguageUser.LanguageId == key.languageId)
+                ];
+            // write to cache
+            WordUsersByUserIdAndLanguageId[key] = value;
+            // also write each worduser to cache
+            foreach (var wordUser in value)
+            {
+                if (wordUser.Id is null) continue;
+                WordUserById[(int)wordUser.Id] = wordUser;
+            }
+            return value;
         }
         public static async Task<List<WordUser>> WordUsersByUserIdAndLanguageIdReadAsync(
             (int userId, int languageId) key, IdiomaticaContext context)
         {
-            // check cache
-            if (WordUsersByUserIdAndLanguageId.ContainsKey(key))
+            return await Task<List<WordUser>>.Run(() =>
             {
-                return WordUsersByUserIdAndLanguageId[key];
-            }
-
-            // read DB
-            var value = context.WordUsers
-                .Where(x => x.LanguageUser.UserId == key.userId && x.LanguageUser.LanguageId == key.languageId)
-                .ToList();
-            // write to cache
-            WordUsersByUserIdAndLanguageId[key] = value;
-            // also write each worduser to cache
-            foreach (var wordUser in value) { WordUserById[(int)wordUser.Id] = wordUser; }
-            return value;
+                return WordUsersByUserIdAndLanguageIdRead(key, context);
+            });
         }
         #endregion
 
@@ -522,13 +582,13 @@ namespace Model.DAL
 
         #endregion
 
-        private static bool doesWordUserListContainById(List<WordUser> list, int key)
+        private static bool DoesWordUserListContainById(List<WordUser> list, int key)
         {
             return list.Where(x => x.Id == key).Any();
         }
         private static List<WordUser> WordUsersListGetUpdated(List<WordUser> list, WordUser value)
         {
-            List<WordUser> newList = new List<WordUser>();
+            List<WordUser> newList = [];
             foreach (var wu in list)
             {
                 if (wu.Id == value.Id) newList.Add(value);
@@ -544,7 +604,7 @@ namespace Model.DAL
         private static Dictionary<string, WordUser> WordUsersDictGetUpdated(
             Dictionary<string, WordUser> dict, WordUser updatedWordUser)
         {
-            Dictionary<string, WordUser> newDict = new Dictionary<string, WordUser>();
+            Dictionary<string, WordUser> newDict = [];
             foreach (var kvpStringWordUser in dict)
             {
                 if (kvpStringWordUser.Value.Id == updatedWordUser.Id) newDict[kvpStringWordUser.Key] = updatedWordUser;
@@ -562,7 +622,7 @@ namespace Model.DAL
             foreach (var item in cachedList1) WordUserByWordIdAndUserId[item.Key] = value;
 
             var cachedList2 = WordUsersByBookIdAndLanguageUserId
-                .Where(x => doesWordUserListContainById(x.Value, (int)value.Id)).ToArray();
+                .Where(x => DoesWordUserListContainById(x.Value, (int)value.Id)).ToArray();
             for (int i = 0; i < cachedList2.Length; i++)
             {
                 var item = cachedList2[i];
