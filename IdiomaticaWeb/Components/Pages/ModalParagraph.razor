@@ -5,6 +5,9 @@
 @using System.Text;
 @using Logic.Services.API
 
+<div>
+    @burp
+</div>
 @* Modal for paragraph translation *@
 <Modal @ref="ppModal" title="@_title" IsVerticallyCentered="true" Size="ModalSize.Large">
     <BodyTemplate>
@@ -33,11 +36,12 @@
     private string? _title;
     private string? _translateFrom;
     private string? _translateTo;
+    private string burp = "hell";
 
-    
 
     public async Task OnShowPpModalClick(Paragraph pp)
     {
+        burp = "bloody";
         if (pp is null || pp.Id is null || pp.Id < 1)
         {
             ErrorHandler.LogAndThrow();
@@ -53,6 +57,7 @@
             ErrorHandler.LogAndThrow();
             return;
         }
+        burp = "bloody2";
         _title = $"{UserService.GetUILabelF("ppModalTitle", [LanguageFromCode.LanguageName, LanguageToCode.LanguageName])}";
         var context = await DbContextFactory.CreateDbContextAsync();
 
@@ -60,8 +65,9 @@
             context, (int)pp.Id, LanguageFromCode.Code, LanguageToCode.Code);
         _translateFrom = translation.input;
         _translateTo = translation.output;
-
+        burp = "bloody3";
         await ppModal.ShowAsync();
+        burp = "bloody4";
     }
     private async Task OnHidePpModalClick()
     {
