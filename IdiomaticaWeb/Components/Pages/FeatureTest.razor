@@ -5,6 +5,18 @@
 
 <h3>FeatureTest</h3>
 
+<Modal @ref="modal" Title="Modal title">
+    <BodyTemplate>
+        Modal body text goes here.
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
+        <Button Color="ButtonColor.Primary">Save changes</Button>
+    </FooterTemplate>
+</Modal>
+
+<Button Color="ButtonColor.Primary" @onclick="OnShowModalClick">Show Modal</Button>
+
 @code {
     protected override async Task OnInitializedAsync()
     {
@@ -29,5 +41,17 @@
         {
             var burp = ex.ToString();
         }
+    }
+
+    private Modal modal;
+
+    private async Task OnShowModalClick()
+    {
+        await modal?.ShowAsync();
+    }
+
+    private async Task OnHideModalClick()
+    {
+        await modal?.HideAsync();
     }
 }
