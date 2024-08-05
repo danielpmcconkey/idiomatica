@@ -237,7 +237,7 @@ namespace Logic.Services.API
             }
             // nope, no existing translations will work
             
-            var deeplResult = DeepLService.Translate(input, fromCode, toCode);
+            var deeplResult = await DeepLService.TranslateAsync(input, fromCode, toCode);
             if (deeplResult is not null)
             {
                 output = deeplResult;

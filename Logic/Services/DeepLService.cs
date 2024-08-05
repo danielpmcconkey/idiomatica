@@ -8,18 +8,14 @@ namespace Logic.Services
 {
     public static class DeepLService
     {
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public static async Task<string> TranslateAsync (
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             string input, string sourceLanguageCode, string targetLanguageCode) 
         {
-            return await Task<string?>.Run(() =>
-            {
-                return Translate(input, sourceLanguageCode, targetLanguageCode);
-            });
-        }
-
-        public static string Translate(
-            string input, string sourceLanguageCode, string targetLanguageCode)
-        {
+#if DEBUG
+            return "This is a stubbed result";
+#else
             var authKey = Environment.GetEnvironmentVariable("DeepLApiKey");
             if (string.IsNullOrEmpty(authKey))
             {
@@ -27,16 +23,18 @@ namespace Logic.Services
                 return string.Empty;
             }
             var translator = new Translator(authKey);
-#if DEBUG
-            return "This is a stubbed result";
-#else
-
-            var translatedText = translator.TranslateTextAsync(
+            var translatedText = await translator.TranslateTextAsync(
                     input,
                     sourceLanguageCode,
-                    targetLanguageCode).Result;
+                    targetLanguageCode);
             return translatedText.ToString();
 #endif
+        }
+
+        public static string Translate(
+            string input, string sourceLanguageCode, string targetLanguageCode)
+        {
+            return TranslateAsync(input, sourceLanguageCode, targetLanguageCode).Result;
         }
 
     }
