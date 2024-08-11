@@ -12,6 +12,7 @@ namespace Model.DAL
     {
         private static ConcurrentDictionary<int, FlashCard?> FlashCardById = new ConcurrentDictionary<int, FlashCard?>();
         private static ConcurrentDictionary<int, FlashCard?> FlashCardAndFullRelationshipsById = new ConcurrentDictionary<int, FlashCard?>();
+        private static ConcurrentDictionary<int, FlashCard?> FlashCardByWordUserId = new ();
         //private static ConcurrentDictionary<(int languageUserId, int take), List<FlashCard>> FlashCardsActiveAndFullRelationshipsByLanguageUserId = new ();
 
 
@@ -55,7 +56,7 @@ namespace Model.DAL
         }
 
 
-        
+
         #endregion
 
         #region read
@@ -81,6 +82,30 @@ namespace Model.DAL
                 return FlashCardByIdRead(key, context);
             });
         }
+
+        public static FlashCard? FlashCardByWordUserIdRead(int key, IdiomaticaContext context)
+        {
+            // check cache
+            if (FlashCardByWordUserId.ContainsKey(key))
+            {
+                return FlashCardByWordUserId[key];
+            }
+
+            // read DB
+            var value = context.FlashCards.Where(x => x.WordUserId == key).FirstOrDefault();
+            if (value == null) return null;
+            // write to cache
+            FlashCardByWordUserId[key] = value;
+            return value;
+        }
+        public static async Task<FlashCard?> FlashCardByWordUserIdReadAsync(int key, IdiomaticaContext context)
+        {
+            return await Task<FlashCard?>.Run(() =>
+            {
+                return FlashCardByWordUserIdRead(key, context);
+            });
+        }
+
 
         public static FlashCard? FlashCardAndFullRelationshipsByIdRead(int key, IdiomaticaContext context)
         {

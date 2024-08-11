@@ -57,6 +57,19 @@
 
     </BodyTemplate>
     <FooterTemplate>
+        @if (_doesFlashCardExist == false)
+        {
+            @if (_isSavingFlashCard)
+            {
+                <Button Color="ButtonColor.Info" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+            }
+            else
+            {
+                <Button Color="ButtonColor.Info" @onclick="OnMakeFlashCard">
+                    @UserService.GetUILabel("createFlashCard")
+                </Button>
+            }
+        }
         <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">
             @UserService.GetUILabel("closeButton")
         </Button>
@@ -82,6 +95,10 @@
     private string? _title = null;
     private string? _translation = null;
     private string? _selectedStatus = null;
+
+    private bool _doesFlashCardExist = false;
+    private bool _isSavingFlashCard = false;
+    const int LoadingDelayMiliseconds = 500;
 
 
 
@@ -120,8 +137,8 @@
             _wordUser = ReadDataPacket.AllWordUsersInPage[_word.TextLowerCase];
             _token = thisToken;
             _token.Word = _word;
-            
-            if (_wordUser == null || _wordUser.Id < 1)
+
+            if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
             {
                 ErrorHandler.LogAndThrow(2430);
                 return;
@@ -131,6 +148,12 @@
             _title = (_word is null) ? "" : _word.TextLowerCase;
             _translation = _wordUser.Translation;
             _selectedStatus = UserService.GetUILabel($"statusLabel{(int)_wordUser.Status}");
+
+            // check to display the "create card" button
+            var existingCard = FlashCardApi.FlashCardReadByWordUserId(context, (int)_wordUser.Id);
+            if (existingCard is null) _doesFlashCardExist = false;
+            else _doesFlashCardExist = true;
+
             await modal.ShowAsync();
         }
         catch 
@@ -190,7 +213,7 @@
         if (_wordUser is null) return;
         _wordUser.Status = (AvailableWordUserStatus)newStatusInt;
     }
-    
+
     private string GetTokenClass(AvailableWordUserStatus status)
     {
         if (status == AvailableWordUserStatus.UNKNOWN) return "statusUNKNOWN";
@@ -203,6 +226,45 @@
         if (status == AvailableWordUserStatus.IGNORED) return "statusIGNORED";
         return "statusUNKNOWN";
     }
-    
+    private async Task OnMakeFlashCard()
+    {
+        var t_delay = Task.Delay(LoadingDelayMiliseconds);
+
+        _isSavingFlashCard = true;
+        if (_doesFlashCardExist) return;
+
+        if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        var uiLanguage = ReadDataPacket.LanguageToCode;
+        if (uiLanguage is null || string.IsNullOrEmpty(uiLanguage.Code))
+        {
+            ErrorHandler.LogAndThrow();
+            return;
+        }
+        if (_wordUser.Status is null)
+        {
+            _wordUser.Status = AvailableWordUserStatus.UNKNOWN;
+        }
+        if (_wordUser.Translation is null)
+        {
+            _wordUser.Translation = string.Empty;
+        }
+        var context = await DbContextFactory.CreateDbContextAsync();
+
+        // save the wordUser first
+        await WordUserApi.WordUserUpdateAsync(
+                context, (int)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
+
+        // now make the card
+        await FlashCardApi.FlashCardCreateAsync(context, (int)_wordUser.Id, uiLanguage.Code);
+
+        _isSavingFlashCard = false;
+        _doesFlashCardExist = true;
+        await t_delay;
+    }
+
 
 }

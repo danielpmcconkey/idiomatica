@@ -719,5 +719,17 @@ namespace Logic.Services.API.Tests
                 CommonFunctions.CleanUpUser(userId, context);
             }
         }
+
+        [TestMethod()]
+        public void FlashCardReadByWordUserIdTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void FlashCardReadByWordUserIdAsyncTest()
+        {
+            Assert.Fail();
+        }
     }
 }

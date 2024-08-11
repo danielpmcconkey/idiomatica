@@ -98,6 +98,7 @@ namespace Logic.UILabels
             _labels.Add("pageTurnerCurrentPage", "Page {0} of {1}");
             _labels.Add("readJumpDefault", "Jump to page...");
             _labels.Add("readJumpSubmit", "Jump");
+            _labels.Add("createFlashCard", "Make a flash card of this word");
             _labels.Add("", "");
             #endregion
             #region book create

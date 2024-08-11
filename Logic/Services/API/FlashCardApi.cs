@@ -145,6 +145,16 @@ namespace Logic.Services.API
         {
             return await DataCache.FlashCardByIdReadAsync(Id, context);
         }
+        public static FlashCard? FlashCardReadByWordUserId(
+          IdiomaticaContext context, int wordUserId)
+        {
+            return DataCache.FlashCardByWordUserIdRead(wordUserId, context);
+        }
+        public static async Task<FlashCard?> FlashCardReadByWordUserIdAsync(
+           IdiomaticaContext context, int wordUserId)
+        {
+            return await DataCache.FlashCardByWordUserIdReadAsync(wordUserId, context);
+        }
 
 
         public static List<FlashCard>? FlashCardsCreate(
