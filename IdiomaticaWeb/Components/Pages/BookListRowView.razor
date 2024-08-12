@@ -169,9 +169,9 @@
     public EventCallback<int> OnArchiveAsync { get; set; }
     [Parameter]
     public EventCallback<int> OnAddAsync { get; set; }
+    [Parameter] public ErrorState? errorState { get; set; }
 
 
-    public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isLoading = false;
     const int LoadingDelayMiliseconds = 500;
 
@@ -224,16 +224,24 @@
         }
         catch (IdiomaticaException ex)
         {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
-            errorState.code = ex.code;
+            if(errorState is not null)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+                errorState.code = ex.code;
+            }
+            
             StateHasChanged();
             return "";
         }
         catch (Exception ex)
         {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            if (errorState is not null)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = $"{UserService.GetUILabel("bookListInitializationError")}{Environment.NewLine}{ex.Message}";
+            }
+            
             StateHasChanged();
             return string.Empty;
         }
@@ -255,8 +263,12 @@
         }
         catch (Exception ex)
         {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            if (errorState is not null)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = $"{UserService.GetUILabel("bookListInitializationError")}{Environment.NewLine}{ex.Message}";
+            }
+
             StateHasChanged();
             return string.Empty;
         }
@@ -278,8 +290,12 @@
         }
         catch (Exception ex)
         {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            if (errorState is not null)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = $"{UserService.GetUILabel("bookListInitializationError")}{Environment.NewLine}{ex.Message}";
+            }
+
             StateHasChanged();
             return string.Empty;
         }
@@ -312,8 +328,12 @@
         }
         catch (Exception ex)
         {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            if (errorState is not null)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = $"{UserService.GetUILabel("bookListInitializationError")}{Environment.NewLine}{ex.Message}";
+            }
+
             StateHasChanged();
             return string.Empty;
         }
@@ -336,8 +356,12 @@
         }
         catch (Exception ex)
         {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            if (errorState is not null)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = $"{UserService.GetUILabel("bookListInitializationError")}{Environment.NewLine}{ex.Message}";
+            }
+
             StateHasChanged();
             return string.Empty;
         }
@@ -359,8 +383,12 @@
         }
         catch (Exception ex)
         {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            if (errorState is not null)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = $"{UserService.GetUILabel("bookListInitializationError")}{Environment.NewLine}{ex.Message}";
+            }
+
             StateHasChanged();
             return string.Empty;
         }
@@ -385,8 +413,12 @@
         }
         catch (Exception ex)
         {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            if (errorState is not null)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = $"{UserService.GetUILabel("bookListInitializationError")}{Environment.NewLine}{ex.Message}";
+            }
+
             StateHasChanged();
             return false;
         }
@@ -438,9 +470,14 @@
         }
         catch (Exception ex)
         {
-            errorState.isError = true;
-            errorState.errorMessage = UserService.GetUILabel("bookListRefreshStatsError");
+            if (errorState is not null)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = $"{UserService.GetUILabel("bookListInitializationError")}{Environment.NewLine}{ex.Message}";
+            }
+
             StateHasChanged();
+            return;
         }
     }
 }

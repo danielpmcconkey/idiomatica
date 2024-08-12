@@ -73,7 +73,7 @@ namespace Logic.Services.API.Tests
             int userId = 0;
             var context = CommonFunctions.CreateContext();
             int bookId = 1;
-            
+
 
             try
             {
@@ -93,7 +93,7 @@ namespace Logic.Services.API.Tests
                 var bookUser = BookUserApi.BookUserCreate(
                     context, bookId, (int)user.Id);
                 if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-                    { ErrorHandler.LogAndThrow(); }
+                { ErrorHandler.LogAndThrow(); }
 
                 // create wordUsers
                 // create the wordUsers
@@ -170,6 +170,30 @@ namespace Logic.Services.API.Tests
             {
                 CommonFunctions.CleanUpUser(userId, context);
             }
+        }
+
+        [TestMethod()]
+        public void UserBreadCrumbReadLatestTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void UserBreadCrumbReadLatestAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void UserBreadCrumbCreateTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void UserBreadCrumbCreateAsyncTest()
+        {
+            Assert.Fail();
         }
     }
 }

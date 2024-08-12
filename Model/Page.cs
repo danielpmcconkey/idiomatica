@@ -19,6 +19,7 @@ namespace Model
         public Book? Book { get; set; }
         public List<Paragraph> Paragraphs { get; set; } = new List<Paragraph>();
         public List<PageUser> PageUsers { get; set; } = new List<PageUser>();
+        public List<UserBreadCrumb>? UserBreadCrumbs { get; set; }
         #endregion
 
         public int? Ordinal { get; set; }

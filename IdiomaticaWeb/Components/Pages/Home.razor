@@ -6,14 +6,7 @@
 
 <PageTitle>Blazor Bootstrap - WebAssembly Standalone App (.NET 8) - Starter Template</PageTitle>
 
-<h1>Hello, world!</h1>
 
-Welcome to your new Blazor Bootstrap - Web App (.NET 8). 
-<br /> 
-<br />
-Interactive render mode: Server 
-<br />
-Interactive location: Global
 
 <ErrorAlert ErrorState="errorState"></ErrorAlert>
 
@@ -22,32 +15,39 @@ Interactive location: Global
 <AuthorizeView>
     <Authorized>
         <p>Hello, @context.User.Identity?.Name!</p>
-        
-        @if(_wordsReadCountList.Any())
-        {
-            <Card>
-                <CardBody>
-                    <CardTitle>@_wordCountCardTitle</CardTitle>
-                    <dl class="row">
-                        @foreach (var item in _wordsReadCountList)
-                        {
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    @if(_wordsReadCountList.Any())
+                    {
+                        <Card>
+                            <CardBody>
+                                <CardTitle>@_wordCountCardTitle</CardTitle>
+                                <dl class="row">
+                                    @foreach (var item in _wordsReadCountList)
+                                    {
                             
-                            <dt class="col-sm-3">
-                                @item.language:</dt>
-                            <dd class="col-sm-9">
-                                @OnFormatCount(item.wordCount)
-                            </dd>
+                                        <dt class="col-sm-3">
+                                            @item.language:</dt>
+                                        <dd class="col-sm-9">
+                                            @OnFormatCount(item.wordCount)
+                                        </dd>
 
-                        }
-                    </dl>
-                    <Button Color="ButtonColor.Primary" To="/Books/Mine" Type="ButtonType.Link">
-                        @_bookshelfButtonText
-                    </Button>
-                </CardBody>
-            </Card>
-        }
-        
-        <p></p>
+                                    }
+                                </dl>
+                                <Button Color="ButtonColor.Primary" To="/Books/Mine" Type="ButtonType.Link">
+                                    @_bookshelfButtonText
+                                </Button>
+                            </CardBody>
+                        </Card>
+                    }
+                </div
+                <div class="col">
+                    <PickBackUp UserId="@UserId" />
+                </div>
+            </div>
+
+        </div>
         
 
     </Authorized>
@@ -68,12 +68,14 @@ Interactive location: Global
     private List<(string language, int wordCount)> _wordsReadCountList = new List<(string language, int wordCount)>();
     private string? _wordCountCardTitle;
     private string? _bookshelfButtonText;
+    private int? UserId;
 
     private async Task InitData()
     {
         var context = await DbContextFactory.CreateDbContextAsync();
         var loggedInUser = UserService.GetLoggedInUser(context);
         if (loggedInUser is null || loggedInUser.Id is null || loggedInUser.Id < 1) return;
+        UserId = loggedInUser.Id;
         _wordCountCardTitle = UserService.GetUILabel("homeWordCountsHeader");
         _wordsReadCountList = WordApi.WordsGetListOfReadCount(
             context, (int)loggedInUser.Id);
