@@ -20,6 +20,7 @@ namespace Model.DAL
         {
             // no sense caching this; it's too transient
             Guid guid = Guid.NewGuid();
+            value.UniqueKey = guid;
             int numRows = context.Database.ExecuteSql($"""
                 
                 INSERT INTO [Idioma].UserBreadCrumb

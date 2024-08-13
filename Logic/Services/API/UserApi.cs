@@ -53,7 +53,7 @@ namespace Logic.Services.API
                 ActionDateTime = DateTime.Now
             };
             crumb = DataCache.UserBreadCrumbCreate(crumb, context);
-            if (crumb is null || crumb.UniqueKey is null) return null;
+            if (crumb is null || crumb.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
             return crumb;
         }
         public static async Task<UserBreadCrumb?> UserBreadCrumbCreateAsync(
