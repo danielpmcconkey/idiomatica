@@ -1,0 +1,117 @@
+﻿@page "/PickBackUp"
+@rendermode InteractiveServer
+@inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
+@inject UserService UserService;
+@using Logic.Services.API
+
+@if (_isLoading)
+{
+    <Button Color="ButtonColor.Primary" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+}
+else
+{
+    <Card>
+            <CardBody>
+                @if(_hasCrumbs)
+                {
+                    <CardTitle>@UserService.GetUILabel("pickUpTitle")</CardTitle>
+                    <p>@Title</p>
+                    <p>Page @PageNum</p>
+                    <Button Color="ButtonColor.Primary"
+                            Type="ButtonType.Link"
+                            Size="Size.Small"
+                            Outline="true"
+                            To="@BookUri">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-book-half" viewBox="0 0 16 16">
+                            <path d="M8.5 2.687c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783" />
+                        </svg>
+                        @UserService.GetUILabel("pickUpRead")
+                    </Button>
+                }
+                else
+                {
+                    <CardTitle>@UserService.GetUILabel("pickUpNoCrumbs")</CardTitle>
+        
+                }
+        </CardBody>
+    </Card>
+}
+
+
+@code {
+    [Parameter] public int? UserId { get; set; }
+    [Parameter] public ErrorState? errorState { get; set; }
+    string? Title;
+    int? BookId;
+    string? BookUri;
+    int? PageNum;
+    bool _isLoading = false;
+    private const int LoadingDelayMiliseconds = 500;
+    bool _hasCrumbs = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (UserId is null || UserId < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            _isLoading = true;
+            var t_delay = Task.Delay(LoadingDelayMiliseconds);
+            var context = await DbContextFactory.CreateDbContextAsync();
+            var breadCrumb = await UserApi.UserBreadCrumbReadLatestAsync(context, (int)UserId);
+            if (breadCrumb is not null && breadCrumb.PageId is not null)
+            {
+                var page = await PageApi.PageReadByIdAsync(context, (int)breadCrumb.PageId);
+                if (page is null || page.BookId is null || page.Ordinal is null) return;
+                var book = await BookApi.BookReadAsync(context, (int)page.BookId);
+                if (book is null || book.Id is null || string.IsNullOrEmpty(book.Title)) return;
+
+                Title = FormatTitle(book.Title);
+                BookUri = $"/Book/{book.Id}/Read";
+                PageNum = page.Ordinal;
+
+                _hasCrumbs = true;
+            }
+
+            await t_delay;
+            _isLoading = false;
+        }
+        catch (IdiomaticaException ex)
+        {
+            if (errorState is not null)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = UserService.GetUILabel("pickUpError");
+                errorState.code = ex.code;
+            }
+
+            StateHasChanged();
+            return;
+        }
+        catch (Exception ex)
+        {
+            if (errorState is not null)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = $"{UserService.GetUILabel("pickUpError")}{Environment.NewLine}{ex.Message}";
+            }
+
+            StateHasChanged();
+            return;
+        }
+    }
+    private string FormatTitle(string? title)
+    {
+        if (title == null) return string.Empty;
+        int maxCharsInBookListTitle = 60;
+        if (title.Length > maxCharsInBookListTitle)
+        {
+            title = title.Substring(0, maxCharsInBookListTitle) + "...";
+        }
+        return title;
+    }
+}

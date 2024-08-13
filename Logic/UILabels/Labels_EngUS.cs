@@ -38,6 +38,10 @@ namespace Logic.UILabels
             _labels.Add("homeInitializationError", "There was an error initializing data for the home page."); 
             _labels.Add("homeWordCountsHeader", "How many words have you read?");
             _labels.Add("homeBookshelfButtonText", "Read more...");
+            _labels.Add("pickUpTitle", "Pick back up where you left off");
+            _labels.Add("pickUpError", "There was an error determining your last reading location");
+            _labels.Add("pickUpRead", "Read");
+            _labels.Add("pickUpNoCrumbs", "No prior reading history found");
             #endregion
 
             #region book list

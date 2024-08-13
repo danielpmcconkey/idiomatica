@@ -720,16 +720,96 @@ namespace Logic.Services.API.Tests
             }
         }
 
+
         [TestMethod()]
         public void FlashCardReadByWordUserIdTest()
         {
-            Assert.Fail();
-        }
+            int userId = 0;
+            var context = CommonFunctions.CreateContext();
+            int languageId = 1;
+            string uiLanguageCode = "EN-US";
+            int wordId = 39; // dice
+            AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
 
+            try
+            {
+                // create the user
+                var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
+                userId = (int)user.Id;
+
+                var languageUser = LanguageUserApi.LanguageUserCreate(
+                    context, languageId, (int)user.Id);
+                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+
+                // create the wordUser
+                var wordUser = WordUserApi.WordUserCreate(
+                    context, wordId, (int)languageUser.Id, null, status);
+                Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
+                Assert.AreEqual(wordId, wordUser.WordId);
+
+                // create the flashcard
+                FlashCardApi.FlashCardCreate(context, (int)wordUser.Id, uiLanguageCode);
+
+                // read the flashcard
+                var flashCard = FlashCardApi.FlashCardReadByWordUserId(context, (int)wordUser.Id);
+
+                Assert.IsNotNull(flashCard);
+                Assert.IsNotNull(flashCard.Id);
+                Assert.AreEqual(wordUser.Id, flashCard.WordUserId);
+            }
+            finally
+            {
+                // clean-up
+                CommonFunctions.CleanUpUser(userId, context);
+            }
+        }
         [TestMethod()]
-        public void FlashCardReadByWordUserIdAsyncTest()
+        public async Task FlashCardReadByWordUserIdAsyncTest()
         {
-            Assert.Fail();
+            int userId = 0;
+            var context = CommonFunctions.CreateContext();
+            int languageId = 1;
+            string uiLanguageCode = "EN-US";
+            int wordId = 39; // dice
+            AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
+
+            try
+            {
+                // create the user
+                var userService = CommonFunctions.CreateUserService();
+                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
+                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
+                userId = (int)user.Id;
+
+                var languageUser = LanguageUserApi.LanguageUserCreate(
+                    context, languageId, (int)user.Id);
+                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+
+                // create the wordUser
+                var wordUser = WordUserApi.WordUserCreate(
+                    context, wordId, (int)languageUser.Id, null, status);
+                Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
+                Assert.AreEqual(wordId, wordUser.WordId);
+
+                // create the flashcard
+                await FlashCardApi.FlashCardCreateAsync(context, (int)wordUser.Id, uiLanguageCode);
+
+                // read the flashcard
+                var flashCard = await FlashCardApi.FlashCardReadByWordUserIdAsync(context, (int)wordUser.Id);
+                
+                Assert.IsNotNull(flashCard);
+                Assert.IsNotNull(flashCard.Id);
+                Assert.AreEqual(wordUser.Id, flashCard.WordUserId);
+            }
+            finally
+            {
+                // clean-up
+                CommonFunctions.CleanUpUser(userId, context);
+            }
         }
     }
 }

@@ -30,6 +30,7 @@ namespace Model
         /// </summary>
         public LanguageCode? LanguageCode { get; set; }
         public List<BookTag> BookTags { get; set; } = new List<BookTag>();
+        public List<UserBreadCrumb>? UserBreadCrumbs { get; set; }
 
 
         #endregion

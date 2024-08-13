@@ -310,7 +310,7 @@ namespace Logic.Services.API
                 context, readDataPacket, (int)readDataPacket.CurrentPageUser.PageId);
             if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
                 newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
-                newReadDataPacket.CurrentPageUser.PageId is null)
+                newReadDataPacket.CurrentPageUser.PageId is null )
             {
                 ErrorHandler.LogAndThrow();
                 return null;
@@ -361,7 +361,6 @@ namespace Logic.Services.API
             readDataPacket.BookUser = BookUserApi.BookUserByBookIdAndUserIdRead(context, (int)readDataPacket.Book.Id, (int)readDataPacket.LoggedInUser.Id);
             readDataPacket.LanguageUser = LanguageUserApi.LanguageUserGet(context, (int)readDataPacket.Book.LanguageId, (int)readDataPacket.LoggedInUser.Id);
             readDataPacket.Language = LanguageApi.LanguageRead(context, (int)readDataPacket.Book.LanguageId);
-
 
 
             if (readDataPacket.BookUser is null)
@@ -430,6 +429,11 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow();
                 return null;
             }
+
+            // finally, update the breadcrumbs
+            UserApi.UserBreadCrumbCreate(
+                context, (int)readDataPacket.LoggedInUser.Id, (int)readDataPacket.CurrentPage.Id);
+            
             return resetDataPacket;
 
         }
@@ -521,6 +525,12 @@ namespace Logic.Services.API
                     }
                 }
             }
+            // finally, update the breadcrumbs
+            if (readDataPacket.CurrentPage is null || readDataPacket.CurrentPage.Id is null)
+                { ErrorHandler.LogAndThrow(2130); return null; }
+            UserApi.UserBreadCrumbCreate(
+                context, (int)readDataPacket.LoggedInUser.Id, (int)readDataPacket.CurrentPage.Id);
+            
             return readDataPacket;
         }
         public static async Task<ReadDataPacket?> OrchestrateResetReadDataForNewPageAsync(

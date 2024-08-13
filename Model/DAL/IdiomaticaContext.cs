@@ -26,7 +26,8 @@ namespace Model.DAL
         public DbSet<Sentence> Sentences { get; set; }
         public DbSet<Token> Tokens { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<UserSetting> Settings { get; set; }
+        public DbSet<UserBreadCrumb> UserBreadCrumbs { get; set; }
+        public DbSet<UserSetting> UserSettings { get; set; }
         public DbSet<Word> Words { get; set; }
         public DbSet<WordUser> WordUsers { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
@@ -133,6 +134,7 @@ namespace Model.DAL
                 e.HasOne(p => p.Book).WithMany(b => b.Pages).HasForeignKey(p => p.BookId);
                 e.HasMany(p => p.Paragraphs).WithOne(pp => pp.Page).HasForeignKey(pp => pp.PageId);
                 e.HasMany(p => p.PageUsers).WithOne(pu => pu.Page).HasForeignKey(pu => pu.PageId);
+                e.HasMany(p => p.UserBreadCrumbs).WithOne(ubc => ubc.Page).HasForeignKey(ubc => ubc.PageId);
             });
             modelBuilder.Entity<PageUser>(e => {
                 e.HasKey(pu => pu.Id);
@@ -171,6 +173,13 @@ namespace Model.DAL
                 e.HasKey(u => u.Id);
                 e.HasMany(u => u.LanguageUsers).WithOne(lu => lu.User).HasForeignKey(u => u.UserId);
                 e.HasMany(u => u.UserSettings).WithOne(us => us.User).HasForeignKey(us => us.UserId);
+                e.HasMany(u => u.UserBreadCrumbs).WithOne(ubc => ubc.User).HasForeignKey(ubc => ubc.UserId);
+            });
+            modelBuilder.Entity<UserBreadCrumb>(e =>
+            {
+                e.HasKey(ubc => ubc.UniqueKey);
+                e.HasOne(ubc => ubc.User).WithMany(u => u.UserBreadCrumbs).HasForeignKey(ubc => ubc.UserId);
+                e.HasOne(ubc => ubc.Page).WithMany(p => p.UserBreadCrumbs).HasForeignKey(ubc => ubc.PageId);
             });
             modelBuilder.Entity<UserSetting>(e => {
                 e.HasKey(us => new { us.UserId, us.Key });
