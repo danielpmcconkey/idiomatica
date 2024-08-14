@@ -31,10 +31,16 @@ namespace Logic.Services.API
             List<Word> wordUsages = DataCache.WordsAndTokensAndSentencesAndParagraphsByWordIdRead(
                 (int)wordUser.WordId, context);
 
+            int maxPptPerCard = 5;
+            int currentPptThisCard = 0;
+
             foreach (var wordUsage in wordUsages)
             {
+                if (currentPptThisCard >= maxPptPerCard) continue;
                 foreach (var token in wordUsage.Tokens)
                 {
+                    if (currentPptThisCard >= maxPptPerCard) continue;
+
                     if (token.Sentence == null) { ErrorHandler.LogAndThrow(); return null; }
                     var sentence = token.Sentence;
                     if (sentence.Paragraph == null || sentence.Paragraph.Id == null) 
@@ -98,6 +104,7 @@ namespace Logic.Services.API
                     fcptb.FlashCard = card;
                     fcptb.ParagraphTranslation = ppts;
                     card.FlashCardParagraphTranslationBridges.Add(fcptb);
+                    currentPptThisCard++;
                 }
             }
             
