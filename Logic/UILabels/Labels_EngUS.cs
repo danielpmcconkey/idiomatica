@@ -79,6 +79,7 @@ namespace Logic.UILabels
             _labels.Add("bookListAddToolTip", "Add to your bookshelf.");
             _labels.Add("bookListAddTag", "Add tag");
             _labels.Add("bookListBrowseForBooks", "Browse for books to add to your shelf");
+            _labels.Add("bookListDifficultyLabel", "Difficulty score");
             #endregion
             #region read
             _labels.Add("readInitializationError", "There was an error retrieving this book from the database.");

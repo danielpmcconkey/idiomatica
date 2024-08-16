@@ -17,7 +17,7 @@ namespace Logic
         }
         public BookListDataPacket(IdiomaticaContext context, bool isBrowse)
         {
-            OrderByOptions[1] = "Book ID";
+            OrderByOptions[1] = "Difficulty";
             OrderByOptions[2] = "Language";
             OrderByOptions[3] = "Completed";
             OrderByOptions[4] = "Title";

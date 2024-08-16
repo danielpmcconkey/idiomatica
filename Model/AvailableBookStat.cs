@@ -11,5 +11,6 @@ namespace Model
         TOTALPAGES = 1,
         TOTALWORDCOUNT = 2,
         DISTINCTWORDCOUNT = 3,
+        DIFFICULTYSCORE = 4
     }
 }

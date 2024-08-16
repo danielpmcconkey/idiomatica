@@ -8,7 +8,7 @@ namespace Model
 {
     public enum AvailableBookListSortProperties
     {
-        BOOKID = 1,
+        DIFFICULTY = 1,
         LANGUAGENAME = 2,
         ISCOMPLETE = 3,
         TITLE = 4,
