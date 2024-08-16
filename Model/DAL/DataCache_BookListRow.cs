@@ -71,8 +71,8 @@ namespace Model.DAL
             {
                 switch (orderBy)
                 {
-                    case AvailableBookListSortProperties.BOOKID:
-                        orderByClause = $"order by b.Id {sortDirection}";
+                    case AvailableBookListSortProperties.DIFFICULTY:
+                        orderByClause = $"order by cast(bsDifficultyScore.[Value] as numeric(5,2)) {sortDirection}";
                         break;
                     case AvailableBookListSortProperties.LANGUAGENAME:
                         orderByClause = $"order by l.[Name] {sortDirection}";
@@ -149,6 +149,7 @@ namespace Model.DAL
                             , cast(bsTotalWordCount.[Value] as int) as TotalWordCount
                             , cast(bsDistinctWordCount.[Value] as int) as DistinctWordCount
                             , bus_DISTINCTKNOWNPERCENT.ValueNumeric as DistinctKnownPercent
+                            , cast(bsDifficultyScore.[Value] as numeric(5,2)) as DifficultyScore
                             , bu.IsArchived
                 """);
             if (useTags && bookIdOverride is null)
@@ -169,9 +170,10 @@ namespace Model.DAL
 
                         from Idioma.Book b
                         left join Idioma.Language l on b.LanguageId = l.Id
-                        left join Idioma.BookStat bsTotalPages on bsTotalPages.BookId = b.Id and bsTotalPages.[Key] = 1
-                        left join Idioma.BookStat bsTotalWordCount on bsTotalWordCount.BookId = b.Id and bsTotalWordCount.[Key] = 2
-                        left join Idioma.BookStat bsDistinctWordCount on bsDistinctWordCount.BookId = b.Id and bsDistinctWordCount.[Key] = 3
+                        left join Idioma.BookStat bsTotalPages on bsTotalPages.BookId = b.Id and bsTotalPages.[Key] = {(int)AvailableBookStat.TOTALPAGES}
+                        left join Idioma.BookStat bsTotalWordCount on bsTotalWordCount.BookId = b.Id and bsTotalWordCount.[Key] = {(int)AvailableBookStat.TOTALWORDCOUNT}
+                        left join Idioma.BookStat bsDistinctWordCount on bsDistinctWordCount.BookId = b.Id and bsDistinctWordCount.[Key] = {(int)AvailableBookStat.DISTINCTWORDCOUNT}
+                        left join Idioma.BookStat bsDifficultyScore on bsDifficultyScore.BookId = b.Id and bsDifficultyScore.[Key] = {(int)AvailableBookStat.DIFFICULTYSCORE}
                         left join Idioma.LanguageUser lu on lu.LanguageId = b.LanguageId and lu.UserId = {userId}
                         left join Idioma.BookUser bu on bu.BookId = b.Id and bu.LanguageUserId = lu.Id
                         left join [Idioma].[BookUserStat] bus_ISCOMPLETE on bus_ISCOMPLETE.BookId = b.Id and bus_ISCOMPLETE.LanguageUserId = lu.Id and bus_ISCOMPLETE.[Key] = {(int)AvailableBookUserStat.ISCOMPLETE}
@@ -245,6 +247,7 @@ namespace Model.DAL
                             , bsTotalWordCount.[Value]
                             , bsDistinctWordCount.[Value]
                             , bus_DISTINCTKNOWNPERCENT.ValueNumeric
+                            , bsDifficultyScore.[Value]
                             , bu.IsArchived
                     """);
             }
@@ -269,6 +272,7 @@ namespace Model.DAL
                         , null as TotalWordCount
                         , null as DistinctWordCount
                         , null as DistinctKnownPercent
+                        , null as DifficultyScore
                         , null as IsArchived
                         , null as Tags
                     from AllResults

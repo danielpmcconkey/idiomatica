@@ -28,7 +28,15 @@
                     <div class="col-6">
                         <h5 class="card-title"># @Row.BookId @OnFormatTitle(Row.Title)</h5>
                     </div>
-                    <div class="col-5">
+                    <div class="col-1">
+                         <span class="p-1 rounded border border-dark border-2 @GetDifficultyClass(@Row.DifficultyScore)"
+                              data-toggle="tooltip"
+                              data-placement="top"
+                              title="@UserService.GetUILabel("bookListDifficultyLabel")">
+                            @Row.DifficultyScore
+                        </span>
+                    </div>
+                    <div class="col-4">
                         
                         <div class="btn-group" role="group" aria-label="@UserService.GetUILabel("bookListButtonGroupLabel")">
                             <Button Color="ButtonColor.Primary"
@@ -252,6 +260,36 @@
         {
             if (_bookId == null) return "";
             return $"/Book/{_bookId}/Read";
+        }
+        catch (IdiomaticaException ex)
+        {
+            errorState.isError = true;
+            errorState.errorMessage = UserService.GetUILabel("bookListInitializationError");
+            errorState.code = ex.code;
+            StateHasChanged();
+            return "";
+        }
+        catch (Exception ex)
+        {
+            if (errorState is not null)
+            {
+                errorState.isError = true;
+                errorState.errorMessage = $"{UserService.GetUILabel("bookListInitializationError")}{Environment.NewLine}{ex.Message}";
+            }
+
+            StateHasChanged();
+            return string.Empty;
+        }
+    }
+    
+    private string GetDifficultyClass(decimal? score)
+    {
+        try
+        {
+            if (score is null) return "scoreEasy";
+            if (score <= 30.0M) return "scoreEasy";
+            if (score <= 60.0M) return "scoreMedium";
+            return "scoreTough";
         }
         catch (IdiomaticaException ex)
         {

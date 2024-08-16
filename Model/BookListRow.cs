@@ -26,6 +26,7 @@ namespace Model
         public int? TotalWordCount { get; set; }
         public int? DistinctWordCount { get; set; }
         public decimal? DistinctKnownPercent { get; set; }
+        public decimal? DifficultyScore { get; set; }
         public bool? IsArchived { get; set; }
         public string? Tags { get; set; }
     }
