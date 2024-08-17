@@ -44,23 +44,49 @@ namespace Logic.Services.API
             	from allWords
             	group by bookId, wordText
             ), totalPageCount as (
-            	select bookId as BookId, {(int)AvailableBookStat.TOTALPAGES} as [Key], count(*) as [Value]
+            	select 
+                      bookId as BookId
+                    , {(int)AvailableBookStat.TOTALPAGES} as [Key]
+                    , FORMAT(count(*),'#') as [Value]
             	from allPages
             	group by bookId
             ), totalWordCount as (
-            	select bookId as BookId, {(int)AvailableBookStat.TOTALWORDCOUNT} as [Key], sum(numInstances) as [Value]
+            	select 
+                      bookId as BookId
+                    , {(int)AvailableBookStat.TOTALWORDCOUNT} as [Key]
+                    , FORMAT (sum(numInstances),'#') as [Value]
             	from distinctWords
             	group by bookId
             ), distinctWordCount as (
-            	select bookId as BookId, {(int)AvailableBookStat.DISTINCTWORDCOUNT} as [Key], count(wordText) as [Value]
+            	select 
+                      bookId as BookId
+                    , {(int)AvailableBookStat.DISTINCTWORDCOUNT} as [Key]
+                    , FORMAT (count(wordText),'#') as [Value]
             	from distinctWords
             	group by bookId
+            ), difficultyScore as (
+                select
+            	    b.Id as BookId
+            	    , {(int)AvailableBookStat.DIFFICULTYSCORE} as [Key]
+            	    , FORMAT (avg(case when wr.WordId is null then 65000 else wr.[DifficultyScore] end) / 650, '##.##') as [Value]
+                from [Idioma].[Page] p
+                left join [Idioma].[Book] b on p.BookId = b.Id
+                left join [Idioma].[Language] l on b.LanguageId = l.Id
+                left join [Idioma].[Paragraph] pp on p.Id = pp.PageId
+                left join [Idioma].[Sentence] s on pp.Id = s.ParagraphId
+                left join [Idioma].[Token] t on s.Id = t.SentenceId
+                left join [Idioma].[Word] w on t.WordId = w.Id
+                left join [Idioma].[WordRank] wr on l.Id = wr.[LanguageId] and w.Id = wr.[WordId]
+                where b.Id = {bookId}
+                group by b.Id
             ), bookStatQueries as (
             	select * from totalPageCount
             	union all
             	select * from totalWordCount
             	union all
             	select * from distinctWordCount
+                union all
+            	select * from difficultyScore
             )
             insert into [Idioma].[BookStat](BookId, [Key], [Value])
             select * from bookStatQueries
