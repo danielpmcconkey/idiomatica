@@ -58,8 +58,9 @@ namespace Logic.Services.API
         public static LanguageUser? LanguageUserGet(
             IdiomaticaContext context, int languageId, int userId)
         {
-            var task = LanguageUserGetAsync(context, languageId, userId);
-            return task.Result;
+            if (languageId < 1) ErrorHandler.LogAndThrow();
+            if (userId < 1) ErrorHandler.LogAndThrow();
+            return DataCache.LanguageUserByLanguageIdAndUserIdRead((languageId, userId), context);
         }
         public static async Task<LanguageUser?> LanguageUserGetAsync(
             IdiomaticaContext context, int languageId, int userId)
