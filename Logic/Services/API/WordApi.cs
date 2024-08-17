@@ -72,15 +72,16 @@ namespace Logic.Services.API
         }
 
 
-        public static List<(Word? word, int ordinal)> WordsCreateOrderedFromSentenceId(
+        public static List<(Word? word, int? ordinal, string? tokenDisplay)> WordsCreateOrderedFromSentenceId(
             IdiomaticaContext context, int languageId, int sentenceId)
         {
+            List<(Word? word, int? ordinal, string? tokenDisplay)> outList = [];
             if (sentenceId < 1) ErrorHandler.LogAndThrow();
             var sentence = DataCache.SentenceByIdRead(sentenceId, context);
             if (sentence == null || string.IsNullOrEmpty(sentence.Text))
             {
                 ErrorHandler.LogAndThrow();
-                return new List<(Word? word, int ordinal)>();
+                return outList;
             }
 
             // check if any already exist. there shouldn't be any but whateves
@@ -92,45 +93,38 @@ namespace Logic.Services.API
                 string.IsNullOrEmpty(language.Code))
             {
                 ErrorHandler.LogAndThrow();
-                return new List<(Word? word, int ordinal)>();
+                return outList;
             }
 
             var parser = LanguageParser.Factory.GetLanguageParser(language);
             if (parser is null) { ErrorHandler.LogAndThrow(); return []; }
             var wordsSplits = parser.SegmentTextByWordsKeepingPunctuation(sentence.Text);
             if (wordsSplits is null || wordsSplits.Length == 0)
-                return new List<(Word? word, int ordinal)>();
-            var orderedSplits = new List<(string split, int ordinal)>();
+                return outList;
+            
             for (int i = 0; i < wordsSplits.Length; i++)
             {
-                orderedSplits.Add((wordsSplits[i], i));
-            }
-
-            List<(string word, int ordinal)> cleanWords = orderedSplits
-                .Select(x => (parser.StipNonWordCharacters(x.split), x.ordinal))
-                .ToList();
-            List<(Word? word, int ordinal)> words = new();
-            foreach (var cleanWord in cleanWords)
-            {
-                Word? existingWord = DataCache.WordByLanguageIdAndTextLowerRead(
-                    ((int)languageId, cleanWord.word), context);
-                if (existingWord is not null)
+                Word? word = null;
+                int? ordinal = i;
+                string? tokenDisplay = wordsSplits[i];
+                var cleanWord = parser.TextToLower(parser.StipNonWordCharacters(tokenDisplay));
+                word = DataCache.WordByLanguageIdAndTextLowerRead(
+                    ((int)languageId, cleanWord), context);
+                if (word is null)
                 {
-                    words.Add(((Word?)existingWord, cleanWord.ordinal));
-                    continue;
+                    // word doesn't exist; create it
+                    word = WordApi.WordCreate(
+                        context, languageId, cleanWord, cleanWord);
                 }
-                // word doesn't exist; create it
-                Word? newWord = WordApi.WordCreate(
-                    context, languageId, cleanWord.word, cleanWord.word);
-                words.Add((newWord, cleanWord.ordinal));
+                
+                outList.Add((word, i, tokenDisplay));
             }
-
-            return words;
+            return outList;
         }
-        public static async Task<List<(Word? word, int ordinal)>> WordsCreateOrderedFromSentenceIdAsync(
+        public static async Task<List<(Word? word, int? ordinal, string? tokenDisplay)>> WordsCreateOrderedFromSentenceIdAsync(
             IdiomaticaContext context, int languageId, int sentenceId)
         {
-            return await Task<List<(Word word, int ordinal)>>.Run(() =>
+            return await Task<List<(Word? word, int? ordinal, string? tokenDisplay)>>.Run(() =>
             {
                 return WordsCreateOrderedFromSentenceId(context, languageId, sentenceId);
             });

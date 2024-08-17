@@ -131,7 +131,7 @@ namespace Logic.Services.API
             }
 
             // create the words first
-            List<(Word? word, int ordinal)> words = WordApi.WordsCreateOrderedFromSentenceId(
+            List<(Word? word, int? ordinal, string? tokenDisplay)> words = WordApi.WordsCreateOrderedFromSentenceId(
                 context, languageId, sentenceId);
 
             if (words.Count < 1) return new List<Token>();
@@ -140,12 +140,13 @@ namespace Logic.Services.API
             List<Token> tokens = [];
             foreach (var x in words)
             {
-                if (x.word is null || x.word.Id is null || x.word.Id < 1 || x.word.Text is null) continue;
+                if (x.word is null || x.word.Id is null || x.word.Id < 1 ||
+                    x.word.Text is null || x.ordinal is null || x.tokenDisplay is null) continue;
                 Token? newToken = TokenCreate(
                     context,
-                    $"{x.word.Text} ", // display; add the space that you previously took out
+                    $"{x.tokenDisplay} ", // display; add the space that you previously took out
                     sentenceId,
-                    x.ordinal,
+                    (int)x.ordinal,
                     (int)x.word.Id
                     );
                 if(newToken is null || newToken.Id is null)

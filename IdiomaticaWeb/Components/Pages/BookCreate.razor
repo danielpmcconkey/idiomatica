@@ -193,7 +193,7 @@
             string textInput = await _largeVolumeTextArea.GetTextValue();
 
             
-            Book? book = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
+            Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
                 context, (int)_loggedInUser.Id, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
             if (book is null || book.Id is null || book.Id < 1)
             {

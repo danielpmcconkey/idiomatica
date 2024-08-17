@@ -40,5 +40,9 @@ namespace Logic.LanguageParser
             string replacement = "";
             return Regex.Replace(text, pattern, replacement);
         }
+        public string TextToLower(string text)
+        {
+            return text.ToLower();
+        }
     }
 }
