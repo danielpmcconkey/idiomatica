@@ -118,6 +118,58 @@ namespace Logic.Services.API.Tests
 
 
         [TestMethod()]
+        public async Task BookListReadSortByDifficultyAsyncTest()
+        {
+            var context = CommonFunctions.CreateContext();
+            var originalPacket = new BookListDataPacket(context, false);
+            originalPacket.OrderBy = (int)AvailableBookListSortProperties.DIFFICULTY;
+            originalPacket.ShouldSortAscending = true;
+
+            int loggedInUserId = 1;
+
+            int originalRowCount = originalPacket.BookListRows is null ? 0 : originalPacket.BookListRows.Count;
+            var newPacket = await BookApi.BookListReadAsync(context, loggedInUserId, originalPacket);
+            
+            Assert.IsNotNull(newPacket.BookListRows);
+            Assert.IsTrue(newPacket.BookListRows.Count > 0);
+
+            decimal lastDifficulty = 0.0M;
+            for (int i = 0; i < newPacket.BookListRows.Count; i++)
+            {
+                var thisDifficulty = newPacket.BookListRows[i].DifficultyScore;
+                Assert.IsNotNull(thisDifficulty);
+                Assert.IsTrue(thisDifficulty >= lastDifficulty);
+                lastDifficulty = (decimal)thisDifficulty;
+            }
+        }
+        [TestMethod()]
+        public void BookListReadSortByDifficultyTest()
+        {
+            var context = CommonFunctions.CreateContext();
+            var originalPacket = new BookListDataPacket(context, false);
+            originalPacket.OrderBy = (int)AvailableBookListSortProperties.DIFFICULTY;
+            originalPacket.ShouldSortAscending = true;
+
+            int loggedInUserId = 1;
+
+            int originalRowCount = originalPacket.BookListRows is null ? 0 : originalPacket.BookListRows.Count;
+            var newPacket = BookApi.BookListRead(context, loggedInUserId, originalPacket);
+
+            Assert.IsNotNull(newPacket.BookListRows);
+            Assert.IsTrue(newPacket.BookListRows.Count > 0);
+
+            decimal lastDifficulty = 0.0M;
+            for (int i = 0; i < newPacket.BookListRows.Count; i++)
+            {
+                var thisDifficulty = newPacket.BookListRows[i].DifficultyScore;
+                Assert.IsNotNull(thisDifficulty);
+                Assert.IsTrue(thisDifficulty >= lastDifficulty);
+                lastDifficulty = (decimal)thisDifficulty;
+            }
+        }
+
+
+        [TestMethod()]
         public void BookListRowByBookIdAndUserIdReadTest()
         {
             int userId = 0;
