@@ -8,16 +8,30 @@
     <BodyTemplate>
         <div>
             <label for="inputTranslation" class="form-label">Translation</label>
-            @if(_wordUser is not null)
+            @if (_isFormattingTranslation)
             {
-                <textarea rows="4"
-                          cols="150"
-                          class="form-control"
-                          id="inputTranslation"
-                          @bind="_wordUser.Translation"
-                          @bind:event="oninput">
-                 </textarea>
+                <Button Color="ButtonColor.Info" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
             }
+            else
+            {
+                @if (_wordUser is not null)
+                {
+                    <textarea rows="4"
+                              cols="150"
+                              class="form-control"
+                              id="inputTranslation"
+                              @bind="_wordUser.Translation"
+                              @bind:event="oninput">
+                         </textarea>
+                }
+                <div class="m-1">
+                    <Button Color="ButtonColor.Secondary" Size="Size.Small" @onclick="OnFormatTranslationInputAsync">
+                        @UserService.GetUILabel("formatTranslationInput")
+                    </Button>
+                </div>
+            }
+            
+
         </div>
         <div>
             <label class="form-label">Word status</label><br />
@@ -98,6 +112,7 @@
 
     private bool _doesFlashCardExist = false;
     private bool _isSavingFlashCard = false;
+    private bool _isFormattingTranslation = false;
     const int LoadingDelayMiliseconds = 500;
 
 
@@ -193,6 +208,7 @@
                 _wordUser.Translation = string.Empty;
             }
             var context = await DbContextFactory.CreateDbContextAsync();
+
             await WordUserApi.WordUserUpdateAsync(
                 context, (int)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
             if (Parent is not null) Parent.RefreshState();
@@ -202,6 +218,41 @@
         {
             StateHasChanged();
             throw;
+        }
+    }
+    private async Task OnFormatTranslationInputAsync()
+    {
+        var t_delay = Task.Delay(LoadingDelayMiliseconds);
+        try
+        {
+            _isFormattingTranslation = true;
+            if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            if (_wordUser.Translation is null)
+            {
+                _wordUser.Translation = string.Empty;
+            }
+            var context = await DbContextFactory.CreateDbContextAsync();
+
+            if (ReadDataPacket.LanguageToCode is not null)
+            {
+                var formattedTranslation = await WordUserApi.WordUserTranslationFormatAsync(
+                    context, _wordUser.Translation, ReadDataPacket.LanguageToCode.Code);
+                if (formattedTranslation is not null) _wordUser.Translation = formattedTranslation;
+            }
+        }
+        catch
+        {
+            StateHasChanged();
+            throw;
+        }
+        finally
+        {
+            await t_delay;
+            _isFormattingTranslation = false;
         }
     }
     /// <summary>

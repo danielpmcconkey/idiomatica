@@ -15,6 +15,10 @@ namespace Logic.LanguageParser
         public string[] SegmentTextByWordsKeepingPunctuation(string text);
         public string StipNonWordCharacters(string text);
         public string TextToLower(string text);
+        /// <summary>
+        /// used to make it easier to cut+paste from certain online dictionaries
+        /// </summary>
+        public string FormatTranslation(string text);
         //public string StripAllButWordCharacters(string input);
         //public string[] GetWordsFromPage(Page page);
         //public string[] GetWordsFromText(string text);

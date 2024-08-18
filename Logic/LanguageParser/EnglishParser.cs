@@ -1,7 +1,4 @@
-﻿using Logic.UILabels;
-using Microsoft.IdentityModel.Tokens;
-using Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Logic.LanguageParser
 {
-    public class SpanishParser : ILanguageParser
+    public class EnglishParser : ILanguageParser
     {
         public string[] SegmentTextByParagraphs(string text)
         {
@@ -19,7 +16,7 @@ namespace Logic.LanguageParser
         public string[] SegmentTextBySentences(string text)
         {
             return PragmaticSegmenterNet.Segmenter
-                .Segment(text, PragmaticSegmenterNet.Language.Spanish)
+                .Segment(text, PragmaticSegmenterNet.Language.English)
                 .ToArray();
         }
         public string[] SegmentTextByWordsKeepingPunctuation(string text)
@@ -36,11 +33,7 @@ namespace Logic.LanguageParser
         }
         public string FormatTranslation(string text)
         {
-            // spanish dict verb conjugations
-            const string pattern = "(Preterite|Present|Affirmative imperative|Subjunctive|Imperfect|Conditional|Future|Future subjunctive|Imperfect subjunctive|Future subjunctive|Negative imperative)(nosotros|tú|usted|vosotros|él/ella/usted|ustedes|yo|ellos/ellas/ustedes|vos)conjugation of([\\w]{1,})\\.";
-            const string replacement = "$1 $2 conjugation of $3";
-            var formatted = Regex.Replace(text, pattern, replacement, RegexOptions.None);
-            return formatted;
+            throw new NotImplementedException();
         }
     }
 }

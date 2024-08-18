@@ -136,5 +136,28 @@ namespace Logic.Services.API
             dbWordUser.StatusChanged = DateTime.Now;
             await DataCache.WordUserUpdateAsync(dbWordUser, context);
         }
+
+
+        public static string? WordUserTranslationFormat(IdiomaticaContext context,
+            string? translation, string? translationLanguageCode)
+        {
+            if (string.IsNullOrEmpty(translation) || string.IsNullOrEmpty(translationLanguageCode))
+                return translation;
+            // get the language so we can use the right parser
+            var language = LanguageApi.LanguageReadByCode(context, translationLanguageCode);
+            if (language is null) { ErrorHandler.LogAndThrow(); return translation; }
+            var parser = LanguageParser.Factory.GetLanguageParser(language);
+            if (parser is null) { ErrorHandler.LogAndThrow(); return translation; }
+            return parser.FormatTranslation(translation);
+
+        }
+        public static async Task<string?> WordUserTranslationFormatAsync(IdiomaticaContext context,
+            string? translation, string? translationLanguageCode)
+        {
+            return await Task<WordUser>.Run(() =>
+            {
+                return WordUserTranslationFormat(context, translation, translationLanguageCode);
+            });
+        }
     }
 }
