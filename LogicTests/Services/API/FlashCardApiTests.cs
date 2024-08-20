@@ -9,6 +9,7 @@ using LogicTests;
 using Model.DAL;
 using Model;
 using Logic.Telemetry;
+using System.Linq.Expressions;
 
 namespace Logic.Services.API.Tests
 {
@@ -353,7 +354,6 @@ namespace Logic.Services.API.Tests
                     Assert.IsNotNull(card.FlashCardParagraphTranslationBridges);
                     Assert.IsTrue(card.FlashCardParagraphTranslationBridges.Count > 0);
                     Assert.IsNotNull(card.Status);
-                    Assert.IsNotNull(card.NextReview);
                     Assert.IsNotNull(card.UniqueKey);
                 }
 
@@ -416,7 +416,6 @@ namespace Logic.Services.API.Tests
                     Assert.IsNotNull(card.FlashCardParagraphTranslationBridges);
                     Assert.IsTrue(card.FlashCardParagraphTranslationBridges.Count > 0);
                     Assert.IsNotNull(card.Status);
-                    Assert.IsNotNull(card.NextReview);
                     Assert.IsNotNull(card.UniqueKey);
                 }
 
@@ -430,7 +429,7 @@ namespace Logic.Services.API.Tests
 
 
         [TestMethod()]
-        public void FlashCardsFetchByNextReviewDateByLanguageUserTest()
+        public void FlashCardsFetchByNextReviewDateByPredicateTest()
         {
             int userId = 0;
             var context = CommonFunctions.CreateContext();
@@ -474,10 +473,25 @@ namespace Logic.Services.API.Tests
                     context, (int)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
+                foreach (var card in cards)
+                {
+                    if (card.Id is null || card.WordUserId is null) { ErrorHandler.LogAndThrow(); return; }
+                    // update next review to 5 mins ago, so we can pull them
+                    FlashCardApi.FlashCardUpdate(
+                        context, (int)card.Id, (int)card.WordUserId,
+                        AvailableFlashCardStatus.ACTIVE, DateTime.Now.AddMinutes(-5),
+                        card.UniqueKey);
+                }
 
                 // now pull them 
-                var cardsPulled = FlashCardApi.FlashCardsFetchByNextReviewDateByLanguageUser(
-                    context, (int)languageUser.Id, numCards);
+                Expression<Func<FlashCard, bool>> predicate = fc => fc.WordUser != null
+                    && fc.WordUser.LanguageUserId == languageUser.Id
+                    && fc.Status == AvailableFlashCardStatus.ACTIVE
+                    && fc.NextReview != null
+                    && fc.NextReview <= DateTime.Now;
+
+                var cardsPulled = FlashCardApi.FlashCardsFetchByNextReviewDateByPredicate(
+                    context, predicate, numCards);
 
                 Assert.IsNotNull(cardsPulled);
                 Assert.IsTrue(cardsPulled.Count == numCards);
@@ -500,7 +514,7 @@ namespace Logic.Services.API.Tests
             }
         }
         [TestMethod()]
-        public async Task FlashCardsFetchByNextReviewDateByLanguageUserAsyncTest()
+        public async Task FlashCardsFetchByNextReviewDateByPredicateAsyncTest()
         {
             int userId = 0;
             var context = CommonFunctions.CreateContext();
@@ -544,10 +558,25 @@ namespace Logic.Services.API.Tests
                     context, (int)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
+                foreach (var card in cards)
+                {
+                    if (card.Id is null || card.WordUserId is null) { ErrorHandler.LogAndThrow(); return; }
+                    // update next review to 5 mins ago, so we can pull them
+                    await FlashCardApi.FlashCardUpdateAsync(
+                        context, (int)card.Id, (int)card.WordUserId,
+                        AvailableFlashCardStatus.ACTIVE, DateTime.Now.AddMinutes(-5),
+                        card.UniqueKey);
+                }
 
                 // now pull them 
-                var cardsPulled = await FlashCardApi.FlashCardsFetchByNextReviewDateByLanguageUserAsync(
-                    context, (int)languageUser.Id, numCards);
+                Expression<Func<FlashCard, bool>> predicate = fc => fc.WordUser != null
+                    && fc.WordUser.LanguageUserId == languageUser.Id
+                    && fc.Status == AvailableFlashCardStatus.ACTIVE
+                    && fc.NextReview != null
+                    && fc.NextReview <= DateTime.Now;
+
+                var cardsPulled = await FlashCardApi.FlashCardsFetchByNextReviewDateByPredicateAsync(
+                    context, predicate, numCards);
 
                 Assert.IsNotNull(cardsPulled);
                 Assert.IsTrue(cardsPulled.Count == numCards);

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using DeepL;
+using System.Linq.Expressions;
 
 namespace Logic.Services.API
 {
@@ -22,7 +23,7 @@ namespace Logic.Services.API
             if (wordUser == null || wordUser.Id < 1) { ErrorHandler.LogAndThrow(); return null; }
             card.WordUser = wordUser;
             card.WordUserId = wordUserId;
-            card.NextReview = DateTime.Now;
+            card.NextReview = null;
             card.Status = AvailableFlashCardStatus.ACTIVE;
             card = DataCache.FlashCardCreate(card, context);
             if (card is null || card.Id is null || card.Id < 1) { ErrorHandler.LogAndThrow(); return null; }
@@ -215,18 +216,18 @@ namespace Logic.Services.API
         }
 
 
-        public static List<FlashCard>? FlashCardsFetchByNextReviewDateByLanguageUser(
-            IdiomaticaContext context, int languageUserId, int numCards)
+        public static List<FlashCard>? FlashCardsFetchByNextReviewDateByPredicate(
+            IdiomaticaContext context, Expression<Func<FlashCard, bool>> predicate, int take)
         {
-            return DataCache.FlashCardsActiveAndFullRelationshipsByLanguageUserIdRead(
-                (languageUserId, numCards), context);
+            return DataCache.FlashCardsActiveAndFullRelationshipsByPredicateRead(
+                predicate, take, context);
         }
-        public static async Task<List<FlashCard>?> FlashCardsFetchByNextReviewDateByLanguageUserAsync(
-            IdiomaticaContext context, int languageUserId, int numCards)
+        public static async Task<List<FlashCard>?> FlashCardsFetchByNextReviewDateByPredicateAsync(
+            IdiomaticaContext context, Expression<Func<FlashCard, bool>> predicate, int take)
         {
             return await Task<List<FlashCard>?>.Run(() =>
             {
-                return FlashCardsFetchByNextReviewDateByLanguageUser(context, languageUserId, numCards);
+                return FlashCardsFetchByNextReviewDateByPredicate(context, predicate, take);
             });
         }
 
