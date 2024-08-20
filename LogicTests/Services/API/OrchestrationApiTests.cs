@@ -571,20 +571,40 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(dataPacket1.CurrentCard);
                 Assert.IsNotNull(dataPacket1.CurrentCard.Id);
 
-                // disposition the current card as stop
-                dataPacket1 = OrchestrationApi.OrchestrateFlashCardDispositionAndAdvance(
-                    context, dataPacket1, AvailableFlashCardAttemptStatus.STOP);
-                // disposition the next card as stop
-                dataPacket1 = OrchestrationApi.OrchestrateFlashCardDispositionAndAdvance(
-                    context, dataPacket1, AvailableFlashCardAttemptStatus.STOP);
+
+                // manually update card 1 to do not use, and next review date in
+                // the past so it would show up in the next deck creation had we
+                // not set it to STOP
+                Assert.IsNotNull(dataPacket1);
+                var cardToUpdate1 = dataPacket1.Deck[1];
+                Assert.IsNotNull(cardToUpdate1);
+                Assert.IsNotNull(cardToUpdate1.Id);
+                Assert.IsNotNull(cardToUpdate1.WordUserId);
+                FlashCardApi.FlashCardUpdate(context, (int)cardToUpdate1.Id,
+                    (int)cardToUpdate1.WordUserId, AvailableFlashCardStatus.DONTUSE,
+                    DateTime.Now.AddHours(-1), cardToUpdate1.UniqueKey);
+
+                // manually update card 2's next review date so it shows up in the next deck creation
+                Assert.IsNotNull(dataPacket1);
+                var cardToUpdate = dataPacket1.Deck[1];
+                Assert.IsNotNull(cardToUpdate);
+                Assert.IsNotNull(cardToUpdate.Id);
+                Assert.IsNotNull(cardToUpdate.WordUserId);
+                FlashCardApi.FlashCardUpdate(context, (int)cardToUpdate.Id,
+                    (int)cardToUpdate.WordUserId, AvailableFlashCardStatus.ACTIVE,
+                    DateTime.Now.AddHours(-1), cardToUpdate.UniqueKey);
 
                 // create deck 2
                 var dataPacket2 = OrchestrationApi.OrchestrateFlashCardDeckCreation(
                     context, userId, learningLanguageCode, numNew, numOld);
 
+                int expectedCount = 1 // prior review card
+                    + 4 // numNew
+                    ;
+
                 Assert.IsNotNull(dataPacket2);
                 Assert.IsNotNull(dataPacket2.Deck);
-                Assert.IsTrue(dataPacket2.CardCount == numNew + numOld - 1); // 4 new cards + 3 old cards, but there are only 2 old cards left that aren't stopped
+                Assert.AreEqual(expectedCount, dataPacket2.CardCount);
                 Assert.IsNotNull(dataPacket2.CurrentCard);
             }
             finally
@@ -645,20 +665,40 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(dataPacket1.CurrentCard);
                 Assert.IsNotNull(dataPacket1.CurrentCard.Id);
 
-                // disposition the current card as stop
-                dataPacket1 = await OrchestrationApi.OrchestrateFlashCardDispositionAndAdvanceAsync(
-                    context, dataPacket1, AvailableFlashCardAttemptStatus.STOP);
-                // disposition the next card as stop
-                dataPacket1 = await OrchestrationApi.OrchestrateFlashCardDispositionAndAdvanceAsync(
-                    context, dataPacket1, AvailableFlashCardAttemptStatus.STOP);
+                
+                // manually update card 1 to do not use, and next review date in
+                // the past so it would show up in the next deck creation had we
+                // not set it to STOP
+                Assert.IsNotNull(dataPacket1);
+                var cardToUpdate1 = dataPacket1.Deck[1];
+                Assert.IsNotNull(cardToUpdate1);
+                Assert.IsNotNull(cardToUpdate1.Id);
+                Assert.IsNotNull(cardToUpdate1.WordUserId);
+                await FlashCardApi.FlashCardUpdateAsync(context, (int)cardToUpdate1.Id,
+                    (int)cardToUpdate1.WordUserId, AvailableFlashCardStatus.DONTUSE,
+                    DateTime.Now.AddHours(-1), cardToUpdate1.UniqueKey);
+
+                // manually update card 2's next review date so it shows up in the next deck creation
+                Assert.IsNotNull(dataPacket1); 
+                var cardToUpdate = dataPacket1.Deck[1];
+                Assert.IsNotNull(cardToUpdate);
+                Assert.IsNotNull(cardToUpdate.Id);
+                Assert.IsNotNull(cardToUpdate.WordUserId);
+                await FlashCardApi.FlashCardUpdateAsync(context, (int)cardToUpdate.Id,
+                    (int)cardToUpdate.WordUserId, AvailableFlashCardStatus.ACTIVE,
+                    DateTime.Now.AddHours(-1), cardToUpdate.UniqueKey);
 
                 // create deck 2
                 var dataPacket2 = await OrchestrationApi.OrchestrateFlashCardDeckCreationAsync(
                     context, userId, learningLanguageCode, numNew, numOld);
 
+                int expectedCount = 1 // prior review card
+                    + 4 // numNew
+                    ;
+
                 Assert.IsNotNull(dataPacket2);
                 Assert.IsNotNull(dataPacket2.Deck);
-                Assert.IsTrue(dataPacket2.CardCount == numNew + numOld - 1); // 4 new cards + 3 old cards, but there are only 2 old cards left that aren't stopped
+                Assert.AreEqual(expectedCount, dataPacket2.CardCount);
                 Assert.IsNotNull(dataPacket2.CurrentCard);
             }
             finally

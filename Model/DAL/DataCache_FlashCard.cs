@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -140,24 +141,16 @@ namespace Model.DAL
                 return FlashCardAndFullRelationshipsByIdRead(key, context);
             });
         }
-        public static List<FlashCard>? FlashCardsActiveAndFullRelationshipsByLanguageUserIdRead(
-            (int languageUserId, int take) key, IdiomaticaContext context)
+        public static List<FlashCard>? FlashCardsActiveAndFullRelationshipsByPredicateRead(
+            Expression<Func<FlashCard, bool>> predicate, int take, IdiomaticaContext context)
         {
             // don't check cache here. The statuses change and new cards get
             // created for the first time while this cache thinks there's a
             // null for the deck
-            //if (FlashCardsActiveAndFullRelationshipsByLanguageUserId.ContainsKey(key))
-            //{
-            //    return FlashCardsActiveAndFullRelationshipsByLanguageUserId[key];
-            //}
 
             // read DB
             var value = context.FlashCards
-                .Where(
-                       fc => fc.WordUser != null 
-                    && fc.WordUser.LanguageUserId == key.languageUserId
-                    && fc.Status == AvailableFlashCardStatus.ACTIVE
-                    )
+                .Where(predicate)
                 .Include(fc => fc.WordUser)
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                     .ThenInclude(wu => wu.Word)
@@ -170,14 +163,14 @@ namespace Model.DAL
                             .ThenInclude(pp => pp.Sentences)
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                 .OrderBy(fc => fc.NextReview)
-                .Take(key.take)
+                .Take(take)
                 .ToList();
             if (value is null) return value;
             // write to cache
             //FlashCardsActiveAndFullRelationshipsByLanguageUserId[key] = value;
             foreach (var f in value)
             {
-                FlashCardUpdateAllCaches(f, key);
+                FlashCardUpdateAllCaches(f);
             }
             return value;
         }
@@ -236,7 +229,7 @@ namespace Model.DAL
             }
             return newList;
         }
-        private static void FlashCardUpdateAllCaches(FlashCard value, (int languageUserId, int take)? keyLanguageUser = null)
+        private static void FlashCardUpdateAllCaches(FlashCard value)
         {
             if (value.Id is null) throw new ArgumentNullException(nameof(value));
 
@@ -251,18 +244,7 @@ namespace Model.DAL
                 cachedFull.WordUserId = value.WordUserId;
                 cachedFull.Status = value.Status;
             }
-            //if(keyLanguageUser != null)
-            //{
-            //    // FlashCardsActiveAndFullRelationshipsByLanguageUserId
-            //    var cachedList2 = FlashCardsActiveAndFullRelationshipsByLanguageUserId
-            //        .Where(x => doesFlashCardListContainId(x.Value, (int)value.Id)).ToArray();
-            //    for (int i = 0; i < cachedList2.Length; i++)
-            //    {
-            //        var item = cachedList2[i];
-            //        var newList = FlashCardsListGetUpdated(item.Value, value);
-            //        FlashCardsActiveAndFullRelationshipsByLanguageUserId[item.Key] = newList;
-            //    }
-            //}
+            
             return;
         }
     }

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Net;
 using k8s.KubeConfigModels;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Linq.Expressions;
 
 namespace Logic.Services.API
 {
@@ -153,7 +154,7 @@ namespace Logic.Services.API
             {
                 default:
                 case AvailableFlashCardAttemptStatus.GOOD:
-                    nextReview = DateTime.Now.AddDays(1);
+                    nextReview = DateTime.Now.AddDays(3);
                     break;
                 case AvailableFlashCardAttemptStatus.WRONG:
                     nextReview = DateTime.Now.AddMinutes(5);
@@ -162,7 +163,7 @@ namespace Logic.Services.API
                     nextReview = DateTime.Now.AddHours(1);
                     break;
                 case AvailableFlashCardAttemptStatus.EASY:
-                    nextReview = DateTime.Now.AddDays(5);
+                    nextReview = DateTime.Now.AddDays(7);
                     break;
                 case AvailableFlashCardAttemptStatus.STOP:
                     newStatus = AvailableFlashCardStatus.DONTUSE;
@@ -172,6 +173,13 @@ namespace Logic.Services.API
             var card = FlashCardApi.FlashCardUpdate(
                 context, (int)dataPacket.CurrentCard.Id, (int)dataPacket.CurrentCard.WordUserId,
                 newStatus, nextReview, dataPacket.CurrentCard.UniqueKey);
+
+            if (card is not null && previousCardsStatus == AvailableFlashCardAttemptStatus.WRONG)
+            {
+                // add the card to the end of the deck
+                dataPacket.Deck.Add(card);
+                dataPacket.CardCount++;
+            }
 
             // advance the deck
             dataPacket.CurrentCardPosition++;
@@ -214,15 +222,44 @@ namespace Logic.Services.API
             var languageUser = DataCache.LanguageUserByLanguageIdAndUserIdRead(((int)language.Id, userId), context);
             if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return null; }
 
-            // create / pull the cards and add them to the deck
-            var oldCards = FlashCardApi.FlashCardsFetchByNextReviewDateByLanguageUser(
-                context, (int)languageUser.Id, numReview);
-            var newCards = FlashCardApi.FlashCardsCreate(
-                context, (int)languageUser.Id, numNew, uiLanguageCode.Code);
+            // pull cards that are ready for their next review
+            Expression<Func<FlashCard, bool>> predicate = fc => fc.WordUser != null
+                    && fc.WordUser.LanguageUserId == languageUser.Id
+                    && fc.Status == AvailableFlashCardStatus.ACTIVE
+                    && fc.NextReview != null
+                    && fc.NextReview <= DateTime.Now;
+
+            var oldCards = FlashCardApi.FlashCardsFetchByNextReviewDateByPredicate(
+                context, predicate, numReview);
+
             if (oldCards is not null && oldCards.Count > 0) 
                 newDataPacket.Deck.AddRange(oldCards);
-            if (newCards is not null && newCards.Count > 0) 
-                newDataPacket.Deck.AddRange(newCards);
+
+            // pull cards that have already been created, but never reviewed
+            Expression<Func<FlashCard, bool>> predicate2 = fc => fc.WordUser != null
+                    && fc.WordUser.LanguageUserId == languageUser.Id
+                    && fc.Status == AvailableFlashCardStatus.ACTIVE
+                    && fc.NextReview == null;
+
+            var readyForReviewCards = FlashCardApi.FlashCardsFetchByNextReviewDateByPredicate(
+                context, predicate2, numNew);
+
+            int numReadyForReviewReturned = 0;
+            if (readyForReviewCards is not null && readyForReviewCards.Count > 0)
+            {
+                newDataPacket.Deck.AddRange(readyForReviewCards);
+                numReadyForReviewReturned = readyForReviewCards.Count;
+            }
+
+            // create enough new cards to fill out the numNew
+            if(numReadyForReviewReturned < numNew)
+            {
+                int numToCreate = numNew - numReadyForReviewReturned;
+                var newCards = FlashCardApi.FlashCardsCreate(
+                context, (int)languageUser.Id, numToCreate, uiLanguageCode.Code);
+                if (newCards is not null && newCards.Count > 0)
+                    newDataPacket.Deck.AddRange(newCards);
+            }
            
             // shuffle it
             newDataPacket.Deck = FlashCardApi.FlashCardDeckShuffle(newDataPacket.Deck);
@@ -231,7 +268,6 @@ namespace Logic.Services.API
             newDataPacket.CardCount = newDataPacket.Deck.Count;
             newDataPacket.CurrentCardPosition = 0;
             newDataPacket.CurrentCard = newDataPacket.Deck[0];
-            
 
             return newDataPacket;
         }

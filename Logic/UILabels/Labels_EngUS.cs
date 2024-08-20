@@ -126,7 +126,7 @@ namespace Logic.UILabels
             _labels.Add("flashCardReviewInitializationError", "There was an error initializing flash card review.");
             _labels.Add("fcLanguage", "Which language do you want to study today?");
             _labels.Add("fcSelectLanguage", "Please select language");
-            _labels.Add("fcNumNewCardsLabel", "How many new cards do you want to create?");
+            _labels.Add("fcNumNewCardsLabel", "How many new cards do you want to add?");
             _labels.Add("fcNumOldCardsLabel", "How many review cards do you want to fetch?");
             _labels.Add("fcCreateDeck", "Create deck");
             _labels.Add("fcSeeAnswer", "Show translation");
