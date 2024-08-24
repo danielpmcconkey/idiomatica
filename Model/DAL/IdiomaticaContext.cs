@@ -29,6 +29,7 @@ namespace Model.DAL
         public DbSet<UserBreadCrumb> UserBreadCrumbs { get; set; }
         public DbSet<UserSetting> UserSettings { get; set; }
         public DbSet<Word> Words { get; set; }
+        public DbSet<WordTranslation> WordTranslations { get; set; }
         public DbSet<WordUser> WordUsers { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<IdentityRole> IdentityRoles { get; set; }
@@ -191,6 +192,13 @@ namespace Model.DAL
                 e.HasMany(w => w.Tokens).WithOne(t => t.Word).HasForeignKey(t => t.WordId)
                     .OnDelete(DeleteBehavior.NoAction);
                 e.HasMany(w => w.WordUsers).WithOne(wu => wu.Word).HasForeignKey(wu => wu.WordId);
+            });
+            modelBuilder.Entity<WordTranslation>(e => {
+                e.HasKey(wt => wt.UniqueKey);
+                e.HasOne(wt => wt.LanguageTo).WithMany(l => l.WordTranslations).HasForeignKey(wt => wt.LanguageToId);
+                e.HasOne(wt => wt.Word).WithMany(w => w.WordTranslations).HasForeignKey(wt => wt.WordId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                e.Property(wt => wt.PartOfSpeech).HasConversion<int>();
             });
             modelBuilder.Entity<WordUser>(e => {
                 e.HasKey(wu => wu.Id);

@@ -5,37 +5,33 @@
 
 <h3>FeatureTest</h3>
 
-<Modal @ref="modal" Title="Modal title">
-    <BodyTemplate>
-        Modal body text goes here.
-    </BodyTemplate>
-    <FooterTemplate>
-        <Button Color="ButtonColor.Secondary" @onclick="OnHideModalClick">Close</Button>
-        <Button Color="ButtonColor.Primary">Save changes</Button>
-    </FooterTemplate>
-</Modal>
-
-<Button Color="ButtonColor.Primary" @onclick="OnShowModalClick">Show Modal</Button>
+<div>
+    <ConjugationTable />
+    
+</div>
 
 @code {
+    
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            var context = DbContextFactory.CreateDbContext();
-            BookUser? bookUser = context.BookUsers.Where(x => x.LanguageUserId == 1).FirstOrDefault();
-            if (bookUser is null || bookUser.LanguageUserId is null) return;
-            var languageUser = await DataCache.LanguageUserByIdReadAsync(
-                     (int)bookUser.LanguageUserId, context);
-            bookUser.LanguageUser = languageUser;
-            //bookUser = _nullHandler.ThrowIfNull<BookUser>(bookUser);
-            //int languageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(bookUser.LanguageUserId);
-            // if (bookUser.LanguageUser == null)
-            // {
-            //     // pull it from the db
-            //     bookUser.LanguageUser = await DataCache.LanguageUserByIdReadAsync(
-            //         (int)bookUser.LanguageUserId, context);
-            // }
+            
+
+            // var context = DbContextFactory.CreateDbContext();
+            // BookUser? bookUser = context.BookUsers.Where(x => x.LanguageUserId == 1).FirstOrDefault();
+            // if (bookUser is null || bookUser.LanguageUserId is null) return;
+            // var languageUser = await DataCache.LanguageUserByIdReadAsync(
+            //          (int)bookUser.LanguageUserId, context);
+            // bookUser.LanguageUser = languageUser;
+            // //bookUser = _nullHandler.ThrowIfNull<BookUser>(bookUser);
+            // //int languageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(bookUser.LanguageUserId);
+            // // if (bookUser.LanguageUser == null)
+            // // {
+            // //     // pull it from the db
+            // //     bookUser.LanguageUser = await DataCache.LanguageUserByIdReadAsync(
+            // //         (int)bookUser.LanguageUserId, context);
+            // // }
         }
         catch (Exception ex)
         {

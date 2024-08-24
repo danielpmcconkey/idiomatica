@@ -1,0 +1,628 @@
+﻿@page "/ConjugationTable"
+@rendermode InteractiveServer
+@inject UserService UserService;
+
+@* This assumes spanish. will need to change to support other languages *@
+
+<style>
+    .piecePronoun {display:none;}
+    .pieceCore {color:black;}
+    .pieceRegular {color: #00cc00; font-weight:900;}
+    .pieceIrregular {color: #cc0000; font-weight:900}
+    .clubbedRow {background-color: #dedede;}
+</style>
+
+<div class="border p-2">
+    <h3>Indicative conjugations of @infinitive</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th scope="col">Present</th>
+                <th scope="col">Preterite</th>
+                <th scope="col">Imperfect</th>
+                <th scope="col">Conditional</th>
+                <th scope="col">Future</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">yo</th>
+                <td><Conjugation VerbConjugation="@presentYo" /></td>
+                <td><Conjugation VerbConjugation="@preteriteYo" /></td>
+                <td><Conjugation VerbConjugation="@imperfectYo" /></td>
+                <td><Conjugation VerbConjugation="@conditionalYo" /></td>
+                <td><Conjugation VerbConjugation="@futureYo" /></td>
+            </tr>
+            <tr>
+                <th scope="row">tú</th>
+                <td><Conjugation VerbConjugation="@presentTu" /></td>
+                <td><Conjugation VerbConjugation="@preteriteTu" /></td>
+                <td><Conjugation VerbConjugation="@imperfectTu" /></td>
+                <td><Conjugation VerbConjugation="@conditionalTu" /></td>
+                <td><Conjugation VerbConjugation="@futureTu" /></td>
+            </tr>
+            <tr class="clubbedRow">
+                <th scope="row">usted</th>
+                <td><Conjugation VerbConjugation="@presentUsted" /></td>
+                <td><Conjugation VerbConjugation="@preteriteUsted" /></td>
+                <td><Conjugation VerbConjugation="@imperfectUsted" /></td>
+                <td><Conjugation VerbConjugation="@conditionalUsted" /></td>
+                <td><Conjugation VerbConjugation="@futureUsted" /></td>
+            </tr>
+            <tr class="clubbedRow">
+                <th scope="row">él</th>
+                <td><Conjugation VerbConjugation="@presentEl" /></td>
+                <td><Conjugation VerbConjugation="@preteriteEl" /></td>
+                <td><Conjugation VerbConjugation="@imperfectEl" /></td>
+                <td><Conjugation VerbConjugation="@conditionalEl" /></td>
+                <td><Conjugation VerbConjugation="@futureEl" /></td>
+            </tr>
+            <tr class="clubbedRow">
+                <th scope="row">ella</th>
+                <td><Conjugation VerbConjugation="@presentElla" /></td>
+                <td><Conjugation VerbConjugation="@preteriteElla" /></td>
+                <td><Conjugation VerbConjugation="@imperfectElla" /></td>
+                <td><Conjugation VerbConjugation="@conditionalElla" /></td>
+                <td><Conjugation VerbConjugation="@futureElla" /></td>
+            </tr>
+            <tr>
+                <th scope="row">nosotros</th>
+                <td><Conjugation VerbConjugation="@presentNosotros" /></td>
+                <td><Conjugation VerbConjugation="@preteriteNosotros" /></td>
+                <td><Conjugation VerbConjugation="@imperfectNosotros" /></td>
+                <td><Conjugation VerbConjugation="@conditionalNosotros" /></td>
+                <td><Conjugation VerbConjugation="@futureNosotros" /></td>
+            </tr>
+            <tr>
+                <th scope="row">vosotros</th>
+                <td><Conjugation VerbConjugation="@presentVosotros" /></td>
+                <td><Conjugation VerbConjugation="@preteriteVosotros" /></td>
+                <td><Conjugation VerbConjugation="@imperfectVosotros" /></td>
+                <td><Conjugation VerbConjugation="@conditionalVosotros" /></td>
+                <td><Conjugation VerbConjugation="@futureVosotros" /></td>
+            </tr>
+            <tr class="clubbedRow">
+                <th scope="row">ustedes</th>
+                <td><Conjugation VerbConjugation="@presentUstedes" /></td>
+                <td><Conjugation VerbConjugation="@preteriteUstedes" /></td>
+                <td><Conjugation VerbConjugation="@imperfectUstedes" /></td>
+                <td><Conjugation VerbConjugation="@conditionalUstedes" /></td>
+                <td><Conjugation VerbConjugation="@futureUstedes" /></td>
+            </tr>
+            <tr class="clubbedRow">
+                <th scope="row">ellos</th>
+                <td><Conjugation VerbConjugation="@presentEllos" /></td>
+                <td><Conjugation VerbConjugation="@preteriteEllos" /></td>
+                <td><Conjugation VerbConjugation="@imperfectEllos" /></td>
+                <td><Conjugation VerbConjugation="@conditionalEllos" /></td>
+                <td><Conjugation VerbConjugation="@futureEllos" /></td>
+            </tr>
+            <tr class="clubbedRow">
+                <th scope="row">ellas</th>
+                <td><Conjugation VerbConjugation="@presentEllas" /></td>
+                <td><Conjugation VerbConjugation="@preteriteEllas" /></td>
+                <td><Conjugation VerbConjugation="@imperfectEllas" /></td>
+                <td><Conjugation VerbConjugation="@conditionalEllas" /></td>
+                <td><Conjugation VerbConjugation="@futureEllas" /></td>
+            </tr>
+        </tbody>
+
+    </table>
+</div>
+
+@code {
+    List<VerbConjugation> conjugations = [];
+
+    private string? infinitive { get; set; }
+
+    private VerbConjugation? presentYo { get; set; }
+    private VerbConjugation? presentTu { get; set; }
+    private VerbConjugation? presentEl { get; set; }
+    private VerbConjugation? presentElla { get; set; }
+    private VerbConjugation? presentUsted { get; set; }
+    private VerbConjugation? presentNosotros { get; set; }
+    private VerbConjugation? presentVosotros { get; set; }
+    private VerbConjugation? presentUstedes { get; set; }
+    private VerbConjugation? presentEllos { get; set; }
+    private VerbConjugation? presentEllas { get; set; }
+
+    private VerbConjugation? preteriteYo { get; set; }
+    private VerbConjugation? preteriteTu { get; set; }
+    private VerbConjugation? preteriteEl { get; set; }
+    private VerbConjugation? preteriteElla { get; set; }
+    private VerbConjugation? preteriteUsted { get; set; }
+    private VerbConjugation? preteriteNosotros { get; set; }
+    private VerbConjugation? preteriteVosotros { get; set; }
+    private VerbConjugation? preteriteUstedes { get; set; }
+    private VerbConjugation? preteriteEllos { get; set; }
+    private VerbConjugation? preteriteEllas { get; set; }
+
+    private VerbConjugation? imperfectYo { get; set; }
+    private VerbConjugation? imperfectTu { get; set; }
+    private VerbConjugation? imperfectEl { get; set; }
+    private VerbConjugation? imperfectElla { get; set; }
+    private VerbConjugation? imperfectUsted { get; set; }
+    private VerbConjugation? imperfectNosotros { get; set; }
+    private VerbConjugation? imperfectVosotros { get; set; }
+    private VerbConjugation? imperfectUstedes { get; set; }
+    private VerbConjugation? imperfectEllos { get; set; }
+    private VerbConjugation? imperfectEllas { get; set; }
+
+    private VerbConjugation? conditionalYo { get; set; }
+    private VerbConjugation? conditionalTu { get; set; }
+    private VerbConjugation? conditionalEl { get; set; }
+    private VerbConjugation? conditionalElla { get; set; }
+    private VerbConjugation? conditionalUsted { get; set; }
+    private VerbConjugation? conditionalNosotros { get; set; }
+    private VerbConjugation? conditionalVosotros { get; set; }
+    private VerbConjugation? conditionalUstedes { get; set; }
+    private VerbConjugation? conditionalEllos { get; set; }
+    private VerbConjugation? conditionalEllas { get; set; }
+
+    private VerbConjugation? futureYo { get; set; }
+    private VerbConjugation? futureTu { get; set; }
+    private VerbConjugation? futureEl { get; set; }
+    private VerbConjugation? futureElla { get; set; }
+    private VerbConjugation? futureUsted { get; set; }
+    private VerbConjugation? futureNosotros { get; set; }
+    private VerbConjugation? futureVosotros { get; set; }
+    private VerbConjugation? futureUstedes { get; set; }
+    private VerbConjugation? futureEllos { get; set; }
+    private VerbConjugation? futureEllas { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Logic.Conjugator.EnglishVerbTranslator translator = new();
+
+            Verb hablar = new()
+                {
+                    Infinitive = "hablar",
+                    Core = "habl",
+                    Gerund = "hablando",
+                    PastParticiple = "hablado",
+                };
+            Verb toSpeak = new()
+                {
+                    Infinitive = "to speak",
+                    Core = "speak",
+                    Gerund = "speaking",
+                    PastParticiple = "spoken",
+                    FirstPersonSingularPreterite = "spoke",
+                    ThirdPersonSingularPreterite = "spoke"
+                };
+            Logic.Conjugator.SpanishConjugatorArBase conjugator = new(translator, hablar, toSpeak);
+            conjugations = conjugator.Conjugate();
+
+            // now apply 
+            infinitive = hablar.Infinitive;
+            ApplyPresentConjugations();
+            ApplyPreteriteConjugations();
+            ApplyImperfectConjugations();
+            ApplyConditionalConjugations();
+            ApplyFutureConjugations();
+
+        }
+        catch (Exception ex)
+        {
+            var burp = ex.ToString();
+        }
+    }
+    private void ApplyPresentConjugations()
+    {
+        presentYo = conjugations.Where(x =>
+                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
+                x.Number == AvailableGrammaticalNumber.SINGULAR &&
+                x.Gender == AvailableGrammaticalGender.ANY &&
+                x.Tense == AvailableGrammaticalTense.PRESENT &&
+                x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+                x.Mood == AvailableGrammaticalMood.INDICATIVE
+            ).FirstOrDefault();
+        presentTu = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        presentUsted = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        presentEl = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.MASCULINE &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        presentElla = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.FEMININE &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        presentNosotros = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        presentVosotros = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        presentUstedes = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        presentEllos = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.MASCULINE &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        presentEllas = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.FEMININE &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+    }
+    private void ApplyPreteriteConjugations()
+    {
+        preteriteYo = conjugations.Where(x =>
+                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
+                x.Number == AvailableGrammaticalNumber.SINGULAR &&
+                x.Gender == AvailableGrammaticalGender.ANY &&
+                x.Tense == AvailableGrammaticalTense.PAST &&
+                x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+                x.Mood == AvailableGrammaticalMood.INDICATIVE
+            ).FirstOrDefault();
+        preteriteTu = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        preteriteUsted = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        preteriteEl = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.MASCULINE &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        preteriteElla = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.FEMININE &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        preteriteNosotros = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        preteriteVosotros = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        preteriteUstedes = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        preteriteEllos = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.MASCULINE &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        preteriteEllas = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.FEMININE &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+    }
+    private void ApplyImperfectConjugations()
+    {
+        imperfectYo = conjugations.Where(x =>
+                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
+                x.Number == AvailableGrammaticalNumber.SINGULAR &&
+                x.Gender == AvailableGrammaticalGender.ANY &&
+                x.Tense == AvailableGrammaticalTense.PAST &&
+                x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
+                x.Mood == AvailableGrammaticalMood.INDICATIVE
+            ).FirstOrDefault();
+        imperfectTu = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        imperfectUsted = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        imperfectEl = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.MASCULINE &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        imperfectElla = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.FEMININE &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        imperfectNosotros = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        imperfectVosotros = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        imperfectUstedes = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        imperfectEllos = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.MASCULINE &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        imperfectEllas = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.FEMININE &&
+            x.Tense == AvailableGrammaticalTense.PAST &&
+            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+    }
+    private void ApplyConditionalConjugations()
+    {
+        conditionalYo = conjugations.Where(x =>
+                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
+                x.Number == AvailableGrammaticalNumber.SINGULAR &&
+                x.Gender == AvailableGrammaticalGender.ANY &&
+                x.Tense == AvailableGrammaticalTense.PRESENT &&
+                x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+                x.Mood == AvailableGrammaticalMood.CONDITIONAL
+            ).FirstOrDefault();
+        conditionalTu = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.CONDITIONAL
+        ).FirstOrDefault();
+        conditionalUsted = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.CONDITIONAL
+        ).FirstOrDefault();
+        conditionalEl = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.MASCULINE &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.CONDITIONAL
+        ).FirstOrDefault();
+        conditionalElla = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.FEMININE &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.CONDITIONAL
+        ).FirstOrDefault();
+        conditionalNosotros = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.CONDITIONAL
+        ).FirstOrDefault();
+        conditionalVosotros = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.CONDITIONAL
+        ).FirstOrDefault();
+        conditionalUstedes = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.CONDITIONAL
+        ).FirstOrDefault();
+        conditionalEllos = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.MASCULINE &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.CONDITIONAL
+        ).FirstOrDefault();
+        conditionalEllas = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.FEMININE &&
+            x.Tense == AvailableGrammaticalTense.PRESENT &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.CONDITIONAL
+        ).FirstOrDefault();
+    }
+    private void ApplyFutureConjugations()
+    {
+        futureYo = conjugations.Where(x =>
+                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
+                x.Number == AvailableGrammaticalNumber.SINGULAR &&
+                x.Gender == AvailableGrammaticalGender.ANY &&
+                x.Tense == AvailableGrammaticalTense.FUTURE &&
+                x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+                x.Mood == AvailableGrammaticalMood.INDICATIVE
+            ).FirstOrDefault();
+        futureTu = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.FUTURE &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        futureUsted = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.FUTURE &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        futureEl = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.MASCULINE &&
+            x.Tense == AvailableGrammaticalTense.FUTURE &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        futureElla = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.SINGULAR &&
+            x.Gender == AvailableGrammaticalGender.FEMININE &&
+            x.Tense == AvailableGrammaticalTense.FUTURE &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        futureNosotros = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.FUTURE &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        futureVosotros = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.FUTURE &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        futureUstedes = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.ANY &&
+            x.Tense == AvailableGrammaticalTense.FUTURE &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        futureEllos = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.MASCULINE &&
+            x.Tense == AvailableGrammaticalTense.FUTURE &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+        futureEllas = conjugations.Where(x =>
+            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
+            x.Number == AvailableGrammaticalNumber.PLURAL &&
+            x.Gender == AvailableGrammaticalGender.FEMININE &&
+            x.Tense == AvailableGrammaticalTense.FUTURE &&
+            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
+            x.Mood == AvailableGrammaticalMood.INDICATIVE
+        ).FirstOrDefault();
+    }
+}
