@@ -13,13 +13,19 @@
                 </span>
             }
         </div>
-        <div>@VerbConjugation.Translation</div>
+        @if(ShouldShowTranslations)
+        {
+            <div class="text-sm">@VerbConjugation.Translation</div>
+        }
+        
     }
 </div>
 
 @code {
     [Parameter]
     public VerbConjugation VerbConjugation { get; set; } = new();
+    [Parameter]
+    public bool ShouldShowTranslations {get; set; }
 
     public string GetPieceClass(VerbConjugationPiece piece)
     {

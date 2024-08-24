@@ -8,10 +8,6 @@ using System.Threading.Tasks;
 
 namespace Logic.Conjugator
 {
-    public interface IVerbTranslator
-    {
-        public string? Translate(Verb targetVerb, VerbConjugation conjugationType);
-    }
     public class EnglishVerbTranslator: IVerbTranslator
     {
         public string Translate(Verb englishVerb, VerbConjugation conjugationType)

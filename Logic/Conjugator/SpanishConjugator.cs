@@ -6,25 +6,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Logic.Conjugator
 {
-    public abstract class Conjugator
-    {
-        protected IVerbTranslator _targetTranslator;
-        protected Verb _sourceLanguageInfinitive;
-        protected Verb _targetLanguageInfinitive;
-        
-        public Conjugator(
-            IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive,Verb targetLanguageInfinitive)
-        {
-            _targetTranslator = targetTranslator;
-            _sourceLanguageInfinitive = sourceLanguageInfinitive;
-            _targetLanguageInfinitive= targetLanguageInfinitive;
-        }
-        public abstract List<VerbConjugation> Conjugate();
-    }
+    
     public abstract class SpanishConjugator : Conjugator
     {
         public SpanishConjugator(
@@ -41,6 +26,11 @@ namespace Logic.Conjugator
             conjugations.AddRange(ConjugateImperfect());
             conjugations.AddRange(ConjugateConditional());
             conjugations.AddRange(ConjugateFuture());
+            conjugations.AddRange(ConjugateSubjunctivePresent());
+            conjugations.AddRange(ConjugateSubjunctiveImperfect());
+            conjugations.AddRange(ConjugateSubjunctiveFuture());
+            conjugations.AddRange(ConjugateAffirmativeImperative());
+            conjugations.AddRange(ConjugateNegativeImperative());
             return conjugations;
 
         }
@@ -1340,6 +1330,1050 @@ namespace Logic.Conjugator
         }
         #endregion
 
+        #region SubjunctivePresent
+        public List<VerbConjugation> ConjugateSubjunctivePresent()
+        {
+            List<VerbConjugation> conjugations = [];
+            conjugations.Add(ConjugateSubjunctivePresentYo());
+            conjugations.Add(ConjugateSubjunctivePresentTu());
+            conjugations.Add(ConjugateSubjunctivePresentUsted());
+            conjugations.Add(ConjugateSubjunctivePresentEl());
+            conjugations.Add(ConjugateSubjunctivePresentElla());
+            conjugations.Add(ConjugateSubjunctivePresentNosotros());
+            conjugations.Add(ConjugateSubjunctivePresentVosotros());
+            conjugations.Add(ConjugateSubjunctivePresentUstedes());
+            conjugations.Add(ConjugateSubjunctivePresentEllos());
+            conjugations.Add(ConjugateSubjunctivePresentEllas());
+            return conjugations;
+        }
+        public abstract VerbConjugation ConjugateSubjunctivePresentYo();
+        public abstract VerbConjugation ConjugateSubjunctivePresentTu();
+        public abstract VerbConjugation ConjugateSubjunctivePresentUsted();
+        public abstract VerbConjugation ConjugateSubjunctivePresentEl();
+        public abstract VerbConjugation ConjugateSubjunctivePresentElla();
+        public abstract VerbConjugation ConjugateSubjunctivePresentNosotros();
+        public abstract VerbConjugation ConjugateSubjunctivePresentVosotros();
+        public abstract VerbConjugation ConjugateSubjunctivePresentUstedes();
+        public abstract VerbConjugation ConjugateSubjunctivePresentEllos();
+        public abstract VerbConjugation ConjugateSubjunctivePresentEllas();
+        internal VerbConjugation GetBaseSubjunctivePresentYoConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.FIRSTPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("yo"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctivePresentTuConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("tú"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctivePresentUstedConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON_FORMAL,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("usted"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctivePresentElConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.THIRDPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.MASCULINE,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("él"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «él» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctivePresentEllaConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.THIRDPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.FEMININE,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ella"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctivePresentNosotrosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.FIRSTPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("nosotros"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctivePresentVosotrosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("vosotros"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctivePresentUstedesConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON_FORMAL,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ustedes"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctivePresentEllosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.THIRDPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.MASCULINE,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ellos"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctivePresentEllasConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.THIRDPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.FEMININE,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ellas"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        #endregion
+
+        #region SubjunctiveImperfect
+        public List<VerbConjugation> ConjugateSubjunctiveImperfect()
+        {
+            List<VerbConjugation> conjugations = [];
+            conjugations.Add(ConjugateSubjunctiveImperfectYo());
+            conjugations.Add(ConjugateSubjunctiveImperfectTu());
+            conjugations.Add(ConjugateSubjunctiveImperfectUsted());
+            conjugations.Add(ConjugateSubjunctiveImperfectEl());
+            conjugations.Add(ConjugateSubjunctiveImperfectElla());
+            conjugations.Add(ConjugateSubjunctiveImperfectNosotros());
+            conjugations.Add(ConjugateSubjunctiveImperfectVosotros());
+            conjugations.Add(ConjugateSubjunctiveImperfectUstedes());
+            conjugations.Add(ConjugateSubjunctiveImperfectEllos());
+            conjugations.Add(ConjugateSubjunctiveImperfectEllas());
+            return conjugations;
+        }
+        public abstract VerbConjugation ConjugateSubjunctiveImperfectYo();
+        public abstract VerbConjugation ConjugateSubjunctiveImperfectTu();
+        public abstract VerbConjugation ConjugateSubjunctiveImperfectUsted();
+        public abstract VerbConjugation ConjugateSubjunctiveImperfectEl();
+        public abstract VerbConjugation ConjugateSubjunctiveImperfectElla();
+        public abstract VerbConjugation ConjugateSubjunctiveImperfectNosotros();
+        public abstract VerbConjugation ConjugateSubjunctiveImperfectVosotros();
+        public abstract VerbConjugation ConjugateSubjunctiveImperfectUstedes();
+        public abstract VerbConjugation ConjugateSubjunctiveImperfectEllos();
+        public abstract VerbConjugation ConjugateSubjunctiveImperfectEllas();
+        internal VerbConjugation GetBaseSubjunctiveImperfectYoConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.FIRSTPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PAST,
+                Aspect = AvailableGrammaticalAspect.IMPERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("yo"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveImperfectTuConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PAST,
+                Aspect = AvailableGrammaticalAspect.IMPERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("tú"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveImperfectUstedConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON_FORMAL,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PAST,
+                Aspect = AvailableGrammaticalAspect.IMPERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("usted"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveImperfectElConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.THIRDPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.MASCULINE,
+                Tense = AvailableGrammaticalTense.PAST,
+                Aspect = AvailableGrammaticalAspect.IMPERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("él"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «él» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveImperfectEllaConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.THIRDPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.FEMININE,
+                Tense = AvailableGrammaticalTense.PAST,
+                Aspect = AvailableGrammaticalAspect.IMPERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ella"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveImperfectNosotrosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.FIRSTPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PAST,
+                Aspect = AvailableGrammaticalAspect.IMPERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("nosotros"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveImperfectVosotrosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PAST,
+                Aspect = AvailableGrammaticalAspect.IMPERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("vosotros"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveImperfectUstedesConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON_FORMAL,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PAST,
+                Aspect = AvailableGrammaticalAspect.IMPERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ustedes"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveImperfectEllosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.THIRDPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.MASCULINE,
+                Tense = AvailableGrammaticalTense.PAST,
+                Aspect = AvailableGrammaticalAspect.IMPERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ellos"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveImperfectEllasConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.THIRDPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.FEMININE,
+                Tense = AvailableGrammaticalTense.PAST,
+                Aspect = AvailableGrammaticalAspect.IMPERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ellas"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        #endregion
+
+        #region SubjunctiveFuture
+        public List<VerbConjugation> ConjugateSubjunctiveFuture()
+        {
+            List<VerbConjugation> conjugations = [];
+            conjugations.Add(ConjugateSubjunctiveFutureYo());
+            conjugations.Add(ConjugateSubjunctiveFutureTu());
+            conjugations.Add(ConjugateSubjunctiveFutureUsted());
+            conjugations.Add(ConjugateSubjunctiveFutureEl());
+            conjugations.Add(ConjugateSubjunctiveFutureElla());
+            conjugations.Add(ConjugateSubjunctiveFutureNosotros());
+            conjugations.Add(ConjugateSubjunctiveFutureVosotros());
+            conjugations.Add(ConjugateSubjunctiveFutureUstedes());
+            conjugations.Add(ConjugateSubjunctiveFutureEllos());
+            conjugations.Add(ConjugateSubjunctiveFutureEllas());
+            return conjugations;
+        }
+        public abstract VerbConjugation ConjugateSubjunctiveFutureYo();
+        public abstract VerbConjugation ConjugateSubjunctiveFutureTu();
+        public abstract VerbConjugation ConjugateSubjunctiveFutureUsted();
+        public abstract VerbConjugation ConjugateSubjunctiveFutureEl();
+        public abstract VerbConjugation ConjugateSubjunctiveFutureElla();
+        public abstract VerbConjugation ConjugateSubjunctiveFutureNosotros();
+        public abstract VerbConjugation ConjugateSubjunctiveFutureVosotros();
+        public abstract VerbConjugation ConjugateSubjunctiveFutureUstedes();
+        public abstract VerbConjugation ConjugateSubjunctiveFutureEllos();
+        public abstract VerbConjugation ConjugateSubjunctiveFutureEllas();
+        internal VerbConjugation GetBaseSubjunctiveFutureYoConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.FIRSTPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.FUTURE,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("yo"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «yo» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveFutureTuConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.FUTURE,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("tú"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «tú» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveFutureUstedConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON_FORMAL,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.FUTURE,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("usted"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «usted» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveFutureElConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.THIRDPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.MASCULINE,
+                Tense = AvailableGrammaticalTense.FUTURE,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("él"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «él» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveFutureEllaConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.THIRDPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.FEMININE,
+                Tense = AvailableGrammaticalTense.FUTURE,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ella"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ella» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveFutureNosotrosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.FIRSTPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.FUTURE,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("nosotros"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveFutureVosotrosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.FUTURE,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("vosotros"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveFutureUstedesConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON_FORMAL,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.FUTURE,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ustedes"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveFutureEllosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.THIRDPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.MASCULINE,
+                Tense = AvailableGrammaticalTense.FUTURE,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ellos"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseSubjunctiveFutureEllasConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.THIRDPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.FEMININE,
+                Tense = AvailableGrammaticalTense.FUTURE,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ellas"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        #endregion
+
+        #region AffirmativeImperative
+        public List<VerbConjugation> ConjugateAffirmativeImperative()
+        {
+            List<VerbConjugation> conjugations = [];
+            conjugations.Add(ConjugateAffirmativeImperativeTu());
+            conjugations.Add(ConjugateAffirmativeImperativeUsted());
+            conjugations.Add(ConjugateAffirmativeImperativeNosotros());
+            conjugations.Add(ConjugateAffirmativeImperativeVosotros());
+            conjugations.Add(ConjugateAffirmativeImperativeUstedes());
+            return conjugations;
+        }
+        public abstract VerbConjugation ConjugateAffirmativeImperativeTu();
+        public abstract VerbConjugation ConjugateAffirmativeImperativeUsted();
+        public abstract VerbConjugation ConjugateAffirmativeImperativeNosotros();
+        public abstract VerbConjugation ConjugateAffirmativeImperativeVosotros();
+        public abstract VerbConjugation ConjugateAffirmativeImperativeUstedes();
+        
+        internal VerbConjugation GetBaseAffirmativeImperativeTuConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.IMPERATIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("tú"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «tú» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseAffirmativeImperativeUstedConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON_FORMAL,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.IMPERATIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("usted"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «usted» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseAffirmativeImperativeNosotrosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.FIRSTPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.IMPERATIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("nosotros"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseAffirmativeImperativeVosotrosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.IMPERATIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("vosotros"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseAffirmativeImperativeUstedesConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON_FORMAL,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.IMPERATIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePiece());
+            conjugation.Pieces.Add(GetPronounPiece("ustedes"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        #endregion
+
+        #region NegativeImperative
+        public List<VerbConjugation> ConjugateNegativeImperative()
+        {
+            List<VerbConjugation> conjugations = [];
+            conjugations.Add(ConjugateNegativeImperativeTu());
+            conjugations.Add(ConjugateNegativeImperativeUsted());
+            conjugations.Add(ConjugateNegativeImperativeNosotros());
+            conjugations.Add(ConjugateNegativeImperativeVosotros());
+            conjugations.Add(ConjugateNegativeImperativeUstedes());
+            return conjugations;
+        }
+        public abstract VerbConjugation ConjugateNegativeImperativeTu();
+        public abstract VerbConjugation ConjugateNegativeImperativeUsted();
+        public abstract VerbConjugation ConjugateNegativeImperativeNosotros();
+        public abstract VerbConjugation ConjugateNegativeImperativeVosotros();
+        public abstract VerbConjugation ConjugateNegativeImperativeUstedes();
+        internal VerbConjugation GetBaseNegativeImperativeTuConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.NEGATIVE_IMPERATIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePieceNegativeImperative());
+            conjugation.Pieces.Add(GetPronounPiece("tú"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseNegativeImperativeUstedConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON_FORMAL,
+                Number = AvailableGrammaticalNumber.SINGULAR,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.NEGATIVE_IMPERATIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePieceNegativeImperative());
+            conjugation.Pieces.Add(GetPronounPiece("usted"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseNegativeImperativeNosotrosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.FIRSTPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.NEGATIVE_IMPERATIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePieceNegativeImperative());
+            conjugation.Pieces.Add(GetPronounPiece("nosotros"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseNegativeImperativeVosotrosConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.NEGATIVE_IMPERATIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePieceNegativeImperative());
+            conjugation.Pieces.Add(GetPronounPiece("vosotros"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        internal VerbConjugation GetBaseNegativeImperativeUstedesConjugation()
+        {
+            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
+            var conjugation = new VerbConjugation()
+            {
+                Verb = _sourceLanguageInfinitive,
+                Person = AvailableGrammaticalPerson.SECONDPERSON_FORMAL,
+                Number = AvailableGrammaticalNumber.PLURAL,
+                Gender = AvailableGrammaticalGender.ANY,
+                Tense = AvailableGrammaticalTense.PRESENT,
+                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Mood = AvailableGrammaticalMood.NEGATIVE_IMPERATIVE,
+                Voice = AvailableGrammaticalVoice.ACTIVE
+            };
+            conjugation.Pieces.Add(GetCorePieceNegativeImperative());
+            conjugation.Pieces.Add(GetPronounPiece("ustedes"));
+
+            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+            conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+
+            return conjugation;
+        }
+        #endregion
+
         internal VerbConjugationPiece GetCorePiece()
         {
             return new VerbConjugationPiece()
@@ -1347,6 +2381,15 @@ namespace Logic.Conjugator
                 Ordinal = 1,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core
+            };
+        }
+        internal VerbConjugationPiece GetCorePieceNegativeImperative()
+        {
+            return new VerbConjugationPiece()
+            {
+                Ordinal = 1,
+                Type = AvailableVerbConjugationPieceType.CORE,
+                Piece = $"no {_sourceLanguageInfinitive.Core}" 
             };
         }
         internal VerbConjugationPiece GetPronounPiece(string pronoun)
@@ -1359,591 +2402,5 @@ namespace Logic.Conjugator
             };
         }
     }
-    public class SpanishConjugatorArBase : SpanishConjugator
-    {
-        public SpanishConjugatorArBase(
-            IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
-                base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
-        {
-
-        }
-       
-        
-        #region Present
-        
-        public override VerbConjugation ConjugatePresentYo()
-        {
-            var conjugation = GetBasePresentYoConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "o"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePresentTu()
-        {
-            var conjugation = GetBasePresentTuConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "as"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePresentUsted()
-        {
-            var conjugation = GetBasePresentUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "a"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePresentEl()
-        {
-            var conjugation = GetBasePresentElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "a"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePresentElla()
-        {
-            var conjugation = GetBasePresentEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "a"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePresentNosotros()
-        {
-            var conjugation = GetBasePresentNosotrosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "amos"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePresentVosotros()
-        {
-            var conjugation = GetBasePresentVosotrosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "áis"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePresentUstedes()
-        {
-            var conjugation = GetBasePresentUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "an"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePresentEllos()
-        {
-            var conjugation = GetBasePresentEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "an"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePresentEllas()
-        {
-            var conjugation = GetBasePresentEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "an"
-            });
-            return conjugation;
-        }
-        #endregion
-
-
-        #region Preterite
-       
-        public override VerbConjugation ConjugatePreteriteYo()
-        {
-            var conjugation = GetBasePreteriteYoConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "é"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePreteriteTu()
-        {
-            var conjugation = GetBasePreteriteTuConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aste"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePreteriteUsted()
-        {
-            var conjugation = GetBasePreteriteUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ó"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePreteriteEl()
-        {
-            var conjugation = GetBasePreteriteElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ó"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePreteriteElla()
-        {
-            var conjugation = GetBasePreteriteEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ó"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePreteriteNosotros()
-        {
-            var conjugation = GetBasePreteriteNosotrosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "amos"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePreteriteVosotros()
-        {
-            var conjugation = GetBasePreteriteVosotrosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "asteis"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePreteriteUstedes()
-        {
-            var conjugation = GetBasePreteriteUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aron"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePreteriteEllos()
-        {
-            var conjugation = GetBasePreteriteEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aron"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePreteriteEllas()
-        {
-            var conjugation = GetBasePreteriteEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aron"
-            });
-            return conjugation;
-        }
-        #endregion
-
-
-        #region Imperfect
-        
-        public override VerbConjugation ConjugateImperfectYo()
-        {
-            var conjugation = GetBaseImperfectYoConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aba"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateImperfectTu()
-        {
-            var conjugation = GetBaseImperfectTuConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "abas"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateImperfectUsted()
-        {
-            var conjugation = GetBaseImperfectUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aba"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateImperfectEl()
-        {
-            var conjugation = GetBaseImperfectElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aba"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateImperfectElla()
-        {
-            var conjugation = GetBaseImperfectEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aba"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateImperfectNosotros()
-        {
-            var conjugation = GetBaseImperfectNosotrosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "abamos"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateImperfectVosotros()
-        {
-            var conjugation = GetBaseImperfectVosotrosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "abais"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateImperfectUstedes()
-        {
-            var conjugation = GetBaseImperfectUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aban"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateImperfectEllos()
-        {
-            var conjugation = GetBaseImperfectEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aban"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateImperfectEllas()
-        {
-            var conjugation = GetBaseImperfectEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aban"
-            });
-            return conjugation;
-        }
-        #endregion
-
-
-        #region Conditional
-
-        public override VerbConjugation ConjugateConditionalYo()
-        {
-            var conjugation = GetBaseConditionalYoConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aría"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateConditionalTu()
-        {
-            var conjugation = GetBaseConditionalTuConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arías"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateConditionalUsted()
-        {
-            var conjugation = GetBaseConditionalUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aría"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateConditionalEl()
-        {
-            var conjugation = GetBaseConditionalElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aría"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateConditionalElla()
-        {
-            var conjugation = GetBaseConditionalEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aría"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateConditionalNosotros()
-        {
-            var conjugation = GetBaseConditionalNosotrosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aríamos"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateConditionalVosotros()
-        {
-            var conjugation = GetBaseConditionalVosotrosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aríais"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateConditionalUstedes()
-        {
-            var conjugation = GetBaseConditionalUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arían"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateConditionalEllos()
-        {
-            var conjugation = GetBaseConditionalEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arían"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateConditionalEllas()
-        {
-            var conjugation = GetBaseConditionalEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arían"
-            });
-            return conjugation;
-        }
-        #endregion
-
-
-        #region Future
-
-        public override VerbConjugation ConjugateFutureYo()
-        {
-            var conjugation = GetBaseFutureYoConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aré"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateFutureTu()
-        {
-            var conjugation = GetBaseFutureTuConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arás"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateFutureUsted()
-        {
-            var conjugation = GetBaseFutureUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ará"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateFutureEl()
-        {
-            var conjugation = GetBaseFutureElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ará"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateFutureElla()
-        {
-            var conjugation = GetBaseFutureEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ará"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateFutureNosotros()
-        {
-            var conjugation = GetBaseFutureNosotrosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aremos"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateFutureVosotros()
-        {
-            var conjugation = GetBaseFutureVosotrosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aréis"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateFutureUstedes()
-        {
-            var conjugation = GetBaseFutureUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arán"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateFutureEllos()
-        {
-            var conjugation = GetBaseFutureEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arán"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateFutureEllas()
-        {
-            var conjugation = GetBaseFutureEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arán"
-            });
-            return conjugation;
-        }
-        #endregion
-
-
-
-    }
+    
 }
