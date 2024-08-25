@@ -441,30 +441,50 @@ else
         try
         {
             Logic.Conjugator.EnglishVerbTranslator translator = new();
-
-            Verb hablar = new()
+/*
+                        // hablar - to speak
+                                    Verb spanishVerb = new()
+                                        {
+                                            Infinitive = "hablar",
+                                            Core = "habl",
+                                            Gerund = "hablando",
+                                            PastParticiple = "hablado",
+                                        };
+                                    Verb englishVerb = new()
+                                        {
+                                            Infinitive = "to speak",
+                                            Core = "speak",
+                                            Gerund = "speaking",
+                                            PastParticiple = "spoken",
+                                            FirstPersonSingularPreterite = "spoke",
+                                            ThirdPersonSingularPreterite = "spoke"
+                                        };
+                                    Logic.Conjugator.SpanishConjugatorArBase conjugator = new(translator, spanishVerb, englishVerb);
+                        */
+// comer - to eat
+            Verb spanishVerb = new()
                 {
-                    Infinitive = "hablar",
-                    Core = "habl",
-                    Gerund = "hablando",
-                    PastParticiple = "hablado",
+                    Infinitive = "comer",
+                    Core = "com",
+                    Gerund = "comiendo",
+                    PastParticiple = "comido",
                 };
-            Verb toSpeak = new()
+            Verb englishVerb = new()
                 {
-                    Infinitive = "to speak",
-                    Core = "speak",
-                    Gerund = "speaking",
-                    PastParticiple = "spoken",
-                    FirstPersonSingularPreterite = "spoke",
-                    ThirdPersonSingularPreterite = "spoke"
+                    Infinitive = "to eat",
+                    Core = "eat",
+                    Gerund = "eating",
+                    PastParticiple = "eaten",
+                    FirstPersonSingularPreterite = "ate",
+                    ThirdPersonSingularPreterite = "ate"
                 };
-            Logic.Conjugator.SpanishConjugatorArBase conjugator = new(translator, hablar, toSpeak);
+            Logic.Conjugator.SpanishConjugatorErBase conjugator = new(translator, spanishVerb, englishVerb);
             conjugations = conjugator.Conjugate();
 
             // now apply 
-            infinitive = hablar.Infinitive;
-            gerund = hablar.Gerund;
-            pastParticiple = hablar.PastParticiple;
+            infinitive = spanishVerb.Infinitive;
+            gerund = spanishVerb.Gerund;
+            pastParticiple = spanishVerb.PastParticiple;
             ApplyPresentConjugations();
             ApplyPreteriteConjugations();
             ApplyImperfectConjugations();
