@@ -112,10 +112,12 @@ namespace Logic.Conjugator
         }
         private string GetConjugation(Verb englishVerb, VerbConjugation conjugationType)
         {
-            if (string.IsNullOrEmpty(englishVerb.Core)) { ErrorHandler.LogAndThrow(); return ""; }
+            if (string.IsNullOrEmpty(englishVerb.Core1)) { ErrorHandler.LogAndThrow(); return ""; }
             if (string.IsNullOrEmpty(englishVerb.Gerund)) { ErrorHandler.LogAndThrow(); return ""; }
-            if (string.IsNullOrEmpty(englishVerb.ThirdPersonSingularPreterite)) 
+            if (string.IsNullOrEmpty(englishVerb.Core2)) 
                 { ErrorHandler.LogAndThrow(); return ""; }
+            if (string.IsNullOrEmpty(englishVerb.Core3))
+            { ErrorHandler.LogAndThrow(); return ""; }
 
             if (conjugationType.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
                 conjugationType.Mood == AvailableGrammaticalMood.INDICATIVE)
@@ -127,12 +129,12 @@ namespace Logic.Conjugator
                 if (conjugationType.Aspect == AvailableGrammaticalAspect.PERFECT &&
                     conjugationType.Mood == AvailableGrammaticalMood.INDICATIVE)
                 {
-                    return englishVerb.ThirdPersonSingularPreterite;
+                    return englishVerb.Core2;
                 }
                 if (conjugationType.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
                     conjugationType.Mood == AvailableGrammaticalMood.SUBJUNCTIVE)
                 {
-                    return englishVerb.ThirdPersonSingularPreterite;
+                    return englishVerb.Core2;
                 }
             }
             if (conjugationType.Person == AvailableGrammaticalPerson.THIRDPERSON &&
@@ -142,10 +144,10 @@ namespace Logic.Conjugator
                 if (conjugationType.Mood == AvailableGrammaticalMood.INDICATIVE ||
                     conjugationType.Mood == AvailableGrammaticalMood.SUBJUNCTIVE)
                 {
-                    return $"{englishVerb.Core}s";
+                    return englishVerb.Core3;
                 }
             }
-            return englishVerb.Core;
+            return englishVerb.Core1;
         }
     }
 }

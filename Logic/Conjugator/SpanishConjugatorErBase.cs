@@ -24,7 +24,7 @@ namespace Logic.Conjugator
             var conjugation = GetBasePresentYoConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "o"
             });
@@ -35,51 +35,27 @@ namespace Logic.Conjugator
             var conjugation = GetBasePresentTuConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "es"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugatePresentUsted()
+        public override List<VerbConjugationPiece> GetPresentElPieces()
         {
-            var conjugation = GetBasePresentUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "e"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePresentEl()
-        {
-            var conjugation = GetBasePresentElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "e"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePresentElla()
-        {
-            var conjugation = GetBasePresentEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "e"
-            });
-            return conjugation;
+            }];
         }
         public override VerbConjugation ConjugatePresentNosotros()
         {
             var conjugation = GetBasePresentNosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "emos"
             });
@@ -90,45 +66,22 @@ namespace Logic.Conjugator
             var conjugation = GetBasePresentVosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "éis"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugatePresentUstedes()
+        public override List<VerbConjugationPiece> GetPresentEllosPieces()
         {
-            var conjugation = GetBasePresentUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "en"
-            });
-            return conjugation;
+            }];
         }
-        public override VerbConjugation ConjugatePresentEllos()
-        {
-            var conjugation = GetBasePresentEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "en"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePresentEllas()
-        {
-            var conjugation = GetBasePresentEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "en"
-            });
-            return conjugation;
-        }
+        
         #endregion
 
 
@@ -139,7 +92,7 @@ namespace Logic.Conjugator
             var conjugation = GetBasePreteriteYoConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "í"
             });
@@ -150,51 +103,28 @@ namespace Logic.Conjugator
             var conjugation = GetBasePreteriteTuConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "iste"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugatePreteriteUsted()
+        public override List<VerbConjugationPiece> GetPreteriteElPieces()
         {
-            var conjugation = GetBasePreteriteUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ió"
-            });
-            return conjugation;
+            }];
         }
-        public override VerbConjugation ConjugatePreteriteEl()
-        {
-            var conjugation = GetBasePreteriteElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ió"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePreteriteElla()
-        {
-            var conjugation = GetBasePreteriteEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ió"
-            });
-            return conjugation;
-        }
+
         public override VerbConjugation ConjugatePreteriteNosotros()
         {
             var conjugation = GetBasePreteriteNosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "imos"
             });
@@ -205,45 +135,22 @@ namespace Logic.Conjugator
             var conjugation = GetBasePreteriteVosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "isteis"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugatePreteriteUstedes()
+        public override List<VerbConjugationPiece> GetPreteriteEllosPieces()
         {
-            var conjugation = GetBasePreteriteUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ieron"
-            });
-            return conjugation;
+            }];
         }
-        public override VerbConjugation ConjugatePreteriteEllos()
-        {
-            var conjugation = GetBasePreteriteEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ieron"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugatePreteriteEllas()
-        {
-            var conjugation = GetBasePreteriteEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ieron"
-            });
-            return conjugation;
-        }
+
         #endregion
 
 
@@ -254,7 +161,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseImperfectYoConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ía"
             });
@@ -265,51 +172,29 @@ namespace Logic.Conjugator
             var conjugation = GetBaseImperfectTuConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ías"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugateImperfectUsted()
+
+        public override List<VerbConjugationPiece> GetImperfectElPieces()
         {
-            var conjugation = GetBaseImperfectUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ía"
-            });
-            return conjugation;
+            }];
         }
-        public override VerbConjugation ConjugateImperfectEl()
-        {
-            var conjugation = GetBaseImperfectElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ía"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateImperfectElla()
-        {
-            var conjugation = GetBaseImperfectEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ía"
-            });
-            return conjugation;
-        }
+
         public override VerbConjugation ConjugateImperfectNosotros()
         {
             var conjugation = GetBaseImperfectNosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "íamos"
             });
@@ -320,45 +205,22 @@ namespace Logic.Conjugator
             var conjugation = GetBaseImperfectVosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "íais"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugateImperfectUstedes()
+        public override List<VerbConjugationPiece> GetImperfectEllosPieces()
         {
-            var conjugation = GetBaseImperfectUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ían"
-            });
-            return conjugation;
+            }];
         }
-        public override VerbConjugation ConjugateImperfectEllos()
-        {
-            var conjugation = GetBaseImperfectEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ían"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateImperfectEllas()
-        {
-            var conjugation = GetBaseImperfectEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ían"
-            });
-            return conjugation;
-        }
+
         #endregion
 
 
@@ -369,7 +231,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseConditionalYoConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ería"
             });
@@ -380,51 +242,29 @@ namespace Logic.Conjugator
             var conjugation = GetBaseConditionalTuConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "erías"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugateConditionalUsted()
+
+        public override List<VerbConjugationPiece> GetConditionalElPieces()
         {
-            var conjugation = GetBaseConditionalUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ería"
-            });
-            return conjugation;
+            }];
         }
-        public override VerbConjugation ConjugateConditionalEl()
-        {
-            var conjugation = GetBaseConditionalElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ería"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateConditionalElla()
-        {
-            var conjugation = GetBaseConditionalEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ería"
-            });
-            return conjugation;
-        }
+
         public override VerbConjugation ConjugateConditionalNosotros()
         {
             var conjugation = GetBaseConditionalNosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "eríamos"
             });
@@ -435,45 +275,22 @@ namespace Logic.Conjugator
             var conjugation = GetBaseConditionalVosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "eríais"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugateConditionalUstedes()
+        public override List<VerbConjugationPiece> GetConditionalEllosPieces()
         {
-            var conjugation = GetBaseConditionalUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "erían"
-            });
-            return conjugation;
+            }];
         }
-        public override VerbConjugation ConjugateConditionalEllos()
-        {
-            var conjugation = GetBaseConditionalEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "erían"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateConditionalEllas()
-        {
-            var conjugation = GetBaseConditionalEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "erían"
-            });
-            return conjugation;
-        }
+
         #endregion
 
 
@@ -484,7 +301,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseFutureYoConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "eré"
             });
@@ -495,51 +312,28 @@ namespace Logic.Conjugator
             var conjugation = GetBaseFutureTuConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "erás"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugateFutureUsted()
+        public override List<VerbConjugationPiece> GetFutureElPieces()
         {
-            var conjugation = GetBaseFutureUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "erá"
-            });
-            return conjugation;
+            }];
         }
-        public override VerbConjugation ConjugateFutureEl()
-        {
-            var conjugation = GetBaseFutureElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "erá"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateFutureElla()
-        {
-            var conjugation = GetBaseFutureEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "erá"
-            });
-            return conjugation;
-        }
+
         public override VerbConjugation ConjugateFutureNosotros()
         {
             var conjugation = GetBaseFutureNosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "eremos"
             });
@@ -550,44 +344,20 @@ namespace Logic.Conjugator
             var conjugation = GetBaseFutureVosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "eréis"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugateFutureUstedes()
+        public override List<VerbConjugationPiece> GetFutureEllosPieces()
         {
-            var conjugation = GetBaseFutureUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "erán"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateFutureEllos()
-        {
-            var conjugation = GetBaseFutureEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "erán"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateFutureEllas()
-        {
-            var conjugation = GetBaseFutureEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "erán"
-            });
-            return conjugation;
+            }];
         }
         #endregion
 
@@ -599,7 +369,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseSubjunctivePresentYoConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "a"
             });
@@ -610,51 +380,27 @@ namespace Logic.Conjugator
             var conjugation = GetBaseSubjunctivePresentTuConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "as"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugateSubjunctivePresentUsted()
+        public override List<VerbConjugationPiece> GetSubjunctivePresentElPieces()
         {
-            var conjugation = GetBaseSubjunctivePresentUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "a"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateSubjunctivePresentEl()
-        {
-            var conjugation = GetBaseSubjunctivePresentElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "a"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateSubjunctivePresentElla()
-        {
-            var conjugation = GetBaseSubjunctivePresentEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "a"
-            });
-            return conjugation;
+            }];
         }
         public override VerbConjugation ConjugateSubjunctivePresentNosotros()
         {
             var conjugation = GetBaseSubjunctivePresentNosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "amos"
             });
@@ -665,46 +411,21 @@ namespace Logic.Conjugator
             var conjugation = GetBaseSubjunctivePresentVosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "áis"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugateSubjunctivePresentUstedes()
+        public override List<VerbConjugationPiece> GetSubjunctivePresentEllosPieces()
         {
-            var conjugation = GetBaseSubjunctivePresentUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "an"
-            });
-            return conjugation;
+            }];
         }
-        public override VerbConjugation ConjugateSubjunctivePresentEllos()
-        {
-            var conjugation = GetBaseSubjunctivePresentEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "an"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateSubjunctivePresentEllas()
-        {
-            var conjugation = GetBaseSubjunctivePresentEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "an"
-            });
-            return conjugation;
-        }
-
         #endregion
 
 
@@ -715,7 +436,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseSubjunctiveImperfectYoConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "iera"
             });
@@ -726,51 +447,27 @@ namespace Logic.Conjugator
             var conjugation = GetBaseSubjunctiveImperfectTuConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ieras"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugateSubjunctiveImperfectUsted()
+        public override List<VerbConjugationPiece> GetSubjunctiveImperfectElPieces()
         {
-            var conjugation = GetBaseSubjunctiveImperfectUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "iera"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateSubjunctiveImperfectEl()
-        {
-            var conjugation = GetBaseSubjunctiveImperfectElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "iera"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateSubjunctiveImperfectElla()
-        {
-            var conjugation = GetBaseSubjunctiveImperfectEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "iera"
-            });
-            return conjugation;
+            }];
         }
         public override VerbConjugation ConjugateSubjunctiveImperfectNosotros()
         {
             var conjugation = GetBaseSubjunctiveImperfectNosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "iéramos"
             });
@@ -781,44 +478,20 @@ namespace Logic.Conjugator
             var conjugation = GetBaseSubjunctiveImperfectVosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ierais"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugateSubjunctiveImperfectUstedes()
+        public override List<VerbConjugationPiece> GetSubjunctiveImperfectEllosPieces()
         {
-            var conjugation = GetBaseSubjunctiveImperfectUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ieran"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateSubjunctiveImperfectEllos()
-        {
-            var conjugation = GetBaseSubjunctiveImperfectEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ieran"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateSubjunctiveImperfectEllas()
-        {
-            var conjugation = GetBaseSubjunctiveImperfectEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ieran"
-            });
-            return conjugation;
+            }];
         }
         #endregion
 
@@ -830,7 +503,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseSubjunctiveFutureYoConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "iere"
             });
@@ -841,51 +514,27 @@ namespace Logic.Conjugator
             var conjugation = GetBaseSubjunctiveFutureTuConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ieres"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugateSubjunctiveFutureUsted()
+        public override List<VerbConjugationPiece> GetSubjunctiveFutureElPieces()
         {
-            var conjugation = GetBaseSubjunctiveFutureUstedConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "iere"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateSubjunctiveFutureEl()
-        {
-            var conjugation = GetBaseSubjunctiveFutureElConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "iere"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateSubjunctiveFutureElla()
-        {
-            var conjugation = GetBaseSubjunctiveFutureEllaConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "iere"
-            });
-            return conjugation;
+            }];
         }
         public override VerbConjugation ConjugateSubjunctiveFutureNosotros()
         {
             var conjugation = GetBaseSubjunctiveFutureNosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "iéremos"
             });
@@ -896,44 +545,20 @@ namespace Logic.Conjugator
             var conjugation = GetBaseSubjunctiveFutureVosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "iereis"
             });
             return conjugation;
         }
-        public override VerbConjugation ConjugateSubjunctiveFutureUstedes()
+        public override List<VerbConjugationPiece> GetSubjunctiveFutureEllosPieces()
         {
-            var conjugation = GetBaseSubjunctiveFutureUstedesConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
+            return [new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ieren"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateSubjunctiveFutureEllos()
-        {
-            var conjugation = GetBaseSubjunctiveFutureEllosConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ieren"
-            });
-            return conjugation;
-        }
-        public override VerbConjugation ConjugateSubjunctiveFutureEllas()
-        {
-            var conjugation = GetBaseSubjunctiveFutureEllasConjugation();
-            conjugation.Pieces.Add(new VerbConjugationPiece()
-            {
-                Ordinal = 2,
-                Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ieren"
-            });
-            return conjugation;
+            }];
         }
         #endregion
 
@@ -946,7 +571,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseAffirmativeImperativeTuConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "e"
             });
@@ -957,7 +582,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseAffirmativeImperativeUstedConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "a"
             });
@@ -969,7 +594,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseAffirmativeImperativeNosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "amos"
             });
@@ -980,7 +605,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseAffirmativeImperativeVosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ed"
             });
@@ -991,7 +616,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseAffirmativeImperativeUstedesConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "an"
             });
@@ -1009,7 +634,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseNegativeImperativeTuConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "as"
             });
@@ -1020,7 +645,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseNegativeImperativeUstedConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "a"
             });
@@ -1031,7 +656,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseNegativeImperativeNosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "amos"
             });
@@ -1042,7 +667,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseNegativeImperativeVosotrosConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "áis"
             });
@@ -1053,7 +678,7 @@ namespace Logic.Conjugator
             var conjugation = GetBaseNegativeImperativeUstedesConjugation();
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
-                Ordinal = 2,
+                Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "an"
             });

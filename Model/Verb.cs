@@ -1,11 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Model
 {
@@ -95,15 +88,17 @@ namespace Model
         [StringLength(2000)]
         public string? Infinitive { get; set; }
         [StringLength(2000)]
-        public string? Core { get; set; }
+        public string? Core1 { get; set; }
+        [StringLength(2000)]
+        public string? Core2 { get; set; } // used in English as first person preterite
+        [StringLength(2000)]
+        public string? Core3 { get; set; } // used in English as third person present
+        [StringLength(2000)]
+        public string? Core4 { get; set; }
         [StringLength(2000)]
         public string? Gerund { get; set; }
         [StringLength(2000)]
         public string? PastParticiple { get; set; }
-        [StringLength(2000)]
-        public string? FirstPersonSingularPreterite { get; set; } // used for english translations
-        [StringLength(2000)]
-        public string? ThirdPersonSingularPreterite { get; set; } // used for english translations
 
     }
     //[Table("VerbConjugation", Schema = "Idioma")]

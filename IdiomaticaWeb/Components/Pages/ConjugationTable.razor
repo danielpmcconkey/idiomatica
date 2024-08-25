@@ -440,68 +440,41 @@ else
     {
         try
         {
-            Logic.Conjugator.EnglishVerbTranslator translator = new();
-/*
-                        // hablar - to speak
-                                    Verb spanishVerb = new()
-                                        {
-                                            Infinitive = "hablar",
-                                            Core = "habl",
-                                            Gerund = "hablando",
-                                            PastParticiple = "hablado",
-                                        };
-                                    Verb englishVerb = new()
-                                        {
-                                            Infinitive = "to speak",
-                                            Core = "speak",
-                                            Gerund = "speaking",
-                                            PastParticiple = "spoken",
-                                            FirstPersonSingularPreterite = "spoke",
-                                            ThirdPersonSingularPreterite = "spoke"
-                                        };
-                                    Logic.Conjugator.SpanishConjugatorArBase conjugator = new(translator, spanishVerb, englishVerb);
-                        */
-// comer - to eat
-            Verb spanishVerb = new()
-                {
-                    Infinitive = "comer",
-                    Core = "com",
-                    Gerund = "comiendo",
-                    PastParticiple = "comido",
-                };
-            Verb englishVerb = new()
-                {
-                    Infinitive = "to eat",
-                    Core = "eat",
-                    Gerund = "eating",
-                    PastParticiple = "eaten",
-                    FirstPersonSingularPreterite = "ate",
-                    ThirdPersonSingularPreterite = "ate"
-                };
-            Logic.Conjugator.SpanishConjugatorErBase conjugator = new(translator, spanishVerb, englishVerb);
-            conjugations = conjugator.Conjugate();
+            
+
+            Verb spanishVerb4 = new() { Infinitive = "venir", Core1 = "ven", Core2 = "vien", Core3 = "vin", Gerund = "viniendo", PastParticiple = "venido", };
+            Verb englishVerb4 = new() { Infinitive = "to come", Core1 = "come", Core2 = "came", Core3 = "comes", Gerund = "coming", PastParticiple = "come", };
+            Logic.Conjugator.EnglishVerbTranslator translator4 = new();
+            Logic.Conjugator.SpanishConjugatorIrregularPatternVenir conjugator4 = new(translator4, spanishVerb4, englishVerb4);
+            conjugations = conjugator4.Conjugate();
+            ProcessConjugations(spanishVerb4);
+
+
 
             // now apply 
-            infinitive = spanishVerb.Infinitive;
-            gerund = spanishVerb.Gerund;
-            pastParticiple = spanishVerb.PastParticiple;
-            ApplyPresentConjugations();
-            ApplyPreteriteConjugations();
-            ApplyImperfectConjugations();
-            ApplyConditionalConjugations();
-            ApplyFutureConjugations();
-            ApplySubjunctivePresentConjugations();
-            ApplySubjunctiveImperfectConjugations();
-            ApplySubjunctiveFutureConjugations();
-            ApplyAffirmativeImperativeConjugations();
-            ApplyNegativeImperativeConjugations();
+            
         }
         catch (Exception ex)
         {
             var burp = ex.ToString();
         }
     }
-
+    private void ProcessConjugations(Verb spanishVerb)
+    {
+        infinitive = spanishVerb.Infinitive;
+        gerund = spanishVerb.Gerund;
+        pastParticiple = spanishVerb.PastParticiple;
+        ApplyPresentConjugations();
+        ApplyPreteriteConjugations();
+        ApplyImperfectConjugations();
+        ApplyConditionalConjugations();
+        ApplyFutureConjugations();
+        ApplySubjunctivePresentConjugations();
+        ApplySubjunctiveImperfectConjugations();
+        ApplySubjunctiveFutureConjugations();
+        ApplyAffirmativeImperativeConjugations();
+        ApplyNegativeImperativeConjugations();
+    }
     private async Task ToggleTranslations()
     {
         shouldShowTranslations = !shouldShowTranslations;

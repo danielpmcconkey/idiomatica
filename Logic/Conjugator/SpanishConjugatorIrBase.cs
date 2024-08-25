@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Logic.Conjugator
 {
-    public class SpanishConjugatorArBase : SpanishConjugator
+    public class SpanishConjugatorIrBase : SpanishConjugator
     {
-        public SpanishConjugatorArBase(
+        public SpanishConjugatorIrBase(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
@@ -37,7 +37,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "as"
+                Piece = "es"
             });
             return conjugation;
         }
@@ -47,10 +47,9 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "a"
+                Piece = "e"
             }];
         }
-        
         public override VerbConjugation ConjugatePresentNosotros()
         {
             var conjugation = GetBasePresentNosotrosConjugation();
@@ -58,7 +57,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "amos"
+                Piece = "imos"
             });
             return conjugation;
         }
@@ -69,7 +68,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "áis"
+                Piece = "ís"
             });
             return conjugation;
         }
@@ -79,10 +78,9 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "an"
+                Piece = "en"
             }];
         }
-        
         #endregion
 
 
@@ -95,7 +93,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "é"
+                Piece = "í"
             });
             return conjugation;
         }
@@ -106,7 +104,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aste"
+                Piece = "iste"
             });
             return conjugation;
         }
@@ -116,9 +114,10 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ó"
+                Piece = "ió"
             }];
         }
+
         public override VerbConjugation ConjugatePreteriteNosotros()
         {
             var conjugation = GetBasePreteriteNosotrosConjugation();
@@ -126,7 +125,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "amos"
+                Piece = "imos"
             });
             return conjugation;
         }
@@ -137,7 +136,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "asteis"
+                Piece = "isteis"
             });
             return conjugation;
         }
@@ -147,9 +146,10 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aron"
+                Piece = "ieron"
             }];
         }
+
         #endregion
 
 
@@ -162,7 +162,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aba"
+                Piece = "ía"
             });
             return conjugation;
         }
@@ -173,20 +173,20 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "abas"
+                Piece = "ías"
             });
             return conjugation;
         }
-
         public override List<VerbConjugationPiece> GetImperfectElPieces()
         {
             return [new VerbConjugationPiece()
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aba"
+                Piece = "ía"
             }];
         }
+
         public override VerbConjugation ConjugateImperfectNosotros()
         {
             var conjugation = GetBaseImperfectNosotrosConjugation();
@@ -194,7 +194,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ábamos"
+                Piece = "íamos"
             });
             return conjugation;
         }
@@ -205,7 +205,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "abais"
+                Piece = "íais"
             });
             return conjugation;
         }
@@ -215,9 +215,10 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aban"
+                Piece = "ían"
             }];
         }
+
         #endregion
 
 
@@ -230,7 +231,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aría"
+                Piece = "iría"
             });
             return conjugation;
         }
@@ -241,7 +242,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arías"
+                Piece = "irías"
             });
             return conjugation;
         }
@@ -252,9 +253,10 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aría"
+                Piece = "iría"
             }];
         }
+
         public override VerbConjugation ConjugateConditionalNosotros()
         {
             var conjugation = GetBaseConditionalNosotrosConjugation();
@@ -262,7 +264,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aríamos"
+                Piece = "iríamos"
             });
             return conjugation;
         }
@@ -273,7 +275,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aríais"
+                Piece = "iríais"
             });
             return conjugation;
         }
@@ -283,9 +285,10 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arían"
+                Piece = "irían"
             }];
         }
+
         #endregion
 
 
@@ -298,7 +301,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aré"
+                Piece = "iré"
             });
             return conjugation;
         }
@@ -309,7 +312,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arás"
+                Piece = "irás"
             });
             return conjugation;
         }
@@ -319,9 +322,10 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ará"
+                Piece = "irá"
             }];
         }
+
         public override VerbConjugation ConjugateFutureNosotros()
         {
             var conjugation = GetBaseFutureNosotrosConjugation();
@@ -329,7 +333,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aremos"
+                Piece = "iremos"
             });
             return conjugation;
         }
@@ -340,7 +344,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aréis"
+                Piece = "iréis"
             });
             return conjugation;
         }
@@ -350,10 +354,9 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arán"
+                Piece = "irán"
             }];
         }
-        
         #endregion
 
 
@@ -366,7 +369,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "e"
+                Piece = "a"
             });
             return conjugation;
         }
@@ -377,7 +380,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "es"
+                Piece = "as"
             });
             return conjugation;
         }
@@ -387,7 +390,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "e"
+                Piece = "a"
             }];
         }
         public override VerbConjugation ConjugateSubjunctivePresentNosotros()
@@ -397,7 +400,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "emos"
+                Piece = "amos"
             });
             return conjugation;
         }
@@ -408,7 +411,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "éis"
+                Piece = "áis"
             });
             return conjugation;
         }
@@ -418,10 +421,9 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "en"
+                Piece = "an"
             }];
         }
-        
         #endregion
 
 
@@ -434,7 +436,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ara"
+                Piece = "iera"
             });
             return conjugation;
         }
@@ -445,7 +447,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aras"
+                Piece = "ieras"
             });
             return conjugation;
         }
@@ -455,7 +457,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ara"
+                Piece = "iera"
             }];
         }
         public override VerbConjugation ConjugateSubjunctiveImperfectNosotros()
@@ -465,7 +467,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "áramos"
+                Piece = "iéramos"
             });
             return conjugation;
         }
@@ -476,7 +478,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "arais"
+                Piece = "ierais"
             });
             return conjugation;
         }
@@ -486,7 +488,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aran"
+                Piece = "ieran"
             }];
         }
         #endregion
@@ -501,7 +503,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "are"
+                Piece = "iere"
             });
             return conjugation;
         }
@@ -512,7 +514,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ares"
+                Piece = "ieres"
             });
             return conjugation;
         }
@@ -522,7 +524,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "are"
+                Piece = "iere"
             }];
         }
         public override VerbConjugation ConjugateSubjunctiveFutureNosotros()
@@ -532,7 +534,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "áremos"
+                Piece = "iéremos"
             });
             return conjugation;
         }
@@ -543,7 +545,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "areis"
+                Piece = "iereis"
             });
             return conjugation;
         }
@@ -553,10 +555,9 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "aren"
+                Piece = "ieren"
             }];
         }
-        
         #endregion
 
 
@@ -570,7 +571,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "a"
+                Piece = "e"
             });
             return conjugation;
         }
@@ -581,7 +582,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "e"
+                Piece = "a"
             });
             return conjugation;
         }
@@ -593,7 +594,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "emos"
+                Piece = "amos"
             });
             return conjugation;
         }
@@ -604,7 +605,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "ad"
+                Piece = "id"
             });
             return conjugation;
         }
@@ -615,7 +616,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "en"
+                Piece = "an"
             });
             return conjugation;
         }
@@ -633,7 +634,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "es"
+                Piece = "as"
             });
             return conjugation;
         }
@@ -644,7 +645,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "e"
+                Piece = "a"
             });
             return conjugation;
         }
@@ -655,7 +656,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "emos"
+                Piece = "amos"
             });
             return conjugation;
         }
@@ -666,7 +667,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "éis"
+                Piece = "áis"
             });
             return conjugation;
         }
@@ -677,7 +678,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "len"
+                Piece = "an"
             });
             return conjugation;
         }
