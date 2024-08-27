@@ -37,11 +37,8 @@ namespace Logic.Conjugator
 
         #region helper functions
 
-        internal virtual List<VerbConjugationPiece> GetCorePiece(int whichCore = 1)
+        internal virtual List<VerbConjugationPiece> GetCorePiece()
         {
-            if (whichCore == 2) return GetCorePiece2();
-            if (whichCore == 3) return GetCorePiece3();
-            if (whichCore == 4) return GetCorePiece4();
             return [new VerbConjugationPiece()
             {
                 Ordinal = 100,
@@ -76,46 +73,7 @@ namespace Logic.Conjugator
                 Piece = _sourceLanguageInfinitive.Core4
             }];
         }
-        internal List<VerbConjugationPiece> GetCorePieceNegativeImperative(int whichCore = 1)
-        {
-            if (whichCore == 2) return GetCorePieceNegativeImperative2();
-            if (whichCore == 3) return GetCorePieceNegativeImperative3();
-            if (whichCore == 4) return GetCorePieceNegativeImperative4();
-
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = $"no {_sourceLanguageInfinitive.Core1}"
-            }];
-        }
-        internal List<VerbConjugationPiece> GetCorePieceNegativeImperative2()
-        {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = $"no {_sourceLanguageInfinitive.Core2}"
-            }];
-        }
-        internal List<VerbConjugationPiece> GetCorePieceNegativeImperative3()
-        {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = $"no {_sourceLanguageInfinitive.Core3}"
-            }];
-        }
-        internal List<VerbConjugationPiece> GetCorePieceNegativeImperative4()
-        {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = $"no {_sourceLanguageInfinitive.Core4}"
-            }];
-        }
+        
         internal List<VerbConjugationPiece> GetPronounPiece(string pronoun)
         {
             return [new VerbConjugationPiece()
@@ -976,7 +934,7 @@ namespace Logic.Conjugator
                 Number = AvailableGrammaticalNumber.SINGULAR,
                 Gender = AvailableGrammaticalGender.ANY,
                 Tense = AvailableGrammaticalTense.PAST,
-                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE
             };
@@ -2514,7 +2472,7 @@ namespace Logic.Conjugator
                 Number = AvailableGrammaticalNumber.SINGULAR,
                 Gender = AvailableGrammaticalGender.ANY,
                 Tense = AvailableGrammaticalTense.PAST,
-                Aspect = AvailableGrammaticalAspect.PERFECT,
+                Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE
             };

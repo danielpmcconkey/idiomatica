@@ -441,14 +441,8 @@ else
         try
         {
             
-
-            Verb spanishVerb4 = new() { Infinitive = "venir", Core1 = "ven", Core2 = "vien", Core3 = "vin", Gerund = "viniendo", PastParticiple = "venido", };
-            Verb englishVerb4 = new() { Infinitive = "to come", Core1 = "come", Core2 = "came", Core3 = "comes", Gerund = "coming", PastParticiple = "come", };
-            Logic.Conjugator.EnglishVerbTranslator translator4 = new();
-            Logic.Conjugator.SpanishConjugatorIrregularPatternVenir conjugator4 = new(translator4, spanishVerb4, englishVerb4);
-            conjugations = conjugator4.Conjugate();
-            ProcessConjugations(spanishVerb4);
-
+            Verb spanishVerb27 = new() { Infinitive = "dar", Core1 = "d", Gerund = "dando", PastParticiple = "dado", }; Verb englishVerb27 = new() { Infinitive = "", Core1 = "give", Core2 = "gave", Core3 = "gives", Gerund = "giving", PastParticiple = "given", }; Logic.Conjugator.EnglishVerbTranslator translator27 = new(); Logic.Conjugator.SpanishConjugatorIrrulalarPatternDar conjugator27 = new(translator27, spanishVerb27, englishVerb27); conjugations = conjugator27.Conjugate(); ProcessConjugations(spanishVerb27);
+            
 
 
             // now apply 
