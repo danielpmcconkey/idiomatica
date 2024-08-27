@@ -6,12 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Conjugator
+namespace Logic.Conjugator.Spanish
 {
 
-    public class SpanishConjugatorIrregularPatternTemplateRootOnly : SpanishConjugatorIrBase
+    public class RootsOnly : _Ir
     {
-        public SpanishConjugatorIrregularPatternTemplateRootOnly(
+        public RootsOnly(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
@@ -274,22 +274,22 @@ namespace Logic.Conjugator
         {
             return GetCorePiece();
         }
-        
+
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeUsted()
         {
             return GetCorePiece();
         }
-        
+
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeNosotros()
         {
             return GetCorePiece();
         }
-        
+
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeVosotros()
         {
             return GetCorePiece();
         }
-        
+
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeUstedes()
         {
             return GetCorePiece();

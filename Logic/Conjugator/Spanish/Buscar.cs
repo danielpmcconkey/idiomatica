@@ -6,11 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Conjugator
+namespace Logic.Conjugator.Spanish
 {
-    public class SpanishConjugatorIrrulalarPatternAcordar : SpanishConjugatorArBase
+
+    public class Buscar : _Ar
     {
-        public SpanishConjugatorIrrulalarPatternAcordar(
+        public Buscar(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
@@ -19,57 +20,28 @@ namespace Logic.Conjugator
 
         internal override List<VerbConjugationPiece> GetCorePiece2()
         {
-            // acord -> acuerd
+            // busc -> busqu
             if (string.IsNullOrEmpty(_sourceLanguageInfinitive.Core2))
             {
                 ErrorHandler.LogAndThrow();
                 return [];
             }
-            string seek = "ue";
-            return ReplaceMiddleOfCore(_sourceLanguageInfinitive.Core2, seek);
-        }
-        
-
-        #region Present
-
-        public override List<VerbConjugationPiece> GetRootPiecesPresentYo()
-        {
-            return GetCorePiece2();
-        }
-        public override List<VerbConjugationPiece> GetRootPiecesPresentTu()
-        {
-            return GetCorePiece2();
-        }
-        public override List<VerbConjugationPiece> GetRootPiecesPresentEl()
-        {
-            return GetCorePiece2();
-        }
-        public override List<VerbConjugationPiece> GetRootPiecesPresentEllos()
-        {
-            return GetCorePiece2();
+            string seek = "qu";
+            return ReplaceRightOfCore(_sourceLanguageInfinitive.Core2, seek);
         }
 
-        #endregion
+
+
 
         #region Preterite
-        
+        public override List<VerbConjugationPiece> GetRootPiecesPreteriteYo()
+        {
+            return GetCorePiece2();
+        }
 
         #endregion
 
-        #region Imperfect
-        
 
-        #endregion
-
-        #region Conditional
-
-        
-        #endregion
-
-        #region Future
-        
-
-        #endregion
 
         #region SubjunctivePresent
 
@@ -85,36 +57,37 @@ namespace Logic.Conjugator
         {
             return GetCorePiece2();
         }
+        public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentNosotros()
+        {
+            return GetCorePiece2();
+        }
+        public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentVosotros()
+        {
+            return GetCorePiece2();
+        }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentEllos()
         {
             return GetCorePiece2();
         }
         #endregion
 
-        #region SubjunctiveImperfect
-        
 
-
-        #endregion
-
-        #region SubjunctiveFuture
-
-        
-        #endregion
 
         #region AffirmativeImperative
 
 
-        public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeTu()
-        {
-            return GetCorePiece2();
-        }
+
 
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeUsted()
         {
             return GetCorePiece2();
         }
-        
+
+        public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeNosotros()
+        {
+            return GetCorePiece2();
+        }
+
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeUstedes()
         {
             return GetCorePiece2();
@@ -131,11 +104,20 @@ namespace Logic.Conjugator
         {
             return GetCorePiece2();
         }
+        public override List<VerbConjugationPiece> GetRootPiecesNegativeImperativeNosotros()
+        {
+            return GetCorePiece2();
+        }
+        public override List<VerbConjugationPiece> GetRootPiecesNegativeImperativeVosotros()
+        {
+            return GetCorePiece2();
+        }
         public override List<VerbConjugationPiece> GetRootPiecesNegativeImperativeUstedes()
         {
             return GetCorePiece2();
         }
         #endregion
+
 
 
     }

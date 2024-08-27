@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Conjugator
+namespace Logic.Conjugator.Spanish
 {
-    public class SpanishConjugatorArBase : SpanishConjugator
+    public class _Ar : SpanishConjugator
     {
-        public SpanishConjugatorArBase(
+        public _Ar(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
@@ -24,38 +24,38 @@ namespace Logic.Conjugator
 
 
         #region Present
-        
+
         #endregion
 
 
         #region Preterite
 
-        
+
         #endregion
 
 
         #region Imperfect
 
-        
+
         #endregion
 
 
         #region Conditional
 
-        
+
         #endregion
 
 
         #region Future
 
-        
-        
+
+
         #endregion
 
 
         #region SubjunctivePresent
 
-        
+
         #endregion
 
 
@@ -66,8 +66,8 @@ namespace Logic.Conjugator
 
         #region SubjunctiveFuture
 
-        
-        
+
+
         #endregion
 
 

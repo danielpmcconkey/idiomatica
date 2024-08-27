@@ -6,23 +6,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Conjugator
+namespace Logic.Conjugator.Spanish
 {
-    public class SpanishConjugatorIrregularPatternVenir : SpanishConjugatorIrBase
+    public class Venir : _Ir
     {
-        public SpanishConjugatorIrregularPatternVenir(
+        public Venir(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
 
         }
 
-        
+
 
         internal override List<VerbConjugationPiece> GetCorePiece2()
         {
             // ven -> vien
-            if(string.IsNullOrEmpty(_sourceLanguageInfinitive.Core2))
+            if (string.IsNullOrEmpty(_sourceLanguageInfinitive.Core2))
             {
                 ErrorHandler.LogAndThrow();
                 return [];
@@ -338,7 +338,7 @@ namespace Logic.Conjugator
 
         #region SubjunctivePresent
 
-        
+
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentYo()
         {
             return [new VerbConjugationPiece()
@@ -353,7 +353,7 @@ namespace Logic.Conjugator
                 Piece = "a"
             }];
         }
-        
+
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentTu()
         {
             return [new VerbConjugationPiece()
@@ -368,7 +368,7 @@ namespace Logic.Conjugator
                 Piece = "as"
             }];
         }
-        
+
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentEl()
         {
             return [new VerbConjugationPiece()
@@ -383,7 +383,7 @@ namespace Logic.Conjugator
                 Piece = "a"
             }];
         }
-        
+
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentNosotros()
         {
             return [new VerbConjugationPiece()
@@ -398,7 +398,7 @@ namespace Logic.Conjugator
                 Piece = "amos"
             }];
         }
-        
+
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentVosotros()
         {
             return [new VerbConjugationPiece()
@@ -413,7 +413,7 @@ namespace Logic.Conjugator
                 Piece = "áis"
             }];
         }
-        
+
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentEllos()
         {
             return [new VerbConjugationPiece()
@@ -436,27 +436,27 @@ namespace Logic.Conjugator
         {
             return GetCorePiece3();
         }
-        
+
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectTu()
         {
             return GetCorePiece3();
         }
-        
+
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectEl()
         {
             return GetCorePiece3();
         }
-        
+
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectNosotros()
         {
             return GetCorePiece3();
         }
-        
+
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectVosotros()
         {
             return GetCorePiece3();
         }
-        
+
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectEllos()
         {
             return GetCorePiece3();
@@ -497,7 +497,7 @@ namespace Logic.Conjugator
         #endregion
 
         #region AffirmativeImperative
-        
+
         public override List<VerbConjugationPiece> GetStemPiecesAffirmativeImperativeTu()
         {
             return []; // it's just ven. that's it

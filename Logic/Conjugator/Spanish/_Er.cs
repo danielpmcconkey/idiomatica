@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Conjugator
+namespace Logic.Conjugator.Spanish
 {
-    public class SpanishConjugatorErBase : SpanishConjugator
+    public class _Er : SpanishConjugator
     {
-        public SpanishConjugatorErBase(
+        public _Er(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {

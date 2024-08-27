@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Conjugator
+namespace Logic.Conjugator.Spanish
 {
-    public class SpanishConjugatorIrBase : SpanishConjugatorErBase
+    public class _Ir : _Er
     {
-        public SpanishConjugatorIrBase(
+        public _Ir(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
@@ -19,7 +19,7 @@ namespace Logic.Conjugator
 
         #region Present
 
-        
+
         public override List<VerbConjugationPiece> GetStemPiecesPresentNosotros()
         {
             return [new VerbConjugationPiece()
@@ -35,7 +35,7 @@ namespace Logic.Conjugator
             {
                 Ordinal = 200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "is"
+                Piece = "ís"
             }];
         }
         #endregion
@@ -172,25 +172,25 @@ namespace Logic.Conjugator
 
         #region SubjunctivePresent
 
-        
+
         #endregion
 
 
         #region SubjunctiveImperfect
 
-        
+
         #endregion
 
 
         #region SubjunctiveFuture
 
-      
+
         #endregion
 
 
         #region AffirmativeImperative
 
-       
+
         public override List<VerbConjugationPiece> GetStemPiecesAffirmativeImperativeVosotros()
         {
             return [new VerbConjugationPiece()
@@ -206,7 +206,7 @@ namespace Logic.Conjugator
 
         #region NegativeImperative
 
-        
+
         #endregion
 
     }

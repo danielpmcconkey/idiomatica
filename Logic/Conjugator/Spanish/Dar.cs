@@ -5,15 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Conjugator
+namespace Logic.Conjugator.Spanish
 {
-    public class SpanishConjugatorIrrulalarPatternDar : SpanishConjugatorArBase
+    public class Dar : _Ar
     {
-        public SpanishConjugatorIrrulalarPatternDar(
+        public Dar(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
-            
+
         }
 
 
@@ -133,17 +133,17 @@ namespace Logic.Conjugator
         #endregion
 
         #region Imperfect
-        
+
         #endregion
 
         #region Conditional
 
-        
+
         #endregion
 
         #region Future
 
-        
+
 
         #endregion
 
@@ -167,7 +167,7 @@ namespace Logic.Conjugator
                 Piece = "é"
             }];
         }
-        
+
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentVosotros()
         {
             return [new VerbConjugationPiece()
@@ -365,7 +365,7 @@ namespace Logic.Conjugator
 
 
 
-        
+
         public override List<VerbConjugationPiece> GetStemPiecesAffirmativeImperativeUsted()
         {
             return [new VerbConjugationPiece()

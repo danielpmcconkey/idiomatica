@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Conjugator
+namespace Logic.Conjugator.Spanish
 {
-    public class SpanishConjugatorIrregularPatternTemplateStemOnly : SpanishConjugatorArBase
+    public class StemsOnly : _Ar
     {
-        public SpanishConjugatorIrregularPatternTemplateStemOnly(
+        public StemsOnly(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {

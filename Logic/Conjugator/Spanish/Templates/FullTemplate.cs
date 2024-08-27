@@ -5,12 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Conjugator
+namespace Logic.Conjugator.Spanish
 {
-    
-    public class SpanishConjugatorIrregularPatternTemplate : SpanishConjugatorIrBase
-    { 
-        public SpanishConjugatorIrregularPatternTemplate(
+
+    public class FullTemplate : _Ir
+    {
+        public FullTemplate(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
@@ -916,7 +916,7 @@ namespace Logic.Conjugator
 
         #region AffirmativeImperative
 
-        
+
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeTu()
         {
             return [new VerbConjugationPiece()
@@ -1008,7 +1008,7 @@ namespace Logic.Conjugator
             }];
         }
         #endregion
-        
+
         #region NegativeImperative
 
         public override List<VerbConjugationPiece> GetRootPiecesNegativeImperativeTu()

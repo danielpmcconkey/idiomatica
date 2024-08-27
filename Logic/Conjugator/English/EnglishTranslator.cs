@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Conjugator
+namespace Logic.Conjugator.English
 {
-    public class EnglishVerbTranslator: IVerbTranslator
+    public class EnglishVerbTranslator : IVerbTranslator
     {
-        public string Translate(Verb englishVerb, VerbConjugation conjugationType)
+        public virtual string Translate(Verb englishVerb, VerbConjugation conjugationType)
         {
             string pronoun = GetPronoun(conjugationType);
             string verbHelper = GetVerbHelper(conjugationType);
@@ -18,7 +18,7 @@ namespace Logic.Conjugator
 
             return $"{pronoun} {verbHelper} {conjugation}";
         }
-        private string GetPronoun(VerbConjugation conjugationType)
+        internal virtual string GetPronoun(VerbConjugation conjugationType)
         {
             if (conjugationType.Mood == AvailableGrammaticalMood.NEGATIVE_IMPERATIVE ||
                     conjugationType.Mood == AvailableGrammaticalMood.IMPERATIVE)
@@ -57,10 +57,10 @@ namespace Logic.Conjugator
                     return "they";
                 }
             }
-            
-            return string.Empty; 
+
+            return string.Empty;
         }
-        private string GetVerbHelper(VerbConjugation conjugationType)
+        internal virtual string GetVerbHelper(VerbConjugation conjugationType)
         {
             if (conjugationType.Tense == AvailableGrammaticalTense.FUTURE)
             {
@@ -90,7 +90,7 @@ namespace Logic.Conjugator
                     return "were";
                 }
             }
-            if(conjugationType.Mood == AvailableGrammaticalMood.IMPERATIVE &&
+            if (conjugationType.Mood == AvailableGrammaticalMood.IMPERATIVE &&
                 conjugationType.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
                 conjugationType.Number == AvailableGrammaticalNumber.PLURAL)
             {
@@ -110,12 +110,12 @@ namespace Logic.Conjugator
             }
             return string.Empty;
         }
-        private string GetConjugation(Verb englishVerb, VerbConjugation conjugationType)
+        internal virtual string GetConjugation(Verb englishVerb, VerbConjugation conjugationType)
         {
             if (string.IsNullOrEmpty(englishVerb.Core1)) { ErrorHandler.LogAndThrow(); return ""; }
             if (string.IsNullOrEmpty(englishVerb.Gerund)) { ErrorHandler.LogAndThrow(); return ""; }
-            if (string.IsNullOrEmpty(englishVerb.Core2)) 
-                { ErrorHandler.LogAndThrow(); return ""; }
+            if (string.IsNullOrEmpty(englishVerb.Core2))
+            { ErrorHandler.LogAndThrow(); return ""; }
             if (string.IsNullOrEmpty(englishVerb.Core3))
             { ErrorHandler.LogAndThrow(); return ""; }
 

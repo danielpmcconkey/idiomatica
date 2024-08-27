@@ -7,14 +7,14 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Conjugator
+namespace Logic.Conjugator.Spanish
 {
-    
+
     public abstract class SpanishConjugator : Conjugator
     {
         public SpanishConjugator(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
-                base (targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
+                base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
 
         }
@@ -73,7 +73,7 @@ namespace Logic.Conjugator
                 Piece = _sourceLanguageInfinitive.Core4
             }];
         }
-        
+
         internal List<VerbConjugationPiece> GetPronounPiece(string pronoun)
         {
             return [new VerbConjugationPiece()
@@ -106,7 +106,7 @@ namespace Logic.Conjugator
             int firstBitLength = location; // vIEn -> location is 1 length is 1
             string firstBit = core.Substring(firstBitStart, firstBitLength);
 
-            int endBitStart = firstBitStart + firstBitLength + 2;  // vIEn -> 0 + 1 + 2 = 3
+            int endBitStart = firstBitStart + firstBitLength + seek.Length;  // vIEn -> 0 + 1 + 2 = 3
             int endBitLength = core.Length - endBitStart; // vIEn -> 4 - 3 = 1
             string endBit = core.Substring(endBitStart, endBitLength);
             if (firstBit.Length > 0 && endBit.Length > 0)
@@ -136,6 +136,51 @@ namespace Logic.Conjugator
                 return [];
             }
         }
+        internal List<VerbConjugationPiece> ReplaceRightOfCore(string? core, string seek)
+        {
+            if (string.IsNullOrEmpty(core))
+            {
+                ErrorHandler.LogAndThrow();
+                return [];
+            }
+            if (string.IsNullOrEmpty(seek))
+            {
+                ErrorHandler.LogAndThrow();
+                return [];
+            }
+            int location = core.IndexOf(seek);
+            if (location < 1)
+            {
+                // not found; throw an error because we probably have the wrong conjugator
+                ErrorHandler.LogAndThrow();
+                return [];
+            }
+            const int firstBitStart = 0; // always
+            int firstBitLength = location; // vIEn -> location is 1 length is 1
+            string firstBit = core.Substring(firstBitStart, firstBitLength);
+
+            if (firstBit.Length > 0)
+            {
+                // this is the way
+                return [new VerbConjugationPiece()
+                {
+                    Ordinal = 100,
+                    Type = AvailableVerbConjugationPieceType.CORE,
+                    Piece = firstBit
+                },new VerbConjugationPiece()
+                {
+                    Ordinal = 110,
+                    Type = AvailableVerbConjugationPieceType.IRREGULAR,
+                    Piece = seek
+                }];
+            }
+            else
+            {
+                // something screwy; throw an error because we probably have the wrong conjugator
+                ErrorHandler.LogAndThrow();
+                return [];
+            }
+        }
         #endregion
 
         #region Present
@@ -156,7 +201,7 @@ namespace Logic.Conjugator
             return conjugations;
         }
 
-        public virtual VerbConjugation GetStructurePresentYo() 
+        public virtual VerbConjugation GetStructurePresentYo()
         {
             if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
 
@@ -387,11 +432,11 @@ namespace Logic.Conjugator
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
         }
-        public virtual List<VerbConjugationPiece> GetRootPiecesPresentTu() { return GetRootPiecesPresentYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesPresentEl() { return GetRootPiecesPresentYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesPresentNosotros() { return GetRootPiecesPresentYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesPresentVosotros() { return GetRootPiecesPresentYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesPresentEllos() { return GetRootPiecesPresentYo(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesPresentTu() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesPresentEl() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesPresentNosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesPresentVosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesPresentEllos() { return GetCorePiece(); }
 
         public virtual List<VerbConjugationPiece> GetStemPiecesPresentYo()
         {
@@ -448,40 +493,42 @@ namespace Logic.Conjugator
             }];
         }
 
-        public virtual VerbConjugation ConjugatePresentYo() 
+        public virtual VerbConjugation ConjugatePresentYo()
         {
             var conjugation = GetStructurePresentYo();
             conjugation.Pieces.AddRange(GetRootPiecesPresentYo());
             conjugation.Pieces.AddRange(GetStemPiecesPresentYo());
             return conjugation;
         }
-        public virtual VerbConjugation ConjugatePresentTu() 
+        public virtual VerbConjugation ConjugatePresentTu()
         {
             var conjugation = GetStructurePresentTu();
             conjugation.Pieces.AddRange(GetRootPiecesPresentTu());
             conjugation.Pieces.AddRange(GetStemPiecesPresentTu());
             return conjugation;
         }
-        public virtual VerbConjugation ConjugatePresentEl() 
+        public virtual VerbConjugation ConjugatePresentEl()
         {
             var conjugation = GetStructurePresentEl();
             conjugation.Pieces.AddRange(GetRootPiecesPresentEl());
             conjugation.Pieces.AddRange(GetStemPiecesPresentEl());
             return conjugation;
         }
-        public virtual VerbConjugation ConjugatePresentElla() 
+        public virtual VerbConjugation ConjugatePresentElla()
         {
             var conjugation = GetStructurePresentElla();
             conjugation.Pieces.AddRange(GetRootPiecesPresentEl());
             conjugation.Pieces.AddRange(GetStemPiecesPresentEl());
             return conjugation;
         }
-        public virtual VerbConjugation ConjugatePresentUsted() 
-        { var conjugation = GetStructurePresentUsted();
+        public virtual VerbConjugation ConjugatePresentUsted()
+        {
+            var conjugation = GetStructurePresentUsted();
             conjugation.Pieces.AddRange(GetRootPiecesPresentEl());
             conjugation.Pieces.AddRange(GetStemPiecesPresentEl());
-            return conjugation; }
-        public virtual VerbConjugation ConjugatePresentNosotros() 
+            return conjugation;
+        }
+        public virtual VerbConjugation ConjugatePresentNosotros()
         {
             var conjugation = GetStructurePresentNosotros();
             conjugation.Pieces.AddRange(GetRootPiecesPresentNosotros());
@@ -494,12 +541,13 @@ namespace Logic.Conjugator
             var conjugation = GetStructurePresentVosotros();
             conjugation.Pieces.AddRange(GetRootPiecesPresentVosotros());
             conjugation.Pieces.AddRange(GetStemPiecesPresentVosotros());
-            return conjugation; }
+            return conjugation;
+        }
         public virtual VerbConjugation ConjugatePresentEllos()
         {
             var conjugation = GetStructurePresentEllos();
             conjugation.Pieces.AddRange(GetRootPiecesPresentEllos());
-            conjugation.Pieces.AddRange(GetStemPiecesPresentEllos()); 
+            conjugation.Pieces.AddRange(GetStemPiecesPresentEllos());
             return conjugation;
         }
         public virtual VerbConjugation ConjugatePresentEllas()
@@ -760,20 +808,12 @@ namespace Logic.Conjugator
             return conjugation;
         }
 
-        public virtual List<VerbConjugationPiece> GetRootPiecesPreteriteYo()
-        {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }]; ;
-        }
-        public virtual List<VerbConjugationPiece> GetRootPiecesPreteriteTu() { return GetRootPiecesPreteriteYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesPreteriteEl() { return GetRootPiecesPreteriteYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesPreteriteNosotros() { return GetRootPiecesPreteriteYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesPreteriteVosotros() { return GetRootPiecesPreteriteYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesPreteriteEllos() { return GetRootPiecesPreteriteYo(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesPreteriteYo() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesPreteriteTu() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesPreteriteEl() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesPreteriteNosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesPreteriteVosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesPreteriteEllos() { return GetCorePiece(); }
 
         public virtual List<VerbConjugationPiece> GetStemPiecesPreteriteYo()
         {
@@ -942,7 +982,7 @@ namespace Logic.Conjugator
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
 
             string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+            conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «yo» de {_sourceLanguageInfinitive.Infinitive}";
 
             return conjugation;
         }
@@ -1154,11 +1194,11 @@ namespace Logic.Conjugator
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
         }
-        public virtual List<VerbConjugationPiece> GetRootPiecesImperfectTu() { return GetRootPiecesImperfectYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesImperfectEl() { return GetRootPiecesImperfectYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesImperfectNosotros() { return GetRootPiecesImperfectYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesImperfectVosotros() { return GetRootPiecesImperfectYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesImperfectEllos() { return GetRootPiecesImperfectYo(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesImperfectTu() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesImperfectEl() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesImperfectNosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesImperfectVosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesImperfectEllos() { return GetCorePiece(); }
 
         public virtual List<VerbConjugationPiece> GetStemPiecesImperfectYo()
         {
@@ -1539,11 +1579,11 @@ namespace Logic.Conjugator
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
         }
-        public virtual List<VerbConjugationPiece> GetRootPiecesConditionalTu() { return GetRootPiecesConditionalYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesConditionalEl() { return GetRootPiecesConditionalYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesConditionalNosotros() { return GetRootPiecesConditionalYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesConditionalVosotros() { return GetRootPiecesConditionalYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesConditionalEllos() { return GetRootPiecesConditionalYo(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesConditionalTu() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesConditionalEl() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesConditionalNosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesConditionalVosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesConditionalEllos() { return GetCorePiece(); }
 
         public virtual List<VerbConjugationPiece> GetStemPiecesConditionalYo()
         {
@@ -1922,11 +1962,11 @@ namespace Logic.Conjugator
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
         }
-        public virtual List<VerbConjugationPiece> GetRootPiecesFutureTu() { return GetRootPiecesFutureYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesFutureEl() { return GetRootPiecesFutureYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesFutureNosotros() { return GetRootPiecesFutureYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesFutureVosotros() { return GetRootPiecesFutureYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesFutureEllos() { return GetRootPiecesFutureYo(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesFutureTu() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesFutureEl() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesFutureNosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesFutureVosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesFutureEllos() { return GetCorePiece(); }
 
         public virtual List<VerbConjugationPiece> GetStemPiecesFutureYo()
         {
@@ -2307,11 +2347,11 @@ namespace Logic.Conjugator
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
         }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentTu() { return GetRootPiecesSubjunctivePresentYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentEl() { return GetRootPiecesSubjunctivePresentYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentNosotros() { return GetRootPiecesSubjunctivePresentYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentVosotros() { return GetRootPiecesSubjunctivePresentYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentEllos() { return GetRootPiecesSubjunctivePresentYo(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentTu() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentEl() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentNosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentVosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentEllos() { return GetCorePiece(); }
 
         public virtual List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentYo()
         {
@@ -2480,7 +2520,7 @@ namespace Logic.Conjugator
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
 
             string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «yo» de {_sourceLanguageInfinitive.Infinitive}";
 
             return conjugation;
         }
@@ -2692,11 +2732,11 @@ namespace Logic.Conjugator
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
         }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectTu() { return GetRootPiecesSubjunctiveImperfectYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectEl() { return GetRootPiecesSubjunctiveImperfectYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectNosotros() { return GetRootPiecesSubjunctiveImperfectYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectVosotros() { return GetRootPiecesSubjunctiveImperfectYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectEllos() { return GetRootPiecesSubjunctiveImperfectYo(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectTu() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectEl() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectNosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectVosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectEllos() { return GetCorePiece(); }
 
         public virtual List<VerbConjugationPiece> GetStemPiecesSubjunctiveImperfectYo()
         {
@@ -3076,11 +3116,11 @@ namespace Logic.Conjugator
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
         }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureTu() { return GetRootPiecesSubjunctiveFutureYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureEl() { return GetRootPiecesSubjunctiveFutureYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureNosotros() { return GetRootPiecesSubjunctiveFutureYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureVosotros() { return GetRootPiecesSubjunctiveFutureYo(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureEllos() { return GetRootPiecesSubjunctiveFutureYo(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureTu() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureEl() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureNosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureVosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureEllos() { return GetCorePiece(); }
 
         public virtual List<VerbConjugationPiece> GetStemPiecesSubjunctiveFutureYo()
         {
@@ -3344,12 +3384,12 @@ namespace Logic.Conjugator
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
         }
-        public virtual List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeUsted() { return GetRootPiecesAffirmativeImperativeTu(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeNosotros() { return GetRootPiecesAffirmativeImperativeTu(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeVosotros() { return GetRootPiecesAffirmativeImperativeTu(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeUstedes() { return GetRootPiecesAffirmativeImperativeTu(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeUsted() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeNosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeVosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeUstedes() { return GetCorePiece(); }
 
-        
+
         public virtual List<VerbConjugationPiece> GetStemPiecesAffirmativeImperativeTu()
         {
             return [new VerbConjugationPiece()
@@ -3396,14 +3436,14 @@ namespace Logic.Conjugator
             }];
         }
 
-        
+
         public virtual VerbConjugation ConjugateAffirmativeImperativeTu()
         {
             var conjugation = GetStructureAffirmativeImperativeTu();
             conjugation.Pieces.AddRange(GetRootPiecesAffirmativeImperativeTu());
             conjugation.Pieces.AddRange(GetStemPiecesAffirmativeImperativeTu());
             return conjugation;
-        }        
+        }
         public virtual VerbConjugation ConjugateAffirmativeImperativeUsted()
         {
             var conjugation = GetStructureAffirmativeImperativeUsted();
@@ -3571,9 +3611,12 @@ namespace Logic.Conjugator
                 Mood = AvailableGrammaticalMood.NEGATIVE_IMPERATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE
             };
-            
-            conjugation.Pieces.Add(new VerbConjugationPiece() { 
-                Type = AvailableVerbConjugationPieceType.CORE, Ordinal = 0, Piece = "no "
+
+            conjugation.Pieces.Add(new VerbConjugationPiece()
+            {
+                Type = AvailableVerbConjugationPieceType.CORE,
+                Ordinal = 0,
+                Piece = "no "
             });
 
             string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
@@ -3591,10 +3634,10 @@ namespace Logic.Conjugator
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
         }
-        public virtual List<VerbConjugationPiece> GetRootPiecesNegativeImperativeUsted() { return GetRootPiecesNegativeImperativeTu(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesNegativeImperativeNosotros() { return GetRootPiecesNegativeImperativeTu(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesNegativeImperativeVosotros() { return GetRootPiecesNegativeImperativeTu(); }
-        public virtual List<VerbConjugationPiece> GetRootPiecesNegativeImperativeUstedes() { return GetRootPiecesNegativeImperativeTu(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesNegativeImperativeUsted() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesNegativeImperativeNosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesNegativeImperativeVosotros() { return GetCorePiece(); }
+        public virtual List<VerbConjugationPiece> GetRootPiecesNegativeImperativeUstedes() { return GetCorePiece(); }
 
 
         public virtual List<VerbConjugationPiece> GetStemPiecesNegativeImperativeTu()

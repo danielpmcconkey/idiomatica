@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Logic.Conjugator
+namespace Logic.Conjugator.Spanish
 {
-    public class SpanishConjugatorIrrulalarPatternEstar: SpanishConjugatorIrrulalarPatternAndar
+    public class Estar : Andar
     {
-        public SpanishConjugatorIrrulalarPatternEstar(
+        public Estar(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
@@ -56,7 +56,7 @@ namespace Logic.Conjugator
                 Piece = "á"
             }];
         }
-       public override List<VerbConjugationPiece> GetStemPiecesPresentEllos()
+        public override List<VerbConjugationPiece> GetStemPiecesPresentEllos()
         {
             return [new VerbConjugationPiece()
             {
@@ -74,7 +74,7 @@ namespace Logic.Conjugator
 
         #region Preterite
 
-        
+
         #endregion
 
         #region Imperfect
@@ -147,7 +147,7 @@ namespace Logic.Conjugator
 
         #region SubjunctiveImperfect
 
-        
+
         #endregion
 
         #region SubjunctiveFuture
@@ -157,7 +157,7 @@ namespace Logic.Conjugator
         #region AffirmativeImperative
 
 
-        
+
         public override List<VerbConjugationPiece> GetStemPiecesAffirmativeImperativeTu()
         {
             return [new VerbConjugationPiece()
