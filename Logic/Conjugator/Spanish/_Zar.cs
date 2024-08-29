@@ -9,29 +9,26 @@ using System.Threading.Tasks;
 namespace Logic.Conjugator.Spanish
 {
 
-    public class Buscar : _Ar
+    public class _Zar : _Ar
     {
-        public Buscar(
+        public _Zar(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
-
+            
         }
 
         internal override List<VerbConjugationPiece> GetCorePiece2()
         {
-            // busc -> busqu
+            // ven -> vien
             if (string.IsNullOrEmpty(_sourceLanguageInfinitive.Core2))
             {
                 ErrorHandler.LogAndThrow();
                 return [];
             }
-            string seek = "qu";
+            string seek = "c";
             return ReplaceRightOfCore(_sourceLanguageInfinitive.Core2, seek);
         }
-
-
-
 
         #region Preterite
         public override List<VerbConjugationPiece> GetRootPiecesPreteriteYo()
@@ -41,7 +38,7 @@ namespace Logic.Conjugator.Spanish
 
         #endregion
 
-
+       
 
         #region SubjunctivePresent
 
@@ -71,10 +68,9 @@ namespace Logic.Conjugator.Spanish
         }
         #endregion
 
-
+       
 
         #region AffirmativeImperative
-
 
 
 

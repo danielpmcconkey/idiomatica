@@ -1,4 +1,5 @@
-﻿using Model;
+﻿using Logic.Telemetry;
+using Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace Logic.Conjugator.Spanish
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
-
+            
         }
 
         /*

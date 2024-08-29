@@ -9,18 +9,18 @@ using System.Threading.Tasks;
 namespace Logic.Conjugator.Spanish
 {
 
-    public class Conseguir : _Ir
+    public class Seguir : _Ir
     {
-        public Conseguir(
+        public Seguir(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
-            
+
         }
 
         internal override List<VerbConjugationPiece> GetCorePiece2()
         {
-            // consegu -> consig
+            // segu -> sig
             if (string.IsNullOrEmpty(_sourceLanguageInfinitive.Core2))
             {
                 ErrorHandler.LogAndThrow();
@@ -31,7 +31,7 @@ namespace Logic.Conjugator.Spanish
         }
         internal override List<VerbConjugationPiece> GetCorePiece3()
         {
-            // consegu -> consigu
+            // segu -> sigu
             if (string.IsNullOrEmpty(_sourceLanguageInfinitive.Core3))
             {
                 ErrorHandler.LogAndThrow();
@@ -74,7 +74,7 @@ namespace Logic.Conjugator.Spanish
 
         #endregion
 
-        
+
 
         #region SubjunctivePresent
 
