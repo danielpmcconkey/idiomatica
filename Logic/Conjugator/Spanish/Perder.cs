@@ -8,26 +8,29 @@ using System.Threading.Tasks;
 
 namespace Logic.Conjugator.Spanish
 {
-    public class Acordar : _Ar
+    public class Perder : Mover
     {
-        public Acordar(
+        public Perder(
             IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
 
         }
 
+
+
         internal override List<VerbConjugationPiece> GetCorePiece2()
         {
-            // acord -> acuerd
+            // perd -> pierd
             if (string.IsNullOrEmpty(_sourceLanguageInfinitive.Core2))
             {
                 ErrorHandler.LogAndThrow();
                 return [];
             }
-            string seek = "ue";
+            string seek = "i";
             return ReplaceMiddleOfCore(_sourceLanguageInfinitive.Core2, seek);
         }
+
 
 
         #region Present
@@ -48,35 +51,18 @@ namespace Logic.Conjugator.Spanish
         {
             return GetCorePiece2();
         }
-
         #endregion
 
-        #region Preterite
 
-
-        #endregion
-
-        #region Imperfect
-
-
-        #endregion
-
-        #region Conditional
-
-
-        #endregion
-
-        #region Future
-
-
-        #endregion
 
         #region SubjunctivePresent
+
 
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentYo()
         {
             return GetCorePiece2();
         }
+
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentTu()
         {
             return GetCorePiece2();
@@ -91,16 +77,7 @@ namespace Logic.Conjugator.Spanish
         }
         #endregion
 
-        #region SubjunctiveImperfect
 
-
-
-        #endregion
-
-        #region SubjunctiveFuture
-
-
-        #endregion
 
         #region AffirmativeImperative
 
@@ -114,7 +91,6 @@ namespace Logic.Conjugator.Spanish
         {
             return GetCorePiece2();
         }
-
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeUstedes()
         {
             return GetCorePiece2();
@@ -136,7 +112,5 @@ namespace Logic.Conjugator.Spanish
             return GetCorePiece2();
         }
         #endregion
-
-
     }
 }
