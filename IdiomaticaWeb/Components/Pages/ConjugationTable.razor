@@ -41,11 +41,31 @@ else
         <tbody>
             <tr>
                 <th scope="row">Gerund:</th>
-                <td>@gerund</td>
+                <td>
+                    @if (@gerund is not null)
+                    {
+                        <span class="m-0 p-0 pieceCore">@gerund</span>
+                    }
+                    else
+                    {
+                        <span class="m-0 p-0 pieceCore">&mdash;</span>
+                    }
+
+                </td>
             </tr>
             <tr>
                 <th scope="row">Past participle:</th>
-                <td>@pastParticiple</td>
+                <td>
+                    @if (@pastParticiple is not null)
+                    {
+                        <span class="m-0 p-0 pieceCore">@pastParticiple</span>
+                    }
+                    else
+                    {
+                        <span class="m-0 p-0 pieceCore">&mdash;</span>
+                    }
+                    
+                </td>
             </tr>
         </tbody>
 
@@ -441,7 +461,7 @@ else
         try
         {
             
-            Verb spanishVerb81 = new() { Infinitive = "haber", Core1 = "hab", Gerund = "habiendo", PastParticiple = "habido", }; Verb englishVerb81 = new() { Infinitive = "there is", Core1 = "there is", Core2 = "there was", Core3 = "there is", Gerund = "there is", PastParticiple = "there was", }; Logic.Conjugator.English.EnglishVerbTranslator translator81 = new(); Logic.Conjugator.Spanish.HaberThereIs conjugator81 = new(translator81, spanishVerb81, englishVerb81); conjugations = conjugator81.Conjugate(); ProcessConjugations(spanishVerb81);
+            Verb spanishVerb89 = new() { Infinitive = "ir", Gerund = "yendo", PastParticiple = "ido", }; Verb englishVerb89 = new() { Infinitive = "to go", Core1 = "go", Core2 = "went", Core3 = "goes", Gerund = "going", PastParticiple = "gone", }; Logic.Conjugator.English.EnglishVerbTranslator translator89 = new(); Logic.Conjugator.Spanish.Ir conjugator89 = new(translator89, spanishVerb89, englishVerb89); conjugations = conjugator89.Conjugate(); ProcessConjugations(spanishVerb89);
             // somewhere in this, the present usted is getting changed
             
         }

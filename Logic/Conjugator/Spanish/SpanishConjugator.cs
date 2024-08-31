@@ -185,7 +185,7 @@ namespace Logic.Conjugator.Spanish
 
         #region Present
 
-        public List<VerbConjugation> ConjugatePresent()
+        public virtual List<VerbConjugation> ConjugatePresent()
         {
             List<VerbConjugation> conjugations = [];
             conjugations.Add(ConjugatePresentYo());
@@ -570,7 +570,7 @@ namespace Logic.Conjugator.Spanish
 
         #region Preterite
 
-        public List<VerbConjugation> ConjugatePreterite()
+        public virtual List<VerbConjugation> ConjugatePreterite()
         {
             List<VerbConjugation> conjugations = [];
             conjugations.Add(ConjugatePreteriteYo());
@@ -947,7 +947,7 @@ namespace Logic.Conjugator.Spanish
 
         #region Imperfect
 
-        public List<VerbConjugation> ConjugateImperfect()
+        public virtual List<VerbConjugation> ConjugateImperfect()
         {
             List<VerbConjugation> conjugations = [];
             conjugations.Add(ConjugateImperfectYo());
@@ -1332,7 +1332,7 @@ namespace Logic.Conjugator.Spanish
 
         #region Conditional
 
-        public List<VerbConjugation> ConjugateConditional()
+        public virtual List<VerbConjugation> ConjugateConditional()
         {
             List<VerbConjugation> conjugations = [];
             conjugations.Add(ConjugateConditionalYo());
@@ -1715,7 +1715,7 @@ namespace Logic.Conjugator.Spanish
 
 
         #region Future
-        public List<VerbConjugation> ConjugateFuture()
+        public virtual List<VerbConjugation> ConjugateFuture()
         {
             List<VerbConjugation> conjugations = [];
             conjugations.Add(ConjugateFutureYo());
@@ -2100,7 +2100,7 @@ namespace Logic.Conjugator.Spanish
 
         #region SubjunctivePresent
 
-        public List<VerbConjugation> ConjugateSubjunctivePresent()
+        public virtual List<VerbConjugation> ConjugateSubjunctivePresent()
         {
             List<VerbConjugation> conjugations = [];
             conjugations.Add(ConjugateSubjunctivePresentYo());
@@ -2485,7 +2485,7 @@ namespace Logic.Conjugator.Spanish
 
         #region SubjunctiveImperfect
 
-        public List<VerbConjugation> ConjugateSubjunctiveImperfect()
+        public virtual List<VerbConjugation> ConjugateSubjunctiveImperfect()
         {
             List<VerbConjugation> conjugations = [];
             conjugations.Add(ConjugateSubjunctiveImperfectYo());
@@ -2869,7 +2869,7 @@ namespace Logic.Conjugator.Spanish
 
 
         #region SubjunctiveFuture
-        public List<VerbConjugation> ConjugateSubjunctiveFuture()
+        public virtual List<VerbConjugation> ConjugateSubjunctiveFuture()
         {
             List<VerbConjugation> conjugations = [];
             conjugations.Add(ConjugateSubjunctiveFutureYo());
@@ -3253,7 +3253,7 @@ namespace Logic.Conjugator.Spanish
 
 
         #region AffirmativeImperative
-        public List<VerbConjugation> ConjugateAffirmativeImperative()
+        public virtual List<VerbConjugation> ConjugateAffirmativeImperative()
         {
             List<VerbConjugation> conjugations = [];
             conjugations.Add(ConjugateAffirmativeImperativeTu());
@@ -3477,7 +3477,7 @@ namespace Logic.Conjugator.Spanish
 
 
         #region NegativeImperative
-        public List<VerbConjugation> ConjugateNegativeImperative()
+        public virtual List<VerbConjugation> ConjugateNegativeImperative()
         {
             List<VerbConjugation> conjugations = [];
             conjugations.Add(ConjugateNegativeImperativeTu());

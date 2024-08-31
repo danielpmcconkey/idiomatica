@@ -17,7 +17,18 @@
         {
             <div class="text-sm">@VerbConjugation.Translation</div>
         }
-        
+
+    }
+    else
+    {
+        <div>
+
+            <span class="m-0 p-0 pieceCore">&mdash;</span>
+        </div>
+        @if (ShouldShowTranslations)
+        {
+            <div class="text-sm">&mdash;</div>
+        }
     }
 </div>
 
