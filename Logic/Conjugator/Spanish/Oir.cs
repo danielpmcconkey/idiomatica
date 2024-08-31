@@ -12,7 +12,7 @@ namespace Logic.Conjugator.Spanish
     public class Oir : _Ir
     {
         public Oir(
-            IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
+            IVerbTranslator? targetTranslator, Verb sourceLanguageInfinitive, Verb? targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
             

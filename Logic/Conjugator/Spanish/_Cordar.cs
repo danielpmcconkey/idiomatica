@@ -11,7 +11,7 @@ namespace Logic.Conjugator.Spanish
     public class _Cordar : _Ar
     {
         public _Cordar(
-            IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
+            IVerbTranslator? targetTranslator, Verb sourceLanguageInfinitive, Verb? targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
 

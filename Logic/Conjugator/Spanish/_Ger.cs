@@ -12,7 +12,7 @@ namespace Logic.Conjugator.Spanish
     public class _Ger : _Er
     {
         public _Ger(
-            IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
+            IVerbTranslator? targetTranslator, Verb sourceLanguageInfinitive, Verb? targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
             throw new NotImplementedException();

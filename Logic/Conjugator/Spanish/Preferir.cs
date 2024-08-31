@@ -8,10 +8,9 @@ using System.Threading.Tasks;
 
 namespace Logic.Conjugator.Spanish
 {
-
-    public class Pedir : _Ir
+    public class Preferir : Dormir
     {
-        public Pedir(
+        public Preferir(
             IVerbTranslator? targetTranslator, Verb sourceLanguageInfinitive, Verb? targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
@@ -20,14 +19,25 @@ namespace Logic.Conjugator.Spanish
 
         internal override List<VerbConjugationPiece> GetCorePiece2()
         {
-            // ped -> pid
+            // prefier
             if (string.IsNullOrEmpty(_sourceLanguageInfinitive.Core2))
             {
                 ErrorHandler.LogAndThrow();
                 return [];
             }
-            string seek = "i";
+            string seek = "ie";
             return ReplaceMiddleOfCore(_sourceLanguageInfinitive.Core2, seek);
+        }
+        internal override List<VerbConjugationPiece> GetCorePiece3()
+        {
+            // prefir
+            if (string.IsNullOrEmpty(_sourceLanguageInfinitive.Core3))
+            {
+                ErrorHandler.LogAndThrow();
+                return [];
+            }
+            string seek = "i";
+            return ReplaceMiddleOfCore(_sourceLanguageInfinitive.Core3, seek);
         }
 
         #region Present
@@ -54,11 +64,11 @@ namespace Logic.Conjugator.Spanish
         #region Preterite
         public override List<VerbConjugationPiece> GetRootPiecesPreteriteEl()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesPreteriteEllos()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
 
         #endregion
@@ -81,11 +91,11 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentNosotros()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentVosotros()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentEllos()
         {
@@ -96,27 +106,27 @@ namespace Logic.Conjugator.Spanish
         #region SubjunctiveImperfect
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectYo()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectTu()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectEl()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectNosotros()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectVosotros()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectEllos()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
 
 
@@ -126,27 +136,27 @@ namespace Logic.Conjugator.Spanish
 
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureYo()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureTu()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureEl()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureNosotros()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureVosotros()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureEllos()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         #endregion
 
@@ -165,8 +175,9 @@ namespace Logic.Conjugator.Spanish
 
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeNosotros()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
+
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeUstedes()
         {
             return GetCorePiece2();
@@ -185,11 +196,11 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesNegativeImperativeNosotros()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesNegativeImperativeVosotros()
         {
-            return GetCorePiece2();
+            return GetCorePiece3();
         }
         public override List<VerbConjugationPiece> GetRootPiecesNegativeImperativeUstedes()
         {

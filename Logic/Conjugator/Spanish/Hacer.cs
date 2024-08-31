@@ -12,7 +12,7 @@ namespace Logic.Conjugator.Spanish
     public class Hacer : _Er
     {
         public Hacer(
-            IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
+            IVerbTranslator? targetTranslator, Verb sourceLanguageInfinitive, Verb? targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
             

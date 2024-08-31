@@ -35,16 +35,16 @@ else
 }
 
 <div class="border p-2">
-    <h3>Participles of @infinitive</h3>
+    <h3>Participles of @conjugationTable.Infinitive</h3>
     <table class="table">
         
         <tbody>
             <tr>
                 <th scope="row">Gerund:</th>
                 <td>
-                    @if (@gerund is not null)
+                    @if (@conjugationTable.Gerund is not null)
                     {
-                        <span class="m-0 p-0 pieceCore">@gerund</span>
+                        <span class="m-0 p-0 pieceCore">@conjugationTable.Gerund</span>
                     }
                     else
                     {
@@ -56,9 +56,9 @@ else
             <tr>
                 <th scope="row">Past participle:</th>
                 <td>
-                    @if (@pastParticiple is not null)
+                    @if (@conjugationTable.PastParticiple is not null)
                     {
-                        <span class="m-0 p-0 pieceCore">@pastParticiple</span>
+                        <span class="m-0 p-0 pieceCore">@conjugationTable.PastParticiple</span>
                     }
                     else
                     {
@@ -72,7 +72,7 @@ else
     </table>
 </div>
 <div class="border p-2">
-    <h3>Indicative conjugations of @infinitive</h3>
+    <h3>Indicative conjugations of @conjugationTable.Infinitive</h3>
     <table class="table">
         <thead>
             <tr>
@@ -87,111 +87,111 @@ else
         <tbody>
             <tr>
                 <th scope="row">yo</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@presentYo" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@preteriteYo" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@imperfectYo" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conditionalYo" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@futureYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureYo" /></td>
             </tr>
             <tr>
                 <th scope="row">tú</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@presentTu" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@preteriteTu" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@imperfectTu" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conditionalTu" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@futureTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureTu" /></td>
             </tr>
             @if (shouldShowTranslations)
             {
                 <tr class="clubbedRow">
                     <th scope="row">usted</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@presentUsted" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@preteriteUsted" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@imperfectUsted" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conditionalUsted" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@futureUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureUsted" /></td>
                 </tr>
                 <tr class="clubbedRow">
                     <th scope="row">él</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@presentEl" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@preteriteEl" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@imperfectEl" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conditionalEl" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@futureEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureEl" /></td>
                 </tr>
                 <tr class="clubbedRow">
                     <th scope="row">ella</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@presentElla" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@preteriteElla" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@imperfectElla" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conditionalElla" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@futureElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureElla" /></td>
                 </tr>
             }
             else
             {
                 <tr>
                     <th scope="row">él/ella/usted</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@presentEl" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@preteriteEl" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@imperfectEl" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conditionalEl" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@futureEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureEl" /></td>
                 </tr>
             }
             
             <tr>
                 <th scope="row">nosotros</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@presentNosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@preteriteNosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@imperfectNosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conditionalNosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@futureNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureNosotros" /></td>
             </tr>
             <tr>
                 <th scope="row">vosotros</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@presentVosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@preteriteVosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@imperfectVosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conditionalVosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@futureVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureVosotros" /></td>
             </tr>
             @if (shouldShowTranslations)
             {
                 <tr class="clubbedRow">
                     <th scope="row">ustedes</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@presentUstedes" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@preteriteUstedes" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@imperfectUstedes" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conditionalUstedes" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@futureUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureUstedes" /></td>
                 </tr>
                 <tr class="clubbedRow">
                     <th scope="row">ellos</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@presentEllos" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@preteriteEllos" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@imperfectEllos" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conditionalEllos" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@futureEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureEllos" /></td>
                 </tr>
                 <tr class="clubbedRow">
                     <th scope="row">ellas</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@presentEllas" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@preteriteEllas" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@imperfectEllas" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conditionalEllas" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@futureEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureEllas" /></td>
                 </tr>
             }
             else
             {
                 <tr>
                     <th scope="row">ellos/ellas/ustedes</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@presentEllos" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@preteriteEllos" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@imperfectEllos" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conditionalEllos" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@futureEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureEllos" /></td>
                 </tr>
             }
             
@@ -201,7 +201,7 @@ else
 </div>
 
 <div class="border p-2">
-    <h3>Subjunctive conjugations of @infinitive</h3>
+    <h3>Subjunctive conjugations of @conjugationTable.Infinitive</h3>
     <table class="table">
         <thead>
             <tr>
@@ -214,87 +214,87 @@ else
         <tbody>
             <tr>
                 <th scope="row">yo</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctivePresentYo" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveImperfectYo" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveFutureYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureYo" /></td>
             </tr>
             <tr>
                 <th scope="row">tú</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctivePresentTu" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveImperfectTu" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveFutureTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureTu" /></td>
             </tr>
             @if (shouldShowTranslations)
             {
                 <tr class="clubbedRow">
                     <th scope="row">usted</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctivePresentUsted" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveImperfectUsted" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveFutureUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureUsted" /></td>
                 </tr>
                 <tr class="clubbedRow">
                     <th scope="row">él</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctivePresentEl" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveImperfectEl" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveFutureEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureEl" /></td>
                 </tr>
                 <tr class="clubbedRow">
                     <th scope="row">ella</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctivePresentElla" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveImperfectElla" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveFutureElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureElla" /></td>
                 </tr>
             }
             else
             {
                 <tr>
                     <th scope="row">él/ella/usted</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctivePresentEl" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveImperfectEl" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveFutureEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureEl" /></td>
                 </tr>
             }
             
             <tr>
                 <th scope="row">nosotros</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctivePresentNosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveImperfectNosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveFutureNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureNosotros" /></td>
             </tr>
             <tr>
                 <th scope="row">vosotros</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctivePresentVosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveImperfectVosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveFutureVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureVosotros" /></td>
             </tr>
             @if (shouldShowTranslations)
             {
                 <tr class="clubbedRow">
                     <th scope="row">ustedes</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctivePresentUstedes" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveImperfectUstedes" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveFutureUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureUstedes" /></td>
                 </tr>
                 <tr class="clubbedRow">
                     <th scope="row">ellos</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctivePresentEllos" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveImperfectEllos" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveFutureEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureEllos" /></td>
                 </tr>
                 <tr class="clubbedRow">
                     <th scope="row">ellas</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctivePresentEllas" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveImperfectEllas" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveFutureEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureEllas" /></td>
                 </tr>
             }
             else
             {
                 <tr>
                     <th scope="row">ellos/ellas/ustedes</th>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctivePresentEllos" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveImperfectEllos" /></td>
-                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@subjunctiveFutureEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureEllos" /></td>
                 </tr>
             }
         </tbody>
@@ -303,7 +303,7 @@ else
 </div>
 
 <div class="border p-2">
-    <h3>Imperative conjugations of @infinitive</h3>
+    <h3>Imperative conjugations of @conjugationTable.Infinitive</h3>
     <table class="table">
         <thead>
             <tr>
@@ -315,930 +315,62 @@ else
         <tbody>
             <tr>
                 <th scope="row">tú</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@affirmativeImperativeTu" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@negativeImperativeTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.AffirmativeImperativeTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.NegativeImperativeTu" /></td>
             </tr>
             <tr>
                 <th scope="row">usted</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@affirmativeImperativeUsted" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@negativeImperativeUsted" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.AffirmativeImperativeUsted" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.NegativeImperativeUsted" /></td>
             </tr>
             <tr>
                 <th scope="row">nosotros</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@affirmativeImperativeNosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@negativeImperativeNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.AffirmativeImperativeNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.NegativeImperativeNosotros" /></td>
             </tr>
             <tr>
                 <th scope="row">vosotros</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@affirmativeImperativeVosotros" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@negativeImperativeVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.AffirmativeImperativeVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.NegativeImperativeVosotros" /></td>
             </tr>
             <tr>
                 <th scope="row">ustedes</th>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@affirmativeImperativeUstedes" /></td>
-                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@negativeImperativeUstedes" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.AffirmativeImperativeUstedes" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.NegativeImperativeUstedes" /></td>
             </tr>
         </tbody>
     </table>
 </div>
 
 @code {
-    List<VerbConjugation> conjugations = [];
+
     public bool shouldShowTranslations = false;
+    Logic.Conjugator.Spanish.SpanishConjugationTable? conjugationTable;
 
-    private string? infinitive { get; set; }
-    private string? gerund { get; set; }
-    private string? pastParticiple { get; set; }
 
-    private VerbConjugation? presentYo { get; set; }
-    private VerbConjugation? presentTu { get; set; }
-    private VerbConjugation? presentEl { get; set; }
-    private VerbConjugation? presentElla { get; set; }
-    private VerbConjugation? presentUsted { get; set; }
-    private VerbConjugation? presentNosotros { get; set; }
-    private VerbConjugation? presentVosotros { get; set; }
-    private VerbConjugation? presentUstedes { get; set; }
-    private VerbConjugation? presentEllos { get; set; }
-    private VerbConjugation? presentEllas { get; set; }
-
-    private VerbConjugation? preteriteYo { get; set; }
-    private VerbConjugation? preteriteTu { get; set; }
-    private VerbConjugation? preteriteEl { get; set; }
-    private VerbConjugation? preteriteElla { get; set; }
-    private VerbConjugation? preteriteUsted { get; set; }
-    private VerbConjugation? preteriteNosotros { get; set; }
-    private VerbConjugation? preteriteVosotros { get; set; }
-    private VerbConjugation? preteriteUstedes { get; set; }
-    private VerbConjugation? preteriteEllos { get; set; }
-    private VerbConjugation? preteriteEllas { get; set; }
-
-    private VerbConjugation? imperfectYo { get; set; }
-    private VerbConjugation? imperfectTu { get; set; }
-    private VerbConjugation? imperfectEl { get; set; }
-    private VerbConjugation? imperfectElla { get; set; }
-    private VerbConjugation? imperfectUsted { get; set; }
-    private VerbConjugation? imperfectNosotros { get; set; }
-    private VerbConjugation? imperfectVosotros { get; set; }
-    private VerbConjugation? imperfectUstedes { get; set; }
-    private VerbConjugation? imperfectEllos { get; set; }
-    private VerbConjugation? imperfectEllas { get; set; }
-
-    private VerbConjugation? conditionalYo { get; set; }
-    private VerbConjugation? conditionalTu { get; set; }
-    private VerbConjugation? conditionalEl { get; set; }
-    private VerbConjugation? conditionalElla { get; set; }
-    private VerbConjugation? conditionalUsted { get; set; }
-    private VerbConjugation? conditionalNosotros { get; set; }
-    private VerbConjugation? conditionalVosotros { get; set; }
-    private VerbConjugation? conditionalUstedes { get; set; }
-    private VerbConjugation? conditionalEllos { get; set; }
-    private VerbConjugation? conditionalEllas { get; set; }
-
-    private VerbConjugation? futureYo { get; set; }
-    private VerbConjugation? futureTu { get; set; }
-    private VerbConjugation? futureEl { get; set; }
-    private VerbConjugation? futureElla { get; set; }
-    private VerbConjugation? futureUsted { get; set; }
-    private VerbConjugation? futureNosotros { get; set; }
-    private VerbConjugation? futureVosotros { get; set; }
-    private VerbConjugation? futureUstedes { get; set; }
-    private VerbConjugation? futureEllos { get; set; }
-    private VerbConjugation? futureEllas { get; set; }
-
-    private VerbConjugation? subjunctivePresentYo { get; set; }
-    private VerbConjugation? subjunctivePresentTu { get; set; }
-    private VerbConjugation? subjunctivePresentEl { get; set; }
-    private VerbConjugation? subjunctivePresentElla { get; set; }
-    private VerbConjugation? subjunctivePresentUsted { get; set; }
-    private VerbConjugation? subjunctivePresentNosotros { get; set; }
-    private VerbConjugation? subjunctivePresentVosotros { get; set; }
-    private VerbConjugation? subjunctivePresentUstedes { get; set; }
-    private VerbConjugation? subjunctivePresentEllos { get; set; }
-    private VerbConjugation? subjunctivePresentEllas { get; set; }
-
-    private VerbConjugation? subjunctiveImperfectYo { get; set; }
-    private VerbConjugation? subjunctiveImperfectTu { get; set; }
-    private VerbConjugation? subjunctiveImperfectEl { get; set; }
-    private VerbConjugation? subjunctiveImperfectElla { get; set; }
-    private VerbConjugation? subjunctiveImperfectUsted { get; set; }
-    private VerbConjugation? subjunctiveImperfectNosotros { get; set; }
-    private VerbConjugation? subjunctiveImperfectVosotros { get; set; }
-    private VerbConjugation? subjunctiveImperfectUstedes { get; set; }
-    private VerbConjugation? subjunctiveImperfectEllos { get; set; }
-    private VerbConjugation? subjunctiveImperfectEllas { get; set; }
-
-    private VerbConjugation? subjunctiveFutureYo { get; set; }
-    private VerbConjugation? subjunctiveFutureTu { get; set; }
-    private VerbConjugation? subjunctiveFutureEl { get; set; }
-    private VerbConjugation? subjunctiveFutureElla { get; set; }
-    private VerbConjugation? subjunctiveFutureUsted { get; set; }
-    private VerbConjugation? subjunctiveFutureNosotros { get; set; }
-    private VerbConjugation? subjunctiveFutureVosotros { get; set; }
-    private VerbConjugation? subjunctiveFutureUstedes { get; set; }
-    private VerbConjugation? subjunctiveFutureEllos { get; set; }
-    private VerbConjugation? subjunctiveFutureEllas { get; set; }
-
-    private VerbConjugation? affirmativeImperativeYo { get; set; }
-    private VerbConjugation? affirmativeImperativeTu { get; set; }
-    private VerbConjugation? affirmativeImperativeEl { get; set; }
-    private VerbConjugation? affirmativeImperativeElla { get; set; }
-    private VerbConjugation? affirmativeImperativeUsted { get; set; }
-    private VerbConjugation? affirmativeImperativeNosotros { get; set; }
-    private VerbConjugation? affirmativeImperativeVosotros { get; set; }
-    private VerbConjugation? affirmativeImperativeUstedes { get; set; }
-    private VerbConjugation? affirmativeImperativeEllos { get; set; }
-    private VerbConjugation? affirmativeImperativeEllas { get; set; }
-
-    private VerbConjugation? negativeImperativeTu { get; set; }
-    private VerbConjugation? negativeImperativeUsted { get; set; }
-    private VerbConjugation? negativeImperativeNosotros { get; set; }
-    private VerbConjugation? negativeImperativeVosotros { get; set; }
-    private VerbConjugation? negativeImperativeUstedes { get; set; }
 
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            
-            Verb spanishVerb140 = new() { Infinitive = "poner", Core1 = "pon", Core2 = "pus", Gerund = "poniendo", PastParticiple = "puesto", }; Verb englishVerb140 = new() { Infinitive = "to put", Core1 = "put", Core2 = "put", Core3 = "puts", Gerund = "putting", PastParticiple = "put", }; Logic.Conjugator.English.EnglishVerbTranslator translator140 = new(); Logic.Conjugator.Spanish.Poner conjugator140 = new(translator140, spanishVerb140, englishVerb140); conjugations = conjugator140.Conjugate(); ProcessConjugations(spanishVerb140);
-            
+
+            Verb spanishVerb141 = new() { Infinitive = "preferir", Core1 = "prefer", Core2 = "prefier", Core3 = "prefir", Gerund = "prefiriendo", PastParticiple = "preferido", };
+            Verb englishVerb141 = new() { Infinitive = "to prefer", Core1 = "prefer", Core2 = "preferred", Core3 = "prefers", Gerund = "preferring", PastParticiple = "preferred", };
+            Logic.Conjugator.English.EnglishVerbTranslator translator141 = new();
+            Logic.Conjugator.Spanish.Preferir conjugator141 = new(translator141, spanishVerb141, englishVerb141);
+            var conjugations = conjugator141.Conjugate();
+            conjugationTable = new (spanishVerb141, conjugations);
+
         }
         catch (Exception ex)
         {
             var burp = ex.ToString();
         }
     }
-    private void ProcessConjugations(Verb spanishVerb)
-    {
-        infinitive = spanishVerb.Infinitive;
-        gerund = spanishVerb.Gerund;
-        pastParticiple = spanishVerb.PastParticiple;
-        ApplyPresentConjugations();
-        ApplyPreteriteConjugations();
-        ApplyImperfectConjugations();
-        ApplyConditionalConjugations();
-        ApplyFutureConjugations();
-        ApplySubjunctivePresentConjugations();
-        ApplySubjunctiveImperfectConjugations();
-        ApplySubjunctiveFutureConjugations();
-        ApplyAffirmativeImperativeConjugations();
-        ApplyNegativeImperativeConjugations();
-    }
     private async Task ToggleTranslations()
     {
         shouldShowTranslations = !shouldShowTranslations;
     }
-    private void ApplyPresentConjugations()
-    {
-        presentYo = conjugations.Where(x =>
-                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-                x.Number == AvailableGrammaticalNumber.SINGULAR &&
-                x.Gender == AvailableGrammaticalGender.ANY &&
-                x.Tense == AvailableGrammaticalTense.PRESENT &&
-                x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-                x.Mood == AvailableGrammaticalMood.INDICATIVE
-            ).FirstOrDefault();
-        presentTu = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        presentUsted = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        presentEl = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        presentElla = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        presentNosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        presentVosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        presentUstedes = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        presentEllos = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        presentEllas = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-    }
-    private void ApplyPreteriteConjugations()
-    {
-        preteriteYo = conjugations.Where(x =>
-                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-                x.Number == AvailableGrammaticalNumber.SINGULAR &&
-                x.Gender == AvailableGrammaticalGender.ANY &&
-                x.Tense == AvailableGrammaticalTense.PAST &&
-                x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-                x.Mood == AvailableGrammaticalMood.INDICATIVE
-            ).FirstOrDefault();
-        preteriteTu = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        preteriteUsted = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        preteriteEl = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        preteriteElla = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        preteriteNosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        preteriteVosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        preteriteUstedes = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        preteriteEllos = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        preteriteEllas = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-    }
-    private void ApplyImperfectConjugations()
-    {
-        imperfectYo = conjugations.Where(x =>
-                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-                x.Number == AvailableGrammaticalNumber.SINGULAR &&
-                x.Gender == AvailableGrammaticalGender.ANY &&
-                x.Tense == AvailableGrammaticalTense.PAST &&
-                x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-                x.Mood == AvailableGrammaticalMood.INDICATIVE
-            ).FirstOrDefault();
-        imperfectTu = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        imperfectUsted = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        imperfectEl = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        imperfectElla = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        imperfectNosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        imperfectVosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        imperfectUstedes = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        imperfectEllos = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        imperfectEllas = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-    }
-    private void ApplyConditionalConjugations()
-    {
-        conditionalYo = conjugations.Where(x =>
-                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-                x.Number == AvailableGrammaticalNumber.SINGULAR &&
-                x.Gender == AvailableGrammaticalGender.ANY &&
-                x.Tense == AvailableGrammaticalTense.PRESENT &&
-                x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-                x.Mood == AvailableGrammaticalMood.CONDITIONAL
-            ).FirstOrDefault();
-        conditionalTu = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.CONDITIONAL
-        ).FirstOrDefault();
-        conditionalUsted = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.CONDITIONAL
-        ).FirstOrDefault();
-        conditionalEl = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.CONDITIONAL
-        ).FirstOrDefault();
-        conditionalElla = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.CONDITIONAL
-        ).FirstOrDefault();
-        conditionalNosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.CONDITIONAL
-        ).FirstOrDefault();
-        conditionalVosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.CONDITIONAL
-        ).FirstOrDefault();
-        conditionalUstedes = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.CONDITIONAL
-        ).FirstOrDefault();
-        conditionalEllos = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.CONDITIONAL
-        ).FirstOrDefault();
-        conditionalEllas = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.CONDITIONAL
-        ).FirstOrDefault();
-    }
-    private void ApplyFutureConjugations()
-    {
-        futureYo = conjugations.Where(x =>
-                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-                x.Number == AvailableGrammaticalNumber.SINGULAR &&
-                x.Gender == AvailableGrammaticalGender.ANY &&
-                x.Tense == AvailableGrammaticalTense.FUTURE &&
-                x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-                x.Mood == AvailableGrammaticalMood.INDICATIVE
-            ).FirstOrDefault();
-        futureTu = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        futureUsted = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        futureEl = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        futureElla = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        futureNosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        futureVosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        futureUstedes = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        futureEllos = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-        futureEllas = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.INDICATIVE
-        ).FirstOrDefault();
-    }
-
-    private void ApplySubjunctivePresentConjugations()
-    {
-        subjunctivePresentYo = conjugations.Where(x =>
-                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-                x.Number == AvailableGrammaticalNumber.SINGULAR &&
-                x.Gender == AvailableGrammaticalGender.ANY &&
-                x.Tense == AvailableGrammaticalTense.PRESENT &&
-                x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-                x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-            ).FirstOrDefault();
-        subjunctivePresentTu = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctivePresentUsted = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctivePresentEl = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctivePresentElla = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctivePresentNosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctivePresentVosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctivePresentUstedes = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctivePresentEllos = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctivePresentEllas = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-    }
-    private void ApplySubjunctiveImperfectConjugations()
-    {
-        subjunctiveImperfectYo = conjugations.Where(x =>
-                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-                x.Number == AvailableGrammaticalNumber.SINGULAR &&
-                x.Gender == AvailableGrammaticalGender.ANY &&
-                x.Tense == AvailableGrammaticalTense.PAST &&
-                x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-                x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-            ).FirstOrDefault();
-        subjunctiveImperfectTu = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveImperfectUsted = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveImperfectEl = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveImperfectElla = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveImperfectNosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveImperfectVosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveImperfectUstedes = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveImperfectEllos = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveImperfectEllas = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.PAST &&
-            x.Aspect == AvailableGrammaticalAspect.IMPERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-    }
-    private void ApplySubjunctiveFutureConjugations()
-    {
-        subjunctiveFutureYo = conjugations.Where(x =>
-                x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-                x.Number == AvailableGrammaticalNumber.SINGULAR &&
-                x.Gender == AvailableGrammaticalGender.ANY &&
-                x.Tense == AvailableGrammaticalTense.FUTURE &&
-                x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-                x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-            ).FirstOrDefault();
-        subjunctiveFutureTu = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveFutureUsted = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveFutureEl = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveFutureElla = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveFutureNosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveFutureVosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveFutureUstedes = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveFutureEllos = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.MASCULINE &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-        subjunctiveFutureEllas = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.THIRDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.FEMININE &&
-            x.Tense == AvailableGrammaticalTense.FUTURE &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.SUBJUNCTIVE
-        ).FirstOrDefault();
-    }
-
-    private void ApplyAffirmativeImperativeConjugations()
-    {
-        affirmativeImperativeTu = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.IMPERATIVE
-        ).FirstOrDefault();
-        affirmativeImperativeUsted = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.IMPERATIVE
-        ).FirstOrDefault();
-        affirmativeImperativeNosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.IMPERATIVE
-        ).FirstOrDefault();
-        affirmativeImperativeVosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.IMPERATIVE
-        ).FirstOrDefault();
-        affirmativeImperativeUstedes = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.IMPERATIVE
-        ).FirstOrDefault();
-    }
-    private void ApplyNegativeImperativeConjugations()
-    {
-        negativeImperativeTu = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.NEGATIVE_IMPERATIVE
-        ).FirstOrDefault();
-        negativeImperativeUsted = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.SINGULAR &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.NEGATIVE_IMPERATIVE
-        ).FirstOrDefault();
-        negativeImperativeNosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.FIRSTPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.NEGATIVE_IMPERATIVE
-        ).FirstOrDefault();
-        negativeImperativeVosotros = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.NEGATIVE_IMPERATIVE
-        ).FirstOrDefault();
-        negativeImperativeUstedes = conjugations.Where(x =>
-            x.Person == AvailableGrammaticalPerson.SECONDPERSON_FORMAL &&
-            x.Number == AvailableGrammaticalNumber.PLURAL &&
-            x.Gender == AvailableGrammaticalGender.ANY &&
-            x.Tense == AvailableGrammaticalTense.PRESENT &&
-            x.Aspect == AvailableGrammaticalAspect.PERFECT &&
-            x.Mood == AvailableGrammaticalMood.NEGATIVE_IMPERATIVE
-        ).FirstOrDefault();
-    }
+    
 }

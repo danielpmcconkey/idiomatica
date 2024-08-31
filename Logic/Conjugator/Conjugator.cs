@@ -9,12 +9,12 @@ namespace Logic.Conjugator
 {
     public abstract class Conjugator
     {
-        protected IVerbTranslator _targetTranslator;
+        protected IVerbTranslator? _targetTranslator;
         protected Verb _sourceLanguageInfinitive;
-        protected Verb _targetLanguageInfinitive;
+        protected Verb? _targetLanguageInfinitive;
 
         public Conjugator(
-            IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive)
+            IVerbTranslator? targetTranslator, Verb sourceLanguageInfinitive, Verb? targetLanguageInfinitive)
         {
             _targetTranslator = targetTranslator;
             _sourceLanguageInfinitive = sourceLanguageInfinitive;

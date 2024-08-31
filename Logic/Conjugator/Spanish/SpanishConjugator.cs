@@ -13,7 +13,7 @@ namespace Logic.Conjugator.Spanish
     public abstract class SpanishConjugator : Conjugator
     {
         public SpanishConjugator(
-            IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
+            IVerbTranslator? targetTranslator, Verb sourceLanguageInfinitive, Verb? targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
 

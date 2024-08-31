@@ -12,7 +12,7 @@ namespace Logic.Conjugator.Spanish
     public class _Guir : _Ir
     {
         public _Guir(
-            IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
+            IVerbTranslator? targetTranslator, Verb sourceLanguageInfinitive, Verb? targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
             // gu is written g before an o or an a

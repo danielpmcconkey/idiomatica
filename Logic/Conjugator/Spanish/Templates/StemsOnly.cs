@@ -10,7 +10,7 @@ namespace Logic.Conjugator.Spanish
     public class StemsOnly : _Ar
     {
         public StemsOnly(
-            IVerbTranslator targetTranslator, Verb sourceLanguageInfinitive, Verb targetLanguageInfinitive) :
+            IVerbTranslator? targetTranslator, Verb sourceLanguageInfinitive, Verb? targetLanguageInfinitive) :
                 base(targetTranslator, sourceLanguageInfinitive, targetLanguageInfinitive)
         {
             throw new NotImplementedException("this is a template. do not use. when you do copy it into a real class, make sure to check which class it's inheriting from");
