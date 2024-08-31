@@ -461,7 +461,7 @@ else
         try
         {
             
-            Verb spanishVerb89 = new() { Infinitive = "ir", Gerund = "yendo", PastParticiple = "ido", }; Verb englishVerb89 = new() { Infinitive = "to go", Core1 = "go", Core2 = "went", Core3 = "goes", Gerund = "going", PastParticiple = "gone", }; Logic.Conjugator.English.EnglishVerbTranslator translator89 = new(); Logic.Conjugator.Spanish.Ir conjugator89 = new(translator89, spanishVerb89, englishVerb89); conjugations = conjugator89.Conjugate(); ProcessConjugations(spanishVerb89);
+            Verb spanishVerb122 = new() { Infinitive = "oír", Core1 = "o", Core2 = "oig", Core3 = "oy", Gerund = "oyendo", PastParticiple = "oído", }; Verb englishVerb122 = new() { Infinitive = "to hear", Core1 = "hear", Core2 = "heard", Core3 = "hears", Gerund = "hearing", PastParticiple = "heard", }; Logic.Conjugator.English.EnglishVerbTranslator translator122 = new(); Logic.Conjugator.Spanish.Oir conjugator122 = new(translator122, spanishVerb122, englishVerb122); conjugations = conjugator122.Conjugate(); ProcessConjugations(spanishVerb122);
             // somewhere in this, the present usted is getting changed
             
         }

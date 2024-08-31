@@ -121,7 +121,7 @@ namespace Logic.Conjugator.Spanish
             {
                 Ordinal = 100,
                 Type = AvailableVerbConjugationPieceType.IRREGULAR,
-                Piece = "fuistes"
+                Piece = "fuiste"
             }];
         }
         public override List<VerbConjugationPiece> GetStemPiecesPreteriteTu()
