@@ -461,8 +461,7 @@ else
         try
         {
             
-            Verb spanishVerb35 = new() { Infinitive = "cerrar", Core1 = "cerr", Core2 = "cierr", Gerund = "cerrando", PastParticiple = "cerrado", }; Verb englishVerb35 = new() { Infinitive = "to close", Core1 = "close", Core2 = "closed", Core3 = "closes", Gerund = "closing", PastParticiple = "closed", }; Logic.Conjugator.English.EnglishVerbTranslator translator35 = new(); Logic.Conjugator.Spanish.Cerrar conjugator35 = new(translator35, spanishVerb35, englishVerb35); conjugations = conjugator35.Conjugate(); ProcessConjugations(spanishVerb35);
-            // somewhere in this, the present usted is getting changed
+            Verb spanishVerb140 = new() { Infinitive = "poner", Core1 = "pon", Core2 = "pus", Gerund = "poniendo", PastParticiple = "puesto", }; Verb englishVerb140 = new() { Infinitive = "to put", Core1 = "put", Core2 = "put", Core3 = "puts", Gerund = "putting", PastParticiple = "put", }; Logic.Conjugator.English.EnglishVerbTranslator translator140 = new(); Logic.Conjugator.Spanish.Poner conjugator140 = new(translator140, spanishVerb140, englishVerb140); conjugations = conjugator140.Conjugate(); ProcessConjugations(spanishVerb140);
             
         }
         catch (Exception ex)
