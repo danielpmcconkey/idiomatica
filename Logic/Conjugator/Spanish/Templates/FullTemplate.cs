@@ -1,4 +1,5 @@
-﻿using Model;
+﻿using Logic.Telemetry;
+using Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,16 +19,46 @@ namespace Logic.Conjugator.Spanish
         }
 
 
+        internal override List<VerbConjugationPiece> GetCorePiece2()
+        {
+            // ven -> vien
+            if (string.IsNullOrEmpty(_sourceLanguageInfinitive.Core2))
+            {
+                ErrorHandler.LogAndThrow();
+                return [];
+            }
+            string seek = "ie";
+            return ReplaceMiddleOfCore(_sourceLanguageInfinitive.Core2, seek);
+        }
+        internal override List<VerbConjugationPiece> GetCorePiece3()
+        {
+            // ven -> vin
+            if (string.IsNullOrEmpty(_sourceLanguageInfinitive.Core3))
+            {
+                ErrorHandler.LogAndThrow();
+                return [];
+            }
+            string seek = "i";
+            return ReplaceMiddleOfCore(_sourceLanguageInfinitive.Core3, seek);
+        }
+        internal override List<VerbConjugationPiece> GetCorePiece4()
+        {
+            // ven -> vin
+            if (string.IsNullOrEmpty(_sourceLanguageInfinitive.Core4))
+            {
+                ErrorHandler.LogAndThrow();
+                return [];
+            }
+            string seek = "i";
+            return ReplaceMiddleOfCore(_sourceLanguageInfinitive.Core4, seek);
+        }
+
+
         #region Present
 
         public override List<VerbConjugationPiece> GetRootPiecesPresentYo()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesPresentYo()
         {
@@ -40,12 +71,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesPresentTu()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesPresentTu()
         {
@@ -58,12 +84,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesPresentEl()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesPresentEl()
         {
@@ -76,12 +97,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesPresentNosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesPresentNosotros()
         {
@@ -94,12 +110,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesPresentVosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesPresentVosotros()
         {
@@ -112,12 +123,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesPresentEllos()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesPresentEllos()
         {
@@ -134,12 +140,7 @@ namespace Logic.Conjugator.Spanish
 
         public override List<VerbConjugationPiece> GetRootPiecesPreteriteYo()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesPreteriteYo()
         {
@@ -152,12 +153,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesPreteriteTu()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesPreteriteTu()
         {
@@ -170,12 +166,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesPreteriteEl()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesPreteriteEl()
         {
@@ -188,12 +179,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesPreteriteNosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesPreteriteNosotros()
         {
@@ -206,12 +192,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesPreteriteVosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesPreteriteVosotros()
         {
@@ -224,12 +205,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesPreteriteEllos()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesPreteriteEllos()
         {
@@ -246,12 +222,7 @@ namespace Logic.Conjugator.Spanish
 
         public override List<VerbConjugationPiece> GetRootPiecesImperfectYo()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesImperfectYo()
         {
@@ -264,12 +235,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesImperfectTu()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesImperfectTu()
         {
@@ -282,12 +248,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesImperfectEl()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesImperfectEl()
         {
@@ -300,12 +261,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesImperfectNosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesImperfectNosotros()
         {
@@ -318,12 +274,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesImperfectVosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesImperfectVosotros()
         {
@@ -336,12 +287,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesImperfectEllos()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesImperfectEllos()
         {
@@ -358,12 +304,7 @@ namespace Logic.Conjugator.Spanish
 
         public override List<VerbConjugationPiece> GetRootPiecesConditionalYo()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesConditionalYo()
         {
@@ -376,12 +317,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesConditionalTu()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesConditionalTu()
         {
@@ -394,12 +330,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesConditionalEl()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesConditionalEl()
         {
@@ -412,12 +343,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesConditionalNosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesConditionalNosotros()
         {
@@ -430,12 +356,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesConditionalVosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesConditionalVosotros()
         {
@@ -448,12 +369,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesConditionalEllos()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesConditionalEllos()
         {
@@ -470,12 +386,7 @@ namespace Logic.Conjugator.Spanish
 
         public override List<VerbConjugationPiece> GetRootPiecesFutureYo()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesFutureYo()
         {
@@ -488,12 +399,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesFutureTu()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesFutureTu()
         {
@@ -506,12 +412,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesFutureEl()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesFutureEl()
         {
@@ -524,12 +425,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesFutureNosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesFutureNosotros()
         {
@@ -542,12 +438,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesFutureVosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesFutureVosotros()
         {
@@ -560,12 +451,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesFutureEllos()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesFutureEllos()
         {
@@ -582,12 +468,7 @@ namespace Logic.Conjugator.Spanish
 
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentYo()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentYo()
         {
@@ -600,12 +481,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentTu()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentTu()
         {
@@ -618,12 +494,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentEl()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentEl()
         {
@@ -636,12 +507,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentNosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentNosotros()
         {
@@ -654,12 +520,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentVosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentVosotros()
         {
@@ -672,12 +533,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentEllos()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctivePresentEllos()
         {
@@ -694,12 +550,7 @@ namespace Logic.Conjugator.Spanish
 
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectYo()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctiveImperfectYo()
         {
@@ -712,12 +563,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectTu()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctiveImperfectTu()
         {
@@ -730,12 +576,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectEl()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctiveImperfectEl()
         {
@@ -748,12 +589,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectNosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctiveImperfectNosotros()
         {
@@ -766,12 +602,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectVosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctiveImperfectVosotros()
         {
@@ -784,12 +615,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveImperfectEllos()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctiveImperfectEllos()
         {
@@ -806,12 +632,7 @@ namespace Logic.Conjugator.Spanish
 
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureYo()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctiveFutureYo()
         {
@@ -824,12 +645,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureTu()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctiveFutureTu()
         {
@@ -842,12 +658,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureEl()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctiveFutureEl()
         {
@@ -860,12 +671,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureNosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctiveFutureNosotros()
         {
@@ -878,12 +684,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureVosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctiveFutureVosotros()
         {
@@ -896,12 +697,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctiveFutureEllos()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesSubjunctiveFutureEllos()
         {
@@ -919,12 +715,7 @@ namespace Logic.Conjugator.Spanish
 
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeTu()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesAffirmativeImperativeTu()
         {
@@ -937,12 +728,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeUsted()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesAffirmativeImperativeUsted()
         {
@@ -955,12 +741,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeNosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesAffirmativeImperativeNosotros()
         {
@@ -973,12 +754,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeVosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesAffirmativeImperativeVosotros()
         {
@@ -991,12 +767,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesAffirmativeImperativeUstedes()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesAffirmativeImperativeUstedes()
         {
@@ -1013,12 +784,7 @@ namespace Logic.Conjugator.Spanish
 
         public override List<VerbConjugationPiece> GetRootPiecesNegativeImperativeTu()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesNegativeImperativeTu()
         {
@@ -1031,12 +797,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesNegativeImperativeUsted()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesNegativeImperativeUsted()
         {
@@ -1049,12 +810,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesNegativeImperativeNosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesNegativeImperativeNosotros()
         {
@@ -1067,12 +823,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesNegativeImperativeVosotros()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesNegativeImperativeVosotros()
         {
@@ -1085,12 +836,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override List<VerbConjugationPiece> GetRootPiecesNegativeImperativeUstedes()
         {
-            return [new VerbConjugationPiece()
-            {
-                Ordinal = 100,
-                Type = AvailableVerbConjugationPieceType.CORE,
-                Piece = _sourceLanguageInfinitive.Core1
-            }];
+            return GetCorePiece2();
         }
         public override List<VerbConjugationPiece> GetStemPiecesNegativeImperativeUstedes()
         {
