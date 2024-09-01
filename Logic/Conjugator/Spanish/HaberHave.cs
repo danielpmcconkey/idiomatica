@@ -258,7 +258,7 @@ namespace Logic.Conjugator.Spanish
                 {
                     Ordinal = 220,
                     Type = AvailableVerbConjugationPieceType.CORE,
-                    Piece = "ías"
+                    Piece = "íais"
                 }];
         }
         public override List<VerbConjugationPiece> GetStemPiecesConditionalEllos()
@@ -361,7 +361,7 @@ namespace Logic.Conjugator.Spanish
                 {
                     Ordinal = 220,
                     Type = AvailableVerbConjugationPieceType.CORE,
-                    Piece = "rán"
+                    Piece = "án"
                 }];
         }
         #endregion

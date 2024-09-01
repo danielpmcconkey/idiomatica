@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Model
 {
@@ -70,8 +73,8 @@ namespace Model
         REGULAR = 2,
         IRREGULAR = 3,
     }
-    //[Table("Verb", Schema = "Idioma")]
-    //[PrimaryKey(nameof(UniqueKey))]
+    [Table("Verb", Schema = "Idioma")]
+    [PrimaryKey(nameof(UniqueKey))]
     public class Verb
     {
         public Guid? UniqueKey { get; set; }
@@ -81,10 +84,15 @@ namespace Model
 
         public int? LanguageId { get; set; }
         public Language? Language { get; set; }
+
+        [NotMapped]
         public List<VerbConjugation> VerbConjugations { get; set; } = [];
 
         #endregion
-
+        [StringLength(2000)]
+        public string? Conjugator { get; set; }
+        [StringLength(2000)]
+        public string? DisplayName { get; set; }
         [StringLength(2000)]
         public string? Infinitive { get; set; }
         [StringLength(2000)]
@@ -126,6 +134,15 @@ namespace Model
         public AvailableGrammaticalVoice Voice { get; set; }
         [StringLength(2000)]
         public string? Translation { get; set; }
+
+        public override string ToString()
+        {
+            return string
+                .Join("", 
+                    Pieces
+                        .Where(x => x.Type != AvailableVerbConjugationPieceType.PRONOUN)
+                        .Select(x => x.Piece));
+        }
 
     }
     //[Table("VerbConjugationPiece", Schema = "Idioma")]

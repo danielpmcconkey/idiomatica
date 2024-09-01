@@ -28,6 +28,7 @@ namespace Model.DAL
         public DbSet<User> Users { get; set; }
         public DbSet<UserBreadCrumb> UserBreadCrumbs { get; set; }
         public DbSet<UserSetting> UserSettings { get; set; }
+        public DbSet<Verb> Verbs { get; set; }
         public DbSet<Word> Words { get; set; }
         public DbSet<WordTranslation> WordTranslations { get; set; }
         public DbSet<WordUser> WordUsers { get; set; }
@@ -185,6 +186,10 @@ namespace Model.DAL
             modelBuilder.Entity<UserSetting>(e => {
                 e.HasKey(us => new { us.UserId, us.Key });
                 e.HasOne(us => us.User).WithMany(u => u.UserSettings).HasForeignKey(us => us.UserId);
+            });
+            modelBuilder.Entity<Verb>(e => {
+                e.HasKey(v => v.UniqueKey);
+                e.HasOne(v => v.Language).WithMany(l => l.Verbs).HasForeignKey(v => v.LanguageId);
             });
             modelBuilder.Entity<Word>(e => {
                 e.HasKey(w => w.Id);

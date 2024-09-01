@@ -23,6 +23,7 @@ namespace Model
         public string? Code { get; set; }
         public LanguageCode? LanguageCode { get; set; }
         public List<WordTranslation> WordTranslations { get; set; } = [];
+        public List<Verb> Verbs { get; set; } = [];
 
         #endregion
 

@@ -25,7 +25,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override VerbConjugation GetStructurePresentEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            // if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
 
             var conjugation = new VerbConjugation()
             {
@@ -38,9 +38,11 @@ namespace Logic.Conjugator.Spanish
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE
             };
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = "there is / there are: present conjugation of haber (there is)";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = "there is / there are: present conjugation of haber (there is)";
+            }
             return conjugation;
         }
         public override List<VerbConjugationPiece> GetRootPiecesPresentEl()
@@ -72,7 +74,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override VerbConjugation GetStructurePreteriteEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            // if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
 
             var conjugation = new VerbConjugation()
             {
@@ -85,9 +87,11 @@ namespace Logic.Conjugator.Spanish
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE
             };
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = "there was / there were: preterite conjugation of haber (there is)";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = "there was / there were: preterite conjugation of haber (there is)";
+            }
             return conjugation;
         }
         #endregion
@@ -101,7 +105,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override VerbConjugation GetStructureImperfectEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            // if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
 
             var conjugation = new VerbConjugation()
             {
@@ -114,9 +118,12 @@ namespace Logic.Conjugator.Spanish
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE
             };
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = "there was / there were: imperfect conjugation of haber (there is)";
 
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = "there was / there were: imperfect conjugation of haber (there is)";
+            }
             return conjugation;
         }
         #endregion
@@ -130,7 +137,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override VerbConjugation GetStructureConditionalEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            // if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
 
             var conjugation = new VerbConjugation()
             {
@@ -143,9 +150,12 @@ namespace Logic.Conjugator.Spanish
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
                 Voice = AvailableGrammaticalVoice.ACTIVE
             };
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = "there would be: conditional conjugation of haber (there is)";
 
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = "there would be: conditional conjugation of haber (there is)";
+            }
             return conjugation;
         }
         #endregion
@@ -159,7 +169,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override VerbConjugation GetStructureFutureEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            // if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
 
             var conjugation = new VerbConjugation()
             {
@@ -172,9 +182,12 @@ namespace Logic.Conjugator.Spanish
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE
             };
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = "there was / there were: preterite conjugation of haber (there is)";
 
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = "there was / there were: preterite conjugation of haber (there is)";
+            }
             return conjugation;
         }
         #endregion
@@ -188,7 +201,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override VerbConjugation GetStructureSubjunctivePresentEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            // if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
 
             var conjugation = new VerbConjugation()
             {
@@ -201,10 +214,11 @@ namespace Logic.Conjugator.Spanish
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE
             };
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = "there were: subjunctive present conjugation of haber (there is)";
-
-            return conjugation;
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = "there were: subjunctive present conjugation of haber (there is)";
+            }return conjugation;
         }
         #endregion
 
@@ -217,7 +231,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override VerbConjugation GetStructureSubjunctiveImperfectEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            // if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
 
             var conjugation = new VerbConjugation()
             {
@@ -230,9 +244,11 @@ namespace Logic.Conjugator.Spanish
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE
             };
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = "there were: subjunctive imperfect conjugation of haber (there is)";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = "there were: subjunctive imperfect conjugation of haber (there is)";
+            }
             return conjugation;
         }
         #endregion
@@ -246,7 +262,7 @@ namespace Logic.Conjugator.Spanish
         }
         public override VerbConjugation GetStructureSubjunctiveFutureEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            // if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
 
             var conjugation = new VerbConjugation()
             {
@@ -259,9 +275,11 @@ namespace Logic.Conjugator.Spanish
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE
             };
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = conjugation.Translation = "there will be: subjunctive future conjugation of haber (there is)"; ;
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = conjugation.Translation = "there will be: subjunctive future conjugation of haber (there is)"; ;
+            }
             return conjugation;
         }
         #endregion

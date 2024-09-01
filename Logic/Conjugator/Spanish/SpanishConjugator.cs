@@ -203,7 +203,7 @@ namespace Logic.Conjugator.Spanish
 
         public virtual VerbConjugation GetStructurePresentYo()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -219,14 +219,17 @@ namespace Logic.Conjugator.Spanish
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación del presente de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+            }
 
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePresentTu()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+
 
             var conjugation = new VerbConjugation()
             {
@@ -241,14 +244,17 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación del presente de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+            }
 
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePresentEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -263,14 +269,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación del presente de «él» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «él» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePresentElla()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -285,14 +293,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación del presente de «ella» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePresentUsted()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -307,14 +317,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación del presente de «usted» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePresentNosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -329,14 +341,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación del presente de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePresentVosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -351,14 +365,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación del presente de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePresentEllos()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -373,14 +389,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación del presente de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePresentEllas()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -395,14 +413,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación del presente de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePresentUstedes()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -417,9 +437,11 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación del presente de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
 
@@ -588,7 +610,7 @@ namespace Logic.Conjugator.Spanish
 
         public virtual VerbConjugation GetStructurePreteriteYo()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -604,14 +626,16 @@ namespace Logic.Conjugator.Spanish
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «yo» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePreteriteTu()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -626,14 +650,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «tú» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePreteriteEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -648,14 +674,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «él» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «él» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePreteriteElla()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -670,14 +698,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «ella» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePreteriteUsted()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -692,14 +722,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «usted» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePreteriteNosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -714,14 +746,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePreteriteVosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -736,14 +770,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePreteriteEllos()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -758,14 +794,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePreteriteEllas()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -780,14 +818,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructurePreteriteUstedes()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -802,9 +842,11 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
 
@@ -965,7 +1007,7 @@ namespace Logic.Conjugator.Spanish
 
         public virtual VerbConjugation GetStructureImperfectYo()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -981,14 +1023,16 @@ namespace Logic.Conjugator.Spanish
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «yo» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureImperfectTu()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1003,14 +1047,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «tú» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureImperfectEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1025,14 +1071,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «él» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «él» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureImperfectElla()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1047,14 +1095,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «ella» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureImperfectUsted()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1069,14 +1119,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «usted» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureImperfectNosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1091,14 +1143,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureImperfectVosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1113,14 +1167,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureImperfectEllos()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1135,14 +1191,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureImperfectEllas()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1157,14 +1215,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureImperfectUstedes()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1179,9 +1239,11 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
 
@@ -1350,7 +1412,7 @@ namespace Logic.Conjugator.Spanish
 
         public virtual VerbConjugation GetStructureConditionalYo()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1366,14 +1428,16 @@ namespace Logic.Conjugator.Spanish
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación condicional de «yo» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureConditionalTu()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1388,14 +1452,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación condicional de «tú» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureConditionalEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1410,14 +1476,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación condicional de «él» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «él» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureConditionalElla()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1432,14 +1500,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación condicional de «ella» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureConditionalUsted()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1454,14 +1524,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación condicional de «usted» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureConditionalNosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1476,14 +1548,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación condicional de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureConditionalVosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1498,14 +1572,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación condicional de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureConditionalEllos()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1520,14 +1596,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación condicional de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureConditionalEllas()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1542,14 +1620,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación condicional de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureConditionalUstedes()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1564,9 +1644,11 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación condicional de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
 
@@ -1733,7 +1815,7 @@ namespace Logic.Conjugator.Spanish
 
         public virtual VerbConjugation GetStructureFutureYo()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1749,14 +1831,16 @@ namespace Logic.Conjugator.Spanish
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «yo» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «yo» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureFutureTu()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1771,14 +1855,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «tú» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «tú» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureFutureEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1793,14 +1879,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «él» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «él» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureFutureElla()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1815,14 +1903,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «ella» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «ella» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureFutureUsted()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1837,14 +1927,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «usted» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «usted» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureFutureNosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1859,14 +1951,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureFutureVosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1881,14 +1975,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureFutureEllos()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1903,14 +1999,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «ellos» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureFutureEllas()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1925,14 +2023,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «ellas» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureFutureUstedes()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -1947,9 +2047,11 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
 
@@ -2118,7 +2220,7 @@ namespace Logic.Conjugator.Spanish
 
         public virtual VerbConjugation GetStructureSubjunctivePresentYo()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2134,14 +2236,16 @@ namespace Logic.Conjugator.Spanish
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «yo» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctivePresentTu()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2156,14 +2260,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «tú» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctivePresentEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2178,14 +2284,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «él» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «él» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctivePresentElla()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2200,14 +2308,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ella» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctivePresentUsted()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2222,14 +2332,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «usted» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctivePresentNosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2244,14 +2356,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctivePresentVosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2266,14 +2380,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctivePresentEllos()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2288,14 +2404,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctivePresentEllas()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2310,14 +2428,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctivePresentUstedes()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2332,9 +2452,11 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
 
@@ -2503,7 +2625,7 @@ namespace Logic.Conjugator.Spanish
 
         public virtual VerbConjugation GetStructureSubjunctiveImperfectYo()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2519,14 +2641,16 @@ namespace Logic.Conjugator.Spanish
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «yo» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveImperfectTu()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2541,14 +2665,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «tú» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveImperfectEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2563,14 +2689,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «él» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «él» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveImperfectElla()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2585,14 +2713,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ella» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveImperfectUsted()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2607,14 +2737,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «usted» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveImperfectNosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2629,14 +2761,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveImperfectVosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2651,14 +2785,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveImperfectEllos()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2673,14 +2809,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveImperfectEllas()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2695,14 +2833,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveImperfectUstedes()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2717,9 +2857,11 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
 
@@ -2887,7 +3029,7 @@ namespace Logic.Conjugator.Spanish
 
         public virtual VerbConjugation GetStructureSubjunctiveFutureYo()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2903,14 +3045,16 @@ namespace Logic.Conjugator.Spanish
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «yo» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «yo» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveFutureTu()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2925,14 +3069,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «tú» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «tú» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveFutureEl()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2947,14 +3093,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «él» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «él» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveFutureElla()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2969,14 +3117,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ella» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ella» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveFutureUsted()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -2991,14 +3141,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «usted» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «usted» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveFutureNosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3013,14 +3165,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveFutureVosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3035,14 +3189,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveFutureEllos()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3057,14 +3213,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ellos» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveFutureEllas()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3079,14 +3237,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ellas» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureSubjunctiveFutureUstedes()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3101,9 +3261,11 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
 
@@ -3266,7 +3428,7 @@ namespace Logic.Conjugator.Spanish
 
         public virtual VerbConjugation GetStructureAffirmativeImperativeTu()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3281,14 +3443,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «tú» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «tú» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureAffirmativeImperativeUsted()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3303,14 +3467,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «usted» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «usted» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureAffirmativeImperativeNosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3325,14 +3491,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureAffirmativeImperativeVosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3347,14 +3515,16 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureAffirmativeImperativeUstedes()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3369,9 +3539,11 @@ namespace Logic.Conjugator.Spanish
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
 
@@ -3490,7 +3662,7 @@ namespace Logic.Conjugator.Spanish
 
         public virtual VerbConjugation GetStructureNegativeImperativeTu()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3510,14 +3682,16 @@ namespace Logic.Conjugator.Spanish
                 Piece = "no "
             });
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «tú» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureNegativeImperativeUsted()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3537,14 +3711,16 @@ namespace Logic.Conjugator.Spanish
                 Piece = "no "
             });
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «usted» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureNegativeImperativeNosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3564,14 +3740,16 @@ namespace Logic.Conjugator.Spanish
                 Piece = "no "
             });
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureNegativeImperativeVosotros()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3591,14 +3769,16 @@ namespace Logic.Conjugator.Spanish
                 Piece = "no "
             });
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
         public virtual VerbConjugation GetStructureNegativeImperativeUstedes()
         {
-            if (_targetTranslator is null) { ErrorHandler.LogAndThrow(); return new(); }
+            
 
             var conjugation = new VerbConjugation()
             {
@@ -3619,9 +3799,11 @@ namespace Logic.Conjugator.Spanish
                 Piece = "no "
             });
 
-            string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-            conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
-
+            if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
+            {
+                string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
+                conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+            }
             return conjugation;
         }
 
