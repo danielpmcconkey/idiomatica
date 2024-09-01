@@ -289,7 +289,7 @@ namespace Logic.Conjugator.Spanish
             {
                 Ordinal = 210,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "a"
+                Piece = "á"
             }];
         }
         public override List<VerbConjugationPiece> GetStemPiecesFutureNosotros()
@@ -331,7 +331,7 @@ namespace Logic.Conjugator.Spanish
             {
                 Ordinal = 210,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
-                Piece = "an"
+                Piece = "án"
             }];
         }
         #endregion
