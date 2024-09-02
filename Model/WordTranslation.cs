@@ -29,6 +29,8 @@ namespace Model
         public Language? LanguageTo { get; set; }
         public int? WordId { get; set; }
         public Word? Word { get; set; }
+        public Guid? VerbKey { get; set; }
+        public Verb? Verb { get; set; }
 
         #endregion
 

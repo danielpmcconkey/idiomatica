@@ -87,6 +87,7 @@ namespace Model
 
         [NotMapped]
         public List<VerbConjugation> VerbConjugations { get; set; } = [];
+        public List<WordTranslation> WordTranslations { get; set; } = [];
 
         #endregion
         [StringLength(2000)]

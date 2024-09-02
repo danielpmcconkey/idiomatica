@@ -203,6 +203,8 @@ namespace Model.DAL
                 e.HasOne(wt => wt.LanguageTo).WithMany(l => l.WordTranslations).HasForeignKey(wt => wt.LanguageToId);
                 e.HasOne(wt => wt.Word).WithMany(w => w.WordTranslations).HasForeignKey(wt => wt.WordId)
                     .OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(wt => wt.Verb).WithMany(v => v.WordTranslations)
+                    .HasForeignKey(wt => wt.VerbKey).OnDelete(DeleteBehavior.NoAction);
                 e.Property(wt => wt.PartOfSpeech).HasConversion<int>();
             });
             modelBuilder.Entity<WordUser>(e => {
