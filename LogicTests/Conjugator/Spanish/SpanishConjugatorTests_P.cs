@@ -238,6 +238,79 @@ namespace Logic.Conjugator.Spanish.Tests
             Assert.IsNotNull(conjugationTable.NegativeImperativeUstedes); Assert.AreEqual("no parezcan", conjugationTable.NegativeImperativeUstedes.ToString());
         }
         [TestMethod()]
+        public void ConjugatePartirTest()
+        {
+            var context = CommonFunctions.CreateContext();
+            string conjugatorName = "Logic.Conjugator.Spanish._Ir";
+            var spanishVerb = context.Verbs.Where(x => x.LanguageId == 1 && x.Conjugator == conjugatorName && x.Infinitive == "partir").FirstOrDefault();
+            Assert.IsNotNull(spanishVerb);
+            var conjugator = Logic.Conjugator.Factory.Get(conjugatorName, null, spanishVerb, null);
+            Assert.IsNotNull(conjugator);
+            var conjugations = conjugator.Conjugate();
+            Logic.Conjugator.Spanish.SpanishConjugationTable conjugationTable = new(spanishVerb, conjugations);
+            Assert.AreEqual("partir", conjugationTable.Infinitive);
+            Assert.AreEqual("partiendo", conjugationTable.Gerund);
+            Assert.AreEqual("partido", conjugationTable.PastParticiple);
+            Assert.IsNotNull(conjugationTable.PresentYo); Assert.AreEqual("parto", conjugationTable.PresentYo.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteYo); Assert.AreEqual("partí", conjugationTable.PreteriteYo.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectYo); Assert.AreEqual("partía", conjugationTable.ImperfectYo.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalYo); Assert.AreEqual("partiría", conjugationTable.ConditionalYo.ToString());
+            Assert.IsNotNull(conjugationTable.FutureYo); Assert.AreEqual("partiré", conjugationTable.FutureYo.ToString());
+            Assert.IsNotNull(conjugationTable.PresentTu); Assert.AreEqual("partes", conjugationTable.PresentTu.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteTu); Assert.AreEqual("partiste", conjugationTable.PreteriteTu.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectTu); Assert.AreEqual("partías", conjugationTable.ImperfectTu.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalTu); Assert.AreEqual("partirías", conjugationTable.ConditionalTu.ToString());
+            Assert.IsNotNull(conjugationTable.FutureTu); Assert.AreEqual("partirás", conjugationTable.FutureTu.ToString());
+            Assert.IsNotNull(conjugationTable.PresentEl); Assert.AreEqual("parte", conjugationTable.PresentEl.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteEl); Assert.AreEqual("partió", conjugationTable.PreteriteEl.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectEl); Assert.AreEqual("partía", conjugationTable.ImperfectEl.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalEl); Assert.AreEqual("partiría", conjugationTable.ConditionalEl.ToString());
+            Assert.IsNotNull(conjugationTable.FutureEl); Assert.AreEqual("partirá", conjugationTable.FutureEl.ToString());
+            Assert.IsNotNull(conjugationTable.PresentNosotros); Assert.AreEqual("partimos", conjugationTable.PresentNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteNosotros); Assert.AreEqual("partimos", conjugationTable.PreteriteNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectNosotros); Assert.AreEqual("partíamos", conjugationTable.ImperfectNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalNosotros); Assert.AreEqual("partiríamos", conjugationTable.ConditionalNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.FutureNosotros); Assert.AreEqual("partiremos", conjugationTable.FutureNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.PresentVosotros); Assert.AreEqual("partís", conjugationTable.PresentVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteVosotros); Assert.AreEqual("partisteis", conjugationTable.PreteriteVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectVosotros); Assert.AreEqual("partíais", conjugationTable.ImperfectVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalVosotros); Assert.AreEqual("partiríais", conjugationTable.ConditionalVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.FutureVosotros); Assert.AreEqual("partiréis", conjugationTable.FutureVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.PresentEllos); Assert.AreEqual("parten", conjugationTable.PresentEllos.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteEllos); Assert.AreEqual("partieron", conjugationTable.PreteriteEllos.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectEllos); Assert.AreEqual("partían", conjugationTable.ImperfectEllos.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalEllos); Assert.AreEqual("partirían", conjugationTable.ConditionalEllos.ToString());
+            Assert.IsNotNull(conjugationTable.FutureEllos); Assert.AreEqual("partirán", conjugationTable.FutureEllos.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentYo); Assert.AreEqual("parta", conjugationTable.SubjunctivePresentYo.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectYo); Assert.AreEqual("partiera", conjugationTable.SubjunctiveImperfectYo.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureYo); Assert.AreEqual("partiere", conjugationTable.SubjunctiveFutureYo.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentTu); Assert.AreEqual("partas", conjugationTable.SubjunctivePresentTu.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectTu); Assert.AreEqual("partieras", conjugationTable.SubjunctiveImperfectTu.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureTu); Assert.AreEqual("partieres", conjugationTable.SubjunctiveFutureTu.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentEl); Assert.AreEqual("parta", conjugationTable.SubjunctivePresentEl.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectEl); Assert.AreEqual("partiera", conjugationTable.SubjunctiveImperfectEl.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureEl); Assert.AreEqual("partiere", conjugationTable.SubjunctiveFutureEl.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentNosotros); Assert.AreEqual("partamos", conjugationTable.SubjunctivePresentNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectNosotros); Assert.AreEqual("partiéramos", conjugationTable.SubjunctiveImperfectNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureNosotros); Assert.AreEqual("partiéremos", conjugationTable.SubjunctiveFutureNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentVosotros); Assert.AreEqual("partáis", conjugationTable.SubjunctivePresentVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectVosotros); Assert.AreEqual("partierais", conjugationTable.SubjunctiveImperfectVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureVosotros); Assert.AreEqual("partiereis", conjugationTable.SubjunctiveFutureVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentEllos); Assert.AreEqual("partan", conjugationTable.SubjunctivePresentEllos.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectEllos); Assert.AreEqual("partieran", conjugationTable.SubjunctiveImperfectEllos.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureEllos); Assert.AreEqual("partieren", conjugationTable.SubjunctiveFutureEllos.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeTu); Assert.AreEqual("parte", conjugationTable.AffirmativeImperativeTu.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeTu); Assert.AreEqual("no partas", conjugationTable.NegativeImperativeTu.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeUsted); Assert.AreEqual("parta", conjugationTable.AffirmativeImperativeUsted.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeUsted); Assert.AreEqual("no parta", conjugationTable.NegativeImperativeUsted.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeNosotros); Assert.AreEqual("partamos", conjugationTable.AffirmativeImperativeNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeNosotros); Assert.AreEqual("no partamos", conjugationTable.NegativeImperativeNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeVosotros); Assert.AreEqual("partid", conjugationTable.AffirmativeImperativeVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeVosotros); Assert.AreEqual("no partáis", conjugationTable.NegativeImperativeVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeUstedes); Assert.AreEqual("partan", conjugationTable.AffirmativeImperativeUstedes.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeUstedes); Assert.AreEqual("no partan", conjugationTable.NegativeImperativeUstedes.ToString());
+        }
+        [TestMethod()]
         public void ConjugatePasarTest()
         {
             var context = CommonFunctions.CreateContext();

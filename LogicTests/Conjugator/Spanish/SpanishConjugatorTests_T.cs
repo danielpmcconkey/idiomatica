@@ -19,6 +19,79 @@ namespace Logic.Conjugator.Spanish.Tests
     public class SpanishConjugatorTests_T
     {
         [TestMethod()]
+        public void ConjugateTenerTest()
+        {
+            var context = CommonFunctions.CreateContext();
+            string conjugatorName = "Logic.Conjugator.Spanish.Tener";
+            var spanishVerb = context.Verbs.Where(x => x.LanguageId == 1 && x.Conjugator == conjugatorName && x.Infinitive == "tener").FirstOrDefault();
+            Assert.IsNotNull(spanishVerb);
+            var conjugator = Logic.Conjugator.Factory.Get(conjugatorName, null, spanishVerb, null);
+            Assert.IsNotNull(conjugator);
+            var conjugations = conjugator.Conjugate();
+            Logic.Conjugator.Spanish.SpanishConjugationTable conjugationTable = new(spanishVerb, conjugations);
+            Assert.AreEqual("tener", conjugationTable.Infinitive);
+            Assert.AreEqual("teniendo", conjugationTable.Gerund);
+            Assert.AreEqual("tenido", conjugationTable.PastParticiple);
+            Assert.IsNotNull(conjugationTable.PresentYo); Assert.AreEqual("tengo", conjugationTable.PresentYo.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteYo); Assert.AreEqual("tuve", conjugationTable.PreteriteYo.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectYo); Assert.AreEqual("tenía", conjugationTable.ImperfectYo.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalYo); Assert.AreEqual("tendría", conjugationTable.ConditionalYo.ToString());
+            Assert.IsNotNull(conjugationTable.FutureYo); Assert.AreEqual("tendré", conjugationTable.FutureYo.ToString());
+            Assert.IsNotNull(conjugationTable.PresentTu); Assert.AreEqual("tienes", conjugationTable.PresentTu.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteTu); Assert.AreEqual("tuviste", conjugationTable.PreteriteTu.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectTu); Assert.AreEqual("tenías", conjugationTable.ImperfectTu.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalTu); Assert.AreEqual("tendrías", conjugationTable.ConditionalTu.ToString());
+            Assert.IsNotNull(conjugationTable.FutureTu); Assert.AreEqual("tendrás", conjugationTable.FutureTu.ToString());
+            Assert.IsNotNull(conjugationTable.PresentEl); Assert.AreEqual("tiene", conjugationTable.PresentEl.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteEl); Assert.AreEqual("tuvo", conjugationTable.PreteriteEl.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectEl); Assert.AreEqual("tenía", conjugationTable.ImperfectEl.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalEl); Assert.AreEqual("tendría", conjugationTable.ConditionalEl.ToString());
+            Assert.IsNotNull(conjugationTable.FutureEl); Assert.AreEqual("tendrá", conjugationTable.FutureEl.ToString());
+            Assert.IsNotNull(conjugationTable.PresentNosotros); Assert.AreEqual("tenemos", conjugationTable.PresentNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteNosotros); Assert.AreEqual("tuvimos", conjugationTable.PreteriteNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectNosotros); Assert.AreEqual("teníamos", conjugationTable.ImperfectNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalNosotros); Assert.AreEqual("tendríamos", conjugationTable.ConditionalNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.FutureNosotros); Assert.AreEqual("tendremos", conjugationTable.FutureNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.PresentVosotros); Assert.AreEqual("tenéis", conjugationTable.PresentVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteVosotros); Assert.AreEqual("tuvisteis", conjugationTable.PreteriteVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectVosotros); Assert.AreEqual("teníais", conjugationTable.ImperfectVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalVosotros); Assert.AreEqual("tendríais", conjugationTable.ConditionalVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.FutureVosotros); Assert.AreEqual("tendréis", conjugationTable.FutureVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.PresentEllos); Assert.AreEqual("tienen", conjugationTable.PresentEllos.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteEllos); Assert.AreEqual("tuvieron", conjugationTable.PreteriteEllos.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectEllos); Assert.AreEqual("tenían", conjugationTable.ImperfectEllos.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalEllos); Assert.AreEqual("tendrían", conjugationTable.ConditionalEllos.ToString());
+            Assert.IsNotNull(conjugationTable.FutureEllos); Assert.AreEqual("tendrán", conjugationTable.FutureEllos.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentYo); Assert.AreEqual("tenga", conjugationTable.SubjunctivePresentYo.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectYo); Assert.AreEqual("tuviera", conjugationTable.SubjunctiveImperfectYo.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureYo); Assert.AreEqual("tuviere", conjugationTable.SubjunctiveFutureYo.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentTu); Assert.AreEqual("tengas", conjugationTable.SubjunctivePresentTu.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectTu); Assert.AreEqual("tuvieras", conjugationTable.SubjunctiveImperfectTu.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureTu); Assert.AreEqual("tuvieres", conjugationTable.SubjunctiveFutureTu.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentEl); Assert.AreEqual("tenga", conjugationTable.SubjunctivePresentEl.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectEl); Assert.AreEqual("tuviera", conjugationTable.SubjunctiveImperfectEl.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureEl); Assert.AreEqual("tuviere", conjugationTable.SubjunctiveFutureEl.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentNosotros); Assert.AreEqual("tengamos", conjugationTable.SubjunctivePresentNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectNosotros); Assert.AreEqual("tuviéramos", conjugationTable.SubjunctiveImperfectNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureNosotros); Assert.AreEqual("tuviéremos", conjugationTable.SubjunctiveFutureNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentVosotros); Assert.AreEqual("tengáis", conjugationTable.SubjunctivePresentVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectVosotros); Assert.AreEqual("tuvierais", conjugationTable.SubjunctiveImperfectVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureVosotros); Assert.AreEqual("tuviereis", conjugationTable.SubjunctiveFutureVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentEllos); Assert.AreEqual("tengan", conjugationTable.SubjunctivePresentEllos.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectEllos); Assert.AreEqual("tuvieran", conjugationTable.SubjunctiveImperfectEllos.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureEllos); Assert.AreEqual("tuvieren", conjugationTable.SubjunctiveFutureEllos.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeTu); Assert.AreEqual("ten", conjugationTable.AffirmativeImperativeTu.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeTu); Assert.AreEqual("no tengas", conjugationTable.NegativeImperativeTu.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeUsted); Assert.AreEqual("tenga", conjugationTable.AffirmativeImperativeUsted.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeUsted); Assert.AreEqual("no tenga", conjugationTable.NegativeImperativeUsted.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeNosotros); Assert.AreEqual("tengamos", conjugationTable.AffirmativeImperativeNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeNosotros); Assert.AreEqual("no tengamos", conjugationTable.NegativeImperativeNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeVosotros); Assert.AreEqual("tened", conjugationTable.AffirmativeImperativeVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeVosotros); Assert.AreEqual("no tengáis", conjugationTable.NegativeImperativeVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeUstedes); Assert.AreEqual("tengan", conjugationTable.AffirmativeImperativeUstedes.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeUstedes); Assert.AreEqual("no tengan", conjugationTable.NegativeImperativeUstedes.ToString());
+        }
+        [TestMethod()]
         public void ConjugateTerminarTest()
         {
             var context = CommonFunctions.CreateContext();
