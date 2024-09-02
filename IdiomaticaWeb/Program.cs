@@ -42,7 +42,7 @@ if (builder.Environment.IsDevelopment())
     connection = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING_DEV");
 
     // use the below connection to run against prod DB,  with error messages enabled
-    // connection = "Server=tcp:idiomatica.database.windows.net,1433;Initial Catalog=idiomatica;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default;";
+    //connection = "Server=tcp:idiomatica.database.windows.net,1433;Initial Catalog=idiomatica;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default;";
 }
 else
 {

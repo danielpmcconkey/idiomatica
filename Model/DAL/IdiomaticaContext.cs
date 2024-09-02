@@ -28,7 +28,9 @@ namespace Model.DAL
         public DbSet<User> Users { get; set; }
         public DbSet<UserBreadCrumb> UserBreadCrumbs { get; set; }
         public DbSet<UserSetting> UserSettings { get; set; }
+        public DbSet<Verb> Verbs { get; set; }
         public DbSet<Word> Words { get; set; }
+        public DbSet<WordTranslation> WordTranslations { get; set; }
         public DbSet<WordUser> WordUsers { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<IdentityRole> IdentityRoles { get; set; }
@@ -185,12 +187,25 @@ namespace Model.DAL
                 e.HasKey(us => new { us.UserId, us.Key });
                 e.HasOne(us => us.User).WithMany(u => u.UserSettings).HasForeignKey(us => us.UserId);
             });
+            modelBuilder.Entity<Verb>(e => {
+                e.HasKey(v => v.UniqueKey);
+                e.HasOne(v => v.Language).WithMany(l => l.Verbs).HasForeignKey(v => v.LanguageId);
+            });
             modelBuilder.Entity<Word>(e => {
                 e.HasKey(w => w.Id);
                 e.HasOne(w => w.Language).WithMany(l => l.Words).HasForeignKey(w => w.LanguageId);
                 e.HasMany(w => w.Tokens).WithOne(t => t.Word).HasForeignKey(t => t.WordId)
                     .OnDelete(DeleteBehavior.NoAction);
                 e.HasMany(w => w.WordUsers).WithOne(wu => wu.Word).HasForeignKey(wu => wu.WordId);
+            });
+            modelBuilder.Entity<WordTranslation>(e => {
+                e.HasKey(wt => wt.UniqueKey);
+                e.HasOne(wt => wt.LanguageTo).WithMany(l => l.WordTranslations).HasForeignKey(wt => wt.LanguageToId);
+                e.HasOne(wt => wt.Word).WithMany(w => w.WordTranslations).HasForeignKey(wt => wt.WordId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(wt => wt.Verb).WithMany(v => v.WordTranslations)
+                    .HasForeignKey(wt => wt.VerbKey).OnDelete(DeleteBehavior.NoAction);
+                e.Property(wt => wt.PartOfSpeech).HasConversion<int>();
             });
             modelBuilder.Entity<WordUser>(e => {
                 e.HasKey(wu => wu.Id);

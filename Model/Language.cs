@@ -15,13 +15,15 @@ namespace Model
         public int? Id { get; set; }
 
         #region relationships
-        public List<Book> Books { get; set; } = new List<Book>();
-        public List<Word> Words { get; set; } = new List<Word>();
-        public List<LanguageUser> LanguageUsers { get; set; } = new List<LanguageUser>();
+        public List<Book> Books { get; set; } = [];
+        public List<Word> Words { get; set; } = [];
+        public List<LanguageUser> LanguageUsers { get; set; } = [];
         [StringLength(25)]
         [Column("LanguageCode")]
         public string? Code { get; set; }
         public LanguageCode? LanguageCode { get; set; }
+        public List<WordTranslation> WordTranslations { get; set; } = [];
+        public List<Verb> Verbs { get; set; } = [];
 
         #endregion
 

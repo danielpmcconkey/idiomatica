@@ -8,11 +8,123 @@ using System.Threading.Tasks;
 using Logic.Telemetry;
 using DeepL;
 using static System.Net.Mime.MediaTypeNames;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class WordApi
     {
+        public static WordTranslation? VerbWordTranslationSave(IdiomaticaContext context, 
+            Guid verbKey, int fromLanguageId, int toLanguageId,
+            string wordTextLower, string translation)
+        {
+            int englishLangId = 2;
+            // look up the existing word
+            var word = context.Words
+                .Where(x => x.TextLowerCase == wordTextLower &&
+                    x.LanguageId == fromLanguageId)
+                .FirstOrDefault();
+            if (word is null)
+            {
+                // create it
+                word = WordCreate(context, fromLanguageId, wordTextLower, wordTextLower);
+            }
+            if (word is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return null;
+            }
+            WordTranslation? wordTranslation = new ()
+            {
+                UniqueKey = Guid.NewGuid(),
+                LanguageToId = englishLangId,
+                WordId = word.Id,
+                PartOfSpeech = AvailablePartOfSpeech.VERB,
+                Translation = translation.Trim(),
+                VerbKey = verbKey
+            };
+            context.WordTranslations.Add(wordTranslation);
+            context.SaveChanges();
+            return wordTranslation;
+        }
+        public static Verb? VerbCreateAndSaveTranslations(IdiomaticaContext context,
+            Verb learningVerb, Verb translationVerb, List<VerbConjugation> conjugations)
+        {
+            if (learningVerb.LanguageId is null) { ErrorHandler.LogAndThrow(); return null; }
+            if (learningVerb.Infinitive is null) { ErrorHandler.LogAndThrow(); return null; }
+            if (learningVerb.Conjugator is null) { ErrorHandler.LogAndThrow(); return null; }
+            // save the learning verb object
+            // but only if it doesn't already exist
+            Verb? verbToUse = context.Verbs
+                .Where(x=>x.LanguageId == learningVerb.LanguageId &&
+                    x.Conjugator == learningVerb.Conjugator &&
+                    x.Infinitive == learningVerb.Infinitive)
+                .FirstOrDefault();
+            if (verbToUse is null)
+            {
+                verbToUse = learningVerb;
+                verbToUse.UniqueKey = Guid.NewGuid();
+                context.Verbs.Add(verbToUse);
+                context.SaveChanges();
+            }
+            if (verbToUse is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return null;
+            }
+            if (verbToUse.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
+            if (verbToUse.LanguageId is null) { ErrorHandler.LogAndThrow(); return null; }
+            if (translationVerb.LanguageId is null) { ErrorHandler.LogAndThrow(); return null; }
+            if (verbToUse.Infinitive is null) { ErrorHandler.LogAndThrow(); return null; }
+            if (translationVerb.Infinitive is null) { ErrorHandler.LogAndThrow(); return null; }
+            
+            // save the infinitive translation
+            VerbWordTranslationSave(context, (Guid)verbToUse.UniqueKey,
+            (int)verbToUse.LanguageId, (int)translationVerb.LanguageId,
+            verbToUse.Infinitive, translationVerb.Infinitive);
+
+            if (verbToUse.Gerund is not null && translationVerb.Gerund is not null)
+            {
+                // save the gerund translation
+                var gerundTranslation = translationVerb.Gerund;
+                if (translationVerb.LanguageId == 2)
+                {
+                    gerundTranslation = $"{translationVerb.Gerund}: gerund of {learningVerb.Infinitive}";
+                }
+
+                VerbWordTranslationSave(context, (Guid)verbToUse.UniqueKey,
+                    (int)verbToUse.LanguageId, (int)translationVerb.LanguageId,
+                    verbToUse.Gerund, gerundTranslation);
+            }
+            if (verbToUse.PastParticiple is not null && translationVerb.PastParticiple is not null)
+            {
+                // save the past participle translation
+                var participleTranslation = translationVerb.PastParticiple;
+                if (translationVerb.LanguageId == 2)
+                {
+                    participleTranslation = $"{translationVerb.PastParticiple}: past participle of {learningVerb.Infinitive}";
+                }
+                VerbWordTranslationSave(context, (Guid)verbToUse.UniqueKey,
+                    (int)verbToUse.LanguageId, (int)translationVerb.LanguageId,
+                    verbToUse.PastParticiple, participleTranslation);
+            }
+            // save the conjugation translations
+            foreach (var conjugation in conjugations)
+            {
+                var wordInLearningLang = conjugation.ToString();
+                var wordInKnownLang = conjugation.Translation;
+                if (string.IsNullOrEmpty(wordInLearningLang))
+                    { ErrorHandler.LogAndThrow(); return null; }
+                if (string.IsNullOrEmpty(wordInKnownLang))
+                    { ErrorHandler.LogAndThrow(); return null; }
+                VerbWordTranslationSave(context, (Guid)verbToUse.UniqueKey,
+                    (int)verbToUse.LanguageId, (int)translationVerb.LanguageId,
+                    wordInLearningLang, wordInKnownLang );
+            }
+
+            return verbToUse;
+        }
         public static Word? WordCreate(IdiomaticaContext context,
             int languageId, string text, string romanization)
         {

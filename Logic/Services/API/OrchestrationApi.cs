@@ -577,5 +577,33 @@ namespace Logic.Services.API
                 return OrchestrateResetReadDataForNewPage(context, readDataPacket, newPageId);
             });
         }
+
+        /// <summary>
+        /// this should not be used in the main app. it is only here to make it
+        /// possible to write all the damned verb conjugations and translations
+        /// to the DB
+        /// </summary>
+        public static Verb? OrchestrateVerbConjugationAndTranslationSpanishToEnglish(
+            IdiomaticaContext context, Verb learningVerb, Verb translationVerb)
+        {
+            if (learningVerb.Conjugator is null) { ErrorHandler.LogAndThrow(); return null; }
+            Logic.Conjugator.English.EnglishVerbTranslator translator = new();
+            var conjugator = Logic.Conjugator.Factory.Get(
+                learningVerb.Conjugator, translator, learningVerb, translationVerb);
+            if (conjugator is null) { ErrorHandler.LogAndThrow(); return null; }
+
+            var conjugations = conjugator.Conjugate();
+            if (conjugations.Count < 1)
+            {
+                ErrorHandler.LogAndThrow(); return null;
+            }
+            var verb = WordApi.VerbCreateAndSaveTranslations(
+                context, learningVerb, translationVerb, conjugations);
+            if (verb is null)
+            {
+                ErrorHandler.LogAndThrow(); return null;
+            }
+            return verb;
+        }
     }
 }

@@ -24,8 +24,9 @@ namespace Model
         
         public int? LanguageId { get; set; }
         public Language? Language { get; set; }
-        public List<Token> Tokens { get; set; } = new List<Token>();
-        public List<WordUser> WordUsers { get; set; } = new List<WordUser>();
+        public List<Token> Tokens { get; set; } = [];
+        public List<WordUser> WordUsers { get; set; } = [];
+        public List<WordTranslation> WordTranslations { get; set; } = [];
 
         #endregion
 

@@ -1,0 +1,376 @@
+﻿@page "/ConjugationTable"
+@rendermode InteractiveServer
+@inject UserService UserService;
+
+@* This assumes spanish. will need to change to support other languages *@
+
+<style>
+    .piecePronoun {display:none;}
+    .pieceCore {color:black;}
+    .pieceRegular {color: #00cc00; font-weight:900;}
+    .pieceIrregular {color: #cc0000; font-weight:900}
+    .clubbedRow {background-color: #dedede;}
+    .conjugationTranslation {display:none;}
+    
+</style>
+
+@if (shouldShowTranslations)
+{
+    <div class="col-2">
+        <button type="button" class="btn btn-primary"
+                @onclick="@ToggleTranslations">
+            @UserService.GetUILabel("btnHideTranslations")
+        </button>
+    </div>
+}
+
+else
+{
+    <div class="col-2">
+        <button type="button" class="btn btn-primary"
+                @onclick="@ToggleTranslations">
+            @UserService.GetUILabel("btnShowTranslations")
+        </button>
+    </div>
+}
+
+<div class="border p-2">
+    <h3>Participles of @conjugationTable.Infinitive</h3>
+    <table class="table">
+        
+        <tbody>
+            <tr>
+                <th scope="row">Gerund:</th>
+                <td>
+                    @if (@conjugationTable.Gerund is not null)
+                    {
+                        <span class="m-0 p-0 pieceCore">@conjugationTable.Gerund</span>
+                    }
+                    else
+                    {
+                        <span class="m-0 p-0 pieceCore">&mdash;</span>
+                    }
+
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Past participle:</th>
+                <td>
+                    @if (@conjugationTable.PastParticiple is not null)
+                    {
+                        <span class="m-0 p-0 pieceCore">@conjugationTable.PastParticiple</span>
+                    }
+                    else
+                    {
+                        <span class="m-0 p-0 pieceCore">&mdash;</span>
+                    }
+                    
+                </td>
+            </tr>
+        </tbody>
+
+    </table>
+</div>
+<div class="border p-2">
+    <h3>Indicative conjugations of @conjugationTable.Infinitive</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th scope="col">Present</th>
+                <th scope="col">Preterite</th>
+                <th scope="col">Imperfect</th>
+                <th scope="col">Conditional</th>
+                <th scope="col">Future</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">yo</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureYo" /></td>
+            </tr>
+            <tr>
+                <th scope="row">tú</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureTu" /></td>
+            </tr>
+            @if (shouldShowTranslations)
+            {
+                <tr class="clubbedRow">
+                    <th scope="row">usted</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureUsted" /></td>
+                </tr>
+                <tr class="clubbedRow">
+                    <th scope="row">él</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureEl" /></td>
+                </tr>
+                <tr class="clubbedRow">
+                    <th scope="row">ella</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureElla" /></td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <th scope="row">él/ella/usted</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureEl" /></td>
+                </tr>
+            }
+            
+            <tr>
+                <th scope="row">nosotros</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureNosotros" /></td>
+            </tr>
+            <tr>
+                <th scope="row">vosotros</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureVosotros" /></td>
+            </tr>
+            @if (shouldShowTranslations)
+            {
+                <tr class="clubbedRow">
+                    <th scope="row">ustedes</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureUstedes" /></td>
+                </tr>
+                <tr class="clubbedRow">
+                    <th scope="row">ellos</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureEllos" /></td>
+                </tr>
+                <tr class="clubbedRow">
+                    <th scope="row">ellas</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureEllas" /></td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <th scope="row">ellos/ellas/ustedes</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PresentEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.PreteriteEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ImperfectEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.ConditionalEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.FutureEllos" /></td>
+                </tr>
+            }
+            
+        </tbody>
+
+    </table>
+</div>
+
+<div class="border p-2">
+    <h3>Subjunctive conjugations of @conjugationTable.Infinitive</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th scope="col">Subjunctive Present</th>
+                <th scope="col">Subjunctive Imperfect</th>
+                <th scope="col">Subjunctive Future</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">yo</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectYo" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureYo" /></td>
+            </tr>
+            <tr>
+                <th scope="row">tú</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureTu" /></td>
+            </tr>
+            @if (shouldShowTranslations)
+            {
+                <tr class="clubbedRow">
+                    <th scope="row">usted</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectUsted" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureUsted" /></td>
+                </tr>
+                <tr class="clubbedRow">
+                    <th scope="row">él</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureEl" /></td>
+                </tr>
+                <tr class="clubbedRow">
+                    <th scope="row">ella</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectElla" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureElla" /></td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <th scope="row">él/ella/usted</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectEl" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureEl" /></td>
+                </tr>
+            }
+            
+            <tr>
+                <th scope="row">nosotros</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureNosotros" /></td>
+            </tr>
+            <tr>
+                <th scope="row">vosotros</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureVosotros" /></td>
+            </tr>
+            @if (shouldShowTranslations)
+            {
+                <tr class="clubbedRow">
+                    <th scope="row">ustedes</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectUstedes" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureUstedes" /></td>
+                </tr>
+                <tr class="clubbedRow">
+                    <th scope="row">ellos</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureEllos" /></td>
+                </tr>
+                <tr class="clubbedRow">
+                    <th scope="row">ellas</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectEllas" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureEllas" /></td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <th scope="row">ellos/ellas/ustedes</th>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctivePresentEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveImperfectEllos" /></td>
+                    <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.SubjunctiveFutureEllos" /></td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+</div>
+
+<div class="border p-2">
+    <h3>Imperative conjugations of @conjugationTable.Infinitive</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th scope="col">Affirmative Imperative</th>
+                <th scope="col">Negative Imperative</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">tú</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.AffirmativeImperativeTu" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.NegativeImperativeTu" /></td>
+            </tr>
+            <tr>
+                <th scope="row">usted</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.AffirmativeImperativeUsted" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.NegativeImperativeUsted" /></td>
+            </tr>
+            <tr>
+                <th scope="row">nosotros</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.AffirmativeImperativeNosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.NegativeImperativeNosotros" /></td>
+            </tr>
+            <tr>
+                <th scope="row">vosotros</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.AffirmativeImperativeVosotros" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.NegativeImperativeVosotros" /></td>
+            </tr>
+            <tr>
+                <th scope="row">ustedes</th>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.AffirmativeImperativeUstedes" /></td>
+                <td><Conjugation ShouldShowTranslations="@shouldShowTranslations" VerbConjugation="@conjugationTable.NegativeImperativeUstedes" /></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@code {
+
+    public bool shouldShowTranslations = false;
+    Logic.Conjugator.Spanish.SpanishConjugationTable? conjugationTable;
+
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+
+            Verb spanishVerb141 = new() { Infinitive = "preferir", Core1 = "prefer", Core2 = "prefier", Core3 = "prefir", Gerund = "prefiriendo", PastParticiple = "preferido", };
+            Verb englishVerb141 = new() { Infinitive = "to prefer", Core1 = "prefer", Core2 = "preferred", Core3 = "prefers", Gerund = "preferring", PastParticiple = "preferred", };
+            Logic.Conjugator.English.EnglishVerbTranslator translator141 = new();
+            Logic.Conjugator.Spanish.Preferir conjugator141 = new(translator141, spanishVerb141, englishVerb141);
+            var conjugations = conjugator141.Conjugate();
+            conjugationTable = new (spanishVerb141, conjugations);
+
+        }
+        catch (Exception ex)
+        {
+            var burp = ex.ToString();
+        }
+    }
+    private async Task ToggleTranslations()
+    {
+        shouldShowTranslations = !shouldShowTranslations;
+    }
+    
+}

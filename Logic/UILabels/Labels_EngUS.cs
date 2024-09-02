@@ -139,6 +139,10 @@ namespace Logic.UILabels
             _labels.Add("fcDeckCreateError", "There was an error creating the card deck");
             _labels.Add("fcDeckComplete", "You have finished reviewing all cards in this deck. Create another?");
             #endregion
+            #region conjugation table
+            _labels.Add("btnShowTranslations", "Show translations");
+            _labels.Add("btnHideTranslations", "Hide translations");
+            #endregion
             //_labels.Add("", "");
             //_labels.Add("", "");
         }

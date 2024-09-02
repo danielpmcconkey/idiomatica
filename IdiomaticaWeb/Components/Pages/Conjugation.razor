@@ -1,0 +1,49 @@
+﻿@page "/Conjugation"
+@rendermode InteractiveServer
+@inject UserService UserService;
+
+<div>
+    @if (VerbConjugation is not null)
+    {
+        <div>
+            @foreach (var piece in VerbConjugation.Pieces.OrderBy(x => x.Ordinal))
+            {
+                <span class="m-0 p-0 @GetPieceClass(piece)">
+                    @piece.Piece
+                </span>
+            }
+        </div>
+        @if(ShouldShowTranslations)
+        {
+            <div class="text-sm">@VerbConjugation.Translation</div>
+        }
+
+    }
+    else
+    {
+        <div>
+
+            <span class="m-0 p-0 pieceCore">&mdash;</span>
+        </div>
+        @if (ShouldShowTranslations)
+        {
+            <div class="text-sm">&mdash;</div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public VerbConjugation VerbConjugation { get; set; } = new();
+    [Parameter]
+    public bool ShouldShowTranslations {get; set; }
+
+    public string GetPieceClass(VerbConjugationPiece piece)
+    {
+        if (piece.Type == AvailableVerbConjugationPieceType.PRONOUN) return "piecePronoun";
+        if (piece.Type == AvailableVerbConjugationPieceType.IRREGULAR) return "pieceIrregular";
+        if (piece.Type == AvailableVerbConjugationPieceType.REGULAR) return "pieceRegular";
+        if (piece.Type == AvailableVerbConjugationPieceType.CORE) return "pieceCore";
+        return "pieceRegular";
+    }
+}
