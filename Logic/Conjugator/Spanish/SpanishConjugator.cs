@@ -222,7 +222,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present \"yo\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
 
             return conjugation;
@@ -247,7 +247,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present \"tú\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
 
             return conjugation;
@@ -272,7 +272,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «él» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present \"él\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -296,7 +296,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present \"ella\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -320,7 +320,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present \"usted\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -344,7 +344,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present \"nosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -368,7 +368,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present \"vosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -392,7 +392,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present \"ellos\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -416,7 +416,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present \"ellas\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -440,7 +440,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación del presente de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present \"ustedes\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -629,7 +629,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: preterite \"yo\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -653,7 +653,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: preterite \"tú\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -677,7 +677,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «él» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: preterite \"él\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -701,7 +701,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: preterite \"ella\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -725,7 +725,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: preterite \"usted\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -749,7 +749,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: preterite \"nosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -773,7 +773,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: preterite \"vosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -797,7 +797,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: preterite \"ellos\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -821,7 +821,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: preterite \"ellas\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -845,7 +845,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación pretérita de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: preterite \"ustedes\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1026,7 +1026,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect \"yo\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1050,7 +1050,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect \"tú\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1074,7 +1074,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «él» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect \"él\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1098,7 +1098,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect \"ella\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1122,7 +1122,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect \"usted\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1146,7 +1146,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect \"nosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1170,7 +1170,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect \"vosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1194,7 +1194,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect \"ellos\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1218,7 +1218,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect \"ellas\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1242,7 +1242,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación imperfecta de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect \"ustedes\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1431,7 +1431,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: conditional \"yo\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1455,7 +1455,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: conditional \"tú\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1479,7 +1479,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «él» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: conditional \"él\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1503,7 +1503,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: conditional \"ella\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1527,7 +1527,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: conditional \"usted\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1551,7 +1551,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: conditional \"nosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1575,7 +1575,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: conditional \"vosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1599,7 +1599,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: conditional \"ellos\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1623,7 +1623,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: conditional \"ellas\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1647,7 +1647,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación condicional de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: conditional \"ustedes\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1834,7 +1834,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «yo» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future \"yo\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1858,7 +1858,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «tú» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future \"tú\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1882,7 +1882,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «él» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future \"él\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1906,7 +1906,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «ella» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future \"ella\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1930,7 +1930,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «usted» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future \"usted\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1954,7 +1954,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future \"nosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -1978,7 +1978,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future \"vosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2002,7 +2002,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future \"ellos\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2026,7 +2026,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future \"ellas\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2050,7 +2050,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de la conjugación «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future \"ustedes\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2239,7 +2239,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present subjunctive \"yo\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2263,7 +2263,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present subjunctive \"tú\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2287,7 +2287,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «él» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present subjunctive \"él\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2311,7 +2311,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present subjunctive \"ella\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2335,7 +2335,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present subjunctive \"usted\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2359,7 +2359,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present subjunctive \"nosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2383,7 +2383,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present subjunctive \"vosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2407,7 +2407,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present subjunctive \"ellos\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2431,7 +2431,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present subjunctive \"ellas\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2455,7 +2455,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en presente de subjuntivo de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: present subjunctive \"ustedes\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2644,7 +2644,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «yo» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect subjunctive \"yo\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2668,7 +2668,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect subjunctive \"tú\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2692,7 +2692,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «él» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect subjunctive \"él\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2716,7 +2716,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ella» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect subjunctive \"ella\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2740,7 +2740,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect subjunctive \"usted\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2764,7 +2764,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect subjunctive \"nosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2788,7 +2788,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect subjunctive \"vosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2812,7 +2812,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect subjunctive \"ellos\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2836,7 +2836,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect subjunctive \"ellas\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -2860,7 +2860,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación en imperfecto de subjuntivo de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: imperfect subjunctive \"ustedes\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3048,7 +3048,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «yo» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future subjunctive \"yo\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3072,7 +3072,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «tú» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future subjunctive \"tú\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3096,7 +3096,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «él» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future subjunctive \"él\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3120,7 +3120,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ella» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future subjunctive \"ella\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3144,7 +3144,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «usted» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future subjunctive \"usted\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3168,7 +3168,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future subjunctive \"nosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3192,7 +3192,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future subjunctive \"vosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3216,7 +3216,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ellos» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future subjunctive \"ellos\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3240,7 +3240,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ellas» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future subjunctive \"ellas\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3264,7 +3264,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: futuro de subjuntivo de la conjugación «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: future subjunctive \"ustedes\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3446,7 +3446,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «tú» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: affirmative imperative \"tú\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3470,7 +3470,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «usted» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: affirmative imperative \"usted\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3494,7 +3494,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: affirmative imperative \"nosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3518,7 +3518,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: affirmative imperative \"vosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3542,7 +3542,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación afirmativa imperativa «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: affirmative imperative \"ustedes\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3685,7 +3685,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «tú» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: negative imperative \"tú\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3714,7 +3714,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «usted» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: negative imperative \"usted\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3743,7 +3743,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «nosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: negative imperative \"nosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3772,7 +3772,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «vosotros» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: negative imperative \"vosotros\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
@@ -3802,7 +3802,7 @@ namespace Logic.Conjugator.Spanish
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
                 string? targetTranslation = _targetTranslator.Translate(_targetLanguageInfinitive, conjugation);
-                conjugation.Translation = $"{targetTranslation}: conjugación negativo imperativo de «ustedes» de {_sourceLanguageInfinitive.Infinitive}";
+                conjugation.Translation = $"{targetTranslation}: negative imperative \"ustedes\" conjugation of {_sourceLanguageInfinitive.Infinitive}";
             }
             return conjugation;
         }
