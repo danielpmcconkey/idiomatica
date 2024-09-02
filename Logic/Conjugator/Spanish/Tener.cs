@@ -295,8 +295,6 @@ namespace Logic.Conjugator.Spanish
 
         #endregion
 
-
-
         #region SubjunctivePresent
 
         public override List<VerbConjugationPiece> GetRootPiecesSubjunctivePresentYo()

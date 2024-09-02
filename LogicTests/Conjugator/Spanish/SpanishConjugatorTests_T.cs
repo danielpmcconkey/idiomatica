@@ -238,6 +238,79 @@ namespace Logic.Conjugator.Spanish.Tests
             Assert.IsNotNull(conjugationTable.NegativeImperativeUstedes); Assert.AreEqual("no tiren", conjugationTable.NegativeImperativeUstedes.ToString());
         }
         [TestMethod()]
+        public void ConjugateTocarTest()
+        {
+            var context = CommonFunctions.CreateContext();
+            string conjugatorName = "Logic.Conjugator.Spanish._Car";
+            var spanishVerb = context.Verbs.Where(x => x.LanguageId == 1 && x.Conjugator == conjugatorName && x.Infinitive == "tocar").FirstOrDefault();
+            Assert.IsNotNull(spanishVerb);
+            var conjugator = Logic.Conjugator.Factory.Get(conjugatorName, null, spanishVerb, null);
+            Assert.IsNotNull(conjugator);
+            var conjugations = conjugator.Conjugate();
+            Logic.Conjugator.Spanish.SpanishConjugationTable conjugationTable = new(spanishVerb, conjugations);
+            Assert.AreEqual("tocar", conjugationTable.Infinitive);
+            Assert.AreEqual("tocando", conjugationTable.Gerund);
+            Assert.AreEqual("tocado", conjugationTable.PastParticiple);
+            Assert.IsNotNull(conjugationTable.PresentYo); Assert.AreEqual("toco", conjugationTable.PresentYo.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteYo); Assert.AreEqual("toqué", conjugationTable.PreteriteYo.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectYo); Assert.AreEqual("tocaba", conjugationTable.ImperfectYo.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalYo); Assert.AreEqual("tocaría", conjugationTable.ConditionalYo.ToString());
+            Assert.IsNotNull(conjugationTable.FutureYo); Assert.AreEqual("tocaré", conjugationTable.FutureYo.ToString());
+            Assert.IsNotNull(conjugationTable.PresentTu); Assert.AreEqual("tocas", conjugationTable.PresentTu.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteTu); Assert.AreEqual("tocaste", conjugationTable.PreteriteTu.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectTu); Assert.AreEqual("tocabas", conjugationTable.ImperfectTu.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalTu); Assert.AreEqual("tocarías", conjugationTable.ConditionalTu.ToString());
+            Assert.IsNotNull(conjugationTable.FutureTu); Assert.AreEqual("tocarás", conjugationTable.FutureTu.ToString());
+            Assert.IsNotNull(conjugationTable.PresentEl); Assert.AreEqual("toca", conjugationTable.PresentEl.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteEl); Assert.AreEqual("tocó", conjugationTable.PreteriteEl.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectEl); Assert.AreEqual("tocaba", conjugationTable.ImperfectEl.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalEl); Assert.AreEqual("tocaría", conjugationTable.ConditionalEl.ToString());
+            Assert.IsNotNull(conjugationTable.FutureEl); Assert.AreEqual("tocará", conjugationTable.FutureEl.ToString());
+            Assert.IsNotNull(conjugationTable.PresentNosotros); Assert.AreEqual("tocamos", conjugationTable.PresentNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteNosotros); Assert.AreEqual("tocamos", conjugationTable.PreteriteNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectNosotros); Assert.AreEqual("tocábamos", conjugationTable.ImperfectNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalNosotros); Assert.AreEqual("tocaríamos", conjugationTable.ConditionalNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.FutureNosotros); Assert.AreEqual("tocaremos", conjugationTable.FutureNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.PresentVosotros); Assert.AreEqual("tocáis", conjugationTable.PresentVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteVosotros); Assert.AreEqual("tocasteis", conjugationTable.PreteriteVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectVosotros); Assert.AreEqual("tocabais", conjugationTable.ImperfectVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalVosotros); Assert.AreEqual("tocaríais", conjugationTable.ConditionalVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.FutureVosotros); Assert.AreEqual("tocaréis", conjugationTable.FutureVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.PresentEllos); Assert.AreEqual("tocan", conjugationTable.PresentEllos.ToString());
+            Assert.IsNotNull(conjugationTable.PreteriteEllos); Assert.AreEqual("tocaron", conjugationTable.PreteriteEllos.ToString());
+            Assert.IsNotNull(conjugationTable.ImperfectEllos); Assert.AreEqual("tocaban", conjugationTable.ImperfectEllos.ToString());
+            Assert.IsNotNull(conjugationTable.ConditionalEllos); Assert.AreEqual("tocarían", conjugationTable.ConditionalEllos.ToString());
+            Assert.IsNotNull(conjugationTable.FutureEllos); Assert.AreEqual("tocarán", conjugationTable.FutureEllos.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentYo); Assert.AreEqual("toque", conjugationTable.SubjunctivePresentYo.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectYo); Assert.AreEqual("tocara", conjugationTable.SubjunctiveImperfectYo.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureYo); Assert.AreEqual("tocare", conjugationTable.SubjunctiveFutureYo.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentTu); Assert.AreEqual("toques", conjugationTable.SubjunctivePresentTu.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectTu); Assert.AreEqual("tocaras", conjugationTable.SubjunctiveImperfectTu.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureTu); Assert.AreEqual("tocares", conjugationTable.SubjunctiveFutureTu.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentEl); Assert.AreEqual("toque", conjugationTable.SubjunctivePresentEl.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectEl); Assert.AreEqual("tocara", conjugationTable.SubjunctiveImperfectEl.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureEl); Assert.AreEqual("tocare", conjugationTable.SubjunctiveFutureEl.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentNosotros); Assert.AreEqual("toquemos", conjugationTable.SubjunctivePresentNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectNosotros); Assert.AreEqual("tocáramos", conjugationTable.SubjunctiveImperfectNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureNosotros); Assert.AreEqual("tocáremos", conjugationTable.SubjunctiveFutureNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentVosotros); Assert.AreEqual("toquéis", conjugationTable.SubjunctivePresentVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectVosotros); Assert.AreEqual("tocarais", conjugationTable.SubjunctiveImperfectVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureVosotros); Assert.AreEqual("tocareis", conjugationTable.SubjunctiveFutureVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctivePresentEllos); Assert.AreEqual("toquen", conjugationTable.SubjunctivePresentEllos.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveImperfectEllos); Assert.AreEqual("tocaran", conjugationTable.SubjunctiveImperfectEllos.ToString());
+            Assert.IsNotNull(conjugationTable.SubjunctiveFutureEllos); Assert.AreEqual("tocaren", conjugationTable.SubjunctiveFutureEllos.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeTu); Assert.AreEqual("toca", conjugationTable.AffirmativeImperativeTu.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeTu); Assert.AreEqual("no toques", conjugationTable.NegativeImperativeTu.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeUsted); Assert.AreEqual("toque", conjugationTable.AffirmativeImperativeUsted.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeUsted); Assert.AreEqual("no toque", conjugationTable.NegativeImperativeUsted.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeNosotros); Assert.AreEqual("toquemos", conjugationTable.AffirmativeImperativeNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeNosotros); Assert.AreEqual("no toquemos", conjugationTable.NegativeImperativeNosotros.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeVosotros); Assert.AreEqual("tocad", conjugationTable.AffirmativeImperativeVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeVosotros); Assert.AreEqual("no toquéis", conjugationTable.NegativeImperativeVosotros.ToString());
+            Assert.IsNotNull(conjugationTable.AffirmativeImperativeUstedes); Assert.AreEqual("toquen", conjugationTable.AffirmativeImperativeUstedes.ToString());
+            Assert.IsNotNull(conjugationTable.NegativeImperativeUstedes); Assert.AreEqual("no toquen", conjugationTable.NegativeImperativeUstedes.ToString());
+        }
+        [TestMethod()]
         public void ConjugateTomarTest()
         {
             var context = CommonFunctions.CreateContext();
