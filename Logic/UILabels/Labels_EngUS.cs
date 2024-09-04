@@ -142,6 +142,7 @@ namespace Logic.UILabels
             _labels.Add("fcLoading", "Loading...");
             _labels.Add("fcDeckCreateError", "There was an error creating the card deck");
             _labels.Add("fcDeckComplete", "You have finished reviewing all cards in this deck. Create another?");
+            _labels.Add("fcShowConjugationTable", "Show conjugation table");
             #endregion
             #region conjugation table
             _labels.Add("btnShowTranslations", "Show translations");

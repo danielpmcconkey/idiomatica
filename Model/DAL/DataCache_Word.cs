@@ -323,6 +323,7 @@ namespace Model.DAL
             var value = context.WordTranslations
                 .Where(wt => wt.WordId == key)
                 .OrderBy(x => x.Ordinal)
+                .Include(wt => wt.Verb)
                 .ToList();
             if (value == null) return [];
             // write to cache

@@ -57,7 +57,22 @@
                     <ul>
                         @foreach (var t in DefaultTranslations)
                         {
-                            <li>@t.Translation</li>
+                            <li>
+                                    <span class="m-1">@t.Translation</span>
+                                @if(t.Verb is not null)
+                                {
+                                    <Button Color="ButtonColor.Primary"
+                                            Type="ButtonType.Link"
+                                            Size="Size.Small"
+                                            Outline="true"
+                                            @onclick="@(e => OnShowConjugationTableClick(t.Verb))">
+
+                                            @UserService.GetUILabel("fcShowConjugationTable")
+                                            
+                                    </Button>
+                                }
+                                    
+                            </li>
                         }
                     </ul>
                     </CardText>
@@ -110,6 +125,8 @@
     </CardFooter>
 </Card>
 
+<ConjugationTable @ref="ConjugationTable"
+    ShouldDisplay="_shouldShowConjugationTable" />
 
 
 
@@ -118,6 +135,8 @@
     [Parameter] public string? UiLanguageCode { get; set; }
     [Parameter] public string? CardCss { get; set; }
     [Parameter] public EventCallback<int> ResetFormFunction { get; set; }
+
+    private ConjugationTable ConjugationTable = default!;
 
     public string? ExampleParagraph { get; set; } = null;
     public string? ParagraphTranslation { get; set; } = null;
@@ -132,12 +151,18 @@
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private int LoadingDelayMiliseconds = 500;
 
+    private bool _shouldShowConjugationTable = false;
+
+
+    private Verb? _conjugationVerb;
+
     public void ResetCardProperties()
     {
         CardTitle = null;
         CustomTranslation = null;
         ExampleParagraph = null;
         ParagraphTranslation = null;
+        _shouldShowConjugationTable = false;
 
         if (FlashCardDataPacket is null) return;
         if (FlashCardDataPacket.CurrentCard is null || FlashCardDataPacket.CurrentCard.Id is null) return;
@@ -195,7 +220,7 @@
             ErrorHandler.LogAndThrow();
             return;
         }
-        
+
         ResetCardProperties();
     }
     public async Task OnNextCardClickAsync(AvailableFlashCardAttemptStatus previousCardsStatus)
@@ -231,6 +256,10 @@
             StateHasChanged();
         }
     }
-    
-    
+    public async Task OnShowConjugationTableClick(Verb verb)
+    {
+        _shouldShowConjugationTable = true;
+        await ConjugationTable.ResetConjugationAsync(verb);
+    }
+
 }
