@@ -133,6 +133,7 @@ namespace Logic.UILabels
             _labels.Add("fcNumOldCardsLabel", "How many review cards do you want to fetch?");
             _labels.Add("fcCreateDeck", "Create deck");
             _labels.Add("fcSeeAnswer", "Show translation");
+            _labels.Add("fcCustomTranslationHead", "Your personal translation");
             _labels.Add("fcWrong", "Wrong");
             _labels.Add("fcHard", "Hard");
             _labels.Add("fcGood", "Good");
@@ -141,6 +142,7 @@ namespace Logic.UILabels
             _labels.Add("fcLoading", "Loading...");
             _labels.Add("fcDeckCreateError", "There was an error creating the card deck");
             _labels.Add("fcDeckComplete", "You have finished reviewing all cards in this deck. Create another?");
+            _labels.Add("fcShowConjugationTable", "Show conjugation table");
             #endregion
             #region conjugation table
             _labels.Add("btnShowTranslations", "Show translations");

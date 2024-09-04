@@ -38,8 +38,49 @@
         }
         else
         {
+
+            @if (!string.IsNullOrEmpty(CustomTranslation))
+            {
+                <CardBody>
+
+                    <CardTitle>@UserService.GetUILabel("fcCustomTranslationHead")</CardTitle>
+                    <CardText>@CustomTranslation</CardText>
+                    
+                </CardBody>
+            }
+
+            @if (DefaultTranslations.Count > 0)
+            {
+                <CardBody>
+                    <CardTitle>@UserService.GetUILabel("wordModalDefaultTranslations")</CardTitle>
+                    <CardText>
+                    <ul>
+                        @foreach (var t in DefaultTranslations)
+                        {
+                            <li>
+                                    <span class="m-1">@t.Translation</span>
+                                @if(t.Verb is not null)
+                                {
+                                    <Button Color="ButtonColor.Primary"
+                                            Type="ButtonType.Link"
+                                            Size="Size.Small"
+                                            Outline="true"
+                                            @onclick="@(e => OnShowConjugationTableClick(t.Verb))">
+
+                                            @UserService.GetUILabel("fcShowConjugationTable")
+                                            
+                                    </Button>
+                                }
+                                    
+                            </li>
+                        }
+                    </ul>
+                    </CardText>
+                </CardBody>
+            }
+
+
             <CardBody>
-                <CardTitle>@CardTranslation</CardTitle>
                 <CardText>@ParagraphTranslation</CardText>
             </CardBody>
         }
@@ -84,6 +125,10 @@
     </CardFooter>
 </Card>
 
+<ConjugationTable @ref="ConjugationTable"
+    ShouldDisplay="_shouldShowConjugationTable" />
+
+
 
 @code {
     [Parameter] public FlashCardDataPacket? FlashCardDataPacket { get; set; }
@@ -91,10 +136,14 @@
     [Parameter] public string? CardCss { get; set; }
     [Parameter] public EventCallback<int> ResetFormFunction { get; set; }
 
+    private ConjugationTable ConjugationTable = default!;
+
     public string? ExampleParagraph { get; set; } = null;
     public string? ParagraphTranslation { get; set; } = null;
     public string? CardTitle { get; set; } = null;
-    public string? CardTranslation { get; set; } = null;
+    //public string? CardTranslation { get; set; } = null;
+    public string? CustomTranslation { get; set; } = null;
+    private List<WordTranslation> DefaultTranslations = [];
 
 
     private bool _isLoading = false;
@@ -102,12 +151,18 @@
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private int LoadingDelayMiliseconds = 500;
 
+    private bool _shouldShowConjugationTable = false;
+
+
+    private Verb? _conjugationVerb;
+
     public void ResetCardProperties()
     {
         CardTitle = null;
-        CardTranslation = null;
+        CustomTranslation = null;
         ExampleParagraph = null;
         ParagraphTranslation = null;
+        _shouldShowConjugationTable = false;
 
         if (FlashCardDataPacket is null) return;
         if (FlashCardDataPacket.CurrentCard is null || FlashCardDataPacket.CurrentCard.Id is null) return;
@@ -124,7 +179,11 @@
         CardTitle = $"{FlashCardDataPacket.CurrentCard.Id}: {FlashCardDataPacket.CurrentCard.WordUser.Word.TextLowerCase}";
 
         if (FlashCardDataPacket.CurrentCard.WordUser.Translation is null) return;
-        CardTranslation = FlashCardDataPacket.CurrentCard.WordUser.Translation;
+        CustomTranslation = FlashCardDataPacket.CurrentCard.WordUser.Translation;
+
+        if (FlashCardDataPacket.CurrentCard.WordUser.Word.Id is null) return;
+        DefaultTranslations = WordApi.WordTranslationsReadByWordId(
+            context, (int)FlashCardDataPacket.CurrentCard.WordUser.Word.Id);
     }
     private async Task OnShowAnswerClick()
     {
@@ -161,7 +220,7 @@
             ErrorHandler.LogAndThrow();
             return;
         }
-        
+
         ResetCardProperties();
     }
     public async Task OnNextCardClickAsync(AvailableFlashCardAttemptStatus previousCardsStatus)
@@ -197,6 +256,10 @@
             StateHasChanged();
         }
     }
-    
-    
+    public async Task OnShowConjugationTableClick(Verb verb)
+    {
+        _shouldShowConjugationTable = true;
+        await ConjugationTable.ResetConjugationAsync(verb);
+    }
+
 }
