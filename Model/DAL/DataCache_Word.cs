@@ -19,8 +19,8 @@ namespace Model.DAL
         private static ConcurrentDictionary<int, Dictionary<string, Word>> WordsDictByPageId = new ConcurrentDictionary<int, Dictionary<string, Word>>();
         private static ConcurrentDictionary<int, List<Word>> WordsAndTokensAndSentencesAndParagraphsByWordId = new ConcurrentDictionary<int, List<Word>>();
         private static ConcurrentDictionary<(int pageId, int languageUserId), Dictionary<string, Word>> WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserId = [];
-         
-           
+        private static ConcurrentDictionary<int, List<WordTranslation>> WordTranslationsByWordId = [];
+
 
         #region read
         public static  Word? WordByIdRead(int key, IdiomaticaContext context)
@@ -309,7 +309,26 @@ namespace Model.DAL
             });
         }
 
+        
+        public static List<WordTranslation> WordTranslationsByWordIdRead(
+            int key, IdiomaticaContext context)
+        {
+            // check cache
+            if (WordTranslationsByWordId.ContainsKey(key))
+            {
+                return WordTranslationsByWordId[key];
+            }
 
+            // read DB
+            var value = context.WordTranslations
+                .Where(wt => wt.WordId == key)
+                .OrderBy(x => x.Ordinal)
+                .ToList();
+            if (value == null) return [];
+            // write to cache
+            WordTranslationsByWordId[key] = value;
+            return value;
+        }
         #endregion
 
         #region create

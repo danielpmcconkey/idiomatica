@@ -705,5 +705,11 @@ namespace Logic.Services.API.Tests
                 await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
+
+        [TestMethod()]
+        public void WordTranslationsReadByWordIdTest()
+        {
+            Assert.Fail();
+        }
     }
 }

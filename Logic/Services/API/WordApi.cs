@@ -307,5 +307,11 @@ namespace Logic.Services.API
                 return WordsGetListOfReadCount(context, userId);
             });
         }
+
+        public static List<WordTranslation> WordTranslationsReadByWordId(
+            IdiomaticaContext context, int wordId)
+        {
+            return DataCache.WordTranslationsByWordIdRead(wordId, context);
+        }
     }
 }
