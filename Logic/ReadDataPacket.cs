@@ -10,7 +10,6 @@ namespace Logic
     public class ReadDataPacket
     {
         public Dictionary<string, Word>? AllWordsInPage { get; set; } = null;
-        public Dictionary<string, WordUser>? AllWordUsersInPage { get; set; } = null;
         public Page? CurrentPage { get; set; } = null;
         public PageUser? CurrentPageUser { get; set; } = null;
         public Book? Book { get; set; } = null;

@@ -133,31 +133,32 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            _word = WordApi.WordGetById(context, (int)thisToken.WordId);
+            _word = thisToken.Word; 
             if (_word == null || _word.Id is null || _word.Id < 1 || _word.TextLowerCase is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (ReadDataPacket == null || ReadDataPacket.AllWordUsersInPage is null)
+            if (ReadDataPacket == null || ReadDataPacket.LanguageUser is null ||
+                ReadDataPacket.LanguageUser.Id is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (!ReadDataPacket.AllWordUsersInPage.ContainsKey(_word.TextLowerCase))
-            {
-                ErrorHandler.LogAndThrow();
-                return;
-            }
-            _wordUser = ReadDataPacket.AllWordUsersInPage[_word.TextLowerCase];
+            _wordUser = _word.WordUsers
+               .Where(x => x.LanguageUserId == (int)ReadDataPacket.LanguageUser.Id)
+               .FirstOrDefault();
             _token = thisToken;
-            _token.Word = _word;
 
-            if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+            if (_wordUser is null)
             {
-                ErrorHandler.LogAndThrow(2430);
-                return;
+                // it shouldn't be, but create it if so
+                _wordUser = WordUserApi.WordUserCreate(context, (int)_word.Id,
+                    (int)ReadDataPacket.LanguageUser.Id, "", AvailableWordUserStatus.UNKNOWN);
             }
+            if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+                { ErrorHandler.LogAndThrow(); return; }
+            
             _wordUser.Status = _wordUser.Status is null ? AvailableWordUserStatus.UNKNOWN : _wordUser.Status;
 
             _title = (_word is null) ? "" : _word.TextLowerCase;

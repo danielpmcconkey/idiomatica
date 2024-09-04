@@ -242,6 +242,23 @@ namespace Logic.Services.API
             });
         }
 
+        
+        public static Dictionary<string, Word>? WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
+            IdiomaticaContext context, int pageId, int languageUserId)
+        {
+            return DataCache
+                .WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
+                (pageId, languageUserId), context);
+        }
+        public static async Task<Dictionary<string, Word>?> WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdReadAsync(
+            IdiomaticaContext context, int pageId, int languageUserId)
+        {
+            return await Task<List<(Word? word, int? ordinal, string? tokenDisplay)>>.Run(() =>
+            {
+                return WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
+                    context, pageId, languageUserId);
+            });
+        }
 
         public static Dictionary<string, Word>? WordsDictReadByPageId(
             IdiomaticaContext context, int pageId)

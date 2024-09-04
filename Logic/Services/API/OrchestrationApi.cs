@@ -491,6 +491,11 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow(1240);
                 return null;
             }
+            if (readDataPacket.LanguageUser == null || readDataPacket.LanguageUser.Id == null || readDataPacket.LoggedInUser.Id == 0)
+            {
+                ErrorHandler.LogAndThrow(2130);
+                return null;
+            }
             if (readDataPacket.LoggedInUser == null || readDataPacket.LoggedInUser.Id == null || readDataPacket.LoggedInUser.Id == 0)
             {
                 ErrorHandler.LogAndThrow(2130);
@@ -499,7 +504,6 @@ namespace Logic.Services.API
             // wipe the old ones out
             readDataPacket.CurrentPage = null;
             readDataPacket.Paragraphs = null;
-            readDataPacket.AllWordUsersInPage = null;
             readDataPacket.AllWordsInPage = null;
             readDataPacket.Sentences = null;
             readDataPacket.Tokens = null;
@@ -507,7 +511,9 @@ namespace Logic.Services.API
             // and rebuild
             readDataPacket.CurrentPage = PageApi.PageReadById(context, newPageId);
             readDataPacket.Paragraphs = ParagraphApi.ParagraphsReadByPageId(context, newPageId);
-            readDataPacket.AllWordsInPage = WordApi.WordsDictReadByPageId(context, newPageId);
+            readDataPacket.AllWordsInPage = WordApi
+                .WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
+                context, newPageId, (int)readDataPacket.LanguageUser.Id);
             readDataPacket.Sentences = SentenceApi.SentencesReadByPageId(context, newPageId);
             readDataPacket.Tokens = TokenApi.TokensReadByPageId(context, newPageId);
 
@@ -517,16 +523,6 @@ namespace Logic.Services.API
                 return null;
             }
 
-            // do not do this until you've already pulled the _allWordsInPage as 
-            // that makes it way more efficient since it checks the words dict cache
-            readDataPacket.AllWordUsersInPage = WordUserApi.WordUsersDictByPageIdAndUserIdRead(
-                context, newPageId, (int)readDataPacket.LoggedInUser.Id);
-
-            if (readDataPacket.AllWordUsersInPage is null)
-            {
-                ErrorHandler.LogAndThrow(2130);
-                return null;
-            }
             if (readDataPacket.Paragraphs is null)
             {
                 ErrorHandler.LogAndThrow(2130);

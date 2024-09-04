@@ -188,7 +188,7 @@ namespace Logic.Services.API.Tests
             int bookId = 2;
             int languageId = 1;
             int wordCount = 134;
-            int wordUsersCount = 134;
+            //int wordUsersCount = 134;
             int paragraphCount = 29;
             string wordToLookUp = "conocido";
             AvailableWordUserStatus statusBeforeExpected = AvailableWordUserStatus.UNKNOWN;
@@ -204,22 +204,26 @@ namespace Logic.Services.API.Tests
                 userId = (int)user.Id;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
-                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    //readDataPacket.AllWordUsersInPage is null ||
+                    readDataPacket.Paragraphs is null ||
                     readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
                     readDataPacket.LanguageUser.Id is null || readDataPacket.CurrentPageUser.PageId is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // check the word and its status
-                WordUser? foundUserBefore = null;
-                if (!readDataPacket.AllWordUsersInPage.TryGetValue(wordToLookUp, out foundUserBefore))
-                { ErrorHandler.LogAndThrow(); return; }
+                Word? foundWordBefore = null;
+                if (!readDataPacket.AllWordsInPage.TryGetValue(wordToLookUp, out foundWordBefore))
+                    { ErrorHandler.LogAndThrow(); return; }
+                WordUser? foundUserBefore = foundWordBefore.WordUsers
+                    .Where(x => x.LanguageUserId == languageUser.Id)
+                    .FirstOrDefault();
                 if (foundUserBefore is null || foundUserBefore.Status is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                    { ErrorHandler.LogAndThrow(); return; }
                 var statusBeforeActual = foundUserBefore.Status;
 
                 // pull the current page ID before moving so you can later look up its wordUsers
@@ -230,7 +234,8 @@ namespace Logic.Services.API.Tests
                 if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
                     newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
-                    newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
+                    // newReadDataPacket.AllWordUsersInPage is null || 
+                    newReadDataPacket.Paragraphs is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // pull the previous page's wordUser list
@@ -247,7 +252,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
                 Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
-                Assert.AreEqual(wordUsersCount, newReadDataPacket.AllWordUsersInPage.Count);
+                //Assert.AreEqual(wordUsersCount, newReadDataPacket.AllWordUsersInPage.Count);
                 Assert.AreEqual(paragraphCount, newReadDataPacket.Paragraphs.Count);
                 Assert.AreEqual(statusBeforeExpected, statusBeforeActual);
                 Assert.AreEqual(statusAfterExpected, statusAfterActual);
@@ -266,7 +271,7 @@ namespace Logic.Services.API.Tests
             int bookId = 2;
             int languageId = 1;
             int wordCount = 134;
-            int wordUsersCount = 134;
+            //int wordUsersCount = 134;
             int paragraphCount = 29;
             string wordToLookUp = "conocido";
             AvailableWordUserStatus statusBeforeExpected = AvailableWordUserStatus.UNKNOWN;
@@ -287,17 +292,21 @@ namespace Logic.Services.API.Tests
                 var readDataPacket = await OrchestrationApi.OrchestrateReadDataInitAsync(context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
-                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    //readDataPacket.AllWordUsersInPage is null ||
+                    readDataPacket.Paragraphs is null ||
                     readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
                     readDataPacket.LanguageUser.Id is null || readDataPacket.CurrentPageUser.PageId is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // check the word and its status
-                WordUser? foundUserBefore = null;
-                if (!readDataPacket.AllWordUsersInPage.TryGetValue(wordToLookUp, out foundUserBefore))
-                    { ErrorHandler.LogAndThrow(); return; }
+                Word? foundWordBefore = null;
+                if (!readDataPacket.AllWordsInPage.TryGetValue(wordToLookUp, out foundWordBefore))
+                { ErrorHandler.LogAndThrow(); return; }
+                WordUser? foundUserBefore = foundWordBefore.WordUsers
+                    .Where(x => x.LanguageUserId == languageUser.Id)
+                    .FirstOrDefault();
                 if (foundUserBefore is null || foundUserBefore.Status is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                { ErrorHandler.LogAndThrow(); return; }
                 var statusBeforeActual = foundUserBefore.Status;
 
                 // pull the current page ID before moving so you can later look up its wordUsers
@@ -308,7 +317,8 @@ namespace Logic.Services.API.Tests
                 if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
                     newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
-                    newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
+                    //newReadDataPacket.AllWordUsersInPage is null ||
+                    newReadDataPacket.Paragraphs is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // pull the previous page's wordUser list
@@ -325,7 +335,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
                 Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
-                Assert.AreEqual(wordUsersCount, newReadDataPacket.AllWordUsersInPage.Count);
+                //Assert.AreEqual(wordUsersCount, newReadDataPacket.AllWordUsersInPage.Count);
                 Assert.AreEqual(paragraphCount, newReadDataPacket.Paragraphs.Count);
                 Assert.AreEqual(statusBeforeExpected, statusBeforeActual);
                 Assert.AreEqual(statusAfterExpected, statusAfterActual);
@@ -716,7 +726,6 @@ namespace Logic.Services.API.Tests
             int bookId = 2;
             int languageId = 1;
             int wordCount = 134;
-            int wordUsersCount = 134;
             int paragraphCount = 29;
 
             try
@@ -737,7 +746,7 @@ namespace Logic.Services.API.Tests
                 var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
-                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    readDataPacket.Paragraphs is null ||
                     readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
                     readDataPacket.LanguageUser.Id is null)
                 { ErrorHandler.LogAndThrow(); return; }
@@ -747,14 +756,13 @@ namespace Logic.Services.API.Tests
                 if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
                     newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
-                    newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
+                    newReadDataPacket.Paragraphs is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
 
                 Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
                 Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
-                Assert.AreEqual(wordUsersCount, newReadDataPacket.AllWordUsersInPage.Count);
                 Assert.AreEqual(paragraphCount, newReadDataPacket.Paragraphs.Count);
             }
             finally
@@ -771,7 +779,6 @@ namespace Logic.Services.API.Tests
             int bookId = 2;
             int languageId = 1;
             int wordCount = 134;
-            int wordUsersCount = 134;
             int paragraphCount = 29;
 
             try
@@ -792,7 +799,7 @@ namespace Logic.Services.API.Tests
                 var readDataPacket = await OrchestrationApi.OrchestrateReadDataInitAsync(context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
-                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    readDataPacket.Paragraphs is null ||
                     readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
                     readDataPacket.LanguageUser.Id is null)
                     { ErrorHandler.LogAndThrow(); return; }
@@ -802,14 +809,13 @@ namespace Logic.Services.API.Tests
                 if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
                     newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
-                    newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
+                    newReadDataPacket.Paragraphs is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
 
                 Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
                 Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
-                Assert.AreEqual(wordUsersCount, newReadDataPacket.AllWordUsersInPage.Count);
                 Assert.AreEqual(paragraphCount, newReadDataPacket.Paragraphs.Count);
             }
             finally
@@ -828,7 +834,6 @@ namespace Logic.Services.API.Tests
             int bookId = 2;
             int languageId = 1;
             int wordCount = 135;
-            int wordUsersCount = 135;
             int paragraphCount = 13;
             int bookUserStatsCount = 8;
 
@@ -852,7 +857,7 @@ namespace Logic.Services.API.Tests
                     context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
-                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    readDataPacket.Paragraphs is null ||
                     readDataPacket.BookUserStats is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
@@ -860,7 +865,6 @@ namespace Logic.Services.API.Tests
                 Assert.IsTrue(readDataPacket.BookCurrentPageNum == 1);
                 Assert.IsNotNull(readDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, readDataPacket.AllWordsInPage.Count);
-                Assert.AreEqual(wordUsersCount, readDataPacket.AllWordUsersInPage.Count);
                 Assert.AreEqual(paragraphCount, readDataPacket.Paragraphs.Count);
                 Assert.AreEqual(bookUserStatsCount, readDataPacket.BookUserStats.Count);
             }
@@ -878,7 +882,6 @@ namespace Logic.Services.API.Tests
             int bookId = 2;
             int languageId = 1;
             int wordCount = 135;
-            int wordUsersCount = 135;
             int paragraphCount = 13;
             int bookUserStatsCount = 8;
 
@@ -902,7 +905,8 @@ namespace Logic.Services.API.Tests
                     context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
-                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    //readDataPacket.AllWordUsersInPage is null ||
+                    readDataPacket.Paragraphs is null ||
                     readDataPacket.BookUserStats is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
@@ -910,7 +914,6 @@ namespace Logic.Services.API.Tests
                 Assert.IsTrue(readDataPacket.BookCurrentPageNum == 1);
                 Assert.IsNotNull(readDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, readDataPacket.AllWordsInPage.Count);
-                Assert.AreEqual(wordUsersCount, readDataPacket.AllWordUsersInPage.Count);
                 Assert.AreEqual(paragraphCount, readDataPacket.Paragraphs.Count);
                 Assert.AreEqual(bookUserStatsCount, readDataPacket.BookUserStats.Count);
             }
@@ -930,7 +933,6 @@ namespace Logic.Services.API.Tests
             int bookId = 2;
             int languageId = 1;
             int wordCount = 134;
-            int wordUsersCount = 134;
             int paragraphCount = 29;
 
             try
@@ -953,7 +955,7 @@ namespace Logic.Services.API.Tests
                     context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
-                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    readDataPacket.Paragraphs is null ||
                     readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
                     readDataPacket.LanguageUser.Id is null)
                 { ErrorHandler.LogAndThrow(); return; }
@@ -984,14 +986,13 @@ namespace Logic.Services.API.Tests
                 if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
                     newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
-                    newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
+                    newReadDataPacket.Paragraphs is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
 
                 Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
                 Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
-                Assert.AreEqual(wordUsersCount, newReadDataPacket.AllWordUsersInPage.Count);
                 Assert.AreEqual(paragraphCount, newReadDataPacket.Paragraphs.Count);
             }
             finally
@@ -1008,7 +1009,6 @@ namespace Logic.Services.API.Tests
             int bookId = 2;
             int languageId = 1;
             int wordCount = 134;
-            int wordUsersCount = 134;
             int paragraphCount = 29;
 
             try
@@ -1031,7 +1031,7 @@ namespace Logic.Services.API.Tests
                     context, userService, bookId);
                 if (readDataPacket is null || readDataPacket.CurrentPageUser is null ||
                     readDataPacket.CurrentPageUser.Page is null || readDataPacket.AllWordsInPage is null ||
-                    readDataPacket.AllWordUsersInPage is null || readDataPacket.Paragraphs is null ||
+                    readDataPacket.Paragraphs is null ||
                     readDataPacket.CurrentPageUser.Id is null || readDataPacket.LanguageUser is null ||
                     readDataPacket.LanguageUser.Id is null)
                     { ErrorHandler.LogAndThrow(); return; }
@@ -1062,14 +1062,13 @@ namespace Logic.Services.API.Tests
                 if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
                     newReadDataPacket.BookUser.Id is null || newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.CurrentPageUser.PageId is null || newReadDataPacket.AllWordsInPage is null ||
-                    newReadDataPacket.AllWordUsersInPage is null || newReadDataPacket.Paragraphs is null)
+                    newReadDataPacket.Paragraphs is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
 
                 Assert.IsTrue(newReadDataPacket.BookCurrentPageNum == 2);
                 Assert.IsNotNull(newReadDataPacket.BookTotalPageCount == 12);
                 Assert.AreEqual(wordCount, newReadDataPacket.AllWordsInPage.Count);
-                Assert.AreEqual(wordUsersCount, newReadDataPacket.AllWordUsersInPage.Count);
                 Assert.AreEqual(paragraphCount, newReadDataPacket.Paragraphs.Count);
             }
             finally

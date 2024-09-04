@@ -30,6 +30,8 @@ namespace Model
         public string? Translation { get; set; }
         public AvailablePartOfSpeech? PartOfSpeech { get; set; }
 
+        public int? Ordinal {  get; set; }
+
     }
 }
 

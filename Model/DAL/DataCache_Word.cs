@@ -18,6 +18,9 @@ namespace Model.DAL
         private static ConcurrentDictionary<int, Dictionary<string, Word>> WordsDictByBookId = new ConcurrentDictionary<int, Dictionary<string, Word>>();
         private static ConcurrentDictionary<int, Dictionary<string, Word>> WordsDictByPageId = new ConcurrentDictionary<int, Dictionary<string, Word>>();
         private static ConcurrentDictionary<int, List<Word>> WordsAndTokensAndSentencesAndParagraphsByWordId = new ConcurrentDictionary<int, List<Word>>();
+        private static ConcurrentDictionary<(int pageId, int languageUserId), Dictionary<string, Word>> WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserId = [];
+         
+           
 
         #region read
         public static  Word? WordByIdRead(int key, IdiomaticaContext context)
@@ -155,7 +158,41 @@ namespace Model.DAL
             });
         }
 
+        public static Dictionary<string, Word> WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
+            (int pageId, int languageUserId) key, IdiomaticaContext context)
+        {
+            // check cache
+            if (WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserId.ContainsKey(key))
+            {
+                return WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserId[key];
+            }
+            // read DB
+            var groups = (from p in context.Pages
+                          join pp in context.Paragraphs on p.Id equals pp.PageId
+                          join s in context.Sentences on pp.Id equals s.ParagraphId
+                          join t in context.Tokens on s.Id equals t.SentenceId
+                          join w in context.Words on t.WordId equals w.Id
+                          join wu in context.WordUsers on w.Id equals wu.WordId into grouping1
+                          from wordUsers in grouping1.DefaultIfEmpty()
+                          join wt in context.WordTranslations on w.Id equals wt.WordId into grouping2
+                          from wordTranslations in grouping2.DefaultIfEmpty()
+                          where (p.Id == key.pageId && 
+                            (wordUsers == null || wordUsers.LanguageUserId == key.languageUserId))
+                          select new { w, wordUsers, wordTranslations }
+                          );
+            var value = new Dictionary<string, Word>();
+            foreach (var g in groups)
+            {
+                if (g.w is null || g.w.Id is null || g.w.TextLowerCase is null) continue;
+                value[g.w.TextLowerCase] = g.w;
+                // add it to the word cache
+                WordById[(int)g.w.Id] = g.w;
+            }
 
+            // write to cache
+            WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserId[key] = value;
+            return value;
+        }
         public static Dictionary<string, Word> WordsDictByPageIdRead(
             int key, IdiomaticaContext context)
         {

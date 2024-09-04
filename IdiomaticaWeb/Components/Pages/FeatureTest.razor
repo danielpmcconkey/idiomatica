@@ -6,7 +6,7 @@
 <h3>FeatureTest</h3>
 
 <div>
-    @* @if (isWriting)
+    @if (isWriting)
     {
         <Button Color="ButtonColor.Primary" Loading="true" LoadingText="@writingText" />
     }
@@ -17,18 +17,10 @@
     else
     {
         <Button Color="ButtonColor.Warning"
-                @onclick="OnClick100">
-            1 - 100
+                @onclick="OnClickGo">
+            Go
         </Button>
-        <Button Color="ButtonColor.Warning"
-                @onclick="OnClick200">
-            100 - 200
-        </Button>
-        <Button Color="ButtonColor.Warning"
-                @onclick="OnClick300">
-            200 - 300
-        </Button>
-    } *@
+    }
 
     
 </div>
@@ -42,17 +34,17 @@
 
     // Logic.deleteme deleteme = new deleteme();
 
-    // private async Task OnClick100()
-    // {
-    //     await Task.Run(() =>
-    //     {
-    //         _isLoading = true;
-    //         var context = DbContextFactory.CreateDbContext();
-    //         deleteme.write100(context);
-    //         _isLoading = false;
-    //     });
+    private async Task OnClickGo()
+    {
+        await Task.Run(() =>
+        {
+            _isLoading = true;
+            var context = DbContextFactory.CreateDbContext();
+            var words = DataCache.WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead((66, 1), context);
+            _isLoading = false;
+        });
 
-    // }
+    }
     // private async Task OnClick200()
     // {
     //     await Task.Run(() =>
@@ -91,27 +83,7 @@
         if (isDataInit) return;
         try
         {
-            // Spin();
-
-            // isDataInit = true;
-
             
-            //ErrorHandler.LogAndThrow();
-
-            // var context = DbContextFactory.CreateDbContext();
-            // BookUser? bookUser = context.BookUsers.Where(x => x.LanguageUserId == 1).FirstOrDefault();
-            // if (bookUser is null || bookUser.LanguageUserId is null) return;
-            // var languageUser = await DataCache.LanguageUserByIdReadAsync(
-            //          (int)bookUser.LanguageUserId, context);
-            // bookUser.LanguageUser = languageUser;
-            // //bookUser = _nullHandler.ThrowIfNull<BookUser>(bookUser);
-            // //int languageUserIdDenulled = _nullHandler.ThrowIfNullOrZeroInt(bookUser.LanguageUserId);
-            // // if (bookUser.LanguageUser == null)
-            // // {
-            // //     // pull it from the db
-            // //     bookUser.LanguageUser = await DataCache.LanguageUserByIdReadAsync(
-            // //         (int)bookUser.LanguageUserId, context);
-            // // }
         }
         catch (Exception ex)
         {

@@ -58,8 +58,6 @@ else
     public EventCallback<Token> OnShowWordModal { get; set; }
     [Parameter]
     public EventCallback<Paragraph> OnShowPpModal { get; set; }
-    // [Parameter]
-    //public Dictionary<string, WordUser>? AllWordUsersInPage { get; set; }
     [Parameter]
     public ReadDataPacket ReadDataPacket { get; set; } = new();
 
@@ -84,7 +82,7 @@ else
         {
             if (sentence.Tokens is not null && sentence.Tokens.Count > 0) continue;
             sentence.Tokens = await GetSentenceTokens(sentence);
-    }
+        }
         _isDataInit = true;
     }
     protected override async Task OnInitializedAsync()
@@ -110,17 +108,23 @@ else
     public string GetTokenClass(Token token)
     {
         if (token.Word is null || token.Word.TextLowerCase is null) return "statusUNKNOWN";
-        if (ReadDataPacket.AllWordUsersInPage is null) return "statusUNKNOWN";
-        if (!ReadDataPacket.AllWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "statusUNKNOWN";
-        var wordUser = ReadDataPacket.AllWordUsersInPage[token.Word.TextLowerCase];
+        if (ReadDataPacket is null || ReadDataPacket.LanguageUser is null ||
+            ReadDataPacket.LanguageUser.Id is null) return "statusUNKNOWN";
+        
+        var wordUser = token.Word.WordUsers
+            .Where(x => x.LanguageUserId == (int)ReadDataPacket.LanguageUser.Id)
+            .FirstOrDefault();
+        if (wordUser is null) return "statusUNKNOWN";
         return $"status{wordUser.Status}";
     }
     private string GetTokenTranslation(Token token)
     {
         if (token.Word is null || token.Word.TextLowerCase is null) return "";
-        if (ReadDataPacket.AllWordUsersInPage is null) return "";
-        if (!ReadDataPacket.AllWordUsersInPage.ContainsKey(token.Word.TextLowerCase)) return "";
-        var wordUser = ReadDataPacket.AllWordUsersInPage[token.Word.TextLowerCase];
+        if (ReadDataPacket is null || ReadDataPacket.LanguageUser is null ||
+            ReadDataPacket.LanguageUser.Id is null) return "";
+        var wordUser = token.Word.WordUsers
+            .Where(x => x.LanguageUserId == (int)ReadDataPacket.LanguageUser.Id)
+            .FirstOrDefault();
         if (wordUser is null || wordUser.Translation is null) return "";
         return wordUser.Translation;
     }
