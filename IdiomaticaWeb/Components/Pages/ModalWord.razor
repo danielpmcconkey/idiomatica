@@ -7,30 +7,58 @@
 <Modal @ref="modal" Title="@_title" Size="ModalSize.Large">
     <BodyTemplate>
         <div>
-            <label for="inputTranslation" class="form-label">Translation</label>
-            @if (_isFormattingTranslation)
+            @if (_wordUser is not null)
             {
-                <Button Color="ButtonColor.Info" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
-            }
-            else
-            {
-                @if (_wordUser is not null)
+                @if (_shouldShowTranslationForm)
                 {
-                    <textarea rows="4"
-                              cols="150"
-                              class="form-control"
-                              id="inputTranslation"
-                              @bind="_wordUser.Translation"
-                              @bind:event="oninput">
-                         </textarea>
+                    <div class="m-1 border">
+                        <h4>@UserService.GetUILabel("provideTranslation")</h4>
+                        @if (_isFormattingTranslation)
+                        {
+                            <Button Color="ButtonColor.Info" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
+                        }
+                        else
+                        {
+
+                            <textarea rows="4"
+                                      cols="150"
+                                      class="form-control"
+                                      id="inputTranslation"
+                                      @bind="_wordUser.Translation"
+                                      @bind:event="oninput">
+                                             </textarea>
+
+                            <div class="m-1">
+                                <Button Color="ButtonColor.Secondary" Size="Size.Small" @onclick="OnFormatTranslationInputAsync">
+                                    @UserService.GetUILabel("formatTranslationInput")
+                                </Button>
+                            </div>
+                        }
+                    </div>
                 }
-                <div class="m-1">
-                    <Button Color="ButtonColor.Secondary" Size="Size.Small" @onclick="OnFormatTranslationInputAsync">
-                        @UserService.GetUILabel("formatTranslationInput")
-                    </Button>
+                else
+                {
+                    <div class="m-1">
+                        <Button Color="ButtonColor.Primary" @onclick="OnShowTranslationFormButtonClick">
+                            @UserService.GetUILabel("provideTranslation")
+                        </Button>
+                    </div>
+                }
+            }
+
+            @if(_defaultTranslations.Count > 0)
+            {
+                <div class="m-1 border">
+                    <h4>@UserService.GetUILabel("wordModalDefaultTranslations")</h4>
+                    <ul>
+                    @foreach(var t in _defaultTranslations)
+                    {
+                        <li>@t</li>
+                    }
+                    </ul>
                 </div>
             }
-            
+
 
         </div>
         <div>
@@ -115,6 +143,8 @@
     private bool _isFormattingTranslation = false;
     const int LoadingDelayMiliseconds = 500;
 
+    private List<string> _defaultTranslations = [];
+    private bool _shouldShowTranslationForm = false;
 
 
     public async Task OnShowModalClick(Token thisToken)
@@ -157,18 +187,23 @@
                     (int)ReadDataPacket.LanguageUser.Id, "", AvailableWordUserStatus.UNKNOWN);
             }
             if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
-            
+            { ErrorHandler.LogAndThrow(); return; }
+
             _wordUser.Status = _wordUser.Status is null ? AvailableWordUserStatus.UNKNOWN : _wordUser.Status;
 
             _title = (_word is null) ? "" : _word.TextLowerCase;
             _translation = _wordUser.Translation;
+            _defaultTranslations = GetDefaultTranslations(thisToken);
+
             _selectedStatus = UserService.GetUILabel($"statusLabel{(int)_wordUser.Status}");
 
             // check to display the "create card" button
             var existingCard = FlashCardApi.FlashCardReadByWordUserId(context, (int)_wordUser.Id);
             if (existingCard is null) _doesFlashCardExist = false;
             else _doesFlashCardExist = true;
+
+            if (!string.IsNullOrEmpty(_wordUser.Translation)) _shouldShowTranslationForm = true;
+            if (_defaultTranslations.Count == 0) _shouldShowTranslationForm = true;
 
             await modal.ShowAsync();
         }
@@ -179,6 +214,32 @@
         }
 
 
+    }
+
+    private void OnShowTranslationFormButtonClick()
+    {
+        _shouldShowTranslationForm = true;
+    }
+    private List<string> GetDefaultTranslations(Token thisToken)
+    {
+        if (thisToken == null || thisToken.Word == null || thisToken.Word.Id < 1)
+        {
+            ErrorHandler.LogAndThrow();
+            return [];
+        }
+
+        List<string> translationStrings = [];
+        // get any default translations
+        var defaultTranslations = thisToken.Word.WordTranslations
+            .OrderBy(x => x.Ordinal)
+            .ToList();
+        foreach (var t in defaultTranslations)
+        {
+            if (t.Translation is null) continue;
+            translationStrings.Add(t.Translation);
+        }
+
+        return translationStrings;
     }
     private string GetTokenClassSelected(int statusToCheck)
     {

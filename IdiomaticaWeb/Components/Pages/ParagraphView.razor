@@ -110,7 +110,7 @@ else
         if (token.Word is null || token.Word.TextLowerCase is null) return "statusUNKNOWN";
         if (ReadDataPacket is null || ReadDataPacket.LanguageUser is null ||
             ReadDataPacket.LanguageUser.Id is null) return "statusUNKNOWN";
-        
+
         var wordUser = token.Word.WordUsers
             .Where(x => x.LanguageUserId == (int)ReadDataPacket.LanguageUser.Id)
             .FirstOrDefault();
@@ -120,13 +120,36 @@ else
     private string GetTokenTranslation(Token token)
     {
         if (token.Word is null || token.Word.TextLowerCase is null) return "";
-        if (ReadDataPacket is null || ReadDataPacket.LanguageUser is null ||
-            ReadDataPacket.LanguageUser.Id is null) return "";
-        var wordUser = token.Word.WordUsers
-            .Where(x => x.LanguageUserId == (int)ReadDataPacket.LanguageUser.Id)
-            .FirstOrDefault();
-        if (wordUser is null || wordUser.Translation is null) return "";
-        return wordUser.Translation;
+
+        List<string> translationStrings = [];
+
+        // first get the override translations, if there is one
+
+        if (ReadDataPacket is not null && ReadDataPacket.LanguageUser is not null &&
+            ReadDataPacket.LanguageUser.Id is not null)
+        {
+            var wordUser = token.Word.WordUsers
+                .Where(x => x.LanguageUserId == (int)ReadDataPacket.LanguageUser.Id)
+                .FirstOrDefault();
+
+            if (wordUser is not null && !string.IsNullOrEmpty(wordUser.Translation))
+            {
+                translationStrings.Add(wordUser.Translation);
+            }
+        }
+
+        // next get any default translations
+        var defaultTranslations = token.Word.WordTranslations
+            .OrderBy(x => x.Ordinal)
+            .ToList();
+        foreach (var t in defaultTranslations)
+        {
+            if (t.Translation is null) continue;
+            translationStrings.Add(t.Translation);
+        }
+
+        return string.Join(Environment.NewLine, translationStrings);
+
     }
     private async Task<List<Token>> GetSentenceTokens(Sentence sentence)
     {

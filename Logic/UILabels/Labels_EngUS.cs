@@ -104,7 +104,10 @@ namespace Logic.UILabels
             _labels.Add("readJumpDefault", "Jump to page...");
             _labels.Add("readJumpSubmit", "Jump");
             _labels.Add("createFlashCard", "Make a flash card of this word");
-            _labels.Add("formatTranslationInput", "Auto format");
+            _labels.Add("formatTranslationInput", "Format help SpanishDictionary.com verbs");
+            _labels.Add("wordModalOverrideTranslations", "What you think this word means...");
+            _labels.Add("wordModalDefaultTranslations", "What we think this word means...");
+            _labels.Add("provideTranslation", "Provide your own translation");
             #endregion
             #region book create
             _labels.Add("bookCreateInitializationError", "There was an error setting up the book creation form");
