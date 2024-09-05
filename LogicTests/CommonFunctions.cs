@@ -31,19 +31,11 @@ namespace LogicTests
 
         static CommonFunctions()
         {
-            //setup our DI
-            var connectionstring = "Server=localhost;Database=Idiomatica;Trusted_Connection=True;TrustServerCertificate=true;";
-
+            
             _serviceProvider = new ServiceCollection()
                 .AddLogging()
-                //.AddCascadingAuthenticationState()
-                //.AddScoped<IdentityUserAccessor>()
-                //.AddScoped<IdentityRedirectManager>()
                 .AddScoped<AuthenticationStateProvider, RevalidatingProviderForUnitTesting>()
                 .AddTransient<UserService>()
-                //.AddDbContext<IdiomaticaContext>(options => {
-                //    options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("IdiomaticaWeb"));
-                //    })
                 .BuildServiceProvider();
         }
 
@@ -56,10 +48,7 @@ namespace LogicTests
         }
         internal static IdiomaticaContext CreateContext()
         {
-            //var factory = _serviceProvider.GetService<DbContext<IdiomaticaContext>>();
-            //var context = factory.CreateDbContext();
-            //return context;
-            var connectionstring = "Server=localhost;Database=Idiomatica;Trusted_Connection=True;TrustServerCertificate=true;";
+            var connectionstring = "Server=localhost;Database=Idiomatica_test;Trusted_Connection=True;TrustServerCertificate=true;";
             var optionsBuilder = new DbContextOptionsBuilder<IdiomaticaContext>();
             optionsBuilder.UseSqlServer(connectionstring);
             return new IdiomaticaContext(optionsBuilder.Options);
