@@ -17,9 +17,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void UserAndAllChildrenDeleteTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int bookId = 1;
+            Guid bookId = 11;
 
 
             try
@@ -28,18 +28,18 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                int languageUserId = (int)languageUser.Id;
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (Guid)user.UniqueKey);
+                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                Guid languageUserId = (Guid)languageUser.UniqueKey;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                    context, bookId, (Guid)user.UniqueKey);
+                if (bookUser is null || bookUser.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // create wordUsers
@@ -50,10 +50,10 @@ namespace Logic.Services.API.Tests
                 UserApi.UserAndAllChildrenDelete(context, userId);
 
                 // now try to pull anything
-                var userRead = context.Users.Where(x => x.Id == userId).FirstOrDefault();
-                var languageUserRead = context.LanguageUsers.Where(x => x.UserId == userId).FirstOrDefault();
-                var bookUserRead = context.BookUsers.Where(x => x.LanguageUserId == languageUserId).FirstOrDefault();
-                var wordUserRead = context.WordUsers.Where(x => x.LanguageUserId == languageUserId).FirstOrDefault();
+                var userRead = context.Users.Where(x => x.UniqueKey == userId).FirstOrDefault();
+                var languageUserRead = context.LanguageUsers.Where(x => x.UserKey == userId).FirstOrDefault();
+                var bookUserRead = context.BookUsers.Where(x => x.LanguageUserKey == languageUserId).FirstOrDefault();
+                var wordUserRead = context.WordUsers.Where(x => x.LanguageUserKey == languageUserId).FirstOrDefault();
 
                 Assert.IsNull(userRead);
                 Assert.IsNull(languageUserRead);
@@ -70,9 +70,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task UserAndAllChildrenDeleteAsyncTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int bookId = 1;
+            Guid bookId = 11;
 
 
             try
@@ -81,18 +81,18 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                int languageUserId = (int)languageUser.Id;
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (Guid)user.UniqueKey);
+                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                Guid languageUserId = (Guid)languageUser.UniqueKey;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                    context, bookId, (Guid)user.UniqueKey);
+                if (bookUser is null || bookUser.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // create wordUsers
@@ -103,10 +103,10 @@ namespace Logic.Services.API.Tests
                 await UserApi.UserAndAllChildrenDeleteAsync(context, userId);
 
                 // now try to pull anything
-                var userRead = context.Users.Where(x => x.Id == userId).FirstOrDefault();
-                var languageUserRead = context.LanguageUsers.Where(x => x.UserId == userId).FirstOrDefault();
-                var bookUserRead = context.BookUsers.Where(x => x.LanguageUserId == languageUserId).FirstOrDefault();
-                var wordUserRead = context.WordUsers.Where(x => x.LanguageUserId == languageUserId).FirstOrDefault();
+                var userRead = context.Users.Where(x => x.UniqueKey == userId).FirstOrDefault();
+                var languageUserRead = context.LanguageUsers.Where(x => x.UserKey == userId).FirstOrDefault();
+                var bookUserRead = context.BookUsers.Where(x => x.LanguageUserKey == languageUserId).FirstOrDefault();
+                var wordUserRead = context.WordUsers.Where(x => x.LanguageUserKey == languageUserId).FirstOrDefault();
 
                 Assert.IsNull(userRead);
                 Assert.IsNull(languageUserRead);
@@ -123,7 +123,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void UserCreateTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string code = "HU";
             var applicationUserId = Guid.NewGuid().ToString();
@@ -133,8 +133,8 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var user = UserApi.UserCreate(applicationUserId, name, code, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (Guid)user.UniqueKey;
 
                 Assert.IsNotNull(user.UniqueKey);
                 var ukString = user.UniqueKey.ToString();
@@ -149,7 +149,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task UserCreateAsyncTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string code = "HU";
             var applicationUserId = Guid.NewGuid().ToString();
@@ -159,8 +159,8 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var user = await UserApi.UserCreateAsync(applicationUserId, name, code, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (Guid)user.UniqueKey;
 
                 Assert.IsNotNull(user.UniqueKey);
                 var ukString = user.UniqueKey.ToString();
@@ -175,9 +175,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void UserBreadCrumbReadLatestTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int bookId = 1;
+            Guid bookId = 11;
 
             try
             {
@@ -185,20 +185,20 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null)
+                    context, 1, (Guid)user.UniqueKey);
+                if (languageUser is null || languageUser.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                int languageUserId = (int)languageUser.Id;
+                Guid languageUserId = (Guid)languageUser.UniqueKey;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                    context, bookId, (Guid)user.UniqueKey);
+                if (bookUser is null || bookUser.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // take a reading of time before you make the first crumb
@@ -210,16 +210,16 @@ namespace Logic.Services.API.Tests
                     context, 1, bookId);
 
                 // create the first breadcrumb
-                if (page1 is null || page1.Id is null)
+                if (page1 is null || page1.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                UserApi.UserBreadCrumbCreate(context, userId, (int)page1.Id);
+                UserApi.UserBreadCrumbCreate(context, userId, (Guid)page1.UniqueKey);
 
                 // read it back
                 var crumb1 = UserApi.UserBreadCrumbReadLatest(context, userId);
 
                 Assert.IsNotNull(crumb1);
                 Assert.IsNotNull(crumb1.UniqueKey);
-                Assert.IsTrue(crumb1.PageId == page1.Id);
+                Assert.IsTrue(crumb1.PageKey == page1.UniqueKey);
                 Assert.IsTrue(crumb1.ActionDateTime > time1);
 
                 // take a reading of time before you make the first crumb
@@ -231,16 +231,16 @@ namespace Logic.Services.API.Tests
                     context, 2, bookId);
 
                 // create the first breadcrumb
-                if (page2 is null || page2.Id is null)
+                if (page2 is null || page2.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                UserApi.UserBreadCrumbCreate(context, userId, (int)page2.Id);
+                UserApi.UserBreadCrumbCreate(context, userId, (Guid)page2.UniqueKey);
 
                 // read it back
                 var crumb2 = UserApi.UserBreadCrumbReadLatest(context, userId);
 
                 Assert.IsNotNull(crumb2);
                 Assert.IsNotNull(crumb2.UniqueKey);
-                Assert.IsTrue(crumb2.PageId == page2.Id);
+                Assert.IsTrue(crumb2.PageKey == page2.UniqueKey);
                 Assert.IsTrue(crumb2.ActionDateTime > time2);
             }
             finally
@@ -253,9 +253,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task UserBreadCrumbReadLatestAsyncTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int bookId = 1;
+            Guid bookId = 11;
 
             try
             {
@@ -263,20 +263,20 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null)
+                    context, 1, (Guid)user.UniqueKey);
+                if (languageUser is null || languageUser.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                int languageUserId = (int)languageUser.Id;
+                Guid languageUserId = (Guid)languageUser.UniqueKey;
 
                 // craete a bookUser
                 var bookUser = await BookUserApi.BookUserCreateAsync(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                    context, bookId, (Guid)user.UniqueKey);
+                if (bookUser is null || bookUser.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // take a reading of time before you make the first crumb
@@ -288,16 +288,16 @@ namespace Logic.Services.API.Tests
                     context, 1, bookId);
 
                 // create the first breadcrumb
-                if (page1 is null || page1.Id is null)
+                if (page1 is null || page1.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                await UserApi.UserBreadCrumbCreateAsync(context, userId, (int)page1.Id);
+                await UserApi.UserBreadCrumbCreateAsync(context, userId, (Guid)page1.UniqueKey);
 
                 // read it back
                 var crumb1 = await UserApi.UserBreadCrumbReadLatestAsync(context, userId);
 
                 Assert.IsNotNull(crumb1);
                 Assert.IsNotNull(crumb1.UniqueKey);
-                Assert.IsTrue(crumb1.PageId == page1.Id);
+                Assert.IsTrue(crumb1.PageKey == page1.UniqueKey);
                 Assert.IsTrue(crumb1.ActionDateTime > time1);
 
                 // take a reading of time before you make the first crumb
@@ -309,16 +309,16 @@ namespace Logic.Services.API.Tests
                     context, 2, bookId);
 
                 // create the first breadcrumb
-                if (page2 is null || page2.Id is null)
+                if (page2 is null || page2.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                await UserApi.UserBreadCrumbCreateAsync(context, userId, (int)page2.Id);
+                await UserApi.UserBreadCrumbCreateAsync(context, userId, (Guid)page2.UniqueKey);
 
                 // read it back
                 var crumb2 = await UserApi.UserBreadCrumbReadLatestAsync(context, userId);
 
                 Assert.IsNotNull(crumb2);
                 Assert.IsNotNull(crumb2.UniqueKey);
-                Assert.IsTrue(crumb2.PageId == page2.Id);
+                Assert.IsTrue(crumb2.PageKey == page2.UniqueKey);
                 Assert.IsTrue(crumb2.ActionDateTime > time2);
             }
             finally
@@ -331,9 +331,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void UserBreadCrumbCreateTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int bookId = 1;
+            Guid bookId = 11;
 
             try
             {
@@ -341,20 +341,20 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null)
+                    context, 1, (Guid)user.UniqueKey);
+                if (languageUser is null || languageUser.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                int languageUserId = (int)languageUser.Id;
+                Guid languageUserId = (Guid)languageUser.UniqueKey;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                    context, bookId, (Guid)user.UniqueKey);
+                if (bookUser is null || bookUser.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // get the first page
@@ -362,9 +362,9 @@ namespace Logic.Services.API.Tests
                     context, 1, bookId);
 
                 // create the breadcrumb
-                if (page is null || page.Id is null)
+                if (page is null || page.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                var crumb = UserApi.UserBreadCrumbCreate(context, userId, (int)page.Id);
+                var crumb = UserApi.UserBreadCrumbCreate(context, userId, (Guid)page.UniqueKey);
 
                 Assert.IsNotNull(crumb);
                 Assert.IsNotNull(crumb.UniqueKey);
@@ -380,9 +380,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task UserBreadCrumbCreateAsyncTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int bookId = 1;
+            Guid bookId = 11;
 
             try
             {
@@ -390,20 +390,20 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null) 
+                    context, 1, (Guid)user.UniqueKey);
+                if (languageUser is null || languageUser.UniqueKey is null) 
                     { ErrorHandler.LogAndThrow(); return; }
-                int languageUserId = (int)languageUser.Id;
+                Guid languageUserId = (Guid)languageUser.UniqueKey;
 
                 // craete a bookUser
                 var bookUser = await BookUserApi.BookUserCreateAsync(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                    context, bookId, (Guid)user.UniqueKey);
+                if (bookUser is null || bookUser.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // get the first page
@@ -411,9 +411,9 @@ namespace Logic.Services.API.Tests
                     context, 1, bookId);
 
                 // create the breadcrumb
-                if (page is null || page.Id is null)
+                if (page is null || page.UniqueKey is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                var crumb = await UserApi.UserBreadCrumbCreateAsync(context, userId, (int)page.Id);
+                var crumb = await UserApi.UserBreadCrumbCreateAsync(context, userId, (Guid)page.UniqueKey);
 
                 Assert.IsNotNull(crumb);
                 Assert.IsNotNull(crumb.UniqueKey);

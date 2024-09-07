@@ -29,7 +29,7 @@ namespace Logic.Services.API
 
             // pull language from the db
             var language = DataCache.LanguageByCodeRead(languageCodeT, context);
-            if (language is null || language.Id is null or 0)
+            if (language is null || language.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
@@ -44,10 +44,10 @@ namespace Logic.Services.API
             {
                 Title = titleT,
                 SourceURI = urlT,
-                LanguageId = language.Id,
+                LanguageKey = language.UniqueKey,
             };
             book = DataCache.BookCreate(book, context);
-            if (book is null || book.Id is null || book.Id < 1)
+            if (book is null || book.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow(2090);
                 return null;
@@ -67,8 +67,8 @@ namespace Logic.Services.API
                 if (string.IsNullOrEmpty(pageSplitTextTrimmed)) continue;
                 Page? page = PageApi.PageCreateFromPageSplit(context,
                     pageSplit.pageNum, pageSplitTextTrimmed,
-                    (int)book.Id, (int)language.Id);
-                if (page is not null && page.Id is not null or 0)
+                    (Guid)book.UniqueKey, (Guid)language.UniqueKey);
+                if (page is not null && page.UniqueKey is not null)
                 {
                     book.Pages.Add(page);
                 }
@@ -86,11 +86,11 @@ namespace Logic.Services.API
             });
         }
 
-        public static void BookAndAllChildrenDelete(IdiomaticaContext context, int bookId)
+        public static void BookAndAllChildrenDelete(IdiomaticaContext context, Guid bookId)
         {
             DataCache.BookAndAllChildrenDelete(bookId, context);
         }
-        public static async Task BookAndAllChildrenDeleteAsync(IdiomaticaContext context, int bookId)
+        public static async Task BookAndAllChildrenDeleteAsync(IdiomaticaContext context, Guid bookId)
         {
             await Task.Run(() =>
             {
@@ -99,24 +99,24 @@ namespace Logic.Services.API
         }
 
 
-        public static Book? BookRead(IdiomaticaContext context, int bookId)
+        public static Book? BookRead(IdiomaticaContext context, Guid bookId)
         {
             return DataCache.BookByIdRead(bookId, context);
         }
-        public static async Task<Book?> BookReadAsync(IdiomaticaContext context, int bookId)
+        public static async Task<Book?> BookReadAsync(IdiomaticaContext context, Guid bookId)
         {
             return await DataCache.BookByIdReadAsync(bookId, context);
         }
 
 
-        public static int BookReadPageCount(IdiomaticaContext context, int bookId)
+        public static int BookReadPageCount(IdiomaticaContext context, Guid bookId)
         {
             var dbVal = DataCache.BookStatByBookIdAndStatKeyRead((bookId, AvailableBookStat.TOTALPAGES), context);
             int outVal = 0;
             if (dbVal != null) int.TryParse(dbVal.Value, out outVal);
             return outVal;
         }
-        public static async Task<int> BookReadPageCountAsync(IdiomaticaContext context, int bookId)
+        public static async Task<int> BookReadPageCountAsync(IdiomaticaContext context, Guid bookId)
         {
             return await Task<int>.Run(() =>
             {
@@ -126,7 +126,7 @@ namespace Logic.Services.API
 
 
         public static BookListDataPacket BookListRead(
-            IdiomaticaContext context, int loggedInUserId, BookListDataPacket bookListDataPacket)
+            IdiomaticaContext context, Guid loggedInUserId, BookListDataPacket bookListDataPacket)
         {
             var powerQueryResults = DataCache.BookListRowsPowerQuery(
                     loggedInUserId,
@@ -146,7 +146,7 @@ namespace Logic.Services.API
 
         }
         public static async Task<BookListDataPacket> BookListReadAsync(
-            IdiomaticaContext context, int loggedInUserId, BookListDataPacket bookListDataPacket)
+            IdiomaticaContext context, Guid loggedInUserId, BookListDataPacket bookListDataPacket)
         {
             var powerQueryResults = await DataCache.BookListRowsPowerQueryAsync(
                     loggedInUserId,
@@ -168,7 +168,7 @@ namespace Logic.Services.API
 
 
         public static BookListRow? BookListRowByBookIdAndUserIdRead(
-            IdiomaticaContext context, int bookId, int userId)
+            IdiomaticaContext context, Guid bookId, Guid userId)
         {
             var powerQueryResults = DataCache.BookListRowsPowerQuery(
                     userId,
@@ -186,7 +186,7 @@ namespace Logic.Services.API
             return powerQueryResults.results.FirstOrDefault();
         }
         public static async Task<BookListRow?> BookListRowByBookIdAndUserIdReadAsync(
-            IdiomaticaContext context, int bookId, int userId)
+            IdiomaticaContext context, Guid bookId, Guid userId)
         {
             return await Task<BookListRow?>.Run(() =>
             {

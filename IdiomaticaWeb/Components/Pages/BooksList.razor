@@ -153,34 +153,34 @@
     private async Task ResetBookListAsync()
     {
         var context = await DbContextFactory.CreateDbContextAsync();
-        if (_loggedInUser is null || _loggedInUser.Id is null) return;
+        if (_loggedInUser is null || _loggedInUser.UniqueKey is null) return;
 
 
         BookListDataPacket = await BookApi.BookListReadAsync(
-            context, (int)_loggedInUser.Id, BookListDataPacket);
+            context, (Guid)_loggedInUser.UniqueKey, BookListDataPacket);
 
     }
 
 
-    private async Task OnArchiveBookUser(int bookId)
+    private async Task OnArchiveBookUser(Guid bookId)
     {
         try
         {
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            if (_loggedInUser is null || _loggedInUser.Id is null)
+            if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(context, bookId, (int)_loggedInUser.Id);
-            if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+            var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(context, bookId, (Guid)_loggedInUser.UniqueKey);
+            if (bookUser is null || bookUser.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            await BookUserApi.BookUserArchiveAsync(context, (int)bookUser.Id);
+            await BookUserApi.BookUserArchiveAsync(context, (Guid)bookUser.UniqueKey);
             // now pull a fresh copy of the book list
             await ResetBookListAsync();
             await t_delay;
@@ -199,7 +199,7 @@
             return;
         }
     }
-    private async Task OnAddBookUser(int bookId)
+    private async Task OnAddBookUser(Guid bookId)
     {
         _isLoading = true;
         var t_delay = Task.Delay(LoadingDelayMiliseconds);
@@ -207,7 +207,7 @@
         await context.Database.BeginTransactionAsync();
         try
         {
-            if (_loggedInUser is null || _loggedInUser.Id is null)
+            if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -217,9 +217,9 @@
             var bookUser = Task.Run(() =>
             {
                 return OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                context, bookId, (int)_loggedInUser.Id);
+                context, bookId, (Guid)_loggedInUser.UniqueKey);
             }).Result;
-            if (bookUser is null || bookUser.Id is null)
+            if (bookUser is null || bookUser.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;

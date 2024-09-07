@@ -15,13 +15,13 @@ namespace Model
     /// </summary>
     public class Token
     {
-        public int? Id { get; set; }
+        public Guid? UniqueKey { get; set; }
 
         #region relationships
 
-        public int? WordId { get; set; }
+        public Guid? WordKey { get; set; }
         public Word? Word { get; set; }
-        public int? SentenceId { get; set; }
+        public Guid? SentenceKey { get; set; }
         public Sentence? Sentence { get; set; }
 
         #endregion
@@ -37,7 +37,6 @@ namespace Model
         /// the order it appears within its sentence
         /// </summary>
         public int? Ordinal { get; set; }
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
 
     }
 }

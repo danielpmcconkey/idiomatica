@@ -16,9 +16,9 @@ namespace Model
 
         #region relationships
 
-        public int? LanguageToId { get; set; }
+        public Guid? LanguageToKey { get; set; }
         public Language? LanguageTo { get; set; }
-        public int? WordId { get; set; }
+        public Guid? WordKey { get; set; }
         public Word? Word { get; set; }
         public Guid? VerbKey { get; set; }
         public Verb? Verb { get; set; }

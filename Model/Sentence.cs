@@ -12,10 +12,11 @@ namespace Model
     [Table("Sentence", Schema = "Idioma")]
     public class Sentence
     {
-        public int? Id { get; set; }
+        public Guid? UniqueKey { get; set; }
+        
 
         #region relationships
-        public int? ParagraphId { get; set; }
+        public Guid? ParagraphKey { get; set; }
         public Paragraph? Paragraph { get; set; }
         public List<Token> Tokens { get; set; } = new List<Token>();
         #endregion
@@ -23,7 +24,6 @@ namespace Model
         public int? Ordinal { get; set; }
         [Column(TypeName = "TEXT")]
         public string? Text { get; set; }
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
 
     }
 }

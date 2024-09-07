@@ -11,15 +11,15 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, LanguageUser> LanguageUserById = new ConcurrentDictionary<int, LanguageUser>();
-        private static ConcurrentDictionary<(int languageId, int userId), LanguageUser> LanguageUserByLanguageIdAndUserId = new ConcurrentDictionary<(int languageId, int userId), LanguageUser>();
-        private static ConcurrentDictionary<int, List<LanguageUser>> LanguageUsersAndLanguageByUserId = new ConcurrentDictionary<int, List<LanguageUser>>();
+        private static ConcurrentDictionary<Guid, LanguageUser> LanguageUserById = new ConcurrentDictionary<Guid, LanguageUser>();
+        private static ConcurrentDictionary<(Guid languageId, Guid userId), LanguageUser> LanguageUserByLanguageIdAndUserId = new ConcurrentDictionary<(Guid languageId, Guid userId), LanguageUser>();
+        private static ConcurrentDictionary<Guid, List<LanguageUser>> LanguageUsersAndLanguageByUserId = new ConcurrentDictionary<Guid, List<LanguageUser>>();
 
         #region create
         public static LanguageUser? LanguageUserCreate(LanguageUser languageUser, IdiomaticaContext context)
         {
-            if (languageUser.LanguageId is null) throw new ArgumentNullException(nameof(languageUser.LanguageId));
-            if (languageUser.UserId is null) throw new ArgumentNullException(nameof(languageUser.UserId));
+            if (languageUser.LanguageKey is null) throw new ArgumentNullException(nameof(languageUser.LanguageKey));
+            if (languageUser.UserKey is null) throw new ArgumentNullException(nameof(languageUser.UserKey));
 
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
@@ -30,15 +30,15 @@ namespace Model.DAL
                            ,[TotalWordsRead]
                            ,[UniqueKey])
                      VALUES
-                           ({languageUser.LanguageId}
-                           ,{languageUser.UserId}
+                           ({languageUser.LanguageKey}
+                           ,{languageUser.UserKey}
                            ,{languageUser.TotalWordsRead}
                            ,{guid})
                 
                 """);
             if (numRows < 1) throw new InvalidDataException("creating LanguageUser affected 0 rows");
             var newEntity = context.LanguageUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            if (newEntity is null || newEntity.UniqueKey is null)
             {
                 throw new InvalidDataException("newEntity is null in LanguageUserCreate");
             }
@@ -57,7 +57,7 @@ namespace Model.DAL
 
         #region read
         public static LanguageUser? LanguageUserByIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (LanguageUserById.ContainsKey(key))
@@ -67,7 +67,7 @@ namespace Model.DAL
 
             // read DB
             var value = context.LanguageUsers
-                .Where(x => x.Id == key)
+                .Where(x => x.UniqueKey == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -75,7 +75,7 @@ namespace Model.DAL
             return value;
         }
         public static async Task<LanguageUser?> LanguageUserByIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             return await Task<LanguageUser?>.Run(() =>
             {
@@ -83,7 +83,7 @@ namespace Model.DAL
             });
         }
         public static LanguageUser? LanguageUserByLanguageIdAndUserIdRead(
-            (int languageId, int userId) key, IdiomaticaContext context)
+            (Guid languageId, Guid userId) key, IdiomaticaContext context)
         {
             // check cache
             if (LanguageUserByLanguageIdAndUserId.ContainsKey(key))
@@ -93,7 +93,7 @@ namespace Model.DAL
 
             // read DB
             var value = context.LanguageUsers
-                .Where(x => x.LanguageId == key.languageId && x.UserId == key.userId)
+                .Where(x => x.LanguageKey == key.languageId && x.UserKey == key.userId)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -101,7 +101,7 @@ namespace Model.DAL
             return value;
         }
         public static async Task<LanguageUser?> LanguageUserByLanguageIdAndUserIdReadAsync(
-            (int languageId, int userId) key, IdiomaticaContext context)
+            (Guid languageId, Guid userId) key, IdiomaticaContext context)
         {
             return await Task<LanguageUser?>.Run(() =>
             {
@@ -109,7 +109,7 @@ namespace Model.DAL
             });
         }        
         public static List<LanguageUser>? LanguageUsersAndLanguageByUserIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (LanguageUsersAndLanguageByUserId.ContainsKey(key))
@@ -119,7 +119,7 @@ namespace Model.DAL
 
             // read DB
             var value = context.LanguageUsers
-                .Where(x => x.UserId == key && x.Language != null)
+                .Where(x => x.UserKey == key && x.Language != null)
                 .Include(lu => lu.Language)
                 .OrderBy(x => x.Language)
                 .ToList();
@@ -133,7 +133,7 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<LanguageUser>?> LanguageUsersAndLanguageByUserIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             return await Task<List<LanguageUser>?>.Run(() =>
             {
@@ -145,15 +145,14 @@ namespace Model.DAL
 
         private static void LanguageUserUpdateCache(LanguageUser languageUser, IdiomaticaContext context)
         {
-            if (languageUser is null || languageUser.Id is null ||
-                languageUser.UserId is null || languageUser.LanguageId is null ||
-                languageUser.LanguageId < 1 || languageUser.UserId < 1)
+            if (languageUser is null || languageUser.UniqueKey is null ||
+                languageUser.UserKey is null || languageUser.LanguageKey is null)
             {
                 return;
             }
-            int id = (int)languageUser.Id;
-            int userId = (int)languageUser.UserId;
-            int languageId = (int)languageUser.LanguageId;
+            Guid id = (Guid)languageUser.UniqueKey;
+            Guid userId = (Guid)languageUser.UserKey;
+            Guid languageId = (Guid)languageUser.LanguageKey;
             LanguageUserById[id] = languageUser;
             LanguageUserByLanguageIdAndUserId[(languageId, userId)] = languageUser;
             languageUser.Language = DataCache.LanguageByIdRead(languageId, context);
@@ -161,7 +160,7 @@ namespace Model.DAL
             {
                 var list = LanguageUsersAndLanguageByUserId[userId];
                 // grab the entries in the list that are NOT this language
-                var newList = list.Where(x => x.LanguageId != languageId).ToList();
+                var newList = list.Where(x => x.LanguageKey != languageId).ToList();
                 newList.Add(languageUser);
                 LanguageUsersAndLanguageByUserId[userId] = newList;
             }

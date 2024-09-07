@@ -10,12 +10,12 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, Paragraph> ParagraphById = new ConcurrentDictionary<int, Paragraph>();
-        private static ConcurrentDictionary<int, List<Paragraph>> ParagraphsByPageId = new ConcurrentDictionary<int, List<Paragraph>>();
+        private static ConcurrentDictionary<Guid, Paragraph> ParagraphById = [];
+        private static ConcurrentDictionary<Guid, List<Paragraph>> ParagraphsByPageId = [];
 
 
         #region read
-        public static Paragraph? ParagraphByIdRead(int key, IdiomaticaContext context)
+        public static Paragraph? ParagraphByIdRead(Guid key, IdiomaticaContext context)
         {
             // check cache
             if (ParagraphById.ContainsKey(key))
@@ -24,14 +24,14 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.Paragraphs.Where(x => x.Id == key)
+            var value = context.Paragraphs.Where(x => x.UniqueKey == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
             ParagraphById[key] = value;
             return value;
         }
-        public static async Task<Paragraph?> ParagraphByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<Paragraph?> ParagraphByIdReadAsync(Guid key, IdiomaticaContext context)
         {
             return await Task<Paragraph?>.Run(() =>
             {
@@ -39,7 +39,7 @@ namespace Model.DAL
             });
         }
         public static List<Paragraph> ParagraphsByPageIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (ParagraphsByPageId.ContainsKey(key))
@@ -47,7 +47,7 @@ namespace Model.DAL
                 return ParagraphsByPageId[key];
             }
             // read DB
-            var value = context.Paragraphs.Where(x => x.PageId == key).OrderBy(x => x.Ordinal)
+            var value = context.Paragraphs.Where(x => x.PageKey == key).OrderBy(x => x.Ordinal)
                 .ToList();
 
             // write the whole list to cache
@@ -56,14 +56,14 @@ namespace Model.DAL
             // write each item to cache
             foreach (var item in value) 
             {
-                if (item.Id is null) continue;
-                ParagraphById[(int)item.Id] = item;
+                if (item.UniqueKey is null) continue;
+                ParagraphById[(Guid)item.UniqueKey] = item;
             }
 
             return value;
         }
         public static async Task<List<Paragraph>> ParagraphsByPageIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             return await Task<List<Paragraph>>.Run(() =>
             {
@@ -77,7 +77,7 @@ namespace Model.DAL
 
         public static Paragraph? ParagraphCreate(Paragraph paragraph, IdiomaticaContext context)
         {
-            if (paragraph.PageId is null) throw new ArgumentNullException(nameof(paragraph.PageId));
+            if (paragraph.PageKey is null) throw new ArgumentNullException(nameof(paragraph.PageKey));
             if (paragraph.Ordinal is null) throw new ArgumentNullException(nameof(paragraph.Ordinal));
 
             Guid guid = Guid.NewGuid();
@@ -88,20 +88,20 @@ namespace Model.DAL
                       ,[Ordinal]
                       ,[UniqueKey])
                 VALUES
-                      ({paragraph.PageId}
+                      ({paragraph.PageKey}
                       ,{paragraph.Ordinal}
                       ,{guid})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Paragraph affected 0 rows");
             var newEntity = context.Paragraphs.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            if (newEntity is null || newEntity.UniqueKey is null)
             {
                 throw new InvalidDataException("newEntity is null in ParagraphCreate");
             }
 
             // add it to cache
-            ParagraphById[(int)newEntity.Id] = newEntity;
+            ParagraphById[(Guid)newEntity.UniqueKey] = newEntity;
 
             return newEntity;
         }

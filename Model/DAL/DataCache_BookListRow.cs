@@ -15,14 +15,14 @@ namespace Model.DAL
     public static partial class DataCache
     {
 
-        private static ConcurrentDictionary<int, List<BookListRow>> BookListRowsByUserId = new ConcurrentDictionary<int, List<BookListRow>>();
-        private static ConcurrentDictionary<(int bookId, int userId), BookListRow?> BookListRowByBookIdAndUserId = new ();
+        private static ConcurrentDictionary<Guid, List<BookListRow>> BookListRowsByUserId = [];
+        private static ConcurrentDictionary<(Guid bookId, Guid userId), BookListRow?> BookListRowByBookIdAndUserId = [];
 
 
 
         #region read
         public static BookListRow? BookListRowByBookIdAndUserIdRead(
-            (int bookId, int userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+            (Guid bookId, Guid userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
         {
             // check cache
             if (BookListRowByBookIdAndUserId.ContainsKey(key) && !shouldOverrideCache)
@@ -31,7 +31,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.BookListRows.Where(x => x.BookId == key.bookId && x.UserId == key.userId)
+            var value = context.BookListRows.Where(x => x.BookKey == key.bookId && x.UserKey == key.userId)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -39,7 +39,7 @@ namespace Model.DAL
             return value;
         }
         public static async Task<BookListRow?> BookListRowByBookIdAndUserIdReadAsync(
-            (int bookId, int userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+            (Guid bookId, Guid userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
         {
             return await Task<BookListRow?>.Run(() =>
             {
@@ -49,9 +49,9 @@ namespace Model.DAL
 
 
         public static (long count, List<BookListRow> results) BookListRowsPowerQuery(
-            int userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
+            Guid userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
             LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
-            bool sortAscending, IdiomaticaContext context, int? bookIdOverride = null)
+            bool sortAscending, IdiomaticaContext context, Guid? bookIdOverride = null)
         {
             /*
              * note: none of the string fields are safe. and, since we don't 
@@ -66,7 +66,7 @@ namespace Model.DAL
 
 
             string sortDirection = sortAscending ? "asc" : "desc";
-            string orderByClause = $"order by b.Id {sortDirection}";
+            string orderByClause = $"order by b.UniqueKey {sortDirection}";
             if (orderBy is not null)
             {
                 switch (orderBy)
@@ -107,12 +107,12 @@ namespace Model.DAL
 
                      AllTags as (
                         select 
-                            b.Id as BookId
+                            b.UniqueKey as BookId
                             , bt.Tag
                         from Idioma.Book b
-                        left join Idioma.BookTag bt on b.Id = bt.BookId
+                        left join Idioma.BookTag bt on b.UniqueKey = bt.BookKey
                         where bt.Tag like '%{DALUtilities.SanitizeString(tagsFilter)}%'
-                        group by b.Id, bt.Tag
+                        group by b.UniqueKey, bt.Tag
                     ),
                     """);
             }
@@ -137,9 +137,9 @@ namespace Model.DAL
             }
             sb.Append($"""
 
-                            , case when bu.Id is null or bu.IsArchived = 1 then cast(0 as bit) else cast (1 as bit) end as IsInShelf
-                            , lu.UserId
-                            , b.Id as BookId
+                            , case when bu.UniqueKey is null or bu.IsArchived = 1 then cast(0 as bit) else cast (1 as bit) end as IsInShelf
+                            , lu.UserKey
+                            , b.UniqueKey as BookId
                             , l.[Name] as LanguageName
                             , bus_ISCOMPLETE.ValueString as IsComplete
                             , b.Title
@@ -169,44 +169,44 @@ namespace Model.DAL
             sb.Append($"""
 
                         from Idioma.Book b
-                        left join Idioma.Language l on b.LanguageId = l.Id
-                        left join Idioma.BookStat bsTotalPages on bsTotalPages.BookId = b.Id and bsTotalPages.[Key] = {(int)AvailableBookStat.TOTALPAGES}
-                        left join Idioma.BookStat bsTotalWordCount on bsTotalWordCount.BookId = b.Id and bsTotalWordCount.[Key] = {(int)AvailableBookStat.TOTALWORDCOUNT}
-                        left join Idioma.BookStat bsDistinctWordCount on bsDistinctWordCount.BookId = b.Id and bsDistinctWordCount.[Key] = {(int)AvailableBookStat.DISTINCTWORDCOUNT}
-                        left join Idioma.BookStat bsDifficultyScore on bsDifficultyScore.BookId = b.Id and bsDifficultyScore.[Key] = {(int)AvailableBookStat.DIFFICULTYSCORE}
-                        left join Idioma.LanguageUser lu on lu.LanguageId = b.LanguageId and lu.UserId = {userId}
-                        left join Idioma.BookUser bu on bu.BookId = b.Id and bu.LanguageUserId = lu.Id
-                        left join [Idioma].[BookUserStat] bus_ISCOMPLETE on bus_ISCOMPLETE.BookId = b.Id and bus_ISCOMPLETE.LanguageUserId = lu.Id and bus_ISCOMPLETE.[Key] = {(int)AvailableBookUserStat.ISCOMPLETE}
-                        left join [Idioma].[BookUserStat] bus_PROGRESS on bus_PROGRESS.BookId = b.Id and bus_PROGRESS.LanguageUserId = lu.Id and bus_PROGRESS.[Key] = {(int)AvailableBookUserStat.PROGRESS}
-                        left join [Idioma].[BookUserStat] bus_PROGRESSPERCENT on bus_PROGRESSPERCENT.BookId = b.Id and bus_PROGRESSPERCENT.LanguageUserId = lu.Id and bus_PROGRESSPERCENT.[Key] = {(int)AvailableBookUserStat.PROGRESSPERCENT}
-                        left join [Idioma].[BookUserStat] bus_TOTALWORDCOUNT on bus_TOTALWORDCOUNT.BookId = b.Id and bus_TOTALWORDCOUNT.LanguageUserId = lu.Id and bus_TOTALWORDCOUNT.[Key] = {(int)AvailableBookUserStat.TOTALWORDCOUNT}
-                        left join [Idioma].[BookUserStat] bus_TOTALKNOWNPERCENT on bus_TOTALKNOWNPERCENT.BookId = b.Id and bus_TOTALKNOWNPERCENT.LanguageUserId = lu.Id and bus_TOTALKNOWNPERCENT.[Key] = {(int)AvailableBookUserStat.TOTALKNOWNPERCENT}
-                        left join [Idioma].[BookUserStat] bus_DISTINCTWORDCOUNT on bus_DISTINCTWORDCOUNT.BookId = b.Id and bus_DISTINCTWORDCOUNT.LanguageUserId = lu.Id and bus_DISTINCTWORDCOUNT.[Key] = {(int)AvailableBookUserStat.DISTINCTWORDCOUNT}
-                        left join [Idioma].[BookUserStat] bus_DISTINCTKNOWNPERCENT on bus_DISTINCTKNOWNPERCENT.BookId = b.Id and bus_DISTINCTKNOWNPERCENT.LanguageUserId = lu.Id and bus_DISTINCTKNOWNPERCENT.[Key] = {(int)AvailableBookUserStat.DISTINCTKNOWNPERCENT}
+                        left join Idioma.Language l on b.LanguageKey = l.UniqueKey
+                        left join Idioma.BookStat bsTotalPages on bsTotalPages.BookKey = b.UniqueKey and bsTotalPages.[Key] = {(int)AvailableBookStat.TOTALPAGES}
+                        left join Idioma.BookStat bsTotalWordCount on bsTotalWordCount.BookKey = b.UniqueKey and bsTotalWordCount.[Key] = {(int)AvailableBookStat.TOTALWORDCOUNT}
+                        left join Idioma.BookStat bsDistinctWordCount on bsDistinctWordCount.BookKey = b.UniqueKey and bsDistinctWordCount.[Key] = {(int)AvailableBookStat.DISTINCTWORDCOUNT}
+                        left join Idioma.BookStat bsDifficultyScore on bsDifficultyScore.BookKey = b.UniqueKey and bsDifficultyScore.[Key] = {(int)AvailableBookStat.DIFFICULTYSCORE}
+                        left join Idioma.LanguageUser lu on lu.LanguageKey = b.LanguageKey and lu.UserKey = {userId}
+                        left join Idioma.BookUser bu on bu.BookKey = b.UniqueKey and bu.LanguageUserKey = lu.UniqueKey
+                        left join [Idioma].[BookUserStat] bus_ISCOMPLETE on bus_ISCOMPLETE.BookKey = b.UniqueKey and bus_ISCOMPLETE.LanguageUserKey = lu.UniqueKey and bus_ISCOMPLETE.[Key] = {(int)AvailableBookUserStat.ISCOMPLETE}
+                        left join [Idioma].[BookUserStat] bus_PROGRESS on bus_PROGRESS.BookKey = b.UniqueKey and bus_PROGRESS.LanguageUserKey = lu.UniqueKey and bus_PROGRESS.[Key] = {(int)AvailableBookUserStat.PROGRESS}
+                        left join [Idioma].[BookUserStat] bus_PROGRESSPERCENT on bus_PROGRESSPERCENT.BookKey = b.UniqueKey and bus_PROGRESSPERCENT.LanguageUserKey = lu.UniqueKey and bus_PROGRESSPERCENT.[Key] = {(int)AvailableBookUserStat.PROGRESSPERCENT}
+                        left join [Idioma].[BookUserStat] bus_TOTALWORDCOUNT on bus_TOTALWORDCOUNT.BookKey = b.UniqueKey and bus_TOTALWORDCOUNT.LanguageUserKey = lu.UniqueKey and bus_TOTALWORDCOUNT.[Key] = {(int)AvailableBookUserStat.TOTALWORDCOUNT}
+                        left join [Idioma].[BookUserStat] bus_TOTALKNOWNPERCENT on bus_TOTALKNOWNPERCENT.BookKey = b.UniqueKey and bus_TOTALKNOWNPERCENT.LanguageUserKey = lu.UniqueKey and bus_TOTALKNOWNPERCENT.[Key] = {(int)AvailableBookUserStat.TOTALKNOWNPERCENT}
+                        left join [Idioma].[BookUserStat] bus_DISTINCTWORDCOUNT on bus_DISTINCTWORDCOUNT.BookKey = b.UniqueKey and bus_DISTINCTWORDCOUNT.LanguageUserKey = lu.UniqueKey and bus_DISTINCTWORDCOUNT.[Key] = {(int)AvailableBookUserStat.DISTINCTWORDCOUNT}
+                        left join [Idioma].[BookUserStat] bus_DISTINCTKNOWNPERCENT on bus_DISTINCTKNOWNPERCENT.BookKey = b.UniqueKey and bus_DISTINCTKNOWNPERCENT.LanguageUserKey = lu.UniqueKey and bus_DISTINCTKNOWNPERCENT.[Key] = {(int)AvailableBookUserStat.DISTINCTKNOWNPERCENT}
                 """);
             if (useTags && bookIdOverride is null)
             {
                 sb.Append($"""
 
-                        left join AllTags at on at.BookId = b.Id
+                        left join AllTags at on at.BookKey = b.UniqueKey
                     """);
             }
              sb.Append($"""
 
                         where 1=1
                 """);
-            if (bookIdOverride is not null && bookIdOverride > 0)
+            if (bookIdOverride is not null)
             {
                 sb.Append($"""
 
-                        and b.Id = {bookIdOverride}
+                        and b.UniqueKey = {bookIdOverride}
                     """);
             }
             if (shouldShowOnlyInShelf && bookIdOverride is null)
             {
                 sb.Append($"""
 
-                        and bu.Id is not null and bu.IsArchived <> 1
+                        and bu.UniqueKey is not null and bu.IsArchived <> 1
                     """);
             }
             if (useTags && bookIdOverride is null)
@@ -235,9 +235,9 @@ namespace Model.DAL
                 sb.Append($"""
 
                         group by
-                              b.Id
-                            , bu.Id
-                            , lu.UserId
+                              b.UniqueKey
+                            , bu.UniqueKey
+                            , lu.UserKey
                             , l.[Name]
                             , bus_ISCOMPLETE.ValueString
                             , b.Title
@@ -293,13 +293,13 @@ namespace Model.DAL
             var dbValue = context.Database.SqlQueryRaw<BookListRow>(sb.ToString()).ToList();
             if (dbValue.Count > 0) {
                 var leadingRecord = dbValue.Where(
-                    x => x.BookId == null && x.Title == null && x.LanguageName == null)
+                    x => x.BookKey == null && x.Title == null && x.LanguageName == null)
                     .FirstOrDefault();
                 if (leadingRecord != null && leadingRecord.RowNumber != null)
                 {
                     long count = (long)leadingRecord.RowNumber;
                     var realRows = dbValue.Where(
-                    x => x.BookId != null && x.Title != null && x.LanguageName != null)
+                    x => x.BookKey != null && x.Title != null && x.LanguageName != null)
                         .OrderBy(x => x.RowNumber)
                         .ToList();
                     return (count,  realRows);
@@ -308,9 +308,9 @@ namespace Model.DAL
             return (0L, new List<BookListRow>());
         }
         public static async Task<(long count, List<BookListRow> results)> BookListRowsPowerQueryAsync(
-            int userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
+            Guid userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
             LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
-            bool sortAscending, IdiomaticaContext context, int? bookIdOverride = null)
+            bool sortAscending, IdiomaticaContext context, Guid? bookIdOverride = null)
         {
             return await Task<(long count, List<BookListRow> results)>.Run(() =>
             {
@@ -325,7 +325,7 @@ namespace Model.DAL
         * since BookListRow is just a view, delete methods 
         * will only delete the cache
         * */
-        public static void BookListRowsByUserIdDelete( int key, IdiomaticaContext context)
+        public static void BookListRowsByUserIdDelete( Guid key, IdiomaticaContext context)
         {
             BookListRowsByUserId.TryRemove(key, out var deletedRow);
         }

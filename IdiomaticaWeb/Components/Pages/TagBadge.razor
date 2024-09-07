@@ -41,7 +41,7 @@
     [Parameter]
     public BookTag? BookTag { get; set; }
     [Parameter]
-    public int? BookId { get; set; }
+    public Guid? BookId { get; set; }
     [Parameter]
     public EventCallback OnRefreshRowAsync { get; set; }
 
@@ -90,12 +90,12 @@
         {
             var context = DbContextFactory.CreateDbContext();
             _loggedInUser = UserService.GetLoggedInUser(context);
-            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow(2450);
                 return;
             }
-            if (BookId is null || BookId < 1)
+            if (BookId is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -105,7 +105,7 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            BookTagApi.BookTagAdd(context, (int)BookId, (int)_loggedInUser.Id, BookTag.Tag);
+            BookTagApi.BookTagAdd(context, (Guid)BookId, (Guid)_loggedInUser.UniqueKey, BookTag.Tag);
         }
         catch (IdiomaticaException ex)
         {
@@ -127,12 +127,12 @@
     {
         var context = DbContextFactory.CreateDbContext();
         _loggedInUser =UserService.GetLoggedInUser(context);
-        if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+        if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
         {
             ErrorHandler.LogAndThrow(2450);
             return;
         }
-        if (BookId is null || BookId < 1)
+        if (BookId is null)
         {
             ErrorHandler.LogAndThrow();
             return;
@@ -142,7 +142,7 @@
             ErrorHandler.LogAndThrow();
             return;
         }
-        BookTagApi.BookTagRemove(context, (int)BookId, (int)_loggedInUser.Id, BookTag.Tag);
+        BookTagApi.BookTagRemove(context, (Guid)BookId, (Guid)_loggedInUser.UniqueKey, BookTag.Tag);
     }
     private async Task OnDownVote()
     {

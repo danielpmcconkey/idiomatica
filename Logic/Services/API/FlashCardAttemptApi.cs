@@ -13,16 +13,16 @@ namespace Logic.Services.API
     public static class FlashCardAttemptApi
     {
         public static FlashCardAttempt? FlashCardAttemptCreate(
-            IdiomaticaContext context, int flashCardId, AvailableFlashCardAttemptStatus status)
+            IdiomaticaContext context, Guid flashCardId, AvailableFlashCardAttemptStatus status)
         {
             FlashCardAttempt? attempt = new ()
             {
-                FlashCardId = flashCardId,
+                FlashCardKey = flashCardId,
                 AttemptedWhen = DateTime.Now,
                 Status = status,
             };
             attempt = DataCache.FlashCardAttemptCreate(attempt, context);
-            if (attempt is null || attempt.Id is null || attempt.Id < 1)
+            if (attempt is null || attempt.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
@@ -30,7 +30,7 @@ namespace Logic.Services.API
             return attempt;
         }
         public static async Task<FlashCardAttempt?> FlashCardAttemptCreateAsync(
-            IdiomaticaContext context, int flashCardId, AvailableFlashCardAttemptStatus status)
+            IdiomaticaContext context, Guid flashCardId, AvailableFlashCardAttemptStatus status)
         {
             return await Task<FlashCardAttempt?>.Run(() =>
             {

@@ -38,14 +38,14 @@ namespace Model.DAL
                 """);
             if (numRows < 1) throw new InvalidDataException("creating FlashCardAttempt affected 0 rows");
             var newEntity = context.FlashCardAttempts.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            if (newEntity is null || newEntity.UniqueKey is null)
             {
                 throw new InvalidDataException("newEntity is null in FlashCardAttemptCreate");
             }
 
 
             // add it to cache
-            FlashCardAttemptById[(int)newEntity.Id] = newEntity;
+            FlashCardAttemptById[(int)newEntity.UniqueKey] = newEntity;
 
             return newEntity;
         }

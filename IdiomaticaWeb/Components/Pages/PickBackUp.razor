@@ -39,10 +39,10 @@ else
 
 
 @code {
-    [Parameter] public int? UserId { get; set; }
+    [Parameter] public Guid? UserId { get; set; }
     [Parameter] public ErrorState? errorState { get; set; }
     string? Title;
-    int? BookId;
+    Guid? BookId;
     string? BookUri;
     int? PageNum;
     bool _isLoading = false;
@@ -54,7 +54,7 @@ else
     {
         try
         {
-            if (UserId is null || UserId < 1)
+            if (UserId is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -62,16 +62,16 @@ else
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            var breadCrumb = await UserApi.UserBreadCrumbReadLatestAsync(context, (int)UserId);
-            if (breadCrumb is not null && breadCrumb.PageId is not null)
+            var breadCrumb = await UserApi.UserBreadCrumbReadLatestAsync(context, (Guid)UserId);
+            if (breadCrumb is not null && breadCrumb.PageKey is not null)
             {
-                var page = await PageApi.PageReadByIdAsync(context, (int)breadCrumb.PageId);
-                if (page is null || page.BookId is null || page.Ordinal is null) return;
-                var book = await BookApi.BookReadAsync(context, (int)page.BookId);
-                if (book is null || book.Id is null || string.IsNullOrEmpty(book.Title)) return;
+                var page = await PageApi.PageReadByIdAsync(context, (Guid)breadCrumb.PageKey);
+                if (page is null || page.BookKey is null || page.Ordinal is null) return;
+                var book = await BookApi.BookReadAsync(context, (Guid)page.BookKey);
+                if (book is null || book.UniqueKey is null || string.IsNullOrEmpty(book.Title)) return;
 
                 Title = FormatTitle(book.Title);
-                BookUri = $"/Book/{book.Id}/Read";
+                BookUri = $"/Book/{book.UniqueKey}/Read";
                 PageNum = page.Ordinal;
 
                 _hasCrumbs = true;

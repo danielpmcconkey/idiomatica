@@ -290,13 +290,13 @@
         using var transaction = context.Database.BeginTransaction();
         try
         {
-            if (LoggedInUser is null || LoggedInUser.Id is null) return;
+            if (LoggedInUser is null || LoggedInUser.UniqueKey is null) return;
             if (string.IsNullOrEmpty(LanguageInput)) return;
             if (NumNewCardsInput is null) NumNewCardsInput = 0;
             if (NumOldCardsInput is null) NumOldCardsInput = 0;
 
             FlashCardDataPacket = OrchestrationApi.OrchestrateFlashCardDeckCreation(
-                context, (int)LoggedInUser.Id, LanguageInput, (int)NumNewCardsInput, (int)NumOldCardsInput);
+                context, (Guid)LoggedInUser.UniqueKey, LanguageInput, (int)NumNewCardsInput, (int)NumOldCardsInput);
 
             IsDeckDefined = true;
             IsDeckComplete = false;

@@ -19,7 +19,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookCreateAndSaveTest()
         {
-            int bookId = 0;
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedTitle = TestConstants.NewBookTitle;
 
@@ -32,11 +32,11 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                if (newBook is null || newBook.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)newBook.Id;
+                if (newBook is null || newBook.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                bookId = (Guid)newBook.UniqueKey;
 
-                var newBookFromDb = BookApi.BookRead(context, (int)newBook.Id);
-                var newPageFromDb = PageApi.PageReadFirstByBookId(context, (int)newBook.Id);
+                var newBookFromDb = BookApi.BookRead(context, (Guid)newBook.UniqueKey);
+                var newPageFromDb = PageApi.PageReadFirstByBookId(context, (Guid)newBook.UniqueKey);
 
                 // assert
                 Assert.IsNotNull(newBookFromDb);
@@ -52,7 +52,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task BookCreateAndSaveAsyncTest()
         {
-            int bookId = 0;
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedTitle = TestConstants.NewBookTitle;
 
@@ -65,11 +65,11 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                if (newBook is null || newBook.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)newBook.Id;
+                if (newBook is null || newBook.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                bookId = (Guid)newBook.UniqueKey;
 
-                var newBookFromDb = await BookApi.BookReadAsync(context, (int)newBook.Id);
-                var newPageFromDb = await PageApi.PageReadFirstByBookIdAsync(context, (int)newBook.Id);
+                var newBookFromDb = await BookApi.BookReadAsync(context, (Guid)newBook.UniqueKey);
+                var newPageFromDb = await PageApi.PageReadFirstByBookIdAsync(context, (Guid)newBook.UniqueKey);
 
                 Assert.IsNotNull(newBookFromDb);
                 Assert.IsNotNull(newPageFromDb);
@@ -87,10 +87,10 @@ namespace Logic.Services.API.Tests
         public async Task BookListReadAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            var originalPacket = new BookListDataPacket(context, false);
+            var originalPacket = new BookListDataPacket(context, true);
             int expectedCount = originalPacket.BookListRowsToDisplay;
 
-            int loggedInUserId = 1;
+            Guid loggedInUserId = Guid.NewGuid(); Assert.Fail();
 
             int originalRowCount = originalPacket.BookListRows is null ? 0 : originalPacket.BookListRows.Count;
             var newPacket = await BookApi.BookListReadAsync(context, loggedInUserId, originalPacket);
@@ -105,9 +105,9 @@ namespace Logic.Services.API.Tests
         public void BookListReadTest()
         {
             var context = CommonFunctions.CreateContext();
-            var originalPacket = new BookListDataPacket(context, false);
+            var originalPacket = new BookListDataPacket(context, true);
             int expectedCount = originalPacket.BookListRowsToDisplay;
-            int loggedInUserId = 1;
+            Guid loggedInUserId = Guid.NewGuid(); Assert.Fail();
             int originalRowCount = originalPacket.BookListRows is null ? 0 : originalPacket.BookListRows.Count;
             var newPacket = BookApi.BookListRead(context, loggedInUserId, originalPacket);
 
@@ -125,7 +125,7 @@ namespace Logic.Services.API.Tests
             originalPacket.OrderBy = (int)AvailableBookListSortProperties.DIFFICULTY;
             originalPacket.ShouldSortAscending = true;
 
-            int loggedInUserId = 1;
+            Guid loggedInUserId = Guid.NewGuid(); Assert.Fail();
 
             int originalRowCount = originalPacket.BookListRows is null ? 0 : originalPacket.BookListRows.Count;
             var newPacket = await BookApi.BookListReadAsync(context, loggedInUserId, originalPacket);
@@ -150,7 +150,7 @@ namespace Logic.Services.API.Tests
             originalPacket.OrderBy = (int)AvailableBookListSortProperties.DIFFICULTY;
             originalPacket.ShouldSortAscending = true;
 
-            int loggedInUserId = 1;
+            Guid loggedInUserId = Guid.NewGuid(); Assert.Fail();
 
             int originalRowCount = originalPacket.BookListRows is null ? 0 : originalPacket.BookListRows.Count;
             var newPacket = BookApi.BookListRead(context, loggedInUserId, originalPacket);
@@ -172,8 +172,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookListRowByBookIdAndUserIdReadTest()
         {
-            int userId = 0;
-            int bookId = 0;
+            Guid userId = Guid.NewGuid();
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedTitle = TestConstants.NewBookTitle;
             string secondProgressExpected = "1 / 3";
@@ -186,7 +186,7 @@ namespace Logic.Services.API.Tests
                 var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
-                int bookUserId = createResult.bookUserId;
+                Guid bookUserId = createResult.bookUserId;
                 
                 // take the first row -- should be pretty empty
                 var firstRow = BookApi.BookListRowByBookIdAndUserIdRead(context, bookId, userId);
@@ -225,8 +225,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task BookListRowByBookIdAndUserIdReadAsyncTest()
         {
-            int userId = 0;
-            int bookId = 0;
+            Guid userId = Guid.NewGuid();
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedTitle = TestConstants.NewBookTitle;
             string secondProgressExpected = "1 / 3";
@@ -239,7 +239,7 @@ namespace Logic.Services.API.Tests
                 var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
-                int bookUserId = createResult.bookUserId;
+                Guid bookUserId = createResult.bookUserId;
                 
                 // take the first row -- should be pretty empty
 
@@ -284,8 +284,9 @@ namespace Logic.Services.API.Tests
         public void BookReadTest()
         {
             var context = CommonFunctions.CreateContext();
-            int bookId = 6;
-            string expectedTitle = "Tierras desconocidas";
+            //int bookId = 13;
+            Guid bookId = Guid.NewGuid(); Assert.Fail();
+            string expectedTitle = "Cenicienta";
             var book = BookApi.BookRead(context, bookId);
             
             Assert.IsNotNull(book);
@@ -296,8 +297,9 @@ namespace Logic.Services.API.Tests
         public async Task BookReadAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            int bookId = 6;
-            string expectedTitle = "Tierras desconocidas";
+            //int bookId = 13;
+            Guid bookId = Guid.NewGuid(); Assert.Fail();
+            string expectedTitle = "Cenicienta";
             var book = await BookApi.BookReadAsync(context, bookId);
 
             Assert.IsNotNull(book);
@@ -310,8 +312,9 @@ namespace Logic.Services.API.Tests
         public void BookReadPageCountTest()
         {
             var context = CommonFunctions.CreateContext();
-            int bookId = 6;
-            int expectedPageCount = 13;
+            //int bookId = 17;
+            Guid bookId = Guid.NewGuid(); Assert.Fail();
+            int expectedPageCount = 5;
             int actualPageCount = BookApi.BookReadPageCount(context, bookId);
             Assert.AreEqual(expectedPageCount, actualPageCount);
         }
@@ -320,8 +323,9 @@ namespace Logic.Services.API.Tests
         public async Task BookReadPageCountAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            int bookId = 6;
-            int expectedPageCount = 13;
+            //int bookId = 17;
+            Guid bookId = Guid.NewGuid(); Assert.Fail();
+            int expectedPageCount = 5;
             int actualPageCount = await BookApi.BookReadPageCountAsync(context, bookId);
             Assert.AreEqual(expectedPageCount, actualPageCount);
         }

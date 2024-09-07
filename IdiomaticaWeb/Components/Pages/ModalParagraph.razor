@@ -38,7 +38,7 @@
 
     public async Task OnShowPpModalClick(Paragraph pp)
     {
-        if (pp is null || pp.Id is null || pp.Id < 1)
+        if (pp is null || pp.UniqueKey is null)
         {
             ErrorHandler.LogAndThrow();
             return;
@@ -57,7 +57,7 @@
         var context = await DbContextFactory.CreateDbContextAsync();
 
         var translation = await ParagraphApi.ParagraphTranslateAsync(
-            context, (int)pp.Id, LanguageFromCode.Code, LanguageToCode.Code);
+            context, (int)pp.UniqueKey, LanguageFromCode.Code, LanguageToCode.Code);
         _translateFrom = translation.input;
         _translateTo = translation.output;
         await ppModal.ShowAsync();

@@ -11,11 +11,12 @@ namespace Model
     [Table("Paragraph", Schema = "Idioma")]
     public class Paragraph
     {
-        public int? Id { get; set; }
+        public Guid? UniqueKey { get; set; } 
+        //public int? Id { get; set; }
 
         #region relationships
         public List<Sentence>? Sentences { get; set; }
-        public int? PageId { get; set; }
+        public Guid? PageKey { get; set; }
         public Page? Page { get; set; }
 
         // warning, do not auto create the ParagraphTranslations list or you'll
@@ -25,7 +26,6 @@ namespace Model
         #endregion
 
         public int? Ordinal { get; set; }
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
 
     }
 }

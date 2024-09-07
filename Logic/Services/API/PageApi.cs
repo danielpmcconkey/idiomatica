@@ -16,18 +16,16 @@ namespace Logic.Services.API
     {
         public static Page? PageCreateFromPageSplit(
             IdiomaticaContext context, int ordinal, string text,
-            int bookId, int languageId)
+            Guid bookId, Guid languageId)
         {
             if (ordinal < 0) ErrorHandler.LogAndThrow();
-            if (bookId < 0) ErrorHandler.LogAndThrow();
-            if (languageId < 0) ErrorHandler.LogAndThrow();
             string textTrimmed = text.Trim();
             if (string.IsNullOrEmpty(textTrimmed)) ErrorHandler.LogAndThrow();
 
             // pull language from the db
             var language = DataCache.LanguageByIdRead(languageId, context);
             if (language is null ||
-                language.Id is null or 0 ||
+                language.UniqueKey is null ||
                 string.IsNullOrEmpty(language.Code))
             {
                 ErrorHandler.LogAndThrow();
@@ -35,24 +33,24 @@ namespace Logic.Services.API
             }
             var newPage = new Page()
             {
-                BookId = bookId,
+                BookKey = bookId,
                 Ordinal = ordinal,
                 OriginalText = textTrimmed
             };
             newPage = DataCache.PageCreate(newPage, context);
-            if (newPage is null || newPage.Id is null || newPage.Id < 1)
+            if (newPage is null || newPage.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow(2040);
                 return null;
             }
             // create paragraphs
             newPage.Paragraphs = ParagraphApi.ParagraphsCreateFromPage(
-                context, (int)newPage.Id, languageId);
+                context, (Guid)newPage.UniqueKey, languageId);
             return newPage;
         }
         public static async Task<Page?> PageCreateFromPageSplitAsync(
             IdiomaticaContext context, int ordinal, string text,
-            int bookId, int languageId)
+            Guid bookId, Guid languageId)
         {
             return await Task<Page?>.Run(() =>
             {
@@ -61,40 +59,34 @@ namespace Logic.Services.API
         }
 
 
-        public static Page? PageReadById(IdiomaticaContext context, int pageId)
+        public static Page? PageReadById(IdiomaticaContext context, Guid pageId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
             return DataCache.PageByIdRead(pageId, context);
         }
-        public static async Task<Page?> PageReadByIdAsync(IdiomaticaContext context, int pageId)
+        public static async Task<Page?> PageReadByIdAsync(IdiomaticaContext context, Guid pageId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.PageByIdReadAsync(pageId, context);
         }
 
 
-        public static Page? PageReadByOrdinalAndBookId(IdiomaticaContext context, int ordinal, int bookId)
+        public static Page? PageReadByOrdinalAndBookId(IdiomaticaContext context, int ordinal, Guid bookId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
             if (ordinal < 1) ErrorHandler.LogAndThrow();
             return DataCache.PageByOrdinalAndBookIdRead((ordinal, bookId), context);
         }
         public static async Task<Page?> PageReadByOrdinalAndBookIdAsync(
-            IdiomaticaContext context, int ordinal, int bookId)
+            IdiomaticaContext context, int ordinal, Guid bookId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.PageByOrdinalAndBookIdReadAsync((ordinal, bookId), context);
         }
 
 
-        public static Page? PageReadFirstByBookId(IdiomaticaContext context, int bookId)
+        public static Page? PageReadFirstByBookId(IdiomaticaContext context, Guid bookId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
             return DataCache.PageByOrdinalAndBookIdRead((1, bookId), context);
         }
-        public static async Task<Page?> PageReadFirstByBookIdAsync(IdiomaticaContext context, int bookId)
+        public static async Task<Page?> PageReadFirstByBookIdAsync(IdiomaticaContext context, Guid bookId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.PageByOrdinalAndBookIdReadAsync((1, bookId), context);
         }
 

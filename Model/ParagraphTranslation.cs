@@ -10,11 +10,12 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("ParagraphTranslation", Schema = "Idioma")]
-    [PrimaryKey(nameof(Id))]
+    [PrimaryKey(nameof(UniqueKey))]
     public class ParagraphTranslation
     {
-        public int? Id {  get; set; }
-        public int? ParagraphId { get; set; }
+        public Guid? UniqueKey { get; set; }
+        //public int? Id {  get; set; }
+        public Guid? ParagraphKey { get; set; }
         public Paragraph? Paragraph { get; set; }
         [Column("LanguageCode")]
         public string? Code { get; set; }
@@ -22,7 +23,6 @@ namespace Model
         [StringLength(8000)]
         public string? TranslationText { get; set; }
         public List<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridges { get; set; } = new List<FlashCardParagraphTranslationBridge>();
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
 
     }
 }

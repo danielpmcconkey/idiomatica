@@ -10,11 +10,11 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<(int bookId, int userId), List<BookUserStat>> BookUserStatsByBookIdAndUserId = new ConcurrentDictionary<(int bookId, int userId), List<BookUserStat>>();
+        private static ConcurrentDictionary<(Guid bookId, Guid userId), List<BookUserStat>> BookUserStatsByBookIdAndUserId = new ConcurrentDictionary<(Guid bookId, Guid userId), List<BookUserStat>>();
 
         #region create
         public static bool BookUserStatsByBookIdAndUserIdCreate(
-            (int bookId, int userId) key, List<BookUserStat> value, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, List<BookUserStat> value, IdiomaticaContext context)
         {
             foreach (var item in value)
             {
@@ -26,8 +26,8 @@ namespace Model.DAL
                                ,[ValueString]
                                ,[ValueNumeric])
                          VALUES
-                               ({item.LanguageUserId}
-                               ,{item.BookId}
+                               ({item.LanguageUserKey}
+                               ,{item.BookKey}
                                ,{item.Key}
                                ,{item.ValueString}
                                ,{item.ValueNumeric})
@@ -39,7 +39,7 @@ namespace Model.DAL
             return true;
         }
         public static async Task<bool> BookUserStatsByBookIdAndUserIdCreateAsync(
-            (int bookId, int userId) key, List<BookUserStat> value, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, List<BookUserStat> value, IdiomaticaContext context)
         {
             return await Task<bool?>.Run(() =>
             {
@@ -49,7 +49,7 @@ namespace Model.DAL
         #endregion
         #region read
         public static List<BookUserStat> BookUserStatsByBookIdAndUserIdRead(
-            (int bookId, int userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IdiomaticaContext context)
         {
             // check cache
             if (BookUserStatsByBookIdAndUserId.ContainsKey(key))
@@ -60,15 +60,15 @@ namespace Model.DAL
             // read DB
             var value = context.BookUserStats
                 .Where(x => x.LanguageUser != null &&
-                    x.LanguageUser.UserId == key.userId &&
-                    x.BookId == key.bookId)
+                    x.LanguageUser.UserKey == key.userId &&
+                    x.BookKey == key.bookId)
                 .ToList();
             // write to cache
             BookUserStatsByBookIdAndUserId[key] = value;
             return value;
         }
         public static async Task<List<BookUserStat>> BookUserStatsByBookIdAndUserIdReadAsync(
-            (int bookId, int userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IdiomaticaContext context)
         {
             return await Task<List<BookUserStat>>.Run(() =>
             {
@@ -79,16 +79,15 @@ namespace Model.DAL
 
         #region delete
         public static bool BookUserStatsByBookIdAndUserIdDelete(
-            (int bookId, int userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IdiomaticaContext context)
         {
-            if (key.bookId < 1) throw new ArgumentException(nameof(key.bookId));
-            if (key.userId < 1) throw new ArgumentException(nameof(key.userId));
+
 
             // remove from context
             var existingList = context.BookUserStats
-                .Where(x => x.BookId == key.bookId 
+                .Where(x => x.BookKey == key.bookId 
                     && x.LanguageUser != null &&
-                    x.LanguageUser.UserId == key.userId);
+                    x.LanguageUser.UserKey == key.userId);
             foreach (var existingItem in existingList)
             {
                 context.BookUserStats.Remove(existingItem);
@@ -97,10 +96,10 @@ namespace Model.DAL
             // remove from the DB
             context.Database.ExecuteSql($"""
                 delete bus
-                from [Idiomatica].[Idioma].[BookUserStat] bus
-                left join [Idioma].[LanguageUser] lu on bus.LanguageUserId = lu.Id
-                where bus.BookId = {key.bookId}
-                and lu.UserId = {key.userId}
+                from [Idioma].[BookUserStat] bus
+                left join [Idioma].[LanguageUser] lu on bus.LanguageUserKey = lu.UniqueKey
+                where bus.BookKey = {key.bookId}
+                and lu.UserKey = {key.userId}
                 """);
             // remove from cache
             if (BookUserStatsByBookIdAndUserId.ContainsKey(key))
@@ -113,7 +112,7 @@ namespace Model.DAL
             return true;
         }
         public static async Task<bool> BookUserStatsByBookIdAndUserIdDeleteAsync(
-            (int bookId, int userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IdiomaticaContext context)
         {
             return await Task<bool>.Run(() => {
                 return BookUserStatsByBookIdAndUserIdDelete(key, context);

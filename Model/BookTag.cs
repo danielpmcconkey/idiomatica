@@ -11,13 +11,16 @@ namespace Model
     [Table("BookTag", Schema = "Idioma")]
     public class BookTag
     {
-        public int? Id { get; set; }
+        public Guid? UniqueKey { get; set; } 
+        //public int? Id { get; set; }
 
         #region relationships
 
-        public int? BookId { get; set; }
+        //public int? BookId { get; set; }
+        public Guid? BookKey { get; set; }
         public Book? Book { get; set; }
-        public int? UserId { get; set; }
+        //public int? UserId { get; set; }
+        public Guid? UserKey { get; set; }
         public User? User { get; set; }
 
         #endregion
@@ -37,7 +40,6 @@ namespace Model
         /// </summary>
         [NotMapped]
         public bool? IsPersonal { get; set; }
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
 
     }
 }

@@ -16,7 +16,7 @@ else
 
             @foreach (var tag in _tags)
             {
-                <TagBadge BookId="BookId" BookTag="tag" OnRefreshRowAsync="RefreshTags" />
+                <TagBadge BookId="BookKey" BookTag="tag" OnRefreshRowAsync="RefreshTags" />
             }
 
         </div>
@@ -36,7 +36,7 @@ else
 }
 @code {
     [Parameter]
-    public int? BookId { get; set; }
+    public Guid? BookKey { get; set; }
     private List<BookTag> _tags = new List<BookTag>();
     private string? _addTagInput;
     private User? _loggedInUser;
@@ -53,14 +53,14 @@ else
 
             var context = await DbContextFactory.CreateDbContextAsync();
             _loggedInUser = await UserService.GetLoggedInUserAsync(context);
-            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow(2450);
                 return;
             }
-            if (BookId is not null)
+            if (BookKey is not null)
             {
-                _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (int)BookId, (int)_loggedInUser.Id);
+                _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (Guid)BookKey, (Guid)_loggedInUser.UniqueKey);
             }
             
             await t_delay;
@@ -84,7 +84,7 @@ else
     }
     private async Task RefreshTags()
     {
-        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1) return;
+        if (_loggedInUser == null || _loggedInUser.UniqueKey == null) return;
         
 
         try
@@ -92,15 +92,15 @@ else
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (BookId is not null)
+            if (BookKey is not null)
             {
                 _tags = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(
-                    context, (int)BookId, (int)_loggedInUser.Id);
+                    context, (Guid)BookKey, (Guid)_loggedInUser.UniqueKey);
             }
             await t_delay;
             _isLoading = false;
@@ -116,7 +116,7 @@ else
     }
     private async Task OnAddTagAsync()
     {
-        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1) return;
+        if (_loggedInUser == null || _loggedInUser.UniqueKey == null) return;
         if (_addTagInput == null) return;
         var sanitized = _addTagInput.Trim().ToLower();
         if (sanitized == string.Empty) return;
@@ -126,18 +126,18 @@ else
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (BookId is null || BookId < 1)
+            if (BookKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            BookTagApi.BookTagAdd(context, (int)BookId, (int)_loggedInUser.Id, sanitized);
-            _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (int)BookId, (int)_loggedInUser.Id);
+            BookTagApi.BookTagAdd(context, (Guid)BookKey, (Guid)_loggedInUser.UniqueKey, sanitized);
+            _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (Guid)BookKey, (Guid)_loggedInUser.UniqueKey);
             await t_delay;
             _isLoading = false;
         }

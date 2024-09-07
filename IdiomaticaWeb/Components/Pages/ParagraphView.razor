@@ -68,7 +68,7 @@ else
 
     private async Task InitData()
     {
-        if(ParagraphAndChildren.Id == null || ParagraphAndChildren.Id == 0)
+        if(ParagraphAndChildren.UniqueKey == null)
         {
             ErrorHandler.LogAndThrow(2210);
             return;
@@ -109,10 +109,10 @@ else
     {
         if (token.Word is null || token.Word.TextLowerCase is null) return "statusUNKNOWN";
         if (ReadDataPacket is null || ReadDataPacket.LanguageUser is null ||
-            ReadDataPacket.LanguageUser.Id is null) return "statusUNKNOWN";
+            ReadDataPacket.LanguageUser.UniqueKey is null) return "statusUNKNOWN";
 
         var wordUser = token.Word.WordUsers
-            .Where(x => x.LanguageUserId == (int)ReadDataPacket.LanguageUser.Id)
+            .Where(x => x.LanguageUserKey == (Guid)ReadDataPacket.LanguageUser.UniqueKey)
             .FirstOrDefault();
         if (wordUser is null) return "statusUNKNOWN";
         return $"status{wordUser.Status}";
@@ -126,10 +126,10 @@ else
         // first get the override translations, if there is one
 
         if (ReadDataPacket is not null && ReadDataPacket.LanguageUser is not null &&
-            ReadDataPacket.LanguageUser.Id is not null)
+            ReadDataPacket.LanguageUser.UniqueKey is not null)
         {
             var wordUser = token.Word.WordUsers
-                .Where(x => x.LanguageUserId == (int)ReadDataPacket.LanguageUser.Id)
+                .Where(x => x.LanguageUserKey == (Guid)ReadDataPacket.LanguageUser.UniqueKey)
                 .FirstOrDefault();
 
             if (wordUser is not null && !string.IsNullOrEmpty(wordUser.Translation))
@@ -153,7 +153,7 @@ else
     }
     private async Task<List<Token>> GetSentenceTokens(Sentence sentence)
     {
-        if (sentence.Id is null || sentence.Id < 1)
+        if (sentence.UniqueKey is null)
         {
             ErrorHandler.LogAndThrow(2230);
             return new List<Token>();
@@ -161,7 +161,7 @@ else
         
 
         var context = DbContextFactory.CreateDbContext();
-        sentence.Tokens = await TokenApi.TokensAndWordsReadBySentenceIdAsync(context, (int)sentence.Id);
+        sentence.Tokens = await TokenApi.TokensAndWordsReadBySentenceIdAsync(context, (Guid)sentence.UniqueKey);
         return sentence.Tokens;
         
     }

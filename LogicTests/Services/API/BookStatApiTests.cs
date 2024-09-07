@@ -18,7 +18,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookStatsCreateAndSaveTest()
         {
-            int bookId = 0;
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             int expectedPageCount = 3;
 
@@ -31,8 +31,8 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                if (newBook is null || newBook.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)newBook.Id;
+                if (newBook is null || newBook.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                bookId = (Guid)newBook.UniqueKey;
 
                 BookStatApi.BookStatsCreateAndSave(context, bookId);
 
@@ -49,7 +49,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task BookStatsCreateAndSaveAsyncTest()
         {
-            int bookId = 0;
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             int expectedPageCount = 3;
 
@@ -62,8 +62,8 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                if (newBook is null || newBook.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)newBook.Id;
+                if (newBook is null || newBook.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                bookId = (Guid)newBook.UniqueKey;
 
                 await BookStatApi.BookStatsCreateAndSaveAsync(context, bookId);
 
@@ -82,7 +82,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookStatsCreateAndSaveMakesDifficultyScoreTest()
         {
-            int bookId = 0;
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             decimal expectedDifficulty = 13.23M;
 
@@ -95,8 +95,8 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                if (newBook is null || newBook.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)newBook.Id;
+                if (newBook is null || newBook.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                bookId = (Guid)newBook.UniqueKey;
 
                 BookStatApi.BookStatsCreateAndSave(context, bookId);
                 var difficultyStat = DataCache.BookStatByBookIdAndStatKeyRead(
@@ -116,7 +116,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task BookStatsCreateAndSaveMakesDifficultyScoreAsyncTest()
         {
-            int bookId = 0;
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             decimal expectedDifficulty = 13.23M;
 
@@ -129,8 +129,8 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                if (newBook is null || newBook.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)newBook.Id;
+                if (newBook is null || newBook.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                bookId = (Guid)newBook.UniqueKey;
 
                 await BookStatApi.BookStatsCreateAndSaveAsync(context, bookId);
                 var difficultyStat = await DataCache.BookStatByBookIdAndStatKeyReadAsync(

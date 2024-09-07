@@ -11,14 +11,14 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridgeById = new ConcurrentDictionary<int, FlashCardParagraphTranslationBridge>();
-        private static ConcurrentDictionary<(int flashCardId, string uiCode), List<FlashCardParagraphTranslationBridge>>
-            FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode = new();
+        private static ConcurrentDictionary<Guid, FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridgeById = [];
+        private static ConcurrentDictionary<(Guid flashCardId, string uiCode), List<FlashCardParagraphTranslationBridge>>
+            FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode = [];
 
         #region read
         public static List<FlashCardParagraphTranslationBridge>?
             FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCodeRead(
-            (int flashCardId, string uiCode) key, IdiomaticaContext context)
+            (Guid flashCardId, string uiCode) key, IdiomaticaContext context)
         {
             // check cache
             if (FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode.ContainsKey(key))
@@ -28,15 +28,15 @@ namespace Model.DAL
 
             // read DB
             var bridges = (from fcptb in context.FlashCardParagraphTranslationBridges
-                          join pt in context.ParagraphTranslations on fcptb.ParagraphTranslationId equals pt.Id
-                          where pt.Code == key.uiCode && fcptb.FlashCardId == key.flashCardId
+                          join pt in context.ParagraphTranslations on fcptb.ParagraphTranslationKey equals pt.UniqueKey
+                          where pt.Code == key.uiCode && fcptb.FlashCardKey == key.flashCardId
                           select fcptb).ToList();
             FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode[key] = bridges;
             return bridges;
         }
 
         public static FlashCardParagraphTranslationBridge? FlashCardParagraphTranslationBridgeByIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (FlashCardParagraphTranslationBridgeById.ContainsKey(key))
@@ -46,7 +46,7 @@ namespace Model.DAL
 
             // read DB
             var value = context.FlashCardParagraphTranslationBridges
-                .Where(x => x.Id == key)
+                .Where(x => x.UniqueKey == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -54,7 +54,7 @@ namespace Model.DAL
             return value;
         }
         public static async Task<FlashCardParagraphTranslationBridge?> 
-            FlashCardParagraphTranslationBridgeByIdReadAsync(int key, IdiomaticaContext context)
+            FlashCardParagraphTranslationBridgeByIdReadAsync(Guid key, IdiomaticaContext context)
         {
             return await Task<FlashCardParagraphTranslationBridge?>.Run(() =>
             {
@@ -68,8 +68,8 @@ namespace Model.DAL
         public static FlashCardParagraphTranslationBridge? FlashCardParagraphTranslationBridgeCreate(
             FlashCardParagraphTranslationBridge fcptb, IdiomaticaContext context)
         {
-            if (fcptb.FlashCardId is null) throw new ArgumentNullException(nameof(fcptb.FlashCardId));
-            if (fcptb.ParagraphTranslationId is null) throw new ArgumentNullException(nameof(fcptb.ParagraphTranslationId));
+            if (fcptb.FlashCardKey is null) throw new ArgumentNullException(nameof(fcptb.FlashCardKey));
+            if (fcptb.ParagraphTranslationKey is null) throw new ArgumentNullException(nameof(fcptb.ParagraphTranslationKey));
 
             Guid guid = Guid.NewGuid();
             
@@ -79,20 +79,20 @@ namespace Model.DAL
                         ,[ParagraphTranslationId]
                         ,[UniqueKey])
                     VALUES
-                        ({fcptb.FlashCardId}
-                        ,{fcptb.ParagraphTranslationId}
+                        ({fcptb.FlashCardKey}
+                        ,{fcptb.ParagraphTranslationKey}
                         ,{guid})
             """);
             
             if (numRows < 1) throw new InvalidDataException("creating FlashCardParagraphTranslationBridge affected 0 rows");
             var newEntity = context.FlashCardParagraphTranslationBridges.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            if (newEntity is null || newEntity.UniqueKey is null)
             {
                 throw new InvalidDataException("newEntity is null in FlashCardParagraphTranslationBridgeCreate");
             }
 
             // add it to cache
-            FlashCardParagraphTranslationBridgeById[(int)newEntity.Id] = newEntity;
+            FlashCardParagraphTranslationBridgeById[(Guid)newEntity.UniqueKey] = newEntity;
 
             return newEntity;
         }

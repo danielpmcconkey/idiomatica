@@ -18,21 +18,21 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void LanguageUserCreateTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int languageId = 1;
+            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
+                if (user is null || user.UniqueKey is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                userId = (Guid)user.UniqueKey;
 
                 var languageUsersBefore = DataCache.LanguageUsersAndLanguageByUserIdRead(
-                    (int)user.Id, context);
+                    (Guid)user.UniqueKey, context);
                 if(languageUsersBefore is null) {  ErrorHandler.LogAndThrow(); return; }
 
                 int countBefore = languageUsersBefore.Count;
@@ -40,15 +40,14 @@ namespace Logic.Services.API.Tests
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, userId);
                 var languageUsersAfter = DataCache.LanguageUsersAndLanguageByUserIdRead(
-                    (int)user.Id, context);
+                    (Guid)user.UniqueKey, context);
                 if (languageUsersAfter is null) { ErrorHandler.LogAndThrow(); return; }
 
                 int actualCountAfter = languageUsersAfter.Count;
 
 
                 Assert.IsNotNull(languageUser);
-                Assert.IsNotNull(languageUser.Id);
-                Assert.IsTrue(languageUser.Id > 0);
+                Assert.IsNotNull(languageUser.UniqueKey);
                 Assert.AreEqual(expectedCountAfter, actualCountAfter);
             }
             finally
@@ -60,21 +59,21 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task LanguageUserCreateAsyncTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int languageId = 1;
+            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
 
             try
             {
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
+                if (user is null || user.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                userId = (Guid)user.UniqueKey;
 
                 var languageUsersBefore = await DataCache.LanguageUsersAndLanguageByUserIdReadAsync(
-                    (int)user.Id, context);
+                    (Guid)user.UniqueKey, context);
                 if (languageUsersBefore is null) { ErrorHandler.LogAndThrow(); return; }
 
                 int countBefore = languageUsersBefore.Count;
@@ -83,15 +82,14 @@ namespace Logic.Services.API.Tests
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
                     context, languageId, userId);
                 var languageUsersAfter = await DataCache.LanguageUsersAndLanguageByUserIdReadAsync(
-                    (int)user.Id, context);
+                    (Guid)user.UniqueKey, context);
                 if (languageUsersAfter is null) { ErrorHandler.LogAndThrow(); return; }
 
                 int actualCountAfter = languageUsersAfter.Count;
 
 
                 Assert.IsNotNull(languageUser);
-                Assert.IsNotNull(languageUser.Id);
-                Assert.IsTrue(languageUser.Id > 0);
+                Assert.IsNotNull(languageUser.UniqueKey);
                 Assert.AreEqual(expectedCountAfter, actualCountAfter);
             }
             finally
@@ -105,7 +103,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void LanguageUserGetTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
 
             try
@@ -113,27 +111,27 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
+                if (user is null || user.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                userId = (Guid)user.UniqueKey;
 
-                int languageId = 1;
-                var languageUserMake = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
-                if (languageUserMake is null || languageUserMake.Id is null || languageUserMake.Id < 1)
+                Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+                var languageUserMake = LanguageUserApi.LanguageUserCreate(context, languageId, (Guid)user.UniqueKey);
+                if (languageUserMake is null || languageUserMake.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                var expectedResultId = languageUserMake.Id;
-                var expectedResultLanguageId = languageUserMake.LanguageId;
-                var expectedResultUserId = languageUserMake.UserId;
+                var expectedResultId = languageUserMake.UniqueKey;
+                var expectedResultLanguageId = languageUserMake.LanguageKey;
+                var expectedResultUserId = languageUserMake.UserKey;
 
 
                 // act
                 var languageUserRead = LanguageUserApi.LanguageUserGet(
-                    context, languageId, (int)user.Id);
-                if (languageUserRead is null || languageUserRead.Id is null || languageUserRead.Id < 1)
+                    context, languageId, (Guid)user.UniqueKey);
+                if (languageUserRead is null || languageUserRead.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                var actualResultId = languageUserRead.Id;
-                var actualResultLanguageId = languageUserRead.LanguageId;
-                var actualResultUserId = languageUserRead.UserId;
+                var actualResultId = languageUserRead.UniqueKey;
+                var actualResultLanguageId = languageUserRead.LanguageKey;
+                var actualResultUserId = languageUserRead.UserKey;
                 // assert
 
                 Assert.IsNotNull(actualResultId);
@@ -152,7 +150,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task LanguageUserGetAsyncTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
 
             try
@@ -160,27 +158,27 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
+                if (user is null || user.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                userId = (Guid)user.UniqueKey;
 
-                int languageId = 1;
-                var languageUserMake = await LanguageUserApi.LanguageUserCreateAsync(context, languageId, (int)user.Id);
-                if (languageUserMake is null || languageUserMake.Id is null || languageUserMake.Id < 1)
+                Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+                var languageUserMake = await LanguageUserApi.LanguageUserCreateAsync(context, languageId, (Guid)user.UniqueKey);
+                if (languageUserMake is null || languageUserMake.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                var expectedResultId = languageUserMake.Id;
-                var expectedResultLanguageId = languageUserMake.LanguageId;
-                var expectedResultUserId = languageUserMake.UserId;
+                var expectedResultId = languageUserMake.UniqueKey;
+                var expectedResultLanguageId = languageUserMake.LanguageKey;
+                var expectedResultUserId = languageUserMake.UserKey;
 
 
                 // act
                 var languageUserRead = await LanguageUserApi.LanguageUserGetAsync(
-                    context, languageId, (int)user.Id);
-                if (languageUserRead is null || languageUserRead.Id is null || languageUserRead.Id < 1)
+                    context, languageId, (Guid)user.UniqueKey);
+                if (languageUserRead is null || languageUserRead.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                var actualResultId = languageUserRead.Id;
-                var actualResultLanguageId = languageUserRead.LanguageId;
-                var actualResultUserId = languageUserRead.UserId;
+                var actualResultId = languageUserRead.UniqueKey;
+                var actualResultLanguageId = languageUserRead.LanguageKey;
+                var actualResultUserId = languageUserRead.UserKey;
                 // assert
 
                 Assert.IsNotNull(actualResultId);
@@ -201,9 +199,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void LanguageUsersAndLanguageGetByUserIdTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int languageId = 2;
+            Guid languageId = CommonFunctions.GetEnglishLanguageKey(context);
             string expectedResult = "English";
 
             try
@@ -211,23 +209,23 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
+                if (user is null || user.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                userId = (Guid)user.UniqueKey;
 
                 var languageUsersBefore = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(
-                    context, (int)user.Id);
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (int)user.Id);
+                    context, (Guid)user.UniqueKey);
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, languageId, (Guid)user.UniqueKey);
 
                 // act
                 var languageUsersAfter = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(
-                    context, (int)user.Id);
+                    context, (Guid)user.UniqueKey);
 
                 if (languageUsersAfter is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 var matchingLanguageUser = languageUsersAfter
-                    .Where(x => x.LanguageId == languageId)
+                    .Where(x => x.LanguageKey == languageId)
                     .FirstOrDefault();
 
                 if (matchingLanguageUser is null || matchingLanguageUser.Language is null
@@ -247,9 +245,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task LanguageUsersAndLanguageGetByUserIdAsyncTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int languageId = 2;
+            Guid languageId = CommonFunctions.GetEnglishLanguageKey(context);
             string expectedResult = "English";
 
             try
@@ -257,23 +255,23 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
+                if (user is null || user.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                userId = (Guid)user.UniqueKey;
 
                 var languageUsersBefore = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
-                    context, (int)user.Id);
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, languageId, (int)user.Id);
+                    context, (Guid)user.UniqueKey);
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, languageId, (Guid)user.UniqueKey);
 
                 // act
                 var languageUsersAfter = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
-                    context, (int)user.Id);
+                    context, (Guid)user.UniqueKey);
 
                 if (languageUsersAfter is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 var matchingLanguageUser = languageUsersAfter
-                    .Where(x => x.LanguageId == languageId)
+                    .Where(x => x.LanguageKey == languageId)
                     .FirstOrDefault();
 
                 if (matchingLanguageUser is null || matchingLanguageUser.Language is null

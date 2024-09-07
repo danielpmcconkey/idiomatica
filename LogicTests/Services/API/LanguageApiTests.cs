@@ -19,7 +19,7 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
 
-            int languageId = 2;
+            Guid languageId = CommonFunctions.GetEnglishLanguageKey(context);
             string expectedCode = "EN-US";
             
             var language = LanguageApi.LanguageRead(context, languageId);
@@ -33,7 +33,7 @@ namespace Logic.Services.API.Tests
         public async Task LanguageReadAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            int languageId = 2;
+            Guid languageId = CommonFunctions.GetEnglishLanguageKey(context);
             string expectedCode = "EN-US";
 
             var language = await LanguageApi.LanguageReadAsync(context, languageId);
@@ -49,13 +49,13 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
             string code = "EN-US";
-            int expectedId = 2;
+            Guid expectedId = CommonFunctions.GetEnglishLanguageKey(context);
 
             var language = LanguageApi.LanguageReadByCode(context, code);
             if (language == null)
             { ErrorHandler.LogAndThrow(); return; }
 
-            Assert.AreEqual(expectedId, language.Id);
+            Assert.AreEqual(expectedId, language.UniqueKey);
             
         }
 
@@ -64,12 +64,12 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
             string code = "EN-US";
-            int expectedId = 2;
+            Guid expectedId = CommonFunctions.GetEnglishLanguageKey(context);
             var language = await LanguageApi.LanguageReadByCodeAsync(context, code);
             if (language == null)
                 { ErrorHandler.LogAndThrow(); return; }
 
-            Assert.AreEqual(expectedId, language.Id);
+            Assert.AreEqual(expectedId, language.UniqueKey);
         }
     }
 }

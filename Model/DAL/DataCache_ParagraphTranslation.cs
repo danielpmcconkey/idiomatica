@@ -11,8 +11,8 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, ParagraphTranslation> ParagraphTranslationById = new ConcurrentDictionary<int, ParagraphTranslation>();
-        private static ConcurrentDictionary<int, List<ParagraphTranslation>> ParagraphTranslationsByParagraphId = new ConcurrentDictionary<int, List<ParagraphTranslation>>();
+        private static ConcurrentDictionary<Guid, ParagraphTranslation> ParagraphTranslationById = [];
+        private static ConcurrentDictionary<Guid, List<ParagraphTranslation>> ParagraphTranslationsByParagraphId = [];
 
         #region create
 
@@ -20,8 +20,8 @@ namespace Model.DAL
         public static ParagraphTranslation? ParagraphTranslationCreate(
             ParagraphTranslation paragraphTranslation, IdiomaticaContext context)
         {
-            if (paragraphTranslation.ParagraphId is null) 
-                throw new ArgumentNullException(nameof(paragraphTranslation.ParagraphId));
+            if (paragraphTranslation.ParagraphKey is null) 
+                throw new ArgumentNullException(nameof(paragraphTranslation.ParagraphKey));
 
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
@@ -32,7 +32,7 @@ namespace Model.DAL
                       ,[TranslationText]
                       ,[UniqueKey])
                 VALUES
-                      ({paragraphTranslation.ParagraphId}
+                      ({paragraphTranslation.ParagraphKey}
                       ,{paragraphTranslation.Code}
                       ,{paragraphTranslation.TranslationText}
                       ,{guid})
@@ -40,7 +40,7 @@ namespace Model.DAL
                 """);
             if (numRows < 1) throw new InvalidDataException("creating ParagraphTranslation affected 0 rows");
             var newEntity = context.ParagraphTranslations.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            if (newEntity is null || newEntity.UniqueKey is null)
             {
                 throw new InvalidDataException("newEntity is null in ParagraphTranslationCreate");
             }
@@ -60,7 +60,7 @@ namespace Model.DAL
         #endregion
 
         #region read
-        public static ParagraphTranslation? ParagraphTranslationByIdRead(int key, IdiomaticaContext context)
+        public static ParagraphTranslation? ParagraphTranslationByIdRead(Guid key, IdiomaticaContext context)
         {
             // check cache
             if (ParagraphTranslationById.ContainsKey(key))
@@ -69,7 +69,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.ParagraphTranslations.Where(x => x.Id == key)
+            var value = context.ParagraphTranslations.Where(x => x.UniqueKey == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -77,7 +77,7 @@ namespace Model.DAL
             return value;
         }
         public static List<ParagraphTranslation> ParagraphTranslationsByParargraphIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (ParagraphTranslationsByParagraphId.ContainsKey(key))
@@ -85,21 +85,21 @@ namespace Model.DAL
                 return ParagraphTranslationsByParagraphId[key];
             }
             // read DB
-            var value = context.ParagraphTranslations.Where(x => x.ParagraphId == key).ToList();
+            var value = context.ParagraphTranslations.Where(x => x.ParagraphKey == key).ToList();
 
             // write to cache
             ParagraphTranslationsByParagraphId[key] = value;
             // write each item to cache
             foreach (var item in value)
             {
-                if (item.Id is null) continue;
-                ParagraphTranslationById[(int)item.Id] = item;
+                if (item.UniqueKey is null) continue;
+                ParagraphTranslationById[(Guid)item.UniqueKey] = item;
             }
 
             return value;
         }
         public static async Task<List<ParagraphTranslation>> ParagraphTranslationsByParargraphIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             return await Task<List<ParagraphTranslation>>.Run(() =>
             {
@@ -110,7 +110,7 @@ namespace Model.DAL
 
         #region delete
         public static void ParagraphTranslationDeleteByParagraphIdAndLanguageCode(
-            (int paragraphId, string code) key, IdiomaticaContext context)
+            (Guid paragraphId, string code) key, IdiomaticaContext context)
         {
             int numRows = context.Database.ExecuteSql($"""
                 delete from [Idioma].[ParagraphTranslation]
@@ -119,7 +119,7 @@ namespace Model.DAL
                 """);
         }
         public static async Task ParagraphTranslationDeleteByParagraphIdAndLanguageCodeAsync(
-            (int paragraphId, string code) key, IdiomaticaContext context)
+            (Guid paragraphId, string code) key, IdiomaticaContext context)
         {
             await Task.Run(() =>
             {
@@ -131,18 +131,18 @@ namespace Model.DAL
         #region cache
         private static void ParagraphTranslationUpdateCache(ParagraphTranslation value)
         {
-            if (value.Id is null) return;
+            if (value.UniqueKey is null) return;
             // write to the ID cache
-            ParagraphTranslationById[(int)value.Id] = value;
+            ParagraphTranslationById[(Guid)value.UniqueKey] = value;
 
             // are there any lists with this one's paragraph already cached?
-            if (value.ParagraphId == null)
+            if (value.ParagraphKey == null)
             {
                 return;
             }
-            if (ParagraphTranslationsByParagraphId.ContainsKey((int)value.ParagraphId))
+            if (ParagraphTranslationsByParagraphId.ContainsKey((Guid)value.ParagraphKey))
             {
-                var cachedList = ParagraphTranslationsByParagraphId[(int)value.ParagraphId];
+                var cachedList = ParagraphTranslationsByParagraphId[(Guid)value.ParagraphKey];
                 if (cachedList != null)
                 {
                     cachedList.Add(value);

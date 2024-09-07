@@ -11,13 +11,13 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, Sentence> SentenceById = new ConcurrentDictionary<int, Sentence>();
-        private static ConcurrentDictionary<int, List<Sentence>> SentencesByPageId = new ConcurrentDictionary<int, List<Sentence>>();
-        private static ConcurrentDictionary<int, List<Sentence>> SentencesByParagraphId = new ConcurrentDictionary<int, List<Sentence>>();
+        private static ConcurrentDictionary<Guid, Sentence> SentenceById = [];
+        private static ConcurrentDictionary<Guid, List<Sentence>> SentencesByPageId = [];
+        private static ConcurrentDictionary<Guid, List<Sentence>> SentencesByParagraphId = [];
 
 
         #region read
-        public static Sentence? SentenceByIdRead(int key, IdiomaticaContext context)
+        public static Sentence? SentenceByIdRead(Guid key, IdiomaticaContext context)
         {
             // check cache
             if (SentenceById.ContainsKey(key))
@@ -26,14 +26,14 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.Sentences.Where(x => x.Id == key)
+            var value = context.Sentences.Where(x => x.UniqueKey == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
             SentenceById[key] = value;
             return value;
         }
-        public static async Task<Sentence?> SentenceByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<Sentence?> SentenceByIdReadAsync(Guid key, IdiomaticaContext context)
         {
             return await Task<Sentence?>.Run(() =>
             {
@@ -43,7 +43,7 @@ namespace Model.DAL
 
 
         public static List<Sentence> SentencesByPageIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (SentencesByPageId.ContainsKey(key))
@@ -52,10 +52,10 @@ namespace Model.DAL
             }
             // read DB
             var value = (from p in context.Pages
-                         join pp in context.Paragraphs on p.Id equals pp.PageId
-                         join s in context.Sentences on pp.Id equals s.ParagraphId
+                         join pp in context.Paragraphs on p.UniqueKey equals pp.PageKey
+                         join s in context.Sentences on pp.UniqueKey equals s.ParagraphKey
                          orderby pp.Ordinal, s.Ordinal
-                         where (p.Id == key)
+                         where (p.UniqueKey == key)
                          select s
 
                           ).ToList();
@@ -66,7 +66,7 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<Sentence>> SentencesByPageIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             return await Task<List<Sentence>>.Run(() =>
             {
@@ -75,7 +75,7 @@ namespace Model.DAL
         }
 
 
-        public static List<Sentence> SentencesByParagraphIdRead(int key, IdiomaticaContext context)
+        public static List<Sentence> SentencesByParagraphIdRead(Guid key, IdiomaticaContext context)
         {
             // check cache
             if (SentencesByParagraphId.ContainsKey(key))
@@ -85,13 +85,13 @@ namespace Model.DAL
 
             // read DB
             var value = context.Sentences
-                .Where(x => x.ParagraphId == key)
+                .Where(x => x.ParagraphKey == key)
                 .ToList();
             // write to cache
             SentencesByParagraphId[key] = value;
             return value;
         }
-        public static async Task<List<Sentence>> SentencesByParagraphIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<List<Sentence>> SentencesByParagraphIdReadAsync(Guid key, IdiomaticaContext context)
         {
             return await Task<List<Sentence>>.Run(() =>
             {
@@ -107,7 +107,7 @@ namespace Model.DAL
 
         public static Sentence? SentenceCreate(Sentence sentence, IdiomaticaContext context)
         {
-            if (sentence.ParagraphId is null) throw new ArgumentNullException(nameof(sentence.ParagraphId));
+            if (sentence.ParagraphKey is null) throw new ArgumentNullException(nameof(sentence.ParagraphKey));
             if (sentence.Ordinal is null) throw new ArgumentNullException(nameof(sentence.Ordinal));
 
             Guid guid = Guid.NewGuid();
@@ -119,7 +119,7 @@ namespace Model.DAL
                       ,[Text]
                       ,[UniqueKey])
                 VALUES
-                      ({sentence.ParagraphId}
+                      ({sentence.ParagraphKey}
                       ,{sentence.Ordinal}
                       ,{sentence.Text}
                       ,{guid})
@@ -127,14 +127,14 @@ namespace Model.DAL
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Sentence affected 0 rows");
             var newEntity = context.Sentences.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            if (newEntity is null || newEntity.UniqueKey is null)
             {
                 throw new InvalidDataException("newEntity is null in SentenceCreate");
             }
 
 
             // add it to cache
-            SentenceById[(int)newEntity.Id] = newEntity;
+            SentenceById[(Guid)newEntity.UniqueKey] = newEntity;
 
             return newEntity;
         }

@@ -23,7 +23,7 @@ namespace Logic.Services.API
                 Code = uiLanguageCode,
             };
             user = DataCache.UserCreate(user, context);
-            if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return null; }
+            if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
 
             return user;
         }
@@ -37,19 +37,17 @@ namespace Logic.Services.API
                 Code = uiLanguageCode,
             };
             user = await DataCache.UserCreateAsync(user, context);
-            if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return null; }
+            if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
 
             return user;
         }
 
 
-        public static UserBreadCrumb? UserBreadCrumbCreate(IdiomaticaContext context, int userId, int pageId)
+        public static UserBreadCrumb? UserBreadCrumbCreate(IdiomaticaContext context, Guid userId, Guid pageId)
         {
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            if (pageId < 1) ErrorHandler.LogAndThrow();
             UserBreadCrumb? crumb = new() {
-                UserId = userId,
-                PageId = pageId,
+                UserKey = userId,
+                PageKey = pageId,
                 ActionDateTime = DateTime.Now
             };
             crumb = DataCache.UserBreadCrumbCreate(crumb, context);
@@ -57,7 +55,7 @@ namespace Logic.Services.API
             return crumb;
         }
         public static async Task<UserBreadCrumb?> UserBreadCrumbCreateAsync(
-            IdiomaticaContext context, int userId, int pageId)
+            IdiomaticaContext context, Guid userId, Guid pageId)
         {
             return await Task.Run(() =>
             {
@@ -70,15 +68,14 @@ namespace Logic.Services.API
 
         #region read
 
-        public static UserBreadCrumb? UserBreadCrumbReadLatest(IdiomaticaContext context, int userId)
+        public static UserBreadCrumb? UserBreadCrumbReadLatest(IdiomaticaContext context, Guid userId)
         {
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            var list = DataCache.UserBreadCrumbReadByFilter((x => x.UserId == userId), 1, context);
+            var list = DataCache.UserBreadCrumbReadByFilter((x => x.UserKey == userId), 1, context);
             if(list.Count < 1) return null;
             return list[0];
         }
         public static async Task<UserBreadCrumb?> UserBreadCrumbReadLatestAsync(
-            IdiomaticaContext context, int userId)
+            IdiomaticaContext context, Guid userId)
         {
             return await Task.Run(() =>
             {
@@ -90,12 +87,11 @@ namespace Logic.Services.API
 
         #region delete
 
-        public static void UserAndAllChildrenDelete(IdiomaticaContext context, int userId)
+        public static void UserAndAllChildrenDelete(IdiomaticaContext context, Guid userId)
         {
-            if (userId < 1) ErrorHandler.LogAndThrow();
             DataCache.UserAndAllChildrenDelete(userId, context);
         }
-        public static async Task UserAndAllChildrenDeleteAsync(IdiomaticaContext context, int userId)
+        public static async Task UserAndAllChildrenDeleteAsync(IdiomaticaContext context, Guid userId)
         {
             await Task.Run(() =>
             {

@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("vw_BookListRow", Schema = "Idioma")]
-    [PrimaryKey(nameof(BookId), nameof(UserId))]
+    [PrimaryKey(nameof(BookKey), nameof(UserKey))]
     public record BookListRow
     {
         public Int64? RowNumber { get; set; }
         public bool? IsInShelf { get; set; }
-        public int? UserId { get; set; }
-        public int? BookId { get; set; }
+        public Guid? UserKey { get; set; }
+        public Guid? BookKey { get; set; }
         public string? LanguageName { get; set; }
         public string? IsComplete { get; set; }
         public string? Title { get; set; }

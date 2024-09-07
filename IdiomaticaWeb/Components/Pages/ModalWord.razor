@@ -153,40 +153,40 @@
         {
             var context = await DbContextFactory.CreateDbContextAsync();
 
-            if (thisToken == null || thisToken.Id == null || thisToken.Id < 1)
+            if (thisToken == null || thisToken.UniqueKey == null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (thisToken.WordId == null || thisToken.WordId < 1)
+            if (thisToken.WordKey == null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
             _word = thisToken.Word; 
-            if (_word == null || _word.Id is null || _word.Id < 1 || _word.TextLowerCase is null)
+            if (_word == null || _word.UniqueKey is null || _word.TextLowerCase is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
             if (ReadDataPacket == null || ReadDataPacket.LanguageUser is null ||
-                ReadDataPacket.LanguageUser.Id is null)
+                ReadDataPacket.LanguageUser.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
             _wordUser = _word.WordUsers
-               .Where(x => x.LanguageUserId == (int)ReadDataPacket.LanguageUser.Id)
+               .Where(x => x.LanguageUserKey == (Guid)ReadDataPacket.LanguageUser.UniqueKey)
                .FirstOrDefault();
             _token = thisToken;
 
             if (_wordUser is null)
             {
                 // it shouldn't be, but create it if so
-                _wordUser = WordUserApi.WordUserCreate(context, (int)_word.Id,
-                    (int)ReadDataPacket.LanguageUser.Id, "", AvailableWordUserStatus.UNKNOWN);
+                _wordUser = WordUserApi.WordUserCreate(context, (Guid)_word.UniqueKey,
+                    (Guid)ReadDataPacket.LanguageUser.UniqueKey, "", AvailableWordUserStatus.UNKNOWN);
             }
-            if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+            if (_wordUser is null || _wordUser.UniqueKey is null)
             { ErrorHandler.LogAndThrow(); return; }
 
             _wordUser.Status = _wordUser.Status is null ? AvailableWordUserStatus.UNKNOWN : _wordUser.Status;
@@ -198,7 +198,7 @@
             _selectedStatus = UserService.GetUILabel($"statusLabel{(int)_wordUser.Status}");
 
             // check to display the "create card" button
-            var existingCard = FlashCardApi.FlashCardReadByWordUserId(context, (int)_wordUser.Id);
+            var existingCard = FlashCardApi.FlashCardReadByWordUserId(context, (Guid)_wordUser.UniqueKey);
             if (existingCard is null) _doesFlashCardExist = false;
             else _doesFlashCardExist = true;
 
@@ -222,7 +222,7 @@
     }
     private List<string> GetDefaultTranslations(Token thisToken)
     {
-        if (thisToken == null || thisToken.Word == null || thisToken.Word.Id < 1)
+        if (thisToken == null || thisToken.Word == null)
         {
             ErrorHandler.LogAndThrow();
             return [];
@@ -256,7 +256,7 @@
     {
         try
         {
-            if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+            if (_wordUser is null || _wordUser.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -272,7 +272,7 @@
             var context = await DbContextFactory.CreateDbContextAsync();
 
             await WordUserApi.WordUserUpdateAsync(
-                context, (int)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
+                context, (Guid)_wordUser.UniqueKey, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
             if (Parent is not null) Parent.RefreshState();
             await modal.HideAsync();
         }
@@ -288,7 +288,7 @@
         try
         {
             _isFormattingTranslation = true;
-            if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+            if (_wordUser is null || _wordUser.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -346,7 +346,7 @@
         _isSavingFlashCard = true;
         if (_doesFlashCardExist) return;
 
-        if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+        if (_wordUser is null || _wordUser.UniqueKey is null)
         {
             ErrorHandler.LogAndThrow();
             return;
@@ -369,10 +369,10 @@
 
         // save the wordUser first
         await WordUserApi.WordUserUpdateAsync(
-                context, (int)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
+                context, (Guid)_wordUser.UniqueKey, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
 
         // now make the card
-        await FlashCardApi.FlashCardCreateAsync(context, (int)_wordUser.Id, uiLanguage.Code);
+        await FlashCardApi.FlashCardCreateAsync(context, (Guid)_wordUser.UniqueKey, uiLanguage.Code);
 
         _isSavingFlashCard = false;
         _doesFlashCardExist = true;

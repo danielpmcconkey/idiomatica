@@ -22,7 +22,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void ParagraphCreateFromSplitTest()
         {
-            int bookId = 0;
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedText = "Era un jardín grande";
 
@@ -30,31 +30,31 @@ namespace Logic.Services.API.Tests
             {
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.Id is null || language.Id < 1)
+                if (language is null || language.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = (int)language.Id,
+                    LanguageKey = (Guid)language.UniqueKey,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.Id is null || book.Id < 1)
+                if (book is null || book.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)book.Id;
+                bookId = (Guid)book.UniqueKey;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookId = book.Id,
+                    BookKey = book.UniqueKey,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.Id is null || page.Id < 1)
+                if (page is null || page.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create the paragraph splits
@@ -71,7 +71,7 @@ namespace Logic.Services.API.Tests
 
 
                 var paragraph = ParagraphApi.ParagraphCreateFromSplit(context,
-                    fifthSplitTrimmed, (int)page.Id, 4, (int)language.Id);
+                    fifthSplitTrimmed, (Guid)page.UniqueKey, 4, (Guid)language.UniqueKey);
 
 
                 Assert.IsNotNull(paragraph);
@@ -92,7 +92,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task ParagraphCreateFromSplitAsyncTest()
         {
-            int bookId = 0;
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedText = "Era un jardín grande";
 
@@ -100,31 +100,31 @@ namespace Logic.Services.API.Tests
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.Id is null || language.Id < 1)
+                if (language is null || language.UniqueKey is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = (int)language.Id,
+                    LanguageKey = (Guid)language.UniqueKey,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.Id is null || book.Id < 1)
+                if (book is null || book.UniqueKey is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)book.Id;
+                bookId = (Guid)book.UniqueKey;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookId = book.Id,
+                    BookKey = book.UniqueKey,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.Id is null || page.Id < 1)
+                if (page is null || page.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create the paragraph splits
@@ -141,7 +141,7 @@ namespace Logic.Services.API.Tests
 
                 
                 var paragraph = await ParagraphApi.ParagraphCreateFromSplitAsync(context,
-                    fifthSplitTrimmed, (int)page.Id, 4, (int)language.Id);
+                    fifthSplitTrimmed, (Guid)page.UniqueKey, 4, (Guid)language.UniqueKey);
 
 
                 Assert.IsNotNull(paragraph);
@@ -165,8 +165,8 @@ namespace Logic.Services.API.Tests
         public void ParagraphExamplePullRandomByFlashCardIdTest()
         {
             var context = CommonFunctions.CreateContext();
-
-            int flashCardId = 400;
+            var languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
+            Guid flashCardId = CommonFunctions.GetFlashCard1Id(context, languageUserId);
             string uiLangugaeCode = "EN-US";
             int numTries = 5;
             HashSet<string> examples = new();
@@ -208,8 +208,8 @@ namespace Logic.Services.API.Tests
         public async Task ParagraphExamplePullRandomByFlashCardIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-
-            int flashCardId = 400;
+            var languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
+            Guid flashCardId = CommonFunctions.GetFlashCard1Id(context, languageUserId);
             string uiLangugaeCode = "EN-US";
             int numTries = 5;
             HashSet<string> examples = new();
@@ -252,8 +252,9 @@ namespace Logic.Services.API.Tests
         public void ParagraphReadAllTextTest()
         {
             var context = CommonFunctions.CreateContext();
-            int paragraphId = 9114;
-            string expectedValue = "Mi nombre es Daniel. Tengo 24 años. Julia es mi hermana y vivimos en la misma casa en Londres. Ella tiene 23 años. Vivimos con nuestros padres, Arthur y Clara. Estamos preparando nuestro viaje a España. Somos estudiantes de intercambio. Estamos aprendiendo español y ya sabemos mucho.";
+            Guid paragraphId = 14706;
+            string expectedValue = "África del Norte, África septentrional o África norsahariana (a veces llamada África Blanca) es la subregión norte de África. Está compuesta por cinco países: Argelia, Egipto, Libia, Marruecos y Túnez. Además, incluye a la República Árabe Saharaui Democrática (que es un Estado con reconocimiento limitado) y otros territorios que dependen de países externos a la subregión: Canarias, Ceuta y Melilla (que dependen de España), Madeira (de Portugal) y Lampedusa e Linosa (de Italia).";
+
 
             string actualValue = ParagraphApi.ParagraphReadAllText(context, paragraphId);
 
@@ -263,8 +264,10 @@ namespace Logic.Services.API.Tests
         public async Task ParagraphReadAllTextAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            int paragraphId = 9114;
-            string expectedValue = "Mi nombre es Daniel. Tengo 24 años. Julia es mi hermana y vivimos en la misma casa en Londres. Ella tiene 23 años. Vivimos con nuestros padres, Arthur y Clara. Estamos preparando nuestro viaje a España. Somos estudiantes de intercambio. Estamos aprendiendo español y ya sabemos mucho.";
+            Guid paragraphId = 14706;
+            string expectedValue = "África del Norte, África septentrional o África norsahariana (a veces llamada África Blanca) es la subregión norte de África. Está compuesta por cinco países: Argelia, Egipto, Libia, Marruecos y Túnez. Además, incluye a la República Árabe Saharaui Democrática (que es un Estado con reconocimiento limitado) y otros territorios que dependen de países externos a la subregión: Canarias, Ceuta y Melilla (que dependen de España), Madeira (de Portugal) y Lampedusa e Linosa (de Italia).";
+
+            
 
             string actualValue = await ParagraphApi.ParagraphReadAllTextAsync(context, paragraphId);
             Assert.AreEqual(expectedValue, actualValue);            
@@ -274,7 +277,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void ParagraphsCreateFromPageTest()
         {
-            int bookId = 0;
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedText = "Era un jardín grande";
 
@@ -282,36 +285,36 @@ namespace Logic.Services.API.Tests
             {
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.Id is null || language.Id < 1)
+                if (language is null || language.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = (int)language.Id,
+                    LanguageKey = (Guid)language.UniqueKey,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.Id is null || book.Id < 1)
+                if (book is null || book.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)book.Id;
+                bookId = (Guid)book.UniqueKey;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookId = book.Id,
+                    BookKey = book.UniqueKey,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.Id is null || page.Id < 1)
+                if (page is null || page.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create the paragraphs
                 var paragraphs = ParagraphApi.ParagraphsCreateFromPage(
-                    context, (int)page.Id, (int)language.Id);
+                    context, (Guid)page.UniqueKey, (Guid)language.UniqueKey);
                 if (paragraphs is null || paragraphs.Count < 1)
                 { ErrorHandler.LogAndThrow(); return; }
                 var fifthParagraph = paragraphs.Where(x => x.Ordinal == 4).FirstOrDefault();
@@ -333,7 +336,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task ParagraphsCreateFromPageAsyncTest()
         {
-            int bookId = 0;
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedText = "Era un jardín grande";
 
@@ -341,36 +344,36 @@ namespace Logic.Services.API.Tests
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.Id is null || language.Id < 1)
+                if (language is null || language.UniqueKey is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = (int)language.Id,
+                    LanguageKey = (Guid)language.UniqueKey,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.Id is null || book.Id < 1)
+                if (book is null || book.UniqueKey is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)book.Id;
+                bookId = (Guid)book.UniqueKey;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookId = book.Id,
+                    BookKey = book.UniqueKey,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.Id is null || page.Id < 1)
+                if (page is null || page.UniqueKey is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // create the paragraphs
                 var paragraphs = await ParagraphApi.ParagraphsCreateFromPageAsync(
-                    context, (int)page.Id, (int)language.Id);
+                    context, (Guid)page.UniqueKey, (Guid)language.UniqueKey);
                 if (paragraphs is null || paragraphs.Count < 1)
                 { ErrorHandler.LogAndThrow(); return; }
                 var fifthParagraph = paragraphs.Where(x => x.Ordinal == 4).FirstOrDefault();
@@ -395,18 +398,18 @@ namespace Logic.Services.API.Tests
         public void ParagraphsReadByPageIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            int pageId = 3;
-            int ppOrd = 6;
+            Guid pageId = 400;
+            int ppOrd = 0;
             int sentenceOrdinal = 1;
-            string expectedValue = "Tengo 24 años.";
+            string expectedValue = "Está compuesta por cinco países: Argelia, Egipto, Libia, Marruecos y Túnez.";
             
             var paragraphs = ParagraphApi.ParagraphsReadByPageId(context, pageId);
             Assert.IsNotNull(paragraphs);
             var seventhParagraph = paragraphs.Where(x => x.Ordinal == ppOrd).FirstOrDefault();
             Assert.IsNotNull(seventhParagraph);
-            Assert.IsNotNull(seventhParagraph.Id);
+            Assert.IsNotNull(seventhParagraph.UniqueKey);
             seventhParagraph.Sentences = SentenceApi.SentencesReadByParagraphId(
-                context, (int)seventhParagraph.Id);
+                context, (Guid)seventhParagraph.UniqueKey);
             Assert.IsNotNull(seventhParagraph.Sentences);
             var secondSentence = seventhParagraph.Sentences.Where(
                 x => x.Ordinal == sentenceOrdinal).FirstOrDefault();
@@ -418,18 +421,18 @@ namespace Logic.Services.API.Tests
         public async Task ParagraphsReadByPageIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            int pageId = 3;
-            int ppOrd = 6;
+            Guid pageId = 400;
+            int ppOrd = 0;
             int sentenceOrdinal = 1;
-            string expectedValue = "Tengo 24 años.";
+            string expectedValue = "Está compuesta por cinco países: Argelia, Egipto, Libia, Marruecos y Túnez.";
 
             var paragraphs = await ParagraphApi.ParagraphsReadByPageIdAsync(context, pageId);
             Assert.IsNotNull(paragraphs);
             var seventhParagraph = paragraphs.Where(x => x.Ordinal == ppOrd).FirstOrDefault();
             Assert.IsNotNull(seventhParagraph);
-            Assert.IsNotNull(seventhParagraph.Id);
+            Assert.IsNotNull(seventhParagraph.UniqueKey);
             seventhParagraph.Sentences = await SentenceApi.SentencesReadByParagraphIdAsync(
-                context, (int)seventhParagraph.Id);
+                context, (Guid)seventhParagraph.UniqueKey);
             Assert.IsNotNull(seventhParagraph.Sentences);
             var secondSentence = seventhParagraph.Sentences.Where(
                 x => x.Ordinal == sentenceOrdinal).FirstOrDefault();
@@ -443,11 +446,11 @@ namespace Logic.Services.API.Tests
         public void ParagraphTranslateTest()
         {
             var context = CommonFunctions.CreateContext();
-            int paragraphId = 9114;
+            Guid paragraphId = 14590;
             string fromCode = "ES";
             string toCode = "EN-US";
-            string expectedInput = "Mi nombre es Daniel. Tengo 24 años. Julia es mi hermana y vivimos en la misma casa en Londres. Ella tiene 23 años. Vivimos con nuestros padres, Arthur y Clara. Estamos preparando nuestro viaje a España. Somos estudiantes de intercambio. Estamos aprendiendo español y ya sabemos mucho.";
-            string expectedTranslation = "My name is Daniel. I am 24 years old. Julia is my sister and we live in the same house in London. She is 23 years old. We live with our parents, Arthur and Clara. We are preparing our trip to Spain. We are exchange students. We are learning Spanish and we already know a lot.";
+            string expectedInput = "Había una vez una pareja que quería un hijo. La esposa, que estaba esperando, tenía antojo de una planta llamada rapunzel, que crecía en un jardín cercano perteneciente a una hechicera.";
+            string expectedTranslation = "Once upon a time there was a couple who wanted a child. The wife, who was expecting, had a craving for a plant called rapunzel, which grew in a nearby garden belonging to a sorceress.";
 
 #if FORCEDEEPLCALL
             DataCache.ParagraphTranslationDeleteByParagraphIdAndLanguageCode(
@@ -467,14 +470,12 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task ParagraphTranslateAsyncTest()
         {
-            // assemble
             var context = CommonFunctions.CreateContext();
-            // don't roll this back. We want to save the translation so we're not always using DeepL
-            int paragraphId = 9114;
+            Guid paragraphId = 14590;
             string fromCode = "ES";
             string toCode = "EN-US";
-            string expectedInput = "Mi nombre es Daniel. Tengo 24 años. Julia es mi hermana y vivimos en la misma casa en Londres. Ella tiene 23 años. Vivimos con nuestros padres, Arthur y Clara. Estamos preparando nuestro viaje a España. Somos estudiantes de intercambio. Estamos aprendiendo español y ya sabemos mucho.";
-            string expectedTranslation = "My name is Daniel. I am 24 years old. Julia is my sister and we live in the same house in London. She is 23 years old. We live with our parents, Arthur and Clara. We are preparing our trip to Spain. We are exchange students. We are learning Spanish and we already know a lot.";
+            string expectedInput = "Había una vez una pareja que quería un hijo. La esposa, que estaba esperando, tenía antojo de una planta llamada rapunzel, que crecía en un jardín cercano perteneciente a una hechicera.";
+            string expectedTranslation = "Once upon a time there was a couple who wanted a child. The wife, who was expecting, had a craving for a plant called rapunzel, which grew in a nearby garden belonging to a sorceress.";
 
 #if FORCEDEEPLCALL
             await DataCache.ParagraphTranslationDeleteByParagraphIdAndLanguageCodeAsync(
@@ -494,7 +495,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PotentialParagraphsFromSplitTextTest()
         {
-            int bookId = 0;
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedText = "Cada tarde, después de la escuela. Los niños iban a jugar al jardín del gigante. Era un jardín grande y bonito.";
 
@@ -502,31 +503,31 @@ namespace Logic.Services.API.Tests
             {
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.Id is null || language.Id < 1)
+                if (language is null || language.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = (int)language.Id,
+                    LanguageKey = (Guid)language.UniqueKey,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.Id is null || book.Id < 1)
+                if (book is null || book.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)book.Id;
+                bookId = (Guid)book.UniqueKey;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookId = book.Id,
+                    BookKey = book.UniqueKey,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.Id is null || page.Id < 1)
+                if (page is null || page.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create the paragraph splits
@@ -552,7 +553,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task PotentialParagraphsFromSplitTextTestAsync()
         {
-            int bookId = 0;
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedText = "Cada tarde, después de la escuela. Los niños iban a jugar al jardín del gigante. Era un jardín grande y bonito.";
 
@@ -560,31 +561,31 @@ namespace Logic.Services.API.Tests
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.Id is null || language.Id < 1)
+                if (language is null || language.UniqueKey is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = (int)language.Id,
+                    LanguageKey = (Guid)language.UniqueKey,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.Id is null || book.Id < 1)
+                if (book is null || book.UniqueKey is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)book.Id;
+                bookId = (Guid)book.UniqueKey;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookId = book.Id,
+                    BookKey = book.UniqueKey,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.Id is null || page.Id < 1)
+                if (page is null || page.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create the paragraph splits

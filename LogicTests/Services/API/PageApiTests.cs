@@ -12,6 +12,7 @@ using Model;
 using static System.Net.Mime.MediaTypeNames;
 using DeepL;
 using System.Net;
+using Logic.Conjugator.Spanish;
 
 namespace Logic.Services.API.Tests
 {
@@ -21,8 +22,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageCreateFromPageSplitTest()
         {
-            int userId = 0;
-            int bookId = 0;
+            Guid userId = Guid.NewGuid();
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedResult = "alió un hermosa flor";
 
@@ -36,7 +37,7 @@ namespace Logic.Services.API.Tests
 
                 // pull language from the db
                 var language = DataCache.LanguageByCodeRead(TestConstants.NewBookLanguageCode, context);
-                if (language is null || language.Id is null or 0)
+                if (language is null || language.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // divide text into paragraphs
@@ -56,8 +57,8 @@ namespace Logic.Services.API.Tests
                 { ErrorHandler.LogAndThrow(); return; }
                 Page? page = PageApi.PageCreateFromPageSplit(context,
                     pageSplit.pageNum, pageSplitTextTrimmed,
-                    bookId, (int)language.Id);
-                if (page is null || page.Id is null || page.Id < 1 || page.OriginalText is null)
+                    bookId, (Guid)language.UniqueKey);
+                if (page is null || page.UniqueKey is null || page.OriginalText is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 string actualResults = page.OriginalText.Substring(page.OriginalText.Length - 20, 20);
@@ -74,8 +75,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task PageCreateFromPageSplitAsyncTest()
         {
-            int userId = 0;
-            int bookId = 0;
+            Guid userId = Guid.NewGuid();
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedResult = "alió un hermosa flor";
 
@@ -89,7 +90,7 @@ namespace Logic.Services.API.Tests
 
                 // pull language from the db
                 var language = await DataCache.LanguageByCodeReadAsync(TestConstants.NewBookLanguageCode, context);
-                if (language is null || language.Id is null or 0)
+                if (language is null || language.UniqueKey is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // divide text into paragraphs
@@ -110,8 +111,8 @@ namespace Logic.Services.API.Tests
                     { ErrorHandler.LogAndThrow(); return; }
                 Page? page = await PageApi.PageCreateFromPageSplitAsync(context,
                     pageSplit.pageNum, pageSplitTextTrimmed,
-                    bookId, (int)language.Id);
-                if (page is null || page.Id is null || page.Id < 1 || page.OriginalText is null)
+                    bookId, (Guid)language.UniqueKey);
+                if (page is null || page.UniqueKey is null || page.OriginalText is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 string actualResults = page.OriginalText.Substring(page.OriginalText.Length - 20, 20);
@@ -131,8 +132,8 @@ namespace Logic.Services.API.Tests
         public void PageReadByIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            int pageId = 3;
-            string expectedResult = "varos al aeropuerto."; // the right-most 20 chars
+            Guid pageId = CommonFunctions.GetPage392Id(context);
+            string expectedResult = "erías pirenaicas.33?"; // the right-most 20 chars
 
             var page = PageApi.PageReadById(context, pageId);
             if (page == null || string.IsNullOrEmpty(page.OriginalText))
@@ -145,8 +146,8 @@ namespace Logic.Services.API.Tests
         public async Task PageReadByIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            int pageId = 3;
-            string expectedResult = "varos al aeropuerto."; // the right-most 20 chars
+            Guid pageId = CommonFunctions.GetPage392Id(context);
+            string expectedResult = "erías pirenaicas.33?"; // the right-most 20 chars
 
             var page = await PageApi.PageReadByIdAsync(context, pageId);
             if (page == null || string.IsNullOrEmpty(page.OriginalText))
@@ -161,9 +162,9 @@ namespace Logic.Services.API.Tests
         public void PageReadByOrdinalAndBookIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            int bookId = 2;
+            Guid bookId = CommonFunctions.GetBook11Id(context);
             int ordinal = 2;
-            string expectedResult = "y viejas. ¡Ven aquí!"; // the right-most 20 chars
+            string expectedResult = "riunfa sobre el mal."; // the right-most 20 chars
 
             var page = PageApi.PageReadByOrdinalAndBookId(context, ordinal, bookId);
             if (page == null || string.IsNullOrEmpty(page.OriginalText))
@@ -176,9 +177,10 @@ namespace Logic.Services.API.Tests
         public async Task PageReadByOrdinalAndBookIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            int bookId = 2;
+            Guid bookId = CommonFunctions.GetBook11Id(context);
             int ordinal = 2;
-            string expectedResult = "y viejas. ¡Ven aquí!"; // the right-most 20 chars
+            string expectedResult = "riunfa sobre el mal."; // the right-most 20 chars
+            
 
             var page = await PageApi.PageReadByOrdinalAndBookIdAsync(context, ordinal, bookId);
             if (page == null || string.IsNullOrEmpty(page.OriginalText))
@@ -193,8 +195,8 @@ namespace Logic.Services.API.Tests
         public void PageReadFirstByBookIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            int bookId = 2;
-            string expectedResult = "pezaron la caminata."; // the right-most 20 chars
+            Guid bookId = CommonFunctions.GetBook11Id(context);
+            string expectedResult = "n lugar de Rapunzel."; // the right-most 20 chars
 
             var page = PageApi.PageReadFirstByBookId(context, bookId);
             if (page == null || string.IsNullOrEmpty(page.OriginalText))
@@ -207,8 +209,8 @@ namespace Logic.Services.API.Tests
         public async Task PageReadFirstByBookIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            int bookId = 2;
-            string expectedResult = "pezaron la caminata."; // the right-most 20 chars
+            Guid bookId = CommonFunctions.GetBook11Id(context);
+            string expectedResult = "n lugar de Rapunzel."; // the right-most 20 chars
 
             var page = await PageApi.PageReadFirstByBookIdAsync(context, bookId);
             if (page == null || string.IsNullOrEmpty(page.OriginalText))
@@ -222,8 +224,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageSplitsCreateFromParagraphSplitsTest()
         {
-            int userId = 0;
-            int bookId = 0;
+            Guid userId = Guid.NewGuid();
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedResult = "a una escena hermosa";
 
@@ -259,8 +261,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task PageSplitsCreateFromParagraphSplitsAsyncTest()
         {
-            int userId = 0;
-            int bookId = 0;
+            Guid userId = Guid.NewGuid();
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string expectedResult = "a una escena hermosa";
 

@@ -68,17 +68,17 @@
     private List<(string language, int wordCount)> _wordsReadCountList = new List<(string language, int wordCount)>();
     private string? _wordCountCardTitle;
     private string? _bookshelfButtonText;
-    private int? UserId;
+    private Guid? UserId;
 
     private async Task InitData()
     {
         var context = await DbContextFactory.CreateDbContextAsync();
         var loggedInUser = UserService.GetLoggedInUser(context);
-        if (loggedInUser is null || loggedInUser.Id is null || loggedInUser.Id < 1) return;
-        UserId = loggedInUser.Id;
+        if (loggedInUser is null || loggedInUser.UniqueKey is null) return;
+        UserId = loggedInUser.UniqueKey;
         _wordCountCardTitle = UserService.GetUILabel("homeWordCountsHeader");
         _wordsReadCountList = WordApi.WordsGetListOfReadCount(
-            context, (int)loggedInUser.Id);
+            context, (Guid)loggedInUser.UniqueKey);
 
         _bookshelfButtonText = UserService.GetUILabel("homeBookshelfButtonText");
 

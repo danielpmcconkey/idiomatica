@@ -80,8 +80,8 @@ namespace Logic.Services
         private User? ProcessUserFromClaimPrincipal(IdiomaticaContext context)
         {
             if (_loggedInUserClaimsPrincipal == null) return null;
-            if (_loggedInUserClaimsPrincipal.Identity is null) return null;
-            if (!_loggedInUserClaimsPrincipal.Identity.IsAuthenticated) return null;
+            if (_loggedInUserClaimsPrincipal.UniqueKeyentity is null) return null;
+            if (!_loggedInUserClaimsPrincipal.UniqueKeyentity.IsAuthenticated) return null;
 
             var appUserId = _loggedInUserClaimsPrincipal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (appUserId == null) return null;

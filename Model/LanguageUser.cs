@@ -11,12 +11,15 @@ namespace Model
     [Table("LanguageUser", Schema = "Idioma")]
     public class LanguageUser
     {
-        public int? Id { get; set; }
+        public Guid? UniqueKey { get; set; } 
+        //public int? Id { get; set; }
 
         #region relationships
-        public int? LanguageId { get; set; }
+        //public int? LanguageId { get; set; }
+        public Guid? LanguageKey { get; set; }
         public Language? Language { get; set; }
-        public int? UserId { get; set; }
+        //public int? UserId { get; set; }
+        public Guid? UserKey { get; set; }
         public User? User { get; set; }
         public List<BookUser> BookUsers { get; set; } = new List<BookUser>();
         public List<WordUser> WordUsers { get; set; } = new List<WordUser>();
@@ -25,7 +28,6 @@ namespace Model
         #endregion
 
         public int? TotalWordsRead { get; set; } = 0;
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
 
     }
 }

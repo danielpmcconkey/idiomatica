@@ -16,8 +16,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookTagAddTest()
         {
-            int userId = 0;
-            int bookId = 0;
+            Guid userId = Guid.NewGuid();
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string tag = Guid.NewGuid().ToString();
 
@@ -29,7 +29,7 @@ namespace Logic.Services.API.Tests
                 var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
-                int bookUserId = createResult.bookUserId;
+                Guid bookUserId = createResult.bookUserId;
 
                 var originalTags = BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
                 int originalCount = originalTags is null ? 0 : originalTags.Count;
@@ -54,8 +54,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task BookTagAddAsyncTest()
         {
-            int bookId = 0;
-            int userId = 0;
+            Guid bookId = Guid.NewGuid();
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string tag = Guid.NewGuid().ToString();
 
@@ -66,7 +66,7 @@ namespace Logic.Services.API.Tests
                 var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
-                int bookUserId = createResult.bookUserId;
+                Guid bookUserId = createResult.bookUserId;
 
                 var originalTags = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(context, bookId, userId);
                 int originalCount = originalTags is null ? 0 : originalTags.Count;
@@ -93,8 +93,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookTagRemoveTest()
         {
-            int userId = 0;
-            int bookId = 0;
+            Guid userId = Guid.NewGuid();
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string tag1 = Guid.NewGuid().ToString();
             string tag2 = $"{Guid.NewGuid().ToString()}varbit"; // just adding an extra string in case the two are somehow identical
@@ -106,7 +106,7 @@ namespace Logic.Services.API.Tests
                 var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
-                int bookUserId = createResult.bookUserId;
+                Guid bookUserId = createResult.bookUserId;
 
                 var originalTags = BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
                 int originalCount = originalTags is null ? 0 : originalTags.Count;
@@ -141,8 +141,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task BookTagRemoveAsyncTest()
         {
-            int userId = 0;
-            int bookId = 0;
+            Guid userId = Guid.NewGuid();
+            Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string tag1 = Guid.NewGuid().ToString();
             string tag2 = $"{Guid.NewGuid().ToString()}varbit"; // just adding an extra string in case the two are somehow identical
@@ -154,7 +154,7 @@ namespace Logic.Services.API.Tests
                 var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
-                int bookUserId = createResult.bookUserId;
+                Guid bookUserId = createResult.bookUserId;
 
                 var originalTags = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(context, bookId, userId);
                 int originalCount = originalTags is null ? 0 : originalTags.Count;

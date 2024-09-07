@@ -13,52 +13,48 @@ namespace Logic.Services.API
     public static class BookUserStatApi
     {
         public static List<BookUserStat>? BookUserStatsRead(
-            IdiomaticaContext context, int bookId, int userId)
+            IdiomaticaContext context, Guid bookId, Guid userId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
             return DataCache.BookUserStatsByBookIdAndUserIdRead(
                     (bookId, userId), context);
         }
         public static async Task<List<BookUserStat>?> BookUserStatsReadAsync(
-            IdiomaticaContext context, int bookId, int userId)
+            IdiomaticaContext context, Guid bookId, Guid userId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
             return await DataCache.BookUserStatsByBookIdAndUserIdReadAsync(
                     (bookId, userId), context);
         }
 
 
-        public static void BookUserStatsUpdateByBookUserId(IdiomaticaContext context, int bookUserId)
+        public static void BookUserStatsUpdateByBookUserId(IdiomaticaContext context, Guid bookUserId)
         {
             var bookUser = DataCache.BookUserByIdRead(bookUserId, context);
 
-            if (bookUser == null || bookUser.LanguageUserId == null || bookUser.LanguageUserId < 1
-                || bookUser.BookId == null || bookUser.BookId < 1)
+            if (bookUser == null || bookUser.LanguageUserKey == null
+                || bookUser.BookKey == null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var languageUser = DataCache.LanguageUserByIdRead((int)bookUser.LanguageUserId, context);
-            if (languageUser is null || languageUser.Id is null || languageUser.UserId is null)
+            var languageUser = DataCache.LanguageUserByIdRead((Guid)bookUser.LanguageUserKey, context);
+            if (languageUser is null || languageUser.UniqueKey is null || languageUser.UserKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
             
             // delete the booklistrows cache for this user
-            DataCache.BookListRowsByUserIdDelete((int)languageUser.Id, context);
+            DataCache.BookListRowsByUserIdDelete((Guid)languageUser.UniqueKey, context);
             // delete the actual stats from teh database and bookuserstats cache
-            DataCache.BookUserStatsByBookIdAndUserIdDelete(((int)bookUser.BookId, (int)languageUser.UserId), context);
+            DataCache.BookUserStatsByBookIdAndUserIdDelete(((Guid)bookUser.BookKey, (Guid)languageUser.UserKey), context);
 
-            var allWordsInBook = DataCache.WordsByBookIdRead((int)bookUser.BookId, context);
+            var allWordsInBook = DataCache.WordsByBookIdRead((Guid)bookUser.BookKey, context);
            
             var allWordUsersInBook = DataCache.WordUsersByBookIdAndLanguageUserIdRead(
-                ((int)bookUser.BookId, (int)bookUser.LanguageUserId), context, true);
+                ((Guid)bookUser.BookKey, (Guid)bookUser.LanguageUserKey), context, true);
             var pageUsers = DataCache.PageUsersByBookUserIdRead(bookUserId, context, true);
-            var pages = DataCache.PagesByBookIdRead((int)bookUser.BookId, context);
-            var bookStats = DataCache.BookStatsByBookIdRead((int)bookUser.BookId, context);
+            var pages = DataCache.PagesByBookIdRead((Guid)bookUser.BookKey, context);
+            var bookStats = DataCache.BookStatsByBookIdRead((Guid)bookUser.BookKey, context);
             if (bookStats is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -69,7 +65,7 @@ namespace Logic.Services.API
             var totalWordsStatline = bookStats.Where(x => x.Key == AvailableBookStat.TOTALWORDCOUNT).FirstOrDefault();
             var totalDistinctWordsStatline = bookStats.Where(x => x.Key == AvailableBookStat.DISTINCTWORDCOUNT).FirstOrDefault();
             var readPages = (from pu in pageUsers
-                             join p in pages on pu.PageId equals p.Id
+                             join p in pages on pu.PageKey equals p.UniqueKey
                              where pu.ReadDate != null
                              orderby p.Ordinal descending
                              select p)
@@ -124,57 +120,57 @@ namespace Logic.Services.API
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.ISCOMPLETE,
-                BookId = bookUser.BookId,
-                LanguageUserId = bookUser.LanguageUserId,
+                BookKey = bookUser.BookKey,
+                LanguageUserKey = bookUser.LanguageUserKey,
                 ValueString = isComplete.ToString(),
             });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.LASTPAGEREAD,
-                BookId = bookUser.BookId,
-                LanguageUserId = bookUser.LanguageUserId,
+                BookKey = bookUser.BookKey,
+                LanguageUserKey = bookUser.LanguageUserKey,
                 ValueNumeric = lastPageRead,
             });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.PROGRESS,
-                BookId = bookUser.BookId,
-                LanguageUserId = bookUser.LanguageUserId,
+                BookKey = bookUser.BookKey,
+                LanguageUserKey = bookUser.LanguageUserKey,
                 ValueString = progress,
             });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.PROGRESSPERCENT,
-                BookId = bookUser.BookId,
-                LanguageUserId = bookUser.LanguageUserId,
+                BookKey = bookUser.BookKey,
+                LanguageUserKey = bookUser.LanguageUserKey,
                 ValueNumeric = progressPercent,
             });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.DISTINCTKNOWNPERCENT,
-                BookId = bookUser.BookId,
-                LanguageUserId = bookUser.LanguageUserId,
+                BookKey = bookUser.BookKey,
+                LanguageUserKey = bookUser.LanguageUserKey,
                 ValueNumeric = distinctKnownPercent,
             });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.DISTINCTWORDCOUNT,
-                BookId = bookUser.BookId,
-                LanguageUserId = bookUser.LanguageUserId,
+                BookKey = bookUser.BookKey,
+                LanguageUserKey = bookUser.LanguageUserKey,
                 ValueNumeric = distinctWordCount,
             });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.TOTALWORDCOUNT,
-                BookId = bookUser.BookId,
-                LanguageUserId = bookUser.LanguageUserId,
+                BookKey = bookUser.BookKey,
+                LanguageUserKey = bookUser.LanguageUserKey,
                 ValueNumeric = totalWordCount,
             });
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.TOTALKNOWNPERCENT,
-                BookId = bookUser.BookId,
-                LanguageUserId = bookUser.LanguageUserId,
+                BookKey = bookUser.BookKey,
+                LanguageUserKey = bookUser.LanguageUserKey,
                 ValueString = null,
                 ValueNumeric = null,
             });
@@ -182,11 +178,11 @@ namespace Logic.Services.API
             
             // add the new stats
             DataCache.BookUserStatsByBookIdAndUserIdCreate(
-                ((int)bookUser.BookId, (int)languageUser.UserId), stats, context);
+                ((Guid)bookUser.BookKey, (Guid)languageUser.UserKey), stats, context);
             
 
         }
-        public static async Task BookUserStatsUpdateByBookUserIdAsync(IdiomaticaContext context, int bookUserId)
+        public static async Task BookUserStatsUpdateByBookUserIdAsync(IdiomaticaContext context, Guid bookUserId)
         {
             await Task.Run(() =>
             {

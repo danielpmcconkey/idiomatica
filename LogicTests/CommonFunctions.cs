@@ -63,26 +63,28 @@ namespace LogicTests
         #endregion
 
         #region cleanup functions
-        internal static void CleanUpBook(int bookId, IdiomaticaContext context)
+        internal static void CleanUpBook(Guid? bookId, IdiomaticaContext context)
         {
-            BookApi.BookAndAllChildrenDelete(context, bookId);
+            if (bookId == null) return;
+            BookApi.BookAndAllChildrenDelete(context, (Guid)bookId);
         }
-        internal static async Task CleanUpBookAsync(int bookId, IdiomaticaContext context)
+        internal static async Task CleanUpBookAsync(Guid? bookId, IdiomaticaContext context)
         {
-            await BookApi.BookAndAllChildrenDeleteAsync(context, bookId);
+            if (bookId == null) return;
+            await BookApi.BookAndAllChildrenDeleteAsync(context, (Guid)bookId);
         }
-        internal static void CleanUpUser(int userId, IdiomaticaContext context)
+        internal static void CleanUpUser(Guid userId, IdiomaticaContext context)
         {
             UserApi.UserAndAllChildrenDelete(context, userId);
         }
-        internal static async Task CleanUpUserAsync(int userId, IdiomaticaContext context)
+        internal static async Task CleanUpUserAsync(Guid userId, IdiomaticaContext context)
         {
             await UserApi.UserAndAllChildrenDeleteAsync(context, userId);
         }
         #endregion
 
         #region object create functions
-        internal static Book? CreateBook(IdiomaticaContext context, int userId)
+        internal static Book? CreateBook(IdiomaticaContext context, Guid userId)
         {
             Book? book = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
                 context,
@@ -91,10 +93,10 @@ namespace LogicTests
                 TestConstants.NewBookLanguageCode,
                 TestConstants.NewBookUrl,
                 TestConstants.NewBookText);
-            if (book is null || book.Id is null || book.Id < 1) { ErrorHandler.LogAndThrow(); return null; }
+            if (book is null || book.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
             return book;
         }
-        internal static async Task <Book?> CreateBookAsync(IdiomaticaContext context, int userId)
+        internal static async Task <Book?> CreateBookAsync(IdiomaticaContext context, Guid userId)
         {
             Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
                 context,
@@ -103,44 +105,72 @@ namespace LogicTests
                 TestConstants.NewBookLanguageCode,
                 TestConstants.NewBookUrl,
                 TestConstants.NewBookText);
-            if (book is null || book.Id is null || book.Id < 1) { ErrorHandler.LogAndThrow(); return null; }
+            if (book is null || book.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
             return book;
         }
+        internal static Guid GetLanguageKey(IdiomaticaContext context, string Code)
+        {
+            var lang = context.Languages.Where(x => x.Code == Code).FirstOrDefault();
+            Assert.IsNotNull(lang);
+            Assert.IsNotNull(lang.UniqueKey);
+            return (Guid)lang.UniqueKey;
+        }
+        internal static Guid GetSpanishLanguageKey(IdiomaticaContext context)
+        {
+            return GetLanguageKey(context, "ES");
+        }
+        internal static Guid GetEnglishLanguageKey(IdiomaticaContext context)
+        {
+            return GetLanguageKey(context, "EN-US");
+        }
+        internal static Guid GetSpanishLanguageUserKey(IdiomaticaContext context)
+        {
+            Guid languageKey = GetLanguageKey(context, "ES");
+            var languageUser = context.LanguageUsers
+                .Where(x => x.LanguageKey == languageKey && x.User != null && x.User.Name == "Dev Test user")
+                .FirstOrDefault();
+            Assert.IsNotNull(languageUser);
+            Assert.IsNotNull(languageUser.UniqueKey);
+            return (Guid)languageUser.UniqueKey;
+        }
 
-
-        internal static (int userId, int bookId, int bookUserId) CreateUserAndBookAndBookUser(
+        internal static (Guid userId, Guid bookId, Guid bookUserId) CreateUserAndBookAndBookUser(
             IdiomaticaContext context, UserService userService)
         {
-            int userId = 0;
-            int bookId = 0;
-            int bookUserId = 0;
+            Guid userId = Guid.NewGuid();
+            Guid bookId = Guid.NewGuid();
+            Guid? bookUserId;
+
+            
+
 
             var user = CreateNewTestUser(userService, context);
 
-            if (user is null || user.Id is null || user.Id < 1)
-            { ErrorHandler.LogAndThrow(); return (userId, bookId, bookUserId); }
-            userId = (int)user.Id;
-            var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
+            if (user is null || user.UniqueKey is null)
+            { ErrorHandler.LogAndThrow(); return (userId, bookId, Guid.NewGuid()); }
+            userId = (Guid)user.UniqueKey;
+            var languageUser = LanguageUserApi.LanguageUserCreate(context, GetSpanishLanguageKey(context),
+                (Guid)user.UniqueKey);
             if (languageUser is null) ErrorHandler.LogAndThrow();
 
 
-            Book? book = CreateBook(context, (int)user.Id);
-            if (book is null || book.Id is null || book.Id < 1)
-            { ErrorHandler.LogAndThrow(); return (userId, bookId, bookUserId); }
-            bookId = (int)book.Id;
+            Book? book = CreateBook(context, (Guid)user.UniqueKey);
+            if (book is null || book.UniqueKey is null)
+            { ErrorHandler.LogAndThrow(); return (userId, bookId, Guid.NewGuid()); }
+            bookId = (Guid)book.UniqueKey;
 
             var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
-                context, (int)book.Id, (int)user.Id);
-            if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-            { ErrorHandler.LogAndThrow(); return (userId, bookId, bookUserId); }
-            bookUserId = (int)bookUser.Id;
+                context, (Guid)book.UniqueKey, (Guid)user.UniqueKey);
+            if (bookUser is null || bookUser.UniqueKey is null)
+            { ErrorHandler.LogAndThrow(); return (userId, bookId, Guid.NewGuid()); }
+            bookUserId = (Guid)bookUser.UniqueKey;
 
-            return (userId, bookId, bookUserId);
+            return (userId, bookId, (Guid)bookUserId);
         }
-        internal static async Task<(int userId, int bookId, int bookUserId)> CreateUserAndBookAndBookUserAsync(
+        internal static async Task<(Guid userId, Guid bookId, Guid bookUserId)> CreateUserAndBookAndBookUserAsync(
             IdiomaticaContext context, UserService userService)
         {
-            return await Task<(int userId, int bookId, int bookUserId)>.Run(() =>
+            return await Task<(Guid userId, Guid bookId, Guid bookUserId)>.Run(() =>
             {
                 return CreateUserAndBookAndBookUser(context, userService);
             });
@@ -152,7 +182,7 @@ namespace LogicTests
             var name = "Auto gen tester 2";
             var code = "En-US";
             var user = UserApi.UserCreate(applicationUserId, name, code, context);
-            if (user is null || user.Id is null)
+            if (user is null || user.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
@@ -170,6 +200,90 @@ namespace LogicTests
             {
                 return CreateNewTestUser(userService, context);
             });
+        }
+
+        internal static Guid GetBook17Id(IdiomaticaContext context)
+        {
+            var book = context.Books.Where(x => x.Title == "España").FirstOrDefault();
+            Assert.IsNotNull(book);
+            Assert.IsNotNull(book.UniqueKey);
+            return (Guid)book.UniqueKey;
+        }
+        internal static Guid GetBook11Id(IdiomaticaContext context)
+        {
+            var book = context.Books.Where(x => x.Title == "Rapunzel").FirstOrDefault();
+            Assert.IsNotNull(book);
+            Assert.IsNotNull(book.UniqueKey);
+            return (Guid)book.UniqueKey;
+        }
+
+        internal static Guid GetWordKeyByTextLower(IdiomaticaContext context, Guid languageKey, string textLower)
+        {
+            var word = context.Words
+                .Where(x => x.LanguageKey == languageKey && x.TextLowerCase == textLower)
+                .FirstOrDefault();
+            Assert.IsNotNull(word);
+            Assert.IsNotNull(word.UniqueKey);
+            return (Guid)word.UniqueKey;
+        }
+
+        internal static Guid GetPage392Id(IdiomaticaContext context)
+        {
+            var book = context.Books.Where(x => x.Title == "España").Include(x => x.Pages).FirstOrDefault();
+            Assert.IsNotNull(book);
+            var page = book.Pages.Where(x => x.Ordinal == 2).FirstOrDefault();
+            Assert.IsNotNull(page);
+            Assert.IsNotNull(page.UniqueKey);
+            return (Guid)page.UniqueKey;
+        }
+        internal static Guid GetPage384Id(IdiomaticaContext context)
+        {
+            var book = context.Books.Where(x => x.Title == "[GUION PARA VIDEO: EXPLICACIÓN DE \"COMPREHENSIBLE INPUT\" EN 5 MINUTOS]").Include(x => x.Pages).FirstOrDefault();
+            Assert.IsNotNull(book);
+            var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+            Assert.IsNotNull(page);
+            Assert.IsNotNull(page.UniqueKey);
+            return (Guid)page.UniqueKey;
+        }
+
+        internal static Guid GetPageUser380Id(IdiomaticaContext context, Guid languageUserKey)
+        {
+            var book = context.Books.Where(x => x.Title == "[GUION PARA VIDEO: EXPLICACIÓN DE \"COMPREHENSIBLE INPUT\" EN 5 MINUTOS]").Include(x => x.Pages).FirstOrDefault();
+            Assert.IsNotNull(book);
+            var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+            Assert.IsNotNull(page);
+            var BookUser = context.BookUsers
+                .Where(x => x.BookKey == book.UniqueKey && x.LanguageUserKey == languageUserKey)
+                .FirstOrDefault();
+            Assert.IsNotNull(BookUser);
+            var pageUser = context.PageUsers
+                .Where(x => x.BookUserKey == book.UniqueKey && x.PageKey == page.UniqueKey)
+                .FirstOrDefault();
+            Assert.IsNotNull(pageUser);
+            Assert.IsNotNull(pageUser.UniqueKey);
+            return (Guid)pageUser.UniqueKey;
+        }
+
+        
+
+        internal static Guid GetFlashCard1Id(IdiomaticaContext context, Guid languageUserId)
+        {
+            // this is for the word "de" in spanish
+            Guid languageKey = GetSpanishLanguageKey(context);
+            var word = context.Words
+                .Where(x => x.LanguageKey == languageKey && x.TextLowerCase == "de")
+                .FirstOrDefault();
+            Assert.IsNotNull (word);
+            var wordUser = context.WordUsers
+                .Where(x => x.WordKey == word.UniqueKey && x.LanguageUserKey == languageUserId)
+                .FirstOrDefault();
+            Assert.IsNotNull(wordUser);
+            var flashCard = context.FlashCards
+                .Where(x => x.WordUserKey == wordUser.UniqueKey)
+                .FirstOrDefault();
+            Assert.IsNotNull(flashCard);
+            Assert.IsNotNull(flashCard.UniqueKey);
+            return (Guid)flashCard.UniqueKey;
         }
         #endregion
 

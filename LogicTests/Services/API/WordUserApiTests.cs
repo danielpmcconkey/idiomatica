@@ -18,10 +18,10 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordUserCreateTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int languageId = 1;
-            int wordId = 39;
+            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid wordId = 39;
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
 
             try
@@ -29,17 +29,17 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
-                userId = (int)user.Id;
+                Assert.IsNotNull(user); Assert.IsNotNull(user.UniqueKey);
+                userId = (Guid)user.UniqueKey;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, languageId, (int)user.Id);
-                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+                    context, languageId, (Guid)user.UniqueKey);
+                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 var wordUser = WordUserApi.WordUserCreate(
-                    context, wordId, (int)languageUser.Id, null, status);
-                Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
-                Assert.AreEqual(wordId, wordUser.WordId);
+                    context, wordId, (Guid)languageUser.UniqueKey, null, status);
+                Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.UniqueKey);
+                Assert.AreEqual(wordId, wordUser.WordKey);
             }
             finally
             {
@@ -50,10 +50,10 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task WordUserCreateAsyncTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int languageId = 1;
-            int wordId = 39;
+            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid wordId = 39;
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
 
             try
@@ -61,17 +61,17 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
-                userId = (int)user.Id;
+                Assert.IsNotNull(user); Assert.IsNotNull(user.UniqueKey);
+                userId = (Guid)user.UniqueKey;
 
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, languageId, (int)user.Id);
-                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+                    context, languageId, (Guid)user.UniqueKey);
+                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 var wordUser = await WordUserApi.WordUserCreateAsync(
-                    context, wordId, (int)languageUser.Id, null, status);
-                Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
-                Assert.AreEqual(wordId, wordUser.WordId);
+                    context, wordId, (Guid)languageUser.UniqueKey, null, status);
+                Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.UniqueKey);
+                Assert.AreEqual(wordId, wordUser.WordKey);
             }
             finally
             {
@@ -84,10 +84,10 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordUsersCreateAllForBookIdAndUserIdTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int bookId = 6;
-            int pageId = 66;
+            Guid bookId = 6;
+            Guid pageId = 66;
             int expectedCount = 149;
 
             try
@@ -96,17 +96,17 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
-                userId = (int)user.Id;
+                Assert.IsNotNull(user); Assert.IsNotNull(user.UniqueKey);
+                userId = (Guid)user.UniqueKey;
 
                 // create the languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (Guid)user.UniqueKey);
+                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
                 // create the wordUsers
-                WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, (int)user.Id);
+                WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, (Guid)user.UniqueKey);
                 // now read them back for one of the pages
                 var dict = WordUserApi.WordUsersDictByPageIdAndUserIdRead(
-                    context, pageId, (int)user.Id);
+                    context, pageId, (Guid)user.UniqueKey);
                 Assert.IsNotNull(dict);
                 Assert.AreEqual(expectedCount, dict.Count);
             }
@@ -119,10 +119,10 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task WordUsersCreateAllForBookIdAndUserIdAsyncTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int bookId = 6;
-            int pageId = 66;
+            Guid bookId = 6;
+            Guid pageId = 66;
             int expectedCount = 149;
 
             try
@@ -131,17 +131,17 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
-                userId = (int)user.Id;
+                Assert.IsNotNull(user); Assert.IsNotNull(user.UniqueKey);
+                userId = (Guid)user.UniqueKey;
 
                 // create the languageUser
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
-                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (Guid)user.UniqueKey);
+                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
                 // create the wordUsers
-                await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, (int)user.Id);
+                await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, (Guid)user.UniqueKey);
                 // now read them back for one of the pages
                 var dict = await WordUserApi.WordUsersDictByPageIdAndUserIdReadAsync(
-                    context, pageId, (int)user.Id);
+                    context, pageId, (Guid)user.UniqueKey);
                 Assert.IsNotNull(dict);
                 Assert.AreEqual(expectedCount, dict.Count);
             }
@@ -156,10 +156,10 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordUsersDictByPageIdAndUserIdReadTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int bookId = 6;
-            int pageId = 66;
+            Guid bookId = 6;
+            Guid pageId = 66;
             int expectedCount = 149;
             string wordToCheck = "exploradores";
 
@@ -169,24 +169,24 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
-                userId = (int)user.Id;
+                Assert.IsNotNull(user); Assert.IsNotNull(user.UniqueKey);
+                userId = (Guid)user.UniqueKey;
 
                 // create the languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (Guid)user.UniqueKey);
+                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 // create the wordUsers
-                WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, (int)user.Id);
+                WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, (Guid)user.UniqueKey);
 
                 // now read them back for one of the pages
                 var dict = WordUserApi.WordUsersDictByPageIdAndUserIdRead(
-                    context, pageId, (int)user.Id);
+                    context, pageId, (Guid)user.UniqueKey);
                 Assert.IsNotNull(dict);
                 Assert.AreEqual(expectedCount, dict.Count);
                 var wordUser = dict[wordToCheck];
                 Assert.IsNotNull(wordUser);
-                Assert.IsNotNull(wordUser.Id);
+                Assert.IsNotNull(wordUser.UniqueKey);
             }
             finally
             {
@@ -197,10 +197,10 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task WordUsersDictByPageIdAndUserIdReadAsyncTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int bookId = 6;
-            int pageId = 66;
+            Guid bookId = 6;
+            Guid pageId = 66;
             int expectedCount = 149;
             string wordToCheck = "exploradores";
 
@@ -210,24 +210,24 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
-                userId = (int)user.Id;
+                Assert.IsNotNull(user); Assert.IsNotNull(user.UniqueKey);
+                userId = (Guid)user.UniqueKey;
 
                 // create the languageUser
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (int)user.Id);
-                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (Guid)user.UniqueKey);
+                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 // create the wordUsers
-                await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, (int)user.Id);
+                await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, (Guid)user.UniqueKey);
                 
                 // now read them back for one of the pages
                 var dict = await WordUserApi.WordUsersDictByPageIdAndUserIdReadAsync(
-                    context, pageId, (int)user.Id);
+                    context, pageId, (Guid)user.UniqueKey);
                 Assert.IsNotNull(dict);
                 Assert.AreEqual(expectedCount, dict.Count);
                 var wordUser = dict[wordToCheck];
                 Assert.IsNotNull(wordUser);
-                Assert.IsNotNull(wordUser.Id);
+                Assert.IsNotNull(wordUser.UniqueKey);
             }
             finally
             {
@@ -240,10 +240,10 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordUserUpdateTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             int languageId = 1;
-            int wordId = 39;
+            Guid wordId = 39;
             AvailableWordUserStatus statusBefore = AvailableWordUserStatus.UNKNOWN;
             AvailableWordUserStatus statusAfter = AvailableWordUserStatus.LEARNING3;
             string translation = "he/she says";
@@ -253,23 +253,23 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
-                userId = (int)user.Id;
+                Assert.IsNotNull(user); Assert.IsNotNull(user.UniqueKey);
+                userId = (Guid)user.UniqueKey;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, languageId, (int)user.Id);
-                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+                    context, languageId, (Guid)user.UniqueKey);
+                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 var wordUserBefore = WordUserApi.WordUserCreate(
-                    context, wordId, (int)languageUser.Id, null, statusBefore);
-                Assert.IsNotNull(wordUserBefore); Assert.IsNotNull(wordUserBefore.Id);
+                    context, wordId, (Guid)languageUser.UniqueKey, null, statusBefore);
+                Assert.IsNotNull(wordUserBefore); Assert.IsNotNull(wordUserBefore.UniqueKey);
 
                 // update it
-                WordUserApi.WordUserUpdate(context, (int)wordUserBefore.Id, statusAfter, translation);
+                WordUserApi.WordUserUpdate(context, (Guid)wordUserBefore.UniqueKey, statusAfter, translation);
 
                 // read it back
-                var wordUserAfter = WordUserApi.WordUserReadById(context, (int)wordUserBefore.Id);
-                Assert.IsNotNull(wordUserAfter); Assert.IsNotNull(wordUserAfter.Id);
+                var wordUserAfter = WordUserApi.WordUserReadById(context, (Guid)wordUserBefore.UniqueKey);
+                Assert.IsNotNull(wordUserAfter); Assert.IsNotNull(wordUserAfter.UniqueKey);
                 Assert.AreEqual(statusAfter, wordUserAfter.Status);
                 Assert.AreEqual(translation, wordUserAfter.Translation);
             }
@@ -282,10 +282,10 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task WordUserUpdateAsyncTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int languageId = 1;
-            int wordId = 39;
+            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid wordId = 39;
             AvailableWordUserStatus statusBefore = AvailableWordUserStatus.UNKNOWN;
             AvailableWordUserStatus statusAfter = AvailableWordUserStatus.LEARNING3;
             string translation = "he/she says";
@@ -295,23 +295,23 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
-                userId = (int)user.Id;
+                Assert.IsNotNull(user); Assert.IsNotNull(user.UniqueKey);
+                userId = (Guid)user.UniqueKey;
 
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, languageId, (int)user.Id);
-                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+                    context, languageId, (Guid)user.UniqueKey);
+                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 var wordUserBefore = await WordUserApi.WordUserCreateAsync(
-                    context, wordId, (int)languageUser.Id, null, statusBefore);
-                Assert.IsNotNull(wordUserBefore); Assert.IsNotNull(wordUserBefore.Id);
+                    context, wordId, (Guid)languageUser.UniqueKey, null, statusBefore);
+                Assert.IsNotNull(wordUserBefore); Assert.IsNotNull(wordUserBefore.UniqueKey);
 
                 // update it
-                await WordUserApi.WordUserUpdateAsync(context, (int)wordUserBefore.Id, statusAfter, translation);
+                await WordUserApi.WordUserUpdateAsync(context, (Guid)wordUserBefore.UniqueKey, statusAfter, translation);
 
                 // read it back
-                var wordUserAfter = await WordUserApi.WordUserReadByIdAsync(context, (int)wordUserBefore.Id);
-                Assert.IsNotNull(wordUserAfter); Assert.IsNotNull(wordUserAfter.Id);
+                var wordUserAfter = await WordUserApi.WordUserReadByIdAsync(context, (Guid)wordUserBefore.UniqueKey);
+                Assert.IsNotNull(wordUserAfter); Assert.IsNotNull(wordUserAfter.UniqueKey);
                 Assert.AreEqual(statusAfter, wordUserAfter.Status);
                 Assert.AreEqual(translation, wordUserAfter.Translation);
             }
@@ -327,12 +327,12 @@ namespace Logic.Services.API.Tests
         public void WordUserReadByIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            int wordUserId = 1545;
+            Guid wordUserId = 1545;
             AvailableWordUserStatus status = AvailableWordUserStatus.LEARNED;
             string translation = "they were living (imperfect)";
             
             var wordUser = WordUserApi.WordUserReadById(context, wordUserId);
-            Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
+            Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.UniqueKey);
             Assert.AreEqual(status, wordUser.Status);
             Assert.AreEqual(translation, wordUser.Translation);
         }
@@ -340,12 +340,12 @@ namespace Logic.Services.API.Tests
         public async Task WordUserReadByIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            int wordUserId = 1545;
+            Guid wordUserId = 1545;
             AvailableWordUserStatus status = AvailableWordUserStatus.LEARNED;
             string translation = "they were living (imperfect)";
 
             var wordUser = await WordUserApi.WordUserReadByIdAsync(context, wordUserId);
-            Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
+            Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.UniqueKey);
             Assert.AreEqual(status, wordUser.Status);
             Assert.AreEqual(translation, wordUser.Translation);
         }

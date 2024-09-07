@@ -12,33 +12,29 @@ namespace Logic.Services.API
 {
     public static class BookStatApi
     {
-        public static void BookStatsCreateAndSave(IdiomaticaContext context, int bookId)
+        public static void BookStatsCreateAndSave(IdiomaticaContext context, Guid bookId)
         {
-            if (bookId < 1)
-            {
-                ErrorHandler.LogAndThrow(1100);
-            }
             int numRows = context.Database.ExecuteSql($"""
             with allPages as (
-            	SELECT b.id as bookId, p.Id as pageId, p.Ordinal as pageOrdinal
-            	FROM [Idiomatica].[Idioma].[Book] b
-            	left join [Idioma].[Page] p on p.BookId = b.Id
+            	SELECT b.id as bookId, p.UniqueKey as pageId, p.Ordinal as pageOrdinal
+            	FROM [Idioma].[Book] b
+            	left join [Idioma].[Page] p on p.BookKey = b.UniqueKey
             ), allParagraphs as (
-            	select bookId, p.pageId, pageOrdinal, pp.Id as paragraphId, pp.Ordinal as paragraphOrdinal
+            	select bookId, p.pageId, pageOrdinal, pp.UniqueKey as paragraphId, pp.Ordinal as paragraphOrdinal
             	from [Idioma].[Paragraph] pp
-            	left join allPages p on pp.PageId = p.pageId
+            	left join allPages p on pp.PageKey = p.pageId
             ), allSentences as (
-            	select bookId, pageId, pageOrdinal, pp.paragraphId, paragraphOrdinal, s.Id as sentenceId, s.Ordinal as sentenceOrdinal
+            	select bookId, pageId, pageOrdinal, pp.paragraphId, paragraphOrdinal, s.UniqueKey as sentenceId, s.Ordinal as sentenceOrdinal
             	from allParagraphs pp
-            	join [Idioma].[Sentence] s on s.ParagraphId = pp.paragraphId
+            	join [Idioma].[Sentence] s on s.ParagraphKey = pp.paragraphId
             ), allTokens as (
-            	select bookId, pageId, pageOrdinal, paragraphId, paragraphOrdinal, s.sentenceId, sentenceOrdinal, t.Id as tokenId, t.Ordinal as tokenOrdinal, t.WordId as wordId
+            	select bookId, pageId, pageOrdinal, paragraphId, paragraphOrdinal, s.sentenceId, sentenceOrdinal, t.UniqueKey as tokenId, t.Ordinal as tokenOrdinal, t.WordKey as wordId
             	from allSentences s
-            	left join [Idioma].[Token] t on t.SentenceId = s.sentenceId
+            	left join [Idioma].[Token] t on t.SentenceKey = s.sentenceId
             ), allWords as (
             	select bookId, pageId, pageOrdinal, paragraphId, paragraphOrdinal, sentenceId, sentenceOrdinal, t.tokenId, tokenOrdinal, w.TextLowerCase as wordText
             	from allTokens t
-            	left join [Idioma].[Word] w on t.wordId = w.Id
+            	left join [Idioma].[Word] w on t.wordId = w.UniqueKey
             ), distinctWords as (
             	select bookId, wordText, count(*) as numInstances
             	from allWords
@@ -66,19 +62,19 @@ namespace Logic.Services.API
             	group by bookId
             ), difficultyScore as (
                 select
-            	    b.Id as BookId
+            	    b.UniqueKey as BookId
             	    , {(int)AvailableBookStat.DIFFICULTYSCORE} as [Key]
-            	    , FORMAT (avg(case when wr.WordId is null then 65000 else wr.[DifficultyScore] end) / 650, '##.##') as [Value]
+            	    , FORMAT (avg(case when wr.WordKey is null then 65000 else wr.[DifficultyScore] end) / 650, '##.##') as [Value]
                 from [Idioma].[Page] p
-                left join [Idioma].[Book] b on p.BookId = b.Id
-                left join [Idioma].[Language] l on b.LanguageId = l.Id
-                left join [Idioma].[Paragraph] pp on p.Id = pp.PageId
-                left join [Idioma].[Sentence] s on pp.Id = s.ParagraphId
-                left join [Idioma].[Token] t on s.Id = t.SentenceId
-                left join [Idioma].[Word] w on t.WordId = w.Id
-                left join [Idioma].[WordRank] wr on l.Id = wr.[LanguageId] and w.Id = wr.[WordId]
-                where b.Id = {bookId}
-                group by b.Id
+                left join [Idioma].[Book] b on p.BookKey = b.UniqueKey
+                left join [Idioma].[Language] l on b.LanguageKey = l.UniqueKey
+                left join [Idioma].[Paragraph] pp on p.UniqueKey = pp.PageKey
+                left join [Idioma].[Sentence] s on pp.UniqueKey = s.ParagraphKey
+                left join [Idioma].[Token] t on s.UniqueKey = t.SentenceKey
+                left join [Idioma].[Word] w on t.WordKey = w.UniqueKey
+                left join [Idioma].[WordRank] wr on l.UniqueKey = wr.[LanguageId] and w.UniqueKey = wr.[WordId]
+                where b.UniqueKey = {bookId}
+                group by b.UniqueKey
             ), bookStatQueries as (
             	select * from totalPageCount
             	union all
@@ -90,14 +86,14 @@ namespace Logic.Services.API
             )
             insert into [Idioma].[BookStat](BookId, [Key], [Value])
             select * from bookStatQueries
-            where BookId = {bookId}
+            where BookKey = {bookId}
             """);
             if (numRows < 1)
             {
                 ErrorHandler.LogAndThrow(2110);
             }
         }
-        public static async Task BookStatsCreateAndSaveAsync(IdiomaticaContext context, int bookId)
+        public static async Task BookStatsCreateAndSaveAsync(IdiomaticaContext context, Guid bookId)
         {
             await Task.Run(() => BookStatsCreateAndSave(context, bookId));
         }

@@ -109,7 +109,7 @@
         {
             Logger.LogInformation(
                 "{Name} logged in with {LoginProvider} provider.",
-                externalLoginInfo.Principal.Identity?.Name,
+                externalLoginInfo.Principal.UniqueKeyentity?.Name,
                 externalLoginInfo.LoginProvider);
             RedirectManager.RedirectTo(ReturnUrl);
         }

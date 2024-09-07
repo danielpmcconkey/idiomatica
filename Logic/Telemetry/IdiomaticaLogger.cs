@@ -42,7 +42,7 @@ namespace Logic.Telemetry
 
             LoggerConfiguration config = getCurrentConfig();
 
-            if (config.EventId == 0 || config.EventId == eventId.Id)
+            if (config.EventId == 0 || config.EventId == eventId.UniqueKey)
             {
                 switch (config.LogLevels[logLevel])
                 {
@@ -50,7 +50,7 @@ namespace Logic.Telemetry
                         Console.WriteLine($"{name}: {formatter(state, exception)}");
                         break;
                     case LogFormat.Long:
-                        Console.WriteLine($"[{eventId.Id,2}: {logLevel,-12}] {name} - {formatter(state, exception)}");
+                        Console.WriteLine($"[{eventId.UniqueKey,2}: {logLevel,-12}] {name} - {formatter(state, exception)}");
                         break;
                     default:
                         // No-op

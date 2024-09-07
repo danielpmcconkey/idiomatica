@@ -66,7 +66,7 @@ namespace TestsBench
                 Code = "En-US"
             };
             user = DataCache.UserCreate(user, context);
-            if (user is null || user.Id is null)
+            if (user is null || user.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return user;
@@ -75,7 +75,7 @@ namespace TestsBench
             var languageUser = new LanguageUser()
             {
                 LanguageId = 1, // espAnish
-                UserId = (int)user.Id,
+                UserId = (Guid)user.UniqueKey,
                 TotalWordsRead = 0
             };
             DataCache.LanguageUserCreate(languageUser, context);

@@ -173,7 +173,7 @@ Fin
         //            var user = CommonFunctions.CreateNewTestUser(userService, context);
         //            var bookService = CommonFunctions.CreateBookService();
         //            int bookId = 7;
-        //            int userId = (int)user.Id;
+        //            int userId = (Guid)user.UniqueKey;
         //            int firstBookUserId = 999;
         //            try
         //            {
@@ -202,7 +202,7 @@ Fin
         //    var user = CommonFunctions.CreateNewTestUser(userService, context);
         //    var bookService = CommonFunctions.CreateBookService();
         //    int bookId = 7;
-        //    int userId = (int)user.Id;
+        //    int userId = (Guid)user.UniqueKey;
         //    int bookUserId = 999;
         //    try
         //    {
@@ -236,7 +236,7 @@ Fin
         //            await bookService.BookListRowsFilterAndSort(context);
         //            int book1Id = 7;
         //            int book2Id = 6;
-        //            int userId = (int)user.Id;
+        //            int userId = (Guid)user.UniqueKey;
         //            int bookUser1Id = 0;
         //            int bookUser2Id = 0;
 
@@ -288,7 +288,7 @@ Fin
         //            await bookService.BookListRowsFilterAndSort(context);
         //            int book1Id = 7;
         //            int book2Id = 6;
-        //            int userId = (int)user.Id;
+        //            int userId = (Guid)user.UniqueKey;
         //            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
         //            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
         //            // reset the book list
@@ -337,7 +337,7 @@ Fin
         //            int book2Id = 6;    // Tierras desconocidas
         //            int book3Id = 14;   // LA VIDA EN NUESTRO PLANETA CAPÍTULO 8
 
-        //            int userId = (int)user.Id;
+        //            int userId = (Guid)user.UniqueKey;
         //            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
         //            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
         //            int bookUser3Id = await bookService.BookUserCreateAndSaveAsync(context, book3Id, userId);
@@ -346,8 +346,8 @@ Fin
         //            // now concat the title of just books 1 and 3, because those are the books we expect to survive the filter
         //            var expectedTitleConcat = string.Join("|", (
         //                                    bookService.BookListRows
-        //                                        .Where(x => x.BookId == 7 || x.BookId == 14)
-        //                                        .OrderBy(x => x.BookId)
+        //                                        .Where(x => x.BookKey == 7 || x.BookKey == 14)
+        //                                        .OrderBy(x => x.BookKey)
         //                                        .Select(x => x.Title)
         //                                        .ToArray()));
 
@@ -360,7 +360,7 @@ Fin
         //                // create a concatenated string of all titles in the book liSt
         //                var resultingTitleConcat = string.Join("|", (
         //                                    bookService.BookListRows
-        //                                        .OrderBy(x => x.BookId)
+        //                                        .OrderBy(x => x.BookKey)
         //                                        .Select(x => x.Title)
         //                                        .ToArray()));
         //                // assert
@@ -392,7 +392,7 @@ Fin
         //            int book2Id = 6;
         //            int book3Id = 8;
 
-        //            int userId = (int)user.Id;
+        //            int userId = (Guid)user.UniqueKey;
         //            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
         //            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
         //            int bookUser3Id = await bookService.BookUserCreateAndSaveAsync(context, book3Id, userId);
@@ -401,7 +401,7 @@ Fin
         //            // now concat the title of just books 2 and 3, because those are the books we expect to survive the filter
         //            var expectedTitleConcat = string.Join("|", (
         //                                    bookService.BookListRows
-        //                                        .Where(x => x.BookId == 8 || x.BookId == 6)
+        //                                        .Where(x => x.BookKey == 8 || x.BookId == 6)
         //                                        .OrderBy(x => x.BookId)
         //                                        .Select(x => x.Title)
         //                                        .ToArray()));
@@ -447,7 +447,7 @@ Fin
         //            int book2Id = 6;    // Tierras desconocidas
         //            int book3Id = 14;   // LA VIDA EN NUESTRO PLANETA CAPÍTULO 8
 
-        //            int userId = (int)user.Id;
+        //            int userId = (Guid)user.UniqueKey;
         //            int bookUser1Id = await bookService.BookUserCreateAndSaveAsync(context, book1Id, userId);
         //            int bookUser2Id = await bookService.BookUserCreateAndSaveAsync(context, book2Id, userId);
         //            int bookUser3Id = await bookService.BookUserCreateAndSaveAsync(context, book3Id, userId);
@@ -571,8 +571,8 @@ Fin
         //            var bookService = CommonFunctions.CreateBookService();
 
 
-        //            int userId1 = (int)user1.Id;
-        //            int userId2 = (int)user2.Id;
+        //            int userId1 = (int)user1.UniqueKey;
+        //            int userId2 = (int)user2.UniqueKey;
 
         //            int bookId = 7;
         //            string tag = Guid.NewGuid().ToString();
@@ -619,9 +619,9 @@ Fin
         //            var user2 = CommonFunctions.CreateNewTestUser(userService, context);
         //            var user3 = CommonFunctions.CreateNewTestUser(userService, context);
         //            var bookService = CommonFunctions.CreateBookService();
-        //            int userId1 = (int)user1.Id;
-        //            int userId2 = (int)user2.Id; 
-        //            int userId3 = (int)user3.Id;
+        //            int userId1 = (int)user1.UniqueKey;
+        //            int userId2 = (int)user2.UniqueKey; 
+        //            int userId3 = (int)user3.UniqueKey;
         //            int bookId = 7;
         //            string tag = Guid.NewGuid().ToString();
         //            int secondCount = 0;
@@ -679,7 +679,7 @@ Fin
         //            var user = CommonFunctions.CreateNewTestUser(userService, context);
         //            var bookService = CommonFunctions.CreateBookService();
         //            int bookId = 7;
-        //            int userId = (int)user.Id;
+        //            int userId = (Guid)user.UniqueKey;
         //            int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
         //            try
         //            {
@@ -731,7 +731,7 @@ Fin
         //            var user = CommonFunctions.CreateNewTestUser(userService, context);
         //            var bookService = CommonFunctions.CreateBookService();
         //            int bookId = 7;
-        //            int userId = (int)user.Id;
+        //            int userId = (Guid)user.UniqueKey;
         //            int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
 
         //            try
@@ -745,9 +745,9 @@ Fin
         //                var wordUser = bookService.AllWordUsersInPage["administrativa"];
         //                wordUser.Status = AvailableWordUserStatus.LEARNED;
         //                await bookService.WordUserSaveModalDataAsync(
-        //                    context, (int)wordUser.Id, (AvailableWordUserStatus)wordUser.Status, wordUser.Translation);
+        //                    context, (int)wordUser.UniqueKey, (AvailableWordUserStatus)wordUser.Status, wordUser.Translation);
 
-        //                var wordUserFromDb = context.WordUsers.FirstOrDefault(x => x.Id == wordUser.Id);
+        //                var wordUserFromDb = context.WordUsers.FirstOrDefault(x => x.UniqueKey == wordUser.UniqueKey);
 
         //                // assert
         //                Assert.Equal(wordUserFromDb.Status.ToString(), AvailableWordUserStatus.LEARNED.ToString());
@@ -769,7 +769,7 @@ Fin
         //            var user = CommonFunctions.CreateNewTestUser(userService, context);
         //            var bookService = CommonFunctions.CreateBookService();
         //            int bookId = 7;
-        //            int userId = (int)user.Id;
+        //            int userId = (Guid)user.UniqueKey;
         //            int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
         //            string newTranslation = "administrative";
         //            try
@@ -783,9 +783,9 @@ Fin
         //                var wordUser = bookService.AllWordUsersInPage["administrativa"];
         //                wordUser.Translation = newTranslation;
         //                await bookService.WordUserSaveModalDataAsync(
-        //                    context, (int)wordUser.Id, (AvailableWordUserStatus)wordUser.Status, wordUser.Translation);
+        //                    context, (int)wordUser.UniqueKey, (AvailableWordUserStatus)wordUser.Status, wordUser.Translation);
 
-        //                var wordUserFromDb = context.WordUsers.FirstOrDefault(x => x.Id == wordUser.Id);
+        //                var wordUserFromDb = context.WordUsers.FirstOrDefault(x => x.UniqueKey == wordUser.UniqueKey);
 
         //                // assert
         //                Assert.Equal(wordUserFromDb.Translation, newTranslation);
@@ -807,7 +807,7 @@ Fin
         //            var user = CommonFunctions.CreateNewTestUser(userService, context);
         //            var bookService = CommonFunctions.CreateBookService();
         //            int bookId = 7;
-        //            int userId = (int)user.Id;
+        //            int userId = (Guid)user.UniqueKey;
         //            int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
         //            try
         //            {
@@ -823,7 +823,7 @@ Fin
         //                wordUser1.Status = AvailableWordUserStatus.NEW2;
         //                var wordUserStatus1 = wordUser1.Status.ToString();
         //                await bookService.WordUserSaveModalDataAsync(
-        //                    context, (int)wordUser1.Id, (AvailableWordUserStatus)wordUser1.Status, wordUser1.Translation);
+        //                    context, (int)wordUser1.UniqueKey, (AvailableWordUserStatus)wordUser1.Status, wordUser1.Translation);
 
         //                await bookService.PageMove(context, 2);
         //                var word2 = bookService.Paragraphs[2].Sentences[0].Tokens[4].Word; // de
@@ -853,16 +853,16 @@ Fin
         //            // create the book
         //            var book = await BookApiL1.BookCreateAndSaveAsync(context, 
         //                _newBookTitle, _newBookLanguageCode, _newBookUrl, _newBookText);
-        //            if (book == null || book.Id == null)
+        //            if (book == null || book.UniqueKey == null)
         //            {
         //                ErrorHandler.LogAndThrow();
         //                return;
         //            }
-        //            int bookId = (int)book.Id;
+        //            int bookId = (Guid)book.UniqueKey;
         //            // add the book stats
         //            bookService.BookStatsCreateAndSave(context, bookId);
         //            // now create the book user for teh logged in user
-        //            int userId = (int)user.Id;
+        //            int userId = (Guid)user.UniqueKey;
         //            int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
         //            string fromCode = "ES";
         //            string toCode = "EN-US";
@@ -901,7 +901,7 @@ Fin
         //            var user = CommonFunctions.CreateNewTestUser(userService, context);
         //            var bookService = CommonFunctions.CreateBookService();
         //            int bookId = 7;
-        //            int userId = (int)user.Id;
+        //            int userId = (Guid)user.UniqueKey;
         //            int bookUserId = await bookService.BookUserCreateAndSaveAsync(context, bookId, userId);
         //            try
         //            {

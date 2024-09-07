@@ -18,9 +18,9 @@ namespace Model
         public Guid? UniqueKey { get; set; } 
 
         #region relationships
-        public int? UserId { get; set; }
+        public Guid? UserKey { get; set; }
         public User? User { get; set; }
-        public int? PageId { get; set; }
+        public Guid? PageKey { get; set; }
         public Page? Page { get; set; }
 
         #endregion

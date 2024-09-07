@@ -1,4 +1,4 @@
-﻿using Microsoft.IdentityModel.Protocols.Configuration;
+﻿using Microsoft.UniqueKeyentityModel.Protocols.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;

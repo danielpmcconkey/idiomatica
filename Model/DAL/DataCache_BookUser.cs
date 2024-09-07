@@ -11,8 +11,8 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, BookUser> BookUserById = new ConcurrentDictionary<int, BookUser>();
-        private static ConcurrentDictionary<(int bookId, int userId), BookUser> BookUserByBookIdAndUserId = new ConcurrentDictionary<(int bookId, int userId), BookUser>();
+        private static ConcurrentDictionary<Guid, BookUser> BookUserById = new ConcurrentDictionary<Guid, BookUser>();
+        private static ConcurrentDictionary<(Guid bookId, Guid userId), BookUser> BookUserByBookIdAndUserId = new ConcurrentDictionary<(Guid bookId, Guid userId), BookUser>();
 
         #region create
 
@@ -24,15 +24,15 @@ namespace Model.DAL
                               ([BookId]
                               ,[LanguageUserId]
                               ,[IsArchived]
-                              ,[CurrentPageID]
+                              ,[CurrentPageKey]
                               ,[AudioBookmarks]
                               ,[AudioCurrentPos]
                               ,[UniqueKey])
                         VALUES
-                              ({bookUser.BookId}
-                              ,{bookUser.LanguageUserId}
+                              ({bookUser.BookKey}
+                              ,{bookUser.LanguageUserKey}
                               ,{bookUser.IsArchived}
-                              ,{bookUser.CurrentPageID}
+                              ,{bookUser.CurrentPageKey}
                               ,{bookUser.AudioBookmarks}
                               ,{bookUser.AudioCurrentPos}
                               ,{guid})
@@ -41,14 +41,14 @@ namespace Model.DAL
 
 
             var newEntity = context.BookUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            if (newEntity is null || newEntity.UniqueKey is null)
             {
                 throw new InvalidDataException("newEntity is null in BookUserCreate");
             }
 
 
             // add it to cache
-            BookUserById[(int)newEntity.Id] = newEntity;
+            BookUserById[(Guid)newEntity.UniqueKey] = newEntity;
             return newEntity;
         }
         public static async Task<BookUser?> BookUserCreateAsync(BookUser value, IdiomaticaContext context)
@@ -62,7 +62,7 @@ namespace Model.DAL
         #endregion
 
         #region read
-        public static BookUser? BookUserByIdRead(int key, IdiomaticaContext context)
+        public static BookUser? BookUserByIdRead(Guid key, IdiomaticaContext context)
         {
             // check cache
             if (BookUserById.TryGetValue(key, out BookUser? value))
@@ -71,14 +71,14 @@ namespace Model.DAL
             }
 
             // read DB
-            value = context.BookUsers.Where(x => x.Id == key)
+            value = context.BookUsers.Where(x => x.UniqueKey == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
             BookUserById[key] = value;
             return value;
         }
-        public static async Task<BookUser?> BookUserByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<BookUser?> BookUserByIdReadAsync(Guid key, IdiomaticaContext context)
         {
             return await Task<BookUser?>.Run(() =>
             {
@@ -86,7 +86,7 @@ namespace Model.DAL
             });
         }
         public static BookUser? BookUserByBookIdAndUserIdRead(
-            (int bookId, int userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IdiomaticaContext context)
         {
             // check cache
             if (BookUserByBookIdAndUserId.ContainsKey(key))
@@ -97,17 +97,17 @@ namespace Model.DAL
             // read DB
             var value = context.BookUsers
                 .Where(x => x.LanguageUser != null &&
-                    x.LanguageUser.UserId == key.userId &&
-                    x.BookId == key.bookId)
+                    x.LanguageUser.UserKey == key.userId &&
+                    x.BookKey == key.bookId)
                 .FirstOrDefault();
-            if (value is null || value.Id is null) return null;
+            if (value is null || value.UniqueKey is null) return null;
             // write to cache
             BookUserByBookIdAndUserId[key] = value;
-            BookUserById[(int)value.Id] = value;
+            BookUserById[(Guid)value.UniqueKey] = value;
             return value;
         }
         public static async Task<BookUser?> BookUserByBookIdAndUserIdReadAsync(
-            (int bookId, int userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IdiomaticaContext context)
         {
             return await Task<BookUser?>.Run(() =>
             {
@@ -119,18 +119,18 @@ namespace Model.DAL
         #region update
         public static void BookUserUpdate(BookUser bookUser, IdiomaticaContext context)
         {
-            if (bookUser.Id == null || bookUser.Id < 1) 
+            if (bookUser.UniqueKey == null) 
                 throw new ArgumentException("ID cannot be null or 0 when updating");
             
             int numRows = context.Database.ExecuteSql($"""
                         update [Idioma].[BookUser]
-                              set [BookId] = {bookUser.BookId}
-                              ,[LanguageUserId] = {bookUser.LanguageUserId}
+                              set [BookId] = {bookUser.BookKey}
+                              ,[LanguageUserId] = {bookUser.LanguageUserKey}
                               ,[IsArchived] = {bookUser.IsArchived}
-                              ,[CurrentPageID] = {bookUser.CurrentPageID}
+                              ,[CurrentPageKey] = {bookUser.CurrentPageKey}
                               ,[AudioBookmarks] = {bookUser.AudioBookmarks}
                               ,[AudioCurrentPos] = {bookUser.AudioCurrentPos}
-                        where Id = {bookUser.Id}
+                        where Id = {bookUser.UniqueKey}
                         ;
                         """);
             if (numRows < 1)
@@ -138,9 +138,9 @@ namespace Model.DAL
                 throw new InvalidDataException("BookUser update affected 0 rows");
             };
             // now update the cache
-            BookUserById[(int)bookUser.Id] = bookUser;
+            BookUserById[(Guid)bookUser.UniqueKey] = bookUser;
 
-            var cachedItem1 = BookUserByBookIdAndUserId.Where(x => x.Value.Id == bookUser.Id).FirstOrDefault();
+            var cachedItem1 = BookUserByBookIdAndUserId.Where(x => x.Value.UniqueKey == bookUser.UniqueKey).FirstOrDefault();
             if (cachedItem1.Value != null)
             {
                 BookUserByBookIdAndUserId[cachedItem1.Key] = bookUser;

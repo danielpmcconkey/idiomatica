@@ -14,7 +14,7 @@ namespace Model
 
         #region relationships
 
-        public int? LanguageId { get; set; }
+        public Guid? LanguageKey { get; set; }
         public Language? Language { get; set; }
 
         [NotMapped]

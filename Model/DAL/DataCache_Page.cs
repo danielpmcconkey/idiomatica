@@ -10,12 +10,12 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, Page> PageById = new ConcurrentDictionary<int, Page>();
-        private static ConcurrentDictionary<(int ordinal, int bookId), Page> PageByOrdinalAndBookId = new ConcurrentDictionary<(int ordinal, int bookId), Page>();
-        private static ConcurrentDictionary<int, List<Page>> PagesByBookId = new ConcurrentDictionary<int, List<Page>>();
+        private static ConcurrentDictionary<Guid, Page> PageById = [];
+        private static ConcurrentDictionary<(int ordinal, Guid bookId), Page> PageByOrdinalAndBookId = [];
+        private static ConcurrentDictionary<Guid, List<Page>> PagesByBookId = [];
 
         #region read
-        public static Page? PageByIdRead(int key, IdiomaticaContext context)
+        public static Page? PageByIdRead(Guid key, IdiomaticaContext context)
         {
             // check cache
             if (PageById.ContainsKey(key))
@@ -24,13 +24,13 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.Pages.Where(x => x.Id == key).FirstOrDefault();
+            var value = context.Pages.Where(x => x.UniqueKey == key).FirstOrDefault();
             if (value == null) return null;
             // write to cache
             PageById[key] = value;
             return value;
         }
-        public static async Task<Page?> PageByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<Page?> PageByIdReadAsync(Guid key, IdiomaticaContext context)
         {
             return await Task<Page?>.Run(() =>
             {
@@ -38,7 +38,7 @@ namespace Model.DAL
             });
         }
         public static Page? PageByOrdinalAndBookIdRead(
-            (int ordinal, int bookId) key, IdiomaticaContext context)
+            (int ordinal, Guid bookId) key, IdiomaticaContext context)
         {
             // check cache
             if (PageByOrdinalAndBookId.ContainsKey(key))
@@ -48,18 +48,18 @@ namespace Model.DAL
             // read DB
             var value = context.Pages
                 .Where(p => p.Ordinal == key.ordinal
-                    && p.BookId == key.bookId)
+                    && p.BookKey == key.bookId)
                 .FirstOrDefault();
 
             if (value == null) return null;
             // write to cache
             PageByOrdinalAndBookId[key] = value;
-            if (value.Id is null) return value;
-            PageById[(int)value.Id] = value;
+            if (value.UniqueKey is null) return value;
+            PageById[(Guid)value.UniqueKey] = value;
             return value;
         }
         public static async Task<Page?> PageByOrdinalAndBookIdReadAsync(
-            (int ordinal, int bookId) key, IdiomaticaContext context)
+            (int ordinal, Guid bookId) key, IdiomaticaContext context)
         {
             return await Task<Page?>.Run(() =>
             {
@@ -67,7 +67,7 @@ namespace Model.DAL
             });
         }
         public static List<Page> PagesByBookIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (PagesByBookId.ContainsKey(key))
@@ -75,7 +75,7 @@ namespace Model.DAL
                 return PagesByBookId[key];
             }
             // read DB
-            var value = context.Pages.Where(x => x.BookId == key).OrderBy(x => x.Ordinal)
+            var value = context.Pages.Where(x => x.BookKey == key).OrderBy(x => x.Ordinal)
                 .ToList();
 
             // write to cache
@@ -83,14 +83,14 @@ namespace Model.DAL
             // write each item to cache
             foreach (var item in value)
             {
-                if (item is null || item.Id is null) continue;
-                PageById[(int)item.Id] = item;
+                if (item is null || item.UniqueKey is null) continue;
+                PageById[(Guid)item.UniqueKey] = item;
             }
 
             return value;
         }        
         public static async Task<List<Page>> PagesByBookIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             return await Task<List<Page>>.Run(() =>
             {
@@ -104,7 +104,7 @@ namespace Model.DAL
 
         public static Page? PageCreate(Page page, IdiomaticaContext context)
         {
-            if (page.BookId is null) throw new ArgumentNullException(nameof(page.BookId));
+            if (page.BookKey is null) throw new ArgumentNullException(nameof(page.BookKey));
             if (page.Ordinal is null) throw new ArgumentNullException(nameof(page.Ordinal));
 
             Guid guid = Guid.NewGuid();
@@ -116,7 +116,7 @@ namespace Model.DAL
                       ,[OriginalText]
                       ,[UniqueKey])
                 VALUES
-                      ({page.BookId}
+                      ({page.BookKey}
                       ,{page.Ordinal}
                       ,{page.OriginalText}
                       ,{guid})
@@ -124,14 +124,14 @@ namespace Model.DAL
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Page affected 0 rows");
             var newEntity = context.Pages.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            if (newEntity is null || newEntity.UniqueKey is null)
             {
                 throw new InvalidDataException("newEntity is null in FlashCardCreate");
             }
 
 
             // add it to cache
-            PageById[(int)newEntity.Id] = newEntity; ;
+            PageById[(Guid)newEntity.UniqueKey] = newEntity; ;
 
             return newEntity;
         }

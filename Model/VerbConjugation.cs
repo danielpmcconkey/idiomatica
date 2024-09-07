@@ -18,7 +18,7 @@ namespace Model
 
         public Verb? Verb { get; set; }
         public List<VerbConjugationPiece> Pieces { get; set; } = [];
-        public int? WordId { get; set; }
+        public Guid? WordKey { get; set; }
         public Word? Word { get; set; }
 
         #endregion

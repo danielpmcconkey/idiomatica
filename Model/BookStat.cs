@@ -10,13 +10,14 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("BookStat", Schema = "Idioma")]
-    [PrimaryKey(nameof(BookId), nameof(Key))]
+    [PrimaryKey(nameof(BookKey), nameof(Key))]
     public class BookStat
     {
-        public int? BookId { get; set; }
+        //public int? BookId { get; set; }
         public AvailableBookStat? Key { get; set; }
 
         #region relationships
+        public Guid? BookKey { get; set; }
         public Book? Book { get; set; }
         #endregion
         [StringLength(250)]

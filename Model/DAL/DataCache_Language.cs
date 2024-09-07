@@ -12,7 +12,7 @@ namespace Model.DAL
     public static partial class DataCache
     {
         private static ConcurrentDictionary<string, Language> LanguageByCode = new ConcurrentDictionary<string, Language>();
-        private static ConcurrentDictionary<int, Language> LanguageById = new ConcurrentDictionary<int, Language>();
+        private static ConcurrentDictionary<Guid, Language> LanguageById = new ConcurrentDictionary<Guid, Language>();
 
 
         #region read
@@ -28,10 +28,10 @@ namespace Model.DAL
                 .Where(l => l.Code == key)
                 .FirstOrDefault();
 
-            if (value is null || value.Id is null or 0) return null;
+            if (value is null || value.UniqueKey is null) return null;
             // write to cache
             LanguageByCode[key] = value;
-            LanguageById[(int)value.Id] = value;
+            LanguageById[(Guid)value.UniqueKey] = value;
             return value;
         }
         public static async Task<Language?> LanguageByCodeReadAsync(string key, IdiomaticaContext context)
@@ -42,7 +42,7 @@ namespace Model.DAL
             });
         }
 
-        public static Language? LanguageByIdRead(int key, IdiomaticaContext context)
+        public static Language? LanguageByIdRead(Guid key, IdiomaticaContext context)
         {
             // check cache
             if (LanguageById.ContainsKey(key))
@@ -51,7 +51,7 @@ namespace Model.DAL
             }
             // read DB
             var value = context.Languages
-                .Where(l => l.Id == key)
+                .Where(l => l.UniqueKey == key)
                 .FirstOrDefault();
 
             if (value is null || string.IsNullOrEmpty(value.Code)) return null;
@@ -60,7 +60,7 @@ namespace Model.DAL
             LanguageByCode[value.Code] = value;
             return value;
         }
-        public static async Task<Language?> LanguageByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<Language?> LanguageByIdReadAsync(Guid key, IdiomaticaContext context)
         {
             return await Task<Language?>.Run(() =>
             {

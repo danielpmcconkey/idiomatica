@@ -10,12 +10,14 @@ namespace Model
     [Table("FlashCard", Schema = "Idioma")]
     public class FlashCard
     {
-        public int? Id { get; set; }
+        public Guid? UniqueKey { get; set; }
+        //public int? Id { get; set; }
 
         #region relationships
 
 
-        public int? WordUserId { get; set; }
+        //public int? WordUserId { get; set; }
+        public Guid? WordUserKey { get; set; }
         public WordUser? WordUser { get; set; }
         public List<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridges 
             { get; set; }  = new List<FlashCardParagraphTranslationBridge>();
@@ -25,7 +27,6 @@ namespace Model
 
         #endregion
         public DateTime? NextReview {  get; set; }
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
 
     }
 }

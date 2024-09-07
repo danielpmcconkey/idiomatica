@@ -97,7 +97,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void LanguageCodeUserInterfacePreferenceReadByUserIdTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string code = "HU";
             string expectedName = "Hungarian";
@@ -108,8 +108,8 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var user = UserApi.UserCreate(applicationUserId, name, code, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (Guid)user.UniqueKey;
 
                 var languageCode = LanguageCodeApi.LanguageCodeUserInterfacePreferenceReadByUserId(
                     context, userId);
@@ -126,7 +126,7 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task LanguageCodeUserInterfacePreferenceReadByUserIdAsyncTest()
         {
-            int userId = 0;
+            Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string code = "HU";
             string expectedName = "Hungarian";
@@ -137,8 +137,8 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var user = await UserApi.UserCreateAsync(applicationUserId, name, code, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                userId = (Guid)user.UniqueKey;
 
                 var languageCode = await LanguageCodeApi.LanguageCodeUserInterfacePreferenceReadByUserIdAsync(
                     context, userId);

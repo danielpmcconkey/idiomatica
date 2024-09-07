@@ -12,20 +12,21 @@ namespace Model
     [Table("Page", Schema = "Idioma")]
     public class Page
     {
-        public int? Id { get; set; }
+        public Guid? UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
+        //public int? Id { get; set; }
 
         #region relationships
-        public int? BookId { get; set; }
+        public Guid? BookKey { get; set; }
         public Book? Book { get; set; }
         public List<Paragraph> Paragraphs { get; set; } = new List<Paragraph>();
         public List<PageUser> PageUsers { get; set; } = new List<PageUser>();
         public List<UserBreadCrumb>? UserBreadCrumbs { get; set; }
+        public List<BookUser>? BookUsersBookMarks { get; set; }
         #endregion
 
         public int? Ordinal { get; set; }
         [Column(TypeName = "TEXT")]
         public string? OriginalText { get; set; }
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
 
     }
 }

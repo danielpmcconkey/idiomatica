@@ -10,20 +10,20 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, List<Word>> WordsCommon1000ByLanguageId = new ConcurrentDictionary<int, List<Word>>();
-        private static ConcurrentDictionary<int, Word?> WordById = new ConcurrentDictionary<int, Word?>();
-        private static ConcurrentDictionary<(int languageId, string textLower), Word> WordByLanguageIdAndTextLower = new ConcurrentDictionary<(int languageId, string textLower), Word>();
-        private static ConcurrentDictionary<int, List<Word>> WordsBySentenceId = new ConcurrentDictionary<int, List<Word>>();
-        private static ConcurrentDictionary<int, List<Word>> WordsByBookId = new ConcurrentDictionary<int, List<Word>>();
-        private static ConcurrentDictionary<int, Dictionary<string, Word>> WordsDictByBookId = new ConcurrentDictionary<int, Dictionary<string, Word>>();
-        private static ConcurrentDictionary<int, Dictionary<string, Word>> WordsDictByPageId = new ConcurrentDictionary<int, Dictionary<string, Word>>();
-        private static ConcurrentDictionary<int, List<Word>> WordsAndTokensAndSentencesAndParagraphsByWordId = new ConcurrentDictionary<int, List<Word>>();
-        private static ConcurrentDictionary<(int pageId, int languageUserId), Dictionary<string, Word>> WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserId = [];
-        private static ConcurrentDictionary<int, List<WordTranslation>> WordTranslationsByWordId = [];
+        private static ConcurrentDictionary<Guid, List<Word>> WordsCommon1000ByLanguageId = new ConcurrentDictionary<Guid, List<Word>>();
+        private static ConcurrentDictionary<Guid, Word?> WordById = new ConcurrentDictionary<Guid, Word?>();
+        private static ConcurrentDictionary<(Guid languageId, string textLower), Word> WordByLanguageIdAndTextLower = new ConcurrentDictionary<(Guid languageId, string textLower), Word>();
+        private static ConcurrentDictionary<Guid, List<Word>> WordsBySentenceId = new ConcurrentDictionary<Guid, List<Word>>();
+        private static ConcurrentDictionary<Guid, List<Word>> WordsByBookId = new ConcurrentDictionary<Guid, List<Word>>();
+        private static ConcurrentDictionary<Guid, Dictionary<string, Word>> WordsDictByBookId = new ConcurrentDictionary<Guid, Dictionary<string, Word>>();
+        private static ConcurrentDictionary<Guid, Dictionary<string, Word>> WordsDictByPageId = new ConcurrentDictionary<Guid, Dictionary<string, Word>>();
+        private static ConcurrentDictionary<Guid, List<Word>> WordsAndTokensAndSentencesAndParagraphsByWordId = new ConcurrentDictionary<Guid, List<Word>>();
+        private static ConcurrentDictionary<(Guid pageId, Guid languageUserId), Dictionary<string, Word>> WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserId = [];
+        private static ConcurrentDictionary<Guid, List<WordTranslation>> WordTranslationsByWordId = [];
 
 
         #region read
-        public static  Word? WordByIdRead(int key, IdiomaticaContext context)
+        public static  Word? WordByIdRead(Guid key, IdiomaticaContext context)
         {
             // check cache
             if (WordById.ContainsKey(key))
@@ -32,16 +32,16 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.Words.Where(x => x.Id == key)
+            var value = context.Words.Where(x => x.UniqueKey == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
             WordById[key] = value;
-            if (value.Text is null || value.LanguageId is null) return value;
-            WordByLanguageIdAndTextLower[((int)value.LanguageId, value.Text)] = value;
+            if (value.Text is null || value.LanguageKey is null) return value;
+            WordByLanguageIdAndTextLower[((Guid)value.LanguageKey, value.Text)] = value;
             return value;
         }
-        public static async Task<Word?> WordByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<Word?> WordByIdReadAsync(Guid key, IdiomaticaContext context)
         {
             return await Task<Word?>.Run(() =>
             {
@@ -50,7 +50,7 @@ namespace Model.DAL
         }        
 
         
-        public static Word? WordByLanguageIdAndTextLowerRead((int languageId, string textLower) key, IdiomaticaContext context)
+        public static Word? WordByLanguageIdAndTextLowerRead((Guid languageId, string textLower) key, IdiomaticaContext context)
         {
             // check cache
             if (WordByLanguageIdAndTextLower.ContainsKey(key))
@@ -60,16 +60,16 @@ namespace Model.DAL
 
             // read DB
             var value = context.Words
-                .Where(x => x.LanguageId == key.languageId && x.TextLowerCase == key.textLower)
+                .Where(x => x.LanguageKey == key.languageId && x.TextLowerCase == key.textLower)
                 .FirstOrDefault();
-            if (value == null || value.Id is null || value.Id < 1) return null;
+            if (value == null || value.UniqueKey is null) return null;
             // write to cache
             WordByLanguageIdAndTextLower[key] = value;
-            WordById[(int)value.Id] = value;
+            WordById[(Guid)value.UniqueKey] = value;
             return value;
         }
         public static List<Word> WordsBySentenceIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (WordsBySentenceId.ContainsKey(key))
@@ -78,16 +78,16 @@ namespace Model.DAL
             }
             // read DB
             var value = (from s in context.Sentences
-                          join t in context.Tokens on s.Id equals t.SentenceId
-                          join w in context.Words on t.WordId equals w.Id
-                          where (s.Id == key)
+                          join t in context.Tokens on s.UniqueKey equals t.SentenceKey
+                          join w in context.Words on t.WordKey equals w.UniqueKey
+                          where (s.UniqueKey == key)
                           select w).ToList();
             // write to cache
             WordsBySentenceId[key] = value;
             return value;
         }
         public static List<Word> WordsByBookIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (WordsByBookId.ContainsKey(key))
@@ -96,12 +96,12 @@ namespace Model.DAL
             }
             // read DB
             var value = (from b in context.Books
-                         join p in context.Pages on b.Id equals p.BookId
-                         join pp in context.Paragraphs on p.Id equals pp.PageId
-                         join s in context.Sentences on pp.Id equals s.ParagraphId
-                         join t in context.Tokens on s.Id equals t.SentenceId
-                         join w in context.Words on t.WordId equals w.Id
-                         where (b.Id == key)
+                         join p in context.Pages on b.UniqueKey equals p.BookKey
+                         join pp in context.Paragraphs on p.UniqueKey equals pp.PageKey
+                         join s in context.Sentences on pp.UniqueKey equals s.ParagraphKey
+                         join t in context.Tokens on s.UniqueKey equals t.SentenceKey
+                         join w in context.Words on t.WordKey equals w.UniqueKey
+                         where (b.UniqueKey == key)
                          select w).Distinct().ToList();
 
 
@@ -110,7 +110,7 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<Word>> WordsByBookIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             return await Task<List<Word>>.Run(() =>
             {
@@ -119,7 +119,7 @@ namespace Model.DAL
         }
 
         public static Dictionary<string, Word> WordsDictByBookIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (WordsDictByBookId.ContainsKey(key))
@@ -128,21 +128,21 @@ namespace Model.DAL
             }
             // read DB
             var groups = (from b in context.Books
-                          join p in context.Pages on b.Id equals p.BookId
-                          join pp in context.Paragraphs on p.Id equals pp.PageId
-                          join s in context.Sentences on pp.Id equals s.ParagraphId
-                          join t in context.Tokens on s.Id equals t.SentenceId
-                          join w in context.Words on t.WordId equals w.Id
-                          where (b.Id == key)
-                          group w by w into g //new { w.Id, w.LanguageId, w.Romanization, w.Text, w.TextLowerCase, w.TokenCount } into g
+                          join p in context.Pages on b.UniqueKey equals p.BookKey
+                          join pp in context.Paragraphs on p.UniqueKey equals pp.PageKey
+                          join s in context.Sentences on pp.UniqueKey equals s.ParagraphKey
+                          join t in context.Tokens on s.UniqueKey equals t.SentenceKey
+                          join w in context.Words on t.WordKey equals w.UniqueKey
+                          where (b.UniqueKey == key)
+                          group w by w into g //new { w.UniqueKey, w.LanguageKey, w.Romanization, w.Text, w.TextLowerCase, w.TokenCount } into g
                           select new { word = g.Key });
             var value = new Dictionary<string, Word>();
             foreach (var g in groups)
             {
-                if (g.word is null || g.word.TextLowerCase is null || g.word.Id is null) continue;
+                if (g.word is null || g.word.TextLowerCase is null || g.word.UniqueKey is null) continue;
                 value[g.word.TextLowerCase] = g.word;
                 // add it to the word cache
-                WordById[(int)g.word.Id] = g.word;
+                WordById[(Guid)g.word.UniqueKey] = g.word;
             }
 
             // write to cache
@@ -150,7 +150,7 @@ namespace Model.DAL
             return value;
         }
         public static async Task<Dictionary<string, Word>> WordsDictByBookIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             return await Task<Dictionary<string, Word>>.Run(() =>
             {
@@ -159,7 +159,7 @@ namespace Model.DAL
         }
 
         public static Dictionary<string, Word> WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
-            (int pageId, int languageUserId) key, IdiomaticaContext context)
+            (Guid pageId, Guid languageUserId) key, IdiomaticaContext context)
         {
             // check cache
             if (WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserId.ContainsKey(key))
@@ -168,25 +168,25 @@ namespace Model.DAL
             }
             // read DB
             var groups = (from p in context.Pages
-                          join pp in context.Paragraphs on p.Id equals pp.PageId
-                          join s in context.Sentences on pp.Id equals s.ParagraphId
-                          join t in context.Tokens on s.Id equals t.SentenceId
-                          join w in context.Words on t.WordId equals w.Id
-                          join wu in context.WordUsers on w.Id equals wu.WordId into grouping1
+                          join pp in context.Paragraphs on p.UniqueKey equals pp.PageKey
+                          join s in context.Sentences on pp.UniqueKey equals s.ParagraphKey
+                          join t in context.Tokens on s.UniqueKey equals t.SentenceKey
+                          join w in context.Words on t.WordKey equals w.UniqueKey
+                          join wu in context.WordUsers on w.UniqueKey equals wu.WordKey into grouping1
                           from wordUsers in grouping1.DefaultIfEmpty()
-                          join wt in context.WordTranslations on w.Id equals wt.WordId into grouping2
+                          join wt in context.WordTranslations on w.UniqueKey equals wt.WordKey into grouping2
                           from wordTranslations in grouping2.DefaultIfEmpty()
-                          where (p.Id == key.pageId && 
-                            (wordUsers == null || wordUsers.LanguageUserId == key.languageUserId))
+                          where (p.UniqueKey == key.pageId && 
+                            (wordUsers == null || wordUsers.LanguageUserKey == key.languageUserId))
                           select new { w, wordUsers, wordTranslations }
                           );
             var value = new Dictionary<string, Word>();
             foreach (var g in groups)
             {
-                if (g.w is null || g.w.Id is null || g.w.TextLowerCase is null) continue;
+                if (g.w is null || g.w.UniqueKey is null || g.w.TextLowerCase is null) continue;
                 value[g.w.TextLowerCase] = g.w;
                 // add it to the word cache
-                WordById[(int)g.w.Id] = g.w;
+                WordById[(Guid)g.w.UniqueKey] = g.w;
             }
 
             // write to cache
@@ -194,7 +194,7 @@ namespace Model.DAL
             return value;
         }
         public static Dictionary<string, Word> WordsDictByPageIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (WordsDictByPageId.ContainsKey(key))
@@ -203,20 +203,20 @@ namespace Model.DAL
             }
             // read DB
             var groups = (from p in context.Pages
-                          join pp in context.Paragraphs on p.Id equals pp.PageId
-                          join s in context.Sentences on pp.Id equals s.ParagraphId
-                          join t in context.Tokens on s.Id equals t.SentenceId
-                          join w in context.Words on t.WordId equals w.Id
-                          where (p.Id == key)
+                          join pp in context.Paragraphs on p.UniqueKey equals pp.PageKey
+                          join s in context.Sentences on pp.UniqueKey equals s.ParagraphKey
+                          join t in context.Tokens on s.UniqueKey equals t.SentenceKey
+                          join w in context.Words on t.WordKey equals w.UniqueKey
+                          where (p.UniqueKey == key)
                           group w by w into g
                           select new { word = g.Key });
             var value = new Dictionary<string, Word>();
             foreach (var g in groups)
             {
-                if (g.word is null || g.word.Id is null || g.word.TextLowerCase is null) continue;
+                if (g.word is null || g.word.UniqueKey is null || g.word.TextLowerCase is null) continue;
                 value[g.word.TextLowerCase] = g.word;
                 // add it to the word cache
-                WordById[(int)g.word.Id] = g.word;
+                WordById[(int)g.word.UniqueKey] = g.word;
             }
 
             // write to cache
@@ -224,7 +224,7 @@ namespace Model.DAL
             return value;
         }
         public static async Task<Dictionary<string, Word>> WordsDictByPageIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             return await Task<Dictionary<string, Word>>.Run(() =>
             {
@@ -234,7 +234,7 @@ namespace Model.DAL
 
 
         public static List<Word> WordsCommon1000ByLanguageIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (WordsCommon1000ByLanguageId.ContainsKey(key))
@@ -244,24 +244,24 @@ namespace Model.DAL
             // read DB
             var value = context.Words.FromSql($"""
                 SELECT TOP (1000) 
-                	    w.Id
+                	    w.UniqueKey
                       , LanguageId
                       , Text
                       , TextLowerCase
                       , Romanization
                       , TokenCount
-                	  , count(t.Id) as numberOfUsages
-                from Idiomatica.Idioma.Word w
-                join Idiomatica.Idioma.Token t on w.Id = t.WordId
-                where w.LanguageId = {key}
+                	  , count(t.UniqueKey) as numberOfUsages
+                from Idioma.Word w
+                join Idioma.Token t on w.UniqueKey = t.WordKey
+                where w.LanguageKey = {key}
                 group by 
-                	    w.Id
+                	    w.UniqueKey
                       , LanguageId
                       , Text
                       , TextLowerCase
                       , Romanization
                       , TokenCount
-                order by count(t.Id) desc
+                order by count(t.UniqueKey) desc
                 """)
                 .ToList();
 
@@ -270,15 +270,15 @@ namespace Model.DAL
             // also write each word to cache
             foreach (var word in value)
             {
-                if (word is null || word.Id is null) continue;
-                WordById[(int)word.Id] = word;
+                if (word is null || word.UniqueKey is null) continue;
+                WordById[(Guid)word.UniqueKey] = word;
             }
             return value;
         }
 
 
         public static List<Word> WordsAndTokensAndSentencesAndParagraphsByWordIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (WordsAndTokensAndSentencesAndParagraphsByWordId.ContainsKey(key))
@@ -288,7 +288,7 @@ namespace Model.DAL
 
             // read DB
             var value = context.Words
-                .Where(w => w.Id == key)
+                .Where(w => w.UniqueKey == key)
                 .Include(w => w.Tokens)
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                     .ThenInclude(t => t.Sentence)
@@ -301,7 +301,7 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<Word>> WordsAndTokensAndSentencesAndParagraphsByWordIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             return await Task<List<Word>>.Run(() =>
             {
@@ -311,7 +311,7 @@ namespace Model.DAL
 
         
         public static List<WordTranslation> WordTranslationsByWordIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (WordTranslationsByWordId.ContainsKey(key))
@@ -321,7 +321,7 @@ namespace Model.DAL
 
             // read DB
             var value = context.WordTranslations
-                .Where(wt => wt.WordId == key)
+                .Where(wt => wt.WordKey == key)
                 .OrderBy(x => x.Ordinal)
                 .Include(wt => wt.Verb)
                 .ToList();
@@ -337,7 +337,7 @@ namespace Model.DAL
 
         public static Word? WordCreate(Word word, IdiomaticaContext context)
         {
-            if (word.LanguageId is null) throw new ArgumentNullException(nameof(word.LanguageId));
+            if (word.LanguageKey is null) throw new ArgumentNullException(nameof(word.LanguageKey));
             if (word.TextLowerCase is null) throw new ArgumentNullException(nameof(word.TextLowerCase));
 
             Guid guid = Guid.NewGuid();
@@ -351,7 +351,7 @@ namespace Model.DAL
                            ,[TokenCount]
                            ,[UniqueKey])
                      VALUES
-                           ({word.LanguageId}
+                           ({word.LanguageKey}
                            ,{word.Text}
                            ,{word.TextLowerCase}
                            ,{word.Romanization}
@@ -360,14 +360,14 @@ namespace Model.DAL
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Word affected 0 rows");
             var newEntity = context.Words.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            if (newEntity is null || newEntity.UniqueKey is null)
             {
                 throw new InvalidDataException("newEntity is null in WordCreate");
             }
 
 
             // add it to cache
-            WordById[(int)newEntity.Id] = newEntity;
+            WordById[(Guid)newEntity.UniqueKey] = newEntity;
 
             return newEntity;
         }
@@ -380,7 +380,7 @@ namespace Model.DAL
 
         #region delete
 
-        public static void WordDeleteById(int wordId, IdiomaticaContext context)
+        public static void WordDeleteById(Guid wordId, IdiomaticaContext context)
         {
             context.Database.ExecuteSql($"""
                         

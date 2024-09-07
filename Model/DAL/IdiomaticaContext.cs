@@ -52,67 +52,68 @@ namespace Model.DAL
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity<Book>(e => {
-                e.HasKey(b => b.Id);
-                e.HasOne(b => b.Language).WithMany(l => l.Books).HasForeignKey(b => b.LanguageId);
-                e.HasMany(b => b.BookStats).WithOne(bs => bs.Book).HasForeignKey(bs => bs.BookId);
-                e.HasMany(b => b.Pages).WithOne(p => p.Book).HasForeignKey(p => p.BookId);
-                e.HasMany(b => b.BookUsers).WithOne(bu => bu.Book).HasForeignKey(bu => bu.BookId);
-                e.HasMany(b => b.BookTags).WithOne(bt => bt.Book).HasForeignKey(bt => bt.BookId);
+                e.HasKey(b => b.UniqueKey);
+                e.HasOne(b => b.Language).WithMany(l => l.Books).HasForeignKey(b => b.LanguageKey);
+                e.HasMany(b => b.BookStats).WithOne(bs => bs.Book).HasForeignKey(bs => bs.BookKey);
+                e.HasMany(b => b.Pages).WithOne(p => p.Book).HasForeignKey(p => p.BookKey);
+                e.HasMany(b => b.BookUsers).WithOne(bu => bu.Book).HasForeignKey(bu => bu.BookKey);
+                e.HasMany(b => b.BookTags).WithOne(bt => bt.Book).HasForeignKey(bt => bt.BookKey);
             });
             modelBuilder.Entity<BookStat>(e => {
-                e.HasKey(bs => new { bs.BookId, bs.Key });
-                e.HasOne(bs => bs.Book).WithMany(b => b.BookStats).HasForeignKey(bs => bs.BookId);
+                e.HasKey(bs => new { bs.BookKey, bs.Key });
+                e.HasOne(bs => bs.Book).WithMany(b => b.BookStats).HasForeignKey(bs => bs.BookKey);
                 e.Property(bs => bs.Key).HasConversion<int>();
             });
             modelBuilder.Entity<BookTag>(e => {
-                e.HasKey(bt => bt.Id);
-                e.HasOne(bt => bt.Book).WithMany(b => b.BookTags).HasForeignKey(bt => bt.BookId);
-                e.HasOne(bt => bt.User).WithMany(b => b.BookTags).HasForeignKey(bt => bt.UserId);
+                e.HasKey(bt => bt.UniqueKey);
+                e.HasOne(bt => bt.Book).WithMany(b => b.BookTags).HasForeignKey(bt => bt.BookKey);
+                e.HasOne(bt => bt.User).WithMany(b => b.BookTags).HasForeignKey(bt => bt.UserKey);
             });
             modelBuilder.Entity<BookUser>(e => {
-                e.HasKey(bu => bu.Id);
-                e.HasOne(bu => bu.Book).WithMany(b => b.BookUsers).HasForeignKey(bu => bu.BookId);
+                e.HasKey(bu => bu.UniqueKey);
+                e.HasOne(bu => bu.Book).WithMany(b => b.BookUsers).HasForeignKey(bu => bu.BookKey);
                 e.HasOne(bu => bu.LanguageUser).WithMany(lu => lu.BookUsers)
-                    .HasForeignKey(bu => bu.LanguageUserId);
+                    .HasForeignKey(bu => bu.LanguageUserKey);
                 e.HasMany(bu => bu.PageUsers).WithOne(pu => pu.BookUser)
-                    .HasForeignKey(pu => pu.BookUserId)
-                    //.OnDelete(DeleteBehavior.NoAction)
+                    .HasForeignKey(pu => pu.BookUserKey);
+                e.HasOne(bu => bu.CurrentPage).WithMany(p => p.BookUsersBookMarks)
+                    .HasForeignKey(bu => bu.CurrentPageKey);
                     ;
             });
             modelBuilder.Entity<BookUserStat>(e => {
-                e.HasKey(bus => new {bus.BookId, bus.LanguageUserId, bus.Key});
-                e.HasOne(bus => bus.Book).WithMany(b => b.BookUserStats).HasForeignKey(bus => bus.BookId);
+                e.HasKey(bus => new {bus.BookKey, bus.LanguageUserKey, bus.Key});
+                e.HasOne(bus => bus.Book).WithMany(b => b.BookUserStats).HasForeignKey(bus => bus.BookKey);
                 e.HasOne(bus => bus.LanguageUser).WithMany(lu => lu.BookUsersStats)
-                    .HasForeignKey(bus => bus.LanguageUserId);
+                    .HasForeignKey(bus => bus.LanguageUserKey);
             });
             modelBuilder.Entity<FlashCard>(e => {
-                e.HasKey(fc => fc.Id);
+                e.HasKey(fc => fc.UniqueKey);
                 e.HasOne(fc => fc.WordUser).WithOne(wu => wu.FlashCard)
-                    .HasForeignKey<FlashCard>(fc => fc.WordUserId);
+                    .HasForeignKey<FlashCard>(fc => fc.WordUserKey);
                 e.HasMany(fc => fc.FlashCardParagraphTranslationBridges).WithOne(fcptb => fcptb.FlashCard)
-                    .HasForeignKey(fcpbt => fcpbt.FlashCardId);
-                e.HasMany(fc => fc.Attempts).WithOne(fca => fca.FlashCard).HasForeignKey(fca => fca.FlashCardId);
+                    .HasForeignKey(fcpbt => fcpbt.FlashCardKey);
+                e.HasMany(fc => fc.Attempts).WithOne(fca => fca.FlashCard).HasForeignKey(fca => fca.FlashCardKey);
                 e.Property(fc => fc.Status).HasConversion<int>();
             });
             modelBuilder.Entity<FlashCardAttempt>(e => {
-                e.HasKey(fca => fca.Id);
-                e.HasOne(fca => fca.FlashCard).WithMany(fc => fc.Attempts).HasForeignKey(fca => fca.FlashCardId);
+                e.HasKey(fca => fca.UniqueKey);
+                e.HasOne(fca => fca.FlashCard).WithMany(fc => fc.Attempts).HasForeignKey(fca => fca.FlashCardKey);
                 e.Property(fca => fca.Status).HasConversion<int>();
             });
             modelBuilder.Entity<FlashCardParagraphTranslationBridge>(e => {
-                e.HasKey(fcptb => fcptb.Id);
+                e.HasKey(fcptb => fcptb.UniqueKey);
                 e.HasOne(fcptb => fcptb.FlashCard).WithMany(fc => fc.FlashCardParagraphTranslationBridges)
-                    .HasForeignKey(fcptb => fcptb.FlashCardId);
+                    .HasForeignKey(fcptb => fcptb.FlashCardKey);
                 e.HasOne(fcptb => fcptb.ParagraphTranslation).WithMany(pt => pt.FlashCardParagraphTranslationBridges)
-                    .HasForeignKey(fcptb => fcptb.ParagraphTranslationId);
+                    .HasForeignKey(fcptb => fcptb.ParagraphTranslationKey);
             });
             modelBuilder.Entity<Language>(e => {
-                e.HasKey(l => l.Id);
+                e.HasKey(l => l.UniqueKey);
                 e.HasMany(l => l.LanguageUsers).WithOne(lu => lu.Language)
-                    .HasForeignKey(lu => lu.LanguageId);
-                e.HasMany(l => l.Books).WithOne(b => b.Language).HasForeignKey(b => b.LanguageId);
-                e.HasMany(l => l.Words).WithOne(w => w.Language).HasForeignKey(w => w.LanguageId);
-                e.HasOne(l => l.LanguageCode).WithOne(lc => lc.Language).HasForeignKey<Language>(l => l.Code);
+                    .HasForeignKey(lu => lu.LanguageKey);
+                e.HasMany(l => l.Books).WithOne(b => b.Language).HasForeignKey(b => b.LanguageKey);
+                e.HasMany(l => l.Words).WithOne(w => w.Language).HasForeignKey(w => w.LanguageKey);
+                e.HasOne(l => l.LanguageCode).WithOne(lc => lc.Language).HasForeignKey<Language>(l => l.UniqueKey);
             });
             modelBuilder.Entity<LanguageCode>(e => {
                 e.HasKey(lc => lc.Code);
@@ -121,96 +122,97 @@ namespace Model.DAL
                 e.HasMany(lc => lc.Users).WithOne(u => u.LanguageCode).HasForeignKey(u => u.Code);
             });
             modelBuilder.Entity<LanguageUser>(e => {
-                e.HasKey(lu => lu.Id);
-                e.HasOne(lu => lu.User).WithMany(u => u.LanguageUsers).HasForeignKey(lu => lu.UserId);
+                e.HasKey(lu => lu.UniqueKey);
+                e.HasOne(lu => lu.User).WithMany(u => u.LanguageUsers).HasForeignKey(lu => lu.UserKey);
                 e.HasOne(lu => lu.Language).WithMany(l => l.LanguageUsers)
-                    .HasForeignKey(lu => lu.LanguageId);
+                    .HasForeignKey(lu => lu.LanguageKey);
                 e.HasMany(l => l.BookUsers).WithOne(bu => bu.LanguageUser)
-                    .HasForeignKey(bu => bu.LanguageUserId)
+                    .HasForeignKey(bu => bu.LanguageUserKey)
                     .OnDelete(DeleteBehavior.NoAction);
                 e.HasMany(l => l.WordUsers).WithOne(w => w.LanguageUser)
-                    .HasForeignKey(w => w.LanguageUserId);
+                    .HasForeignKey(w => w.LanguageUserKey);
             });
             modelBuilder.Entity<Page>(e => {
-                e.HasKey(p => p.Id);
-                e.HasOne(p => p.Book).WithMany(b => b.Pages).HasForeignKey(p => p.BookId);
-                e.HasMany(p => p.Paragraphs).WithOne(pp => pp.Page).HasForeignKey(pp => pp.PageId);
-                e.HasMany(p => p.PageUsers).WithOne(pu => pu.Page).HasForeignKey(pu => pu.PageId);
-                e.HasMany(p => p.UserBreadCrumbs).WithOne(ubc => ubc.Page).HasForeignKey(ubc => ubc.PageId);
+                e.HasKey(p => p.UniqueKey);
+                e.HasOne(p => p.Book).WithMany(b => b.Pages).HasForeignKey(p => p.BookKey);
+                e.HasMany(p => p.Paragraphs).WithOne(pp => pp.Page).HasForeignKey(pp => pp.PageKey);
+                e.HasMany(p => p.PageUsers).WithOne(pu => pu.Page).HasForeignKey(pu => pu.PageKey);
+                e.HasMany(p => p.UserBreadCrumbs).WithOne(ubc => ubc.Page).HasForeignKey(ubc => ubc.PageKey);
+                e.HasMany(p => p.BookUsersBookMarks).WithOne(bu => bu.CurrentPage).HasForeignKey(bu => bu.CurrentPageKey);
             });
             modelBuilder.Entity<PageUser>(e => {
-                e.HasKey(pu => pu.Id);
-                e.HasOne(pu => pu.BookUser).WithMany(bu => bu.PageUsers).HasForeignKey(pu => pu.BookUserId);
-                e.HasOne(pu => pu.Page).WithMany(p => p.PageUsers).HasForeignKey(pu => pu.PageId);
+                e.HasKey(pu => pu.UniqueKey);
+                e.HasOne(pu => pu.BookUser).WithMany(bu => bu.PageUsers).HasForeignKey(pu => pu.BookUserKey);
+                e.HasOne(pu => pu.Page).WithMany(p => p.PageUsers).HasForeignKey(pu => pu.PageKey);
             });
             modelBuilder.Entity<Paragraph>(e => {
-                e.HasKey(pp => pp.Id);
-                e.HasOne(pp => pp.Page).WithMany(p => p.Paragraphs).HasForeignKey(pp => pp.PageId);
-                e.HasMany(pp => pp.Sentences).WithOne(s => s.Paragraph).HasForeignKey(s => s.ParagraphId);
+                e.HasKey(pp => pp.UniqueKey);
+                e.HasOne(pp => pp.Page).WithMany(p => p.Paragraphs).HasForeignKey(pp => pp.PageKey);
+                e.HasMany(pp => pp.Sentences).WithOne(s => s.Paragraph).HasForeignKey(s => s.ParagraphKey);
                 e.HasMany(pp => pp.ParagraphTranslations)
                     .WithOne(ppt => ppt.Paragraph)
-                    .HasForeignKey(ppt => ppt.ParagraphId);
+                    .HasForeignKey(ppt => ppt.ParagraphKey);
             });
             modelBuilder.Entity<ParagraphTranslation>(e =>
             {
-                e.HasKey(ppt => ppt.Id);
+                e.HasKey(ppt => ppt.UniqueKey);
                 e.HasOne(ppt => ppt.LanguageCode)
                     .WithMany(s => s.ParagraphTranslations)
                     .HasForeignKey(ppt => ppt.Code);
                 e.HasOne(ppt => ppt.Paragraph)
                     .WithMany(pp => pp.ParagraphTranslations)
-                    .HasForeignKey(ppt => ppt.ParagraphId);
+                    .HasForeignKey(ppt => ppt.ParagraphKey);
             });
             modelBuilder.Entity<Sentence>(e => {
-                e.HasKey(s => s.Id);
-                e.HasOne(s => s.Paragraph).WithMany(pp => pp.Sentences).HasForeignKey(s => s.ParagraphId);
-                e.HasMany(s => s.Tokens).WithOne(t => t.Sentence).HasForeignKey(t => t.SentenceId);
+                e.HasKey(s => s.UniqueKey);
+                e.HasOne(s => s.Paragraph).WithMany(pp => pp.Sentences).HasForeignKey(s => s.ParagraphKey);
+                e.HasMany(s => s.Tokens).WithOne(t => t.Sentence).HasForeignKey(t => t.SentenceKey);
             });
             modelBuilder.Entity<Token>(e => {
-                e.HasKey(t => t.Id);
-                e.HasOne(t => t.Sentence).WithMany(t => t.Tokens).HasForeignKey(t => t.SentenceId);
-                e.HasOne(t => t.Word).WithMany(w => w.Tokens).HasForeignKey(t => t.WordId);
+                e.HasKey(t => t.UniqueKey);
+                e.HasOne(t => t.Sentence).WithMany(t => t.Tokens).HasForeignKey(t => t.SentenceKey);
+                e.HasOne(t => t.Word).WithMany(w => w.Tokens).HasForeignKey(t => t.WordKey);
             });
             modelBuilder.Entity<User>(e => {
-                e.HasKey(u => u.Id);
-                e.HasMany(u => u.LanguageUsers).WithOne(lu => lu.User).HasForeignKey(u => u.UserId);
-                e.HasMany(u => u.UserSettings).WithOne(us => us.User).HasForeignKey(us => us.UserId);
-                e.HasMany(u => u.UserBreadCrumbs).WithOne(ubc => ubc.User).HasForeignKey(ubc => ubc.UserId);
+                e.HasKey(u => u.UniqueKey);
+                e.HasMany(u => u.LanguageUsers).WithOne(lu => lu.User).HasForeignKey(u => u.UserKey);
+                e.HasMany(u => u.UserSettings).WithOne(us => us.User).HasForeignKey(us => us.UserKey);
+                e.HasMany(u => u.UserBreadCrumbs).WithOne(ubc => ubc.User).HasForeignKey(ubc => ubc.UserKey);
             });
             modelBuilder.Entity<UserBreadCrumb>(e =>
             {
                 e.HasKey(ubc => ubc.UniqueKey);
-                e.HasOne(ubc => ubc.User).WithMany(u => u.UserBreadCrumbs).HasForeignKey(ubc => ubc.UserId);
-                e.HasOne(ubc => ubc.Page).WithMany(p => p.UserBreadCrumbs).HasForeignKey(ubc => ubc.PageId);
+                e.HasOne(ubc => ubc.User).WithMany(u => u.UserBreadCrumbs).HasForeignKey(ubc => ubc.UserKey);
+                e.HasOne(ubc => ubc.Page).WithMany(p => p.UserBreadCrumbs).HasForeignKey(ubc => ubc.PageKey);
             });
             modelBuilder.Entity<UserSetting>(e => {
-                e.HasKey(us => new { us.UserId, us.Key });
-                e.HasOne(us => us.User).WithMany(u => u.UserSettings).HasForeignKey(us => us.UserId);
+                e.HasKey(us => new { us.UserKey, us.Key });
+                e.HasOne(us => us.User).WithMany(u => u.UserSettings).HasForeignKey(us => us.UserKey);
             });
             modelBuilder.Entity<Verb>(e => {
                 e.HasKey(v => v.UniqueKey);
-                e.HasOne(v => v.Language).WithMany(l => l.Verbs).HasForeignKey(v => v.LanguageId);
+                e.HasOne(v => v.Language).WithMany(l => l.Verbs).HasForeignKey(v => v.LanguageKey);
             });
             modelBuilder.Entity<Word>(e => {
-                e.HasKey(w => w.Id);
-                e.HasOne(w => w.Language).WithMany(l => l.Words).HasForeignKey(w => w.LanguageId);
-                e.HasMany(w => w.Tokens).WithOne(t => t.Word).HasForeignKey(t => t.WordId)
+                e.HasKey(w => w.UniqueKey);
+                e.HasOne(w => w.Language).WithMany(l => l.Words).HasForeignKey(w => w.LanguageKey);
+                e.HasMany(w => w.Tokens).WithOne(t => t.Word).HasForeignKey(t => t.WordKey)
                     .OnDelete(DeleteBehavior.NoAction);
-                e.HasMany(w => w.WordUsers).WithOne(wu => wu.Word).HasForeignKey(wu => wu.WordId);
+                e.HasMany(w => w.WordUsers).WithOne(wu => wu.Word).HasForeignKey(wu => wu.WordKey);
             });
             modelBuilder.Entity<WordTranslation>(e => {
                 e.HasKey(wt => wt.UniqueKey);
-                e.HasOne(wt => wt.LanguageTo).WithMany(l => l.WordTranslations).HasForeignKey(wt => wt.LanguageToId);
-                e.HasOne(wt => wt.Word).WithMany(w => w.WordTranslations).HasForeignKey(wt => wt.WordId)
+                e.HasOne(wt => wt.LanguageTo).WithMany(l => l.WordTranslations).HasForeignKey(wt => wt.LanguageToKey);
+                e.HasOne(wt => wt.Word).WithMany(w => w.WordTranslations).HasForeignKey(wt => wt.WordKey)
                     .OnDelete(DeleteBehavior.Cascade);
                 e.HasOne(wt => wt.Verb).WithMany(v => v.WordTranslations)
                     .HasForeignKey(wt => wt.VerbKey).OnDelete(DeleteBehavior.NoAction);
                 e.Property(wt => wt.PartOfSpeech).HasConversion<int>();
             });
             modelBuilder.Entity<WordUser>(e => {
-                e.HasKey(wu => wu.Id);
-                e.HasOne(wu => wu.LanguageUser).WithMany(lu => lu.WordUsers).HasForeignKey(w => w.LanguageUserId);
-                e.HasOne(wu => wu.Word).WithMany(w => w.WordUsers).HasForeignKey(wu => wu.WordId)
+                e.HasKey(wu => wu.UniqueKey);
+                e.HasOne(wu => wu.LanguageUser).WithMany(lu => lu.WordUsers).HasForeignKey(w => w.LanguageUserKey);
+                e.HasOne(wu => wu.Word).WithMany(w => w.WordUsers).HasForeignKey(wu => wu.WordKey)
                     .OnDelete(DeleteBehavior.NoAction);
                 e.Property(wu => wu.Status).HasConversion<int>();
             });
@@ -283,7 +285,7 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityRole", b =>
             {
                 b.Property<string>("Id")
                     .HasColumnType("nvarchar(450)");
@@ -312,7 +314,7 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityRoleClaim<string>", b =>
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
@@ -339,7 +341,7 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserClaim<string>", b =>
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
@@ -366,7 +368,7 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserLogin<string>", b =>
             {
                 b.Property<string>("LoginProvider")
                     .HasColumnType("nvarchar(450)");
@@ -390,7 +392,7 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserRole<string>", b =>
             {
                 b.Property<string>("UserId")
                     .HasColumnType("nvarchar(450)");
@@ -407,7 +409,7 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserToken<string>", b =>
             {
                 b.Property<string>("UserId")
                     .HasColumnType("nvarchar(450)");
@@ -428,16 +430,16 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityRoleClaim<string>", b =>
             {
-                b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                b.HasOne("Microsoft.AspNetCore.Identity.UniqueKeyentityRole", null)
                     .WithMany()
                     .HasForeignKey("RoleId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserClaim<string>", b =>
             {
                 b.HasOne("ApplicationUser", null)
                     .WithMany()
@@ -446,7 +448,7 @@ namespace Model.DAL
                     .IsRequired();
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserLogin<string>", b =>
             {
                 b.HasOne("ApplicationUser", null)
                     .WithMany()
@@ -455,9 +457,9 @@ namespace Model.DAL
                     .IsRequired();
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserRole<string>", b =>
             {
-                b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                b.HasOne("Microsoft.AspNetCore.Identity.UniqueKeyentityRole", null)
                     .WithMany()
                     .HasForeignKey("RoleId")
                     .OnDelete(DeleteBehavior.Cascade)
@@ -470,7 +472,7 @@ namespace Model.DAL
                     .IsRequired();
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserToken<string>", b =>
             {
                 b.HasOne("ApplicationUser", null)
                     .WithMany()

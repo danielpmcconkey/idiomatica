@@ -12,11 +12,13 @@ namespace Model
     [Table("Book", Schema = "Idioma")]
     public class Book
     {
-        public int? Id { get; set; }
+        //public int? Id { get; set; }
+        public Guid? UniqueKey { get; set; }
 
         #region relationships
 
-        public int? LanguageId { get; set; }
+        //public int? LanguageId { get; set; }
+        public Guid? LanguageKey { get; set; }
         public Language? Language { get; set; }
         public List<Page> Pages { get; set; } = new List<Page>();
         public List<BookStat> BookStats { get; set; } = new List<BookStat>();
@@ -36,7 +38,7 @@ namespace Model
         [StringLength(250)]
         public string? AudioFilename { get; set; }
 
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
+        
 
     }
 }

@@ -15,21 +15,19 @@ namespace Logic.Services.API
     public static class ParagraphApi
     {
         public static Paragraph? ParagraphCreateFromSplit(
-            IdiomaticaContext context, string splitText, int pageId,
-            int ordinal, int languageId)
+            IdiomaticaContext context, string splitText, Guid pageId,
+            int ordinal, Guid languageId)
         {
             if (splitText.Trim() == string.Empty) return null;
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            if (languageId < 1) ErrorHandler.LogAndThrow();
             if (ordinal < 0) ErrorHandler.LogAndThrow();
 
             var paragraph = new Paragraph()
             {
                 Ordinal = ordinal,
-                PageId = pageId
+                PageKey = pageId
             };
             paragraph = DataCache.ParagraphCreate(paragraph, context);
-            if (paragraph is null || paragraph.Id is null || paragraph.Id < 1)
+            if (paragraph is null || paragraph.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow(2270);
                 return null;
@@ -45,8 +43,8 @@ namespace Logic.Services.API
                 var trimmedSentenceSplit = sentenceSplit.Trim();
                 if (string.IsNullOrEmpty(trimmedSentenceSplit)) continue;
                 var sentence = SentenceApi.SentenceCreate(
-                    context, trimmedSentenceSplit, languageId, sentenceOrdinal, (int)paragraph.Id);
-                if (sentence is null || sentence.Id is  null)
+                    context, trimmedSentenceSplit, languageId, sentenceOrdinal, (Guid)paragraph.UniqueKey);
+                if (sentence is null || sentence.UniqueKey is  null)
                 {
                     ErrorHandler.LogAndThrow();
                     return null;
@@ -55,7 +53,7 @@ namespace Logic.Services.API
                 // the paragraph when it creates the sentence with that
                 // paragraph ID. so only add it if not there already
                 if (paragraph.Sentences is null) paragraph.Sentences = [];
-                else if (paragraph.Sentences.Where(x => x.Id == sentence.Id).FirstOrDefault() is null)
+                else if (paragraph.Sentences.Where(x => x.UniqueKey == sentence.UniqueKey).FirstOrDefault() is null)
                 {
                     paragraph.Sentences.Add(sentence);
                 }
@@ -65,8 +63,8 @@ namespace Logic.Services.API
             return paragraph;
         }
         public static async Task<Paragraph?> ParagraphCreateFromSplitAsync(
-            IdiomaticaContext context, string splitText, int pageId,
-            int ordinal, int languageId)
+            IdiomaticaContext context, string splitText, Guid pageId,
+            int ordinal, Guid languageId)
         {
             return await Task<Paragraph?>.Run(() =>
             {
@@ -78,7 +76,7 @@ namespace Logic.Services.API
         ///  chooses a random ParagraphTranslationBridge from a card, translated to the user's UI preferred language
         /// </summary>
         public static (string example, string translation) ParagraphExamplePullRandomByFlashCardId(
-            IdiomaticaContext context, int flashCardId, string uiLanguageCode)
+            IdiomaticaContext context, Guid flashCardId, string uiLanguageCode)
         {
             var example = string.Empty;
             var translation = string.Empty;
@@ -95,23 +93,23 @@ namespace Logic.Services.API
             var bridge = bridges[position];
 
             // pull the paragraphtranslation
-            if (bridge.ParagraphTranslationId is null) return (example, translation);
+            if (bridge.ParagraphTranslationKey is null) return (example, translation);
             var paragraphTranslation = DataCache.ParagraphTranslationByIdRead(
-                (int)bridge.ParagraphTranslationId, context);
+                (Guid)bridge.ParagraphTranslationKey, context);
             if (paragraphTranslation is null || paragraphTranslation.TranslationText is null) 
                 return (example, translation);
             translation = paragraphTranslation.TranslationText;
 
             // pull the orig text
-            if (paragraphTranslation.ParagraphId is null) return (example, translation);
-            var paragraph = DataCache.ParagraphByIdRead((int)paragraphTranslation.ParagraphId, context);
-            if (paragraph is null || paragraph.Id is null) return (example, translation);
-            example = ParagraphApi.ParagraphReadAllText(context, (int) paragraph.Id);
+            if (paragraphTranslation.ParagraphKey is null) return (example, translation);
+            var paragraph = DataCache.ParagraphByIdRead((Guid)paragraphTranslation.ParagraphKey, context);
+            if (paragraph is null || paragraph.UniqueKey is null) return (example, translation);
+            example = ParagraphApi.ParagraphReadAllText(context, (Guid) paragraph.UniqueKey);
 
             return (example, translation);
         }
         public static async Task<(string example, string translation)> ParagraphExamplePullRandomByFlashCardIdAsync(
-            IdiomaticaContext context, int flashCardId, string uiLanguageCode)
+            IdiomaticaContext context, Guid flashCardId, string uiLanguageCode)
         {
             return await Task<(string example, string translation)>.Run(() =>
             {
@@ -121,16 +119,15 @@ namespace Logic.Services.API
 
 
         public static string ParagraphReadAllText(
-            IdiomaticaContext context, int paragraphId)
+            IdiomaticaContext context, Guid paragraphId)
         {
             return ParagraphReadAllTextAsync(context, paragraphId).Result;
         }
         public static async Task<string> ParagraphReadAllTextAsync(
-            IdiomaticaContext context, int paragraphId)
+            IdiomaticaContext context, Guid paragraphId)
         {
-            if (paragraphId < 1) ErrorHandler.LogAndThrow();
             var sentences = await DataCache.SentencesByParagraphIdReadAsync(paragraphId, context);
-            if (sentences is null || sentences.Count < 1)
+            if (sentences is null)
             {
                 ErrorHandler.LogAndThrow();
                 return string.Empty;
@@ -146,19 +143,17 @@ namespace Logic.Services.API
 
 
         public static List<Paragraph> ParagraphsCreateFromPage(
-            IdiomaticaContext context, int pageId, int languageId)
+            IdiomaticaContext context, Guid pageId, Guid languageId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            if (languageId < 1) ErrorHandler.LogAndThrow();
             var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null || language.Id is null || language.Id < 1 ||
+            if (language is null || language.UniqueKey is null ||
                 string.IsNullOrEmpty(language.Code))
             {
                 ErrorHandler.LogAndThrow();
                 return [];
             }
             var page = DataCache.PageByIdRead(pageId, context);
-            if (page is null || page.Id is null || page.Id < 1 ||
+            if (page is null || page.UniqueKey is null ||
                 string.IsNullOrEmpty(page.OriginalText))
             {
                 ErrorHandler.LogAndThrow();
@@ -174,7 +169,7 @@ namespace Logic.Services.API
                 if (string.IsNullOrEmpty(paragraphSplitTrimmed)) continue;
                 var paragraph = ParagraphCreateFromSplit(context,
                     paragraphSplitTrimmed, pageId, paragraphOrdinal, languageId);
-                if (paragraph is not null && paragraph.Id is not null or 0)
+                if (paragraph is not null && paragraph.UniqueKey is not null)
                 {
                     paragraphs.Add(paragraph);
                 }
@@ -183,7 +178,7 @@ namespace Logic.Services.API
             return paragraphs;
         }
         public static async Task<List<Paragraph>> ParagraphsCreateFromPageAsync(
-            IdiomaticaContext context, int pageId, int languageId)
+            IdiomaticaContext context, Guid pageId, Guid languageId)
         {
             return await Task<List<Paragraph>>.Run(() =>
             {
@@ -193,26 +188,25 @@ namespace Logic.Services.API
 
 
         public static List<Paragraph>? ParagraphsReadByPageId(
-            IdiomaticaContext context, int pageId)
+            IdiomaticaContext context, Guid pageId)
         {
             return DataCache.ParagraphsByPageIdRead(pageId, context);
         }
         public static async Task<List<Paragraph>?> ParagraphsReadByPageIdAsync(
-            IdiomaticaContext context, int pageId)
+            IdiomaticaContext context, Guid pageId)
         {
             return await DataCache.ParagraphsByPageIdReadAsync(pageId, context);
         }
 
 
         public static (string input, string output) ParagraphTranslate(
-            IdiomaticaContext context, int paragraphId, string fromCode, string toCode)
+            IdiomaticaContext context, Guid paragraphId, string fromCode, string toCode)
         {
             return ParagraphTranslateAsync(context, paragraphId, fromCode, toCode).Result;
         }
         public static async Task<(string input, string output)> ParagraphTranslateAsync(
-            IdiomaticaContext context, int paragraphId, string fromCode, string toCode)
+            IdiomaticaContext context, Guid paragraphId, string fromCode, string toCode)
         {
-            if (paragraphId < 1) ErrorHandler.LogAndThrow();
             if (string.IsNullOrEmpty(fromCode)) ErrorHandler.LogAndThrow();
             if (string.IsNullOrEmpty(toCode)) ErrorHandler.LogAndThrow();
 
@@ -244,12 +238,12 @@ namespace Logic.Services.API
                 // add to the DB
                 var ppt = new ParagraphTranslation()
                 {
-                    ParagraphId = paragraphId,
+                    ParagraphKey = paragraphId,
                     Code = toCode,
                     TranslationText = deeplResult
                 };
                 ppt = await DataCache.ParagraphTranslationCreateAsync(ppt, context);
-                if (ppt is null || ppt.Id is null || ppt.Id < 1)
+                if (ppt is null || ppt.UniqueKey is null)
                 {
                     ErrorHandler.LogAndThrow(2340);
                     return ("", "");

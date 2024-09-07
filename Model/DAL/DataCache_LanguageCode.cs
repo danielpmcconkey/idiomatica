@@ -10,7 +10,7 @@ namespace Model.DAL
     public static partial class DataCache
     {
         private static ConcurrentDictionary<string, LanguageCode> LanguageCodeByCode = new ConcurrentDictionary<string, LanguageCode>();
-        private static ConcurrentDictionary<int, LanguageCode> LanguageCodeUserInterfacePreferenceByUserId = new();
+        private static ConcurrentDictionary<Guid, LanguageCode> LanguageCodeUserInterfacePreferenceByUserId = new();
 
         #region read
 
@@ -43,7 +43,7 @@ namespace Model.DAL
 
 
         public static LanguageCode? LanguageCodeUserInterfacePreferenceByUserIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (LanguageCodeUserInterfacePreferenceByUserId.ContainsKey(key))
@@ -53,7 +53,7 @@ namespace Model.DAL
             // read DB
             var value = (from u in context.Users
                         join lc in context.LanguageCodes on u.Code equals lc.Code
-                        where u.Id == key
+                        where u.UniqueKey == key
                         select lc)
                 .FirstOrDefault();
 
@@ -65,7 +65,7 @@ namespace Model.DAL
             return value;
         }
         public static async Task<LanguageCode?> LanguageCodeUserInterfacePreferenceByUserIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             return await Task<LanguageCode?>.Run(() =>
             {

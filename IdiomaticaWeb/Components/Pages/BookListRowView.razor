@@ -26,7 +26,7 @@
                         }
                     </div>
                     <div class="col-6">
-                        <h5 class="card-title"># @Row.BookId @OnFormatTitle(Row.Title)</h5>
+                        <h5 class="card-title"># @Row.BookKey @OnFormatTitle(Row.Title)</h5>
                     </div>
                     <div class="col-1">
                          <span class="p-1 rounded border border-dark border-2 @GetDifficultyClass(@Row.DifficultyScore)"
@@ -159,7 +159,7 @@
         </div>
         <div class="card-footer">
             <div class="container">
-                <BookTagsRow BookId="@Row.BookId" />
+                <BookTagsRow BookKey="@Row.BookKey" />
             </div>
             
         </div>
@@ -174,9 +174,9 @@
     [Parameter]
     public BookListRow Row { get; set; } = new BookListRow();
     [Parameter]
-    public EventCallback<int> OnArchiveAsync { get; set; }
+    public EventCallback<Guid> OnArchiveAsync { get; set; }
     [Parameter]
-    public EventCallback<int> OnAddAsync { get; set; }
+    public EventCallback<Guid> OnAddAsync { get; set; }
     [Parameter] public ErrorState? errorState { get; set; }
 
 
@@ -184,7 +184,7 @@
     const int LoadingDelayMiliseconds = 500;
 
 
-    private int? _bookId;
+    private Guid? _bookId;
     private User? _loggedInUser = null;
 
 
@@ -196,7 +196,7 @@
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
             _loggedInUser = await UserService.GetLoggedInUserAsync(context);
-            _bookId = Row.BookId;
+            _bookId = Row.BookKey;
 
             await t_delay;
             _isLoading = false;
@@ -340,13 +340,13 @@
     }
     private async Task OnClickRemove()
     {
-        if (_bookId == null || _bookId < 1) return;
-        await OnArchiveAsync.InvokeAsync((int)_bookId);
+        if (_bookId == null) return;
+        await OnArchiveAsync.InvokeAsync((Guid)_bookId);
     }
     private async Task OnClickAdd()
     {
-        if (_bookId == null || _bookId < 1) return;
-        await OnAddAsync.InvokeAsync((int)_bookId);
+        if (_bookId == null) return;
+        await OnAddAsync.InvokeAsync((Guid)_bookId);
     }
     private string OnFormatCount(decimal? dbStat)
     {
@@ -463,27 +463,27 @@
     }
     private void RefreshStats()
     {
-        if (_bookId is null || _bookId < 1)
+        if (_bookId is null)
         {
             ErrorHandler.LogAndThrow();
             return;
         }
-        if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+        if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
         {
             ErrorHandler.LogAndThrow();
             return;
         }
         var context = DbContextFactory.CreateDbContext();
         var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
-            context, (int)_bookId, (int)_loggedInUser.Id);
-        if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+            context, (Guid)_bookId, (Guid)_loggedInUser.UniqueKey);
+        if (bookUser is null || bookUser.UniqueKey is null)
         {
             ErrorHandler.LogAndThrow();
             return;
         }
-        BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (int)bookUser.Id);
+        BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (Guid)bookUser.UniqueKey);
         // re-load the row
-        var newRow = BookApi.BookListRowByBookIdAndUserIdRead(context, (int)_bookId, (int)_loggedInUser.Id);
+        var newRow = BookApi.BookListRowByBookIdAndUserIdRead(context, (Guid)_bookId, (Guid)_loggedInUser.UniqueKey);
         if (newRow is not null) Row = newRow;
     }
     private async Task OnClickRefresh()

@@ -10,17 +10,17 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, Token> TokenById = new ConcurrentDictionary<int, Token>(); 
-        private static ConcurrentDictionary<int, List<Token>> TokensByPageId = new ConcurrentDictionary<int, List<Token>>();
-        private static ConcurrentDictionary<int, List<Token>> TokensBySentenceId = new ConcurrentDictionary<int, List<Token>>();
-        private static ConcurrentDictionary<int, List<Token>> TokensAndWordsBySentenceId = new ConcurrentDictionary<int, List<Token>>();
+        private static ConcurrentDictionary<Guid, Token> TokenById = new ConcurrentDictionary<Guid, Token>(); 
+        private static ConcurrentDictionary<Guid, List<Token>> TokensByPageId = new ConcurrentDictionary<Guid, List<Token>>();
+        private static ConcurrentDictionary<Guid, List<Token>> TokensBySentenceId = new ConcurrentDictionary<Guid, List<Token>>();
+        private static ConcurrentDictionary<Guid, List<Token>> TokensAndWordsBySentenceId = new ConcurrentDictionary<Guid, List<Token>>();
 
         #region create
 
         public static Token? TokenCreate(Token token, IdiomaticaContext context)
         {
-            if (token.WordId is null) throw new ArgumentNullException(nameof(token.WordId));
-            if (token.SentenceId is null) throw new ArgumentNullException(nameof(token.SentenceId));
+            if (token.WordKey is null) throw new ArgumentNullException(nameof(token.WordKey));
+            if (token.SentenceKey is null) throw new ArgumentNullException(nameof(token.SentenceKey));
             if (token.Ordinal is null) throw new ArgumentNullException(nameof(token.Ordinal));
 
 
@@ -34,8 +34,8 @@ namespace Model.DAL
                       ,[Ordinal]
                       ,[UniqueKey])
                 VALUES
-                      ({token.WordId}
-                      ,{token.SentenceId}
+                      ({token.WordKey}
+                      ,{token.SentenceKey}
                       ,{token.Display}
                       ,{token.Ordinal}
                       ,{guid})
@@ -43,14 +43,14 @@ namespace Model.DAL
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Token affected 0 rows");
             var newEntity = context.Tokens.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            if (newEntity is null || newEntity.UniqueKey is null)
             {
                 throw new InvalidDataException("newEntity is null in TokenCreate");
             }
 
 
             // add it to cache
-            TokenById[(int)newEntity.Id] = newEntity;
+            TokenById[(Guid)newEntity.UniqueKey] = newEntity;
 
             return newEntity;
         }
@@ -61,7 +61,7 @@ namespace Model.DAL
         #endregion
 
         #region read
-        public static Token? TokenByIdRead(int key, IdiomaticaContext context)
+        public static Token? TokenByIdRead(Guid key, IdiomaticaContext context)
         {
             // check cache
             if (TokenById.ContainsKey(key))
@@ -70,14 +70,14 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.Tokens.Where(x => x.Id == key)
+            var value = context.Tokens.Where(x => x.UniqueKey == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
             TokenById[key] = value;
             return value;
         }
-        public static async Task<Token?> TokenByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<Token?> TokenByIdReadAsync(Guid key, IdiomaticaContext context)
         {
             return await Task<Token?>.Run(() =>
             {
@@ -85,7 +85,7 @@ namespace Model.DAL
             });
         }
         public static List<Token> TokensByPageIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             // check cache
             if (TokensByPageId.ContainsKey(key))
@@ -94,10 +94,10 @@ namespace Model.DAL
             }
             // read DB
             var groups = (from p in context.Pages
-                          join pp in context.Paragraphs on p.Id equals pp.PageId
-                          join s in context.Sentences on pp.Id equals s.ParagraphId
-                          join t in context.Tokens on s.Id equals t.SentenceId
-                          where (p.Id == key)
+                          join pp in context.Paragraphs on p.UniqueKey equals pp.PageKey
+                          join s in context.Sentences on pp.UniqueKey equals s.ParagraphKey
+                          join t in context.Tokens on s.UniqueKey equals t.SentenceKey
+                          where (p.UniqueKey == key)
                           group t by t into g
                           select new { token = g.Key });
             List<Token> value = new List<Token>();
@@ -111,14 +111,14 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<Token>> TokensByPageIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IdiomaticaContext context)
         {
             return await Task<List<Token>>.Run(() =>
             {
                 return TokensByPageIdRead(key, context);
             });
         }
-        public static List<Token> TokensBySentenceIdRead(int key, IdiomaticaContext context)
+        public static List<Token> TokensBySentenceIdRead(Guid key, IdiomaticaContext context)
         {
             // check cache
             if (TokensBySentenceId.ContainsKey(key))
@@ -128,21 +128,21 @@ namespace Model.DAL
 
             // read DB
             var value = context.Tokens
-                .Where(x => x.SentenceId == key)
+                .Where(x => x.SentenceKey == key)
                 .OrderBy(x => x.Ordinal)
                 .ToList();
             // write to cache
             TokensBySentenceId[key] = value;
             return value;
         }
-        public static async Task<List<Token>> TokensBySentenceIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<List<Token>> TokensBySentenceIdReadAsync(Guid key, IdiomaticaContext context)
         {
             return await Task<List<Token>>.Run(() =>
             {
                 return TokensBySentenceIdRead(key, context);
             });
         }
-        public static List<Token> TokensAndWordsBySentenceIdRead(int key, IdiomaticaContext context)
+        public static List<Token> TokensAndWordsBySentenceIdRead(Guid key, IdiomaticaContext context)
         {
             // check cache
             if (TokensAndWordsBySentenceId.ContainsKey(key))
@@ -153,7 +153,7 @@ namespace Model.DAL
             // read DB
             var value = context.Tokens
                 .Include(x => x.Word)
-                .Where(x => x.SentenceId == key)
+                .Where(x => x.SentenceKey == key)
                 .OrderBy(x => x.Ordinal)
                 .ToList();
             // write to cache
@@ -161,12 +161,12 @@ namespace Model.DAL
             TokensBySentenceId[key] = value;
             foreach (var t in value)
             {
-                if (t.Id is null || t.Id < 1) continue;
-                TokenById[(int)t.Id] = t;
+                if (t.UniqueKey is null) continue;
+                TokenById[(Guid)t.UniqueKey] = t;
             }
             return value;
         }
-        public static async Task<List<Token>> TokensAndWordsBySentenceIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<List<Token>> TokensAndWordsBySentenceIdReadAsync(Guid key, IdiomaticaContext context)
         {
             return await Task<List<Token>>.Run(() =>
             {
@@ -176,9 +176,9 @@ namespace Model.DAL
         #endregion
 
         #region delete
-        public static void TokenBySentenceIdDelete(int key, IdiomaticaContext context)
+        public static void TokenBySentenceIdDelete(Guid key, IdiomaticaContext context)
         {
-            var existingList = context.Tokens.Where(x => x.SentenceId == key);
+            var existingList = context.Tokens.Where(x => x.SentenceKey == key);
             foreach (var existingItem in existingList)
             {
                 context.Tokens.Remove(existingItem);
@@ -197,7 +197,7 @@ namespace Model.DAL
                       WHERE SentenceId = {key}
                 """);
         }
-        public static async Task TokenBySentenceIdDeleteAsync(int key, IdiomaticaContext context)
+        public static async Task TokenBySentenceIdDeleteAsync(Guid key, IdiomaticaContext context)
         {
             await Task.Run(() =>
             {

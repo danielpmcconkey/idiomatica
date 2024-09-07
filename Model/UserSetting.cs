@@ -12,15 +12,15 @@ namespace Model
     
     
     [Table("UserSetting", Schema = "Idioma")]
-    [PrimaryKey(nameof(Key), nameof(UserId))]
+    [PrimaryKey(nameof(Key), nameof(UserKey))]
     public class UserSetting
     {
 
         public int? Key { get; set; }
+        public Guid? UserKey { get; set; }
 
 
         #region relationships
-        public int? UserId { get; set; }
         public User? User { get; set; }
         #endregion
 

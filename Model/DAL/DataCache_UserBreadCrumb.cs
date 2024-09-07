@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Query.Internal;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.UniqueKeyentityModel.Tokens;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -31,8 +31,8 @@ namespace Model.DAL
                            )
                      VALUES
                            ({guid}
-                           ,{value.UserId}
-                           ,{value.PageId}
+                           ,{value.UserKey}
+                           ,{value.PageKey}
                            ,{value.ActionDateTime}
                            )
         
