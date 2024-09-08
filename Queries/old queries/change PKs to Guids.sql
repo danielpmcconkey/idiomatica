@@ -85,6 +85,7 @@ ALTER TABLE [Idioma].Word ADD LanguageKey uniqueidentifier NULL;
 --ALTER TABLE [Idioma].ParagraphTranslation ADD LanguageCodeKey uniqueidentifier NULL;
 --ALTER TABLE [Idioma].WordTranslation ADD LanguageToKey uniqueidentifier NULL;
 ALTER TABLE [Idioma].BookUser ADD LanguageUserKey uniqueidentifier NULL;
+ALTER TABLE [Idioma].BookUser ADD CurrentPageKey uniqueidentifier NULL;
 ALTER TABLE [Idioma].BookUserStat ADD LanguageUserKey uniqueidentifier NULL;
 ALTER TABLE [Idioma].WordUser ADD LanguageUserKey uniqueidentifier NULL;
 ALTER TABLE [Idioma].PageUser ADD PageKey uniqueidentifier NULL;
@@ -128,6 +129,7 @@ GO
 --	UPDATE [ParagraphTranslation] SET [ParagraphTranslation].[LanguageCodeKey] = [LanguageCode].UniqueKey FROM [Idioma].[ParagraphTranslation] AS [ParagraphTranslation] INNER JOIN [Idioma].[LanguageCode] AS [LanguageCode] ON [ParagraphTranslation].[LanguageCodeId] = [LanguageCode].Id;
 	UPDATE [WordTranslation] SET [WordTranslation].[LanguageToKey] = [Language].UniqueKey FROM [Idioma].[WordTranslation] AS [WordTranslation] INNER JOIN [Idioma].[Language] AS [Language] ON [WordTranslation].[LanguageToId] = [Language].Id;
 	UPDATE [BookUser] SET [BookUser].[LanguageUserKey] = [LanguageUser].UniqueKey FROM [Idioma].[BookUser] AS [BookUser] INNER JOIN [Idioma].[LanguageUser] AS [LanguageUser] ON [BookUser].[LanguageUserId] = [LanguageUser].Id;
+	UPDATE [BookUser] SET [BookUser].[CurrentPageKey] = [Page].UniqueKey FROM [Idioma].[BookUser] AS [BookUser] INNER JOIN [Idioma].[Page] AS [Page] ON [BookUser].[CurrentPageID] = [Page].Id;
 	UPDATE [BookUserStat] SET [BookUserStat].[LanguageUserKey] = [LanguageUser].UniqueKey FROM [Idioma].[BookUserStat] AS [BookUserStat] INNER JOIN [Idioma].[LanguageUser] AS [LanguageUser] ON [BookUserStat].[LanguageUserId] = [LanguageUser].Id;
 	UPDATE [WordUser] SET [WordUser].[LanguageUserKey] = [LanguageUser].UniqueKey FROM [Idioma].[WordUser] AS [WordUser] INNER JOIN [Idioma].[LanguageUser] AS [LanguageUser] ON [WordUser].[LanguageUserId] = [LanguageUser].Id;
 	UPDATE [PageUser] SET [PageUser].[PageKey] = [Page].UniqueKey FROM [Idioma].[PageUser] AS [PageUser] INNER JOIN [Idioma].[Page] AS [Page] ON [PageUser].[PageId] = [Page].Id;
@@ -349,6 +351,84 @@ ALTER TABLE [Idioma].[WordUser] DROP CONSTRAINT  [UC_WordUser_WordId_LanguageUse
 GO
 ALTER TABLE [Idioma].[WordUser] ADD CONSTRAINT [UC_WordUser_WordKey_LanguageUserKey] UNIQUE ([WordKey],[LanguageUserKey]);
 GO
+
+
+
+ALTER TABLE [Idioma].Language ALTER COLUMN [UniqueKey] uniqueidentifier not null ;
+GO
+alter table [Idioma].[Language] drop CONSTRAINT PK_Language_LanguageCode ;
+GO
+alter table [Idioma].[Language] ADD CONSTRAINT PK_Language_UniqueKey PRIMARY KEY CLUSTERED ([UniqueKey]);
+GO
+
+
+
+ALTER TABLE [Idioma].[WordRank] DROP CONSTRAINT [PK_WordRank_LanguageCode_Ordinal];
+GO
+ALTER TABLE [Idioma].[WordRank] Add LanguageKey uniqueidentifier not null default newid() ;
+GO
+ALTER TABLE [Idioma].[WordRank] DROP CONSTRAINT DF__WordRank__Langua__0FB750B3;
+GO
+ALTER TABLE [Idioma].[WordRank] DROP CONSTRAINT [DF__WordRank__Langua__4AD81681];
+GO
+ALTER TABLE [Idioma].[WordRank] DROP CONSTRAINT [DF__WordRank__WordKe__0EC32C7A];
+GO
+ALTER TABLE [Idioma].[WordRank] drop column LanguageCode ;
+GO
+ALTER TABLE [Idioma].[WordRank] add UniqueKey uniqueidentifier not null default newid();
+GO
+ALTER TABLE [Idioma].[WordRank] ADD CONSTRAINT PK_WordRank_UniqueKey PRIMARY KEY CLUSTERED (UniqueKey);
+GO
+
+UPDATE [WordRank] SET [WordRank].LanguageKey = [Language].UniqueKey FROM [Idioma].[WordRank] AS [WordRank] INNER JOIN [Idioma].[Language] AS [Language] ON [WordRank].[LanguageId] = [Language].Id;
+GO
+-- add the FK relationships now
+
+ALTER TABLE [Idioma].[LanguageUser]  WITH CHECK ADD CONSTRAINT [FK_LanguageUser_Language] FOREIGN KEY([LanguageKey]) REFERENCES [Idioma].[Language] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[Word]  WITH CHECK ADD CONSTRAINT [FK_Word_Language] FOREIGN KEY([LanguageKey]) REFERENCES [Idioma].[Language] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[Book]  WITH CHECK ADD CONSTRAINT [FK_Book_Language] FOREIGN KEY([LanguageKey]) REFERENCES [Idioma].[Language] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[Page]  WITH CHECK ADD CONSTRAINT [FK_Page_Book] FOREIGN KEY([BookKey]) REFERENCES [Idioma].[Book] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[BookStat]  WITH CHECK ADD CONSTRAINT [FK_BookStat_Book] FOREIGN KEY([BookKey]) REFERENCES [Idioma].[Book] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[BookTag]  WITH CHECK ADD CONSTRAINT [FK_BookTag_Book] FOREIGN KEY([BookKey]) REFERENCES [Idioma].[Book] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[BookUser]  WITH CHECK ADD CONSTRAINT [FK_BookUser_LanguageUser] FOREIGN KEY([LanguageUserKey]) REFERENCES [Idioma].[LanguageUser] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[WordUser]  WITH CHECK ADD CONSTRAINT [FK_WordUser_LanguageUser] FOREIGN KEY([LanguageUserKey]) REFERENCES [Idioma].[LanguageUser] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[PageUser]  WITH CHECK ADD CONSTRAINT [FK_PageUser_BookUser] FOREIGN KEY([BookUserKey]) REFERENCES [Idioma].[BookUser] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[Paragraph]  WITH CHECK ADD CONSTRAINT [FK_Paragraph_Page] FOREIGN KEY([PageKey]) REFERENCES [Idioma].[Page] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[Sentence]  WITH CHECK ADD CONSTRAINT [FK_Sentence_Paragraph] FOREIGN KEY([ParagraphKey]) REFERENCES [Idioma].[Paragraph] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[ParagraphTranslation]  WITH CHECK ADD CONSTRAINT [FK_ParagraphTranslation_Paragraph] FOREIGN KEY([ParagraphKey]) REFERENCES [Idioma].[Paragraph] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[Token]  WITH CHECK ADD CONSTRAINT [FK_Token_Sentence] FOREIGN KEY([SentenceKey]) REFERENCES [Idioma].[Sentence] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[PageUser]  WITH CHECK ADD CONSTRAINT [FK_PageUser_Page] FOREIGN KEY([PageKey]) REFERENCES [Idioma].[Page] ([UniqueKey]) ON DELETE NO ACTION;
+ALTER TABLE [Idioma].[Language]  WITH CHECK ADD CONSTRAINT [FK_Language_LanguageCode] FOREIGN KEY([LanguageCode]) REFERENCES [Idioma].[LanguageCode] ([Code]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[LanguageUser]  WITH CHECK ADD CONSTRAINT [FK_LanguageUser_User] FOREIGN KEY([UserKey]) REFERENCES [Idioma].[User] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[BookUser]  WITH CHECK ADD CONSTRAINT [FK_BookUser_Book] FOREIGN KEY([BookKey]) REFERENCES [Idioma].[Book] ([UniqueKey]) ON DELETE NO ACTION;
+ALTER TABLE [Idioma].[BookUser]  WITH CHECK ADD CONSTRAINT [FK_BookUser_Page] FOREIGN KEY([CurrentPageKey]) REFERENCES [Idioma].[Page] ([UniqueKey]) ON DELETE NO ACTION;
+ALTER TABLE [Idioma].[WordUser]  WITH CHECK ADD CONSTRAINT [FK_WordUser_Word] FOREIGN KEY([WordKey]) REFERENCES [Idioma].[Word] ([UniqueKey]) ON DELETE NO ACTION;
+ALTER TABLE [Idioma].[BookTag]  WITH CHECK ADD CONSTRAINT [FK_BookTag_User] FOREIGN KEY([UserKey]) REFERENCES [Idioma].[User] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[BookUserStat]  WITH CHECK ADD CONSTRAINT [FK_BookUserStat_LanguageUser] FOREIGN KEY([LanguageUserKey]) REFERENCES [Idioma].[LanguageUser] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[BookUserStat]  WITH CHECK ADD CONSTRAINT [FK_BookUserStat_Book] FOREIGN KEY([BookKey]) REFERENCES [Idioma].[Book] ([UniqueKey]) ON DELETE NO ACTION;
+ALTER TABLE [Idioma].[FlashCard]  WITH CHECK ADD CONSTRAINT [FK_FlashCard_WordUser] FOREIGN KEY([WordUserKey]) REFERENCES [Idioma].[WordUser] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[FlashCardAttempt]  WITH CHECK ADD CONSTRAINT [FK_FlashCardAttempt_FlashCard] FOREIGN KEY([FlashCardKey]) REFERENCES [Idioma].[FlashCard] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[FlashCardParagraphTranslationBridge]  WITH CHECK ADD CONSTRAINT [FK_FlashCardParagraphTranslationBridge_FlashCard] FOREIGN KEY([FlashCardKey]) REFERENCES [Idioma].[FlashCard] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[FlashCardParagraphTranslationBridge]  WITH CHECK ADD CONSTRAINT [FK_FlashCardParagraphTranslationBridge_ParagraphTranslation] FOREIGN KEY([ParagraphTranslationKey]) REFERENCES [Idioma].[ParagraphTranslation] ([UniqueKey]) ON DELETE NO ACTION;
+ALTER TABLE [Idioma].[ParagraphTranslation]  WITH CHECK ADD CONSTRAINT [FK_ParagraphTranslation_LanguageCode] FOREIGN KEY([LanguageCode]) REFERENCES [Idioma].[LanguageCode] ([Code]) ON DELETE NO ACTION;
+ALTER TABLE [Idioma].[Token]  WITH CHECK ADD CONSTRAINT [FK_Token_Word] FOREIGN KEY([WordKey]) REFERENCES [Idioma].[Word] ([UniqueKey]) ON DELETE NO ACTION;
+ALTER TABLE [Idioma].[UserBreadCrumb]  WITH CHECK ADD CONSTRAINT [FK_UserBreadCrumb_User] FOREIGN KEY([UserKey]) REFERENCES [Idioma].[User] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[UserBreadCrumb]  WITH CHECK ADD CONSTRAINT [FK_UserBreadCrumb_Page] FOREIGN KEY([PageKey]) REFERENCES [Idioma].[Page] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[UserSetting]  WITH CHECK ADD CONSTRAINT [FK_UserSetting_User] FOREIGN KEY([UserKey]) REFERENCES [Idioma].[User] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[Verb]  WITH CHECK ADD CONSTRAINT [FK_Verb_Language] FOREIGN KEY([LanguageKey]) REFERENCES [Idioma].[Language] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[WordRank]  WITH CHECK ADD CONSTRAINT [FK_WordRank_Language] FOREIGN KEY([LanguageKey]) REFERENCES [Idioma].[Language] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[WordRank]  WITH CHECK ADD CONSTRAINT [FK_WordRank_Word] FOREIGN KEY([WordKey]) REFERENCES [Idioma].[Word] ([UniqueKey]) ON DELETE NO ACTION;
+ALTER TABLE [Idioma].[WordTranslation]  WITH CHECK ADD CONSTRAINT [FK_WordTranslation_Language] FOREIGN KEY([LanguageToKey]) REFERENCES [Idioma].[Language] ([UniqueKey]) ON DELETE CASCADE;
+ALTER TABLE [Idioma].[WordTranslation]  WITH CHECK ADD CONSTRAINT [FK_WordTranslation_Verb] FOREIGN KEY([VerbKey]) REFERENCES [Idioma].[Verb] ([UniqueKey]) ON DELETE NO ACTION;
+ALTER TABLE [Idioma].[WordTranslation]  WITH CHECK ADD CONSTRAINT [FK_WordTranslation_Word] FOREIGN KEY([WordKey]) REFERENCES [Idioma].[Word] ([UniqueKey]) ON DELETE NO ACTION;
+
+
+
+
+
+
+
+
 
 
 

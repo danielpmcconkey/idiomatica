@@ -139,7 +139,7 @@ namespace Model.DAL
 
                             , case when bu.UniqueKey is null or bu.IsArchived = 1 then cast(0 as bit) else cast (1 as bit) end as IsInShelf
                             , lu.UserKey
-                            , b.UniqueKey as BookId
+                            , b.UniqueKey as BookKey
                             , l.[Name] as LanguageName
                             , bus_ISCOMPLETE.ValueString as IsComplete
                             , b.Title
@@ -174,7 +174,7 @@ namespace Model.DAL
                         left join Idioma.BookStat bsTotalWordCount on bsTotalWordCount.BookKey = b.UniqueKey and bsTotalWordCount.[Key] = {(int)AvailableBookStat.TOTALWORDCOUNT}
                         left join Idioma.BookStat bsDistinctWordCount on bsDistinctWordCount.BookKey = b.UniqueKey and bsDistinctWordCount.[Key] = {(int)AvailableBookStat.DISTINCTWORDCOUNT}
                         left join Idioma.BookStat bsDifficultyScore on bsDifficultyScore.BookKey = b.UniqueKey and bsDifficultyScore.[Key] = {(int)AvailableBookStat.DIFFICULTYSCORE}
-                        left join Idioma.LanguageUser lu on lu.LanguageKey = b.LanguageKey and lu.UserKey = {userId}
+                        left join Idioma.LanguageUser lu on lu.LanguageKey = b.LanguageKey and lu.UserKey = '{DALUtilities.SanitizeString(userId.ToString())}'
                         left join Idioma.BookUser bu on bu.BookKey = b.UniqueKey and bu.LanguageUserKey = lu.UniqueKey
                         left join [Idioma].[BookUserStat] bus_ISCOMPLETE on bus_ISCOMPLETE.BookKey = b.UniqueKey and bus_ISCOMPLETE.LanguageUserKey = lu.UniqueKey and bus_ISCOMPLETE.[Key] = {(int)AvailableBookUserStat.ISCOMPLETE}
                         left join [Idioma].[BookUserStat] bus_PROGRESS on bus_PROGRESS.BookKey = b.UniqueKey and bus_PROGRESS.LanguageUserKey = lu.UniqueKey and bus_PROGRESS.[Key] = {(int)AvailableBookUserStat.PROGRESS}
@@ -261,8 +261,8 @@ namespace Model.DAL
                     select
                         count(*)  as RowNumber
                         , null as IsInShelf
-                        , null as UserId
-                        , null as BookId
+                        , null as UserKey
+                        , null as BookKey
                         , null as LanguageName
                         , null as IsComplete
                         , null as Title

@@ -27,6 +27,7 @@ namespace Model
         public List<Token> Tokens { get; set; } = [];
         public List<WordUser> WordUsers { get; set; } = [];
         public List<WordTranslation> WordTranslations { get; set; } = [];
+        public WordRank? WordRank { get; set; }
 
         #endregion
 

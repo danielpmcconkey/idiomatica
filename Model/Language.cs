@@ -25,6 +25,7 @@ namespace Model
         public LanguageCode? LanguageCode { get; set; }
         public List<WordTranslation> WordTranslations { get; set; } = [];
         public List<Verb> Verbs { get; set; } = [];
+        public List<WordRank> WordRanks { get; set; } = [];
 
         #endregion
 
