@@ -176,7 +176,7 @@
 
         if (FlashCardDataPacket.CurrentCard.WordUser is null) return;
         if (FlashCardDataPacket.CurrentCard.WordUser.Word is null) return;
-        CardTitle = $"{FlashCardDataPacket.CurrentCard.UniqueKey}: {FlashCardDataPacket.CurrentCard.WordUser.Word.TextLowerCase}";
+        CardTitle = $"{FlashCardDataPacket.CurrentCard.WordUser.Word.TextLowerCase}";
 
         if (FlashCardDataPacket.CurrentCard.WordUser.Translation is null) return;
         CustomTranslation = FlashCardDataPacket.CurrentCard.WordUser.Translation;

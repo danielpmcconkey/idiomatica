@@ -1,4 +1,4 @@
-﻿@page "/Book/{bookid:int}/Read"
+﻿@page "/Book/{bookid_str}/Read"
 @rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
@@ -145,7 +145,8 @@
 
     #region parameters
     [Parameter]
-    public Guid BookId { get; set; }
+    public string? BookId_Str { get; set; }
+    private Guid? BookId;
 
     #endregion
 
@@ -168,6 +169,7 @@
     {
         try
         {
+            if (Guid.TryParse(BookId_Str, out var bookIdGuid)) BookId = bookIdGuid;
 
             if (_isDataInitRead == false)
             {
@@ -202,8 +204,8 @@
     private void InitData()
     {
         var context = DbContextFactory.CreateDbContext();
-
-        var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(context, UserService, BookId);
+        if (BookId is null) { ErrorHandler.LogAndThrow(); return; }
+        var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(context, UserService, (Guid)BookId);
         if(readDataPacket is null)
         {
             ErrorHandler.LogAndThrow();
@@ -325,8 +327,9 @@
     private void PageMove(IdiomaticaContext context, int targetPageNum)
     {
         _isDataInitRead = false;
-
-        var newReadDataPacket = OrchestrationApi.OrchestrateMovePage(context, ReadDataPacket, BookId, targetPageNum);
+        if (BookId is null) { ErrorHandler.LogAndThrow(); return; }
+        var newReadDataPacket = OrchestrationApi.OrchestrateMovePage(context,
+            ReadDataPacket, (Guid)BookId, targetPageNum);
         if (newReadDataPacket is null)
         {
             ErrorHandler.LogAndThrow();

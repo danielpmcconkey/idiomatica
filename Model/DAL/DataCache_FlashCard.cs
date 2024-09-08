@@ -190,7 +190,7 @@ namespace Model.DAL
                            ,[Status] = {flashCard.Status}
                            ,[NextReview] = {flashCard.NextReview}
                            ,[UniqueKey] = {flashCard.UniqueKey}
-                        where Id = {flashCard.UniqueKey}
+                        where UniqueKey = {flashCard.UniqueKey}
                         ;
                         """);
             if (numRows < 1)

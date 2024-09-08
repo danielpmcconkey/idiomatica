@@ -47,7 +47,7 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                                 
                 INSERT INTO [Idioma].[Book]
-                           ([LanguageId]
+                           ([LanguageKey]
                            ,[Title]
                            ,[SourceURI]
                            ,[AudioFilename]

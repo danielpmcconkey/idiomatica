@@ -90,10 +90,10 @@ namespace Model.DAL
             // add all the worduser objects that might not exist
             context.Database.ExecuteSql($"""
                 insert into [Idioma].[WordUser] 
-                ([WordId],[LanguageUserId],[Translation],[Status],[Created],[StatusChanged],[UniqueKey])
+                ([WordKey],[LanguageUserKey],[Translation],[Status],[Created],[StatusChanged],[UniqueKey])
                 select 
-                	 w.UniqueKey as wordId
-                	, lu.UniqueKey as languageUserId
+                	 w.UniqueKey as wordKey
+                	, lu.UniqueKey as languageUserKey
                 	, null as translation
                 	, {(int)AvailableWordUserStatus.UNKNOWN} as unknownStatus
                 	, CURRENT_TIMESTAMP as created

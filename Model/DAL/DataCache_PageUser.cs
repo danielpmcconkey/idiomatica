@@ -193,7 +193,7 @@ namespace Model.DAL
                       ,[PageKey] = {value.PageKey}
                       ,[ReadDate] = {value.ReadDate}
                       ,[UniqueKey] = {value.UniqueKey}
-                 WHERE Id = {value.UniqueKey}
+                 WHERE UniqueKey = {value.UniqueKey}
 
                 """);
 
