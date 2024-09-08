@@ -49,8 +49,8 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                 
                 INSERT INTO [Idioma].[WordUser]
-                      ([WordId]
-                      ,[LanguageUserId]
+                      ([WordKey]
+                      ,[LanguageUserKey]
                       ,[Translation]
                       ,[Status]
                       ,[Created]
@@ -357,10 +357,10 @@ namespace Model.DAL
             // add all the worduser objects that might not exist
             context.Database.ExecuteSql($"""
                 insert into [Idioma].[WordUser] 
-                ([WordId],[LanguageUserId],[Translation],[Status],[Created],[StatusChanged],[UniqueKey])
+                ([WordKey],[LanguageUserKey],[Translation],[Status],[Created],[StatusChanged],[UniqueKey])
                 select 
-                	 w.UniqueKey as wordId
-                	, lu.UniqueKey as languageUserId
+                	 w.UniqueKey as wordKey
+                	, lu.UniqueKey as languageUserKey
                 	, null as translation
                 	, {(int)AvailableWordUserStatus.UNKNOWN} as unknownStatus
                 	, CURRENT_TIMESTAMP as created
@@ -466,14 +466,13 @@ namespace Model.DAL
 
             int numRows = context.Database.ExecuteSql($"""
                         UPDATE [Idioma].[WordUser]
-                        SET [WordId] = {wordUser.WordKey}
-                           ,[LanguageUserId] = {wordUser.LanguageUserKey}
+                        SET [WordKey] = {wordUser.WordKey}
+                           ,[LanguageUserKey] = {wordUser.LanguageUserKey}
                            ,[Translation] = {wordUser.Translation}
                            ,[Status] = {wordUser.Status}
                            ,[Created] = {wordUser.Created}
                            ,[StatusChanged] = {wordUser.StatusChanged}
-                           ,[UniqueKey] = {wordUser.UniqueKey}
-                        where Id = {wordUser.UniqueKey}
+                        where [UniqueKey] = {wordUser.UniqueKey}
                         ;
                         """);
             if (numRows < 1)
@@ -527,7 +526,7 @@ namespace Model.DAL
             int updateCount = context.Database.ExecuteSql($"""
                 update [Idioma].[WordUser]
                 set [Status] = {(int)newStatus}
-                where Id in (
+                where UniqueKey in (
                 	select wu.UniqueKey
                 	from Idioma.PageUser pu
                 	left join Idioma.BookUser bu on pu.BookUserKey = bu.UniqueKey

@@ -25,8 +25,8 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                                 
                 INSERT INTO [Idioma].[LanguageUser]
-                           ([LanguageId]
-                           ,[UserId]
+                           ([LanguageKey]
+                           ,[UserKey]
                            ,[TotalWordsRead]
                            ,[UniqueKey])
                      VALUES

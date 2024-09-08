@@ -28,8 +28,8 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Token]
-                      ([WordId]
-                      ,[SentenceId]
+                      ([WordKey]
+                      ,[SentenceKey]
                       ,[Display]
                       ,[Ordinal]
                       ,[UniqueKey])
@@ -194,7 +194,7 @@ namespace Model.DAL
             // now take them out of the DB
             context.Database.ExecuteSql($"""
                 DELETE FROM [Idioma].[Token]
-                      WHERE SentenceId = {key}
+                      WHERE SentenceKey = {key}
                 """);
         }
         public static async Task TokenBySentenceIdDeleteAsync(Guid key, IdiomaticaContext context)

@@ -21,8 +21,8 @@ namespace Model.DAL
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         INSERT INTO [Idioma].[BookUser]
-                              ([BookId]
-                              ,[LanguageUserId]
+                              ([BookKey]
+                              ,[LanguageUserKey]
                               ,[IsArchived]
                               ,[CurrentPageKey]
                               ,[AudioBookmarks]
@@ -124,13 +124,13 @@ namespace Model.DAL
             
             int numRows = context.Database.ExecuteSql($"""
                         update [Idioma].[BookUser]
-                              set [BookId] = {bookUser.BookKey}
-                              ,[LanguageUserId] = {bookUser.LanguageUserKey}
+                              set [BookKey] = {bookUser.BookKey}
+                              ,[LanguageUserKey] = {bookUser.LanguageUserKey}
                               ,[IsArchived] = {bookUser.IsArchived}
                               ,[CurrentPageKey] = {bookUser.CurrentPageKey}
                               ,[AudioBookmarks] = {bookUser.AudioBookmarks}
                               ,[AudioCurrentPos] = {bookUser.AudioCurrentPos}
-                        where Id = {bookUser.UniqueKey}
+                        where UniqueKey = {bookUser.UniqueKey}
                         ;
                         """);
             if (numRows < 1)

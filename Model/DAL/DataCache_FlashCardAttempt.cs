@@ -25,11 +25,13 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[FlashCardAttempt]
-                      ([Status]
+                      ([FlashCardKey]
+                      ,[Status]
                       ,[AttemptedWhen]
                       ,[UniqueKey])
                 VALUES
-                      ({flashCardAttempt.Status}
+                      ({flashCardAttempt.FlashCardKey}
+                      ,{flashCardAttempt.Status}
                       ,{flashCardAttempt.AttemptedWhen}
                       ,{guid})
         

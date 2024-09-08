@@ -27,8 +27,8 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[PageUser]
-                      ([BookUserId]
-                      ,[PageId]
+                      ([BookUserKey]
+                      ,[PageKey]
                       ,[ReadDate]
                       ,[UniqueKey])
                 VALUES
@@ -189,8 +189,8 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                                 
                 UPDATE [Idioma].[PageUser]
-                   SET [BookUserId] = {value.BookUserKey}
-                      ,[PageId] = {value.PageKey}
+                   SET [BookUserKey] = {value.BookUserKey}
+                      ,[PageKey] = {value.PageKey}
                       ,[ReadDate] = {value.ReadDate}
                       ,[UniqueKey] = {value.UniqueKey}
                  WHERE Id = {value.UniqueKey}

@@ -245,7 +245,7 @@ namespace Model.DAL
             var value = context.Words.FromSql($"""
                 SELECT TOP (1000) 
                 	    w.UniqueKey
-                      , LanguageId
+                      , LanguageKey
                       , Text
                       , TextLowerCase
                       , Romanization
@@ -256,7 +256,7 @@ namespace Model.DAL
                 where w.LanguageKey = {key}
                 group by 
                 	    w.UniqueKey
-                      , LanguageId
+                      , LanguageKey
                       , Text
                       , TextLowerCase
                       , Romanization
@@ -344,7 +344,7 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Word]
-                           ([LanguageId]
+                           ([LanguageKey]
                            ,[Text]
                            ,[TextLowerCase]
                            ,[Romanization]
@@ -385,7 +385,7 @@ namespace Model.DAL
             context.Database.ExecuteSql($"""
                         
                 delete from [Idioma].[Word]
-                where Id = {wordId}
+                where UniqueKey = {wordId}
                 """);
             // delete it from cache
             WordById[wordId] = null;

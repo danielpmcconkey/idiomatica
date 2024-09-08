@@ -27,8 +27,8 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                 
                 INSERT INTO [Idioma].[BookTag]
-                           ([BookId]
-                           ,[UserId]
+                           ([BookKey]
+                           ,[UserKey]
                            ,[Tag]
                            ,[Created]
                            ,[UniqueKey])
@@ -146,8 +146,8 @@ namespace Model.DAL
             }
             int numRows = context.Database.ExecuteSql($"""
                 delete from Idioma.BookTag
-                where BookId = {key.bookId}
-                and UserId = {key.userId}
+                where BookKey = {key.bookId}
+                and UserKey = {key.userId}
                 and Tag = {trimmed}
                 """);
             if (numRows < 1) throw new InvalidDataException("deleting BookTag affected 0 rows");

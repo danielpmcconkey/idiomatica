@@ -111,7 +111,7 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Page]
-                      ([BookId]
+                      ([BookKey]
                       ,[Ordinal]
                       ,[OriginalText]
                       ,[UniqueKey])

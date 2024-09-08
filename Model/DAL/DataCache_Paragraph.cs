@@ -84,7 +84,7 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Paragraph]
-                      ([PageId]
+                      ([PageKey]
                       ,[Ordinal]
                       ,[UniqueKey])
                 VALUES

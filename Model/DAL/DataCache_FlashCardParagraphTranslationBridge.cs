@@ -75,8 +75,8 @@ namespace Model.DAL
             
             int numRows = context.Database.ExecuteSql($"""
             INSERT INTO [Idioma].[FlashCardParagraphTranslationBridge]
-                        ([FlashCardId]
-                        ,[ParagraphTranslationId]
+                        ([FlashCardKey]
+                        ,[ParagraphTranslationKey]
                         ,[UniqueKey])
                     VALUES
                         ({fcptb.FlashCardKey}

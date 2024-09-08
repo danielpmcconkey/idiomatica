@@ -27,7 +27,7 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[FlashCard]
-                      ([WordUserId]
+                      ([WordUserKey]
                       ,[Status]
                       ,[NextReview]
                       ,[UniqueKey])
@@ -186,7 +186,7 @@ namespace Model.DAL
 
             int numRows = context.Database.ExecuteSql($"""
                         UPDATE [Idioma].[FlashCard]
-                        SET [WordUserId] = {flashCard.WordUserKey}
+                        SET [WordUserKey] = {flashCard.WordUserKey}
                            ,[Status] = {flashCard.Status}
                            ,[NextReview] = {flashCard.NextReview}
                            ,[UniqueKey] = {flashCard.UniqueKey}

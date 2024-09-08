@@ -27,7 +27,7 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[ParagraphTranslation]
-                      ([ParagraphId]
+                      ([ParagraphKey]
                       ,[LanguageCode]
                       ,[TranslationText]
                       ,[UniqueKey])
@@ -114,7 +114,7 @@ namespace Model.DAL
         {
             int numRows = context.Database.ExecuteSql($"""
                 delete from [Idioma].[ParagraphTranslation]
-                where [ParagraphId] = {key.paragraphId}
+                where [ParagraphKey] = {key.paragraphId}
                 and [LanguageCode] = {key.code}
                 """);
         }

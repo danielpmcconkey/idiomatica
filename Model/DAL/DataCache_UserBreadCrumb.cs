@@ -25,8 +25,8 @@ namespace Model.DAL
                 
                 INSERT INTO [Idioma].UserBreadCrumb
                            ([UniqueKey]
-                           ,[UserId]
-                           ,[PageId]
+                           ,[UserKey]
+                           ,[PageKey]
                            ,[ActionDateTime]
                            )
                      VALUES

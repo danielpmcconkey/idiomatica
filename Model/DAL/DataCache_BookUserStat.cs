@@ -20,8 +20,8 @@ namespace Model.DAL
             {
                 context.Database.ExecuteSql($"""
                     INSERT INTO [Idioma].[BookUserStat]
-                               ([LanguageUserId]
-                               ,[BookId]
+                               ([LanguageUserKey]
+                               ,[BookKey]
                                ,[Key]
                                ,[ValueString]
                                ,[ValueNumeric])
