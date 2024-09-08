@@ -216,7 +216,7 @@ namespace Model.DAL
                 if (g.word is null || g.word.UniqueKey is null || g.word.TextLowerCase is null) continue;
                 value[g.word.TextLowerCase] = g.word;
                 // add it to the word cache
-                WordById[(int)g.word.UniqueKey] = g.word;
+                WordById[(Guid)g.word.UniqueKey] = g.word;
             }
 
             // write to cache

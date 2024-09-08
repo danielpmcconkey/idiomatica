@@ -173,10 +173,10 @@ namespace Logic.Services.API.Tests
         public void TokenGetChildObjectsTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid tokenId = 94322;
-            Guid languageUserId = 1;
+            Guid tokenId = CommonFunctions.GetToken94322Id(context);
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
             string expectedWordText = "había";
-            Guid expectedWordUserId = 827;
+            Guid expectedWordUserId = CommonFunctions.GetWordUser(context, languageUserId, expectedWordText);
 
             var tokenAndChildren = TokenApi.TokenGetChildObjects(
                 context, tokenId, languageUserId);
@@ -191,10 +191,10 @@ namespace Logic.Services.API.Tests
         public async Task TokenGetChildObjectsAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid tokenId = 94322;
-            Guid languageUserId = 1;
+            Guid tokenId = CommonFunctions.GetToken94322Id(context);
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
             string expectedWordText = "había";
-            Guid expectedWordUserId = 827;
+            Guid expectedWordUserId = CommonFunctions.GetWordUser(context, languageUserId, expectedWordText);
 
             var tokenAndChildren = await TokenApi.TokenGetChildObjectsAsync(
                 context, tokenId, languageUserId);
@@ -210,7 +210,7 @@ namespace Logic.Services.API.Tests
         public void TokensAndWordsReadBySentenceIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid sentenceId = 24379;
+            Guid sentenceId = CommonFunctions.GetSentence24379Id(context);
             int expectedCount = 9;
             string expectedText = "pareja";
 
@@ -227,7 +227,7 @@ namespace Logic.Services.API.Tests
         public async Task TokensAndWordsReadBySentenceIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid sentenceId = 24379;
+            Guid sentenceId = CommonFunctions.GetSentence24379Id(context);
             int expectedCount = 9;
             string expectedText = "pareja";
 
@@ -406,8 +406,8 @@ namespace Logic.Services.API.Tests
         public void TokensReadByPageIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid pageId = 378;
-            Guid sentenceId = 24380;
+            Guid pageId = CommonFunctions.GetPage378Id(context);
+            Guid sentenceId = CommonFunctions.GetSentence24380Id(context);
             int tokenOrdinal = 4;
             int expectedCount = 240;
             string expectedDisplay = "esperando,";
@@ -425,8 +425,8 @@ namespace Logic.Services.API.Tests
         public async Task TokensReadByPageIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid pageId = 378;
-            Guid sentenceId = 24380;
+            Guid pageId = CommonFunctions.GetPage378Id(context);
+            Guid sentenceId = CommonFunctions.GetSentence24380Id(context);
             int tokenOrdinal = 4;
             int expectedCount = 240;
             string expectedDisplay = "esperando,";

@@ -117,7 +117,7 @@
     }
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isSaveSuccess = false;
-    private int _newBookId = 0;
+    private Guid? _newBookId = null;
     private string _newBookUrl
     {
         get { return $"/Book/{_newBookId}/Read/"; }
@@ -194,7 +194,7 @@
 
             
             Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
-                context, (int)_loggedInUser.UniqueKey, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
+                context, (Guid)_loggedInUser.UniqueKey, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
             if (book is null || book.UniqueKey is null)
             {
                 ErrorHandler.LogAndThrow();

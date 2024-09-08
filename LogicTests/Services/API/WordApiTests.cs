@@ -22,7 +22,7 @@ namespace Logic.Services.API.Tests
             var word = new Word();
 
             var context = CommonFunctions.CreateContext();
-            Guid languageId = 2;
+            Guid languageId = CommonFunctions.GetEnglishLanguageKey(context);
             string guid = Guid.NewGuid().ToString();
             string text = guid.ToLower();
             string romanization = guid;
@@ -50,7 +50,7 @@ namespace Logic.Services.API.Tests
             var word = new Word();
             var context = CommonFunctions.CreateContext();
 
-            Guid languageId = 2;
+            Guid languageId = CommonFunctions.GetEnglishLanguageKey(context);
             string guid = Guid.NewGuid().ToString();
             string text = guid.ToLower();
             string romanization = guid;
@@ -80,9 +80,9 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
 
-            Guid wordId = 35;
             string expectedText = "cuerpo";
-            Guid expectedLanguageId = 1;
+            Guid expectedLanguageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid wordId = CommonFunctions.GetWordId(context, expectedText, expectedLanguageId);
 
             var word = WordApi.WordGetById(context, wordId);
 
@@ -96,9 +96,9 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
 
-            Guid wordId = 35;
             string expectedText = "cuerpo";
-            Guid expectedLanguageId = 1;
+            Guid expectedLanguageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid wordId = CommonFunctions.GetWordId(context, expectedText, expectedLanguageId);
 
             var word = await WordApi.WordGetByIdAsync(context, wordId);
 
@@ -114,9 +114,9 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
 
-            Guid expectedWordId = 35;
             string text = "cuerpo";
             Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid expectedWordId = CommonFunctions.GetWordId(context, text, languageId);
 
             var word = WordApi.WordReadByLanguageIdAndText(context, languageId, text);
 
@@ -128,9 +128,9 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
 
-            Guid expectedWordId = 35;
             string text = "cuerpo";
             Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid expectedWordId = CommonFunctions.GetWordId(context, text, languageId);
 
             var word = await WordApi.WordReadByLanguageIdAndTextAsync(context, languageId, text);
 
@@ -145,7 +145,7 @@ namespace Logic.Services.API.Tests
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             string sentence1 = "Cada tarde, después de la escuela.";
-            Guid expectedCount = 6;
+            int expectedCount = 6;
             string expectedWord = "después";
             int wordOrdinalToCheck = 2;
 
@@ -295,10 +295,11 @@ namespace Logic.Services.API.Tests
         public void WordsDictReadByPageIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid pageId = 378;
+            Guid pageId = CommonFunctions.GetPage378Id(context);
             int expectedCount = 122;
             string wordToCheck = "nombre";
-            Guid expectedId = 93;
+            Guid languageKey = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid expectedId = CommonFunctions.GetWordId(context, wordToCheck, languageKey);
 
             var dict = WordApi.WordsDictReadByPageId(context, pageId);
             if (dict is null)
@@ -316,10 +317,11 @@ namespace Logic.Services.API.Tests
         public async Task WordsDictReadByPageIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid pageId = 378;
+            Guid pageId = CommonFunctions.GetPage378Id(context);
             int expectedCount = 122;
             string wordToCheck = "nombre";
-            Guid expectedId = 93;
+            Guid languageKey = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid expectedId = CommonFunctions.GetWordId(context, wordToCheck, languageKey);
 
             var dict = await WordApi.WordsDictReadByPageIdAsync(context, pageId);
             if (dict is null)
@@ -341,14 +343,14 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             //using var transaction = context.Database.BeginTransaction();
-            Guid language1 = 1;
-            Guid language2 = 2;
-            Guid bookIdSpanish = 6;
-            Guid bookIdEnglish = 22;
+            Guid language1 = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid language2 = CommonFunctions.GetEnglishLanguageKey(context);
+            Guid bookIdSpanish = CommonFunctions.GetBook11Id(context);
+            Guid bookIdEnglish = Guid.NewGuid(); Assert.Fail(); // 22;
             int countRows1Expected = 1;
             int countRows2Expected = 2;
             int countSpanishWords1Expected = 0;
-            int countSpanishWords2Expected = 253;
+            int countSpanishWords2Expected = 240;
             int countEnglishWords2Expected = 208;
 
             try
@@ -444,14 +446,15 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int language1 = 1;
-            Guid language2 = 2;
-            Guid bookIdSpanish = 6;
-            Guid bookIdEnglish = 22;
+            //using var transaction = context.Database.BeginTransaction();
+            Guid language1 = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid language2 = CommonFunctions.GetEnglishLanguageKey(context);
+            Guid bookIdSpanish = CommonFunctions.GetBook11Id(context);
+            Guid bookIdEnglish = Guid.NewGuid(); Assert.Fail(); // 22;
             int countRows1Expected = 1;
             int countRows2Expected = 2;
             int countSpanishWords1Expected = 0;
-            int countSpanishWords2Expected = 253;
+            int countSpanishWords2Expected = 240;
             int countEnglishWords2Expected = 208;
 
             try
@@ -486,7 +489,7 @@ namespace Logic.Services.API.Tests
                 var list1 = await WordApi.WordsGetListOfReadCountAsync(context, (Guid)user.UniqueKey);
                 if (list1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                Guid countRows1Actual = list1.Count;
+                int countRows1Actual = list1.Count;
                 int countSpanishWords1Actual = list1.Where(x => x.language == "Spanish").FirstOrDefault().wordCount;
 
                 // add the second language and bookUser
@@ -548,7 +551,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid language = 1;
+            Guid language = CommonFunctions.GetSpanishLanguageKey(context);
             int countRowsExpected = 126;
             string wordToCheck = "volvió";
             int countTranslationsExpected = 3;
@@ -580,7 +583,6 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 Assert.IsNotNull(user);
                 Assert.IsNotNull(user.UniqueKey);
-                Assert.IsTrue(user.UniqueKey >= 1);
                 userId = (Guid)user.UniqueKey;
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, language, (Guid)user.UniqueKey);
                 Assert.IsNotNull(languageUser);
@@ -630,7 +632,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid language = 1;
+            Guid language = CommonFunctions.GetSpanishLanguageKey(context);
             int countRowsExpected = 126;
             string wordToCheck = "volvió";
             int countTranslationsExpected = 3;

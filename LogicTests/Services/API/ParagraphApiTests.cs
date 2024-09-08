@@ -252,7 +252,7 @@ namespace Logic.Services.API.Tests
         public void ParagraphReadAllTextTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid paragraphId = 14706;
+            Guid paragraphId = CommonFunctions.GetParagraph14706Id(context);
             string expectedValue = "África del Norte, África septentrional o África norsahariana (a veces llamada África Blanca) es la subregión norte de África. Está compuesta por cinco países: Argelia, Egipto, Libia, Marruecos y Túnez. Además, incluye a la República Árabe Saharaui Democrática (que es un Estado con reconocimiento limitado) y otros territorios que dependen de países externos a la subregión: Canarias, Ceuta y Melilla (que dependen de España), Madeira (de Portugal) y Lampedusa e Linosa (de Italia).";
 
 
@@ -264,7 +264,7 @@ namespace Logic.Services.API.Tests
         public async Task ParagraphReadAllTextAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid paragraphId = 14706;
+            Guid paragraphId = CommonFunctions.GetParagraph14706Id(context);
             string expectedValue = "África del Norte, África septentrional o África norsahariana (a veces llamada África Blanca) es la subregión norte de África. Está compuesta por cinco países: Argelia, Egipto, Libia, Marruecos y Túnez. Además, incluye a la República Árabe Saharaui Democrática (que es un Estado con reconocimiento limitado) y otros territorios que dependen de países externos a la subregión: Canarias, Ceuta y Melilla (que dependen de España), Madeira (de Portugal) y Lampedusa e Linosa (de Italia).";
 
             
@@ -398,7 +398,7 @@ namespace Logic.Services.API.Tests
         public void ParagraphsReadByPageIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid pageId = 400;
+            Guid pageId = CommonFunctions.GetPage400Id(context);
             int ppOrd = 0;
             int sentenceOrdinal = 1;
             string expectedValue = "Está compuesta por cinco países: Argelia, Egipto, Libia, Marruecos y Túnez.";
@@ -421,7 +421,7 @@ namespace Logic.Services.API.Tests
         public async Task ParagraphsReadByPageIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid pageId = 400;
+            Guid pageId = CommonFunctions.GetPage400Id(context);
             int ppOrd = 0;
             int sentenceOrdinal = 1;
             string expectedValue = "Está compuesta por cinco países: Argelia, Egipto, Libia, Marruecos y Túnez.";
@@ -446,7 +446,7 @@ namespace Logic.Services.API.Tests
         public void ParagraphTranslateTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid paragraphId = 14590;
+            Guid paragraphId = CommonFunctions.GetParagraph14590Id(context);
             string fromCode = "ES";
             string toCode = "EN-US";
             string expectedInput = "Había una vez una pareja que quería un hijo. La esposa, que estaba esperando, tenía antojo de una planta llamada rapunzel, que crecía en un jardín cercano perteneciente a una hechicera.";
@@ -471,7 +471,7 @@ namespace Logic.Services.API.Tests
         public async Task ParagraphTranslateAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid paragraphId = 14590;
+            Guid paragraphId = CommonFunctions.GetParagraph14590Id(context);
             string fromCode = "ES";
             string toCode = "EN-US";
             string expectedInput = "Había una vez una pareja que quería un hijo. La esposa, que estaba esperando, tenía antojo de una planta llamada rapunzel, que crecía en un jardín cercano perteneciente a una hechicera.";

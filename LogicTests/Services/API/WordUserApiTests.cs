@@ -21,7 +21,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
-            Guid wordId = 39;
+            Guid wordId = CommonFunctions.GetWordId(context, "dice", languageId);
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
 
             try
@@ -53,7 +53,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
-            Guid wordId = 39;
+            Guid wordId = CommonFunctions.GetWordId(context, "dice", languageId);
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
 
             try
@@ -86,9 +86,9 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid bookId = 6;
-            Guid pageId = 66;
-            int expectedCount = 149;
+            Guid bookId = CommonFunctions.GetBook11Id(context);
+            Guid pageId = CommonFunctions.GetPage378Id(context);
+            int expectedCount = 122;
 
             try
             {
@@ -100,7 +100,8 @@ namespace Logic.Services.API.Tests
                 userId = (Guid)user.UniqueKey;
 
                 // create the languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (Guid)user.UniqueKey);
+                var languageUser = LanguageUserApi.LanguageUserCreate(context,
+                    CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
                 // create the wordUsers
                 WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, (Guid)user.UniqueKey);
@@ -121,9 +122,9 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid bookId = 6;
-            Guid pageId = 66;
-            int expectedCount = 149;
+            Guid bookId = CommonFunctions.GetBook11Id(context);
+            Guid pageId = CommonFunctions.GetPage378Id(context);
+            int expectedCount = 122;
 
             try
             {
@@ -135,7 +136,8 @@ namespace Logic.Services.API.Tests
                 userId = (Guid)user.UniqueKey;
 
                 // create the languageUser
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (Guid)user.UniqueKey);
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context,
+                    CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
                 // create the wordUsers
                 await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, (Guid)user.UniqueKey);
@@ -158,9 +160,9 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid bookId = 6;
-            Guid pageId = 66;
-            int expectedCount = 149;
+            Guid bookId = CommonFunctions.GetBook11Id(context);
+            Guid pageId = CommonFunctions.GetPage378Id(context);
+            int expectedCount = 122;
             string wordToCheck = "exploradores";
 
             try
@@ -173,7 +175,8 @@ namespace Logic.Services.API.Tests
                 userId = (Guid)user.UniqueKey;
 
                 // create the languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (Guid)user.UniqueKey);
+                var languageUser = LanguageUserApi.LanguageUserCreate(context,
+                    CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 // create the wordUsers
@@ -199,9 +202,9 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid bookId = 6;
-            Guid pageId = 66;
-            int expectedCount = 149;
+            Guid bookId = CommonFunctions.GetBook11Id(context);
+            Guid pageId = CommonFunctions.GetPage378Id(context);
+            int expectedCount = 122;
             string wordToCheck = "exploradores";
 
             try
@@ -214,7 +217,8 @@ namespace Logic.Services.API.Tests
                 userId = (Guid)user.UniqueKey;
 
                 // create the languageUser
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, 1, (Guid)user.UniqueKey);
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context,
+                    CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 // create the wordUsers
@@ -242,8 +246,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int languageId = 1;
-            Guid wordId = 39;
+            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid wordId = CommonFunctions.GetWordId(context, "dice", languageId);
             AvailableWordUserStatus statusBefore = AvailableWordUserStatus.UNKNOWN;
             AvailableWordUserStatus statusAfter = AvailableWordUserStatus.LEARNING3;
             string translation = "he/she says";
@@ -285,7 +289,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
-            Guid wordId = 39;
+            Guid wordId = CommonFunctions.GetWordId(context, "dice", languageId);
             AvailableWordUserStatus statusBefore = AvailableWordUserStatus.UNKNOWN;
             AvailableWordUserStatus statusAfter = AvailableWordUserStatus.LEARNING3;
             string translation = "he/she says";
@@ -327,7 +331,8 @@ namespace Logic.Services.API.Tests
         public void WordUserReadByIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid wordUserId = 1545;
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
+            Guid wordUserId = CommonFunctions.GetWordUser(context, languageUserId, "vivían");
             AvailableWordUserStatus status = AvailableWordUserStatus.LEARNED;
             string translation = "they were living (imperfect)";
             
@@ -340,7 +345,8 @@ namespace Logic.Services.API.Tests
         public async Task WordUserReadByIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid wordUserId = 1545;
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
+            Guid wordUserId = CommonFunctions.GetWordUser(context, languageUserId, "vivían");
             AvailableWordUserStatus status = AvailableWordUserStatus.LEARNED;
             string translation = "they were living (imperfect)";
 

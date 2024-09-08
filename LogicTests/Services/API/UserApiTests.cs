@@ -19,7 +19,7 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid bookId = 11;
+            Guid bookId = CommonFunctions.GetBook11Id(context);
 
 
             try
@@ -32,7 +32,8 @@ namespace Logic.Services.API.Tests
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (Guid)user.UniqueKey);
+                var languageUser = LanguageUserApi.LanguageUserCreate(context,
+                    CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
                 if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
 
@@ -72,7 +73,7 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid bookId = 11;
+            Guid bookId = CommonFunctions.GetBook11Id(context);
 
 
             try
@@ -85,7 +86,8 @@ namespace Logic.Services.API.Tests
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (Guid)user.UniqueKey);
+                var languageUser = LanguageUserApi.LanguageUserCreate(context,
+                    CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
                 if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
 
@@ -177,7 +179,7 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid bookId = 11;
+            Guid bookId = CommonFunctions.GetBook11Id(context);
 
             try
             {
@@ -190,7 +192,7 @@ namespace Logic.Services.API.Tests
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, 1, (Guid)user.UniqueKey);
+                    context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
                 if (languageUser is null || languageUser.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
@@ -255,7 +257,7 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid bookId = 11;
+            Guid bookId = CommonFunctions.GetBook11Id(context);
 
             try
             {
@@ -268,7 +270,7 @@ namespace Logic.Services.API.Tests
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, 1, (Guid)user.UniqueKey);
+                    context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
                 if (languageUser is null || languageUser.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
@@ -333,7 +335,7 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid bookId = 11;
+            Guid bookId = CommonFunctions.GetBook11Id(context);
 
             try
             {
@@ -346,7 +348,7 @@ namespace Logic.Services.API.Tests
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, 1, (Guid)user.UniqueKey);
+                    context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
                 if (languageUser is null || languageUser.UniqueKey is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
@@ -382,7 +384,7 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid bookId = 11;
+            Guid bookId = CommonFunctions.GetBook11Id(context);
 
             try
             {
@@ -395,7 +397,7 @@ namespace Logic.Services.API.Tests
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, 1, (Guid)user.UniqueKey);
+                    context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
                 if (languageUser is null || languageUser.UniqueKey is null) 
                     { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;

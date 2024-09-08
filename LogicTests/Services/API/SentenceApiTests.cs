@@ -195,7 +195,7 @@ namespace Logic.Services.API.Tests
         public void SentencesReadByPageIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid pageId = 378;
+            Guid pageId = CommonFunctions.GetPage378Id(context);
             int expectedCount = 18;
             string expectedText = "El príncipe aprendió las palabras mágicas y visitó a Rapunzel en secreto.";
 
@@ -211,7 +211,7 @@ namespace Logic.Services.API.Tests
         public async Task SentencesReadByPageIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid pageId = 378;
+            Guid pageId = CommonFunctions.GetPage378Id(context);
             int expectedCount = 18;
             string expectedText = "El príncipe aprendió las palabras mágicas y visitó a Rapunzel en secreto.";
             
@@ -227,7 +227,7 @@ namespace Logic.Services.API.Tests
         public void SentencesReadByParagraphIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid paragraphId = 14594;
+            Guid paragraphId = CommonFunctions.GetParagraph14594Id(context);
             int expectedCount = 3;
             int sentenceOrdinal = 2;
             string expectedText = "Rapunzel aceptó escapar con él cuando regresara.";
@@ -244,7 +244,7 @@ namespace Logic.Services.API.Tests
         public async Task SentencesReadByParagraphIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid paragraphId = 14594;
+            Guid paragraphId = CommonFunctions.GetParagraph14594Id(context);
             int expectedCount = 3;
             int sentenceOrdinal = 2;
             string expectedText = "Rapunzel aceptó escapar con él cuando regresara.";

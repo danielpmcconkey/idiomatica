@@ -285,7 +285,7 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityRole", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
             {
                 b.Property<string>("Id")
                     .HasColumnType("nvarchar(450)");
@@ -314,7 +314,7 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
@@ -341,7 +341,7 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
             {
                 b.Property<int>("Id")
                     .ValueGeneratedOnAdd()
@@ -368,7 +368,7 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
             {
                 b.Property<string>("LoginProvider")
                     .HasColumnType("nvarchar(450)");
@@ -392,7 +392,7 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
             {
                 b.Property<string>("UserId")
                     .HasColumnType("nvarchar(450)");
@@ -409,7 +409,7 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
             {
                 b.Property<string>("UserId")
                     .HasColumnType("nvarchar(450)");
@@ -430,16 +430,16 @@ namespace Model.DAL
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityRoleClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
             {
-                b.HasOne("Microsoft.AspNetCore.Identity.UniqueKeyentityRole", null)
+                b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                     .WithMany()
                     .HasForeignKey("RoleId")
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserClaim<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
             {
                 b.HasOne("ApplicationUser", null)
                     .WithMany()
@@ -448,7 +448,7 @@ namespace Model.DAL
                     .IsRequired();
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserLogin<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
             {
                 b.HasOne("ApplicationUser", null)
                     .WithMany()
@@ -457,9 +457,9 @@ namespace Model.DAL
                     .IsRequired();
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserRole<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
             {
-                b.HasOne("Microsoft.AspNetCore.Identity.UniqueKeyentityRole", null)
+                b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                     .WithMany()
                     .HasForeignKey("RoleId")
                     .OnDelete(DeleteBehavior.Cascade)
@@ -472,7 +472,7 @@ namespace Model.DAL
                     .IsRequired();
             });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.UniqueKeyentityUserToken<string>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
             {
                 b.HasOne("ApplicationUser", null)
                     .WithMany()

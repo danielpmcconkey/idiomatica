@@ -57,7 +57,7 @@
         var context = await DbContextFactory.CreateDbContextAsync();
 
         var translation = await ParagraphApi.ParagraphTranslateAsync(
-            context, (int)pp.UniqueKey, LanguageFromCode.Code, LanguageToCode.Code);
+            context, (Guid)pp.UniqueKey, LanguageFromCode.Code, LanguageToCode.Code);
         _translateFrom = translation.input;
         _translateTo = translation.output;
         await ppModal.ShowAsync();

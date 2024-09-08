@@ -236,6 +236,15 @@ namespace LogicTests
             Assert.IsNotNull(page.UniqueKey);
             return (Guid)page.UniqueKey;
         }
+        internal static Guid GetPage400Id(IdiomaticaContext context)
+        {
+            var book = context.Books.Where(x => x.Title == "África del Norte").Include(x => x.Pages).FirstOrDefault();
+            Assert.IsNotNull(book);
+            var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+            Assert.IsNotNull(page);
+            Assert.IsNotNull(page.UniqueKey);
+            return (Guid)page.UniqueKey;
+        }
         internal static Guid GetPage384Id(IdiomaticaContext context)
         {
             var book = context.Books.Where(x => x.Title == "[GUION PARA VIDEO: EXPLICACIÓN DE \"COMPREHENSIBLE INPUT\" EN 5 MINUTOS]").Include(x => x.Pages).FirstOrDefault();
@@ -244,6 +253,60 @@ namespace LogicTests
             Assert.IsNotNull(page);
             Assert.IsNotNull(page.UniqueKey);
             return (Guid)page.UniqueKey;
+        }
+        internal static Guid GetPage378Id(IdiomaticaContext context)
+        {
+            var book = context.Books
+                .Where(x => x.Title == "Rapunzel")
+                .Include(x => x.Pages)
+                .FirstOrDefault();
+            Assert.IsNotNull(book);
+            var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+            Assert.IsNotNull(page);
+            Assert.IsNotNull(page.UniqueKey);
+            return (Guid)page.UniqueKey;
+        }
+        internal static Guid GetParagraph14706Id(IdiomaticaContext context)
+        {
+            var book = context.Books
+                .Where(x => x.Title == "África del Norte")
+                .Include(x => x.Pages).ThenInclude(x => x.Paragraphs)
+                .FirstOrDefault();
+            Assert.IsNotNull(book);
+            var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+            Assert.IsNotNull(page);
+            var pp = page.Paragraphs.Where(x => x.Ordinal == 0).FirstOrDefault();
+            Assert.IsNotNull(pp);
+            Assert.IsNotNull(pp.UniqueKey);
+            return (Guid)pp.UniqueKey;
+        }
+        internal static Guid GetParagraph14590Id(IdiomaticaContext context)
+        {
+            var book = context.Books
+                .Where(x => x.Title == "Rapunzel")
+                .Include(x => x.Pages).ThenInclude(x => x.Paragraphs)
+                .FirstOrDefault();
+            Assert.IsNotNull(book);
+            var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+            Assert.IsNotNull(page);
+            var pp = page.Paragraphs.Where(x => x.Ordinal == 0).FirstOrDefault();
+            Assert.IsNotNull(pp);
+            Assert.IsNotNull(pp.UniqueKey);
+            return (Guid)pp.UniqueKey;
+        }
+        internal static Guid GetParagraph14594Id(IdiomaticaContext context)
+        {
+            var book = context.Books
+                .Where(x => x.Title == "Rapunzel")
+                .Include(x => x.Pages).ThenInclude(x => x.Paragraphs)
+                .FirstOrDefault();
+            Assert.IsNotNull(book);
+            var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
+            Assert.IsNotNull(page);
+            var pp = page.Paragraphs.Where(x => x.Ordinal == 4).FirstOrDefault();
+            Assert.IsNotNull(pp);
+            Assert.IsNotNull(pp.UniqueKey);
+            return (Guid)pp.UniqueKey;
         }
 
         internal static Guid GetPageUser380Id(IdiomaticaContext context, Guid languageUserKey)
@@ -263,8 +326,27 @@ namespace LogicTests
             Assert.IsNotNull(pageUser.UniqueKey);
             return (Guid)pageUser.UniqueKey;
         }
+        internal static Guid GetToken94322Id(IdiomaticaContext context)
+        {
+            var token = (
+                from b in context.Books
+                join p in context.Pages on b.UniqueKey equals p.BookKey
+                join pp in context.Paragraphs on p.UniqueKey equals pp.PageKey
+                join s in context.Sentences on pp.UniqueKey equals s.ParagraphKey
+                join t in context.Tokens on s.UniqueKey equals t.SentenceKey
+                where (
+                    b.Title == "Rapunzel"
+                    && p.Ordinal == 1
+                    && pp.Ordinal == 0
+                    && s.Ordinal == 0
+                    && t.Ordinal == 0)
+                select t
+                ).FirstOrDefault();
+            Assert.IsNotNull(token);
+            Assert.IsNotNull(token.UniqueKey);
+            return (Guid)token.UniqueKey;
+        }
 
-        
 
         internal static Guid GetFlashCard1Id(IdiomaticaContext context, Guid languageUserId)
         {
@@ -284,6 +366,68 @@ namespace LogicTests
             Assert.IsNotNull(flashCard);
             Assert.IsNotNull(flashCard.UniqueKey);
             return (Guid)flashCard.UniqueKey;
+        }
+
+        internal static Guid GetWordUser(IdiomaticaContext context, Guid languageUserId, string textLowerCase)
+        {
+            var wordUser = (
+                from lu in context.LanguageUsers
+                join wu in context.WordUsers on lu.UniqueKey equals wu.LanguageUserKey
+                join w in context.Words on wu.WordKey equals w.UniqueKey
+                where (
+                    lu.UniqueKey == languageUserId && w.TextLowerCase == textLowerCase)
+                select wu
+                ).FirstOrDefault();
+            Assert.IsNotNull(wordUser);
+            Assert.IsNotNull(wordUser.UniqueKey);
+            return (Guid)wordUser.UniqueKey;
+        }
+
+        internal static Guid GetSentence24379Id(IdiomaticaContext context)
+        {
+            var sentence = (
+                from b in context.Books
+                join p in context.Pages on b.UniqueKey equals p.BookKey
+                join pp in context.Paragraphs on p.UniqueKey equals pp.PageKey
+                join s in context.Sentences on pp.UniqueKey equals s.ParagraphKey
+                where (
+                    b.Title == "Rapunzel"
+                    && p.Ordinal == 1
+                    && pp.Ordinal == 0
+                    && s.Ordinal == 0)
+                select s
+                ).FirstOrDefault();
+            Assert.IsNotNull(sentence);
+            Assert.IsNotNull(sentence.UniqueKey);
+            return (Guid)sentence.UniqueKey;
+        }
+        internal static Guid GetSentence24380Id(IdiomaticaContext context)
+        {
+            var sentence = (
+                from b in context.Books
+                join p in context.Pages on b.UniqueKey equals p.BookKey
+                join pp in context.Paragraphs on p.UniqueKey equals pp.PageKey
+                join s in context.Sentences on pp.UniqueKey equals s.ParagraphKey
+                where (
+                    b.Title == "Rapunzel"
+                    && p.Ordinal == 1
+                    && pp.Ordinal == 0
+                    && s.Ordinal == 1)
+                select s
+                ).FirstOrDefault();
+            Assert.IsNotNull(sentence);
+            Assert.IsNotNull(sentence.UniqueKey);
+            return (Guid)sentence.UniqueKey;
+        }
+
+        internal static Guid GetWordId(IdiomaticaContext context, string textToLower, Guid languageKey)
+        {
+            var w = context.Words
+                .Where(x => x.LanguageKey == languageKey && x.TextLowerCase == textToLower)
+                .FirstOrDefault();
+            Assert.IsNotNull(w);
+            Assert.IsNotNull(w.UniqueKey);
+            return (Guid)w.UniqueKey;
         }
         #endregion
 

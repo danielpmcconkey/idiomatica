@@ -10,8 +10,8 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, FlashCardAttempt?> FlashCardAttemptById = new ConcurrentDictionary<int, FlashCardAttempt?>();
-        private static ConcurrentDictionary<int, List<FlashCardAttempt>> FlashCardAttemptsByFlashCardId = new ConcurrentDictionary<int, List<FlashCardAttempt>>();
+        private static ConcurrentDictionary<Guid, FlashCardAttempt?> FlashCardAttemptById = new ConcurrentDictionary<Guid, FlashCardAttempt?>();
+        private static ConcurrentDictionary<Guid, List<FlashCardAttempt>> FlashCardAttemptsByFlashCardId = new ConcurrentDictionary<Guid, List<FlashCardAttempt>>();
 
 
         #region create
@@ -19,19 +19,17 @@ namespace Model.DAL
 
         public static FlashCardAttempt? FlashCardAttemptCreate(FlashCardAttempt flashCardAttempt, IdiomaticaContext context)
         {
-            if (flashCardAttempt.FlashCardId is null) throw new ArgumentNullException(nameof(flashCardAttempt.FlashCardId));
+            if (flashCardAttempt.FlashCardKey is null) throw new ArgumentNullException(nameof(flashCardAttempt.FlashCardKey));
             
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[FlashCardAttempt]
-                      ([FlashCardId]
-                      ,[Status]
+                      ([Status]
                       ,[AttemptedWhen]
                       ,[UniqueKey])
                 VALUES
-                      ({flashCardAttempt.FlashCardId}
-                      ,{flashCardAttempt.Status}
+                      ({flashCardAttempt.Status}
                       ,{flashCardAttempt.AttemptedWhen}
                       ,{guid})
         
@@ -45,7 +43,7 @@ namespace Model.DAL
 
 
             // add it to cache
-            FlashCardAttemptById[(int)newEntity.UniqueKey] = newEntity;
+            FlashCardAttemptById[(Guid)newEntity.UniqueKey] = newEntity;
 
             return newEntity;
         }
@@ -58,7 +56,7 @@ namespace Model.DAL
         #endregion
 
         #region read
-        public static FlashCardAttempt? FlashCardAttemptByIdRead(int key, IdiomaticaContext context)
+        public static FlashCardAttempt? FlashCardAttemptByIdRead(Guid key, IdiomaticaContext context)
         {
             // check cache
             if (FlashCardAttemptById.TryGetValue(key, out FlashCardAttempt? value))
@@ -67,13 +65,13 @@ namespace Model.DAL
             }
 
             // read DB
-            value = context.FlashCardAttempts.Where(x => x.FlashCardId == key).FirstOrDefault();
+            value = context.FlashCardAttempts.Where(x => x.FlashCardKey == key).FirstOrDefault();
             if (value == null) return null;
             // write to cache
             FlashCardAttemptById[key] = value;
             return value;
         }
-        public static async Task<FlashCardAttempt?> FlashCardAttemptByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<FlashCardAttempt?> FlashCardAttemptByIdReadAsync(Guid key, IdiomaticaContext context)
         {
             return await Task<FlashCardAttempt>.Run(() =>
             {
