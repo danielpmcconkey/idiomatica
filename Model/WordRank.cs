@@ -17,21 +17,21 @@ namespace Model
     [Index(nameof(LanguageKey), nameof(WordKey), IsUnique = true)]
     public class WordRank
     {
-        public Guid? UniqueKey { get; set; }
+        #region required data
 
+        [Required] public required Guid UniqueKey { get; set; }
+        [Required] public required Guid LanguageKey { get; set; }
+        public required Language Language { get; set; }
 
-        #region relationships
+        [Required] public required Guid WordKey { get; set; }
+       public required Word Word { get; set; }
 
-        public Guid? LanguageKey { get; set; }
-        public Language? Language { get; set; }
-
-        public Guid? WordKey { get; set; }
-        public Word? Word { get; set; }
+        [Column(TypeName = "numeric(8,2)")]
+        [Required] public required decimal DifficultyScore { get; set; }
+        [Required] public required int Ordinal {  get; set; }
 
         #endregion
 
-        [Column(TypeName = "numeric(8,2)")]
-        public decimal? DifficultyScore { get; set; }
 
     }
 }

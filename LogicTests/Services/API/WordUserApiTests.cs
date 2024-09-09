@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using LogicTests;
 using Logic.Telemetry;
-using Model;
 using k8s.KubeConfigModels;
+using Model.Enums;
 
 namespace Logic.Services.API.Tests
 {

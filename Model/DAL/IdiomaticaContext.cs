@@ -3,6 +3,39 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Model.DAL
 {
+    /*
+     * 
+     * you are here and are about to go to toronto
+     * 
+     * you are in the middle of ripping off the band-aid and complete
+     * refactoring the database. You've done a few things already. You've
+     * already changed the prod DB over to use GUIDs. But your various local
+     * DBs are in various states of disarray.
+     * 
+     * your ultimate goal is to have a database that can be maintained via
+     * dotnet migrations (need to test if we can still do that in prod) and
+     * have a "build a fresh DB" script that new devs can run from their
+     * desktop.
+     * 
+     * you've started on the script but got distracted with the DB migration
+     * stuff. you just made a bunch of fields required and cleaned up a bit of
+     * dodgy DB design. that gives you errors you need to fix in code.
+     * 
+     * order of operations
+     *     1. fix the build errors
+     *     2. get this running in a new DB (probably by finishing the fresh DB
+     *        script)
+     *     3. get all unit tests to pass
+     *     4. finish the fresh db if you haven't
+     *     5. figure out what to do about prod options are:
+     *          a. figure out the deltas and manually apply them (might be 
+     *             needed anyway if you can't get migrations to work)
+     *          b. rename the existing db and install a new one, then migrate
+     *             data
+     *     6. update documentation and archi for justin
+     * 
+     * 
+     * */
     public class IdiomaticaContext : DbContext
     {
         #region DBSets
@@ -17,7 +50,6 @@ namespace Model.DAL
         public DbSet<FlashCardAttempt> FlashCardAttempts { get; set; }
         public DbSet<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridges { get; set; }
         public DbSet<Language> Languages { get; set; }
-        public DbSet<LanguageCode> LanguageCodes { get; set; }
         public DbSet<LanguageUser> LanguageUsers { get; set; }
         public DbSet<Page> Pages { get; set; }
         public DbSet<PageUser> PageUsers { get; set; }
@@ -30,6 +62,7 @@ namespace Model.DAL
         public DbSet<UserSetting> UserSettings { get; set; }
         public DbSet<Verb> Verbs { get; set; }
         public DbSet<Word> Words { get; set; }
+        public DbSet<WordRank> WordRanks { get; set; }
         public DbSet<WordTranslation> WordTranslations { get; set; }
         public DbSet<WordUser> WordUsers { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
@@ -119,17 +152,10 @@ namespace Model.DAL
                     .HasForeignKey(lu => lu.LanguageKey);
                 e.HasMany(l => l.Books).WithOne(b => b.Language).HasForeignKey(b => b.LanguageKey);
                 e.HasMany(l => l.Words).WithOne(w => w.Language).HasForeignKey(w => w.LanguageKey);
-                e.HasOne(l => l.LanguageCode).WithOne(lc => lc.Language)
-                    .HasForeignKey<Language>(l => l.Code).OnDelete(DeleteBehavior.Cascade);
                 e.HasMany(l => l.WordRanks).WithOne(wr => wr.Language).HasForeignKey(wr => wr.LanguageKey);
-            });
-            modelBuilder.Entity<LanguageCode>(e => {
-                e.HasKey(lc => lc.Code);
-                e.HasMany(lc => lc.ParagraphTranslations)
-                    .WithOne(ppt => ppt.LanguageCode).HasForeignKey(ppt => ppt.Code);
-                e.HasMany(lc => lc.Users).WithOne(u => u.LanguageCode).HasForeignKey(u => u.Code);
-                e.HasOne(lc => lc.Language).WithOne(l => l.LanguageCode)
-                    .HasForeignKey<Language>(l => l.Code).OnDelete(DeleteBehavior.Cascade);
+                e.HasMany(l => l.ParagraphTranslations).WithOne(pt => pt.Language)
+                    .HasForeignKey(pt => pt.LanguageKey);
+                e.HasMany(l => l.Users).WithOne(u => u.UiLanguage).HasForeignKey(u => u.UiLanguageKey);
             });
             modelBuilder.Entity<LanguageUser>(e => {
                 e.HasKey(lu => lu.UniqueKey);
@@ -172,9 +198,9 @@ namespace Model.DAL
             modelBuilder.Entity<ParagraphTranslation>(e =>
             {
                 e.HasKey(ppt => ppt.UniqueKey);
-                e.HasOne(ppt => ppt.LanguageCode)
+                e.HasOne(ppt => ppt.Language)
                     .WithMany(s => s.ParagraphTranslations)
-                    .HasForeignKey(ppt => ppt.Code).OnDelete(DeleteBehavior.NoAction);
+                    .HasForeignKey(ppt => ppt.LanguageKey).OnDelete(DeleteBehavior.NoAction);
                 e.HasOne(ppt => ppt.Paragraph)
                     .WithMany(pp => pp.ParagraphTranslations)
                     .HasForeignKey(ppt => ppt.ParagraphKey).OnDelete(DeleteBehavior.Cascade);
@@ -197,6 +223,7 @@ namespace Model.DAL
                 e.HasMany(u => u.LanguageUsers).WithOne(lu => lu.User).HasForeignKey(u => u.UserKey);
                 e.HasMany(u => u.UserSettings).WithOne(us => us.User).HasForeignKey(us => us.UserKey);
                 e.HasMany(u => u.UserBreadCrumbs).WithOne(ubc => ubc.User).HasForeignKey(ubc => ubc.UserKey);
+                e.HasOne(u => u.UiLanguage).WithMany(l => l.Users).HasForeignKey(u => u.UiLanguageKey);
             });
             modelBuilder.Entity<UserBreadCrumb>(e =>
             {

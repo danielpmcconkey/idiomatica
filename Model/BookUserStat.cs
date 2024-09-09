@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Model.Enums;
 
 namespace Model
 {
@@ -13,18 +14,20 @@ namespace Model
     [PrimaryKey(nameof(BookKey), nameof(LanguageUserKey), nameof(Key))]
     public class BookUserStat
     {
-        //public int? BookId { get; set; }
-        public Guid? BookKey { get; set; }
-        public Guid? LanguageUserKey { get; set; }
-        //public int? LanguageUserId { get; set; }
-        public AvailableBookUserStat? Key { get; set; }
+        #region required data
 
-        #region relationships
-        public Book? Book { get; set; }
-        public LanguageUser? LanguageUser { get; set; }
+        [Required] public required Guid BookKey { get; set; }
+        public required Book Book { get; set; }
+        [Required] public required Guid LanguageUserKey { get; set; }
+        public required LanguageUser LanguageUser { get; set; }
+        [Required] public required AvailableBookUserStat Key { get; set; }
+
         #endregion
+
+
         [StringLength(250)]
         public string? ValueString { get; set; }
+
         [Column(TypeName ="numeric(10,4)")]
         public decimal? ValueNumeric { get; set; }
     }

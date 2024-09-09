@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Model.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

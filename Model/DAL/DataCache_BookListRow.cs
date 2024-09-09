@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Model.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

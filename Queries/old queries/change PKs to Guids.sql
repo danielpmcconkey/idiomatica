@@ -421,11 +421,47 @@ ALTER TABLE [Idioma].[WordRank]  WITH CHECK ADD CONSTRAINT [FK_WordRank_Word] FO
 ALTER TABLE [Idioma].[WordTranslation]  WITH CHECK ADD CONSTRAINT [FK_WordTranslation_Language] FOREIGN KEY([LanguageToKey]) REFERENCES [Idioma].[Language] ([UniqueKey]) ON DELETE CASCADE;
 ALTER TABLE [Idioma].[WordTranslation]  WITH CHECK ADD CONSTRAINT [FK_WordTranslation_Verb] FOREIGN KEY([VerbKey]) REFERENCES [Idioma].[Verb] ([UniqueKey]) ON DELETE NO ACTION;
 ALTER TABLE [Idioma].[WordTranslation]  WITH CHECK ADD CONSTRAINT [FK_WordTranslation_Word] FOREIGN KEY([WordKey]) REFERENCES [Idioma].[Word] ([UniqueKey]) ON DELETE NO ACTION;
+GO
+
+Alter table [Idioma].[UserBreadCrumb] alter column UserId int ;
+Alter table [Idioma].[UserBreadCrumb] alter column [PageId] int ;
+
+ALTER TABLE [Idioma].[Book] alter column [LanguageId] int ;
+ALTER TABLE [Idioma].[BookStat] alter column [BookId] int ;
+ALTER TABLE [Idioma].[BookTag] alter column [BookId] int ;
+ALTER TABLE [Idioma].[BookTag] alter column [UserId] int ;
+ALTER TABLE [Idioma].[BookUser] alter column [BookId] int ;
+ALTER TABLE [Idioma].[BookUser] alter column [LanguageUserId] int ;
+ALTER TABLE [Idioma].[BookUser] alter column [CurrentPageID] int ;
+
+ALTER TABLE		[Idioma].[BookUserStat]		 alter column		[LanguageUserId]	 int ;
+ALTER TABLE		[Idioma].[BookUserStat]		 alter column		[BookId]	 int ;
+ALTER TABLE		[Idioma].[FlashCard]		 alter column		[WordUserId]	 int ;
+ALTER TABLE		[Idioma].[FlashCardAttempt]		 alter column	[FlashCardId]		 int ;
+ALTER TABLE		[Idioma].[FlashCardParagraphTranslationBridge]		 alter column	[FlashCardId]		 int ;
+ALTER TABLE		[Idioma].[FlashCardParagraphTranslationBridge]		 alter column	[ParagraphTranslationId]		 int ;
+ALTER TABLE		[Idioma].[LanguageUser]		 alter column		[LanguageId]	 int ;
+ALTER TABLE		[Idioma].[LanguageUser]		 alter column		[UserId]	 int ;
+ALTER TABLE		[Idioma].[Page]		 alter column	[BookId]		 int ;
+ALTER TABLE		[Idioma].[PageUser]		 alter column		[BookUserId]	 int ;
+ALTER TABLE		[Idioma].[PageUser]		 alter column		[PageId]	 int ;
 
 
-
-
-
+ALTER TABLE		[Idioma].[Paragraph]		 alter column		[PageId]	 int ;
+ALTER TABLE		[Idioma].[ParagraphTranslation]		 alter column		[ParagraphId]	 int ;
+ALTER TABLE		[Idioma].[Sentence]		 alter column		[ParagraphId]	 int ;
+ALTER TABLE		[Idioma].[Token]		 alter column	[WordId]		 int ;
+ALTER TABLE		[Idioma].[Token]		 alter column	[SentenceId]		 int ;
+ALTER TABLE		[Idioma].[UserBreadCrumb]		 alter column	[PageId]		 int ;
+ALTER TABLE		[Idioma].[UserSetting]		 alter column		[UserId]	 int ;
+ALTER TABLE		[Idioma].[Verb]		 alter column		[LanguageId]	 int ;
+ALTER TABLE		[Idioma].[Word]		 alter column	[LanguageId]		 int ;
+ALTER TABLE		[Idioma].[WordRank]		 alter column		[LanguageId]	 int ;
+ALTER TABLE		[Idioma].[WordRank]		 alter column	[WordId]		 int ;
+ALTER TABLE		[Idioma].[WordUser]		 alter column		[WordId]	 int ;
+ALTER TABLE		[Idioma].[WordUser]		 alter column		[LanguageUserId]	 int ;
+ALTER TABLE		[Idioma].[WordTranslation]		 alter column		[LanguageToId]	 int ;
+ALTER TABLE		[Idioma].[WordTranslation]		 alter column		[WordId]	 int ;
 
 
 

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Logic.Telemetry;
 using System.ComponentModel.DataAnnotations;
 using Azure;
+using Model.Enums;
 
 namespace Logic.Services.API
 {

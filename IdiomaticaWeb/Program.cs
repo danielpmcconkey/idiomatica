@@ -50,7 +50,7 @@ else
 }
 
 builder.Services.AddDbContextFactory<IdiomaticaContext>(options => {
-    options.UseSqlServer(connection, b => b.MigrationsAssembly("IdiomaticaWeb"));
+    options.UseSqlServer(connection, b => b.MigrationsAssembly("TestDataPopulator"));
     //options.EnableSensitiveDataLogging();
 });
 

@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 
 namespace Model
 {
-    [Table("vw_BookListRow", Schema = "Idioma")]
-    [PrimaryKey(nameof(BookKey), nameof(UserKey))]
+    [NotMapped]
     public record BookListRow
     {
         public Int64? RowNumber { get; set; }

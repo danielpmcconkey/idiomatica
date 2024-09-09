@@ -9,6 +9,7 @@ using LogicTests;
 using Model;
 using Logic.Telemetry;
 using System.Net;
+using Model.Enums;
 
 
 namespace Logic.Services.API.Tests

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,35 +11,29 @@ namespace Model
 {
     
     [Table("Book", Schema = "Idioma")]
+    [PrimaryKey(nameof(UniqueKey))]
     public class Book
     {
-        //public int? Id { get; set; }
-        public Guid? UniqueKey { get; set; }
+        #region required data
 
-        #region relationships
+        [Required] public required Guid UniqueKey { get; set; }
 
-        //public int? LanguageId { get; set; }
-        public Guid? LanguageKey { get; set; }
-        public Language? Language { get; set; }
+        [Required] public required Guid LanguageKey { get; set; }
+        public required Language Language { get; set; }
+        
+        [StringLength(250)]
+        [Required] public required string Title { get; set; }
+        #endregion
+
+        
+
         public List<Page> Pages { get; set; } = new List<Page>();
         public List<BookStat> BookStats { get; set; } = new List<BookStat>();
         public List<BookUserStat> BookUserStats { get; set; } = new List<BookUserStat>();
         public List<BookUser> BookUsers { get; set; } = new List<BookUser>();
         public List<BookTag> BookTags { get; set; } = new List<BookTag>();
 
-        #endregion
-
-
-        [StringLength(250)]
-        public string? Title { get; set; }
         [StringLength(1000)]
         public string? SourceURI { get; set; }
-        
-        //public int WordCount { get; set; } // todo: get rid of Book.WordCount
-        [StringLength(250)]
-        public string? AudioFilename { get; set; }
-
-        
-
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Model.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -13,14 +14,17 @@ namespace Model
     [PrimaryKey(nameof(BookKey), nameof(Key))]
     public class BookStat
     {
-        //public int? BookId { get; set; }
-        public AvailableBookStat? Key { get; set; }
+        #region required data
 
-        #region relationships
-        public Guid? BookKey { get; set; }
-        public Book? Book { get; set; }
+        [Required] public required Guid BookKey { get; set; }
+        public required Book Book { get; set; }
+        [Required] public required AvailableBookStat Key { get; set; }
+
+
         #endregion
+        
+
         [StringLength(250)]
-        public string? Value { get; set; }
+        public required string Value { get; set; }
     }
 }

@@ -15,17 +15,20 @@ namespace Model
     [PrimaryKey(nameof(UniqueKey))]
     public class UserBreadCrumb
     {
-        public Guid? UniqueKey { get; set; } 
+        #region required data
+        [Required] public required Guid UniqueKey { get; set; }
+        [Required] public required Guid UserKey { get; set; }
+        public required User User { get; set; }
+        [Required] public required Guid PageKey { get; set; }
+        public required Page Page { get; set; }
+        [Required] public required DateTime ActionDateTime { get; set; }
 
-        #region relationships
-        public Guid? UserKey { get; set; }
-        public User? User { get; set; }
-        public Guid? PageKey { get; set; }
-        public Page? Page { get; set; }
+
 
         #endregion
 
-        public DateTime? ActionDateTime { get; set; }
+        
+
 
     }
 }

@@ -10,6 +10,7 @@ using Model.DAL;
 using Model;
 using Logic.Telemetry;
 using System.Linq.Expressions;
+using Model.Enums;
 
 namespace Logic.Services.API.Tests
 {

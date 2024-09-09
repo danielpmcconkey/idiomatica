@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Net;
 using DeepL;
 using System.Linq.Expressions;
+using Model.Enums;
 
 namespace Logic.Services.API
 {

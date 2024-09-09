@@ -9,22 +9,27 @@ namespace Model
     [PrimaryKey(nameof(UniqueKey))]
     public class Verb
     {
-        public Guid? UniqueKey { get; set; }
+        #region required data
+        [Required] public required Guid UniqueKey { get; set; }
+        [Required] public required Guid LanguageKey { get; set; }
+        public required Language Language { get; set; }
+
+        [StringLength(2000)]
+        [Required] public required string Conjugator { get; set; }
+        [StringLength(2000)]
 
 
-        #region relationships
+        #endregion
 
-        public Guid? LanguageKey { get; set; }
-        public Language? Language { get; set; }
+
+        
+
 
         [NotMapped]
         public List<VerbConjugation> VerbConjugations { get; set; } = [];
         public List<WordTranslation> WordTranslations { get; set; } = [];
 
-        #endregion
-        [StringLength(2000)]
-        public string? Conjugator { get; set; }
-        [StringLength(2000)]
+        
         public string? DisplayName { get; set; }
         [StringLength(2000)]
         public string? Infinitive { get; set; }

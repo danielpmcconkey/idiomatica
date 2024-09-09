@@ -13,15 +13,20 @@ namespace Model
     [PrimaryKey(nameof(UniqueKey))]
     public class ParagraphTranslation
     {
-        public Guid? UniqueKey { get; set; }
-        //public int? Id {  get; set; }
-        public Guid? ParagraphKey { get; set; }
-        public Paragraph? Paragraph { get; set; }
-        [Column("LanguageCode")]
-        public string? Code { get; set; }
-        public LanguageCode? LanguageCode { get; set; }
+        #region required data
+
+        [Required] public required Guid UniqueKey { get; set; }
+        [Required] public required Guid ParagraphKey { get; set; }
+        public required Paragraph Paragraph { get; set; }
+        [Required] public required string TranslationText { get; set; }
+        [Required] public required Guid LanguageKey { get; set; }
+        public required Language Language { get; set; }
+
+        #endregion
+
+
+        
         [StringLength(8000)]
-        public string? TranslationText { get; set; }
         public List<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridges { get; set; } = new List<FlashCardParagraphTranslationBridge>();
 
     }

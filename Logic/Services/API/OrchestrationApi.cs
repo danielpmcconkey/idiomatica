@@ -10,6 +10,7 @@ using System.Net;
 using k8s.KubeConfigModels;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Linq.Expressions;
+using Model.Enums;
 
 namespace Logic.Services.API
 {

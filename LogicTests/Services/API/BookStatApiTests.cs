@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using LogicTests;
 using Logic.Telemetry;
 using Model.DAL;
-using Model;
+using Model.Enums;
 
 namespace Logic.Services.API.Tests
 {

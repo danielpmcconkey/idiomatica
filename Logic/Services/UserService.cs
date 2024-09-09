@@ -19,7 +19,7 @@ namespace Logic.Services
         private ClaimsPrincipal? _loggedInUserClaimsPrincipal;
         private User? _loggedInUser;
         private UILabels.UILabels _uiLabels;
-        private LanguageCode? _uiLanguageCode;
+        private Language? _uiLanguage;
 #if DEBUG
         /// <summary>
         /// this is used so that the test bench can be used without needing to go through front-end login

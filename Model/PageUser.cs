@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -8,18 +10,19 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("PageUser", Schema = "Idioma")]
+    [PrimaryKey(nameof(UniqueKey))]
     public class PageUser
     {
-        public Guid? UniqueKey { get; set; }
-        //public int? Id { get; set; }
+        #region required data
 
-        #region relationships
-        public Guid? BookUserKey { get; set; }
-        public BookUser? BookUser { get; set; }
-        public Guid? PageKey { get; set; }
-        public Page? Page { get; set; }
-        
+        [Required] public required Guid UniqueKey { get; set; }
+        [Required] public required Guid BookUserKey { get; set; }
+        public required BookUser BookUser { get; set; }
+        [Required] public required Guid PageKey { get; set; }
+        public required Page Page { get; set; }
+
         #endregion
+        
 
         
         public DateTime? ReadDate { get; set; }

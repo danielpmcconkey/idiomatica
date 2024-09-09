@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Logic.Services.API;
+using Model.Enums;
 
 namespace Logic
 {

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using IdentityModel.OidcClient.Browser;
 using DeepL;
 using static System.Net.Mime.MediaTypeNames;
+using Model.Enums;
 
 namespace Logic.Services.API
 {

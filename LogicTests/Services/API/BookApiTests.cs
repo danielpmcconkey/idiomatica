@@ -6,10 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LogicTests;
-using Model;
 using System.Net;
 using Logic.Telemetry;
 using k8s.KubeConfigModels;
+using Model.Enums;
 
 namespace Logic.Services.API.Tests
 {

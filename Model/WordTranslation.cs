@@ -3,6 +3,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
+using Model.Enums;
 
 namespace Model
 {
@@ -11,26 +12,31 @@ namespace Model
     [PrimaryKey(nameof(UniqueKey))]
     public class WordTranslation
     {
-        public Guid? UniqueKey { get; set; }
+        #region required data
 
+        [Required] public required Guid UniqueKey { get; set; }
+        [Required] public required Guid LanguageToKey { get; set; }
+        public required Language LanguageTo { get; set; }
+        [Required] public required Guid WordKey { get; set; }
+        public required Word Word { get; set; }
+        [Required] public required Guid VerbKey { get; set; }
+        [Required] public required string Translation { get; set; }
+        [Required] public required AvailablePartOfSpeech PartOfSpeech { get; set; }
 
-        #region relationships
+        [StringLength(2000)]
+        [Required] public required int Ordinal { get; set; } = 0;
 
-        public Guid? LanguageToKey { get; set; }
-        public Language? LanguageTo { get; set; }
-        public Guid? WordKey { get; set; }
-        public Word? Word { get; set; }
-        public Guid? VerbKey { get; set; }
-        public Verb? Verb { get; set; }
 
         #endregion
 
 
-        [StringLength(2000)]
-        public string? Translation { get; set; }
-        public AvailablePartOfSpeech? PartOfSpeech { get; set; }
+       
 
-        public int? Ordinal {  get; set; }
+        public Verb? Verb { get; set; }
+
+        
+
+
 
     }
 }

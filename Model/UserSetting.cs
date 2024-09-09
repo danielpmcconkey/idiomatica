@@ -15,18 +15,20 @@ namespace Model
     [PrimaryKey(nameof(Key), nameof(UserKey))]
     public class UserSetting
     {
+        #region required data
+        [Required] public required int Key { get; set; }
+        [Required] public required Guid UserKey { get; set; }
+        public required User User { get; set; }
 
-        public int? Key { get; set; }
-        public Guid? UserKey { get; set; }
+        [StringLength(1000)]
+        [Required] public required string Value { get; set; }
 
 
-        #region relationships
-        public User? User { get; set; }
         #endregion
 
 
 
-        [StringLength(1000)]
-        public string? Value { get; set; }
+
+
     }
 }

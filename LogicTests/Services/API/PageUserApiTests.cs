@@ -10,6 +10,7 @@ using Logic.Telemetry;
 using Model;
 using System.Net;
 using k8s.KubeConfigModels;
+using Model.Enums;
 
 namespace Logic.Services.API.Tests
 {

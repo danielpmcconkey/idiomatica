@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using DeepL;
 using static System.Net.Mime.MediaTypeNames;
 using System.Net;
+using Model.Enums;
 
 namespace Logic.Services.API
 {

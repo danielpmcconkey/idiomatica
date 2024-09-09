@@ -317,7 +317,7 @@
             <bendpoint startX="-36" startY="117" endX="204" endY="93"/>
             <bendpoint startX="-192" startY="117" endX="48" endY="117"/>
           </sourceConnection>
-          <sourceConnection xsi:type="archimate:Connection" id="id-7ca4de1f7b084c4498df203c87aaf5f5" source="id-6101a64ec4aa47e59fa6fe1b95a785f3" target="id-9585793cbcdc4cfdabb86db3cfb6f1dc" archimateRelationship="id-1ae9a8349ee743eea5a2d57b72f7fc65">
+          <sourceConnection xsi:type="archimate:Connection" id="id-7ca4de1f7b084c4498df203c87aaf5f5" lineColor="#0000ff" source="id-6101a64ec4aa47e59fa6fe1b95a785f3" target="id-9585793cbcdc4cfdabb86db3cfb6f1dc" archimateRelationship="id-1ae9a8349ee743eea5a2d57b72f7fc65">
             <bendpoint startY="609" endX="1572" endY="777"/>
             <bendpoint startX="-1788" startY="609" endX="-216" endY="777"/>
             <bendpoint startX="-1788" startY="-159" endX="-216" endY="9"/>
@@ -398,17 +398,17 @@
         </child>
         <child xsi:type="archimate:DiagramObject" id="id-81af05c8ba3d4d678557ea37454860df" targetConnections="id-9b3fb7a3ec514a74ac66a798e87ae617" archimateElement="id-ea243264a545423b8788c5314f2922ec">
           <bounds x="1198" y="342" width="120" height="55"/>
-          <sourceConnection xsi:type="archimate:Connection" id="id-948ee0cb01454314837b471a89246617" source="id-81af05c8ba3d4d678557ea37454860df" target="id-4f52e091abda471a822fd8cd7f1f5876" archimateRelationship="id-0639abf65f924357b25316c82228fcaa"/>
-          <sourceConnection xsi:type="archimate:Connection" id="id-4223af3fdaf448079e1776d8f580773c" source="id-81af05c8ba3d4d678557ea37454860df" target="id-9585793cbcdc4cfdabb86db3cfb6f1dc" archimateRelationship="id-603fe9f175044f02acea395f64ccea34"/>
+          <sourceConnection xsi:type="archimate:Connection" id="id-948ee0cb01454314837b471a89246617" lineColor="#0000ff" source="id-81af05c8ba3d4d678557ea37454860df" target="id-4f52e091abda471a822fd8cd7f1f5876" archimateRelationship="id-0639abf65f924357b25316c82228fcaa"/>
+          <sourceConnection xsi:type="archimate:Connection" id="id-4223af3fdaf448079e1776d8f580773c" lineColor="#0000ff" source="id-81af05c8ba3d4d678557ea37454860df" target="id-9585793cbcdc4cfdabb86db3cfb6f1dc" archimateRelationship="id-603fe9f175044f02acea395f64ccea34"/>
         </child>
-        <child xsi:type="archimate:DiagramObject" id="id-4f52e091abda471a822fd8cd7f1f5876" targetConnections="id-948ee0cb01454314837b471a89246617" archimateElement="id-27b974a5634841bd8668ab8b1312c093">
+        <child xsi:type="archimate:DiagramObject" id="id-4f52e091abda471a822fd8cd7f1f5876" targetConnections="id-948ee0cb01454314837b471a89246617" fillColor="#a9dfa2" archimateElement="id-27b974a5634841bd8668ab8b1312c093">
           <bounds x="1198" y="474" width="120" height="55"/>
           <sourceConnection xsi:type="archimate:Connection" id="id-b2bf91a8b6d54dbeb2b46f174f7d3a45" lineColor="#0000ff" source="id-4f52e091abda471a822fd8cd7f1f5876" target="id-8e1b45b043934d829172a4b0fe698379" archimateRelationship="id-9c094491297c4113a72780d3c0556169"/>
         </child>
         <child xsi:type="archimate:DiagramObject" id="id-8e1b45b043934d829172a4b0fe698379" targetConnections="id-b2bf91a8b6d54dbeb2b46f174f7d3a45 id-b63bd957c28047b79d695d8fcf69c706" fillColor="#a9dfa2" archimateElement="id-c338e64d7b3a40698799cf4a73a511b6">
           <bounds x="1198" y="600" width="120" height="55"/>
         </child>
-        <child xsi:type="archimate:DiagramObject" id="id-9585793cbcdc4cfdabb86db3cfb6f1dc" targetConnections="id-4223af3fdaf448079e1776d8f580773c id-7ca4de1f7b084c4498df203c87aaf5f5" archimateElement="id-629d7cc2b6344872bb00712388ed69ca">
+        <child xsi:type="archimate:DiagramObject" id="id-9585793cbcdc4cfdabb86db3cfb6f1dc" targetConnections="id-4223af3fdaf448079e1776d8f580773c id-7ca4de1f7b084c4498df203c87aaf5f5" fillColor="#a9dfa2" archimateElement="id-629d7cc2b6344872bb00712388ed69ca">
           <bounds x="888" y="168" width="120" height="55"/>
           <sourceConnection xsi:type="archimate:Connection" id="id-845cefd782454195a2c23d47c35dc550" lineColor="#0000ff" source="id-9585793cbcdc4cfdabb86db3cfb6f1dc" target="id-472621b50a30493a92ac4f31c482ba23" archimateRelationship="id-02cb427ba33643f3a778a1e79938b98a"/>
         </child>

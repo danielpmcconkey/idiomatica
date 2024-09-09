@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -9,25 +11,25 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("BookTag", Schema = "Idioma")]
+    [PrimaryKey(nameof(UniqueKey))]
     public class BookTag
     {
-        public Guid? UniqueKey { get; set; } 
-        //public int? Id { get; set; }
+        #region required data
 
-        #region relationships
+        [Required] public required Guid UniqueKey { get; set; }
 
-        //public int? BookId { get; set; }
-        public Guid? BookKey { get; set; }
-        public Book? Book { get; set; }
-        //public int? UserId { get; set; }
-        public Guid? UserKey { get; set; }
-        public User? User { get; set; }
+        [Required] public required Guid BookKey { get; set; }
+        public required Book Book { get; set; }
+        [Required] public required Guid UserKey { get; set; }
+        public required User User { get; set; }
 
+        
+        [StringLength(250)]
+        [Required] public required string Tag { get; set; }
+        [Required] public required DateTimeOffset Created { get; set; }
         #endregion
 
-        [StringLength(250)]
-        public string? Tag { get; set; }
-        public DateTimeOffset? Created { get; set; }
+        
         
         /// <summary>
         /// Tags are pulled in aggregate. If 20 users all set the same tag, it would show 20, even though the DB saves them individually
