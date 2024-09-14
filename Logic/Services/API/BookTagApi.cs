@@ -40,7 +40,7 @@ namespace Logic.Services.API
             newTag = DataCache.BookTagCreate(newTag, context);
             if (newTag is null || newTag.UniqueKey is null)
             {
-                ErrorHandler.LogAndThrow(2440);
+                ErrorHandler.LogAndThrow();
             }
         }
         public static async Task BookTagAddAsync(
@@ -66,13 +66,13 @@ namespace Logic.Services.API
         }
 
 
-        public static List<BookTag> BookTagsGetByBookIdAndUserId(
+        public static List<BookTagRow> BookTagsGetByBookIdAndUserId(
             IdiomaticaContext context, Guid bookId, Guid userId)
         {
             var tags = DataCache.BookTagsByBookAndUserRead((bookId, userId), context);
             return tags;
         }
-        public static async Task<List<BookTag>> BookTagsGetByBookIdAndUserIdAsync(
+        public static async Task<List<BookTagRow>> BookTagsGetByBookIdAndUserIdAsync(
             IdiomaticaContext context, Guid bookId, Guid userId)
         {
             return await Task<List<BookTag>>.Run(() =>

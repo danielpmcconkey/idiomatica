@@ -1,5 +1,6 @@
 ﻿@page "/ModalWord"
-@    using Logic.Services.API
+@using Logic.Services.API
+@using Model.Enums
 @rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
@@ -164,13 +165,12 @@
                 return;
             }
             _word = thisToken.Word; 
-            if (_word == null || _word.UniqueKey is null || _word.TextLowerCase is null)
+            if (_word == null || _word.TextLowerCase is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (ReadDataPacket == null || ReadDataPacket.LanguageUser is null ||
-                ReadDataPacket.LanguageUser.UniqueKey is null)
+            if (ReadDataPacket == null || ReadDataPacket.LanguageUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -183,14 +183,12 @@
             if (_wordUser is null)
             {
                 // it shouldn't be, but create it if so
-                _wordUser = WordUserApi.WordUserCreate(context, (Guid)_word.UniqueKey,
-                    (Guid)ReadDataPacket.LanguageUser.UniqueKey, "", AvailableWordUserStatus.UNKNOWN);
+                _wordUser = WordUserApi.WordUserCreate(context, _word,
+                    ReadDataPacket.LanguageUser, "", AvailableWordUserStatus.UNKNOWN);
             }
-            if (_wordUser is null || _wordUser.UniqueKey is null)
-            { ErrorHandler.LogAndThrow(); return; }
-
-            _wordUser.Status = _wordUser.Status is null ? AvailableWordUserStatus.UNKNOWN : _wordUser.Status;
-
+            if (_wordUser is null)
+                { ErrorHandler.LogAndThrow(); return; }
+            
             _title = (_word is null) ? "" : _word.TextLowerCase;
             _translation = _wordUser.Translation;
             _defaultTranslations = GetDefaultTranslations(thisToken);
@@ -243,7 +241,7 @@
     }
     private string GetTokenClassSelected(int statusToCheck)
     {
-        if (_wordUser is null || _wordUser.Status is null) return "unselectedWordStatus";
+        if (_wordUser is null) return "unselectedWordStatus";
         if ((int)_wordUser.Status == statusToCheck) return "selectedWordStatus";
         return "unselectedWordStatus";
     }
@@ -256,14 +254,10 @@
     {
         try
         {
-            if (_wordUser is null || _wordUser.UniqueKey is null)
+            if (_wordUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
-            }
-            if (_wordUser.Status is null)
-            {
-                _wordUser.Status = AvailableWordUserStatus.UNKNOWN;
             }
             if (_wordUser.Translation is null)
             {
@@ -288,7 +282,7 @@
         try
         {
             _isFormattingTranslation = true;
-            if (_wordUser is null || _wordUser.UniqueKey is null)
+            if (_wordUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -346,20 +340,16 @@
         _isSavingFlashCard = true;
         if (_doesFlashCardExist) return;
 
-        if (_wordUser is null || _wordUser.UniqueKey is null)
+        if (_wordUser is null)
         {
             ErrorHandler.LogAndThrow();
             return;
         }
         var uiLanguage = ReadDataPacket.LanguageToCode;
-        if (uiLanguage is null || string.IsNullOrEmpty(uiLanguage.Code))
+        if (uiLanguage is null)
         {
             ErrorHandler.LogAndThrow();
             return;
-        }
-        if (_wordUser.Status is null)
-        {
-            _wordUser.Status = AvailableWordUserStatus.UNKNOWN;
         }
         if (_wordUser.Translation is null)
         {

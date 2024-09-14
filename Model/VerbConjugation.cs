@@ -30,9 +30,10 @@ namespace Model
         public AvailableGrammaticalTense? Tense { get; set; }
         public AvailableGrammaticalAspect? Aspect { get; set; }
         public AvailableGrammaticalMood? Mood { get; set; }
-        public AvailableGrammaticalVoice Voice { get; set; }
+        public AvailableGrammaticalVoice? Voice { get; set; }
         [StringLength(2000)]
         public string? Translation { get; set; }
+        public required int Ordinal { get; set; }
 
         public override string ToString()
         {

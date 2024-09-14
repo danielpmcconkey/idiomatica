@@ -37,7 +37,8 @@ namespace Logic.Conjugator.Spanish
                 Tense = AvailableGrammaticalTense.PRESENT,
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
-                Voice = AvailableGrammaticalVoice.ACTIVE
+                Voice = AvailableGrammaticalVoice.ACTIVE,
+                Ordinal = 100
             };
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
@@ -86,7 +87,8 @@ namespace Logic.Conjugator.Spanish
                 Tense = AvailableGrammaticalTense.PAST,
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
-                Voice = AvailableGrammaticalVoice.ACTIVE
+                Voice = AvailableGrammaticalVoice.ACTIVE,
+                Ordinal = 200
             };
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
@@ -117,7 +119,8 @@ namespace Logic.Conjugator.Spanish
                 Tense = AvailableGrammaticalTense.PAST,
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
-                Voice = AvailableGrammaticalVoice.ACTIVE
+                Voice = AvailableGrammaticalVoice.ACTIVE,
+                Ordinal = 300
             };
 
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
@@ -149,7 +152,8 @@ namespace Logic.Conjugator.Spanish
                 Tense = AvailableGrammaticalTense.PRESENT,
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
-                Voice = AvailableGrammaticalVoice.ACTIVE
+                Voice = AvailableGrammaticalVoice.ACTIVE,
+                Ordinal = 400
             };
 
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
@@ -181,7 +185,8 @@ namespace Logic.Conjugator.Spanish
                 Tense = AvailableGrammaticalTense.FUTURE,
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
-                Voice = AvailableGrammaticalVoice.ACTIVE
+                Voice = AvailableGrammaticalVoice.ACTIVE,
+                Ordinal = 500
             };
 
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
@@ -213,7 +218,8 @@ namespace Logic.Conjugator.Spanish
                 Tense = AvailableGrammaticalTense.PRESENT,
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
-                Voice = AvailableGrammaticalVoice.ACTIVE
+                Voice = AvailableGrammaticalVoice.ACTIVE,
+                Ordinal = 600
             };
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
@@ -243,7 +249,8 @@ namespace Logic.Conjugator.Spanish
                 Tense = AvailableGrammaticalTense.PAST,
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
-                Voice = AvailableGrammaticalVoice.ACTIVE
+                Voice = AvailableGrammaticalVoice.ACTIVE,
+                Ordinal = 700
             };
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
@@ -274,7 +281,8 @@ namespace Logic.Conjugator.Spanish
                 Tense = AvailableGrammaticalTense.FUTURE,
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
-                Voice = AvailableGrammaticalVoice.ACTIVE
+                Voice = AvailableGrammaticalVoice.ACTIVE,
+                Ordinal = 800
             };
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {

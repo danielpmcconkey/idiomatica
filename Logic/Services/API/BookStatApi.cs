@@ -90,7 +90,7 @@ namespace Logic.Services.API
             """);
             if (numRows < 1)
             {
-                ErrorHandler.LogAndThrow(2110);
+                ErrorHandler.LogAndThrow();
             }
         }
         public static async Task BookStatsCreateAndSaveAsync(IdiomaticaContext context, Guid bookId)

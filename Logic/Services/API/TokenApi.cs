@@ -55,38 +55,30 @@ namespace Logic.Services.API
         public static async Task<(Token? t, WordUser? wu)> TokenGetChildObjectsAsync(
             IdiomaticaContext context, Guid tokenId, Guid languageUserId)
         {
-            Token? t = new();
-            WordUser? wu = new ();
             var languageUser = await DataCache.LanguageUserByIdReadAsync(languageUserId, context);
-            if (languageUser == null || languageUser.UniqueKey is null)
+            if (languageUser == null)
             {
                 ErrorHandler.LogAndThrow();
-                return (t, wu);
+                return (null, null);
             }
-            if (languageUser.UserKey == null)
+            var t = await DataCache.TokenByIdReadAsync(tokenId, context);
+            if (t == null)
             {
                 ErrorHandler.LogAndThrow();
-                return (t, wu);
+                return (null, null);
             }
-            t = await DataCache.TokenByIdReadAsync(tokenId, context);
-            if (t == null || t.WordKey == null)
+            if (t.Word == null)
             {
                 ErrorHandler.LogAndThrow();
-                return (t, wu);
+                return (null, null);
             }
-            t.Word = await DataCache.WordByIdReadAsync((Guid)t.WordKey, context);
-            if (t.Word == null || t.Word.UniqueKey == null)
-            {
-                ErrorHandler.LogAndThrow();
-                return (t, wu);
-            }
-            wu = await DataCache.WordUserByWordIdAndUserIdReadAsync(
-                ((Guid)t.Word.UniqueKey, (Guid)languageUser.UserKey), context);
+            var wu = await DataCache.WordUserByWordIdAndUserIdReadAsync(
+                (t.WordKey, languageUser.UserKey), context);
             if (wu is null)
             {
                 // create it
-                wu = await WordUserApi.WordUserCreateAsync(context, (Guid)t.Word.UniqueKey,
-                    (Guid)languageUser.UniqueKey, string.Empty, AvailableWordUserStatus.UNKNOWN);
+                wu = await WordUserApi.WordUserCreateAsync(context, t.Word,
+                    languageUser, string.Empty, AvailableWordUserStatus.UNKNOWN);
             }
             return (t, wu);
         }
@@ -143,11 +135,11 @@ namespace Logic.Services.API
             return tokens;
         }
         public static async Task<List<Token>> TokensCreateFromSentenceAsync(
-            IdiomaticaContext context, Guid sentenceId, Guid languageId)
+            IdiomaticaContext context, Sentence sentence, Language language)
         {
             return await Task<List<Token>>.Run(() =>
             {
-                return TokensCreateFromSentence(context, sentenceId, languageId);
+                return TokensCreateFromSentence(context, sentence, language);
             });
         }
 

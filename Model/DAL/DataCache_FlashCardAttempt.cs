@@ -19,7 +19,6 @@ namespace Model.DAL
 
         public static FlashCardAttempt? FlashCardAttemptCreate(FlashCardAttempt flashCardAttempt, IdiomaticaContext context)
         {
-            Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[FlashCardAttempt]
@@ -31,21 +30,15 @@ namespace Model.DAL
                       ({flashCardAttempt.FlashCardKey}
                       ,{flashCardAttempt.Status}
                       ,{flashCardAttempt.AttemptedWhen}
-                      ,{guid})
+                      ,{flashCardAttempt.UniqueKey})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating FlashCardAttempt affected 0 rows");
-            var newEntity = context.FlashCardAttempts.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null)
-            {
-                throw new InvalidDataException("newEntity is null in FlashCardAttemptCreate");
-            }
-
-
+            
             // add it to cache
-            FlashCardAttemptById[(Guid)newEntity.UniqueKey] = newEntity;
+            FlashCardAttemptById[flashCardAttempt.UniqueKey] = flashCardAttempt;
 
-            return newEntity;
+            return flashCardAttempt;
         }
         public static async Task<FlashCardAttempt?> FlashCardAttemptCreateAsync(FlashCardAttempt value, IdiomaticaContext context)
         {

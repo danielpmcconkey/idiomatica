@@ -1,4 +1,5 @@
-﻿@rendermode InteractiveServer
+﻿@using Model.Enums
+@rendermode InteractiveServer
 @inject UserService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 
@@ -49,12 +50,12 @@
                                 @UserService.GetUILabel("bookListFormFilterLanguage")
                             </div>
                             <div class="text-center  align-items-center">
-                                <InputSelect id="LanguageInput"
-                                             @bind-Value="BookListDataPacket.LcFilterGuidString">
+                                
+                                <InputSelect id="LanguageInput" @bind-Value="BookListDataPacket.LcFilterCode">
                                     <option selected disabled>@UserService.GetUILabel("bookListFormFilterNone")</option>
                                     @foreach (var (key, value) in BookListDataPacket.LanguageOptions)
                                     {
-                                        <option value="@key">@value.Name</option>
+                                        <option value="@value.Code">@value.Name</option>
                                     }
                                 </InputSelect>
                             </div>

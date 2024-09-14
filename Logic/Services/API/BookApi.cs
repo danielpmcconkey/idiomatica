@@ -16,26 +16,22 @@ namespace Logic.Services.API
     public static class BookApi
     {
         public static Book? BookCreateAndSave(
-            IdiomaticaContext context, string title, string languageCode,
+            IdiomaticaContext context, string title, AvailableLanguageCode languageCode,
             string? url, string text)
         {
             // sanitize and validate input
             var titleT = title.Trim();
-            var languageCodeT = languageCode.Trim();
             var urlT = url == null ? "" : url.Trim();
 
             if (titleT == string.Empty) { ErrorHandler.LogAndThrow(); return null; }
-            if (languageCodeT == string.Empty) { ErrorHandler.LogAndThrow(); return null; }
-
-            if (!Enum.TryParse(languageCodeT, out AvailableLanguageCode code)) 
-                { ErrorHandler.LogAndThrow(); return null; }
+            
 
             // pull language from the db
-            var language = DataCache.LanguageByCodeRead((AvailableLanguageCode)code, context);
+            var language = DataCache.LanguageByCodeRead(languageCode, context);
             if (language is null) { ErrorHandler.LogAndThrow(); return null; }
 
             // divide text into paragraphs
-            string[] paragraphSplits = ParagraphApi.PotentialParagraphsSplitFromText(context, text, languageCodeT);
+            string[] paragraphSplits = ParagraphApi.PotentialParagraphsSplitFromText(context, text, language);
 
 
             // add the book to the DB so you can save pages using its ID
@@ -50,7 +46,7 @@ namespace Logic.Services.API
             book = DataCache.BookCreate(book, context);
             if (book is null)
             {
-                ErrorHandler.LogAndThrow(2090);
+                ErrorHandler.LogAndThrow();
                 return null;
             }
 
@@ -67,18 +63,16 @@ namespace Logic.Services.API
                 string pageSplitTextTrimmed = pageSplit.pageText.Trim();
                 if (string.IsNullOrEmpty(pageSplitTextTrimmed)) continue;
                 Page? page = PageApi.PageCreateFromPageSplit(context,
-                    pageSplit.pageNum, pageSplitTextTrimmed,
-                    (Guid)book.UniqueKey, (Guid)language.UniqueKey);
+                    pageSplit.pageNum, pageSplitTextTrimmed, book, language);
                 if (page is not null)
                 {
                     book.Pages.Add(page);
                 }
             }
-
             return book;
         }
         public static async Task<Book?> BookCreateAndSaveAsync(
-            IdiomaticaContext context, string title, string languageCode,
+            IdiomaticaContext context, string title, AvailableLanguageCode languageCode,
             string? url, string text)
         {
             return await Task<Book?>.Run(() =>
@@ -135,7 +129,7 @@ namespace Logic.Services.API
                     bookListDataPacket.SkipRecords,
                     bookListDataPacket.ShouldShowOnlyInShelf,
                     bookListDataPacket.TagsFilter,
-                    bookListDataPacket.LcFilter,
+                    bookListDataPacket.LcFilter?.UniqueKey,
                     bookListDataPacket.TitleFilter,
                     bookListDataPacket.SortProperty,
                     bookListDataPacket.ShouldSortAscending,
@@ -155,7 +149,7 @@ namespace Logic.Services.API
                     bookListDataPacket.SkipRecords,
                     bookListDataPacket.ShouldShowOnlyInShelf,
                     bookListDataPacket.TagsFilter,
-                    bookListDataPacket.LcFilter,
+                    bookListDataPacket.LcFilter?.UniqueKey,
                     bookListDataPacket.TitleFilter,
                     bookListDataPacket.SortProperty,
                     bookListDataPacket.ShouldSortAscending,

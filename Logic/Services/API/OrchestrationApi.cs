@@ -22,7 +22,7 @@ namespace Logic.Services.API
         /// book user stats for the creating user
         /// </summary>
         public static Book? OrchestrateBookCreationAndSubProcesses(
-            IdiomaticaContext context, Guid userId, string title, string languageCode,
+            IdiomaticaContext context, Guid userId, string title, AvailableLanguageCode languageCode,
             string? url, string text)
         {
             Book? book = BookApi.BookCreateAndSave(context, title, languageCode, url, text);
@@ -41,7 +41,7 @@ namespace Logic.Services.API
             return book;
         }
         public static async Task<Book?> OrchestrateBookCreationAndSubProcessesAsync(
-            IdiomaticaContext context, Guid userId, string title, string languageCode,
+            IdiomaticaContext context, Guid userId, string title, AvailableLanguageCode languageCode,
             string? url, string text)
         {
             return await Task<Book?>.Run(() =>
@@ -141,7 +141,7 @@ namespace Logic.Services.API
 
             // create the attempt object
             var attempt = FlashCardAttemptApi.FlashCardAttemptCreate(
-                context, (Guid)dataPacket.CurrentCard.UniqueKey, previousCardsStatus);
+                context, dataPacket.CurrentCard, previousCardsStatus);
 
             // update the current card
             DateTime nextReview = DateTime.Now;
@@ -330,7 +330,7 @@ namespace Logic.Services.API
                     return null;
                 }
                 readDataPacket.CurrentPageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (Guid)readDataPacket.CurrentPage.UniqueKey, (Guid)readDataPacket.LoggedInUser.UniqueKey);
+                    context, readDataPacket.CurrentPage, readDataPacket.LoggedInUser);
             }
             if (readDataPacket.CurrentPageUser is null)
             {
@@ -440,7 +440,7 @@ namespace Logic.Services.API
                     return null;
                 }
                 readDataPacket.CurrentPageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, readDataPacket.CurrentPage.UniqueKey, readDataPacket.LoggedInUser.UniqueKey);
+                    context, readDataPacket.CurrentPage, readDataPacket.LoggedInUser);
             }
             else
             {

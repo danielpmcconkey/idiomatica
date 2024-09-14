@@ -85,7 +85,7 @@ namespace Logic.Services.API
             // last page read
             int lastPageRead = 0;
             var latestReadPage = readPages.FirstOrDefault();
-            if ((int)readPages.Count > 0 && latestReadPage != null && latestReadPage.Ordinal != null)
+            if ((int)readPages.Count > 0 && latestReadPage != null && latestReadPage.Ordinal > 0)
                 lastPageRead = (int)latestReadPage.Ordinal;
 
             // progress

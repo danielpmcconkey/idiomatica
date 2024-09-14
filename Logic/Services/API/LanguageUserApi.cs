@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
-using k8s.KubeConfigModels;
 
 namespace Logic.Services.API
 {
@@ -14,16 +13,19 @@ namespace Logic.Services.API
     {
         #region create
         public static LanguageUser? LanguageUserCreate(
-            IdiomaticaContext context, Guid languageKey, Guid userKey)
+            IdiomaticaContext context, Language language, User user)
         {
             var languageUser = new LanguageUser()
             {
-                LanguageKey = languageKey,
-                UserKey = userKey,
+                UniqueKey = Guid.NewGuid(),
+                LanguageKey = language.UniqueKey,
+                Language = language,
+                UserKey = user.UniqueKey,
+                User = user,
                 TotalWordsRead = 0
             };
             languageUser = DataCache.LanguageUserCreate(languageUser, context);
-            if (languageUser is null || languageUser.UniqueKey is null)
+            if (languageUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
@@ -31,22 +33,10 @@ namespace Logic.Services.API
             return languageUser;
         }
         public static async Task<LanguageUser?> LanguageUserCreateAsync(
-            IdiomaticaContext context, Guid languageKey, Guid userKey)
+            IdiomaticaContext context, Language language, User user)
         {
-            var languageUser = new LanguageUser()
-            {
-                LanguageKey = languageKey,
-                UserKey = userKey,
-                TotalWordsRead = 0
-            };
-            languageUser = await DataCache.LanguageUserCreateAsync(languageUser, context);
-            if (languageUser is null || languageUser.UniqueKey is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-
-            return languageUser;
+            return await Task<LanguageUser?>.Run(() => { 
+                return LanguageUserCreate(context, language, user); });
         }
 
 

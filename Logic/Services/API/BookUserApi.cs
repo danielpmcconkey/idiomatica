@@ -100,7 +100,7 @@ namespace Logic.Services.API
             }, context);
             if (bookUser is null)
             {
-                ErrorHandler.LogAndThrow(2250);
+                ErrorHandler.LogAndThrow();
                 return null;
             }
             return bookUser;
@@ -121,7 +121,7 @@ namespace Logic.Services.API
 
             if (bookUser is null)
             {
-                ErrorHandler.LogAndThrow(2050, [$"bookUserId: {bookUserId}"]);
+                ErrorHandler.LogAndThrow();
                 return;
             }
             bookUser.CurrentPageKey = currentPageId;

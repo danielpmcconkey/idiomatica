@@ -16,11 +16,13 @@ namespace Model
 
         [StringLength(2000)]
         [Required] public required string Conjugator { get; set; }
-        [StringLength(2000)]
 
+        [StringLength(2000)]
+        public required string Infinitive { get; set; }
 
         #endregion
 
+        
 
         
 
@@ -29,10 +31,8 @@ namespace Model
         public List<VerbConjugation> VerbConjugations { get; set; } = [];
         public List<WordTranslation> WordTranslations { get; set; } = [];
 
-        
-        public string? DisplayName { get; set; }
         [StringLength(2000)]
-        public string? Infinitive { get; set; }
+        public string? DisplayName { get; set; }
         [StringLength(2000)]
         public string? Core1 { get; set; }
         [StringLength(2000)]

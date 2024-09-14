@@ -68,12 +68,12 @@ namespace Logic.Services.API
             return paragraph;
         }
         public static async Task<Paragraph?> ParagraphCreateFromSplitAsync(
-            IdiomaticaContext context, string splitText, Guid pageId,
-            int ordinal, Guid languageId)
+            IdiomaticaContext context, string splitText, Page page,
+            int ordinal, Language language)
         {
             return await Task<Paragraph?>.Run(() =>
             {
-                return ParagraphCreateFromSplit(context, splitText, pageId, ordinal, languageId);
+                return ParagraphCreateFromSplit(context, splitText, page, ordinal, language);
             });
         }
 
@@ -81,15 +81,18 @@ namespace Logic.Services.API
         ///  chooses a random ParagraphTranslationBridge from a card, translated to the user's UI preferred language
         /// </summary>
         public static (string example, string translation) ParagraphExamplePullRandomByFlashCardId(
-            IdiomaticaContext context, Guid flashCardId, string uiLanguageCode)
+            IdiomaticaContext context, Guid flashCardId, AvailableLanguageCode uiLanguageCode)
         {
             var example = string.Empty;
             var translation = string.Empty;
+
+            var uiLanguage = LanguageApi.LanguageReadByCode(context, uiLanguageCode);
+            if (uiLanguage is null) { ErrorHandler.LogAndThrow(); return (example, translation); }
             
             // pull all bridges for this card with this language code
             var bridges = DataCache
                 .FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCodeRead(
-                    (flashCardId, uiLanguageCode), context);
+                    (flashCardId, uiLanguage.UniqueKey), context);
             if (bridges is null || bridges.Count == 0) return (example, translation);
             
             // select a random bridge
@@ -98,7 +101,6 @@ namespace Logic.Services.API
             var bridge = bridges[position];
 
             // pull the paragraphtranslation
-            if (bridge.ParagraphTranslationKey is null) return (example, translation);
             var paragraphTranslation = DataCache.ParagraphTranslationByIdRead(
                 (Guid)bridge.ParagraphTranslationKey, context);
             if (paragraphTranslation is null || paragraphTranslation.TranslationText is null) 
@@ -106,15 +108,14 @@ namespace Logic.Services.API
             translation = paragraphTranslation.TranslationText;
 
             // pull the orig text
-            if (paragraphTranslation.ParagraphKey is null) return (example, translation);
             var paragraph = DataCache.ParagraphByIdRead((Guid)paragraphTranslation.ParagraphKey, context);
-            if (paragraph is null || paragraph.UniqueKey is null) return (example, translation);
+            if (paragraph is null) return (example, translation);
             example = ParagraphApi.ParagraphReadAllText(context, (Guid) paragraph.UniqueKey);
 
             return (example, translation);
         }
         public static async Task<(string example, string translation)> ParagraphExamplePullRandomByFlashCardIdAsync(
-            IdiomaticaContext context, Guid flashCardId, string uiLanguageCode)
+            IdiomaticaContext context, Guid flashCardId, AvailableLanguageCode uiLanguageCode)
         {
             return await Task<(string example, string translation)>.Run(() =>
             {
@@ -169,11 +170,11 @@ namespace Logic.Services.API
             return paragraphs;
         }
         public static async Task<List<Paragraph>> ParagraphsCreateFromPageAsync(
-            IdiomaticaContext context, Guid pageId, Guid languageId)
+            IdiomaticaContext context, Page page, Language language)
         {
             return await Task<List<Paragraph>>.Run(() =>
             {
-                return ParagraphsCreateFromPage(context, pageId, languageId);
+                return ParagraphsCreateFromPage(context, page, language);
             });
         }
 
@@ -191,29 +192,33 @@ namespace Logic.Services.API
 
 
         public static (string input, string output) ParagraphTranslate(
-            IdiomaticaContext context, Guid paragraphId, string fromCode, string toCode)
+            IdiomaticaContext context, Paragraph paragraph,
+            AvailableLanguageCode fromCode, AvailableLanguageCode toCode)
         {
-            return ParagraphTranslateAsync(context, paragraphId, fromCode, toCode).Result;
+            return ParagraphTranslateAsync(context, paragraph, fromCode, toCode).Result;
         }
         public static async Task<(string input, string output)> ParagraphTranslateAsync(
-            IdiomaticaContext context, Guid paragraphId, string fromCode, string toCode)
+            IdiomaticaContext context, Paragraph paragraph,
+            AvailableLanguageCode fromCode, AvailableLanguageCode toCode)
         {
-            if (string.IsNullOrEmpty(fromCode)) ErrorHandler.LogAndThrow();
-            if (string.IsNullOrEmpty(toCode)) ErrorHandler.LogAndThrow();
-
-
-            string input = await ParagraphReadAllTextAsync(context, paragraphId);
+            string input = await ParagraphReadAllTextAsync(context, paragraph.UniqueKey);
             string output = "";
+
+
+            var languageFrom = LanguageApi.LanguageReadByCode(context, fromCode);
+            var languageTo = LanguageApi.LanguageReadByCode(context, toCode);
+
+            if (languageFrom == null || languageTo == null) { ErrorHandler.LogAndThrow(); return (input, output); }
 
             // see if the translation already exists
             var existingTranslations = await DataCache.ParagraphTranslationsByParargraphIdReadAsync(
-                    paragraphId, context);
+                    paragraph.UniqueKey, context);
             if (existingTranslations is not null && existingTranslations.Count > 0)
             {
                 // are any in the right language?
                 var currentTranslation = existingTranslations
-                .Where(x => x.Code == toCode)
-                .FirstOrDefault();
+                    .Where(x => x.LanguageKey == languageTo.UniqueKey)
+                    .FirstOrDefault();
                 if (currentTranslation != null && currentTranslation.TranslationText != null)
                 {
                     output = currentTranslation.TranslationText;
@@ -229,15 +234,18 @@ namespace Logic.Services.API
                 // add to the DB
                 var ppt = new ParagraphTranslation()
                 {
-                    ParagraphKey = paragraphId,
-                    Code = toCode,
+                    UniqueKey = Guid.NewGuid(),
+                    ParagraphKey = paragraph.UniqueKey,
+                    Paragraph = paragraph,
+                    LanguageKey = languageTo.UniqueKey,
+                    Language = languageTo,
                     TranslationText = deeplResult
                 };
                 ppt = await DataCache.ParagraphTranslationCreateAsync(ppt, context);
-                if (ppt is null || ppt.UniqueKey is null)
+                if (ppt is null)
                 {
-                    ErrorHandler.LogAndThrow(2340);
-                    return ("", "");
+                    ErrorHandler.LogAndThrow();
+                    return (input, output);
                 }
             }
             

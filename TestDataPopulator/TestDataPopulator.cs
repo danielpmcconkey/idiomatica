@@ -13,8 +13,8 @@ namespace TestDataPopulator
 {
     internal class TestDataPopulator
     {
-        private Guid? _spanishLanguageKey;
-        private Guid? _englishLanguageKey;
+        private Model.Language? _spanishLanguage;
+        private Model.Language? _englishLanguage;
         // creat 5 flash cards
         // they all should be for very commoN words
         // give them actual translations
@@ -31,27 +31,33 @@ namespace TestDataPopulator
         }
         private void AddInitialWordsAndWordRanks()
         {
-            if (_spanishLanguageKey is null) throw new InvalidDataException();
-            if (_englishLanguageKey is null) throw new InvalidDataException();
+            if (_spanishLanguage is null) throw new InvalidDataException();
+            if (_englishLanguage is null) throw new InvalidDataException();
 
             var context = CreateContext();
             foreach (var word in WordRank.words)
             {
                 var wordKey = Guid.NewGuid();
-                var languageKey = _spanishLanguageKey;
-                if (word.language == "English") languageKey = _englishLanguageKey;
-                context.Words.Add(new Word
+                var language = _spanishLanguage;
+                
+                if (word.language == "English") language = _englishLanguage;
+                var modelWord = new Word()
                 {
                     UniqueKey = wordKey,
-                    LanguageKey = languageKey,
+                    LanguageKey = language.UniqueKey,
+                    Language = language,
                     Text = word.word,
                     TextLowerCase = word.word,
                     Romanization = word.word,
-                });
+                };
+                context.Words.Add(modelWord);
                 context.WordRanks.Add(new Model.WordRank() {
                     UniqueKey = Guid.NewGuid(),
-                    LanguageKey = languageKey,
-                    WordKey = wordKey,DifficultyScore = word.difficulty,
+                    LanguageKey = language.UniqueKey,
+                    Language = language,
+                    WordKey = wordKey,
+                    Word = modelWord,
+                    DifficultyScore = word.difficulty,
                     Ordinal = word.ordinal
                 });
             }

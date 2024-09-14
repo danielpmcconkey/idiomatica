@@ -57,12 +57,12 @@ namespace Logic.Services.API
             return newSentence;
         }
         public static async Task<Sentence?> SentenceCreateAsync(
-            IdiomaticaContext context, string text, Guid languageId, int ordinal,
-            Guid paragraphId)
+            IdiomaticaContext context, string text, Language language, int ordinal,
+            Paragraph paragraph)
         {
             return await Task<Sentence?>.Run(() =>
             {
-                return SentenceCreate(context, text, languageId, ordinal, paragraphId);
+                return SentenceCreate(context, text, language, ordinal, paragraph);
             });
         }
 

@@ -76,7 +76,7 @@ namespace Logic.Services.API
                         if (wordUser.LanguageUser == null
                             || wordUser.LanguageUser.Language is null)
                         {
-                            ErrorHandler.LogAndThrow(2500);
+                            ErrorHandler.LogAndThrow();
                             return null;
                         }
                         // create it

@@ -44,11 +44,11 @@ namespace Logic.Services.API
         }
         public static async Task<Page?> PageCreateFromPageSplitAsync(
             IdiomaticaContext context, int ordinal, string text,
-            Guid bookId, Guid languageId)
+            Book book, Language language)
         {
             return await Task<Page?>.Run(() =>
             {
-                return PageCreateFromPageSplit(context, ordinal, text, bookId, languageId);
+                return PageCreateFromPageSplit(context, ordinal, text, book, language);
             });
         }
 

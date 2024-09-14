@@ -17,25 +17,18 @@ namespace Logic.Services.API
     public static class WordApi
     {
         public static WordTranslation? VerbWordTranslationSave(IdiomaticaContext context, 
-            Guid verbKey, Guid fromLanguageId, Guid toLanguageId,
-            string wordTextLower, string translation)
+            Verb verb, Language fromLanguage, Language toLanguage,
+            string wordTextLower, string translation, int ordinal)
         {
-            // note, it's not right to directly query frmo the API. But this
-            // isn't a normal method, used by the app (I hope). It should only
-            // be used for adding new word translations manually by system admins;
-            var englishLang = context.Languages.Where(x => x.Code == "EN-US").FirstOrDefault();
-            if (englishLang == null) { ErrorHandler.LogAndThrow(); return null; }
-            Guid? englishLangId = englishLang.UniqueKey;
-            if (englishLangId == null) { ErrorHandler.LogAndThrow(); return null; }
             // look up the existing word
             var word = context.Words
                 .Where(x => x.TextLowerCase == wordTextLower &&
-                    x.LanguageKey == fromLanguageId)
+                    x.LanguageKey == fromLanguage.UniqueKey)
                 .FirstOrDefault();
             if (word is null)
             {
                 // create it
-                word = WordCreate(context, fromLanguageId, wordTextLower, wordTextLower);
+                word = WordCreate(context, fromLanguage, wordTextLower, wordTextLower);
             }
             if (word is null)
             {
@@ -45,11 +38,15 @@ namespace Logic.Services.API
             WordTranslation? wordTranslation = new ()
             {
                 UniqueKey = Guid.NewGuid(),
-                LanguageToKey = englishLangId,
+                LanguageToKey = toLanguage.UniqueKey,
+                LanguageTo = toLanguage,
                 WordKey = word.UniqueKey,
+                Word = word,
                 PartOfSpeech = AvailablePartOfSpeech.VERB,
                 Translation = translation.Trim(),
-                VerbKey = verbKey
+                VerbKey = verb.UniqueKey,
+                Verb = verb,
+                Ordinal = ordinal,
             };
             context.WordTranslations.Add(wordTranslation);
             context.SaveChanges();
@@ -62,15 +59,11 @@ namespace Logic.Services.API
             // note, it's not right to directly query frmo the API. But this
             // isn't a normal method, used by the app (I hope). It should only
             // be used for adding new word translations manually by system admins;
-            var englishLang = context.Languages.Where(x => x.Code == "EN-US").FirstOrDefault();
+            var englishLang = LanguageApi.LanguageReadByCode(context, AvailableLanguageCode.EN_US);
             if (englishLang == null) { ErrorHandler.LogAndThrow(); return null; }
-            Guid? englishLangId = englishLang.UniqueKey;
-            if (englishLangId == null) { ErrorHandler.LogAndThrow(); return null; }
+            Guid englishLangId = englishLang.UniqueKey;
 
 
-            if (learningVerb.LanguageKey is null) { ErrorHandler.LogAndThrow(); return null; }
-            if (learningVerb.Infinitive is null) { ErrorHandler.LogAndThrow(); return null; }
-            if (learningVerb.Conjugator is null) { ErrorHandler.LogAndThrow(); return null; }
             // save the learning verb object
             // but only if it doesn't already exist
             Verb? verbToUse = context.Verbs
@@ -90,16 +83,11 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow();
                 return null;
             }
-            if (verbToUse.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
-            if (verbToUse.LanguageKey is null) { ErrorHandler.LogAndThrow(); return null; }
-            if (translationVerb.LanguageKey is null) { ErrorHandler.LogAndThrow(); return null; }
-            if (verbToUse.Infinitive is null) { ErrorHandler.LogAndThrow(); return null; }
-            if (translationVerb.Infinitive is null) { ErrorHandler.LogAndThrow(); return null; }
             
             // save the infinitive translation
-            VerbWordTranslationSave(context, (Guid)verbToUse.UniqueKey,
-            (Guid)verbToUse.LanguageKey, (Guid)translationVerb.LanguageKey,
-            verbToUse.Infinitive, translationVerb.Infinitive);
+            VerbWordTranslationSave(context, verbToUse,
+                verbToUse.Language, translationVerb.Language,
+                verbToUse.Infinitive, translationVerb.Infinitive, 1);
 
             if (verbToUse.Gerund is not null && translationVerb.Gerund is not null)
             {
@@ -110,9 +98,9 @@ namespace Logic.Services.API
                     gerundTranslation = $"{translationVerb.Gerund}: gerund of {learningVerb.Infinitive}";
                 }
 
-                VerbWordTranslationSave(context, (Guid)verbToUse.UniqueKey,
-                    (Guid)verbToUse.LanguageKey, (Guid)translationVerb.LanguageKey,
-                    verbToUse.Gerund, gerundTranslation);
+                VerbWordTranslationSave(context, verbToUse,
+                    verbToUse.Language, translationVerb.Language,
+                    verbToUse.Gerund, gerundTranslation, 100);
             }
             if (verbToUse.PastParticiple is not null && translationVerb.PastParticiple is not null)
             {
@@ -122,9 +110,9 @@ namespace Logic.Services.API
                 {
                     participleTranslation = $"{translationVerb.PastParticiple}: past participle of {learningVerb.Infinitive}";
                 }
-                VerbWordTranslationSave(context, (Guid)verbToUse.UniqueKey,
-                    (Guid)verbToUse.LanguageKey, (Guid)translationVerb.LanguageKey,
-                    verbToUse.PastParticiple, participleTranslation);
+                VerbWordTranslationSave(context, verbToUse,
+                    verbToUse.Language, translationVerb.Language,
+                    verbToUse.PastParticiple, participleTranslation, 100);
             }
             // save the conjugation translations
             foreach (var conjugation in conjugations)
@@ -135,9 +123,9 @@ namespace Logic.Services.API
                     { ErrorHandler.LogAndThrow(); return null; }
                 if (string.IsNullOrEmpty(wordInKnownLang))
                     { ErrorHandler.LogAndThrow(); return null; }
-                VerbWordTranslationSave(context, (Guid)verbToUse.UniqueKey,
-                    (Guid)verbToUse.LanguageKey, (Guid)translationVerb.LanguageKey,
-                    wordInLearningLang, wordInKnownLang );
+                VerbWordTranslationSave(context, verbToUse,
+                    verbToUse.Language, translationVerb.Language,
+                    wordInLearningLang, wordInKnownLang, conjugation.Ordinal);
             }
 
             return verbToUse;

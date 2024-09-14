@@ -38,15 +38,16 @@ namespace Logic
         public long? BookListTotalRowsAtCurrentFilter { get; set; } = null;
         public int SkipRecords { get; set; } = 0;
         public string? TagsFilter { get; set; } = null;
-        public string? LcFilterGuidString { get; set; } = null;
+        public AvailableLanguageCode? LcFilterCode { get; set; } = null;
         public Language? LcFilter
         {
             get
             {
-                if (string.IsNullOrEmpty(LcFilterGuidString)) return null;
-                Guid.TryParse(LcFilterGuidString, out var lcFilterGuid);
-                if(!LanguageOptions.TryGetValue(lcFilterGuid, out var lcFilterTry)) return null;
-                return lcFilterTry;
+                if(LcFilterCode is null) return null;
+                var kvp = LanguageOptions
+                    .Where(x => x.Value.Code == LcFilterCode)
+                    .FirstOrDefault();
+                return kvp.Value;
             }
         }
         public AvailableBookListSortProperties SortProperty

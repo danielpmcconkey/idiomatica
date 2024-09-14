@@ -4,6 +4,7 @@
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 @using System.Text;
 @using Logic.Services.API
+@using Model.Enums
 
 
 @* Modal for paragraph translation *@
@@ -25,9 +26,9 @@
 @code {
 
     [Parameter]
-    public LanguageCode? LanguageFromCode { get; set; }
+    public Language? LanguageFrom { get; set; }
     [Parameter]
-    public LanguageCode? LanguageToCode { get; set; }
+    public Language? LanguageTo { get; set; }
 
 
     private Modal ppModal = default!;
@@ -38,26 +39,26 @@
 
     public async Task OnShowPpModalClick(Paragraph pp)
     {
-        if (pp is null || pp.UniqueKey is null)
+        if (pp is null)
         {
             ErrorHandler.LogAndThrow();
             return;
         }
-        if (LanguageFromCode is null || string.IsNullOrEmpty(LanguageFromCode.Code)) 
+        if (LanguageFrom is null) 
         {
             ErrorHandler.LogAndThrow();
             return;
         }
-        if (LanguageToCode is null || string.IsNullOrEmpty(LanguageToCode.Code))
+        if (LanguageTo is null)
         {
             ErrorHandler.LogAndThrow();
             return;
         }
-        _title = $"{UserService.GetUILabelF("ppModalTitle", [LanguageFromCode.LanguageName, LanguageToCode.LanguageName])}";
+        _title = $"{UserService.GetUILabelF("ppModalTitle", [LanguageFrom.Name, LanguageTo.Name])}";
         var context = await DbContextFactory.CreateDbContextAsync();
 
         var translation = await ParagraphApi.ParagraphTranslateAsync(
-            context, (Guid)pp.UniqueKey, LanguageFromCode.Code, LanguageToCode.Code);
+            context, pp, LanguageFrom.Code, LanguageTo.Code);
         _translateFrom = translation.input;
         _translateTo = translation.output;
         await ppModal.ShowAsync();

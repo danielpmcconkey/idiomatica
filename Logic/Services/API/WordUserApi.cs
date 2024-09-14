@@ -104,7 +104,7 @@ namespace Logic.Services.API
             var dbWordUser = await DataCache.WordUserByIdReadAsync(id, context);
             if (dbWordUser == null)
             {
-                ErrorHandler.LogAndThrow(2060);
+                ErrorHandler.LogAndThrow();
                 return;
             }
 
@@ -116,9 +116,9 @@ namespace Logic.Services.API
 
 
         public static string? WordUserTranslationFormat(IdiomaticaContext context,
-            string? translation, string? translationLanguageCode)
+            string? translation, AvailableLanguageCode translationLanguageCode)
         {
-            if (string.IsNullOrEmpty(translation) || string.IsNullOrEmpty(translationLanguageCode))
+            if (string.IsNullOrEmpty(translation))
                 return translation;
             // get the language so we can use the right parser
             var language = LanguageApi.LanguageReadByCode(context, translationLanguageCode);
@@ -129,7 +129,7 @@ namespace Logic.Services.API
 
         }
         public static async Task<string?> WordUserTranslationFormatAsync(IdiomaticaContext context,
-            string? translation, string? translationLanguageCode)
+            string? translation, AvailableLanguageCode translationLanguageCode)
         {
             return await Task<WordUser>.Run(() =>
             {
