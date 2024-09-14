@@ -6,6 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Model;
 using Logic.Telemetry;
+using DeepL;
+using System.Linq.Expressions;
+using Model.Enums;
 
 namespace Logic.Services.API
 {
@@ -19,15 +22,41 @@ namespace Logic.Services.API
         {
             return await DataCache.LanguageByIdReadAsync(languageId, context);
         }
-        public static Language? LanguageReadByCode(IdiomaticaContext context, string code)
+        public static Language? LanguageReadByCode(
+            IdiomaticaContext context, AvailableLanguageCode code)
         {
-            if (string.IsNullOrEmpty(code)) ErrorHandler.LogAndThrow();
             return DataCache.LanguageByCodeRead(code, context);
         }
-        public static async Task<Language?> LanguageReadByCodeAsync(IdiomaticaContext context, string code)
+        public static async Task<Language?> LanguageReadByCodeAsync(
+            IdiomaticaContext context, AvailableLanguageCode code)
         {
-            if (string.IsNullOrEmpty(code)) ErrorHandler.LogAndThrow();
             return await DataCache.LanguageByCodeReadAsync(code, context);
+        }
+
+        public static Dictionary<Guid, Language> LanguageOptionsRead(
+            IdiomaticaContext context, Expression<Func<Language, bool>> filter)
+        {
+            var options = context.Languages
+                .Where(filter).OrderBy(x => x.Name).ToList();
+            var returnDict = new Dictionary<Guid, Language>();
+            if (options is not null)
+            {
+                foreach (var l in options)
+                {
+                    if (l is null) continue;
+                    returnDict.Add(l.UniqueKey, l);
+                }
+            }
+            return returnDict;
+        }
+        public static async Task<Dictionary<Guid, Language>> LanguageOptionsReadAsync(
+            IdiomaticaContext context, Expression<Func<Language, bool>> filter)
+        {
+            return await Task<Dictionary<string, Language>>.Run(() =>
+            {
+                return LanguageOptionsRead(context, filter);
+            });
+
         }
 
     }

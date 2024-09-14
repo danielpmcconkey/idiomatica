@@ -18,12 +18,6 @@ namespace Model.DAL
         #region create
         public static BookTag? BookTagCreate(BookTag bookTag, IdiomaticaContext context)
         {
-            if (bookTag.BookKey == null || bookTag.UserKey == null) 
-                throw new ArgumentNullException("bookTag.BookKey == null || value.UserKey == null during BookTagCreate");
-            
-            
-            var guid = Guid.NewGuid();
-            
             int numRows = context.Database.ExecuteSql($"""
                 
                 INSERT INTO [Idioma].[BookTag]
@@ -37,17 +31,13 @@ namespace Model.DAL
                            ,{bookTag.UserKey}
                            ,{bookTag.Tag}
                            ,{bookTag.Created}
-                           ,{guid})
+                           ,{bookTag.UniqueKey})
                 """);
             if (numRows < 1) throw new InvalidDataException("BookTag create affected 0 rows");
-            // now read it into context
-            var newTag = context.BookTags.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newTag is null || newTag.UniqueKey is null)
-                throw new InvalidDataException("Reading new BookTag after creation returned null");
-
             
-            BookTagAddToCache(newTag);
-            return newTag;
+            // now read it into context
+            BookTagAddToCache(bookTag);
+            return bookTag;
         }
 
         public static async Task<BookTag?> BookTagCreateAsync(BookTag value, IdiomaticaContext context)
@@ -59,7 +49,7 @@ namespace Model.DAL
 
         #region read
 
-        public static List<BookTag> BookTagsByBookIdAndUserIdRead(
+        public static List<BookTagRow> BookTagsByBookAndUserRead(
             (Guid bookId, Guid userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
         {
             // pull all tags from cache
@@ -68,7 +58,8 @@ namespace Model.DAL
 
             // read community created tags from the DB 
             var communityTags = allTags
-                .GroupBy(x => x.Tag, (key, g) => new BookTag { Tag = key, Count = g.Count() })
+                .GroupBy(x => x.Tag, (tagKey, g) => new BookTagRow { 
+                    Tag = tagKey, Count = g.Count(), UserKey = key.userId })
                 .ToList();
 
             // stitch them together
@@ -76,11 +67,12 @@ namespace Model.DAL
                        join pt in personalTags on ct.Tag equals pt.Tag into gj
                        from subgroup in gj.DefaultIfEmpty()
                        orderby ((subgroup == null) ? false : true) descending, ct.Count descending
-                       select new BookTag
+                       select new BookTagRow
                        {
                            BookKey = key.bookId,
                            Tag = ct.Tag,
                            Count = ct.Count,
+                           UserKey = key.userId,
                            IsPersonal = (subgroup == null) ? false : true,
                        };
 
@@ -88,12 +80,12 @@ namespace Model.DAL
             
             return value;
         }
-        public static async Task<List<BookTag>> BookTagsByBookIdAndUserIdReadAsync(
+        public static async Task<List<BookTagRow>> BookTagsByBookIdAndUserIdReadAsync(
            (Guid bookId, Guid userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
         {
-            return await Task<List<BookTag>>.Run(() =>
+            return await Task<List<BookTagRow>>.Run(() =>
             {
-                return BookTagsByBookIdAndUserIdRead(key, context, shouldOverrideCache);
+                return BookTagsByBookAndUserRead(key, context, shouldOverrideCache);
             });
         }
         public static List<BookTag> BookTagsByBookIdRead(
@@ -157,7 +149,6 @@ namespace Model.DAL
 
         private static void BookTagRemoveFromCache(BookTag t)
         {
-            if (t.BookKey == null || t.UserKey == null || t.UniqueKey == null) return;
             // is there an existing cache
             List<BookTag>? existingList;
             if (!BookTagsByBookId.TryGetValue((Guid)t.BookKey, out existingList))
@@ -176,7 +167,6 @@ namespace Model.DAL
         }
         private static void BookTagAddToCache(BookTag t)
         {
-            if (t.BookKey == null || t.UserKey == null || t.UniqueKey == null) return;
             // is there an existing cache
             List<BookTag>? existingList = null;
             if (!BookTagsByBookId.TryGetValue((Guid)t.BookKey, out existingList))

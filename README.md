@@ -34,3 +34,19 @@
     2. Open up the Test Explorer and run all of the "LogicTests"
     3. Confirm everything passes
     4. You should do this step everytime you plan to merge one of your commits into main.
+
+## Learning the application structure
+
+### Projects in the solution
+
+This application is built on an N-Tier pattern, which segregates the application responsibilities into separate tiers, from core data at the bottom, to user interface at the top. That's the order we'll go in...
+
+1. *Model* 
+    1. This is the core data layer. All data types used in the application are defined here, but there should be very little business logic in this layer
+    2. DAL folder. DAL stands for Data Access Layer. This is the interface to the data defined in the model classes.
+        1. IdiomaticaContext.cs this is the Entity Framework definition for how model objects relate to one another. All data interaction in this applicaiton does so through an instantiation of the IdiomaticaContext class
+        2. DataCache_\* files. The DataCache is one gigantic class spread out across multiple files. This is where the create/read/update/delete methods for access data are housed. Generally, these functions should only be accessed by the API classes. They're also not well named :).
+    3. Available\* files. These are all enums, defining look-up data. They generally correspond to an int field in the database
+2. *Logic*
+    1. Herein resides all of the business logic for the application. These are classes and methods that the front-end UI relies upon to consistently and reliably interact with data
+    2. 

@@ -23,6 +23,7 @@ namespace Model.DAL
      * 
      * order of operations
      *     1. fix the build errors
+     *     add unique constraints to the model
      *     2. get this running in a new DB (probably by finishing the fresh DB
      *        script)
      *     3. get all unit tests to pass
@@ -155,7 +156,7 @@ namespace Model.DAL
                 e.HasMany(l => l.WordRanks).WithOne(wr => wr.Language).HasForeignKey(wr => wr.LanguageKey);
                 e.HasMany(l => l.ParagraphTranslations).WithOne(pt => pt.Language)
                     .HasForeignKey(pt => pt.LanguageKey);
-                e.HasMany(l => l.Users).WithOne(u => u.UiLanguage).HasForeignKey(u => u.UiLanguageKey);
+                e.Property(l => l.Code).HasConversion<int>();
             });
             modelBuilder.Entity<LanguageUser>(e => {
                 e.HasKey(lu => lu.UniqueKey);
@@ -223,7 +224,6 @@ namespace Model.DAL
                 e.HasMany(u => u.LanguageUsers).WithOne(lu => lu.User).HasForeignKey(u => u.UserKey);
                 e.HasMany(u => u.UserSettings).WithOne(us => us.User).HasForeignKey(us => us.UserKey);
                 e.HasMany(u => u.UserBreadCrumbs).WithOne(ubc => ubc.User).HasForeignKey(ubc => ubc.UserKey);
-                e.HasOne(u => u.UiLanguage).WithMany(l => l.Users).HasForeignKey(u => u.UiLanguageKey);
             });
             modelBuilder.Entity<UserBreadCrumb>(e =>
             {
@@ -237,6 +237,7 @@ namespace Model.DAL
                 e.HasKey(us => new { us.UserKey, us.Key });
                 e.HasOne(us => us.User).WithMany(u => u.UserSettings).HasForeignKey(us => us.UserKey)
                     .OnDelete(DeleteBehavior.Cascade);
+                e.Property(bs => bs.Key).HasConversion<int>();
             });
             modelBuilder.Entity<Verb>(e => {
                 e.HasKey(v => v.UniqueKey);

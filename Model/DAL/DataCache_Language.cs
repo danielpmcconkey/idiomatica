@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Model.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,12 +12,13 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<string, Language> LanguageByCode = new ConcurrentDictionary<string, Language>();
-        private static ConcurrentDictionary<Guid, Language> LanguageById = new ConcurrentDictionary<Guid, Language>();
+        private static ConcurrentDictionary<AvailableLanguageCode, Language> LanguageByCode = [];
+        private static ConcurrentDictionary<Guid, Language> LanguageById = [];
 
 
         #region read
-        public static Language? LanguageByCodeRead(string key, IdiomaticaContext context)
+        public static Language? LanguageByCodeRead(
+            AvailableLanguageCode key, IdiomaticaContext context)
         {
             // check cache
             if (LanguageByCode.ContainsKey(key))
@@ -28,13 +30,14 @@ namespace Model.DAL
                 .Where(l => l.Code == key)
                 .FirstOrDefault();
 
-            if (value is null || value.UniqueKey is null) return null;
+            if (value is null) return null;
             // write to cache
             LanguageByCode[key] = value;
             LanguageById[(Guid)value.UniqueKey] = value;
             return value;
         }
-        public static async Task<Language?> LanguageByCodeReadAsync(string key, IdiomaticaContext context)
+        public static async Task<Language?> LanguageByCodeReadAsync(
+            AvailableLanguageCode key, IdiomaticaContext context)
         {
             return await Task<Language?>.Run(() =>
             {
@@ -54,7 +57,7 @@ namespace Model.DAL
                 .Where(l => l.UniqueKey == key)
                 .FirstOrDefault();
 
-            if (value is null || string.IsNullOrEmpty(value.Code)) return null;
+            if (value is null) return null;
             // write to cache
             LanguageById[key] = value;
             LanguageByCode[value.Code] = value;

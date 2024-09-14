@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Model.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -20,8 +21,7 @@ namespace Model
         [StringLength(250)]
         [Required] public required string Name { get; set; }
 
-        [StringLength(10)]
-        [Required] public required string Code { get; set; }
+        [Required] public required AvailableLanguageCode Code { get; set; }
 
         [StringLength(250)]
         [Required] public required string ParserType { get; set; } = "spacedel";
@@ -40,7 +40,7 @@ namespace Model
         public List<Verb> Verbs { get; set; } = [];
         public List<WordRank> WordRanks { get; set; } = [];
         public List<ParagraphTranslation> ParagraphTranslations { get; set; } = [];
-        public List<User> Users { get; set; } = [];
+        //public List<User> Users { get; set; } = [];
 
     }
 }

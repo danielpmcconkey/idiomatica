@@ -21,7 +21,7 @@ namespace Model
         public required User User { get; set; }
         [Required] public required Guid PageKey { get; set; }
         public required Page Page { get; set; }
-        [Required] public required DateTime ActionDateTime { get; set; }
+        [Required] public required DateTimeOffset ActionDateTime { get; set; }
 
 
 

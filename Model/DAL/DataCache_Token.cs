@@ -19,11 +19,6 @@ namespace Model.DAL
 
         public static Token? TokenCreate(Token token, IdiomaticaContext context)
         {
-            if (token.WordKey is null) throw new ArgumentNullException(nameof(token.WordKey));
-            if (token.SentenceKey is null) throw new ArgumentNullException(nameof(token.SentenceKey));
-            if (token.Ordinal is null) throw new ArgumentNullException(nameof(token.Ordinal));
-
-
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
@@ -43,7 +38,7 @@ namespace Model.DAL
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Token affected 0 rows");
             var newEntity = context.Tokens.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.UniqueKey is null)
+            if (newEntity is null)
             {
                 throw new InvalidDataException("newEntity is null in TokenCreate");
             }
@@ -161,7 +156,6 @@ namespace Model.DAL
             TokensBySentenceId[key] = value;
             foreach (var t in value)
             {
-                if (t.UniqueKey is null) continue;
                 TokenById[(Guid)t.UniqueKey] = t;
             }
             return value;

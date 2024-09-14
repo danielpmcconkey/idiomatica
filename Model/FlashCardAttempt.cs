@@ -19,7 +19,7 @@ namespace Model
         [Required] public required Guid FlashCardKey { get; set; }
         public required FlashCard FlashCard { get; set; }
         [Required] public required AvailableFlashCardAttemptStatus Status { get; set; }
-        [Required] public required DateTime AttemptedWhen { get; set; }
+        [Required] public required DateTimeOffset AttemptedWhen { get; set; }
 
 
 

@@ -20,9 +20,6 @@ namespace Model.DAL
 
         public static PageUser? PageUserCreate(PageUser pageUser, IdiomaticaContext context)
         {
-            if (pageUser.BookUserKey is null) throw new ArgumentNullException(nameof(pageUser.BookUserKey));
-            if (pageUser.PageKey is null) throw new ArgumentNullException(nameof(pageUser.PageKey));
-
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
@@ -40,7 +37,7 @@ namespace Model.DAL
                 """);
             if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
             var newEntity = context.PageUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.UniqueKey is null)
+            if (newEntity is null)
             {
                 throw new InvalidDataException("newEntity is null in FlashCardCreate");
             }
@@ -182,10 +179,6 @@ namespace Model.DAL
 
         public static void PageUserUpdate(PageUser value, IdiomaticaContext context)
         {
-            if (value.UniqueKey == null) 
-                throw new ArgumentException("ID cannot be null or 0 when updating PageUser");
-
-
             int numRows = context.Database.ExecuteSql($"""
                                 
                 UPDATE [Idioma].[PageUser]
@@ -225,7 +218,6 @@ namespace Model.DAL
         }
         private static void PageUserUpdateAllCaches(PageUser value)
         {
-            if (value.UniqueKey is null) return;
             PageUserById[(Guid)value.UniqueKey] = value;
 
             var cachedItem1 = PageUserByPageIdAndLanguageUserId.Where(x => x.Value.UniqueKey == value.UniqueKey).FirstOrDefault();

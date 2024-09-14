@@ -27,7 +27,7 @@ namespace Model
         public List<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridges 
             { get; set; }  = [];
         public List<FlashCardAttempt> Attempts { get; set; } = [];
-        public DateTime? NextReview {  get; set; }
+        public DateTimeOffset? NextReview {  get; set; }
 
     }
 }

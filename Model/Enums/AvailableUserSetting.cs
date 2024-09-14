@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TestDataPopulator
+namespace Model.Enums
 {
-    
-    internal class Language
+    public enum AvailableUserSetting
     {
-        
+        UILANGUAGE = 1,
+        CURRENTLEARNINGLANGUAGE = 2,
     }
 }

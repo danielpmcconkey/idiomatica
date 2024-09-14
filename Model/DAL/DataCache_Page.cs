@@ -54,7 +54,6 @@ namespace Model.DAL
             if (value == null) return null;
             // write to cache
             PageByOrdinalAndBookId[key] = value;
-            if (value.UniqueKey is null) return value;
             PageById[(Guid)value.UniqueKey] = value;
             return value;
         }
@@ -83,7 +82,7 @@ namespace Model.DAL
             // write each item to cache
             foreach (var item in value)
             {
-                if (item is null || item.UniqueKey is null) continue;
+                if (item is null) continue;
                 PageById[(Guid)item.UniqueKey] = item;
             }
 
@@ -104,10 +103,6 @@ namespace Model.DAL
 
         public static Page? PageCreate(Page page, IdiomaticaContext context)
         {
-            if (page.BookKey is null) throw new ArgumentNullException(nameof(page.BookKey));
-            if (page.Ordinal is null) throw new ArgumentNullException(nameof(page.Ordinal));
-
-            Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Page]
@@ -119,21 +114,17 @@ namespace Model.DAL
                       ({page.BookKey}
                       ,{page.Ordinal}
                       ,{page.OriginalText}
-                      ,{guid})
+                      ,{page.UniqueKey})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Page affected 0 rows");
-            var newEntity = context.Pages.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.UniqueKey is null)
-            {
-                throw new InvalidDataException("newEntity is null in FlashCardCreate");
-            }
+            
 
 
             // add it to cache
-            PageById[(Guid)newEntity.UniqueKey] = newEntity; ;
+            PageById[page.UniqueKey] = page; ;
 
-            return newEntity;
+            return page;
         }
         public static async Task<Page?> PageCreateAsync(Page value, IdiomaticaContext context)
         {

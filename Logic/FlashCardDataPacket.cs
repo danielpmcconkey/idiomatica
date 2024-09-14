@@ -1,4 +1,5 @@
 ﻿using Model;
+using Model.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,8 @@ namespace Logic
 {
     public class FlashCardDataPacket
     {
-        public string? LearningLanguageCode { get; set; } = null;
-        public string? UILanguageCode { get; set; } = null;
+        public AvailableLanguageCode? LearningLanguageCode { get; set; } = null;
+        public AvailableLanguageCode? UILanguageCode { get; set; } = null;
         public List<FlashCard> Deck { get; set; } = new();
         public int CardCount { get; set; } = 0;
         public int CurrentCardPosition { get; set; } = 0;

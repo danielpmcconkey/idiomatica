@@ -18,38 +18,25 @@ namespace Model.DAL
 
         public static BookUser? BookUserCreate(BookUser bookUser, IdiomaticaContext context)
         {
-            Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         INSERT INTO [Idioma].[BookUser]
                               ([BookKey]
                               ,[LanguageUserKey]
                               ,[IsArchived]
                               ,[CurrentPageKey]
-                              ,[AudioBookmarks]
-                              ,[AudioCurrentPos]
                               ,[UniqueKey])
                         VALUES
                               ({bookUser.BookKey}
                               ,{bookUser.LanguageUserKey}
                               ,{bookUser.IsArchived}
                               ,{bookUser.CurrentPageKey}
-                              ,{bookUser.AudioBookmarks}
-                              ,{bookUser.AudioCurrentPos}
-                              ,{guid})
+                              ,{bookUser.UniqueKey})
                         """);
             if (numRows < 1) throw new InvalidDataException("creating BookUser affected 0 rows");
 
-
-            var newEntity = context.BookUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.UniqueKey is null)
-            {
-                throw new InvalidDataException("newEntity is null in BookUserCreate");
-            }
-
-
             // add it to cache
-            BookUserById[(Guid)newEntity.UniqueKey] = newEntity;
-            return newEntity;
+            BookUserById[bookUser.UniqueKey] = bookUser;
+            return bookUser;
         }
         public static async Task<BookUser?> BookUserCreateAsync(BookUser value, IdiomaticaContext context)
         {
@@ -100,7 +87,7 @@ namespace Model.DAL
                     x.LanguageUser.UserKey == key.userId &&
                     x.BookKey == key.bookId)
                 .FirstOrDefault();
-            if (value is null || value.UniqueKey is null) return null;
+            if (value is null) return null;
             // write to cache
             BookUserByBookIdAndUserId[key] = value;
             BookUserById[(Guid)value.UniqueKey] = value;
@@ -119,17 +106,12 @@ namespace Model.DAL
         #region update
         public static void BookUserUpdate(BookUser bookUser, IdiomaticaContext context)
         {
-            if (bookUser.UniqueKey == null) 
-                throw new ArgumentException("ID cannot be null or 0 when updating");
-            
             int numRows = context.Database.ExecuteSql($"""
                         update [Idioma].[BookUser]
                               set [BookKey] = {bookUser.BookKey}
                               ,[LanguageUserKey] = {bookUser.LanguageUserKey}
                               ,[IsArchived] = {bookUser.IsArchived}
                               ,[CurrentPageKey] = {bookUser.CurrentPageKey}
-                              ,[AudioBookmarks] = {bookUser.AudioBookmarks}
-                              ,[AudioCurrentPos] = {bookUser.AudioCurrentPos}
                         where UniqueKey = {bookUser.UniqueKey}
                         ;
                         """);

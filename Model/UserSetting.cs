@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Model.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -16,7 +17,7 @@ namespace Model
     public class UserSetting
     {
         #region required data
-        [Required] public required int Key { get; set; }
+        [Required] public required AvailableUserSetting Key { get; set; }
         [Required] public required Guid UserKey { get; set; }
         public required User User { get; set; }
 

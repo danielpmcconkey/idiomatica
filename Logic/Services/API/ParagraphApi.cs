@@ -9,6 +9,7 @@ using Logic.Telemetry;
 using DeepL;
 using static System.Net.Mime.MediaTypeNames;
 using System.Net;
+using Model.Enums;
 
 namespace Logic.Services.API
 {
@@ -143,22 +144,8 @@ namespace Logic.Services.API
 
 
         public static List<Paragraph> ParagraphsCreateFromPage(
-            IdiomaticaContext context, Guid pageId, Guid languageId)
+            IdiomaticaContext context, Page page, Language language)
         {
-            var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null || language.UniqueKey is null ||
-                string.IsNullOrEmpty(language.Code))
-            {
-                ErrorHandler.LogAndThrow();
-                return [];
-            }
-            var page = DataCache.PageByIdRead(pageId, context);
-            if (page is null || page.UniqueKey is null ||
-                string.IsNullOrEmpty(page.OriginalText))
-            {
-                ErrorHandler.LogAndThrow();
-                return new List<Paragraph>();
-            }
             var paragraphs = new List<Paragraph>();
             var paragraphSplits = PotentialParagraphsSplitFromText(
                 context, page.OriginalText, language.Code);
@@ -260,20 +247,11 @@ namespace Logic.Services.API
         /// creating page and paragraph objects
         /// </summary>
         public static string[] PotentialParagraphsSplitFromText(
-            IdiomaticaContext context, string text, string languageCode)
+            IdiomaticaContext context, string text, Language language)
         {
             if (string.IsNullOrEmpty(text)) { ErrorHandler.LogAndThrow(); return []; }
-            if (string.IsNullOrEmpty(languageCode)) { ErrorHandler.LogAndThrow(); return []; }
             var textSanitized = text.Trim().Replace('\u00A0', ' ');
             
-
-            // pull language from the db
-            var language = DataCache.LanguageByCodeRead(languageCode, context);
-            if (language is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return new string[] { };
-            }
 
             // divide text into paragraphs
             var parser = LanguageParser.Factory.GetLanguageParser(language);
@@ -284,11 +262,11 @@ namespace Logic.Services.API
             return paragraphSplitsRaw;
         }
         public static async Task<string[]> PotentialParagraphsSplitFromTextAsync(
-            IdiomaticaContext context, string text, string languageCode)
+            IdiomaticaContext context, string text, Language language)
         {
             return await Task<string[]>.Run(() =>
             {
-                return PotentialParagraphsSplitFromText(context, text, languageCode);
+                return PotentialParagraphsSplitFromText(context, text, language);
             });
 
         }

@@ -20,36 +20,26 @@ namespace Model.DAL
         public static ParagraphTranslation? ParagraphTranslationCreate(
             ParagraphTranslation paragraphTranslation, IdiomaticaContext context)
         {
-            if (paragraphTranslation.ParagraphKey is null) 
-                throw new ArgumentNullException(nameof(paragraphTranslation.ParagraphKey));
-
-            Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[ParagraphTranslation]
                       ([ParagraphKey]
-                      ,[LanguageCode]
+                      ,[LanguageKey]
                       ,[TranslationText]
                       ,[UniqueKey])
                 VALUES
                       ({paragraphTranslation.ParagraphKey}
-                      ,{paragraphTranslation.Code}
+                      ,{paragraphTranslation.LanguageKey}
                       ,{paragraphTranslation.TranslationText}
-                      ,{guid})
+                      ,{paragraphTranslation.UniqueKey})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating ParagraphTranslation affected 0 rows");
-            var newEntity = context.ParagraphTranslations.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.UniqueKey is null)
-            {
-                throw new InvalidDataException("newEntity is null in ParagraphTranslationCreate");
-            }
-
-
+            
             // add it to cache
-            ParagraphTranslationUpdateCache(newEntity);
+            ParagraphTranslationUpdateCache(paragraphTranslation);
 
-            return newEntity;
+            return paragraphTranslation;
         }
         public static async Task<ParagraphTranslation?> ParagraphTranslationCreateAsync(ParagraphTranslation value, IdiomaticaContext context)
         {
@@ -92,7 +82,6 @@ namespace Model.DAL
             // write each item to cache
             foreach (var item in value)
             {
-                if (item.UniqueKey is null) continue;
                 ParagraphTranslationById[(Guid)item.UniqueKey] = item;
             }
 
@@ -131,15 +120,10 @@ namespace Model.DAL
         #region cache
         private static void ParagraphTranslationUpdateCache(ParagraphTranslation value)
         {
-            if (value.UniqueKey is null) return;
             // write to the ID cache
             ParagraphTranslationById[(Guid)value.UniqueKey] = value;
 
             // are there any lists with this one's paragraph already cached?
-            if (value.ParagraphKey == null)
-            {
-                return;
-            }
             if (ParagraphTranslationsByParagraphId.ContainsKey((Guid)value.ParagraphKey))
             {
                 var cachedList = ParagraphTranslationsByParagraphId[(Guid)value.ParagraphKey];

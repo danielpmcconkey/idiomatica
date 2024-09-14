@@ -16,31 +16,25 @@ namespace Logic.Services.API
     {
         public static Page? PageCreateFromPageSplit(
             IdiomaticaContext context, int ordinal, string text,
-            Guid bookId, Guid languageId)
+            Book book, Language language)
         {
             if (ordinal < 0) ErrorHandler.LogAndThrow();
             string textTrimmed = text.Trim();
             if (string.IsNullOrEmpty(textTrimmed)) ErrorHandler.LogAndThrow();
 
-            // pull language from the db
-            var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null ||
-                language.UniqueKey is null ||
-                string.IsNullOrEmpty(language.Code))
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
+            
             var newPage = new Page()
             {
-                BookKey = bookId,
+                UniqueKey = Guid.NewGuid(),
+                BookKey = book.UniqueKey,
+                Book = book,
                 Ordinal = ordinal,
                 OriginalText = textTrimmed
             };
             newPage = DataCache.PageCreate(newPage, context);
-            if (newPage is null || newPage.UniqueKey is null)
+            if (newPage is null)
             {
-                ErrorHandler.LogAndThrow(2040);
+                ErrorHandler.LogAndThrow();
                 return null;
             }
             // create paragraphs

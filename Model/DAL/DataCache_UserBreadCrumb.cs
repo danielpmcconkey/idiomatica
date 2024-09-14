@@ -19,8 +19,6 @@ namespace Model.DAL
         public static UserBreadCrumb? UserBreadCrumbCreate(UserBreadCrumb value, IdiomaticaContext context)
         {
             // no sense caching this; it's too transient
-            Guid guid = Guid.NewGuid();
-            value.UniqueKey = guid;
             int numRows = context.Database.ExecuteSql($"""
                 
                 INSERT INTO [Idioma].UserBreadCrumb
@@ -30,7 +28,7 @@ namespace Model.DAL
                            ,[ActionDateTime]
                            )
                      VALUES
-                           ({guid}
+                           ({value.UniqueKey}
                            ,{value.UserKey}
                            ,{value.PageKey}
                            ,{value.ActionDateTime}
@@ -38,8 +36,6 @@ namespace Model.DAL
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating UserBreadCrumb affected 0 rows");
-
-
             return value;
         }
         public static async Task<UserBreadCrumb?> UserCreateAsync(UserBreadCrumb value, IdiomaticaContext context)

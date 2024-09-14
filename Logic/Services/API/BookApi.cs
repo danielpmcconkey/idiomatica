@@ -27,14 +27,12 @@ namespace Logic.Services.API
             if (titleT == string.Empty) { ErrorHandler.LogAndThrow(); return null; }
             if (languageCodeT == string.Empty) { ErrorHandler.LogAndThrow(); return null; }
 
+            if (!Enum.TryParse(languageCodeT, out AvailableLanguageCode code)) 
+                { ErrorHandler.LogAndThrow(); return null; }
 
             // pull language from the db
-            var language = DataCache.LanguageByCodeRead(languageCodeT, context);
-            if (language is null || language.UniqueKey is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
+            var language = DataCache.LanguageByCodeRead((AvailableLanguageCode)code, context);
+            if (language is null) { ErrorHandler.LogAndThrow(); return null; }
 
             // divide text into paragraphs
             string[] paragraphSplits = ParagraphApi.PotentialParagraphsSplitFromText(context, text, languageCodeT);
@@ -43,12 +41,14 @@ namespace Logic.Services.API
             // add the book to the DB so you can save pages using its ID
             Book? book = new ()
             {
+                UniqueKey = Guid.NewGuid(),
                 Title = titleT,
                 SourceURI = urlT,
                 LanguageKey = language.UniqueKey,
+                Language = language,
             };
             book = DataCache.BookCreate(book, context);
-            if (book is null || book.UniqueKey is null)
+            if (book is null)
             {
                 ErrorHandler.LogAndThrow(2090);
                 return null;
@@ -69,7 +69,7 @@ namespace Logic.Services.API
                 Page? page = PageApi.PageCreateFromPageSplit(context,
                     pageSplit.pageNum, pageSplitTextTrimmed,
                     (Guid)book.UniqueKey, (Guid)language.UniqueKey);
-                if (page is not null && page.UniqueKey is not null)
+                if (page is not null)
                 {
                     book.Pages.Add(page);
                 }

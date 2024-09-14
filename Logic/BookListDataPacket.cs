@@ -26,26 +26,26 @@ namespace Logic
             OrderByOptions[6] = "Total Word Count";
             OrderByOptions[7] = "Distinct Word Count";
 
-            LanguageOptions = LanguageCodeApi.LanguageCodeOptionsRead(context, 
+            LanguageOptions = LanguageApi.LanguageOptionsRead(context, 
                 (x => x.IsImplementedForLearning == true));
             
             ShouldShowOnlyInShelf = !isBrowse;
         }
         public int BookListRowsToDisplay { get; set; } = 10;
         public Dictionary<int, string> OrderByOptions { get; set; } = [];
-        public Dictionary<string, LanguageCode> LanguageOptions { get; set; } = [];
+        public Dictionary<Guid, Language> LanguageOptions { get; set; } = [];
         public List<BookListRow>? BookListRows { get; set; } = null;
         public long? BookListTotalRowsAtCurrentFilter { get; set; } = null;
         public int SkipRecords { get; set; } = 0;
         public string? TagsFilter { get; set; } = null;
-        public string? LcFilterCode { get; set; } = null;
-        public LanguageCode? LcFilter
+        public string? LcFilterGuidString { get; set; } = null;
+        public Language? LcFilter
         {
             get
             {
-                if (LcFilterCode is null) return null;
-                LanguageCode? lcFilterTry = null;
-                LanguageOptions.TryGetValue(LcFilterCode, out lcFilterTry);
+                if (string.IsNullOrEmpty(LcFilterGuidString)) return null;
+                Guid.TryParse(LcFilterGuidString, out var lcFilterGuid);
+                if(!LanguageOptions.TryGetValue(lcFilterGuid, out var lcFilterTry)) return null;
                 return lcFilterTry;
             }
         }

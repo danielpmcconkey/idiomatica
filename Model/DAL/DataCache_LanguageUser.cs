@@ -18,9 +18,6 @@ namespace Model.DAL
         #region create
         public static LanguageUser? LanguageUserCreate(LanguageUser languageUser, IdiomaticaContext context)
         {
-            if (languageUser.LanguageKey is null) throw new ArgumentNullException(nameof(languageUser.LanguageKey));
-            if (languageUser.UserKey is null) throw new ArgumentNullException(nameof(languageUser.UserKey));
-
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                                 
@@ -38,7 +35,7 @@ namespace Model.DAL
                 """);
             if (numRows < 1) throw new InvalidDataException("creating LanguageUser affected 0 rows");
             var newEntity = context.LanguageUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.UniqueKey is null)
+            if (newEntity is null)
             {
                 throw new InvalidDataException("newEntity is null in LanguageUserCreate");
             }
@@ -145,18 +142,15 @@ namespace Model.DAL
 
         private static void LanguageUserUpdateCache(LanguageUser languageUser, IdiomaticaContext context)
         {
-            if (languageUser is null || languageUser.UniqueKey is null ||
-                languageUser.UserKey is null || languageUser.LanguageKey is null)
-            {
-                return;
-            }
-            Guid id = (Guid)languageUser.UniqueKey;
-            Guid userId = (Guid)languageUser.UserKey;
-            Guid languageId = (Guid)languageUser.LanguageKey;
+            Guid id = languageUser.UniqueKey;
+            Guid userId = languageUser.UserKey;
+            Guid languageId = languageUser.LanguageKey;
             LanguageUserById[id] = languageUser;
             LanguageUserByLanguageIdAndUserId[(languageId, userId)] = languageUser;
-            languageUser.Language = DataCache.LanguageByIdRead(languageId, context);
-            if(LanguageUsersAndLanguageByUserId.ContainsKey(userId))
+            var readLanguage = DataCache.LanguageByIdRead(languageId, context);
+            if (readLanguage == null) return;
+            languageUser.Language = readLanguage;
+            if (LanguageUsersAndLanguageByUserId.ContainsKey(userId))
             {
                 var list = LanguageUsersAndLanguageByUserId[userId];
                 // grab the entries in the list that are NOT this language

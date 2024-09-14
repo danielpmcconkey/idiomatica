@@ -107,9 +107,6 @@ namespace Model.DAL
 
         public static Sentence? SentenceCreate(Sentence sentence, IdiomaticaContext context)
         {
-            if (sentence.ParagraphKey is null) throw new ArgumentNullException(nameof(sentence.ParagraphKey));
-            if (sentence.Ordinal is null) throw new ArgumentNullException(nameof(sentence.Ordinal));
-
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
@@ -127,7 +124,7 @@ namespace Model.DAL
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Sentence affected 0 rows");
             var newEntity = context.Sentences.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.UniqueKey is null)
+            if (newEntity is null)
             {
                 throw new InvalidDataException("newEntity is null in SentenceCreate");
             }

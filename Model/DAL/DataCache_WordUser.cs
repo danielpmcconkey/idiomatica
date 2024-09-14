@@ -28,24 +28,6 @@ namespace Model.DAL
 
         public static WordUser? WordUserCreate(WordUser wordUser, IdiomaticaContext context)
         {
-            if (wordUser.WordKey is null)
-            {
-                var ex = new InvalidDataException(nameof(wordUser.WordKey));
-                throw ex;
-            }
-
-            if (wordUser.LanguageUserKey is null)
-            {
-                var ex = new InvalidDataException(nameof(wordUser.LanguageUserKey));
-                throw ex;
-            }
-
-            if (wordUser.Status is null)
-            {
-                var ex = new InvalidDataException(nameof(wordUser.Status));
-                throw ex;
-            }
-
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                 
@@ -69,7 +51,7 @@ namespace Model.DAL
                 """);
             if (numRows < 1) throw new InvalidDataException("creating WordUser affected 0 rows");
             var newEntity = context.WordUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.UniqueKey is null)
+            if (newEntity is null)
             {
                 throw new InvalidDataException("newEntity is null in WordUserCreate");
             }
@@ -139,8 +121,8 @@ namespace Model.DAL
             foreach (var g in groups)
             {
                 if (g.word is null || g.word.TextLowerCase is null) continue;
-                if (g.page is null || g.page.UniqueKey is null) continue;
-                if (g.wordUser is null || g.wordUser.UniqueKey is null) continue;
+                if (g.page is null) continue;
+                if (g.wordUser is null) continue;
                 (Guid pageId, Guid userId) = ((Guid)g.page.UniqueKey, key.userId);
 
                 try
@@ -251,7 +233,6 @@ namespace Model.DAL
             // write to cache
             WordUserByWordIdAndUserId[key] = value;
             // also write each worduser to cache
-            if (value.UniqueKey is null) { return value; }
             WordUserById[(Guid)value.UniqueKey] = value;
             return value;
         }
@@ -321,7 +302,7 @@ namespace Model.DAL
             value = [];
             foreach (var g in groups)
             {
-                if (g.word is null || g.word.TextLowerCase is null || g.wordUser is null || g.wordUser.UniqueKey is null)
+                if (g.word is null || g.word.TextLowerCase is null || g.wordUser is null)
                     continue;
                 string wordText = g.word.TextLowerCase;// g.wordWordUser.word.TextLowerCase;
                 WordUser wordUser = g.wordUser;
@@ -443,7 +424,6 @@ namespace Model.DAL
             // also write each worduser to cache
             foreach (var wordUser in value)
             {
-                if (wordUser.UniqueKey is null) continue;
                 WordUserById[(Guid)wordUser.UniqueKey] = wordUser;
             }
             return value;
@@ -462,9 +442,6 @@ namespace Model.DAL
 
         public static void WordUserUpdate(WordUser wordUser, IdiomaticaContext context)
         {
-            if (wordUser.UniqueKey == null)
-                throw new ArgumentException("ID cannot be null or 0 when updating WordUser");
-
             int numRows = context.Database.ExecuteSql($"""
                         UPDATE [Idioma].[WordUser]
                         SET [WordKey] = {wordUser.WordKey}
@@ -481,9 +458,8 @@ namespace Model.DAL
                 throw new InvalidDataException("WordUser update affected 0 rows");
             };
             // now update the cache
-            if (wordUser.LanguageUserKey is null) return;
             var languageUser = LanguageUserByIdRead((Guid)wordUser.LanguageUserKey, context);
-            if (languageUser is null || languageUser.UserKey is null) return;
+            if (languageUser is null) return;
             WordUserUpdateAllCaches(wordUser, (Guid)languageUser.UserKey);
 
             return;
@@ -564,7 +540,7 @@ namespace Model.DAL
             // iterate and update cache
             foreach (var row in rows)
             {
-                if (row is null || row.userId is null) continue;
+                if (row is null) continue;
                 // update the context, because the write operation above did not
                 if (row.wordUser.Status == statusToEdit) row.wordUser.Status = newStatus;
                 // update cache
@@ -606,8 +582,6 @@ namespace Model.DAL
         }
         private static void WordUserUpdateAllCaches(WordUser value, Guid userId)
         {
-            if (value.UniqueKey is null) return;
-
             WordUserById[(Guid)value.UniqueKey] = value;
 
             var cachedList1 = WordUserByWordIdAndUserId.Where(x => x.Value.UniqueKey == value.UniqueKey).ToList();

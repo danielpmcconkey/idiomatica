@@ -56,7 +56,6 @@ namespace Model.DAL
             // write each item to cache
             foreach (var item in value) 
             {
-                if (item.UniqueKey is null) continue;
                 ParagraphById[(Guid)item.UniqueKey] = item;
             }
 
@@ -77,10 +76,6 @@ namespace Model.DAL
 
         public static Paragraph? ParagraphCreate(Paragraph paragraph, IdiomaticaContext context)
         {
-            if (paragraph.PageKey is null) throw new ArgumentNullException(nameof(paragraph.PageKey));
-            if (paragraph.Ordinal is null) throw new ArgumentNullException(nameof(paragraph.Ordinal));
-
-            Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Paragraph]
@@ -90,20 +85,15 @@ namespace Model.DAL
                 VALUES
                       ({paragraph.PageKey}
                       ,{paragraph.Ordinal}
-                      ,{guid})
+                      ,{paragraph.UniqueKey})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Paragraph affected 0 rows");
-            var newEntity = context.Paragraphs.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.UniqueKey is null)
-            {
-                throw new InvalidDataException("newEntity is null in ParagraphCreate");
-            }
-
+            
             // add it to cache
-            ParagraphById[(Guid)newEntity.UniqueKey] = newEntity;
+            ParagraphById[paragraph.UniqueKey] = paragraph;
 
-            return newEntity;
+            return paragraph;
         }
         public static async Task<Paragraph?> ParagraphCreateAsync(Paragraph value, IdiomaticaContext context)
         {

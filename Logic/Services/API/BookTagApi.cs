@@ -13,7 +13,7 @@ namespace Logic.Services.API
     public static class BookTagApi
     {
         public static void BookTagAdd(
-            IdiomaticaContext context, Guid bookId, Guid userId, string tag)
+            IdiomaticaContext context, Book book, User user, string tag)
         {
             string trimmedTag = tag.Trim().ToLower();
             if (trimmedTag == string.Empty) return;
@@ -22,18 +22,20 @@ namespace Logic.Services.API
             DateTimeOffset created = DateTimeOffset.UtcNow;
             // check if this user already saved this tag
             var existingTag = context.BookTags.Where(x =>
-                    x.BookKey == bookId &&
-                    x.UserKey == userId &&
+                    x.BookKey == book.UniqueKey &&
+                    x.UserKey == user.UniqueKey &&
                     x.Tag == trimmedTag)
                 .FirstOrDefault();
             if (existingTag != null) return;
             var newTag = new BookTag()
             {
-                BookKey = bookId,
-                UserKey = userId,
+                UniqueKey = Guid.NewGuid(),
+                BookKey = book.UniqueKey,
+                Book = book,
+                UserKey = user.UniqueKey,
+                User = user,
                 Tag = trimmedTag,
                 Created = created,
-                IsPersonal = true
             };
             newTag = DataCache.BookTagCreate(newTag, context);
             if (newTag is null || newTag.UniqueKey is null)
@@ -42,9 +44,9 @@ namespace Logic.Services.API
             }
         }
         public static async Task BookTagAddAsync(
-            IdiomaticaContext context, Guid bookId, Guid userId, string tag)
+            IdiomaticaContext context, Book book, User user, string tag)
         {
-            await Task.Run(() => BookTagAdd(context, bookId, userId, tag));
+            await Task.Run(() => BookTagAdd(context, book, user, tag));
         }
 
 
@@ -67,7 +69,7 @@ namespace Logic.Services.API
         public static List<BookTag> BookTagsGetByBookIdAndUserId(
             IdiomaticaContext context, Guid bookId, Guid userId)
         {
-            var tags = DataCache.BookTagsByBookIdAndUserIdRead((bookId, userId), context);
+            var tags = DataCache.BookTagsByBookAndUserRead((bookId, userId), context);
             return tags;
         }
         public static async Task<List<BookTag>> BookTagsGetByBookIdAndUserIdAsync(

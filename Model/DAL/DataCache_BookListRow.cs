@@ -51,7 +51,7 @@ namespace Model.DAL
 
         public static (long count, List<BookListRow> results) BookListRowsPowerQuery(
             Guid userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
-            LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
+            Guid? langIdFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
             bool sortAscending, IdiomaticaContext context, Guid? bookIdOverride = null)
         {
             /*
@@ -217,11 +217,11 @@ namespace Model.DAL
                         and at.Tag is not null
                     """);
             }
-            if (lcFilter is not null && bookIdOverride is null)
+            if (langIdFilter is not null && bookIdOverride is null)
             {
                 sb.Append($"""
 
-                        and l.LanguageCode = '{lcFilter.Code}'
+                        and l.UniqueKey = '{langIdFilter.ToString()}'
                     """);
             }
             if (titleFilter is not null && bookIdOverride is null)
@@ -310,13 +310,13 @@ namespace Model.DAL
         }
         public static async Task<(long count, List<BookListRow> results)> BookListRowsPowerQueryAsync(
             Guid userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
-            LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
+            Guid? langIdFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
             bool sortAscending, IdiomaticaContext context, Guid? bookIdOverride = null)
         {
             return await Task<(long count, List<BookListRow> results)>.Run(() =>
             {
                 return BookListRowsPowerQuery(userId, numRecords, skip, shouldShowOnlyInShelf, tagsFilter,
-                    lcFilter, titleFilter, orderBy, sortAscending, context, bookIdOverride);
+                    langIdFilter, titleFilter, orderBy, sortAscending, context, bookIdOverride);
             });
         }
         #endregion

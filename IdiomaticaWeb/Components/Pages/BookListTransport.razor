@@ -50,11 +50,11 @@
                             </div>
                             <div class="text-center  align-items-center">
                                 <InputSelect id="LanguageInput"
-                                             @bind-Value="BookListDataPacket.LcFilterCode">
+                                             @bind-Value="BookListDataPacket.LcFilterGuidString">
                                     <option selected disabled>@UserService.GetUILabel("bookListFormFilterNone")</option>
                                     @foreach (var (key, value) in BookListDataPacket.LanguageOptions)
                                     {
-                                        <option value="@key">@value.LanguageName</option>
+                                        <option value="@key">@value.Name</option>
                                     }
                                 </InputSelect>
                             </div>

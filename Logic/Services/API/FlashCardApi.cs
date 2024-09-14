@@ -15,21 +15,22 @@ namespace Logic.Services.API
 {
     public static class FlashCardApi
     {
-        public static FlashCard? FlashCardCreate(IdiomaticaContext context, Guid wordUserId, string uiLanguageCode)
+        public static FlashCard? FlashCardCreate(
+            IdiomaticaContext context, Guid wordUserId, AvailableLanguageCode uiLanguageCode)
         {
-            if (string.IsNullOrEmpty(uiLanguageCode)) { ErrorHandler.LogAndThrow(); return null; }
-            FlashCard? card = new FlashCard();
             var wordUser = DataCache.WordUserAndLanguageUserAndLanguageByIdRead(wordUserId, context);
-
             if (wordUser == null) { ErrorHandler.LogAndThrow(); return null; }
-            card.WordUser = wordUser;
-            card.WordUserKey = wordUserId;
-            card.NextReview = null;
-            card.Status = AvailableFlashCardStatus.ACTIVE;
-            card = DataCache.FlashCardCreate(card, context);
-            if (card is null || card.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
-            if (wordUser.WordKey is null) { ErrorHandler.LogAndThrow(); return null; }
 
+            FlashCard? card = new ()
+            {
+                UniqueKey = Guid.NewGuid(),
+                WordUser = wordUser,
+                WordUserKey = wordUserId,
+                Status = AvailableFlashCardStatus.ACTIVE,
+            };
+            card = DataCache.FlashCardCreate(card, context);
+            if (card is null) { ErrorHandler.LogAndThrow(); return null; }
+            
             List<Word> wordUsages = DataCache.WordsAndTokensAndSentencesAndParagraphsByWordIdRead(
                 (Guid)wordUser.WordKey, context);
 
@@ -45,7 +46,7 @@ namespace Logic.Services.API
 
                     if (token.Sentence == null) { ErrorHandler.LogAndThrow(); return null; }
                     var sentence = token.Sentence;
-                    if (sentence.Paragraph == null || sentence.Paragraph.UniqueKey == null) 
+                    if (sentence.Paragraph is null) 
                         { ErrorHandler.LogAndThrow(); return null; }
                     var paragraph = sentence.Paragraph;
                     // pull paragraph translations here in case the same
@@ -60,10 +61,10 @@ namespace Logic.Services.API
                         ppts = paragraphTranslations
                             .Where(
                                 ppt => ppt != null
-                                && ppt.LanguageCode != null
-                                && ppt.LanguageCode.Code == uiLanguageCode)
+                                && ppt.Language != null
+                                && ppt.Language.Code == uiLanguageCode)
                             .FirstOrDefault();
-                        if (ppts == null || ppts.UniqueKey == null)
+                        if (ppts is null)
                         {
                             // not the right language
                             // reset to null so the code below will create it
@@ -73,33 +74,39 @@ namespace Logic.Services.API
                     if (ppts == null)
                     {
                         if (wordUser.LanguageUser == null
-                            || wordUser.LanguageUser.Language == null
-                            || wordUser.LanguageUser.Language.Code == null)
+                            || wordUser.LanguageUser.Language is null)
                         {
                             ErrorHandler.LogAndThrow(2500);
                             return null;
                         }
                         // create it
-                        string input = ParagraphApi.ParagraphReadAllText(context, (Guid)paragraph.UniqueKey);
-                        string toLang = uiLanguageCode;
-                        string fromLang = wordUser.LanguageUser.Language.Code;
-                        string translation = DeepLService.Translate(input, fromLang, toLang);
+                        string input = ParagraphApi.ParagraphReadAllText(context, paragraph.UniqueKey);
+                        Language? toLang = LanguageApi.LanguageReadByCode(context, uiLanguageCode);
+                        if (toLang is null) { ErrorHandler.LogAndThrow(); return null; }
+                        AvailableLanguageCode fromLangCode = wordUser.LanguageUser.Language.Code;
+                        string translation = DeepLService.Translate(input, fromLangCode, toLang.Code);
                         ppts = new ()
                         {
-                            ParagraphKey = (Guid)paragraph.UniqueKey,
-                            Code = toLang,
+                            UniqueKey = Guid.NewGuid(),
+                            ParagraphKey = paragraph.UniqueKey,
+                            Paragraph = paragraph,
+                            LanguageKey = toLang.UniqueKey,
+                            Language = toLang,
                             TranslationText = translation
                         };
                         ppts = DataCache.ParagraphTranslationCreate(ppts, context);
                     }
 
-                    if (ppts is null || ppts.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
+                    if (ppts is null) { ErrorHandler.LogAndThrow(); return null; }
 
                     // now bridge it to the flash card
                     FlashCardParagraphTranslationBridge? fcptb = new ()
                     {
+                        UniqueKey = Guid.NewGuid(),
                         ParagraphTranslationKey = ppts.UniqueKey,
-                        FlashCardKey = (Guid)card.UniqueKey,
+                        ParagraphTranslation = ppts,
+                        FlashCardKey = card.UniqueKey,
+                        FlashCard = card,
                     };
                     fcptb = DataCache.FlashCardParagraphTranslationBridgeCreate(fcptb, context);
                     if(fcptb is null) { ErrorHandler.LogAndThrow(); return null; }
@@ -112,7 +119,8 @@ namespace Logic.Services.API
             
             return card;
         }
-        public static async Task<FlashCard?> FlashCardCreateAsync(IdiomaticaContext context, Guid wordUserId, string uiLanguageCode)
+        public static async Task<FlashCard?> FlashCardCreateAsync(
+            IdiomaticaContext context, Guid wordUserId, AvailableLanguageCode uiLanguageCode)
         {
             return await Task<FlashCard?>.Run(() =>
             {
@@ -167,7 +175,8 @@ namespace Logic.Services.API
 
 
         public static List<FlashCard>? FlashCardsCreate(
-            IdiomaticaContext context, Guid languageUserId, int numCards, string uiLanguageCode)
+            IdiomaticaContext context, Guid languageUserId, int numCards,
+            AvailableLanguageCode uiLanguageCode)
         {
             if (numCards < 1) { return new List<FlashCard>(); }
             
@@ -182,7 +191,7 @@ namespace Logic.Services.API
                         from fc in grouping.DefaultIfEmpty()
                         where (
                             wu.LanguageUserKey == languageUserId
-                            && fc.UniqueKey == null
+                            && fc == null
                             && wu.Status != AvailableWordUserStatus.LEARNED
                             && wu.Status != AvailableWordUserStatus.IGNORED
                             && wu.Status != AvailableWordUserStatus.WELLKNOWN
@@ -200,14 +209,14 @@ namespace Logic.Services.API
 
             foreach (var wordUser in wordUsers)
             {
-                if(wordUser is null || wordUser.UniqueKey is null) continue;
+                if(wordUser is null) continue;
                 var card = FlashCardCreate(context, (Guid)wordUser.UniqueKey, uiLanguageCode);
                 if (card != null) cards.Add(card);
             }
             return cards;
         }
         public static async Task<List<FlashCard>?> FlashCardsCreateAsync(
-            IdiomaticaContext context, Guid languageUserId, int numCards, string uiLanguageCode)
+            IdiomaticaContext context, Guid languageUserId, int numCards, AvailableLanguageCode uiLanguageCode)
         {
             return await Task<FlashCard?>.Run(() =>
             {

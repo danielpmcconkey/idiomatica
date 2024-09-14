@@ -31,14 +31,13 @@ namespace Logic.Services.API
         {
             var bookUser = DataCache.BookUserByIdRead(bookUserId, context);
 
-            if (bookUser == null || bookUser.LanguageUserKey == null
-                || bookUser.BookKey == null)
+            if (bookUser == null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
             var languageUser = DataCache.LanguageUserByIdRead((Guid)bookUser.LanguageUserKey, context);
-            if (languageUser is null || languageUser.UniqueKey is null || languageUser.UserKey is null)
+            if (languageUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -121,6 +120,8 @@ namespace Logic.Services.API
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.ISCOMPLETE,
+                Book = bookUser.Book,
+                LanguageUser = bookUser.LanguageUser,
                 BookKey = bookUser.BookKey,
                 LanguageUserKey = bookUser.LanguageUserKey,
                 ValueString = isComplete.ToString(),
@@ -128,6 +129,8 @@ namespace Logic.Services.API
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.LASTPAGEREAD,
+                Book = bookUser.Book,
+                LanguageUser = bookUser.LanguageUser,
                 BookKey = bookUser.BookKey,
                 LanguageUserKey = bookUser.LanguageUserKey,
                 ValueNumeric = lastPageRead,
@@ -135,6 +138,8 @@ namespace Logic.Services.API
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.PROGRESS,
+                Book = bookUser.Book,
+                LanguageUser = bookUser.LanguageUser,
                 BookKey = bookUser.BookKey,
                 LanguageUserKey = bookUser.LanguageUserKey,
                 ValueString = progress,
@@ -142,6 +147,8 @@ namespace Logic.Services.API
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.PROGRESSPERCENT,
+                Book = bookUser.Book,
+                LanguageUser = bookUser.LanguageUser,
                 BookKey = bookUser.BookKey,
                 LanguageUserKey = bookUser.LanguageUserKey,
                 ValueNumeric = progressPercent,
@@ -149,6 +156,8 @@ namespace Logic.Services.API
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.DISTINCTKNOWNPERCENT,
+                Book = bookUser.Book,
+                LanguageUser = bookUser.LanguageUser,
                 BookKey = bookUser.BookKey,
                 LanguageUserKey = bookUser.LanguageUserKey,
                 ValueNumeric = distinctKnownPercent,
@@ -156,6 +165,8 @@ namespace Logic.Services.API
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.DISTINCTWORDCOUNT,
+                Book = bookUser.Book,
+                LanguageUser = bookUser.LanguageUser,
                 BookKey = bookUser.BookKey,
                 LanguageUserKey = bookUser.LanguageUserKey,
                 ValueNumeric = distinctWordCount,
@@ -163,6 +174,8 @@ namespace Logic.Services.API
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.TOTALWORDCOUNT,
+                Book = bookUser.Book,
+                LanguageUser = bookUser.LanguageUser,
                 BookKey = bookUser.BookKey,
                 LanguageUserKey = bookUser.LanguageUserKey,
                 ValueNumeric = totalWordCount,
@@ -170,6 +183,8 @@ namespace Logic.Services.API
             stats.Add(new BookUserStat()
             {
                 Key = AvailableBookUserStat.TOTALKNOWNPERCENT,
+                Book = bookUser.Book,
+                LanguageUser = bookUser.LanguageUser,
                 BookKey = bookUser.BookKey,
                 LanguageUserKey = bookUser.LanguageUserKey,
                 ValueString = null,

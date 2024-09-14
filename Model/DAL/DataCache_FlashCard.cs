@@ -21,9 +21,7 @@ namespace Model.DAL
 
         public static FlashCard? FlashCardCreate(FlashCard flashCard, IdiomaticaContext context)
         {
-            if (flashCard.WordUserKey is null) throw new ArgumentNullException(nameof(flashCard.WordUserKey));
             
-            Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[FlashCard]
@@ -35,21 +33,16 @@ namespace Model.DAL
                       ({flashCard.WordUserKey}
                       ,{flashCard.Status}
                       ,{flashCard.NextReview}
-                      ,{guid})
+                      ,{flashCard.UniqueKey})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
-            var newEntity = context.FlashCards.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.UniqueKey is null)
-            {
-                throw new InvalidDataException("newEntity is null in FlashCardCreate");
-            }
-
+            
 
             // add it to cache
-            FlashCardById[(Guid)newEntity.UniqueKey] = newEntity; ;
+            FlashCardById[flashCard.UniqueKey] = flashCard; ;
 
-            return newEntity;
+            return flashCard;
         }
         public static async Task<FlashCard?> FlashCardCreateAsync(FlashCard value, IdiomaticaContext context)
         {
@@ -181,9 +174,6 @@ namespace Model.DAL
 
         public static void FlashCardUpdate(FlashCard flashCard, IdiomaticaContext context)
         {
-            if (flashCard.UniqueKey == null)
-                throw new ArgumentException("ID cannot be null or 0 when updating FlashCard");
-
             int numRows = context.Database.ExecuteSql($"""
                         UPDATE [Idioma].[FlashCard]
                         SET [WordUserKey] = {flashCard.WordUserKey}
@@ -231,8 +221,6 @@ namespace Model.DAL
         }
         private static void FlashCardUpdateAllCaches(FlashCard value)
         {
-            if (value.UniqueKey is null) throw new ArgumentNullException(nameof(value));
-
             FlashCardById[(Guid)value.UniqueKey] = value;
 
             // FlashCardAndFullRelationshipsById

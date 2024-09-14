@@ -19,14 +19,6 @@ namespace Model
 
         // not a strict EF Core relationship
         [Required] public required string ApplicationUserId { get; set; }
-        /// <summary>
-        /// the DB link to the primary language of the user; used for UI rendering and for translations
-        /// </summary>
-        [Required] public required Guid UiLanguageKey { get; set; }
-        /// <summary>
-        /// the primary language of the user; used for UI rendering and for translations
-        /// </summary>
-        public required Language UiLanguage { get; set; }
 
         [StringLength(250)]
         [Required] public required string Name { get; set; }

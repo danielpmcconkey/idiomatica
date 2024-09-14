@@ -17,7 +17,7 @@ namespace Logic
         {
             get
             {
-                if (CurrentPage is null || CurrentPage.Ordinal is null) return 0;
+                if (CurrentPage is null) return 0;
                 return (int)CurrentPage.Ordinal;
             }
         }
@@ -36,11 +36,11 @@ namespace Logic
         /// <summary>
         /// the language the book is written in
         /// </summary>
-        public LanguageCode? LanguageFromCode { get; set; } = null;
+        public Language? LanguageFromCode { get; set; } = null;
         /// <summary>
         /// The user's preferred UI language
         /// </summary>
-        public LanguageCode? LanguageToCode { get; set; } = null;
+        public Language? LanguageToCode { get; set; } = null;
         public LanguageUser? LanguageUser { get; set; } = null;
         public User? LoggedInUser { get; set; } = null;
         public List<Paragraph>? Paragraphs { get; set; } = null;

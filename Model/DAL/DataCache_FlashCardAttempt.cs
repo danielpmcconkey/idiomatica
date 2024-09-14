@@ -19,8 +19,6 @@ namespace Model.DAL
 
         public static FlashCardAttempt? FlashCardAttemptCreate(FlashCardAttempt flashCardAttempt, IdiomaticaContext context)
         {
-            if (flashCardAttempt.FlashCardKey is null) throw new ArgumentNullException(nameof(flashCardAttempt.FlashCardKey));
-            
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
@@ -38,7 +36,7 @@ namespace Model.DAL
                 """);
             if (numRows < 1) throw new InvalidDataException("creating FlashCardAttempt affected 0 rows");
             var newEntity = context.FlashCardAttempts.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.UniqueKey is null)
+            if (newEntity is null)
             {
                 throw new InvalidDataException("newEntity is null in FlashCardAttemptCreate");
             }

@@ -55,12 +55,7 @@ namespace Logic.Services.API
         public static BookUser? BookUserCreate(IdiomaticaContext context, Guid bookId, Guid userId)
         {
             Book? book = DataCache.BookByIdRead(bookId, context);
-            if (book is null || book.UniqueKey is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            if (book.LanguageKey is null)
+            if (book is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
@@ -69,14 +64,14 @@ namespace Logic.Services.API
             book.Pages = DataCache.PagesByBookIdRead(bookId, context);
 
             var firstPage = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
-            if (firstPage is null || firstPage.UniqueKey is null)
+            if (firstPage is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
             }
             var languageUser = LanguageUserApi.LanguageUserGet(context, (Guid)book.LanguageKey, userId);
 
-            if (languageUser is null || languageUser.UniqueKey is null)
+            if (languageUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
@@ -85,7 +80,7 @@ namespace Logic.Services.API
             // make sure that bookUser doesn't already exist before creating it
             var existingBookUser = DataCache.BookUserByBookIdAndUserIdRead(
                 (bookId, userId), context);
-            if (existingBookUser != null && existingBookUser.UniqueKey != null)
+            if (existingBookUser != null)
             {
                 // dude already exists. Just return it. 
                 // mark it as not-archived though
@@ -96,11 +91,14 @@ namespace Logic.Services.API
 
             var bookUser = DataCache.BookUserCreate(new BookUser()
             {
+                UniqueKey = Guid.NewGuid(),
                 BookKey = bookId,
-                CurrentPageKey = (Guid)firstPage.UniqueKey,
-                LanguageUserKey = (Guid)languageUser.UniqueKey
+                Book = book,
+                CurrentPageKey = firstPage.UniqueKey,
+                LanguageUserKey = languageUser.UniqueKey,
+                LanguageUser = languageUser,
             }, context);
-            if (bookUser is null || bookUser.UniqueKey == null)
+            if (bookUser is null)
             {
                 ErrorHandler.LogAndThrow(2250);
                 return null;

@@ -21,8 +21,8 @@ namespace Model
         [Required] public required Guid LanguageUserKey { get; set; }
         public required LanguageUser LanguageUser { get; set; }
         [Required] public required AvailableWordUserStatus Status { get; set; }
-        [Required] public required DateTime Created { get; set; } = DateTime.Now;
-        [Required] public required DateTime StatusChanged { get; set; } = DateTime.Now;
+        [Required] public required DateTimeOffset Created { get; set; } = DateTimeOffset.Now;
+        [Required] public required DateTimeOffset StatusChanged { get; set; } = DateTimeOffset.Now;
 
 
 

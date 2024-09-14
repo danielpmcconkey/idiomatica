@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DeepL;
 
 namespace Logic.Services.API
 {
@@ -18,12 +19,12 @@ namespace Logic.Services.API
         {
             var user = new User()
             {
+                UniqueKey = Guid.NewGuid(),
                 ApplicationUserId = applicationUserId,
                 Name = name,
-                Code = uiLanguageCode,
             };
             user = DataCache.UserCreate(user, context);
-            if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
+            if (user is null) { ErrorHandler.LogAndThrow(); return null; }
 
             return user;
         }
@@ -32,34 +33,33 @@ namespace Logic.Services.API
         {
             var user = new User()
             {
+                UniqueKey = Guid.NewGuid(),
                 ApplicationUserId = applicationUserId,
                 Name = name,
-                Code = uiLanguageCode,
             };
             user = await DataCache.UserCreateAsync(user, context);
-            if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
-
             return user;
         }
 
 
-        public static UserBreadCrumb? UserBreadCrumbCreate(IdiomaticaContext context, Guid userId, Guid pageId)
+        public static UserBreadCrumb? UserBreadCrumbCreate(IdiomaticaContext context, User user, Page page)
         {
-            UserBreadCrumb? crumb = new() {
-                UserKey = userId,
-                PageKey = pageId,
+            UserBreadCrumb crumb = new() {
+                UniqueKey = Guid.NewGuid(),
+                UserKey = user.UniqueKey, 
+                User = user,
+                PageKey = page.UniqueKey,
+                Page = page,
                 ActionDateTime = DateTime.Now
             };
-            crumb = DataCache.UserBreadCrumbCreate(crumb, context);
-            if (crumb is null || crumb.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
-            return crumb;
+            return DataCache.UserBreadCrumbCreate(crumb, context);
         }
         public static async Task<UserBreadCrumb?> UserBreadCrumbCreateAsync(
-            IdiomaticaContext context, Guid userId, Guid pageId)
+            IdiomaticaContext context, User user, Page page)
         {
             return await Task.Run(() =>
             {
-                return UserBreadCrumbCreate(context, userId, pageId);
+                return UserBreadCrumbCreate(context, user, page);
             });
         }
 
@@ -81,6 +81,17 @@ namespace Logic.Services.API
             {
                 return UserBreadCrumbReadLatest(context, userId);
             });
+        }
+
+        public static Language? UserSettingUiLanguagReadByUserId(
+            IdiomaticaContext context, Guid userId)
+        {
+            return DataCache.UserSettingUiLanguageByUserIdRead(userId, context);
+        }
+        public static async Task<Language?> UserSettingUiLanguagReadByUserIdAsync(
+            IdiomaticaContext context, Guid userId)
+        {
+            return await DataCache.UserSettingUiLanguageByUserIdReadAsync(userId, context);
         }
 
         #endregion

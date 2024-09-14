@@ -11,6 +11,8 @@ using Model;
 using Logic.UILabels;
 using Polly;
 using Logic.Telemetry;
+using Logic.Services.API;
+using Model.Enums;
 
 namespace Logic.Services
 {
@@ -33,7 +35,7 @@ namespace Logic.Services
             AuthenticationStateProvider AuthenticationStateProvider)
         {
             _authenticationStateProvider = AuthenticationStateProvider;
-            _uiLabels = UILabels.Factory.GetUILabels(AvailableLanguageCodes.EN_US);
+            _uiLabels = UILabels.Factory.GetUILabels(AvailableLanguageCode.EN_US);
         }
 #if DEBUG
         /// <summary>
@@ -41,19 +43,19 @@ namespace Logic.Services
         /// </summary>
         public void SetLoggedInUserForTestBench(User loggedInUser, IdiomaticaContext context)
         {
-            if (loggedInUser is null || loggedInUser.Code is null)
+            if (loggedInUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
             _loggedInUser = loggedInUser;
-            _uiLanguageCode = DataCache.LanguageCodeByCodeRead(_loggedInUser.Code, context);
-            if (_uiLanguageCode is null)
+            _uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(context, loggedInUser.UniqueKey);
+            if (_uiLanguage is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            _uiLabels = UILabels.Factory.GetUILabels(_uiLanguageCode.LanguageCodeEnum);
+            _uiLabels = UILabels.Factory.GetUILabels(_uiLanguage.Code);
             _loggedInUserOverride = true;
         }
 #endif
@@ -85,19 +87,22 @@ namespace Logic.Services
 
             var appUserId = _loggedInUserClaimsPrincipal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (appUserId == null) return null;
-            //Console.WriteLine($"appUserId = {appUserId}");
            
             var matchingUser = DataCache.UserByApplicationUserIdRead(appUserId, context);
-            if (matchingUser != null)
-            {
-                _loggedInUser = matchingUser;
-                if(_loggedInUser.Code is null) { ErrorHandler.LogAndThrow(); return null; }
-                _uiLanguageCode = DataCache.LanguageCodeByCodeRead(_loggedInUser.Code, context);
-                if (_uiLanguageCode is null) { ErrorHandler.LogAndThrow(); return null; }
-                _uiLabels = UILabels.Factory.GetUILabels(_uiLanguageCode.LanguageCodeEnum);
-                return _loggedInUser;
-            }
-            return null;
+            if (matchingUser is null) return null;
+
+            _loggedInUser = matchingUser;
+            _uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(context, matchingUser.UniqueKey);
+            if (_uiLanguage == null) _uiLanguage = GetDefaultUiLanguage(context);
+            if (_uiLanguage == null) { ErrorHandler.LogAndThrow(); return null; }
+                    
+            _uiLabels = UILabels.Factory.GetUILabels(_uiLanguage.Code);
+            return _loggedInUser;
+        }
+
+        private Language? GetDefaultUiLanguage(IdiomaticaContext context)
+        {
+            return LanguageApi.LanguageReadByCode(context, AvailableLanguageCode.EN_US);
         }
 
         /// <summary>
@@ -114,9 +119,9 @@ namespace Logic.Services
         {
             return _uiLabels.GetLabelF(name, args);
         }
-        public LanguageCode? GetUiLanguageCode()
+        public Language? GetUiLanguageCode()
         {
-            return _uiLanguageCode;
+            return _uiLanguage;
         }
         private async Task<ClaimsPrincipal?> GetAppUserClaimsPrincipalAsync()
         {

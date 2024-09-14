@@ -25,6 +25,6 @@ namespace Model
         
 
         
-        public DateTime? ReadDate { get; set; }
+        public DateTimeOffset? ReadDate { get; set; }
     }
 }

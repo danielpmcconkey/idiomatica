@@ -37,8 +37,7 @@ namespace Model.DAL
             if (value == null) return null;
             // write to cache
             WordById[key] = value;
-            if (value.Text is null || value.LanguageKey is null) return value;
-            WordByLanguageIdAndTextLower[((Guid)value.LanguageKey, value.Text)] = value;
+            WordByLanguageIdAndTextLower[((Guid)value.LanguageKey, value.TextLowerCase)] = value;
             return value;
         }
         public static async Task<Word?> WordByIdReadAsync(Guid key, IdiomaticaContext context)
@@ -62,7 +61,7 @@ namespace Model.DAL
             var value = context.Words
                 .Where(x => x.LanguageKey == key.languageId && x.TextLowerCase == key.textLower)
                 .FirstOrDefault();
-            if (value == null || value.UniqueKey is null) return null;
+            if (value == null) return null;
             // write to cache
             WordByLanguageIdAndTextLower[key] = value;
             WordById[(Guid)value.UniqueKey] = value;
@@ -139,7 +138,7 @@ namespace Model.DAL
             var value = new Dictionary<string, Word>();
             foreach (var g in groups)
             {
-                if (g.word is null || g.word.TextLowerCase is null || g.word.UniqueKey is null) continue;
+                if (g.word is null || g.word.TextLowerCase is null) continue;
                 value[g.word.TextLowerCase] = g.word;
                 // add it to the word cache
                 WordById[(Guid)g.word.UniqueKey] = g.word;
@@ -183,7 +182,7 @@ namespace Model.DAL
             var value = new Dictionary<string, Word>();
             foreach (var g in groups)
             {
-                if (g.w is null || g.w.UniqueKey is null || g.w.TextLowerCase is null) continue;
+                if (g.w is null || g.w.TextLowerCase is null) continue;
                 value[g.w.TextLowerCase] = g.w;
                 // add it to the word cache
                 WordById[(Guid)g.w.UniqueKey] = g.w;
@@ -213,7 +212,7 @@ namespace Model.DAL
             var value = new Dictionary<string, Word>();
             foreach (var g in groups)
             {
-                if (g.word is null || g.word.UniqueKey is null || g.word.TextLowerCase is null) continue;
+                if (g.word is null || g.word.TextLowerCase is null) continue;
                 value[g.word.TextLowerCase] = g.word;
                 // add it to the word cache
                 WordById[(Guid)g.word.UniqueKey] = g.word;
@@ -270,7 +269,7 @@ namespace Model.DAL
             // also write each word to cache
             foreach (var word in value)
             {
-                if (word is null || word.UniqueKey is null) continue;
+                if (word is null) continue;
                 WordById[(Guid)word.UniqueKey] = word;
             }
             return value;
@@ -337,9 +336,6 @@ namespace Model.DAL
 
         public static Word? WordCreate(Word word, IdiomaticaContext context)
         {
-            if (word.LanguageKey is null) throw new ArgumentNullException(nameof(word.LanguageKey));
-            if (word.TextLowerCase is null) throw new ArgumentNullException(nameof(word.TextLowerCase));
-
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
@@ -355,12 +351,11 @@ namespace Model.DAL
                            ,{word.Text}
                            ,{word.TextLowerCase}
                            ,{word.Romanization}
-                           ,{word.TokenCount}
                            ,{guid})
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Word affected 0 rows");
             var newEntity = context.Words.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.UniqueKey is null)
+            if (newEntity is null)
             {
                 throw new InvalidDataException("newEntity is null in WordCreate");
             }

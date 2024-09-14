@@ -43,30 +43,24 @@ namespace Model.DAL
         #region create
         public static Book? BookCreate(Book book, IdiomaticaContext context)
         {
-            var guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                                 
                 INSERT INTO [Idioma].[Book]
                            ([LanguageKey]
                            ,[Title]
                            ,[SourceURI]
-                           ,[AudioFilename]
                            ,[UniqueKey])
                      VALUES
                            ({book.LanguageKey}
                            ,{book.Title}
                            ,{book.SourceURI}
-                           ,{book.AudioFilename}
-                           ,{guid});
+                           ,{book.UniqueKey});
                 """);
             if (numRows < 1) throw new InvalidDataException("Book create affected 0 rows");
-            // now read it into context
-            var newBook = context.Books.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newBook is null || newBook.UniqueKey is null) 
-                throw new InvalidDataException("Reading new book after creation returned null");
             
-            BookById[(Guid)newBook.UniqueKey] = newBook;
-            return newBook;
+            
+            BookById[(Guid)book.UniqueKey] = book;
+            return book;
         }
         public static async Task<Book?> BookCreateAsync(Book value, IdiomaticaContext context)
         {
