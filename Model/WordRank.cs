@@ -15,6 +15,7 @@ namespace Model
     [Table("WordRank", Schema = "Idioma")]
     [PrimaryKey(nameof(UniqueKey))]
     [Index(nameof(LanguageKey), nameof(WordKey), IsUnique = true)]
+    [Index(nameof(LanguageKey), nameof(Ordinal), IsUnique = true)]
     public class WordRank
     {
         #region required data

@@ -13,6 +13,7 @@ namespace Model
     
     [Table("Sentence", Schema = "Idioma")]
     [PrimaryKey(nameof(UniqueKey))]
+    [Index(nameof(ParagraphKey), nameof(Ordinal), IsUnique = true)]
     public class Sentence
     {
         #region required data

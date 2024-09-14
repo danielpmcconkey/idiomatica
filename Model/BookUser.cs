@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,6 +12,7 @@ namespace Model
 {
     [Table("BookUser", Schema = "Idioma")]
     [PrimaryKey(nameof(UniqueKey))]
+    [Index(nameof(BookKey), nameof(LanguageUserKey), IsUnique = true)]
     public class BookUser
     {
         #region required data

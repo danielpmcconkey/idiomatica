@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure;
+using Microsoft.EntityFrameworkCore;
 using Model.Enums;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace Model
     
     [Table("Language", Schema = "Idioma")]
     [PrimaryKey(nameof(UniqueKey))]
+    [Index(nameof(Code), IsUnique = true)]
     public class Language
     {
         #region required data

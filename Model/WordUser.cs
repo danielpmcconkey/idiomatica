@@ -12,6 +12,7 @@ namespace Model
 {
     [Table("WordUser", Schema = "Idioma")]
     [PrimaryKey(nameof(UniqueKey))]
+    [Index(nameof(WordKey), nameof(LanguageUserKey), IsUnique = true)]
     public class WordUser
     {
         #region required data

@@ -12,6 +12,7 @@ namespace Model
     
     [Table("Token", Schema = "Idioma")]
     [PrimaryKey(nameof(UniqueKey))]
+    [Index(nameof(SentenceKey), nameof(Ordinal), IsUnique = true)]
     /// <summary>
     /// This is used to assist UI in writing sentences on the screen easier
     /// </summary>

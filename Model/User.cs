@@ -12,6 +12,7 @@ namespace Model
 
     [Table("User", Schema = "Idioma")]
     [PrimaryKey(nameof(UniqueKey))]
+    [Index(nameof(ApplicationUserId), IsUnique = true)]
     public class User
     {
         #region required data

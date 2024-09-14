@@ -11,6 +11,7 @@ namespace Model
 {
     [Table("ParagraphTranslation", Schema = "Idioma")]
     [PrimaryKey(nameof(UniqueKey))]
+    [Index(nameof(ParagraphKey), nameof(LanguageKey), IsUnique = true)]
     public class ParagraphTranslation
     {
         #region required data

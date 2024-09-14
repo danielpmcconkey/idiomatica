@@ -13,6 +13,7 @@ namespace Model
 	
     [Table("Page", Schema = "Idioma")]
     [PrimaryKey(nameof(UniqueKey))]
+    [Index(nameof(BookKey), nameof(Ordinal), IsUnique = true)]
     public class Page
     {
         #region required data

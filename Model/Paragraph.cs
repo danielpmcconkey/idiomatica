@@ -12,6 +12,7 @@ namespace Model
     
     [Table("Paragraph", Schema = "Idioma")]
     [PrimaryKey(nameof(UniqueKey))]
+    [Index(nameof(PageKey), nameof(Ordinal), IsUnique = true)]
     public class Paragraph
     {
         #region required data

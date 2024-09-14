@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,6 +12,7 @@ namespace Model
 {
     [Table("FlashCardParagraphTranslationBridge", Schema = "Idioma")]
     [PrimaryKey(nameof(UniqueKey))]
+    [Index(nameof(ParagraphTranslationKey), nameof(FlashCardKey), IsUnique = true)]
     public class FlashCardParagraphTranslationBridge
     {
         #region required data

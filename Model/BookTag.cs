@@ -12,6 +12,7 @@ namespace Model
 {
     [Table("BookTag", Schema = "Idioma")]
     [PrimaryKey(nameof(UniqueKey))]
+    [Index(nameof(UserKey), nameof(BookKey), nameof(Tag), IsUnique = true)]
     public class BookTag
     {
         #region required data
