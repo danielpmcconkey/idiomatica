@@ -33,7 +33,7 @@ namespace Logic.Services.API.Tests
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context,
-                    CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                    CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
 
@@ -87,7 +87,7 @@ namespace Logic.Services.API.Tests
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context,
-                    CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                    CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
 
@@ -134,7 +134,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 // create the user
-                var user = UserApi.UserCreate(applicationUserId, name, code, context);
+                var user = UserApi.UserCreate(applicationUserId, name, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
@@ -160,7 +160,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 // create the user
-                var user = await UserApi.UserCreateAsync(applicationUserId, name, code, context);
+                var user = await UserApi.UserCreateAsync(applicationUserId, name, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
@@ -192,7 +192,7 @@ namespace Logic.Services.API.Tests
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                    context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
@@ -214,7 +214,7 @@ namespace Logic.Services.API.Tests
                 // create the first breadcrumb
                 if (page1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                UserApi.UserBreadCrumbCreate(context, userId, (Guid)page1.UniqueKey);
+                UserApi.UserBreadCrumbCreate(context, user, page1);
 
                 // read it back
                 var crumb1 = UserApi.UserBreadCrumbReadLatest(context, userId);
@@ -235,7 +235,7 @@ namespace Logic.Services.API.Tests
                 // create the first breadcrumb
                 if (page2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                UserApi.UserBreadCrumbCreate(context, userId, (Guid)page2.UniqueKey);
+                UserApi.UserBreadCrumbCreate(context, user, page2);
 
                 // read it back
                 var crumb2 = UserApi.UserBreadCrumbReadLatest(context, userId);
@@ -270,7 +270,7 @@ namespace Logic.Services.API.Tests
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                    context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
@@ -292,7 +292,7 @@ namespace Logic.Services.API.Tests
                 // create the first breadcrumb
                 if (page1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                await UserApi.UserBreadCrumbCreateAsync(context, userId, (Guid)page1.UniqueKey);
+                await UserApi.UserBreadCrumbCreateAsync(context, user, page1);
 
                 // read it back
                 var crumb1 = await UserApi.UserBreadCrumbReadLatestAsync(context, userId);
@@ -313,7 +313,7 @@ namespace Logic.Services.API.Tests
                 // create the first breadcrumb
                 if (page2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                await UserApi.UserBreadCrumbCreateAsync(context, userId, (Guid)page2.UniqueKey);
+                await UserApi.UserBreadCrumbCreateAsync(context, user, page2);
 
                 // read it back
                 var crumb2 = await UserApi.UserBreadCrumbReadLatestAsync(context, userId);
@@ -348,7 +348,7 @@ namespace Logic.Services.API.Tests
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                    context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
@@ -366,7 +366,7 @@ namespace Logic.Services.API.Tests
                 // create the breadcrumb
                 if (page is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                var crumb = UserApi.UserBreadCrumbCreate(context, userId, (Guid)page.UniqueKey);
+                var crumb = UserApi.UserBreadCrumbCreate(context, user, page);
 
                 Assert.IsNotNull(crumb);
                 Assert.IsNotNull(crumb.UniqueKey);
@@ -397,7 +397,7 @@ namespace Logic.Services.API.Tests
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                    context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) 
                     { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
@@ -415,7 +415,7 @@ namespace Logic.Services.API.Tests
                 // create the breadcrumb
                 if (page is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                var crumb = await UserApi.UserBreadCrumbCreateAsync(context, userId, (Guid)page.UniqueKey);
+                var crumb = await UserApi.UserBreadCrumbCreateAsync(context, user, page);
 
                 Assert.IsNotNull(crumb);
                 Assert.IsNotNull(crumb.UniqueKey);
