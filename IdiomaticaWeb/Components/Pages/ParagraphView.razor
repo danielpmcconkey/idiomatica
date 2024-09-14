@@ -53,7 +53,7 @@ else
 }
 @code {
     [Parameter]
-    public Paragraph ParagraphAndChildren { get; set; } = new Paragraph();
+    public Paragraph? ParagraphAndChildren { get; set; }
     [Parameter]
     public EventCallback<Token> OnShowWordModal { get; set; }
     [Parameter]
@@ -68,14 +68,9 @@ else
 
     private async Task InitData()
     {
-        if(ParagraphAndChildren.UniqueKey == null)
-        {
-            ErrorHandler.LogAndThrow(2210);
-            return;
-        }
         var context = await DbContextFactory.CreateDbContextAsync();
 
-        if (ParagraphAndChildren.Sentences is null) return;
+        if (ParagraphAndChildren is null) return;
 
         _sentences = ParagraphAndChildren.Sentences.OrderBy(s => s.Ordinal).ToList();
         foreach( var sentence in _sentences)
@@ -108,8 +103,7 @@ else
     public string GetTokenClass(Token token)
     {
         if (token.Word is null || token.Word.TextLowerCase is null) return "statusUNKNOWN";
-        if (ReadDataPacket is null || ReadDataPacket.LanguageUser is null ||
-            ReadDataPacket.LanguageUser.UniqueKey is null) return "statusUNKNOWN";
+        if (ReadDataPacket is null || ReadDataPacket.LanguageUser is null) return "statusUNKNOWN";
 
         var wordUser = token.Word.WordUsers
             .Where(x => x.LanguageUserKey == (Guid)ReadDataPacket.LanguageUser.UniqueKey)
@@ -125,8 +119,7 @@ else
 
         // first get the override translations, if there is one
 
-        if (ReadDataPacket is not null && ReadDataPacket.LanguageUser is not null &&
-            ReadDataPacket.LanguageUser.UniqueKey is not null)
+        if (ReadDataPacket is not null && ReadDataPacket.LanguageUser is not null)
         {
             var wordUser = token.Word.WordUsers
                 .Where(x => x.LanguageUserKey == (Guid)ReadDataPacket.LanguageUser.UniqueKey)
@@ -153,13 +146,6 @@ else
     }
     private async Task<List<Token>> GetSentenceTokens(Sentence sentence)
     {
-        if (sentence.UniqueKey is null)
-        {
-            ErrorHandler.LogAndThrow(2230);
-            return new List<Token>();
-        }
-        
-
         var context = DbContextFactory.CreateDbContext();
         sentence.Tokens = await TokenApi.TokensAndWordsReadBySentenceIdAsync(context, (Guid)sentence.UniqueKey);
         return sentence.Tokens;

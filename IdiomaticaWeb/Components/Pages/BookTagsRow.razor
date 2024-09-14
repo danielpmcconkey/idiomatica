@@ -37,7 +37,7 @@ else
 @code {
     [Parameter]
     public Guid? BookKey { get; set; }
-    private List<BookTag> _tags = new List<BookTag>();
+    private List<BookTagRow> _tags = [];
     private string? _addTagInput;
     private User? _loggedInUser;
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
@@ -53,9 +53,9 @@ else
 
             var context = await DbContextFactory.CreateDbContextAsync();
             _loggedInUser = await UserService.GetLoggedInUserAsync(context);
-            if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
+            if (_loggedInUser is null)
             {
-                ErrorHandler.LogAndThrow(2450);
+                ErrorHandler.LogAndThrow();
                 return;
             }
             if (BookKey is not null)
@@ -84,7 +84,7 @@ else
     }
     private async Task RefreshTags()
     {
-        if (_loggedInUser == null || _loggedInUser.UniqueKey == null) return;
+        if (_loggedInUser is null) return;
         
 
         try
@@ -92,7 +92,7 @@ else
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
+            if (_loggedInUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -116,7 +116,7 @@ else
     }
     private async Task OnAddTagAsync()
     {
-        if (_loggedInUser == null || _loggedInUser.UniqueKey == null) return;
+        if (_loggedInUser == null) return;
         if (_addTagInput == null) return;
         var sanitized = _addTagInput.Trim().ToLower();
         if (sanitized == string.Empty) return;
@@ -126,7 +126,7 @@ else
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
+            if (_loggedInUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -136,7 +136,13 @@ else
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            BookTagApi.BookTagAdd(context, (Guid)BookKey, (Guid)_loggedInUser.UniqueKey, sanitized);
+            var book = BookApi.BookRead(context, (Guid)BookKey);
+            if (book is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            BookTagApi.BookTagAdd(context, book, _loggedInUser, sanitized);
             _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (Guid)BookKey, (Guid)_loggedInUser.UniqueKey);
             await t_delay;
             _isLoading = false;

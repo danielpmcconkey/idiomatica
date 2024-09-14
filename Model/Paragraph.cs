@@ -24,15 +24,13 @@ namespace Model
         #endregion
 
 
-        //public int? Id { get; set; }
-
         #region relationships
-        public List<Sentence>? Sentences { get; set; }
+        public List<Sentence> Sentences { get; set; } = [];
 
         // warning, do not auto create the ParagraphTranslations list or you'll
         // break the translation function's ability to look-up if we've already
         // pulled it
-        public List<ParagraphTranslation> ParagraphTranslations { get; set; } = new List<ParagraphTranslation>();
+        public List<ParagraphTranslation> ParagraphTranslations { get; set; } = [];
         #endregion
 
 

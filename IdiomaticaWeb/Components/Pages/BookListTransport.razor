@@ -50,10 +50,10 @@
                                 @UserService.GetUILabel("bookListFormFilterLanguage")
                             </div>
                             <div class="text-center  align-items-center">
-                                
-                                <InputSelect id="LanguageInput" @bind-Value="BookListDataPacket.LcFilterCode">
+
+                                <InputSelect id="LanguageInput" @bind-Value="dataPacket.LcFilterCode">
                                     <option selected disabled>@UserService.GetUILabel("bookListFormFilterNone")</option>
-                                    @foreach (var (key, value) in BookListDataPacket.LanguageOptions)
+                                    @foreach (var (key, value) in dataPacket.LanguageOptions)
                                     {
                                         <option value="@value.Code">@value.Name</option>
                                     }
@@ -74,7 +74,7 @@
                             </div>
                             <div class="text-center  align-items-center">
                                 <InputText id="TitleInput"
-                                           @bind-Value="BookListDataPacket.TitleFilter">
+                                           @bind-Value="dataPacket.TitleFilter">
                                 </InputText>
                             </div>
                         }
@@ -92,7 +92,7 @@
                             </div>
                             <div class="text-center  align-items-center">
                                 <InputText id="TagsInput"
-                                           @bind-Value="BookListDataPacket.TagsFilter">
+                                           @bind-Value="dataPacket.TagsFilter">
                                 </InputText>
                             </div>
                         }
@@ -133,9 +133,9 @@
                     <div class="row align-items-center">
                         <div class="col text-center">
                             <InputSelect id="SortSelect"
-                                         @bind-Value="BookListDataPacket.OrderBy">
+                                         @bind-Value="dataPacket.OrderBy">
                                 <option selected disabled>@UserService.GetUILabel("bookListFormSortColumn")</option>
-                                @foreach (var (key, value) in BookListDataPacket.OrderByOptions)
+                                @foreach (var (key, value) in dataPacket.OrderByOptions)
                                 {
                                     <option value="@key">@UserService.GetUILabel("bookListFormSortColumn") @value</option>
                                 }
@@ -169,7 +169,7 @@
 </div>
 @code {
     [Parameter]
-    public BookListDataPacket BookListDataPacket { get; set; } = new();
+    public Logic.BookListDataPacket? dataPacket { get; set; }
     [Parameter]
     public EventCallback<int> GetNext { get; set; }
     [Parameter]
@@ -183,25 +183,25 @@
     {
         get
         {
-            if (BookListDataPacket.BookListRows == null || 
-                BookListDataPacket.BookListRows.Count < 1) return 0L;
-            else return BookListDataPacket.BookListRows.Min(x => x.RowNumber);
+            if (dataPacket.BookListRows == null ||
+                dataPacket.BookListRows.Count < 1) return 0L;
+            else return dataPacket.BookListRows.Min(x => x.RowNumber);
         }
     }
     public long? BookListLastRowShown
     {
         get
         {
-            if (BookListDataPacket.BookListRows == null || 
-                BookListDataPacket.BookListRows.Count < 1) return 0L;
-            else return BookListDataPacket.BookListRows.Max(x => x.RowNumber);
+            if (dataPacket.BookListRows == null ||
+                dataPacket.BookListRows.Count < 1) return 0L;
+            else return dataPacket.BookListRows.Max(x => x.RowNumber);
         }
     }
     public long? BookListTotalRowsAtCurrentFilter
     {
         get
         {
-            return BookListDataPacket.BookListTotalRowsAtCurrentFilter;
+            return dataPacket.BookListTotalRowsAtCurrentFilter;
         }
     }
 
@@ -237,7 +237,7 @@
     {
         _isLoadingCounts = true;
         var t_delay = Task.Delay(LoadingDelayMiliseconds);
-        BookListDataPacket.ShouldSortAscending = isAscending;
+        dataPacket.ShouldSortAscending = isAscending;
         await FilterAndSort.InvokeAsync();
         await t_delay;
         StateHasChanged();

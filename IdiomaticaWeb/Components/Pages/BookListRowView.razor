@@ -468,7 +468,7 @@
             ErrorHandler.LogAndThrow();
             return;
         }
-        if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
+        if (_loggedInUser is null)
         {
             ErrorHandler.LogAndThrow();
             return;
@@ -476,7 +476,7 @@
         var context = DbContextFactory.CreateDbContext();
         var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
             context, (Guid)_bookId, (Guid)_loggedInUser.UniqueKey);
-        if (bookUser is null || bookUser.UniqueKey is null)
+        if (bookUser is null)
         {
             ErrorHandler.LogAndThrow();
             return;

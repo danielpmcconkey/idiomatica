@@ -39,7 +39,7 @@
 
 @code {
     [Parameter]
-    public BookTag? BookTag { get; set; }
+    public BookTagRow? BookTag { get; set; }
     [Parameter]
     public Guid? BookId { get; set; }
     [Parameter]
@@ -90,9 +90,9 @@
         {
             var context = DbContextFactory.CreateDbContext();
             _loggedInUser = UserService.GetLoggedInUser(context);
-            if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
+            if (_loggedInUser is null)
             {
-                ErrorHandler.LogAndThrow(2450);
+                ErrorHandler.LogAndThrow();
                 return;
             }
             if (BookId is null)
@@ -105,7 +105,13 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            BookTagApi.BookTagAdd(context, (Guid)BookId, (Guid)_loggedInUser.UniqueKey, BookTag.Tag);
+            var book = BookApi.BookRead(context, (Guid)BookId);
+            if (book is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            BookTagApi.BookTagAdd(context, book, _loggedInUser, BookTag.Tag);
         }
         catch (IdiomaticaException ex)
         {
@@ -127,9 +133,9 @@
     {
         var context = DbContextFactory.CreateDbContext();
         _loggedInUser =UserService.GetLoggedInUser(context);
-        if (_loggedInUser is null || _loggedInUser.UniqueKey is null)
+        if (_loggedInUser is null)
         {
-            ErrorHandler.LogAndThrow(2450);
+            ErrorHandler.LogAndThrow();
             return;
         }
         if (BookId is null)

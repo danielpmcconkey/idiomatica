@@ -63,12 +63,12 @@ else
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
             var breadCrumb = await UserApi.UserBreadCrumbReadLatestAsync(context, (Guid)UserId);
-            if (breadCrumb is not null && breadCrumb.PageKey is not null)
+            if (breadCrumb is not null)
             {
                 var page = await PageApi.PageReadByIdAsync(context, (Guid)breadCrumb.PageKey);
-                if (page is null || page.BookKey is null || page.Ordinal is null) return;
+                if (page is null) return;
                 var book = await BookApi.BookReadAsync(context, (Guid)page.BookKey);
-                if (book is null || book.UniqueKey is null || string.IsNullOrEmpty(book.Title)) return;
+                if (book is null || string.IsNullOrEmpty(book.Title)) return;
 
                 Title = FormatTitle(book.Title);
                 BookUri = $"/Book/{book.UniqueKey}/Read";
