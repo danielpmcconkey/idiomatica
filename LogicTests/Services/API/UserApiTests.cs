@@ -28,19 +28,19 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context,
                     CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
                     context, bookId, (Guid)user.UniqueKey);
-                if (bookUser is null || bookUser.UniqueKey is null)
+                if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // create wordUsers
@@ -82,19 +82,19 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context,
                     CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
                     context, bookId, (Guid)user.UniqueKey);
-                if (bookUser is null || bookUser.UniqueKey is null)
+                if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // create wordUsers
@@ -135,7 +135,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var user = UserApi.UserCreate(applicationUserId, name, code, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 Assert.IsNotNull(user.UniqueKey);
@@ -161,7 +161,7 @@ namespace Logic.Services.API.Tests
             {
                 // create the user
                 var user = await UserApi.UserCreateAsync(applicationUserId, name, code, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 Assert.IsNotNull(user.UniqueKey);
@@ -187,20 +187,20 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
                     context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null)
+                if (languageUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
                     context, bookId, (Guid)user.UniqueKey);
-                if (bookUser is null || bookUser.UniqueKey is null)
+                if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // take a reading of time before you make the first crumb
@@ -212,7 +212,7 @@ namespace Logic.Services.API.Tests
                     context, 1, bookId);
 
                 // create the first breadcrumb
-                if (page1 is null || page1.UniqueKey is null)
+                if (page1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 UserApi.UserBreadCrumbCreate(context, userId, (Guid)page1.UniqueKey);
 
@@ -233,7 +233,7 @@ namespace Logic.Services.API.Tests
                     context, 2, bookId);
 
                 // create the first breadcrumb
-                if (page2 is null || page2.UniqueKey is null)
+                if (page2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 UserApi.UserBreadCrumbCreate(context, userId, (Guid)page2.UniqueKey);
 
@@ -265,20 +265,20 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
                     context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null)
+                if (languageUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
 
                 // craete a bookUser
                 var bookUser = await BookUserApi.BookUserCreateAsync(
                     context, bookId, (Guid)user.UniqueKey);
-                if (bookUser is null || bookUser.UniqueKey is null)
+                if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // take a reading of time before you make the first crumb
@@ -290,7 +290,7 @@ namespace Logic.Services.API.Tests
                     context, 1, bookId);
 
                 // create the first breadcrumb
-                if (page1 is null || page1.UniqueKey is null)
+                if (page1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 await UserApi.UserBreadCrumbCreateAsync(context, userId, (Guid)page1.UniqueKey);
 
@@ -311,7 +311,7 @@ namespace Logic.Services.API.Tests
                     context, 2, bookId);
 
                 // create the first breadcrumb
-                if (page2 is null || page2.UniqueKey is null)
+                if (page2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 await UserApi.UserBreadCrumbCreateAsync(context, userId, (Guid)page2.UniqueKey);
 
@@ -343,20 +343,20 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
                     context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null)
+                if (languageUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
                     context, bookId, (Guid)user.UniqueKey);
-                if (bookUser is null || bookUser.UniqueKey is null)
+                if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // get the first page
@@ -364,7 +364,7 @@ namespace Logic.Services.API.Tests
                     context, 1, bookId);
 
                 // create the breadcrumb
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 var crumb = UserApi.UserBreadCrumbCreate(context, userId, (Guid)page.UniqueKey);
 
@@ -392,20 +392,20 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
                     context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) 
+                if (languageUser is null) 
                     { ErrorHandler.LogAndThrow(); return; }
                 Guid languageUserId = (Guid)languageUser.UniqueKey;
 
                 // craete a bookUser
                 var bookUser = await BookUserApi.BookUserCreateAsync(
                     context, bookId, (Guid)user.UniqueKey);
-                if (bookUser is null || bookUser.UniqueKey is null)
+                if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // get the first page
@@ -413,7 +413,7 @@ namespace Logic.Services.API.Tests
                     context, 1, bookId);
 
                 // create the breadcrumb
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 var crumb = await UserApi.UserBreadCrumbCreateAsync(context, userId, (Guid)page.UniqueKey);
 

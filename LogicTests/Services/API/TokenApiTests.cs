@@ -35,6 +35,7 @@ namespace Logic.Services.API.Tests
                 {
                     Title = TestConstants.NewBookTitle,
                     LanguageKey = (Guid)language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
@@ -45,6 +46,7 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
@@ -56,6 +58,7 @@ namespace Logic.Services.API.Tests
                 Paragraph? paragraph = new()
                 {
                     PageKey = page.UniqueKey,
+                    Page = page,
                     Ordinal = 1,
                     UniqueKey = Guid.NewGuid()
                 };
@@ -66,6 +69,7 @@ namespace Logic.Services.API.Tests
                 Sentence? sentence = new()
                 {
                     ParagraphKey = paragraph.UniqueKey,
+                    Paragraph = paragraph,
                     Text = sentenceText,
                     Ordinal = 1,
                     UniqueKey = Guid.NewGuid()
@@ -78,7 +82,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(word); Assert.IsNotNull(word.UniqueKey);
 
                 // now create the tokens
-                var token = TokenApi.TokenCreate(context, wordDisplay, (Guid)sentence.UniqueKey, 0, (Guid)word.UniqueKey);
+                var token = TokenApi.TokenCreate(context, wordDisplay, sentence, 0, word);
 
                 // token assertions
                 Assert.IsNotNull(token);
@@ -111,6 +115,7 @@ namespace Logic.Services.API.Tests
                 {
                     Title = TestConstants.NewBookTitle,
                     LanguageKey = (Guid)language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = await DataCache.BookCreateAsync(book, context);
@@ -121,6 +126,7 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
@@ -132,6 +138,7 @@ namespace Logic.Services.API.Tests
                 Paragraph? paragraph = new()
                 {
                     PageKey = page.UniqueKey,
+                    Page = page,
                     Ordinal = 1,
                     UniqueKey = Guid.NewGuid()
                 };
@@ -142,6 +149,7 @@ namespace Logic.Services.API.Tests
                 Sentence? sentence = new()
                 {
                     ParagraphKey = paragraph.UniqueKey,
+                    Paragraph = paragraph,
                     Text = sentenceText,
                     Ordinal = 1,
                     UniqueKey = Guid.NewGuid()
@@ -154,7 +162,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(word); Assert.IsNotNull(word.UniqueKey);
 
                 // now create the tokens
-                var token = await TokenApi.TokenCreateAsync(context, wordDisplay, (Guid)sentence.UniqueKey, 0, (Guid)word.UniqueKey);
+                var token = await TokenApi.TokenCreateAsync(context, wordDisplay, sentence, 0, word);
                 
                 // token assertions
                 Assert.IsNotNull(token); 
@@ -262,7 +270,8 @@ namespace Logic.Services.API.Tests
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageKey = language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
@@ -273,6 +282,7 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
@@ -284,6 +294,7 @@ namespace Logic.Services.API.Tests
                 Paragraph? paragraph = new()
                 {
                     PageKey = page.UniqueKey,
+                    Page = page,
                     Ordinal = 1,
                     UniqueKey = Guid.NewGuid()
                 };
@@ -294,6 +305,7 @@ namespace Logic.Services.API.Tests
                 Sentence? sentence = new()
                 {
                     ParagraphKey = paragraph.UniqueKey,
+                    Paragraph = paragraph,
                     Text = sentenceText,
                     Ordinal = 1,
                     UniqueKey = Guid.NewGuid()
@@ -303,7 +315,7 @@ namespace Logic.Services.API.Tests
 
                 // now create the tokens
                 var tokens = TokenApi.TokensCreateFromSentence(
-                    context, (Guid)sentence.UniqueKey, (Guid)language.UniqueKey);
+                    context, sentence, language);
 
                 // token assertions
                 Assert.IsNotNull(tokens);
@@ -341,7 +353,8 @@ namespace Logic.Services.API.Tests
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageKey = language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = await DataCache.BookCreateAsync(book, context);
@@ -352,6 +365,7 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
@@ -363,6 +377,7 @@ namespace Logic.Services.API.Tests
                 Paragraph? paragraph = new()
                 {
                     PageKey = page.UniqueKey,
+                    Page = page,
                     Ordinal = 1,
                     UniqueKey = Guid.NewGuid()
                 };
@@ -373,6 +388,7 @@ namespace Logic.Services.API.Tests
                 Sentence? sentence = new()
                 {
                     ParagraphKey = paragraph.UniqueKey,
+                    Paragraph = paragraph,
                     Text = sentenceText,
                     Ordinal = 1,
                     UniqueKey = Guid.NewGuid()
@@ -382,7 +398,7 @@ namespace Logic.Services.API.Tests
 
                 // now create the tokens
                 var tokens = await TokenApi.TokensCreateFromSentenceAsync(
-                    context, (Guid)sentence.UniqueKey, (Guid)language.UniqueKey);
+                    context, sentence, language);
 
                 // token assertions
                 Assert.IsNotNull(tokens);

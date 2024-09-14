@@ -31,7 +31,7 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                if (newBook is null || newBook.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.UniqueKey;
 
                 BookStatApi.BookStatsCreateAndSave(context, bookId);
@@ -62,7 +62,7 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                if (newBook is null || newBook.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.UniqueKey;
 
                 await BookStatApi.BookStatsCreateAndSaveAsync(context, bookId);
@@ -95,7 +95,7 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                if (newBook is null || newBook.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.UniqueKey;
 
                 BookStatApi.BookStatsCreateAndSave(context, bookId);
@@ -129,7 +129,7 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                if (newBook is null || newBook.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.UniqueKey;
 
                 await BookStatApi.BookStatsCreateAndSaveAsync(context, bookId);

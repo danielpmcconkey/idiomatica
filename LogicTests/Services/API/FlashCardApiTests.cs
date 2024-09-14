@@ -22,8 +22,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid learningLangugeId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
 
             try
             {
@@ -31,22 +31,22 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, learningLangugeId, (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, learningLanguage, user);
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a word
-                var word = context.Words.Where(x => x.LanguageKey == learningLangugeId).Take(1).FirstOrDefault();
-                if (word is null || word.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                var word = context.Words.Where(x => x.LanguageKey == learningLanguage.UniqueKey).Take(1).FirstOrDefault();
+                if (word is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create a WordUser
                 var wordUser = WordUserApi.WordUserCreate(
-                    context, (Guid)word.UniqueKey, (Guid)languageUser.UniqueKey, null, AvailableWordUserStatus.UNKNOWN);
-                if (wordUser is null || wordUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, word, languageUser, null, AvailableWordUserStatus.UNKNOWN);
+                if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 FlashCard? card = FlashCardApi.FlashCardCreate(context, (Guid)wordUser.UniqueKey, uiLanguageCode);
                 Assert.IsNotNull(card);
@@ -63,8 +63,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid learningLangugeId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
 
             try
             {
@@ -72,22 +72,22 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, learningLangugeId, (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, learningLanguage, user);
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a word
-                var word = context.Words.Where(x => x.LanguageKey == learningLangugeId).Take(1).FirstOrDefault();
-                if (word is null || word.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                var word = context.Words.Where(x => x.LanguageKey == learningLanguage.UniqueKey).Take(1).FirstOrDefault();
+                if (word is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create a WordUser
                 var wordUser = await WordUserApi.WordUserCreateAsync(
-                    context, (Guid)word.UniqueKey, (Guid)languageUser.UniqueKey, null, AvailableWordUserStatus.UNKNOWN);
-                if (wordUser is null || wordUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, word, languageUser, null, AvailableWordUserStatus.UNKNOWN);
+                if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 FlashCard? card = await FlashCardApi.FlashCardCreateAsync(context, (Guid)wordUser.UniqueKey, uiLanguageCode);
                 Assert.IsNotNull(card);
@@ -161,8 +161,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid learningLangugeId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 5;
             int numCards = 1;
 
@@ -172,17 +172,17 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, learningLangugeId, (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, learningLanguage, user);
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a bunch of words
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLangugeId)
+                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -190,10 +190,10 @@ namespace Logic.Services.API.Tests
                 // create WordUsers for each
                 foreach (var word in words)
                 {
-                    if (word is null || word.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
                     var wordUser = WordUserApi.WordUserCreate(
-                        context, (Guid)word.UniqueKey, (Guid)languageUser.UniqueKey, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null || wordUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                        context, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
+                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
                 }
 
                 // create cards
@@ -205,9 +205,6 @@ namespace Logic.Services.API.Tests
 
                 foreach (var card in cards)
                 {
-                    if (card.UniqueKey is null || card.WordUserKey is null)
-                    { ErrorHandler.LogAndThrow(); return; }
-
                     // pull the card again
                     var cardAfter = FlashCardApi.FlashCardReadById(context, (Guid)card.UniqueKey);
                     Assert.IsNotNull(cardAfter);
@@ -230,8 +227,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid learningLangugeId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 5;
             int numCards = 1;
 
@@ -241,17 +238,17 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, learningLangugeId, (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, learningLanguage, user);
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a bunch of words
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLangugeId)
+                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -259,10 +256,10 @@ namespace Logic.Services.API.Tests
                 // create WordUsers for each
                 foreach (var word in words)
                 {
-                    if (word is null || word.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
                     var wordUser = await WordUserApi.WordUserCreateAsync(
-                        context, (Guid)word.UniqueKey, (Guid)languageUser.UniqueKey, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null || wordUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                        context, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
+                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
                 }
 
                 // create cards
@@ -274,9 +271,6 @@ namespace Logic.Services.API.Tests
 
                 foreach (var card in cards)
                 {
-                    if (card.UniqueKey is null || card.WordUserKey is null)
-                    { ErrorHandler.LogAndThrow(); return; }
-
                     // pull the card again
                     var cardAfter = await FlashCardApi.FlashCardReadByIdAsync(context, (Guid)card.UniqueKey);
                     Assert.IsNotNull(cardAfter);
@@ -301,8 +295,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid learningLangugeId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 20;
             int numCards = 5;
 
@@ -312,20 +306,20 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, learningLangugeId, (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, learningLanguage, user);
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a bunch of words, but only those that have tokens. if
                 // you pull a word without a token, there won't be a paragraph
                 // to translate and the assertion on the
                 // FlashCardParagraphTranslationBridges.Count will fail
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLangugeId && x.Tokens.Count > 0)
+                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey && x.Tokens.Count > 0)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -333,10 +327,10 @@ namespace Logic.Services.API.Tests
                 // create WordUsers for each
                 foreach (var word in words)
                 {
-                    if (word is null || word.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
                     var wordUser = WordUserApi.WordUserCreate(
-                        context, (Guid)word.UniqueKey, (Guid)languageUser.UniqueKey, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null || wordUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                        context, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
+                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
                 }
 
 
@@ -366,8 +360,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid learningLangugeId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 20;
             int numCards = 5;
 
@@ -377,20 +371,20 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, learningLangugeId, (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, learningLanguage, user);
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a bunch of words, but only those that have tokens. if
                 // you pull a word without a token, there won't be a paragraph
                 // to translate and the assertion on the
                 // FlashCardParagraphTranslationBridges.Count will fail
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLangugeId && x.Tokens.Count > 0)
+                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey && x.Tokens.Count > 0)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -398,10 +392,10 @@ namespace Logic.Services.API.Tests
                 // create WordUsers for each
                 foreach (var word in words)
                 {
-                    if (word is null || word.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
                     var wordUser = await WordUserApi.WordUserCreateAsync(
-                        context, (Guid)word.UniqueKey, (Guid)languageUser.UniqueKey, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null || wordUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                        context, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
+                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
                 }
 
 
@@ -433,8 +427,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid learningLangugeId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 20;
             int numCards = 5;
 
@@ -444,20 +438,20 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, learningLangugeId, (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, learningLanguage, user);
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a bunch of words, but only those that have tokens. if
                 // you pull a word without a token, there won't be a paragraph
                 // to translate and the assertion on the
                 // FlashCardParagraphTranslationBridges.Count will fail
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLangugeId && x.Tokens.Count > 0)
+                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey && x.Tokens.Count > 0)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -465,10 +459,10 @@ namespace Logic.Services.API.Tests
                 // create WordUsers for each
                 foreach (var word in words)
                 {
-                    if (word is null || word.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
                     var wordUser = WordUserApi.WordUserCreate(
-                        context, (Guid)word.UniqueKey, (Guid)languageUser.UniqueKey, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null || wordUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                        context, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
+                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
                 }
 
                 // create cards
@@ -478,7 +472,6 @@ namespace Logic.Services.API.Tests
                 Assert.IsTrue(cards.Count == numCards);
                 foreach (var card in cards)
                 {
-                    if (card.UniqueKey is null || card.WordUserKey is null) { ErrorHandler.LogAndThrow(); return; }
                     // update next review to 5 mins ago, so we can pull them
                     FlashCardApi.FlashCardUpdate(
                         context, (Guid)card.UniqueKey, (Guid)card.WordUserKey,
@@ -521,8 +514,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid learningLangugeId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 20;
             int numCards = 5;
 
@@ -532,20 +525,20 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, learningLangugeId, (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, learningLanguage, user);
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a bunch of words, but only those that have tokens. if
                 // you pull a word without a token, there won't be a paragraph
                 // to translate and the assertion on the
                 // FlashCardParagraphTranslationBridges.Count will fail
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLangugeId && x.Tokens.Count > 0)
+                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey && x.Tokens.Count > 0)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -553,10 +546,10 @@ namespace Logic.Services.API.Tests
                 // create WordUsers for each
                 foreach (var word in words)
                 {
-                    if (word is null || word.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
                     var wordUser = await WordUserApi.WordUserCreateAsync(
-                        context, (Guid)word.UniqueKey, (Guid)languageUser.UniqueKey, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null || wordUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                        context, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
+                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
                 }
 
                 // create cards
@@ -566,7 +559,6 @@ namespace Logic.Services.API.Tests
                 Assert.IsTrue(cards.Count == numCards);
                 foreach (var card in cards)
                 {
-                    if (card.UniqueKey is null || card.WordUserKey is null) { ErrorHandler.LogAndThrow(); return; }
                     // update next review to 5 mins ago, so we can pull them
                     await FlashCardApi.FlashCardUpdateAsync(
                         context, (Guid)card.UniqueKey, (Guid)card.WordUserKey,
@@ -611,8 +603,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid learningLangugeId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 5;
             int numCards = 1;
 
@@ -622,17 +614,17 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, learningLangugeId, (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, learningLanguage, user);
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a bunch of words
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLangugeId)
+                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -640,10 +632,10 @@ namespace Logic.Services.API.Tests
                 // create WordUsers for each
                 foreach (var word in words)
                 {
-                    if (word is null || word.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
                     var wordUser = WordUserApi.WordUserCreate(
-                        context, (Guid)word.UniqueKey, (Guid)languageUser.UniqueKey, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null || wordUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                        context, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
+                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
                 }
 
                 // create cards
@@ -657,9 +649,6 @@ namespace Logic.Services.API.Tests
 
                 foreach (var card in cards)
                 {
-                    if (card.UniqueKey is null || card.WordUserKey is null)
-                    { ErrorHandler.LogAndThrow(); return; }
-
                     // update card
                     FlashCardApi.FlashCardUpdate(context, (Guid)card.UniqueKey,
                         (Guid)card.WordUserKey, AvailableFlashCardStatus.DONTUSE,
@@ -685,8 +674,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid learningLangugeId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 5;
             int numCards = 1;
 
@@ -696,17 +685,17 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, learningLangugeId, (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, learningLanguage, user);
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a bunch of words
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLangugeId)
+                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -714,26 +703,23 @@ namespace Logic.Services.API.Tests
                 // create WordUsers for each
                 foreach (var word in words)
                 {
-                    if (word is null || word.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
                     var wordUser = await WordUserApi.WordUserCreateAsync(
-                        context, (Guid)word.UniqueKey, (Guid)languageUser.UniqueKey, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null || wordUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                        context, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
+                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
                 }
 
                 // create cards
                 var cards = await FlashCardApi.FlashCardsCreateAsync(
                     context, (Guid)languageUser.UniqueKey, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
-                Assert.IsTrue(cards.Count == numCards);
+                Assert.IsTrue(cards.Count() == numCards);
 
 
                 DateTime futureTime = DateTime.Now.AddMinutes(7);
 
                 foreach (var card in cards)
                 {
-                    if (card.UniqueKey is null || card.WordUserKey is null)
-                    { ErrorHandler.LogAndThrow(); return; }
-
                     // update card
                     await FlashCardApi.FlashCardUpdateAsync(context, (Guid)card.UniqueKey,
                         (Guid)card.WordUserKey, AvailableFlashCardStatus.DONTUSE,
@@ -761,13 +747,17 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            Language language = CommonFunctions.GetSpanishLanguage(context);
+            Guid languageId = language.UniqueKey;
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             Guid wordId = CommonFunctions.GetWordKeyByTextLower(context, languageId, "dice");
+            var word = WordApi.WordGetById(context, wordId);
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
 
             try
             {
+                Assert.IsNotNull(word);
+
                 // create the user
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
@@ -776,12 +766,12 @@ namespace Logic.Services.API.Tests
                 userId = (Guid)user.UniqueKey;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, languageId, (Guid)user.UniqueKey);
+                    context, language, user);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 // create the wordUser
                 var wordUser = WordUserApi.WordUserCreate(
-                    context, wordId, (Guid)languageUser.UniqueKey, null, status);
+                    context, word, languageUser, null, status);
                 Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.UniqueKey);
                 Assert.AreEqual(wordId, wordUser.WordKey);
 
@@ -806,13 +796,17 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            Language language = CommonFunctions.GetSpanishLanguage(context);
+            Guid languageId = language.UniqueKey;
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             Guid wordId = CommonFunctions.GetWordKeyByTextLower(context, languageId, "dice");
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
+            var word = WordApi.WordGetById(context, wordId);
 
             try
             {
+                Assert.IsNotNull(word);
+
                 // create the user
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
@@ -821,12 +815,12 @@ namespace Logic.Services.API.Tests
                 userId = (Guid)user.UniqueKey;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, languageId, (Guid)user.UniqueKey);
+                    context, language, user);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 // create the wordUser
                 var wordUser = WordUserApi.WordUserCreate(
-                    context, wordId, (Guid)languageUser.UniqueKey, null, status);
+                    context, word, languageUser, null, status);
                 Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.UniqueKey);
                 Assert.AreEqual(wordId, wordUser.WordKey);
 

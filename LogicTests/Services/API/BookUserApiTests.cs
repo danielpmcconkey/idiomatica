@@ -35,24 +35,25 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null)
+                if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                var languageUser = LanguageUserApi.LanguageUserCreate(
+                    context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
                 Book? book1 = CommonFunctions.CreateBook(context, (Guid)user.UniqueKey);
-                if (book1 is null || book1.UniqueKey is null)
+                if (book1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId1 = (Guid)book1.UniqueKey;
 
                 Book? book2 = CommonFunctions.CreateBook(context, (Guid)user.UniqueKey);
-                if (book2 is null || book2.UniqueKey is null)
+                if (book2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId2 = (Guid)book2.UniqueKey;
 
                 Book? book3 = CommonFunctions.CreateBook(context, (Guid)user.UniqueKey);
-                if (book3 is null || book3.UniqueKey is null)
+                if (book3 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId3 = (Guid)book3.UniqueKey;
 
@@ -65,7 +66,7 @@ namespace Logic.Services.API.Tests
                 var newPacketBefore = BookApi.BookListRead(context, (Guid)user.UniqueKey, originalPacket);
                 int actualCountBefore = newPacketBefore is null ? 0 :
                     newPacketBefore.BookListRows is null ? 0 : newPacketBefore.BookListRows.Count;
-                Guid? bookUser2Id = bookUser2 is null ? null : bookUser2.UniqueKey is null ? null : (Guid)bookUser2.UniqueKey;
+                Guid? bookUser2Id = bookUser2 is null ? null : (Guid)bookUser2.UniqueKey;
                 Assert.IsNotNull(bookUser2Id);
                 BookUserApi.BookUserArchive(context, (Guid)bookUser2Id);
                 var newPacketAfter = BookApi.BookListRead(context, (Guid)user.UniqueKey, originalPacket);
@@ -105,24 +106,25 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null)
+                if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                var languageUser = LanguageUserApi.LanguageUserCreate(
+                    context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
                 
                 Book? book1 = CommonFunctions.CreateBook(context, (Guid)user.UniqueKey);
-                if (book1 is null || book1.UniqueKey is null)
+                if (book1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId1 = (Guid)book1.UniqueKey;
                
                 Book? book2 = CommonFunctions.CreateBook(context, (Guid)user.UniqueKey);
-                if (book2 is null || book2.UniqueKey is null)
+                if (book2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId2 = (Guid)book2.UniqueKey;
                 
                 Book? book3 = CommonFunctions.CreateBook(context, (Guid)user.UniqueKey);
-                if (book3 is null || book3.UniqueKey is null)
+                if (book3 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId3 = (Guid)book3.UniqueKey;
 
@@ -135,7 +137,7 @@ namespace Logic.Services.API.Tests
                 var newPacketBefore = await BookApi.BookListReadAsync(context, (Guid)user.UniqueKey, originalPacket);
                 int actualCountBefore = newPacketBefore is null ? 0 :
                     newPacketBefore.BookListRows is null ? 0 : newPacketBefore.BookListRows.Count;
-                Guid? bookUser2Id = bookUser2 is null ? null : bookUser2.UniqueKey is null ? null : (Guid)bookUser2.UniqueKey;
+                Guid? bookUser2Id = bookUser2 is null ? null : (Guid)bookUser2.UniqueKey;
                 await BookUserApi.BookUserArchiveAsync(context, (Guid)bookUser2Id);
                 var newPacketAfter = await BookApi.BookListReadAsync(context, (Guid)user.UniqueKey, originalPacket);
                 int actualCountAfter = newPacketAfter is null ? 0 :
@@ -178,7 +180,7 @@ namespace Logic.Services.API.Tests
                 var lu = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(context, userId);
                 if (lu is null || lu.Count < 1) { ErrorHandler.LogAndThrow(); return; }
                 var l = lu.Where(x => x.LanguageKey == languageId).FirstOrDefault();
-                if (l is null || l.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (l is null) { ErrorHandler.LogAndThrow(); return; }
                 Guid expectedLanguageUserId = (Guid)l.UniqueKey;
 
                 // now test the bookUser read
@@ -218,7 +220,7 @@ namespace Logic.Services.API.Tests
                 var lu = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(context, userId);
                 if (lu is null || lu.Count < 1) { ErrorHandler.LogAndThrow(); return; }
                 var l = lu.Where(x => x.LanguageKey == languageId).FirstOrDefault();
-                if (l is null || l.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (l is null) { ErrorHandler.LogAndThrow(); return; }
                 Guid expectedLanguageUserId = (Guid)l.UniqueKey;
 
                 // now test the bookUser read
@@ -251,17 +253,18 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null)
+                if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create the languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                var languageUser = LanguageUserApi.LanguageUserCreate(
+                    context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
                 // create the book
                 var book = CommonFunctions.CreateBook(context, userId);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
@@ -293,17 +296,18 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null)
+                if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create the languageUser
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
+                    context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
                 // create the book
                 var book = CommonFunctions.CreateBook(context, userId);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
@@ -337,30 +341,30 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null)
+                if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create the languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
                 // create the book
                 var book = CommonFunctions.CreateBook(context, userId);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
                 // find the second page's ID
                 var secondPage = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
-                if (secondPage is null || secondPage.UniqueKey is null)
+                if (secondPage is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid secondPageId = (Guid)secondPage.UniqueKey;
 
                 // create the bookUser
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                 context, bookId, (Guid)user.UniqueKey);
-                if (bookUser is null || bookUser.UniqueKey is null)
+                if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 BookUserApi.BookUserUpdateBookmark(context, (Guid)bookUser.UniqueKey, secondPageId);
                 var secondBookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
@@ -395,30 +399,30 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null)
+                if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create the languageUser
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
                 // create the book
                 var book = CommonFunctions.CreateBook(context, userId);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
                 // find the second page's ID
                 var secondPage = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
-                if (secondPage is null || secondPage.UniqueKey is null)
+                if (secondPage is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid secondPageId = (Guid)secondPage.UniqueKey;
 
                 // create the bookUser
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                 context, bookId, (Guid)user.UniqueKey);
-                if (bookUser is null || bookUser.UniqueKey is null)
+                if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 await BookUserApi.BookUserUpdateBookmarkAsync(context, (Guid)bookUser.UniqueKey, secondPageId);
                 var secondBookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(

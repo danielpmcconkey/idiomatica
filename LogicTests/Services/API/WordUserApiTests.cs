@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using LogicTests;
 using Logic.Telemetry;
-using k8s.KubeConfigModels;
 using Model.Enums;
+using Model;
 
 namespace Logic.Services.API.Tests
 {
@@ -20,8 +20,10 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
-            Guid wordId = CommonFunctions.GetWordId(context, "dice", languageId);
+            Language language = CommonFunctions.GetSpanishLanguage(context);
+            Guid wordId = CommonFunctions.GetWordId(context, "dice", language.UniqueKey);
+            Word? word = WordApi.WordGetById(context, wordId);
+            Assert.IsNotNull(word);
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
 
             try
@@ -33,11 +35,11 @@ namespace Logic.Services.API.Tests
                 userId = (Guid)user.UniqueKey;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, languageId, (Guid)user.UniqueKey);
+                    context, language, user);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 var wordUser = WordUserApi.WordUserCreate(
-                    context, wordId, (Guid)languageUser.UniqueKey, null, status);
+                    context, word, languageUser, null, status);
                 Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.UniqueKey);
                 Assert.AreEqual(wordId, wordUser.WordKey);
             }
@@ -52,8 +54,10 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
-            Guid wordId = CommonFunctions.GetWordId(context, "dice", languageId);
+            Language language = CommonFunctions.GetSpanishLanguage(context);
+            Guid wordId = CommonFunctions.GetWordId(context, "dice", language.UniqueKey);
+            Word? word = WordApi.WordGetById(context, wordId);
+            Assert.IsNotNull(word);
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
 
             try
@@ -65,11 +69,11 @@ namespace Logic.Services.API.Tests
                 userId = (Guid)user.UniqueKey;
 
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, languageId, (Guid)user.UniqueKey);
+                    context, language, user);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 var wordUser = await WordUserApi.WordUserCreateAsync(
-                    context, wordId, (Guid)languageUser.UniqueKey, null, status);
+                    context, word, languageUser, null, status);
                 Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.UniqueKey);
                 Assert.AreEqual(wordId, wordUser.WordKey);
             }
@@ -101,7 +105,7 @@ namespace Logic.Services.API.Tests
 
                 // create the languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context,
-                    CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                    CommonFunctions.GetSpanishLanguage(context), user);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
                 // create the wordUsers
                 WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, (Guid)user.UniqueKey);
@@ -137,7 +141,7 @@ namespace Logic.Services.API.Tests
 
                 // create the languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context,
-                    CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                    CommonFunctions.GetSpanishLanguage(context), user);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
                 // create the wordUsers
                 await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, (Guid)user.UniqueKey);
@@ -176,7 +180,7 @@ namespace Logic.Services.API.Tests
 
                 // create the languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context,
-                    CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                    CommonFunctions.GetSpanishLanguage(context), user);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 // create the wordUsers
@@ -218,7 +222,7 @@ namespace Logic.Services.API.Tests
 
                 // create the languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context,
-                    CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                    CommonFunctions.GetSpanishLanguage(context), user);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 // create the wordUsers
@@ -246,8 +250,10 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
-            Guid wordId = CommonFunctions.GetWordId(context, "dice", languageId);
+            Language language = CommonFunctions.GetSpanishLanguage(context);
+            Guid wordId = CommonFunctions.GetWordId(context, "dice", language.UniqueKey);
+            Word? word = WordApi.WordGetById(context, wordId);
+            Assert.IsNotNull(word);
             AvailableWordUserStatus statusBefore = AvailableWordUserStatus.UNKNOWN;
             AvailableWordUserStatus statusAfter = AvailableWordUserStatus.LEARNING3;
             string translation = "he/she says";
@@ -261,18 +267,18 @@ namespace Logic.Services.API.Tests
                 userId = (Guid)user.UniqueKey;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, languageId, (Guid)user.UniqueKey);
+                    context, language, user);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 var wordUserBefore = WordUserApi.WordUserCreate(
-                    context, wordId, (Guid)languageUser.UniqueKey, null, statusBefore);
+                    context, word, languageUser, null, statusBefore);
                 Assert.IsNotNull(wordUserBefore); Assert.IsNotNull(wordUserBefore.UniqueKey);
 
                 // update it
-                WordUserApi.WordUserUpdate(context, (Guid)wordUserBefore.UniqueKey, statusAfter, translation);
+                WordUserApi.WordUserUpdate(context, wordUserBefore.UniqueKey, statusAfter, translation);
 
                 // read it back
-                var wordUserAfter = WordUserApi.WordUserReadById(context, (Guid)wordUserBefore.UniqueKey);
+                var wordUserAfter = WordUserApi.WordUserReadById(context, wordUserBefore.UniqueKey);
                 Assert.IsNotNull(wordUserAfter); Assert.IsNotNull(wordUserAfter.UniqueKey);
                 Assert.AreEqual(statusAfter, wordUserAfter.Status);
                 Assert.AreEqual(translation, wordUserAfter.Translation);
@@ -288,8 +294,10 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
-            Guid wordId = CommonFunctions.GetWordId(context, "dice", languageId);
+            Language language = CommonFunctions.GetSpanishLanguage(context);
+            Guid wordId = CommonFunctions.GetWordId(context, "dice", language.UniqueKey);
+            Word? word = WordApi.WordGetById(context, wordId);
+            Assert.IsNotNull(word);
             AvailableWordUserStatus statusBefore = AvailableWordUserStatus.UNKNOWN;
             AvailableWordUserStatus statusAfter = AvailableWordUserStatus.LEARNING3;
             string translation = "he/she says";
@@ -303,18 +311,18 @@ namespace Logic.Services.API.Tests
                 userId = (Guid)user.UniqueKey;
 
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, languageId, (Guid)user.UniqueKey);
+                    context, language, user);
                 Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
 
                 var wordUserBefore = await WordUserApi.WordUserCreateAsync(
-                    context, wordId, (Guid)languageUser.UniqueKey, null, statusBefore);
+                    context, word, languageUser, null, statusBefore);
                 Assert.IsNotNull(wordUserBefore); Assert.IsNotNull(wordUserBefore.UniqueKey);
 
                 // update it
-                await WordUserApi.WordUserUpdateAsync(context, (Guid)wordUserBefore.UniqueKey, statusAfter, translation);
+                await WordUserApi.WordUserUpdateAsync(context, wordUserBefore.UniqueKey, statusAfter, translation);
 
                 // read it back
-                var wordUserAfter = await WordUserApi.WordUserReadByIdAsync(context, (Guid)wordUserBefore.UniqueKey);
+                var wordUserAfter = await WordUserApi.WordUserReadByIdAsync(context, wordUserBefore.UniqueKey);
                 Assert.IsNotNull(wordUserAfter); Assert.IsNotNull(wordUserAfter.UniqueKey);
                 Assert.AreEqual(statusAfter, wordUserAfter.Status);
                 Assert.AreEqual(translation, wordUserAfter.Translation);

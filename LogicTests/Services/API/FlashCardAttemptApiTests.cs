@@ -20,8 +20,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid learningLangugeId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
 
             try
             {
@@ -29,30 +29,30 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, learningLangugeId, (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, learningLanguage, user);
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a word
-                var word = context.Words.Where(x => x.LanguageKey == learningLangugeId).Take(1).FirstOrDefault();
-                if (word is null || word.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                var word = context.Words.Where(x => x.LanguageKey == learningLanguage.UniqueKey).Take(1).FirstOrDefault();
+                if (word is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create a WordUser
                 var wordUser = WordUserApi.WordUserCreate(
-                    context, (Guid)word.UniqueKey, (Guid)languageUser.UniqueKey, null, AvailableWordUserStatus.UNKNOWN);
-                if (wordUser is null || wordUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, word, languageUser, null, AvailableWordUserStatus.UNKNOWN);
+                if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the card
                 FlashCard? card = FlashCardApi.FlashCardCreate(context, (Guid)wordUser.UniqueKey, uiLanguageCode);
-                if (card is null || card.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (card is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the attempt
                 var attempt = FlashCardAttemptApi.FlashCardAttemptCreate(
-                    context, (Guid)card.UniqueKey, AvailableFlashCardAttemptStatus.HARD);
+                    context, card, AvailableFlashCardAttemptStatus.HARD);
                 Assert.IsNotNull(attempt);
                 Assert.IsNotNull(attempt.UniqueKey);
             }
@@ -68,8 +68,8 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid learningLangugeId = CommonFunctions.GetSpanishLanguageKey(context);
-            string uiLanguageCode = "EN-US";
+            var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
 
             try
             {
@@ -77,30 +77,30 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, learningLangugeId, (Guid)user.UniqueKey);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, learningLanguage, user);
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a word
-                var word = context.Words.Where(x => x.LanguageKey == learningLangugeId).Take(1).FirstOrDefault();
-                if (word is null || word.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                var word = context.Words.Where(x => x.LanguageKey == learningLanguage.UniqueKey).Take(1).FirstOrDefault();
+                if (word is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create a WordUser
                 var wordUser = await WordUserApi.WordUserCreateAsync(
-                    context, (Guid)word.UniqueKey, (Guid)languageUser.UniqueKey, null, AvailableWordUserStatus.UNKNOWN);
-                if (wordUser is null || wordUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                    context, word, languageUser, null, AvailableWordUserStatus.UNKNOWN);
+                if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the card
                 FlashCard? card = await FlashCardApi.FlashCardCreateAsync(context, (Guid)wordUser.UniqueKey, uiLanguageCode);
-                if (card is null || card.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (card is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the attempt
                 var attempt = await FlashCardAttemptApi.FlashCardAttemptCreateAsync(
-                    context, (Guid)card.UniqueKey, AvailableFlashCardAttemptStatus.HARD);
+                    context, card, AvailableFlashCardAttemptStatus.HARD);
                 Assert.IsNotNull(attempt);
                 Assert.IsNotNull(attempt.UniqueKey);
             }

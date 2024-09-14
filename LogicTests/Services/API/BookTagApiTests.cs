@@ -35,7 +35,13 @@ namespace Logic.Services.API.Tests
                 int originalCount = originalTags is null ? 0 : originalTags.Count;
                 int expectedNewCount = originalCount + 1;
 
-                BookTagApi.BookTagAdd(context, bookId, userId, tag);
+                var book = BookApi.BookRead(context, bookId);
+                Assert.IsNotNull(book);
+                var user = context.Users.Where(x => x.UniqueKey == userId).FirstOrDefault();
+                Assert.IsNotNull(book);
+                Assert.IsNotNull(user);
+
+                BookTagApi.BookTagAdd(context, book, user, tag);
                 var newTags = BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
                 int newCount = newTags is null ? 0 : newTags.Count;
 
@@ -72,7 +78,13 @@ namespace Logic.Services.API.Tests
                 int originalCount = originalTags is null ? 0 : originalTags.Count;
                 int expectedNewCount = originalCount + 1;
 
-                await BookTagApi.BookTagAddAsync(context, bookId, userId, tag);
+                var book = BookApi.BookRead(context, bookId);
+                Assert.IsNotNull(book);
+                var user = context.Users.Where(x => x.UniqueKey == userId).FirstOrDefault();
+                Assert.IsNotNull(book);
+                Assert.IsNotNull(user);
+
+                await BookTagApi.BookTagAddAsync(context, book, user, tag);
                 var newTags = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(context, bookId, userId);
                 int newCount = newTags is null ? 0 : newTags.Count;
 
@@ -113,8 +125,14 @@ namespace Logic.Services.API.Tests
                 int expectedNewCountFirst = originalCount + 2;
                 int expectedNewCountSecond = originalCount + 1;
 
-                BookTagApi.BookTagAdd(context, bookId, userId, tag1);
-                BookTagApi.BookTagAdd(context, bookId, userId, tag2);
+                var book = BookApi.BookRead(context, bookId);
+                Assert.IsNotNull(book);
+                var user = context.Users.Where(x => x.UniqueKey == userId).FirstOrDefault();
+                Assert.IsNotNull(book);
+                Assert.IsNotNull(user);
+
+                BookTagApi.BookTagAdd(context, book, user, tag1);
+                BookTagApi.BookTagAdd(context, book, user, tag2);
                 var newTagsFirst = BookTagApi.BookTagsGetByBookIdAndUserId(context, bookId, userId);
                 int newCountFirst = newTagsFirst is null ? 0 : newTagsFirst.Count;
                 BookTagApi.BookTagRemove(context, bookId, userId, tag1);
@@ -160,9 +178,15 @@ namespace Logic.Services.API.Tests
                 int originalCount = originalTags is null ? 0 : originalTags.Count;
                 int expectedNewCountFirst = originalCount + 2;
                 int expectedNewCountSecond = originalCount + 1;
-                
-                await BookTagApi.BookTagAddAsync(context, bookId, userId, tag1);
-                await BookTagApi.BookTagAddAsync(context, bookId, userId, tag2);
+
+                var book = BookApi.BookRead(context, bookId);
+                Assert.IsNotNull(book);
+                var user = context.Users.Where(x => x.UniqueKey == userId).FirstOrDefault();
+                Assert.IsNotNull(book);
+                Assert.IsNotNull(user);
+
+                await BookTagApi.BookTagAddAsync(context, book, user, tag1);
+                await BookTagApi.BookTagAddAsync(context, book, user, tag2);
                 var newTagsFirst = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(context, bookId, userId);
                 int newCountFirst = newTagsFirst is null ? 0 : newTagsFirst.Count;
                 await BookTagApi.BookTagRemoveAsync(context, bookId, userId, tag1);

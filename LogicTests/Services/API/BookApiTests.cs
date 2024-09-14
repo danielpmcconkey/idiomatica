@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using LogicTests;
 using System.Net;
 using Logic.Telemetry;
-using k8s.KubeConfigModels;
+
 using Model.Enums;
 
 namespace Logic.Services.API.Tests
@@ -32,7 +32,7 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                if (newBook is null || newBook.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.UniqueKey;
 
                 var newBookFromDb = BookApi.BookRead(context, (Guid)newBook.UniqueKey);
@@ -65,7 +65,7 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText
                     );
-                if (newBook is null || newBook.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.UniqueKey;
 
                 var newBookFromDb = await BookApi.BookReadAsync(context, (Guid)newBook.UniqueKey);

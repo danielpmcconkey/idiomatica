@@ -35,14 +35,17 @@ namespace Logic.Services.API.Tests
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
+                Book? book = BookApi.BookRead(context, bookId);
+                Assert.IsNotNull(book);
+
                 // pull language from the db
                 var language = DataCache.LanguageByCodeRead(TestConstants.NewBookLanguageCode, context);
-                if (language is null || language.UniqueKey is null)
+                if (language is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // divide text into paragraphs
                 string[] paragraphSplits = ParagraphApi.PotentialParagraphsSplitFromText(
-                    context, TestConstants.NewBookText, TestConstants.NewBookLanguageCode);
+                    context, TestConstants.NewBookText, language);
 
                 var pageSplits = PageApi.PageSplitsCreateFromParagraphSplits(paragraphSplits);
                 if (pageSplits is null || pageSplits.Count == 0)
@@ -57,8 +60,8 @@ namespace Logic.Services.API.Tests
                 { ErrorHandler.LogAndThrow(); return; }
                 Page? page = PageApi.PageCreateFromPageSplit(context,
                     pageSplit.pageNum, pageSplitTextTrimmed,
-                    bookId, (Guid)language.UniqueKey);
-                if (page is null || page.UniqueKey is null || page.OriginalText is null)
+                    book, language);
+                if (page is null || page.OriginalText is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 string actualResults = page.OriginalText.Substring(page.OriginalText.Length - 20, 20);
@@ -88,14 +91,17 @@ namespace Logic.Services.API.Tests
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
+                Book? book = BookApi.BookRead(context, bookId);
+                Assert.IsNotNull(book);
+
                 // pull language from the db
                 var language = await DataCache.LanguageByCodeReadAsync(TestConstants.NewBookLanguageCode, context);
-                if (language is null || language.UniqueKey is null)
+                if (language is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // divide text into paragraphs
                 string[] paragraphSplits = await ParagraphApi.PotentialParagraphsSplitFromTextAsync(
-                    context, TestConstants.NewBookText, TestConstants.NewBookLanguageCode);
+                    context, TestConstants.NewBookText, language);
 
                 var pageSplits = await PageApi.PageSplitsCreateFromParagraphSplitsAsync(
                     paragraphSplits);
@@ -111,8 +117,8 @@ namespace Logic.Services.API.Tests
                     { ErrorHandler.LogAndThrow(); return; }
                 Page? page = await PageApi.PageCreateFromPageSplitAsync(context,
                     pageSplit.pageNum, pageSplitTextTrimmed,
-                    bookId, (Guid)language.UniqueKey);
-                if (page is null || page.UniqueKey is null || page.OriginalText is null)
+                    book, language);
+                if (page is null || page.OriginalText is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 string actualResults = page.OriginalText.Substring(page.OriginalText.Length - 20, 20);
@@ -237,9 +243,13 @@ namespace Logic.Services.API.Tests
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
+                // pull language from the db
+                var language = DataCache.LanguageByCodeRead(TestConstants.NewBookLanguageCode, context);
+                Assert.IsNotNull(language);
+
                 // divide text into paragraphs
                 string[] paragraphSplits =  ParagraphApi.PotentialParagraphsSplitFromText(
-                    context, TestConstants.NewBookText, TestConstants.NewBookLanguageCode);
+                    context, TestConstants.NewBookText, language);
 
                 var pageSplits = PageApi.PageSplitsCreateFromParagraphSplits(paragraphSplits);
                 if (pageSplits is null || pageSplits.Count == 0)
@@ -274,9 +284,13 @@ namespace Logic.Services.API.Tests
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
+                // pull language from the db
+                var language = DataCache.LanguageByCodeRead(TestConstants.NewBookLanguageCode, context);
+                Assert.IsNotNull(language);
+
                 // divide text into paragraphs
                 string[] paragraphSplits = await ParagraphApi.PotentialParagraphsSplitFromTextAsync(
-                    context, TestConstants.NewBookText, TestConstants.NewBookLanguageCode);
+                    context, TestConstants.NewBookText, language);
 
                 var pageSplits = await PageApi.PageSplitsCreateFromParagraphSplitsAsync(paragraphSplits);
                 if (pageSplits is null || pageSplits.Count == 0)

@@ -23,11 +23,11 @@ namespace Logic.Services.API.Tests
 
             var language = LanguageApi.LanguageReadByCode(
                 context, TestConstants.NewBookLanguageCode);
-            if (language is null || language.UniqueKey is null)
+            if (language is null)
             { ErrorHandler.LogAndThrow(); return; }
 
             var potentialSentences = SentenceApi.PotentialSentencesSplitFromText(
-                context, TestConstants.NewPageText, (Guid)language.UniqueKey);
+                context, TestConstants.NewPageText, language);
 
             Assert.AreEqual(expectedValue, potentialSentences[5]);
         }
@@ -38,11 +38,11 @@ namespace Logic.Services.API.Tests
             string expectedValue = "Los niños iban a jugar al jardín del gigante.";
             var language = await LanguageApi.LanguageReadByCodeAsync(
                 context, TestConstants.NewBookLanguageCode);
-            if (language is null || language.UniqueKey is null)
+            if (language is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
             var potentialSentences = await SentenceApi.PotentialSentencesSplitFromTextAsync(
-                context, TestConstants.NewPageText, (Guid)language.UniqueKey);
+                context, TestConstants.NewPageText, language);
 
             Assert.AreEqual(expectedValue, potentialSentences[5]);
         }
@@ -60,7 +60,7 @@ namespace Logic.Services.API.Tests
             {
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null)
+                if (language is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // create an empty book
@@ -68,10 +68,11 @@ namespace Logic.Services.API.Tests
                 {
                     Title = TestConstants.NewBookTitle,
                     LanguageKey = (Guid)language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
@@ -79,29 +80,31 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
                     PageKey = page.UniqueKey,
+                    Page = page,
                     Ordinal = 1,
                     UniqueKey = Guid.NewGuid()
                 };
                 paragraph = DataCache.ParagraphCreate(paragraph, context);
-                if (paragraph is null || paragraph.UniqueKey is null)
+                if (paragraph is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 // create two sentences
                 var sentence1created = SentenceApi.SentenceCreate(
-                    context, sentence1, (Guid)language.UniqueKey, 0, (Guid)paragraph.UniqueKey);
+                    context, sentence1, language, 0, paragraph);
                 var sentence2created = SentenceApi.SentenceCreate(
-                    context, sentence2, (Guid)language.UniqueKey, 1, (Guid)paragraph.UniqueKey);
+                    context, sentence2, language, 1, paragraph);
                 // read all the sentences
                 var sentencesRead = SentenceApi.SentencesReadByParagraphId(
                     context, (Guid)paragraph.UniqueKey);
@@ -132,17 +135,18 @@ namespace Logic.Services.API.Tests
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null)
+                if (language is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
                     LanguageKey = (Guid)language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
@@ -150,28 +154,30 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
                     PageKey = page.UniqueKey,
+                    Page = page,
                     Ordinal = 1,
                     UniqueKey = Guid.NewGuid()
                 };
                 paragraph = DataCache.ParagraphCreate(paragraph, context);
-                if (paragraph is null || paragraph.UniqueKey is null)
+                if (paragraph is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 // create two sentences
                 var sentence1created = await SentenceApi.SentenceCreateAsync(
-                    context, sentence1, (Guid)language.UniqueKey, 0, (Guid)paragraph.UniqueKey);
+                    context, sentence1, language, 0, paragraph);
                 var sentence2created = await SentenceApi.SentenceCreateAsync(
-                    context, sentence2, (Guid)language.UniqueKey, 1, (Guid)paragraph.UniqueKey);
+                    context, sentence2, language, 1, paragraph);
                 // read all the sentences
                 var sentencesRead = await SentenceApi.SentencesReadByParagraphIdAsync(
                     context, (Guid)paragraph.UniqueKey);

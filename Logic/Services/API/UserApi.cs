@@ -14,8 +14,8 @@ namespace Logic.Services.API
     {
         #region create
 
-        public static User? UserCreate(string applicationUserId, string name,
-            string uiLanguageCode, IdiomaticaContext context)
+        public static User? UserCreate(
+            string applicationUserId, string name, IdiomaticaContext context)
         {
             var user = new User()
             {
@@ -28,8 +28,8 @@ namespace Logic.Services.API
 
             return user;
         }
-        public static async Task<User?> UserCreateAsync(string applicationUserId, string name,
-            string uiLanguageCode, IdiomaticaContext context)
+        public static async Task<User?> UserCreateAsync(
+            string applicationUserId, string name, IdiomaticaContext context)
         {
             var user = new User()
             {

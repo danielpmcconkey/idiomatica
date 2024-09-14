@@ -41,7 +41,7 @@ namespace Logic.Services.API.Tests
                 var lu = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(context, userId);
                 if (lu is null || lu.Count < 1) { ErrorHandler.LogAndThrow(); return; }
                 var l = lu.Where(x => x.LanguageKey == languageId).FirstOrDefault();
-                if (l is null || l.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (l is null) { ErrorHandler.LogAndThrow(); return; }
                 Guid expectedLanguageUserId = (Guid)l.UniqueKey;
 
 
@@ -50,7 +50,7 @@ namespace Logic.Services.API.Tests
                 int actualStatsCount = bookUserStats is null ? 0 : bookUserStats.Count;
                 BookUserStat? progressStat = bookUserStats is null ? null :
                     bookUserStats.Where(x => x.Key == AvailableBookUserStat.PROGRESS).FirstOrDefault();
-                if (progressStat is null || progressStat.LanguageUserKey is null || progressStat.ValueString is null)
+                if (progressStat is null || progressStat.ValueString is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 string actualProgress = progressStat.ValueString;
 
@@ -92,7 +92,7 @@ namespace Logic.Services.API.Tests
                 var lu = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(context, userId);
                 if (lu is null || lu.Count < 1) { ErrorHandler.LogAndThrow(); return; }
                 var l = lu.Where(x => x.LanguageKey == languageId).FirstOrDefault();
-                if (l is null || l.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (l is null) { ErrorHandler.LogAndThrow(); return; }
                 Guid expectedLanguageUserId = (Guid)l.UniqueKey;
 
 
@@ -101,7 +101,7 @@ namespace Logic.Services.API.Tests
                 int actualStatsCount = bookUserStats is null ? 0 : bookUserStats.Count;
                 BookUserStat? progressStat = bookUserStats is null ? null :
                     bookUserStats.Where(x => x.Key == AvailableBookUserStat.PROGRESS).FirstOrDefault();
-                if (progressStat is null || progressStat.LanguageUserKey is null || progressStat.ValueString is null)
+                if (progressStat is null || progressStat.ValueString is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 string actualProgress = progressStat.ValueString;
 
@@ -135,16 +135,16 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null)
+                if (user is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookId, (Guid)user.UniqueKey);
-                if (bookUser is null || bookUser.UniqueKey is null || bookUser.LanguageUserKey is null)
+                if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // carry on with the test
                 var bookUserStats = BookUserStatApi.BookUserStatsRead(context, bookId, (Guid)user.UniqueKey);
@@ -157,11 +157,11 @@ namespace Logic.Services.API.Tests
 
                 // now move the page forward a couple of times as if we're reading it
                 var firstPage = PageApi.PageReadFirstByBookId(context, bookId);
-                if (firstPage is null || firstPage.UniqueKey is null)
+                if (firstPage is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 var pageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (Guid)firstPage.UniqueKey, (Guid)user.UniqueKey);
-                if (pageUser is null || pageUser.UniqueKey is null)
+                    context, firstPage, user);
+                if (pageUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // update all unknowns to well known
@@ -206,16 +206,16 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null)
+                if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
 
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, CommonFunctions.GetSpanishLanguageKey(context), (Guid)user.UniqueKey);
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookId, (Guid)user.UniqueKey);
-                if (bookUser is null || bookUser.UniqueKey is null || bookUser.LanguageUserKey is null)
+                if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // carry on with the test
                 var bookUserStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (Guid)user.UniqueKey);
@@ -228,12 +228,12 @@ namespace Logic.Services.API.Tests
 
                 // now move the page forward a couple of times as if we're reading it
                 var firstPage = await PageApi.PageReadFirstByBookIdAsync(context, bookId);
-                if (firstPage is null || firstPage.UniqueKey is null)
+                if (firstPage is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 var pageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (Guid)firstPage.UniqueKey, (Guid)user.UniqueKey);
-                if (pageUser is null || pageUser.UniqueKey is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                    context, firstPage, user);
+                if (pageUser is null)
+                    { ErrorHandler.LogAndThrow(); return; }
 
 
                 // update all unknowns to well known

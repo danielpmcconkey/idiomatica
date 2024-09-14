@@ -5,7 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using DeepL;
-using k8s.KubeConfigModels;
+
 using Logic.Telemetry;
 using Model;
 using Model.DAL;

@@ -18,6 +18,7 @@ using Logic.Services.API;
 using Logic.Telemetry;
 using System.Net;
 using Logic;
+using Model.Enums;
 
 namespace LogicTests
 {
@@ -93,7 +94,7 @@ namespace LogicTests
                 TestConstants.NewBookLanguageCode,
                 TestConstants.NewBookUrl,
                 TestConstants.NewBookText);
-            if (book is null || book.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
+            if (book is null) { ErrorHandler.LogAndThrow(); return null; }
             return book;
         }
         internal static async Task <Book?> CreateBookAsync(IdiomaticaContext context, Guid userId)
@@ -105,27 +106,47 @@ namespace LogicTests
                 TestConstants.NewBookLanguageCode,
                 TestConstants.NewBookUrl,
                 TestConstants.NewBookText);
-            if (book is null || book.UniqueKey is null) { ErrorHandler.LogAndThrow(); return null; }
+            if (book is null) { ErrorHandler.LogAndThrow(); return null; }
             return book;
         }
-        internal static Guid GetLanguageKey(IdiomaticaContext context, string Code)
+        internal static Guid GetLanguageKey(IdiomaticaContext context, AvailableLanguageCode Code)
         {
             var lang = context.Languages.Where(x => x.Code == Code).FirstOrDefault();
             Assert.IsNotNull(lang);
             Assert.IsNotNull(lang.UniqueKey);
             return (Guid)lang.UniqueKey;
         }
+        internal static Language GetSpanishLanguage(IdiomaticaContext context)
+        {
+            var lang = LanguageApi.LanguageReadByCode(context, AvailableLanguageCode.ES);
+            if (lang is null) ErrorHandler.LogAndThrow();
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8603 // Possible null reference return.
+            return (Language)lang;
+#pragma warning restore CS8603 // Possible null reference return.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+        }
         internal static Guid GetSpanishLanguageKey(IdiomaticaContext context)
         {
-            return GetLanguageKey(context, "ES");
+            return GetLanguageKey(context, AvailableLanguageCode.ES);
+        }
+        internal static Language GetEnglishLanguage(IdiomaticaContext context)
+        {
+            var lang = LanguageApi.LanguageReadByCode(context, AvailableLanguageCode.EN_US);
+            if (lang is null) ErrorHandler.LogAndThrow();
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8603 // Possible null reference return.
+            return (Language)lang;
+#pragma warning restore CS8603 // Possible null reference return.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
         }
         internal static Guid GetEnglishLanguageKey(IdiomaticaContext context)
         {
-            return GetLanguageKey(context, "EN-US");
+            return GetLanguageKey(context, AvailableLanguageCode.EN_US);
         }
         internal static Guid GetSpanishLanguageUserKey(IdiomaticaContext context)
         {
-            Guid languageKey = GetLanguageKey(context, "ES");
+            Guid languageKey = GetLanguageKey(context, AvailableLanguageCode.ES);
             var languageUser = context.LanguageUsers
                 .Where(x => x.LanguageKey == languageKey && x.User != null && x.User.Name == "Dev Test user")
                 .FirstOrDefault();
@@ -146,22 +167,22 @@ namespace LogicTests
 
             var user = CreateNewTestUser(userService, context);
 
-            if (user is null || user.UniqueKey is null)
+            if (user is null)
             { ErrorHandler.LogAndThrow(); return (userId, bookId, Guid.NewGuid()); }
             userId = (Guid)user.UniqueKey;
-            var languageUser = LanguageUserApi.LanguageUserCreate(context, GetSpanishLanguageKey(context),
-                (Guid)user.UniqueKey);
+            var languageUser = LanguageUserApi.LanguageUserCreate(context, GetSpanishLanguage(context),
+                user);
             if (languageUser is null) ErrorHandler.LogAndThrow();
 
 
             Book? book = CreateBook(context, (Guid)user.UniqueKey);
-            if (book is null || book.UniqueKey is null)
+            if (book is null)
             { ErrorHandler.LogAndThrow(); return (userId, bookId, Guid.NewGuid()); }
             bookId = (Guid)book.UniqueKey;
 
             var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
                 context, (Guid)book.UniqueKey, (Guid)user.UniqueKey);
-            if (bookUser is null || bookUser.UniqueKey is null)
+            if (bookUser is null)
             { ErrorHandler.LogAndThrow(); return (userId, bookId, Guid.NewGuid()); }
             bookUserId = (Guid)bookUser.UniqueKey;
 
@@ -180,9 +201,8 @@ namespace LogicTests
         {
             var applicationUserId = Guid.NewGuid().ToString();
             var name = "Auto gen tester 2";
-            var code = "En-US";
-            var user = UserApi.UserCreate(applicationUserId, name, code, context);
-            if (user is null || user.UniqueKey is null)
+            var user = UserApi.UserCreate(applicationUserId, name, context);
+            if (user is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;

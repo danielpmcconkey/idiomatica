@@ -12,6 +12,7 @@ using Logic.Telemetry;
 using Model.DAL;
 using Model;
 using Microsoft.AspNetCore.Http;
+using Model.Enums;
 
 
 namespace Logic.Services.API.Tests
@@ -30,18 +31,19 @@ namespace Logic.Services.API.Tests
             {
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null)
+                if (language is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageKey = language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
@@ -49,17 +51,18 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create the paragraph splits
                 var paragraphSplits = ParagraphApi.PotentialParagraphsSplitFromText(
-                   context, TestConstants.NewPageText, TestConstants.NewBookLanguageCode);
+                   context, TestConstants.NewPageText, language);
                 if (paragraphSplits is null || paragraphSplits.Length < 1)
                 { ErrorHandler.LogAndThrow(); return; }
                 var fifthSplit = paragraphSplits[4];
@@ -71,7 +74,7 @@ namespace Logic.Services.API.Tests
 
 
                 var paragraph = ParagraphApi.ParagraphCreateFromSplit(context,
-                    fifthSplitTrimmed, (Guid)page.UniqueKey, 4, (Guid)language.UniqueKey);
+                    fifthSplitTrimmed, page, 4, language);
 
 
                 Assert.IsNotNull(paragraph);
@@ -100,18 +103,19 @@ namespace Logic.Services.API.Tests
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null)
+                if (language is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageKey = language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
@@ -119,17 +123,18 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create the paragraph splits
                 var paragraphSplits = await ParagraphApi.PotentialParagraphsSplitFromTextAsync(
-                   context, TestConstants.NewPageText, TestConstants.NewBookLanguageCode);
+                   context, TestConstants.NewPageText, language);
                 if (paragraphSplits is null || paragraphSplits.Length < 1)
                     { ErrorHandler.LogAndThrow(); return; }
                 var fifthSplit = paragraphSplits[4];
@@ -141,7 +146,7 @@ namespace Logic.Services.API.Tests
 
                 
                 var paragraph = await ParagraphApi.ParagraphCreateFromSplitAsync(context,
-                    fifthSplitTrimmed, (Guid)page.UniqueKey, 4, (Guid)language.UniqueKey);
+                    fifthSplitTrimmed, page, 4, language);
 
 
                 Assert.IsNotNull(paragraph);
@@ -167,7 +172,7 @@ namespace Logic.Services.API.Tests
             var context = CommonFunctions.CreateContext();
             var languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
             Guid flashCardId = CommonFunctions.GetFlashCard1Id(context, languageUserId);
-            string uiLangugaeCode = "EN-US";
+            AvailableLanguageCode uiLangugaeCode = AvailableLanguageCode.EN_US;
             int numTries = 5;
             HashSet<string> examples = new();
             HashSet<string> translations = new();
@@ -210,7 +215,7 @@ namespace Logic.Services.API.Tests
             var context = CommonFunctions.CreateContext();
             var languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
             Guid flashCardId = CommonFunctions.GetFlashCard1Id(context, languageUserId);
-            string uiLangugaeCode = "EN-US";
+            AvailableLanguageCode uiLangugaeCode = AvailableLanguageCode.EN_US;
             int numTries = 5;
             HashSet<string> examples = new();
             HashSet<string> translations = new();
@@ -285,18 +290,19 @@ namespace Logic.Services.API.Tests
             {
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null)
+                if (language is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageKey = language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
@@ -304,17 +310,18 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create the paragraphs
                 var paragraphs = ParagraphApi.ParagraphsCreateFromPage(
-                    context, (Guid)page.UniqueKey, (Guid)language.UniqueKey);
+                    context, page, language);
                 if (paragraphs is null || paragraphs.Count < 1)
                 { ErrorHandler.LogAndThrow(); return; }
                 var fifthParagraph = paragraphs.Where(x => x.Ordinal == 4).FirstOrDefault();
@@ -344,18 +351,19 @@ namespace Logic.Services.API.Tests
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null)
+                if (language is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageKey = language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
@@ -363,17 +371,18 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // create the paragraphs
                 var paragraphs = await ParagraphApi.ParagraphsCreateFromPageAsync(
-                    context, (Guid)page.UniqueKey, (Guid)language.UniqueKey);
+                    context, page, language);
                 if (paragraphs is null || paragraphs.Count < 1)
                 { ErrorHandler.LogAndThrow(); return; }
                 var fifthParagraph = paragraphs.Where(x => x.Ordinal == 4).FirstOrDefault();
@@ -408,8 +417,10 @@ namespace Logic.Services.API.Tests
             var seventhParagraph = paragraphs.Where(x => x.Ordinal == ppOrd).FirstOrDefault();
             Assert.IsNotNull(seventhParagraph);
             Assert.IsNotNull(seventhParagraph.UniqueKey);
-            seventhParagraph.Sentences = SentenceApi.SentencesReadByParagraphId(
-                context, (Guid)seventhParagraph.UniqueKey);
+            var sentences = SentenceApi.SentencesReadByParagraphId(
+                context, seventhParagraph.UniqueKey);
+            Assert.IsNotNull(sentences);
+            seventhParagraph.Sentences = sentences;
             Assert.IsNotNull(seventhParagraph.Sentences);
             var secondSentence = seventhParagraph.Sentences.Where(
                 x => x.Ordinal == sentenceOrdinal).FirstOrDefault();
@@ -431,8 +442,10 @@ namespace Logic.Services.API.Tests
             var seventhParagraph = paragraphs.Where(x => x.Ordinal == ppOrd).FirstOrDefault();
             Assert.IsNotNull(seventhParagraph);
             Assert.IsNotNull(seventhParagraph.UniqueKey);
-            seventhParagraph.Sentences = await SentenceApi.SentencesReadByParagraphIdAsync(
+            var sentences = await SentenceApi.SentencesReadByParagraphIdAsync(
                 context, (Guid)seventhParagraph.UniqueKey);
+            Assert.IsNotNull(sentences);
+            seventhParagraph.Sentences = sentences;
             Assert.IsNotNull(seventhParagraph.Sentences);
             var secondSentence = seventhParagraph.Sentences.Where(
                 x => x.Ordinal == sentenceOrdinal).FirstOrDefault();
@@ -447,8 +460,10 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
             Guid paragraphId = CommonFunctions.GetParagraph14590Id(context);
-            string fromCode = "ES";
-            string toCode = "EN-US";
+            var paragraph = context.Paragraphs.Where(x => x.UniqueKey == paragraphId).FirstOrDefault();
+            Assert.IsNotNull(paragraph);
+            AvailableLanguageCode fromCode = AvailableLanguageCode.ES;
+            AvailableLanguageCode toCode = AvailableLanguageCode.EN_US;
             string expectedInput = "Había una vez una pareja que quería un hijo. La esposa, que estaba esperando, tenía antojo de una planta llamada rapunzel, que crecía en un jardín cercano perteneciente a una hechicera.";
             string expectedTranslation = "Once upon a time there was a couple who wanted a child. The wife, who was expecting, had a craving for a plant called rapunzel, which grew in a nearby garden belonging to a sorceress.";
 
@@ -458,7 +473,7 @@ namespace Logic.Services.API.Tests
 #endif
 
             (string input, string output) result = ParagraphApi.ParagraphTranslate(
-                context, paragraphId, fromCode, toCode);
+                context, paragraph, fromCode, toCode);
             string actualInput = result.input;
             string actualTranslation = result.output;
 
@@ -472,8 +487,10 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
             Guid paragraphId = CommonFunctions.GetParagraph14590Id(context);
-            string fromCode = "ES";
-            string toCode = "EN-US";
+            var paragraph = context.Paragraphs.Where(x => x.UniqueKey == paragraphId).FirstOrDefault();
+            Assert.IsNotNull(paragraph);
+            AvailableLanguageCode fromCode = AvailableLanguageCode.ES;
+            AvailableLanguageCode toCode = AvailableLanguageCode.EN_US;
             string expectedInput = "Había una vez una pareja que quería un hijo. La esposa, que estaba esperando, tenía antojo de una planta llamada rapunzel, que crecía en un jardín cercano perteneciente a una hechicera.";
             string expectedTranslation = "Once upon a time there was a couple who wanted a child. The wife, who was expecting, had a craving for a plant called rapunzel, which grew in a nearby garden belonging to a sorceress.";
 
@@ -483,7 +500,7 @@ namespace Logic.Services.API.Tests
 #endif
 
             (string input, string output) result = await ParagraphApi.ParagraphTranslateAsync(
-                context, paragraphId, fromCode, toCode);
+                context, paragraph, fromCode, toCode);
             string actualInput = result.input;
             string actualTranslation = result.output;
 
@@ -503,18 +520,19 @@ namespace Logic.Services.API.Tests
             {
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null)
+                if (language is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageKey = language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
@@ -522,25 +540,26 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create the paragraph splits
                 var paragraphSplits = ParagraphApi.PotentialParagraphsSplitFromText(
-                   context, TestConstants.NewPageText, TestConstants.NewBookLanguageCode);
+                   context, TestConstants.NewPageText, language);
                 if (paragraphSplits is null || paragraphSplits.Length < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                    { ErrorHandler.LogAndThrow(); return; }
                 var fifthSplit = paragraphSplits[4];
                 if (string.IsNullOrEmpty(fifthSplit))
-                { ErrorHandler.LogAndThrow(); return; }
+                    { ErrorHandler.LogAndThrow(); return; }
                 var fifthSplitTrimmed = fifthSplit.Trim();
                 if (string.IsNullOrEmpty(fifthSplitTrimmed))
-                { ErrorHandler.LogAndThrow(); return; }
+                    { ErrorHandler.LogAndThrow(); return; }
 
                 Assert.AreEqual(expectedText, fifthSplitTrimmed);
             }
@@ -561,18 +580,19 @@ namespace Logic.Services.API.Tests
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null)
+                if (language is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                
+
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageKey = language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
@@ -580,25 +600,26 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create the paragraph splits
                 var paragraphSplits = await ParagraphApi.PotentialParagraphsSplitFromTextAsync(
-                   context, TestConstants.NewPageText, TestConstants.NewBookLanguageCode);
+                   context, TestConstants.NewPageText, language);
                 if (paragraphSplits is null || paragraphSplits.Length < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                    { ErrorHandler.LogAndThrow(); return; }
                 var fifthSplit = paragraphSplits[4];
                 if (string.IsNullOrEmpty(fifthSplit))
-                { ErrorHandler.LogAndThrow(); return; }
+                    { ErrorHandler.LogAndThrow(); return; }
                 var fifthSplitTrimmed = fifthSplit.Trim();
                 if (string.IsNullOrEmpty(fifthSplitTrimmed))
-                { ErrorHandler.LogAndThrow(); return; }
+                    { ErrorHandler.LogAndThrow(); return; }
 
                 Assert.AreEqual(expectedText, fifthSplitTrimmed);
             }

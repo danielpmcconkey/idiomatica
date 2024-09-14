@@ -9,7 +9,6 @@ using LogicTests;
 using Logic.Telemetry;
 using Model;
 using System.Net;
-using k8s.KubeConfigModels;
 using Model.Enums;
 
 namespace Logic.Services.API.Tests
@@ -33,14 +32,17 @@ namespace Logic.Services.API.Tests
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
+                User? user = userService.GetLoggedInUser(context);
+                Assert.IsNotNull(user);
+
                 // get the second page of the book
                 var page = context.Pages.Where(x => x.BookKey == bookId && x.Ordinal == 1).FirstOrDefault();
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // create the pageUser
                 var pageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (Guid)page.UniqueKey, userId);
+                    context, page, user);
 
                 // assert
                 Assert.IsNotNull(pageUser);
@@ -70,14 +72,17 @@ namespace Logic.Services.API.Tests
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
+                User? user = userService.GetLoggedInUser(context);
+                Assert.IsNotNull(user);
+
                 // get the second page of the book
                 var page = context.Pages.Where(x => x.BookKey == bookId && x.Ordinal == 1).FirstOrDefault();
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 
                 // create the pageUser
                 var pageUser = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, (Guid)page.UniqueKey, userId);
+                    context, page, user);
 
                 // assert
                 Assert.IsNotNull(pageUser);
@@ -110,21 +115,24 @@ namespace Logic.Services.API.Tests
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
+                User? user = userService.GetLoggedInUser(context);
+                Assert.IsNotNull(user);
+
                 // pull the languageUser
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (language is null) { ErrorHandler.LogAndThrow(); return; }
                 var languageUser = LanguageUserApi.LanguageUserGet(context, (Guid)language.UniqueKey, userId);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the page 1 page user
                 var page1 = PageApi.PageReadByOrdinalAndBookId(context, 1, bookId);
-                if (page1 is null || page1.UniqueKey is null)
+                if (page1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid page1Id = (Guid)page1.UniqueKey;
                 var pageUserBefore = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, page1Id, userId);
-                if (pageUserBefore is null || pageUserBefore.UniqueKey is null)
+                    context, page1, user);
+                if (pageUserBefore is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 PageUserApi.PageUserMarkAsRead(context, (Guid)pageUserBefore.UniqueKey);
@@ -160,21 +168,24 @@ namespace Logic.Services.API.Tests
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
+                User? user = userService.GetLoggedInUser(context);
+                Assert.IsNotNull(user);
+
                 // pull the languageUser
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if(language is null || language.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if(language is null) { ErrorHandler.LogAndThrow(); return; }
                 var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (Guid)language.UniqueKey, userId);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the page 1 page user
                 var page1 = await PageApi.PageReadByOrdinalAndBookIdAsync(context, 1, bookId);
-                if (page1 is null || page1.UniqueKey is null)
+                if (page1 is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 Guid page1Id = (Guid)page1.UniqueKey;
                 var pageUserBefore = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, page1Id, userId);
-                if (pageUserBefore is null || pageUserBefore.UniqueKey is null)
+                    context, page1, user);
+                if (pageUserBefore is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 
                 await PageUserApi.PageUserMarkAsReadAsync(context, (Guid)pageUserBefore.UniqueKey);
@@ -213,37 +224,40 @@ namespace Logic.Services.API.Tests
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
+                User? user = userService.GetLoggedInUser(context);
+                Assert.IsNotNull(user);
+
                 // pull the languageUser
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (language is null) { ErrorHandler.LogAndThrow(); return; }
                 var languageUser = LanguageUserApi.LanguageUserGet(context, (Guid)language.UniqueKey, userId);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the page 1 page user
                 var page1 = PageApi.PageReadByOrdinalAndBookId(context, 1, bookId);
-                if (page1 is null || page1.UniqueKey is null)
+                if (page1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid page1Id = (Guid)page1.UniqueKey;
                 var pageUser1 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, page1Id, userId);
+                    context, page1, user);
 
                 // create the page 2 page user
                 var page2 = PageApi.PageReadByOrdinalAndBookId(context, 2, bookId);
-                if (page2 is null || page2.UniqueKey is null)
+                if (page2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid page2Id = (Guid)page2.UniqueKey;
                 var pageUser2 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, page2Id, userId);
+                    context, page2, user);
 
                 // make the call before every doing anything
                 var pageUserBefore = PageUserApi.PageUserReadBookmarkedOrFirst(
                     context, bookUserId);
-                if (pageUserBefore is null || pageUserBefore.PageKey is null)
+                if (pageUserBefore is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // pull the page object associated to the pageUser
                 var pageBefore = PageApi.PageReadById(context, (Guid)pageUserBefore.PageKey);
-                if (pageBefore is null || pageBefore.Ordinal is null)
+                if (pageBefore is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 int ordinalBeforeActual = (int)pageBefore.Ordinal;
 
@@ -253,11 +267,11 @@ namespace Logic.Services.API.Tests
                 // now pull the page User again
                 var pageUserAfter = PageUserApi.PageUserReadBookmarkedOrFirst(
                     context, bookUserId);
-                if (pageUserAfter is null || pageUserAfter.PageKey is null)
+                if (pageUserAfter is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // pull the page object associated to the pageUser
                 var pageAfter = PageApi.PageReadById(context, (Guid)pageUserAfter.PageKey);
-                if (pageAfter is null || pageAfter.Ordinal is null)
+                if (pageAfter is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 int ordinalAfterActual = (int)pageAfter.Ordinal;
 
@@ -289,37 +303,40 @@ namespace Logic.Services.API.Tests
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
+                User? user = userService.GetLoggedInUser(context);
+                Assert.IsNotNull(user);
+
                 // pull the languageUser
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (language is null) { ErrorHandler.LogAndThrow(); return; }
                 var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (Guid)language.UniqueKey, userId);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the page 1 page user
                 var page1 = await PageApi.PageReadByOrdinalAndBookIdAsync(context, 1, bookId);
-                if (page1 is null || page1.UniqueKey is null)
+                if (page1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid page1Id = (Guid)page1.UniqueKey;
                 var pageUser1 = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, page1Id, userId);
+                    context, page1, user);
 
                 // create the page 2 page user
                 var page2 = await PageApi.PageReadByOrdinalAndBookIdAsync(context, 2, bookId);
-                if (page2 is null || page2.UniqueKey is null)
+                if (page2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid page2Id = (Guid)page2.UniqueKey;
                 var pageUser2 = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, page2Id, userId);
+                    context, page2, user);
 
                 // make the call before every doing anything
                 var pageUserBefore = await PageUserApi.PageUserReadBookmarkedOrFirstAsync(
                     context, bookUserId);
-                if (pageUserBefore is null || pageUserBefore.PageKey is null)
+                if (pageUserBefore is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 // pull the page object associated to the pageUser
                 var pageBefore = await PageApi.PageReadByIdAsync(context, (Guid)pageUserBefore.PageKey);
-                if (pageBefore is null || pageBefore.Ordinal is null)
+                if (pageBefore is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 int ordinalBeforeActual = (int)pageBefore.Ordinal;
 
@@ -329,11 +346,11 @@ namespace Logic.Services.API.Tests
                 // now pull the page User again
                 var pageUserAfter = await PageUserApi.PageUserReadBookmarkedOrFirstAsync(
                     context, bookUserId);
-                if (pageUserAfter is null || pageUserAfter.PageKey is null)
+                if (pageUserAfter is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 // pull the page object associated to the pageUser
                 var pageAfter = await PageApi.PageReadByIdAsync(context, (Guid)pageUserAfter.PageKey);
-                if (pageAfter is null || pageAfter.Ordinal is null)
+                if (pageAfter is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 int ordinalAfterActual = (int)pageAfter.Ordinal;
 
@@ -366,32 +383,35 @@ namespace Logic.Services.API.Tests
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
+                User? user = userService.GetLoggedInUser(context);
+                Assert.IsNotNull(user);
+
                 // pull the languageUser
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (language is null) { ErrorHandler.LogAndThrow(); return; }
                 var languageUser = LanguageUserApi.LanguageUserGet(context, (Guid)language.UniqueKey, userId);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the page 2 page user
                 var page2 = PageApi.PageReadByOrdinalAndBookId(context, 2, bookId);
-                if (page2 is null || page2.UniqueKey is null)
+                if (page2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 Guid page2Id = (Guid)page2.UniqueKey;
                 var pageUserCreated = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, page2Id, userId);
-                if (pageUserCreated is null || pageUserCreated.PageKey is null)
+                    context, page2, user);
+                if (pageUserCreated is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // now pull the pageUser from the DB
                 var pageUserRead = PageUserApi.PageUserReadByOrderWithinBook(
                     context, (Guid)languageUser.UniqueKey, 2, bookId);
-                if (pageUserRead is null || pageUserRead.PageKey is null)
+                if (pageUserRead is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // pull the page object associated to the pageUser you just pulled
                 var pageAfter = PageApi.PageReadById(context, (Guid)pageUserRead.PageKey);
-                if (pageAfter is null || pageAfter.Ordinal is null)
+                if (pageAfter is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 int ordinalActual = (int)pageAfter.Ordinal;
 
@@ -422,32 +442,35 @@ namespace Logic.Services.API.Tests
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
+                User? user = userService.GetLoggedInUser(context);
+                Assert.IsNotNull(user);
+
                 // pull the languageUser
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (language is null) { ErrorHandler.LogAndThrow(); return; }
                 var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (Guid)language.UniqueKey, userId);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the page 2 page user
                 var page2 = await PageApi.PageReadByOrdinalAndBookIdAsync(context, 2, bookId);
-                if (page2 is null || page2.UniqueKey is null)
+                if (page2 is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 Guid page2Id = (Guid)page2.UniqueKey;
                 var pageUserCreated = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, page2Id, userId);
-                if (pageUserCreated is null || pageUserCreated.PageKey is null)
+                    context, page2, user);
+                if (pageUserCreated is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // now pull the pageUser from the DB
                 var pageUserRead = await PageUserApi.PageUserReadByOrderWithinBookAsync(
                     context, (Guid)languageUser.UniqueKey, 2, bookId);
-                if (pageUserRead is null || pageUserRead.PageKey is null)
+                if (pageUserRead is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 
                 // pull the page object associated to the pageUser you just pulled
                 var pageAfter = await PageApi.PageReadByIdAsync(context, (Guid)pageUserRead.PageKey);
-                if (pageAfter is null || pageAfter.Ordinal is null)
+                if (pageAfter is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 int ordinalActual = (int)pageAfter.Ordinal;
 
@@ -513,22 +536,25 @@ namespace Logic.Services.API.Tests
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
+                User? user = userService.GetLoggedInUser(context);
+                Assert.IsNotNull(user);
+
                 // pull the languageUser
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (language is null) { ErrorHandler.LogAndThrow(); return; }
                 var languageUser = LanguageUserApi.LanguageUserGet(context, (Guid)language.UniqueKey, userId);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // get the page Id
                 var page = PageApi.PageReadByOrdinalAndBookId(context, 1, bookId);
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // pull the page User
                 var pageUserBefore = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (Guid)page.UniqueKey, userId);
-                if (pageUserBefore is null || pageUserBefore.UniqueKey is null)
+                    context, page, user);
+                if (pageUserBefore is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // now update the read date
@@ -566,22 +592,25 @@ namespace Logic.Services.API.Tests
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
+                User? user = userService.GetLoggedInUser(context);
+                Assert.IsNotNull(user);
+
                 // pull the languageUser
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (language is null) { ErrorHandler.LogAndThrow(); return; }
                 var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (Guid)language.UniqueKey, userId);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // get the page Id
                 var page = await PageApi.PageReadByOrdinalAndBookIdAsync(context, 1, bookId);
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 
                 // pull the page User
                 var pageUserBefore = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, (Guid)page.UniqueKey, userId);
-                if (pageUserBefore is null || pageUserBefore.UniqueKey is null)
+                    context, page, user);
+                if (pageUserBefore is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
                 // now update the read date
@@ -623,12 +652,15 @@ namespace Logic.Services.API.Tests
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
+                User? user = userService.GetLoggedInUser(context);
+                Assert.IsNotNull(user);
+
                 // pull the languageUser
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (language is null) { ErrorHandler.LogAndThrow(); return; }
                 var languageUser = LanguageUserApi.LanguageUserGet(context, (Guid)language.UniqueKey, userId);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
 
                 var originalPacket = new BookListDataPacket(context, false);
@@ -642,11 +674,11 @@ namespace Logic.Services.API.Tests
 
                 // now move the page forward a couple of times as if we're reading it
                 var firstPage = PageApi.PageReadFirstByBookId(context, bookId);
-                if (firstPage is null || firstPage.UniqueKey is null)
+                if (firstPage is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 var pageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (Guid)firstPage.UniqueKey, userId);
-                if (pageUser is null || pageUser.UniqueKey is null)
+                    context, firstPage, user);
+                if (pageUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
 
@@ -698,12 +730,15 @@ namespace Logic.Services.API.Tests
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
+                User? user = userService.GetLoggedInUser(context);
+                Assert.IsNotNull(user);
+
                 // pull the languageUser
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (language is null) { ErrorHandler.LogAndThrow(); return; }
                 var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (Guid)language.UniqueKey, userId);
-                if (languageUser is null || languageUser.UniqueKey is null) { ErrorHandler.LogAndThrow(); return; }
+                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
 
                 var originalPacket = new BookListDataPacket(context, false);
@@ -717,11 +752,11 @@ namespace Logic.Services.API.Tests
 
                 // now move the page forward a couple of times as if we're reading it
                 var firstPage = await PageApi.PageReadFirstByBookIdAsync(context, bookId);
-                if (firstPage is null || firstPage.UniqueKey is null)
+                if (firstPage is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 var pageUser = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
-                    context, (Guid)firstPage.UniqueKey, userId);
-                if (pageUser is null || pageUser.UniqueKey is null)
+                    context, firstPage, user);
+                if (pageUser is null)
                     { ErrorHandler.LogAndThrow(); return; }
 
 

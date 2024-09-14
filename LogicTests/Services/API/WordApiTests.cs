@@ -19,16 +19,16 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordCreateTest()
         {
-            var word = new Word();
+            Word? word = null;
 
             var context = CommonFunctions.CreateContext();
-            Guid languageId = CommonFunctions.GetEnglishLanguageKey(context);
+            Language language = CommonFunctions.GetSpanishLanguage(context);
             string guid = Guid.NewGuid().ToString();
             string text = guid.ToLower();
             string romanization = guid;
             try
             {
-                word = WordApi.WordCreate(context, languageId, text, romanization);
+                word = WordApi.WordCreate(context, language, text, romanization);
 
                 Assert.IsNotNull(word);
                 Assert.IsNotNull(word.UniqueKey);
@@ -38,7 +38,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (word is not null && word.UniqueKey is not null)
+                if (word is not null)
                 {
                     DataCache.WordDeleteById((Guid)word.UniqueKey, context);
                 }
@@ -47,17 +47,17 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task WordCreateAsyncTest()
         {
-            var word = new Word();
+            Word? word = null;
             var context = CommonFunctions.CreateContext();
 
-            Guid languageId = CommonFunctions.GetEnglishLanguageKey(context);
+            Language language = CommonFunctions.GetSpanishLanguage(context);
             string guid = Guid.NewGuid().ToString();
             string text = guid.ToLower();
             string romanization = guid;
 
             try
             {
-                word = await WordApi.WordCreateAsync(context, languageId, text, romanization);
+                word = await WordApi.WordCreateAsync(context, language, text, romanization);
                 // assert
                 Assert.IsNotNull(word);
                 Assert.IsNotNull(word.UniqueKey);
@@ -67,7 +67,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (word is not null && word.UniqueKey is not null)
+                if (word is not null)
                 {
                     DataCache.WordDeleteById((Guid)word.UniqueKey, context);
                 }
@@ -153,17 +153,18 @@ namespace Logic.Services.API.Tests
             {
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null)
+                if (language is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageKey = language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
@@ -171,33 +172,35 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
                     PageKey = page.UniqueKey,
+                    Page = page,
                     Ordinal = 1,
                     UniqueKey = Guid.NewGuid()
                 };
                 paragraph = DataCache.ParagraphCreate(paragraph, context);
-                if (paragraph is null || paragraph.UniqueKey is null)
+                if (paragraph is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create sentence
                 var sentence1created = SentenceApi.SentenceCreate(
-                    context, sentence1, (Guid)language.UniqueKey, 0, (Guid)paragraph.UniqueKey);
-                if (sentence1created is null || sentence1created.UniqueKey is null)
+                    context, sentence1, language, 0, paragraph);
+                if (sentence1created is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
 
                 var wordOrderPair = WordApi.WordsCreateOrderedFromSentenceId(
-                    context, (Guid)language.UniqueKey, (Guid)sentence1created.UniqueKey);
+                    context, language, sentence1created);
                 int actualCount = wordOrderPair.Count;
                 var checkedWord = wordOrderPair.Where(x => x.ordinal == wordOrdinalToCheck).FirstOrDefault();
                 if (checkedWord.word is null || checkedWord.word.TextLowerCase is null)
@@ -228,17 +231,18 @@ namespace Logic.Services.API.Tests
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.UniqueKey is null)
+                if (language is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageKey = language.UniqueKey,
+                    Language = language,
                     UniqueKey = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null || book.UniqueKey is null)
+                if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)book.UniqueKey;
 
@@ -246,33 +250,35 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookKey = book.UniqueKey,
+                    Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     UniqueKey = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null || page.UniqueKey is null)
+                if (page is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
                     PageKey = page.UniqueKey,
+                    Page = page,
                     Ordinal = 1,
                     UniqueKey = Guid.NewGuid()
                 };
                 paragraph = DataCache.ParagraphCreate(paragraph, context);
-                if (paragraph is null || paragraph.UniqueKey is null)
+                if (paragraph is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create sentence
                 var sentence1created = await SentenceApi.SentenceCreateAsync(
-                    context, sentence1, (Guid)language.UniqueKey, 0, (Guid)paragraph.UniqueKey);
-                if (sentence1created is null || sentence1created.UniqueKey is null)
+                    context, sentence1, language, 0, paragraph);
+                if (sentence1created is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
 
                 var wordOrderPair = await WordApi.WordsCreateOrderedFromSentenceIdAsync(
-                    context, (Guid)language.UniqueKey, (Guid)sentence1created.UniqueKey);
+                    context, language, sentence1created);
                 int actualCount = wordOrderPair.Count;
                 var checkedWord = wordOrderPair.Where(x => x.ordinal == wordOrdinalToCheck).FirstOrDefault();
                 if (checkedWord.word is null || checkedWord.word.TextLowerCase is null)
@@ -306,7 +312,7 @@ namespace Logic.Services.API.Tests
             { ErrorHandler.LogAndThrow(); return; }
             int actualCount = dict.Count;
             var actualWord = dict[wordToCheck];
-            if (actualWord is null || actualWord.UniqueKey is null)
+            if (actualWord is null)
             { ErrorHandler.LogAndThrow(); return; }
             Guid actualId = (Guid)actualWord.UniqueKey;
 
@@ -328,7 +334,7 @@ namespace Logic.Services.API.Tests
             { ErrorHandler.LogAndThrow(); return; }
             int actualCount = dict.Count;
             var actualWord = dict[wordToCheck];
-            if (actualWord is null || actualWord.UniqueKey is null)
+            if (actualWord is null)
             { ErrorHandler.LogAndThrow(); return; }
             Guid actualId = (Guid)actualWord.UniqueKey;
 
@@ -343,8 +349,8 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             //using var transaction = context.Database.BeginTransaction();
-            Guid language1 = CommonFunctions.GetSpanishLanguageKey(context);
-            Guid language2 = CommonFunctions.GetEnglishLanguageKey(context);
+            Language language1 = CommonFunctions.GetSpanishLanguage(context);
+            Language language2 = CommonFunctions.GetEnglishLanguage(context);
             Guid bookIdSpanish = CommonFunctions.GetBook11Id(context);
             Guid bookIdEnglish = Guid.NewGuid(); Assert.Fail(); // 22;
             int countRows1Expected = 1;
@@ -370,16 +376,15 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null)
+                if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
-
-                var languageUser1 = LanguageUserApi.LanguageUserCreate(context, language1, (Guid)user.UniqueKey);
+                var languageUser1 = LanguageUserApi.LanguageUserCreate(context, language1, user);
                 if (languageUser1 is null) ErrorHandler.LogAndThrow();
 
                 var bookUser1 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookIdSpanish, (Guid)user.UniqueKey);
-                if (bookUser1 is null || bookUser1.UniqueKey is null || bookUser1.LanguageUserKey is null)
+                if (bookUser1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // pull the count
@@ -390,32 +395,32 @@ namespace Logic.Services.API.Tests
                 int countSpanishWords1Actual = list1.Where(x => x.language == "Spanish").FirstOrDefault().wordCount;
 
                 // add the second language and bookUser
-                var languageUser2 = LanguageUserApi.LanguageUserCreate(context, language2, (Guid)user.UniqueKey);
+                var languageUser2 = LanguageUserApi.LanguageUserCreate(context, language2, user);
                 if (languageUser2 is null) ErrorHandler.LogAndThrow();
 
                 var bookUser2 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookIdEnglish, (Guid)user.UniqueKey);
-                if (bookUser2 is null || bookUser2.UniqueKey is null || bookUser2.LanguageUserKey is null)
+                if (bookUser2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // read the first page of book 1
                 var firstPageBook1 = PageApi.PageReadFirstByBookId(context, bookIdSpanish);
-                if (firstPageBook1 is null || firstPageBook1.UniqueKey is null)
+                if (firstPageBook1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 var pageUser1 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (Guid)firstPageBook1.UniqueKey, (Guid)user.UniqueKey);
-                if (pageUser1 is null || pageUser1.UniqueKey is null)
+                    context, firstPageBook1, user);
+                if (pageUser1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (Guid)pageUser1.UniqueKey);
                 PageUserApi.PageUserMarkAsRead(context, (Guid)pageUser1.UniqueKey);
 
                 // read the first page of book 2
                 var firstPageBook2 = PageApi.PageReadFirstByBookId(context, bookIdEnglish);
-                if (firstPageBook2 is null || firstPageBook2.UniqueKey is null)
+                if (firstPageBook2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 var pageUser2 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (Guid)firstPageBook2.UniqueKey, (Guid)user.UniqueKey);
-                if (pageUser2 is null || pageUser2.UniqueKey is null)
+                    context, firstPageBook2, user);
+                if (pageUser2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (Guid)pageUser2.UniqueKey);
                 PageUserApi.PageUserMarkAsRead(context, (Guid)pageUser2.UniqueKey);
@@ -447,8 +452,8 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             //using var transaction = context.Database.BeginTransaction();
-            Guid language1 = CommonFunctions.GetSpanishLanguageKey(context);
-            Guid language2 = CommonFunctions.GetEnglishLanguageKey(context);
+            Language language1 = CommonFunctions.GetSpanishLanguage(context);
+            Language language2 = CommonFunctions.GetEnglishLanguage(context);
             Guid bookIdSpanish = CommonFunctions.GetBook11Id(context);
             Guid bookIdEnglish = Guid.NewGuid(); Assert.Fail(); // 22;
             int countRows1Expected = 1;
@@ -474,15 +479,15 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.UniqueKey is null)
+                if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 userId = (Guid)user.UniqueKey;
-                var languageUser1 = LanguageUserApi.LanguageUserCreate(context, language1, (Guid)user.UniqueKey);
+                var languageUser1 = LanguageUserApi.LanguageUserCreate(context, language1, user);
                 if (languageUser1 is null) ErrorHandler.LogAndThrow();
 
                 var bookUser1 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookIdSpanish, (Guid)user.UniqueKey);
-                if (bookUser1 is null || bookUser1.UniqueKey is null || bookUser1.LanguageUserKey is null)
+                if (bookUser1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // pull the count
@@ -493,32 +498,32 @@ namespace Logic.Services.API.Tests
                 int countSpanishWords1Actual = list1.Where(x => x.language == "Spanish").FirstOrDefault().wordCount;
 
                 // add the second language and bookUser
-                var languageUser2 = LanguageUserApi.LanguageUserCreate(context, language2, (Guid)user.UniqueKey);
+                var languageUser2 = LanguageUserApi.LanguageUserCreate(context, language2, user);
                 if (languageUser2 is null) ErrorHandler.LogAndThrow();
 
                 var bookUser2 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     context, bookIdEnglish, (Guid)user.UniqueKey);
-                if (bookUser2 is null || bookUser2.UniqueKey is null || bookUser2.LanguageUserKey is null)
+                if (bookUser2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // read the first page of book 1
                 var firstPageBook1 = await PageApi.PageReadFirstByBookIdAsync(context, bookIdSpanish);
-                if (firstPageBook1 is null || firstPageBook1.UniqueKey is null)
+                if (firstPageBook1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 var pageUser1 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (Guid)firstPageBook1.UniqueKey, (Guid)user.UniqueKey);
-                if (pageUser1 is null || pageUser1.UniqueKey is null)
+                    context, firstPageBook1, user);
+                if (pageUser1 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (Guid)pageUser1.UniqueKey);
                 await PageUserApi.PageUserMarkAsReadAsync(context, (Guid)pageUser1.UniqueKey);
 
                 // read the first page of book 2
                 var firstPageBook2 = await PageApi.PageReadFirstByBookIdAsync(context, bookIdEnglish);
-                if (firstPageBook2 is null || firstPageBook2.UniqueKey is null)
+                if (firstPageBook2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 var pageUser2 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (Guid)firstPageBook2.UniqueKey, (Guid)user.UniqueKey);
-                if (pageUser2 is null || pageUser2.UniqueKey is null)
+                    context, firstPageBook2, user);
+                if (pageUser2 is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (Guid)pageUser2.UniqueKey);
                 await PageUserApi.PageUserMarkAsReadAsync(context, (Guid)pageUser2.UniqueKey);
@@ -551,7 +556,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid language = CommonFunctions.GetSpanishLanguageKey(context);
+            Language language = CommonFunctions.GetSpanishLanguage(context);
             int countRowsExpected = 126;
             string wordToCheck = "volvió";
             int countTranslationsExpected = 3;
@@ -584,7 +589,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(user);
                 Assert.IsNotNull(user.UniqueKey);
                 userId = (Guid)user.UniqueKey;
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, language, (Guid)user.UniqueKey);
+                var languageUser = LanguageUserApi.LanguageUserCreate(context, language, user);
                 Assert.IsNotNull(languageUser);
                 Assert.IsNotNull(languageUser.UniqueKey);
 
@@ -599,7 +604,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(page.UniqueKey);
                 var dict = WordApi
                     .WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
-                        context, (Guid)page.UniqueKey, (Guid)languageUser.UniqueKey);
+                        context, page.UniqueKey, languageUser.UniqueKey);
 
                 Assert.IsNotNull(dict);
                 Assert.AreEqual(countRowsExpected, dict.Count);
@@ -632,7 +637,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid language = CommonFunctions.GetSpanishLanguageKey(context);
+            Language language = CommonFunctions.GetSpanishLanguage(context);
             int countRowsExpected = 126;
             string wordToCheck = "volvió";
             int countTranslationsExpected = 3;
@@ -665,7 +670,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(user);
                 Assert.IsNotNull(user.UniqueKey);
                 userId = (Guid)user.UniqueKey;
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, language, (Guid)user.UniqueKey);
+                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, language, user);
                 Assert.IsNotNull(languageUser);
                 Assert.IsNotNull(languageUser.UniqueKey);
 
@@ -680,7 +685,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(page.UniqueKey);
                 var dict = await WordApi
                     .WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdReadAsync(
-                        context, (Guid)page.UniqueKey, (Guid)languageUser.UniqueKey);
+                        context, page.UniqueKey, languageUser.UniqueKey);
 
                 Assert.IsNotNull(dict);
                 Assert.AreEqual(countRowsExpected, dict.Count);
