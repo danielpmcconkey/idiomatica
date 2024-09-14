@@ -14,52 +14,46 @@ namespace Logic.Services.API
     public static class SentenceApi
     {
         public static string[] PotentialSentencesSplitFromText(
-            IdiomaticaContext context, string text, Guid languageId)
+            IdiomaticaContext context, string text, Language language)
         {
             if (string.IsNullOrEmpty(text)) ErrorHandler.LogAndThrow();
 
-            var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null ||
-                language.UniqueKey is null ||
-                string.IsNullOrEmpty(language.Code))
-            {
-                ErrorHandler.LogAndThrow();
-                return [];
-            }
             var parser = LanguageParser.Factory.GetLanguageParser(language);
             if(parser is null) { ErrorHandler.LogAndThrow(); return []; }
             return parser.SegmentTextBySentences(text);
         }
         public static async Task<string[]> PotentialSentencesSplitFromTextAsync(
-            IdiomaticaContext context, string text, Guid languageId)
+            IdiomaticaContext context, string text, Language language)
         {
             return await Task<string[]>.Run(() =>
             {
-                return PotentialSentencesSplitFromText(context, text, languageId);
+                return PotentialSentencesSplitFromText(context, text, language);
             });
         }
 
 
         public static Sentence? SentenceCreate(
-            IdiomaticaContext context, string text, Guid languageId, int ordinal,
-            Guid paragraphId)
+            IdiomaticaContext context, string text, Language language, int ordinal,
+            Paragraph paragraph)
         {
             if (ordinal < 0) ErrorHandler.LogAndThrow();
             if (string.IsNullOrEmpty(text)) ErrorHandler.LogAndThrow();
             var newSentence = new Sentence()
             {
-                ParagraphKey = paragraphId,
+                UniqueKey = Guid.NewGuid(),
+                ParagraphKey = paragraph.UniqueKey,
+                Paragraph = paragraph,
                 Text = text,
                 Ordinal = ordinal,
             };
             newSentence = DataCache.SentenceCreate(newSentence, context);
-            if (newSentence is null || newSentence.UniqueKey is null)
+            if (newSentence is null)
             {
-                ErrorHandler.LogAndThrow(2280);
+                ErrorHandler.LogAndThrow();
                 return null;
             }
             newSentence.Tokens = TokenApi.TokensCreateFromSentence(context,
-                (Guid)newSentence.UniqueKey, languageId);
+                newSentence, language);
             return newSentence;
         }
         public static async Task<Sentence?> SentenceCreateAsync(

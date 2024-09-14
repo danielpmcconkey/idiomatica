@@ -32,21 +32,15 @@ namespace Model.DAL
                       ({pageUser.BookUserKey}
                       ,{pageUser.PageKey}
                       ,{pageUser.ReadDate}
-                      ,{guid})
+                      ,{pageUser.UniqueKey})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
-            var newEntity = context.PageUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null)
-            {
-                throw new InvalidDataException("newEntity is null in FlashCardCreate");
-            }
-
-
+            
             // add it to cache
-            PageUserUpdateAllCaches(newEntity);
+            PageUserUpdateAllCaches(pageUser);
 
-            return newEntity;
+            return pageUser;
         }
         public static async Task<PageUser?> PageUserCreateAsync(PageUser value, IdiomaticaContext context)
         {

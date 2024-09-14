@@ -39,7 +39,7 @@ namespace Logic.Services.API
             }
             // create paragraphs
             newPage.Paragraphs = ParagraphApi.ParagraphsCreateFromPage(
-                context, (Guid)newPage.UniqueKey, languageId);
+                context, newPage, language);
             return newPage;
         }
         public static async Task<Page?> PageCreateFromPageSplitAsync(

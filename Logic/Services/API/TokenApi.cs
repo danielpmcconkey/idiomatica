@@ -17,29 +17,32 @@ namespace Logic.Services.API
     public static class TokenApi
     {
         public static Token? TokenCreate(IdiomaticaContext context,
-           string display, Guid sentenceId, int ordinal, Guid wordId)
+           string display, Sentence sentence, int ordinal, Word word)
         {
             var token = new Token()
             {
+                UniqueKey = Guid.NewGuid(),
                 Display = display,
-                SentenceKey = sentenceId,
+                SentenceKey = sentence.UniqueKey,
+                Sentence = sentence,
                 Ordinal = ordinal,
-                WordKey = wordId
+                WordKey = word.UniqueKey,
+                Word = word,
             };
             token =  DataCache.TokenCreate(token, context);
-            if (token is null || token.UniqueKey == null)
+            if (token is null)
             {
-                ErrorHandler.LogAndThrow(2290);
+                ErrorHandler.LogAndThrow();
                 return null;
             }
             return token;
         }
         public static async Task<Token?> TokenCreateAsync(IdiomaticaContext context,
-           string display, Guid sentenceId, int ordinal, Guid wordId)
+           string display, Sentence sentence, int ordinal, Word word)
         {
             return await Task<Token?>.Run(() =>
             {
-                return TokenCreate(context, display, sentenceId, ordinal, wordId);
+                return TokenCreate(context, display, sentence, ordinal, word);
             });
         }
 
@@ -105,30 +108,14 @@ namespace Logic.Services.API
 
 
         public static List<Token> TokensCreateFromSentence(IdiomaticaContext context,
-            Guid sentenceId, Guid languageId)
+            Sentence sentence, Language language)
         {
-            var sentence = DataCache.SentenceByIdRead(sentenceId, context);
-            if (sentence == null || string.IsNullOrEmpty(sentence.Text))
-            {
-                ErrorHandler.LogAndThrow();
-                return new List<Token>();
-            }
-
             // check if any already exist. there shouldn't be any but whateves
-            DataCache.TokenBySentenceIdDelete(sentenceId, context);
-
-            var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null ||
-                language.UniqueKey is null ||
-                string.IsNullOrEmpty(language.Code))
-            {
-                ErrorHandler.LogAndThrow();
-                return new List<Token>();
-            }
+            DataCache.TokenBySentenceIdDelete(sentence.UniqueKey, context);
 
             // create the words first
-            List<(Word? word, int? ordinal, string? tokenDisplay)> words = WordApi.WordsCreateOrderedFromSentenceId(
-                context, languageId, sentenceId);
+            List<(Word? word, int? ordinal, string? tokenDisplay)> words = 
+                WordApi.WordsCreateOrderedFromSentenceId(context, language, sentence);
 
             if (words.Count < 1) return new List<Token>();
 
@@ -136,16 +123,16 @@ namespace Logic.Services.API
             List<Token> tokens = [];
             foreach (var x in words)
             {
-                if (x.word is null || x.word.UniqueKey is null ||
+                if (x.word is null ||
                     x.word.Text is null || x.ordinal is null || x.tokenDisplay is null) continue;
                 Token? newToken = TokenCreate(
                     context,
-                    $"{x.tokenDisplay} ", // display; add the space that you previously took out
-                    sentenceId,
+                    $"{x.tokenDisplay} ", // add the space that you previously took out
+                    sentence,
                     (int)x.ordinal,
-                    (Guid)x.word.UniqueKey
+                    x.word
                     );
-                if(newToken is null || newToken.UniqueKey is null)
+                if(newToken is null)
                 {
                     ErrorHandler.LogAndThrow();
                     return [];

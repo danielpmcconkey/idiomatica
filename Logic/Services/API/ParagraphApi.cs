@@ -16,27 +16,29 @@ namespace Logic.Services.API
     public static class ParagraphApi
     {
         public static Paragraph? ParagraphCreateFromSplit(
-            IdiomaticaContext context, string splitText, Guid pageId,
-            int ordinal, Guid languageId)
+            IdiomaticaContext context, string splitText, Page page,
+            int ordinal, Language language)
         {
             if (splitText.Trim() == string.Empty) return null;
             if (ordinal < 0) ErrorHandler.LogAndThrow();
 
             var paragraph = new Paragraph()
             {
+                UniqueKey = Guid.NewGuid(),
                 Ordinal = ordinal,
-                PageKey = pageId
+                PageKey = page.UniqueKey,
+                Page = page,
             };
             paragraph = DataCache.ParagraphCreate(paragraph, context);
-            if (paragraph is null || paragraph.UniqueKey is null)
+            if (paragraph is null)
             {
-                ErrorHandler.LogAndThrow(2270);
+                ErrorHandler.LogAndThrow();
                 return null;
             }
 
             // now create the sentences
             var sentenceSplits = SentenceApi.PotentialSentencesSplitFromText(
-                context, splitText, languageId);
+                context, splitText, language);
             int sentenceOrdinal = 0;
             foreach (var sentenceSplit in sentenceSplits)
             {
@@ -44,8 +46,8 @@ namespace Logic.Services.API
                 var trimmedSentenceSplit = sentenceSplit.Trim();
                 if (string.IsNullOrEmpty(trimmedSentenceSplit)) continue;
                 var sentence = SentenceApi.SentenceCreate(
-                    context, trimmedSentenceSplit, languageId, sentenceOrdinal, (Guid)paragraph.UniqueKey);
-                if (sentence is null || sentence.UniqueKey is  null)
+                    context, trimmedSentenceSplit, language, sentenceOrdinal, paragraph);
+                if (sentence is null)
                 {
                     ErrorHandler.LogAndThrow();
                     return null;
@@ -54,7 +56,9 @@ namespace Logic.Services.API
                 // the paragraph when it creates the sentence with that
                 // paragraph ID. so only add it if not there already
                 if (paragraph.Sentences is null) paragraph.Sentences = [];
-                else if (paragraph.Sentences.Where(x => x.UniqueKey == sentence.UniqueKey).FirstOrDefault() is null)
+                else if (paragraph.Sentences
+                    .Where(x => x.UniqueKey == sentence.UniqueKey)
+                    .FirstOrDefault() is null)
                 {
                     paragraph.Sentences.Add(sentence);
                 }
@@ -148,15 +152,15 @@ namespace Logic.Services.API
         {
             var paragraphs = new List<Paragraph>();
             var paragraphSplits = PotentialParagraphsSplitFromText(
-                context, page.OriginalText, language.Code);
+                context, page.OriginalText, language);
             int paragraphOrdinal = 0;
             foreach (var paragraphSplit in paragraphSplits)
             {
                 var paragraphSplitTrimmed = paragraphSplit.Trim();
                 if (string.IsNullOrEmpty(paragraphSplitTrimmed)) continue;
                 var paragraph = ParagraphCreateFromSplit(context,
-                    paragraphSplitTrimmed, pageId, paragraphOrdinal, languageId);
-                if (paragraph is not null && paragraph.UniqueKey is not null)
+                    paragraphSplitTrimmed, page, paragraphOrdinal, language);
+                if (paragraph is not null)
                 {
                     paragraphs.Add(paragraph);
                 }

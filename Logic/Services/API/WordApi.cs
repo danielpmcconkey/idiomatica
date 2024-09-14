@@ -143,29 +143,31 @@ namespace Logic.Services.API
             return verbToUse;
         }
         public static Word? WordCreate(IdiomaticaContext context,
-            Guid languageId, string text, string romanization)
+            Language language, string text, string romanization)
         {
             var newWord = new Word()
             {
-                LanguageKey = languageId,
+                UniqueKey = Guid.NewGuid(),
+                LanguageKey = language.UniqueKey,
+                Language = language,
                 Romanization = romanization,
                 Text = text.ToLower(),
                 TextLowerCase = text.ToLower(),
             };
             newWord = DataCache.WordCreate(newWord, context);
-            if (newWord is null || newWord.UniqueKey is null)
+            if (newWord is null)
             {
-                ErrorHandler.LogAndThrow(2350);
+                ErrorHandler.LogAndThrow();
                 return newWord;
             }
             return newWord;
         }        
         public static async Task<Word?> WordCreateAsync(IdiomaticaContext context,
-            Guid languageId, string text, string romanization)
+            Language language, string text, string romanization)
         {
             return await Task<Word?>.Run(() =>
             {
-                return WordCreate(context, languageId, text, romanization);
+                return WordCreate(context, language, text, romanization);
             });
         }
 
@@ -200,28 +202,13 @@ namespace Logic.Services.API
 
 
         public static List<(Word? word, int? ordinal, string? tokenDisplay)> WordsCreateOrderedFromSentenceId(
-            IdiomaticaContext context, Guid languageId, Guid sentenceId)
+            IdiomaticaContext context, Language language, Sentence sentence)
         {
             List<(Word? word, int? ordinal, string? tokenDisplay)> outList = [];
-            var sentence = DataCache.SentenceByIdRead(sentenceId, context);
-            if (sentence == null || string.IsNullOrEmpty(sentence.Text))
-            {
-                ErrorHandler.LogAndThrow();
-                return outList;
-            }
 
             // check if any already exist. there shouldn't be any but whateves
-            DataCache.TokenBySentenceIdDelete(sentenceId, context);
-
-            var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null ||
-                language.UniqueKey is null||
-                string.IsNullOrEmpty(language.Code))
-            {
-                ErrorHandler.LogAndThrow();
-                return outList;
-            }
-
+            DataCache.TokenBySentenceIdDelete(sentence.UniqueKey, context);
+            
             var parser = LanguageParser.Factory.GetLanguageParser(language);
             if (parser is null) { ErrorHandler.LogAndThrow(); return []; }
             var wordsSplits = parser.SegmentTextByWordsKeepingPunctuation(sentence.Text);
@@ -235,24 +222,25 @@ namespace Logic.Services.API
                 string? tokenDisplay = wordsSplits[i];
                 var cleanWord = parser.TextToLower(parser.StipNonWordCharacters(tokenDisplay));
                 word = DataCache.WordByLanguageIdAndTextLowerRead(
-                    ((Guid)languageId, cleanWord), context);
+                    (language.UniqueKey, cleanWord), context);
                 if (word is null)
                 {
                     // word doesn't exist; create it
                     word = WordApi.WordCreate(
-                        context, languageId, cleanWord, cleanWord);
+                        context, language, cleanWord, cleanWord);
                 }
                 
                 outList.Add((word, i, tokenDisplay));
             }
             return outList;
         }
-        public static async Task<List<(Word? word, int? ordinal, string? tokenDisplay)>> WordsCreateOrderedFromSentenceIdAsync(
-            IdiomaticaContext context, Guid languageId, Guid sentenceId)
+        public static async Task<List<(Word? word, int? ordinal, string? tokenDisplay)>> 
+            WordsCreateOrderedFromSentenceIdAsync(
+                IdiomaticaContext context, Language language, Sentence sentence)
         {
             return await Task<List<(Word? word, int? ordinal, string? tokenDisplay)>>.Run(() =>
             {
-                return WordsCreateOrderedFromSentenceId(context, languageId, sentenceId);
+                return WordsCreateOrderedFromSentenceId(context, language, sentence);
             });
         }
 

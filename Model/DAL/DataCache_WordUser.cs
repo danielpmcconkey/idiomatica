@@ -28,7 +28,6 @@ namespace Model.DAL
 
         public static WordUser? WordUserCreate(WordUser wordUser, IdiomaticaContext context)
         {
-            Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                 
                 INSERT INTO [Idioma].[WordUser]
@@ -46,21 +45,15 @@ namespace Model.DAL
                       ,{wordUser.Status}
                       ,{wordUser.Created}
                       ,{wordUser.StatusChanged}
-                      ,{guid})
+                      ,{wordUser.UniqueKey})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating WordUser affected 0 rows");
-            var newEntity = context.WordUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null)
-            {
-                throw new InvalidDataException("newEntity is null in WordUserCreate");
-            }
-
-
+            
             // add it to cache
-            WordUserById[(Guid)newEntity.UniqueKey] = newEntity;
+            WordUserById[wordUser.UniqueKey] = wordUser;
 
-            return newEntity;
+            return wordUser;
         }
         public static async Task<WordUser?> WordUserCreateAsync(WordUser value, IdiomaticaContext context)
         {

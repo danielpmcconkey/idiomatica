@@ -15,28 +15,29 @@ namespace Logic.Services.API
     public static class WordUserApi
     {
         public static WordUser? WordUserCreate(
-            IdiomaticaContext context, Guid wordId, Guid languageUserId, string? translation,
-            AvailableWordUserStatus? status)
+            IdiomaticaContext context, Word word, LanguageUser languageUser, string? translation,
+            AvailableWordUserStatus status)
         {
-            return WordUserCreateAsync(context, wordId, languageUserId, translation, status).Result;
+            return WordUserCreateAsync(context, word, languageUser, translation, status).Result;
         }
         public static async Task<WordUser?> WordUserCreateAsync(
-            IdiomaticaContext context, Guid wordId, Guid languageUserId, string? translation,
-            AvailableWordUserStatus? status)
+            IdiomaticaContext context, Word word, LanguageUser languageUser, string? translation,
+            AvailableWordUserStatus status)
         {
-            if (status is null) status = AvailableWordUserStatus.UNKNOWN;
-            
             WordUser? wu = new()
             {
-                WordKey = wordId,
-                LanguageUserKey = languageUserId,
+                UniqueKey = Guid.NewGuid(),
+                WordKey = word.UniqueKey,
+                Word = word,
+                LanguageUserKey = languageUser.UniqueKey,
+                LanguageUser = languageUser,
                 Translation = translation,
                 Status = status,
                 Created = DateTime.Now,
                 StatusChanged = DateTime.Now,
             };
             wu = await DataCache.WordUserCreateAsync(wu, context);
-            if (wu is null || wu.UniqueKey is null)
+            if (wu is null)
             {
                 ErrorHandler.LogAndThrow();
             }

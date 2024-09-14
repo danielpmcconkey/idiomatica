@@ -14,24 +14,17 @@ namespace Logic.Services.API
     public static class PageUserApi
     {
         public static PageUser? PageUserCreateForPageIdAndUserId(
-            IdiomaticaContext context, Guid pageId, Guid userId)
+            IdiomaticaContext context, Page page, User user)
         {
-            // set up all the de-nulled values
-            var page = DataCache.PageByIdRead(pageId, context);
-            if (page is null || page.BookKey is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
             var book = DataCache.BookByIdRead((Guid)page.BookKey, context);
-            if (book is null || book.UniqueKey is null || book.LanguageKey is null)
+            if (book is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
             }
             var languageUser = DataCache.LanguageUserByLanguageIdAndUserIdRead(
-                ((Guid)book.LanguageKey, userId), context);
-            if (languageUser is null || languageUser.UniqueKey is null)
+                (book.LanguageKey, user.UniqueKey), context);
+            if (languageUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
@@ -39,14 +32,14 @@ namespace Logic.Services.API
 
             // make sure it doesn't already exist
             var existingPageUser = DataCache.PageUserByPageIdAndLanguageUserIdRead(
-                (pageId, (Guid)languageUser.UniqueKey), context);
+                (page.UniqueKey, languageUser.UniqueKey), context);
             if (existingPageUser is not null) return existingPageUser;
 
             // nope, definitely create it
             // but first, more stuff to look up
             var bookUser = DataCache.BookUserByBookIdAndUserIdRead(
-                ((Guid)book.UniqueKey, userId), context);
-            if (bookUser is null || bookUser.UniqueKey is null)
+                (book.UniqueKey, user.UniqueKey), context);
+            if (bookUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
@@ -54,23 +47,26 @@ namespace Logic.Services.API
             // save it for real
             var pageUser = new PageUser()
             {
+                UniqueKey = Guid.NewGuid(),
                 BookUserKey = bookUser.UniqueKey,
-                PageKey = pageId
+                BookUser = bookUser,
+                PageKey = page.UniqueKey,
+                Page = page,
             };
             pageUser = DataCache.PageUserCreate(pageUser, context);
-            if (pageUser is null || pageUser.UniqueKey is null)
+            if (pageUser is null)
             {
-                ErrorHandler.LogAndThrow(2310);
+                ErrorHandler.LogAndThrow();
                 return null;
             }
             return pageUser;
         }
         public static async Task<PageUser?> PageUserCreateForPageIdAndUserIdAsync(
-            IdiomaticaContext context, Guid pageId, Guid userId)
+            IdiomaticaContext context, Page page, User user)
         {
             return await Task<PageUser?>.Run(() =>
             {
-                return PageUserCreateForPageIdAndUserId(context, pageId, userId);
+                return PageUserCreateForPageIdAndUserId(context, page, user);
             });
         }
 
@@ -100,16 +96,6 @@ namespace Logic.Services.API
         {
             var bookUser = DataCache.BookUserByIdRead(bookUserId, context);
             if (bookUser is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            if (bookUser.LanguageUserKey is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            if (bookUser.BookKey is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;

@@ -19,7 +19,6 @@ namespace Model.DAL
 
         public static Token? TokenCreate(Token token, IdiomaticaContext context)
         {
-            Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Token]
@@ -33,21 +32,15 @@ namespace Model.DAL
                       ,{token.SentenceKey}
                       ,{token.Display}
                       ,{token.Ordinal}
-                      ,{guid})
+                      ,{token.UniqueKey})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Token affected 0 rows");
-            var newEntity = context.Tokens.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null)
-            {
-                throw new InvalidDataException("newEntity is null in TokenCreate");
-            }
-
-
+            
             // add it to cache
-            TokenById[(Guid)newEntity.UniqueKey] = newEntity;
+            TokenById[token.UniqueKey] = token;
 
-            return newEntity;
+            return token;
         }
         public static async Task<Token?> TokenCreateAsync(Token value, IdiomaticaContext context)
         {
