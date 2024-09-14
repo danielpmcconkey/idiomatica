@@ -106,6 +106,7 @@ namespace Model.DAL
                     .HasForeignKey(bt => bt.BookKey).OnDelete(DeleteBehavior.Cascade);
                 e.HasOne(bt => bt.User).WithMany(b => b.BookTags)
                     .HasForeignKey(bt => bt.UserKey).OnDelete(DeleteBehavior.Cascade);
+                e.HasIndex(bt => new { bt.UserKey, bt.BookKey, bt.Tag }).IsUnique();
             });
             modelBuilder.Entity<BookUser>(e => {
                 e.HasKey(bu => bu.UniqueKey);
@@ -117,6 +118,7 @@ namespace Model.DAL
                     .HasForeignKey(pu => pu.BookUserKey);
                 e.HasOne(bu => bu.CurrentPage).WithMany(p => p.BookUsersBookMarks)
                     .HasForeignKey(bu => bu.CurrentPageKey).OnDelete(DeleteBehavior.NoAction);
+                e.HasIndex(bu => new { bu.BookKey, bu.LanguageUserKey }).IsUnique();
             });
             modelBuilder.Entity<BookUserStat>(e => {
                 e.HasKey(bus => new {bus.BookKey, bus.LanguageUserKey, bus.Key});
@@ -133,6 +135,7 @@ namespace Model.DAL
                     .HasForeignKey(fcpbt => fcpbt.FlashCardKey);
                 e.HasMany(fc => fc.Attempts).WithOne(fca => fca.FlashCard).HasForeignKey(fca => fca.FlashCardKey);
                 e.Property(fc => fc.Status).HasConversion<int>();
+                e.HasIndex(fc => fc.WordUserKey).IsUnique();
             });
             modelBuilder.Entity<FlashCardAttempt>(e => {
                 e.HasKey(fca => fca.UniqueKey);
@@ -146,6 +149,7 @@ namespace Model.DAL
                     .HasForeignKey(fcptb => fcptb.FlashCardKey).OnDelete(DeleteBehavior.Cascade);
                 e.HasOne(fcptb => fcptb.ParagraphTranslation).WithMany(pt => pt.FlashCardParagraphTranslationBridges)
                     .HasForeignKey(fcptb => fcptb.ParagraphTranslationKey).OnDelete(DeleteBehavior.NoAction);
+                e.HasIndex(fcptb => new { fcptb.ParagraphTranslationKey, fcptb.FlashCardKey }).IsUnique();
             });
             modelBuilder.Entity<Language>(e => {
                 e.HasKey(l => l.UniqueKey);
@@ -157,6 +161,7 @@ namespace Model.DAL
                 e.HasMany(l => l.ParagraphTranslations).WithOne(pt => pt.Language)
                     .HasForeignKey(pt => pt.LanguageKey);
                 e.Property(l => l.Code).HasConversion<int>();
+                e.HasIndex(l => l.Code).IsUnique();
             });
             modelBuilder.Entity<LanguageUser>(e => {
                 e.HasKey(lu => lu.UniqueKey);
@@ -164,10 +169,11 @@ namespace Model.DAL
                     .HasForeignKey(lu => lu.UserKey).OnDelete(DeleteBehavior.Cascade);
                 e.HasOne(lu => lu.Language).WithMany(l => l.LanguageUsers)
                     .HasForeignKey(lu => lu.LanguageKey).OnDelete(DeleteBehavior.Cascade);
-                e.HasMany(l => l.BookUsers).WithOne(bu => bu.LanguageUser)
+                e.HasMany(lu => lu.BookUsers).WithOne(bu => bu.LanguageUser)
                     .HasForeignKey(bu => bu.LanguageUserKey);
-                e.HasMany(l => l.WordUsers).WithOne(w => w.LanguageUser)
+                e.HasMany(lu => lu.WordUsers).WithOne(w => w.LanguageUser)
                     .HasForeignKey(w => w.LanguageUserKey);
+                e.HasIndex(lu => new { lu.LanguageKey, lu.UserKey }).IsUnique();
             });
             modelBuilder.Entity<Page>(e => {
                 e.HasKey(p => p.UniqueKey);
@@ -179,6 +185,7 @@ namespace Model.DAL
                 e.HasMany(p => p.BookUsersBookMarks)
                     .WithOne(bu => bu.CurrentPage)
                     .HasForeignKey(bu => bu.CurrentPageKey);
+                e.HasIndex(p => new { p.BookKey, p.Ordinal }).IsUnique();
             });
             modelBuilder.Entity<PageUser>(e => {
                 e.HasKey(pu => pu.UniqueKey);
@@ -186,6 +193,7 @@ namespace Model.DAL
                     .HasForeignKey(pu => pu.BookUserKey).OnDelete(DeleteBehavior.Cascade);
                 e.HasOne(pu => pu.Page).WithMany(p => p.PageUsers)
                     .HasForeignKey(pu => pu.PageKey).OnDelete(DeleteBehavior.NoAction);
+                e.HasIndex(pu => new { pu.PageKey, pu.BookUserKey }).IsUnique();
             });
             modelBuilder.Entity<Paragraph>(e => {
                 e.HasKey(pp => pp.UniqueKey);
@@ -195,6 +203,7 @@ namespace Model.DAL
                 e.HasMany(pp => pp.ParagraphTranslations)
                     .WithOne(ppt => ppt.Paragraph)
                     .HasForeignKey(ppt => ppt.ParagraphKey);
+                e.HasIndex(pp => new { pp.PageKey, pp.Ordinal }).IsUnique();
             });
             modelBuilder.Entity<ParagraphTranslation>(e =>
             {
@@ -205,12 +214,14 @@ namespace Model.DAL
                 e.HasOne(ppt => ppt.Paragraph)
                     .WithMany(pp => pp.ParagraphTranslations)
                     .HasForeignKey(ppt => ppt.ParagraphKey).OnDelete(DeleteBehavior.Cascade);
+                e.HasIndex(ppt => new { ppt.ParagraphKey, ppt.LanguageKey }).IsUnique();
             });
             modelBuilder.Entity<Sentence>(e => {
                 e.HasKey(s => s.UniqueKey);
                 e.HasOne(s => s.Paragraph).WithMany(pp => pp.Sentences)
                     .HasForeignKey(s => s.ParagraphKey).OnDelete(DeleteBehavior.Cascade);
                 e.HasMany(s => s.Tokens).WithOne(t => t.Sentence).HasForeignKey(t => t.SentenceKey);
+                e.HasIndex(s => new { s.ParagraphKey, s.Ordinal }).IsUnique();
             });
             modelBuilder.Entity<Token>(e => {
                 e.HasKey(t => t.UniqueKey);
@@ -218,20 +229,22 @@ namespace Model.DAL
                     .HasForeignKey(t => t.SentenceKey).OnDelete(DeleteBehavior.Cascade);
                 e.HasOne(t => t.Word).WithMany(w => w.Tokens)
                     .HasForeignKey(t => t.WordKey).OnDelete(DeleteBehavior.NoAction);
+                e.HasIndex(t => new { t.SentenceKey, t.Ordinal }).IsUnique();
             });
             modelBuilder.Entity<User>(e => {
                 e.HasKey(u => u.UniqueKey);
                 e.HasMany(u => u.LanguageUsers).WithOne(lu => lu.User).HasForeignKey(u => u.UserKey);
                 e.HasMany(u => u.UserSettings).WithOne(us => us.User).HasForeignKey(us => us.UserKey);
                 e.HasMany(u => u.UserBreadCrumbs).WithOne(ubc => ubc.User).HasForeignKey(ubc => ubc.UserKey);
+                e.HasIndex(u => u.ApplicationUserId).IsUnique();
             });
             modelBuilder.Entity<UserBreadCrumb>(e =>
             {
                 e.HasKey(ubc => ubc.UniqueKey);
                 e.HasOne(ubc => ubc.User).WithMany(u => u.UserBreadCrumbs)
-                    .HasForeignKey(ubc => ubc.UserKey).OnDelete(DeleteBehavior.Cascade); ;
+                    .HasForeignKey(ubc => ubc.UserKey).OnDelete(DeleteBehavior.Cascade);
                 e.HasOne(ubc => ubc.Page).WithMany(p => p.UserBreadCrumbs)
-                    .HasForeignKey(ubc => ubc.PageKey).OnDelete(DeleteBehavior.Cascade); ;
+                    .HasForeignKey(ubc => ubc.PageKey).OnDelete(DeleteBehavior.Cascade);
             });
             modelBuilder.Entity<UserSetting>(e => {
                 e.HasKey(us => new { us.UserKey, us.Key });
@@ -253,6 +266,7 @@ namespace Model.DAL
                 e.HasMany(w => w.WordUsers).WithOne(wu => wu.Word).HasForeignKey(wu => wu.WordKey);
                 e.HasOne(w => w.WordRank).WithOne(wr => wr.Word)
                     .HasForeignKey<WordRank>(wr => wr.WordKey).OnDelete(DeleteBehavior.Cascade);
+                e.HasIndex(w => new { w.LanguageKey, w.TextLowerCase }).IsUnique();
             });
             modelBuilder.Entity<WordRank>(e =>
             {
@@ -261,6 +275,8 @@ namespace Model.DAL
                     .HasForeignKey(wr => wr.LanguageKey).OnDelete(DeleteBehavior.Cascade);
                 e.HasOne(wr => wr.Word).WithOne(w => w.WordRank)
                     .HasForeignKey<WordRank>(wr => wr.WordKey).OnDelete(DeleteBehavior.NoAction);
+                e.HasIndex(wr => new { wr.LanguageKey, wr.WordKey }).IsUnique();
+                e.HasIndex(wr => new { wr.LanguageKey, wr.Ordinal }).IsUnique();
             });
             modelBuilder.Entity<WordTranslation>(e => {
                 e.HasKey(wt => wt.UniqueKey);
@@ -279,6 +295,7 @@ namespace Model.DAL
                 e.HasOne(wu => wu.Word).WithMany(w => w.WordUsers)
                     .HasForeignKey(wu => wu.WordKey).OnDelete(DeleteBehavior.NoAction);
                 e.Property(wu => wu.Status).HasConversion<int>();
+                e.HasIndex(wu => new { wu.WordKey, wu.LanguageUserKey }).IsUnique();
             });
 
             // created by Microsoft.AspNetCore.Identity.EntityFrameworkCore

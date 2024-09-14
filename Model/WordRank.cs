@@ -24,7 +24,7 @@ namespace Model
         public required Language Language { get; set; }
 
         [Required] public required Guid WordKey { get; set; }
-       public required Word Word { get; set; }
+        public required Word Word { get; set; }
 
         [Column(TypeName = "numeric(8,2)")]
         [Required] public required decimal DifficultyScore { get; set; }
