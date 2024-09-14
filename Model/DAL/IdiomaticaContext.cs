@@ -18,12 +18,11 @@ namespace Model.DAL
      * desktop.
      * 
      * you've started on the script but got distracted with the DB migration
-     * stuff. you just made a bunch of fields required and cleaned up a bit of
-     * dodgy DB design. that gives you errors you need to fix in code.
+     * stuff. you dove into a major refactor and have finally fixed the build
+     * errors.
      * 
      * order of operations
-     *     1. fix the build errors
-     *     add unique constraints to the model
+     *     1. change the "UniqueKey" names to "Id"
      *     2. get this running in a new DB (probably by finishing the fresh DB
      *        script)
      *     3. get all unit tests to pass
@@ -33,7 +32,8 @@ namespace Model.DAL
      *             needed anyway if you can't get migrations to work)
      *          b. rename the existing db and install a new one, then migrate
      *             data
-     *     6. update documentation and archi for justin
+     *     6. figure out whether you can go back to context.save
+     *     7. update documentation and archi for justin
      * 
      * 
      * */
