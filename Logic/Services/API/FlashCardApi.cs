@@ -243,24 +243,24 @@ namespace Logic.Services.API
 
         public static FlashCard? FlashCardUpdate(
             IdiomaticaContext context, Guid cardId, Guid wordUserId, 
-            AvailableFlashCardStatus status, DateTime nextReview, Guid uniqueKey)
+            AvailableFlashCardStatus status, DateTime nextReview, Guid id)
         {
             var card = DataCache.FlashCardByIdRead(cardId, context);
             if (card == null) { ErrorHandler.LogAndThrow(); return null; }
             card.WordUserId = wordUserId;
             card.NextReview = nextReview;
             card.Status = status;
-            card.Id = uniqueKey;
+            card.Id = id;
             DataCache.FlashCardUpdate(card, context);
             return card;
         }
         public static async Task<FlashCard?> FlashCardUpdateAsync(
             IdiomaticaContext context, Guid cardId, Guid wordUserId, 
-            AvailableFlashCardStatus status, DateTime nextReview, Guid uniqueKey)
+            AvailableFlashCardStatus status, DateTime nextReview, Guid id)
         {
             return await Task<FlashCard?>.Run(() =>
             {
-                return FlashCardUpdate(context, cardId, wordUserId, status, nextReview, uniqueKey);
+                return FlashCardUpdate(context, cardId, wordUserId, status, nextReview, id);
             });
         }
     }

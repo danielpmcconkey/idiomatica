@@ -339,7 +339,7 @@ namespace Logic.Services.API.Tests
         public void WordUserReadByIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
             Guid wordUserId = CommonFunctions.GetWordUser(context, languageUserId, "vivían");
             AvailableWordUserStatus status = AvailableWordUserStatus.LEARNED;
             string translation = "they were living (imperfect)";
@@ -353,7 +353,7 @@ namespace Logic.Services.API.Tests
         public async Task WordUserReadByIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
             Guid wordUserId = CommonFunctions.GetWordUser(context, languageUserId, "vivían");
             AvailableWordUserStatus status = AvailableWordUserStatus.LEARNED;
             string translation = "they were living (imperfect)";

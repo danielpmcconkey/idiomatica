@@ -12,13 +12,13 @@ namespace Model.DAL
     public static partial class DataCache
     {
         private static ConcurrentDictionary<Guid, FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridgeById = [];
-        private static ConcurrentDictionary<(Guid flashCardId, Guid uiLanguageKey), List<FlashCardParagraphTranslationBridge>>
+        private static ConcurrentDictionary<(Guid flashCardId, Guid uiLanguageId), List<FlashCardParagraphTranslationBridge>>
             FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode = [];
 
         #region read
         public static List<FlashCardParagraphTranslationBridge>?
             FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCodeRead(
-            (Guid flashCardId, Guid uiLanguageKey) key, IdiomaticaContext context)
+            (Guid flashCardId, Guid uiLanguageId) key, IdiomaticaContext context)
         {
             // check cache
             if (FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode.ContainsKey(key))
@@ -29,7 +29,7 @@ namespace Model.DAL
             // read DB
             var bridges = (from fcptb in context.FlashCardParagraphTranslationBridges
                           join pt in context.ParagraphTranslations on fcptb.ParagraphTranslationId equals pt.Id
-                          where pt.LanguageId == key.uiLanguageKey && fcptb.FlashCardId == key.flashCardId
+                          where pt.LanguageId == key.uiLanguageId && fcptb.FlashCardId == key.flashCardId
                           select fcptb).ToList();
             FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode[key] = bridges;
             return bridges;
@@ -70,8 +70,8 @@ namespace Model.DAL
         {
             int numRows = context.Database.ExecuteSql($"""
             INSERT INTO [Idioma].[FlashCardParagraphTranslationBridge]
-                        ([FlashCardKey]
-                        ,[ParagraphTranslationKey]
+                        ([FlashCardId]
+                        ,[ParagraphTranslationId]
                         ,[Id])
                     VALUES
                         ({fcptb.FlashCardId}

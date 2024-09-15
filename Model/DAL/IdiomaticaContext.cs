@@ -22,7 +22,6 @@ namespace Model.DAL
      * errors.
      * 
      * order of operations
-     *     1. change the "Id" names to "Id"
      *     2. get this running in a new DB (probably by finishing the fresh DB
      *        script)
      *     3. get all unit tests to pass

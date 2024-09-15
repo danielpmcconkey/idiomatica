@@ -46,7 +46,7 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                                 
                 INSERT INTO [Idioma].[Book]
-                           ([LanguageKey]
+                           ([LanguageId]
                            ,[Title]
                            ,[SourceURI]
                            ,[Id])
@@ -81,12 +81,12 @@ namespace Model.DAL
                 left join [Idioma].[BookTag] bt on b.Id = bt.BookId
                 left join [Idioma].[BookUserStat] bus on b.Id = bus.BookId
                 left join [Idioma].[Page] p on b.Id = p.BookId
-                left join [Idioma].[PageUser] pu on pu.PageKey = p.Id
-                left join [Idioma].[Paragraph] pp on p.Id = pp.PageKey
-                left join [Idioma].[ParagraphTranslation] ppt on pp.Id = ppt.ParagraphKey
-                left join [Idioma].[FlashCardParagraphTranslationBridge] fcptb on ppt.Id = fcptb.ParagraphTranslationKey
-                left join [Idioma].[Sentence] s on pp.Id = s.ParagraphKey
-                left join [Idioma].[Token] t on s.Id = t.SentenceKey
+                left join [Idioma].[PageUser] pu on pu.PageId = p.Id
+                left join [Idioma].[Paragraph] pp on p.Id = pp.PageId
+                left join [Idioma].[ParagraphTranslation] ppt on pp.Id = ppt.ParagraphId
+                left join [Idioma].[FlashCardParagraphTranslationBridge] fcptb on ppt.Id = fcptb.ParagraphTranslationId
+                left join [Idioma].[Sentence] s on pp.Id = s.ParagraphId
+                left join [Idioma].[Token] t on s.Id = t.SentenceId
                 where b.Id = {bookId};
 
                 delete s
@@ -96,11 +96,11 @@ namespace Model.DAL
                 left join [Idioma].[BookTag] bt on b.Id = bt.BookId
                 left join [Idioma].[BookUserStat] bus on b.Id = bus.BookId
                 left join [Idioma].[Page] p on b.Id = p.BookId
-                left join [Idioma].[PageUser] pu on pu.PageKey = p.Id
-                left join [Idioma].[Paragraph] pp on p.Id = pp.PageKey
-                left join [Idioma].[ParagraphTranslation] ppt on pp.Id = ppt.ParagraphKey
-                left join [Idioma].[FlashCardParagraphTranslationBridge] fcptb on ppt.Id = fcptb.ParagraphTranslationKey
-                left join [Idioma].[Sentence] s on pp.Id = s.ParagraphKey
+                left join [Idioma].[PageUser] pu on pu.PageId = p.Id
+                left join [Idioma].[Paragraph] pp on p.Id = pp.PageId
+                left join [Idioma].[ParagraphTranslation] ppt on pp.Id = ppt.ParagraphId
+                left join [Idioma].[FlashCardParagraphTranslationBridge] fcptb on ppt.Id = fcptb.ParagraphTranslationId
+                left join [Idioma].[Sentence] s on pp.Id = s.ParagraphId
                 where b.Id = {bookId};
 
                 delete fcptb
@@ -110,10 +110,10 @@ namespace Model.DAL
                 left join [Idioma].[BookTag] bt on b.Id = bt.BookId
                 left join [Idioma].[BookUserStat] bus on b.Id = bus.BookId
                 left join [Idioma].[Page] p on b.Id = p.BookId
-                left join [Idioma].[PageUser] pu on pu.PageKey = p.Id
-                left join [Idioma].[Paragraph] pp on p.Id = pp.PageKey
-                left join [Idioma].[ParagraphTranslation] ppt on pp.Id = ppt.ParagraphKey
-                left join [Idioma].[FlashCardParagraphTranslationBridge] fcptb on ppt.Id = fcptb.ParagraphTranslationKey
+                left join [Idioma].[PageUser] pu on pu.PageId = p.Id
+                left join [Idioma].[Paragraph] pp on p.Id = pp.PageId
+                left join [Idioma].[ParagraphTranslation] ppt on pp.Id = ppt.ParagraphId
+                left join [Idioma].[FlashCardParagraphTranslationBridge] fcptb on ppt.Id = fcptb.ParagraphTranslationId
                 where b.Id = {bookId};
 
                 delete ppt
@@ -123,9 +123,9 @@ namespace Model.DAL
                 left join [Idioma].[BookTag] bt on b.Id = bt.BookId
                 left join [Idioma].[BookUserStat] bus on b.Id = bus.BookId
                 left join [Idioma].[Page] p on b.Id = p.BookId
-                left join [Idioma].[PageUser] pu on pu.PageKey = p.Id
-                left join [Idioma].[Paragraph] pp on p.Id = pp.PageKey
-                left join [Idioma].[ParagraphTranslation] ppt on pp.Id = ppt.ParagraphKey
+                left join [Idioma].[PageUser] pu on pu.PageId = p.Id
+                left join [Idioma].[Paragraph] pp on p.Id = pp.PageId
+                left join [Idioma].[ParagraphTranslation] ppt on pp.Id = ppt.ParagraphId
                 where b.Id = {bookId};
 
                 delete pp
@@ -135,8 +135,8 @@ namespace Model.DAL
                 left join [Idioma].[BookTag] bt on b.Id = bt.BookId
                 left join [Idioma].[BookUserStat] bus on b.Id = bus.BookId
                 left join [Idioma].[Page] p on b.Id = p.BookId
-                left join [Idioma].[PageUser] pu on pu.PageKey = p.Id
-                left join [Idioma].[Paragraph] pp on p.Id = pp.PageKey
+                left join [Idioma].[PageUser] pu on pu.PageId = p.Id
+                left join [Idioma].[Paragraph] pp on p.Id = pp.PageId
                 where b.Id = {bookId};
 
                 delete pu
@@ -146,7 +146,7 @@ namespace Model.DAL
                 left join [Idioma].[BookTag] bt on b.Id = bt.BookId
                 left join [Idioma].[BookUserStat] bus on b.Id = bus.BookId
                 left join [Idioma].[Page] p on b.Id = p.BookId
-                left join [Idioma].[PageUser] pu on pu.PageKey = p.Id
+                left join [Idioma].[PageUser] pu on pu.PageId = p.Id
                 where b.Id = {bookId};
 
                 delete p

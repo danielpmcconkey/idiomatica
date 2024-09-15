@@ -202,7 +202,7 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid languageId = CommonFunctions.GetEnglishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetEnglishLanguageId(context);
             Language language = CommonFunctions.GetSpanishLanguage(context);
             string expectedResult = "English";
 
@@ -249,7 +249,7 @@ namespace Logic.Services.API.Tests
         {
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid languageId = CommonFunctions.GetEnglishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetEnglishLanguageId(context);
             Language language = CommonFunctions.GetSpanishLanguage(context);
             string expectedResult = "English";
 

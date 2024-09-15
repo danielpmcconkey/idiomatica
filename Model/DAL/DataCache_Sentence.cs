@@ -111,7 +111,7 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Sentence]
-                      ([ParagraphKey]
+                      ([ParagraphId]
                       ,[Ordinal]
                       ,[Text]
                       ,[Id])

@@ -24,8 +24,8 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[PageUser]
-                      ([BookUserKey]
-                      ,[PageKey]
+                      ([BookUserId]
+                      ,[PageId]
                       ,[ReadDate]
                       ,[Id])
                 VALUES
@@ -35,7 +35,7 @@ namespace Model.DAL
                       ,{pageUser.Id})
         
                 """);
-            if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
+            if (numRows < 1) throw new InvalidDataException("creating PageUser affected 0 rows");
             
             // add it to cache
             PageUserUpdateAllCaches(pageUser);
@@ -176,8 +176,8 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                                 
                 UPDATE [Idioma].[PageUser]
-                   SET [BookUserKey] = {value.BookUserId}
-                      ,[PageKey] = {value.PageId}
+                   SET [BookUserId] = {value.BookUserId}
+                      ,[PageId] = {value.PageId}
                       ,[ReadDate] = {value.ReadDate}
                       ,[Id] = {value.Id}
                  WHERE Id = {value.Id}

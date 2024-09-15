@@ -170,7 +170,7 @@ namespace Logic.Services.API.Tests
         public void ParagraphExamplePullRandomByFlashCardIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            var languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
+            var languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
             Guid flashCardId = CommonFunctions.GetFlashCard1Id(context, languageUserId);
             AvailableLanguageCode uiLangugaeCode = AvailableLanguageCode.EN_US;
             int numTries = 5;
@@ -213,7 +213,7 @@ namespace Logic.Services.API.Tests
         public async Task ParagraphExamplePullRandomByFlashCardIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            var languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
+            var languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
             Guid flashCardId = CommonFunctions.GetFlashCard1Id(context, languageUserId);
             AvailableLanguageCode uiLangugaeCode = AvailableLanguageCode.EN_US;
             int numTries = 5;

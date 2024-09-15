@@ -23,8 +23,8 @@ namespace Model.DAL
                 
                 INSERT INTO [Idioma].UserBreadCrumb
                            ([Id]
-                           ,[UserKey]
-                           ,[PageKey]
+                           ,[UserId]
+                           ,[PageId]
                            ,[ActionDateTime]
                            )
                      VALUES
@@ -43,6 +43,7 @@ namespace Model.DAL
             return await Task.Run(() => { return UserBreadCrumbCreate(value, context); });
         }
         #endregion
+
         #region read
         public static List<UserBreadCrumb> UserBreadCrumbReadByFilter(
             Expression<Func<UserBreadCrumb, bool>> filter, int take, IdiomaticaContext context)

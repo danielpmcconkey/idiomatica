@@ -490,7 +490,7 @@ namespace Logic.Services.API.Tests
         public void PageUserReadByPageIdAndLanguageUserIdTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
             Guid pageId = CommonFunctions.GetPage384Id(context);
             Guid pageUserIdExpected = CommonFunctions.GetPageUser380Id(context, languageUserId);
 
@@ -506,7 +506,7 @@ namespace Logic.Services.API.Tests
         public async Task PageUserReadByPageIdAndLanguageUserIdAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
             Guid pageId = CommonFunctions.GetPage384Id(context);
             Guid pageUserIdExpected = CommonFunctions.GetPageUser380Id(context, languageUserId);
 

@@ -25,7 +25,7 @@ namespace Logic.Services.API.Tests
             var context = CommonFunctions.CreateContext();
             int expectedStatsCount = 8;
             string expectedProgress = "0 / 3";
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
 
 
             try
@@ -76,7 +76,7 @@ namespace Logic.Services.API.Tests
             var context = CommonFunctions.CreateContext();
             int expectedStatsCount = 8;
             string expectedProgress = "0 / 3";
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
 
 
             try

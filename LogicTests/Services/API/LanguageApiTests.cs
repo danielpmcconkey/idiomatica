@@ -21,7 +21,7 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
 
-            Guid languageId = CommonFunctions.GetEnglishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetEnglishLanguageId(context);
             AvailableLanguageCode expectedCode = AvailableLanguageCode.EN_US;
             
             var language = LanguageApi.LanguageRead(context, languageId);
@@ -35,7 +35,7 @@ namespace Logic.Services.API.Tests
         public async Task LanguageReadAsyncTest()
         {
             var context = CommonFunctions.CreateContext();
-            Guid languageId = CommonFunctions.GetEnglishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetEnglishLanguageId(context);
             AvailableLanguageCode expectedCode = AvailableLanguageCode.EN_US;
 
             var language = await LanguageApi.LanguageReadAsync(context, languageId);
@@ -51,7 +51,7 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
             AvailableLanguageCode code = AvailableLanguageCode.EN_US;
-            Guid expectedId = CommonFunctions.GetEnglishLanguageKey(context);
+            Guid expectedId = CommonFunctions.GetEnglishLanguageId(context);
 
             var language = LanguageApi.LanguageReadByCode(context, code);
             if (language == null)
@@ -66,7 +66,7 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
             AvailableLanguageCode code = AvailableLanguageCode.EN_US;
-            Guid expectedId = CommonFunctions.GetEnglishLanguageKey(context);
+            Guid expectedId = CommonFunctions.GetEnglishLanguageId(context);
             var language = await LanguageApi.LanguageReadByCodeAsync(context, code);
             if (language == null)
                 { ErrorHandler.LogAndThrow(); return; }

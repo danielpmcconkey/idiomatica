@@ -20,7 +20,7 @@ namespace Model.DAL
             {
                 context.Database.ExecuteSql($"""
                     INSERT INTO [Idioma].[BookUserStat]
-                               ([LanguageUserKey]
+                               ([LanguageUserId]
                                ,[BookId]
                                ,[Key]
                                ,[ValueString]
@@ -97,9 +97,9 @@ namespace Model.DAL
             context.Database.ExecuteSql($"""
                 delete bus
                 from [Idioma].[BookUserStat] bus
-                left join [Idioma].[LanguageUser] lu on bus.LanguageUserKey = lu.Id
+                left join [Idioma].[LanguageUser] lu on bus.LanguageUserId = lu.Id
                 where bus.BookId = {key.bookId}
-                and lu.UserKey = {key.userId}
+                and lu.UserId = {key.userId}
                 """);
             // remove from cache
             if (BookUserStatsByBookIdAndUserId.ContainsKey(key))

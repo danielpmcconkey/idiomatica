@@ -133,7 +133,7 @@ namespace Model.DAL
                           join t in context.Tokens on s.Id equals t.SentenceId
                           join w in context.Words on t.WordId equals w.Id
                           where (b.Id == key)
-                          group w by w into g //new { w.Id, w.LanguageKey, w.Romanization, w.Text, w.TextLowerCase, w.TokenCount } into g
+                          group w by w into g //new { w.Id, w.LanguageId, w.Romanization, w.Text, w.TextLowerCase, w.TokenCount } into g
                           select new { word = g.Key });
             var value = new Dictionary<string, Word>();
             foreach (var g in groups)
@@ -244,22 +244,20 @@ namespace Model.DAL
             var value = context.Words.FromSql($"""
                 SELECT TOP (1000) 
                 	    w.Id
-                      , LanguageKey
+                      , LanguageId
                       , Text
                       , TextLowerCase
                       , Romanization
-                      , TokenCount
                 	  , count(t.Id) as numberOfUsages
                 from Idioma.Word w
                 join Idioma.Token t on w.Id = t.WordId
-                where w.LanguageKey = {key}
+                where w.LanguageId = {key}
                 group by 
                 	    w.Id
-                      , LanguageKey
+                      , LanguageId
                       , Text
                       , TextLowerCase
                       , Romanization
-                      , TokenCount
                 order by count(t.Id) desc
                 """)
                 .ToList();
@@ -339,7 +337,7 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Word]
-                           ([LanguageKey]
+                           ([LanguageId]
                            ,[Text]
                            ,[TextLowerCase]
                            ,[Romanization]

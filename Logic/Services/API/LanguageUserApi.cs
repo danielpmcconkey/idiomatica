@@ -42,26 +42,26 @@ namespace Logic.Services.API
 
         #endregion
         public static LanguageUser? LanguageUserGet(
-            IdiomaticaContext context, Guid languageKey, Guid userKey)
+            IdiomaticaContext context, Guid languageId, Guid userId)
         {
-            return DataCache.LanguageUserByLanguageIdAndUserIdRead((languageKey, userKey), context);
+            return DataCache.LanguageUserByLanguageIdAndUserIdRead((languageId, userId), context);
         }
         public static async Task<LanguageUser?> LanguageUserGetAsync(
-            IdiomaticaContext context, Guid languageKey, Guid userKey)
+            IdiomaticaContext context, Guid languageId, Guid userId)
         {
-            return await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync((languageKey, userKey), context);
+            return await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync((languageId, userId), context);
         }
 
 
         public static List<LanguageUser>? LanguageUsersAndLanguageGetByUserId(
-            IdiomaticaContext context, Guid userKey)
+            IdiomaticaContext context, Guid userId)
         {
-            return DataCache.LanguageUsersAndLanguageByUserIdRead((Guid)userKey, context);
+            return DataCache.LanguageUsersAndLanguageByUserIdRead((Guid)userId, context);
         }
         public static async Task<List<LanguageUser>?> LanguageUsersAndLanguageGetByUserIdAsync(
-            IdiomaticaContext context, Guid userKey)
+            IdiomaticaContext context, Guid userId)
         {
-            return await DataCache.LanguageUsersAndLanguageByUserIdReadAsync((Guid)userKey, context);
+            return await DataCache.LanguageUsersAndLanguageByUserIdReadAsync((Guid)userId, context);
         }
     }
 }

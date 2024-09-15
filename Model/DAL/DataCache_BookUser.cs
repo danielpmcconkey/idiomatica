@@ -21,9 +21,9 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         INSERT INTO [Idioma].[BookUser]
                               ([BookId]
-                              ,[LanguageUserKey]
+                              ,[LanguageUserId]
                               ,[IsArchived]
-                              ,[CurrentPageKey]
+                              ,[CurrentPageId]
                               ,[Id])
                         VALUES
                               ({bookUser.BookId}
@@ -109,9 +109,9 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         update [Idioma].[BookUser]
                               set [BookId] = {bookUser.BookId}
-                              ,[LanguageUserKey] = {bookUser.LanguageUserId}
+                              ,[LanguageUserId] = {bookUser.LanguageUserId}
                               ,[IsArchived] = {bookUser.IsArchived}
-                              ,[CurrentPageKey] = {bookUser.CurrentPageId}
+                              ,[CurrentPageId] = {bookUser.CurrentPageId}
                         where Id = {bookUser.Id}
                         ;
                         """);

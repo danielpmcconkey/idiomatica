@@ -164,7 +164,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
 
 
             try
@@ -204,7 +204,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
             
 
             try

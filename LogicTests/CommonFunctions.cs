@@ -109,7 +109,7 @@ namespace LogicTests
             if (book is null) { ErrorHandler.LogAndThrow(); return null; }
             return book;
         }
-        internal static Guid GetLanguageKey(IdiomaticaContext context, AvailableLanguageCode Code)
+        internal static Guid GetLanguageId(IdiomaticaContext context, AvailableLanguageCode Code)
         {
             var lang = context.Languages.Where(x => x.Code == Code).FirstOrDefault();
             Assert.IsNotNull(lang);
@@ -126,9 +126,9 @@ namespace LogicTests
 #pragma warning restore CS8603 // Possible null reference return.
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
         }
-        internal static Guid GetSpanishLanguageKey(IdiomaticaContext context)
+        internal static Guid GetSpanishLanguageId(IdiomaticaContext context)
         {
-            return GetLanguageKey(context, AvailableLanguageCode.ES);
+            return GetLanguageId(context, AvailableLanguageCode.ES);
         }
         internal static Language GetEnglishLanguage(IdiomaticaContext context)
         {
@@ -140,15 +140,15 @@ namespace LogicTests
 #pragma warning restore CS8603 // Possible null reference return.
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
         }
-        internal static Guid GetEnglishLanguageKey(IdiomaticaContext context)
+        internal static Guid GetEnglishLanguageId(IdiomaticaContext context)
         {
-            return GetLanguageKey(context, AvailableLanguageCode.EN_US);
+            return GetLanguageId(context, AvailableLanguageCode.EN_US);
         }
-        internal static Guid GetSpanishLanguageUserKey(IdiomaticaContext context)
+        internal static Guid GetSpanishLanguageUserId(IdiomaticaContext context)
         {
-            Guid languageKey = GetLanguageKey(context, AvailableLanguageCode.ES);
+            Guid languageId = GetLanguageId(context, AvailableLanguageCode.ES);
             var languageUser = context.LanguageUsers
-                .Where(x => x.LanguageId == languageKey && x.User != null && x.User.Name == "Dev Test user")
+                .Where(x => x.LanguageId == languageId && x.User != null && x.User.Name == "Dev Test user")
                 .FirstOrDefault();
             Assert.IsNotNull(languageUser);
             Assert.IsNotNull(languageUser.Id);
@@ -237,10 +237,10 @@ namespace LogicTests
             return (Guid)book.Id;
         }
 
-        internal static Guid GetWordIdByTextLower(IdiomaticaContext context, Guid languageKey, string textLower)
+        internal static Guid GetWordIdByTextLower(IdiomaticaContext context, Guid languageId, string textLower)
         {
             var word = context.Words
-                .Where(x => x.LanguageId == languageKey && x.TextLowerCase == textLower)
+                .Where(x => x.LanguageId == languageId && x.TextLowerCase == textLower)
                 .FirstOrDefault();
             Assert.IsNotNull(word);
             Assert.IsNotNull(word.Id);
@@ -329,14 +329,14 @@ namespace LogicTests
             return (Guid)pp.Id;
         }
 
-        internal static Guid GetPageUser380Id(IdiomaticaContext context, Guid languageUserKey)
+        internal static Guid GetPageUser380Id(IdiomaticaContext context, Guid languageUserId)
         {
             var book = context.Books.Where(x => x.Title == "[GUION PARA VIDEO: EXPLICACIÓN DE \"COMPREHENSIBLE INPUT\" EN 5 MINUTOS]").Include(x => x.Pages).FirstOrDefault();
             Assert.IsNotNull(book);
             var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
             Assert.IsNotNull(page);
             var BookUser = context.BookUsers
-                .Where(x => x.BookId == book.Id && x.LanguageUserId == languageUserKey)
+                .Where(x => x.BookId == book.Id && x.LanguageUserId == languageUserId)
                 .FirstOrDefault();
             Assert.IsNotNull(BookUser);
             var pageUser = context.PageUsers
@@ -371,9 +371,9 @@ namespace LogicTests
         internal static Guid GetFlashCard1Id(IdiomaticaContext context, Guid languageUserId)
         {
             // this is for the word "de" in spanish
-            Guid languageKey = GetSpanishLanguageKey(context);
+            Guid languageId = GetSpanishLanguageId(context);
             var word = context.Words
-                .Where(x => x.LanguageId == languageKey && x.TextLowerCase == "de")
+                .Where(x => x.LanguageId == languageId && x.TextLowerCase == "de")
                 .FirstOrDefault();
             Assert.IsNotNull (word);
             var wordUser = context.WordUsers
@@ -440,10 +440,10 @@ namespace LogicTests
             return (Guid)sentence.Id;
         }
 
-        internal static Guid GetWordId(IdiomaticaContext context, string textToLower, Guid languageKey)
+        internal static Guid GetWordId(IdiomaticaContext context, string textToLower, Guid languageId)
         {
             var w = context.Words
-                .Where(x => x.LanguageId == languageKey && x.TextLowerCase == textToLower)
+                .Where(x => x.LanguageId == languageId && x.TextLowerCase == textToLower)
                 .FirstOrDefault();
             Assert.IsNotNull(w);
             Assert.IsNotNull(w.Id);

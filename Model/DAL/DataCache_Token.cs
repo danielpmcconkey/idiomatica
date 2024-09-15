@@ -23,7 +23,7 @@ namespace Model.DAL
                         
                 INSERT INTO [Idioma].[Token]
                       ([WordId]
-                      ,[SentenceKey]
+                      ,[SentenceId]
                       ,[Display]
                       ,[Ordinal]
                       ,[Id])
@@ -181,7 +181,7 @@ namespace Model.DAL
             // now take them out of the DB
             context.Database.ExecuteSql($"""
                 DELETE FROM [Idioma].[Token]
-                      WHERE SentenceKey = {key}
+                      WHERE SentenceId = {key}
                 """);
         }
         public static async Task TokenBySentenceIdDeleteAsync(Guid key, IdiomaticaContext context)

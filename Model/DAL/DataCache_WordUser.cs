@@ -32,7 +32,7 @@ namespace Model.DAL
                 
                 INSERT INTO [Idioma].[WordUser]
                       ([WordId]
-                      ,[LanguageUserKey]
+                      ,[LanguageUserId]
                       ,[Translation]
                       ,[Status]
                       ,[Created]
@@ -66,26 +66,26 @@ namespace Model.DAL
             // add all the worduser objects that might not exist
             context.Database.ExecuteSql($"""
                 insert into [Idioma].[WordUser] 
-                ([WordId],[LanguageUserKey],[Translation],[Status],[Created],[StatusChanged],[Id])
+                ([WordId],[LanguageUserId],[Translation],[Status],[Created],[StatusChanged],[Id])
                 select 
-                	 w.Id as wordKey
-                	, lu.Id as languageUserKey
-                	, null as translation
-                	, {(int)AvailableWordUserStatus.UNKNOWN} as unknownStatus
-                	, CURRENT_TIMESTAMP as created
-                	, CURRENT_TIMESTAMP as statusChanged
-                    , NEWID()
+                	 w.Id as WordId
+                	, lu.Id as LanguageUserId
+                	, null as Translation
+                	, {(int)AvailableWordUserStatus.UNKNOWN} as Status
+                	, CURRENT_TIMESTAMP as Created
+                	, CURRENT_TIMESTAMP as StatusChanged
+                    , NEWID() as Id
                 from [Idioma].[Page] p
                 left join [Idioma].[Book] b on p.BookId = b.Id
-                left join [Idioma].[Language] l on b.LanguageKey = l.Id
-                left join [Idioma].[LanguageUser] lu on l.Id = lu.LanguageKey
-                left join [Idioma].[Paragraph] pp on p.Id = pp.PageKey
-                left join [Idioma].[Sentence] s on pp.Id = s.ParagraphKey
-                left join [Idioma].[Token] t on s.Id = t.SentenceKey
+                left join [Idioma].[Language] l on b.LanguageId = l.Id
+                left join [Idioma].[LanguageUser] lu on l.Id = lu.LanguageId
+                left join [Idioma].[Paragraph] pp on p.Id = pp.PageId
+                left join [Idioma].[Sentence] s on pp.Id = s.ParagraphId
+                left join [Idioma].[Token] t on s.Id = t.SentenceId
                 left join [Idioma].[Word] w on t.WordId = w.Id
-                left join [Idioma].[WordUser] wu on w.Id = wu.WordId and wu.LanguageUserKey = lu.Id
+                left join [Idioma].[WordUser] wu on w.Id = wu.WordId and wu.LanguageUserId = lu.Id
                 where b.Id = {key.bookId}
-                and lu.UserKey = {key.userId}
+                and lu.UserId = {key.userId}
                 and wu.Id is null
                 group by 
                 	  w.Id
@@ -332,10 +332,10 @@ namespace Model.DAL
             // add all the worduser objects that might not exist
             context.Database.ExecuteSql($"""
                 insert into [Idioma].[WordUser] 
-                ([WordId],[LanguageUserKey],[Translation],[Status],[Created],[StatusChanged],[Id])
+                ([WordId],[LanguageUserId],[Translation],[Status],[Created],[StatusChanged],[Id])
                 select 
                 	 w.Id as wordKey
-                	, lu.Id as languageUserKey
+                	, lu.Id as languageUserId
                 	, null as translation
                 	, {(int)AvailableWordUserStatus.UNKNOWN} as unknownStatus
                 	, CURRENT_TIMESTAMP as created
@@ -343,15 +343,15 @@ namespace Model.DAL
                     , NEWID() as uniqueKey
                 from [Idioma].[Page] p
                 left join [Idioma].[Book] b on p.BookId = b.Id
-                left join [Idioma].[Language] l on b.LanguageKey = l.Id
-                left join [Idioma].[LanguageUser] lu on l.Id = lu.LanguageKey
-                left join [Idioma].[Paragraph] pp on p.Id = pp.PageKey
-                left join [Idioma].[Sentence] s on pp.Id = s.ParagraphKey
-                left join [Idioma].[Token] t on s.Id = t.SentenceKey
+                left join [Idioma].[Language] l on b.LanguageId = l.Id
+                left join [Idioma].[LanguageUser] lu on l.Id = lu.LanguageId
+                left join [Idioma].[Paragraph] pp on p.Id = pp.PageId
+                left join [Idioma].[Sentence] s on pp.Id = s.ParagraphId
+                left join [Idioma].[Token] t on s.Id = t.SentenceId
                 left join [Idioma].[Word] w on t.WordId = w.Id
-                left join [Idioma].[WordUser] wu on w.Id = wu.WordId and wu.LanguageUserKey = lu.Id
+                left join [Idioma].[WordUser] wu on w.Id = wu.WordId and wu.LanguageUserId = lu.Id
                 where p.Id = {key.pageId}
-                and lu.UserKey = {key.userId}
+                and lu.UserId = {key.userId}
                 and wu.Id is null
                 and w.Id is not null
                 group by 
@@ -438,7 +438,7 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         UPDATE [Idioma].[WordUser]
                         SET [WordId] = {wordUser.WordId}
-                           ,[LanguageUserKey] = {wordUser.LanguageUserId}
+                           ,[LanguageUserId] = {wordUser.LanguageUserId}
                            ,[Translation] = {wordUser.Translation}
                            ,[Status] = {wordUser.Status}
                            ,[Created] = {wordUser.Created}
@@ -499,18 +499,18 @@ namespace Model.DAL
                 where Id in (
                 	select wu.Id
                 	from Idioma.PageUser pu
-                	left join Idioma.BookUser bu on pu.BookUserKey = bu.Id
-                	left join Idioma.LanguageUser lu on bu.LanguageUserKey = lu.Id
-                	left join Idioma.Page p on pu.PageKey = p.Id
-                	left join Idioma.Paragraph pp on p.Id = pp.PageKey
-                	left join Idioma.Sentence s on pp.Id = s.ParagraphKey
-                	left join Idioma.Token t on s.Id = t.SentenceKey
+                	left join Idioma.BookUser bu on pu.BookUserId = bu.Id
+                	left join Idioma.LanguageUser lu on bu.LanguageUserId = lu.Id
+                	left join Idioma.Page p on pu.PageId = p.Id
+                	left join Idioma.Paragraph pp on p.Id = pp.PageId
+                	left join Idioma.Sentence s on pp.Id = s.ParagraphId
+                	left join Idioma.Token t on s.Id = t.SentenceId
                 	left join Idioma.Word w on t.WordId = w.Id
                 	left join Idioma.WordUser wu on w.Id = wu.WordId
                 	where 
                 		pu.Id = {pageUserId}
                 		and wu.Id is not null 
-                		and wu.LanguageUserKey = bu.LanguageUserKey
+                		and wu.LanguageUserId = bu.LanguageUserId
                 		and wu.Status = {(int)statusToEdit}
                 )
                 """);

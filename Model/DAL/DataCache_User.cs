@@ -132,75 +132,75 @@ namespace Model.DAL
 
                 delete us
                 from [Idioma].[User] u
-                left join [Idioma].[UserSetting] us on u.Id = us.UserKey
+                left join [Idioma].[UserSetting] us on u.Id = us.UserId
                 where u.Id = {userId};
 
                 delete fcptb
                 from [Idioma].[User] u
-                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserKey
-                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserKey
-                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserKey
-                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserKey
-                left join [Idioma].[BookUserStat] bus on lu.Id = bus.LanguageUserKey
-                left join [Idioma].[FlashCard] fc on wu.Id = fc.WordUserKey
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserId
+                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserId
+                left join [Idioma].[BookUserStat] bus on lu.Id = bus.LanguageUserId
+                left join [Idioma].[FlashCard] fc on wu.Id = fc.WordUserId
                 left join [Idioma].[FlashCardAttempt] fca on fc.Id = fca.FlashCardId
                 left join [Idioma].[FlashCardParagraphTranslationBridge] fcptb on fc.Id = fcptb.FlashCardId
                 where u.Id = {userId};
 
                 delete fca
                 from [Idioma].[User] u
-                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserKey
-                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserKey
-                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserKey
-                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserKey
-                left join [Idioma].[BookUserStat] bus on lu.Id = bus.LanguageUserKey
-                left join [Idioma].[FlashCard] fc on wu.Id = fc.WordUserKey
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserId
+                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserId
+                left join [Idioma].[BookUserStat] bus on lu.Id = bus.LanguageUserId
+                left join [Idioma].[FlashCard] fc on wu.Id = fc.WordUserId
                 left join [Idioma].[FlashCardAttempt] fca on fc.Id = fca.FlashCardId
                 where u.Id = {userId};
 
                 delete fc
                 from [Idioma].[User] u
-                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserKey
-                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserKey
-                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserKey
-                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserKey
-                left join [Idioma].[BookUserStat] bus on lu.Id = bus.LanguageUserKey
-                left join [Idioma].[FlashCard] fc on wu.Id = fc.WordUserKey
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserId
+                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserId
+                left join [Idioma].[BookUserStat] bus on lu.Id = bus.LanguageUserId
+                left join [Idioma].[FlashCard] fc on wu.Id = fc.WordUserId
                 where u.Id = {userId};
 
                 delete bus
                 from [Idioma].[User] u
-                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserKey
-                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserKey
-                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserKey
-                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserKey
-                left join [Idioma].[BookUserStat] bus on lu.Id = bus.LanguageUserKey
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserId
+                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserId
+                left join [Idioma].[BookUserStat] bus on lu.Id = bus.LanguageUserId
                 where u.Id = {userId};
 
                 delete pu
                 from [Idioma].[User] u
-                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserKey
-                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserKey
-                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserKey
-                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserKey
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserId
+                left join [Idioma].[PageUser] pu on bu.Id = pu.BookUserId
                 where u.Id = {userId};
 
                 delete bu
                 from [Idioma].[User] u
-                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserKey
-                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserKey
-                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserKey
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
+                left join [Idioma].[BookUser] bu on lu.Id = bu.LanguageUserId
                 where u.Id = {userId};
 
                 delete wu
                 from [Idioma].[User] u
-                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserKey
-                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserKey
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
+                left join [Idioma].[WordUser] wu on lu.Id = wu.LanguageUserId
                 where u.Id = {userId};
 
                 delete lu
                 from [Idioma].[User] u
-                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserKey
+                left join [Idioma].[LanguageUser] lu on u.Id = lu.UserId
                 where u.Id = {userId};
 
                 delete u

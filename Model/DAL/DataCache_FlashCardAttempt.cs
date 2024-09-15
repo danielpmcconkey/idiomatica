@@ -22,7 +22,7 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[FlashCardAttempt]
-                      ([FlashCardKey]
+                      ([FlashCardId]
                       ,[Status]
                       ,[AttemptedWhen]
                       ,[Id])

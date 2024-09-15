@@ -60,21 +60,21 @@ namespace Logic.Services.API.Tests
 
                 // read the book stats
                 var totalPagesStat = book.BookStats
-                    .Where(x => x.Key != null && x.Key == AvailableBookStat.TOTALPAGES)
+                    .Where(x => x.Key == AvailableBookStat.TOTALPAGES)
                     .FirstOrDefault();
                 if (totalPagesStat is null || totalPagesStat.Value is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 string totalPagesActual = totalPagesStat.Value;
 
                 var totalWordsStat = book.BookStats
-                    .Where(x => x.Key != null && x.Key == AvailableBookStat.TOTALWORDCOUNT)
+                    .Where(x => x.Key == AvailableBookStat.TOTALWORDCOUNT)
                     .FirstOrDefault();
                 if (totalWordsStat is null || totalWordsStat.Value is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 string totalWordCountActual = totalWordsStat.Value;
 
                 var distinctWordsStat = book.BookStats
-                    .Where(x => x.Key != null && x.Key == AvailableBookStat.DISTINCTWORDCOUNT)
+                    .Where(x => x.Key == AvailableBookStat.DISTINCTWORDCOUNT)
                     .FirstOrDefault();
                 if (distinctWordsStat is null || distinctWordsStat.Value is null)
                     { ErrorHandler.LogAndThrow(); return; }
@@ -192,7 +192,7 @@ namespace Logic.Services.API.Tests
             var context = CommonFunctions.CreateContext();
             Guid bookId = CommonFunctions.GetBook17Id(context);
             int totalPageCount = 5;
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
             Language language = CommonFunctions.GetSpanishLanguage(context);
             int wordCount = 137;
             int paragraphCount = 1;
@@ -272,7 +272,7 @@ namespace Logic.Services.API.Tests
             var context = CommonFunctions.CreateContext();
             Guid bookId = CommonFunctions.GetBook17Id(context);
             int totalPageCount = 5;
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
             Language language = CommonFunctions.GetSpanishLanguage(context);
             int wordCount = 137;
             int paragraphCount = 1;
@@ -731,7 +731,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             var bookId = CommonFunctions.GetBook17Id(context);
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
             Language language = CommonFunctions.GetSpanishLanguage(context);
             int wordCount = 137;
             int paragraphCount = 1;
@@ -784,7 +784,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             var bookId = CommonFunctions.GetBook17Id(context);
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
             Language language = CommonFunctions.GetSpanishLanguage(context);
             int wordCount = 137;
             int paragraphCount = 1;
@@ -841,7 +841,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             var bookId = CommonFunctions.GetBook17Id(context);
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
             Language language = CommonFunctions.GetSpanishLanguage(context);
             int wordCount = 51; // distinct words on the first page
             int paragraphCount = 1;
@@ -890,7 +890,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             var bookId = CommonFunctions.GetBook17Id(context);
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
             Language language = CommonFunctions.GetSpanishLanguage(context);
             int wordCount = 51; // distinct words on the first page
             int paragraphCount = 1;
@@ -942,7 +942,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             var bookId = CommonFunctions.GetBook17Id(context);
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
             Language language = CommonFunctions.GetSpanishLanguage(context);
             int wordCount = 137; // distinct words on the second page
             int paragraphCount = 1;
@@ -1017,7 +1017,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             var bookId = CommonFunctions.GetBook17Id(context);
-            Guid languageId = CommonFunctions.GetSpanishLanguageKey(context);
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
             Language language = CommonFunctions.GetSpanishLanguage(context);
             int wordCount = 137; // distinct words on the second page
             int paragraphCount = 1;

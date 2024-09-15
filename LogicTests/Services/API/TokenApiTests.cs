@@ -182,7 +182,7 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
             Guid tokenId = CommonFunctions.GetToken94322Id(context);
-            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
             string expectedWordText = "había";
             Guid expectedWordUserId = CommonFunctions.GetWordUser(context, languageUserId, expectedWordText);
 
@@ -200,7 +200,7 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
             Guid tokenId = CommonFunctions.GetToken94322Id(context);
-            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserKey(context);
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
             string expectedWordText = "había";
             Guid expectedWordUserId = CommonFunctions.GetWordUser(context, languageUserId, expectedWordText);
 
