@@ -148,7 +148,7 @@
             ErrorHandler.LogAndThrow();
             return;
         }
-        BookTagApi.BookTagRemove(context, (Guid)BookId, (Guid)_loggedInUser.UniqueKey, BookTag.Tag);
+        BookTagApi.BookTagRemove(context, (Guid)BookId, (Guid)_loggedInUser.Id, BookTag.Tag);
     }
     private async Task OnDownVote()
     {

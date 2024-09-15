@@ -10,16 +10,16 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("PageUser", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(PageKey), nameof(BookUserKey), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(PageId), nameof(BookUserId), IsUnique = true)]
     public class PageUser
     {
         #region required data
 
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid BookUserKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid BookUserId { get; set; }
         public required BookUser BookUser { get; set; }
-        [Required] public required Guid PageKey { get; set; }
+        [Required] public required Guid PageId { get; set; }
         public required Page Page { get; set; }
 
         #endregion

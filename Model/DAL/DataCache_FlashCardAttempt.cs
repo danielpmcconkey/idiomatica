@@ -25,18 +25,18 @@ namespace Model.DAL
                       ([FlashCardKey]
                       ,[Status]
                       ,[AttemptedWhen]
-                      ,[UniqueKey])
+                      ,[Id])
                 VALUES
-                      ({flashCardAttempt.FlashCardKey}
+                      ({flashCardAttempt.FlashCardId}
                       ,{flashCardAttempt.Status}
                       ,{flashCardAttempt.AttemptedWhen}
-                      ,{flashCardAttempt.UniqueKey})
+                      ,{flashCardAttempt.Id})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating FlashCardAttempt affected 0 rows");
             
             // add it to cache
-            FlashCardAttemptById[flashCardAttempt.UniqueKey] = flashCardAttempt;
+            FlashCardAttemptById[flashCardAttempt.Id] = flashCardAttempt;
 
             return flashCardAttempt;
         }
@@ -58,7 +58,7 @@ namespace Model.DAL
             }
 
             // read DB
-            value = context.FlashCardAttempts.Where(x => x.FlashCardKey == key).FirstOrDefault();
+            value = context.FlashCardAttempts.Where(x => x.FlashCardId == key).FirstOrDefault();
             if (value == null) return null;
             // write to cache
             FlashCardAttemptById[key] = value;

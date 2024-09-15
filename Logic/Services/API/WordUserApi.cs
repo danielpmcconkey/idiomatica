@@ -26,10 +26,10 @@ namespace Logic.Services.API
         {
             WordUser? wu = new()
             {
-                UniqueKey = Guid.NewGuid(),
-                WordKey = word.UniqueKey,
+                Id = Guid.NewGuid(),
+                WordId = word.Id,
                 Word = word,
-                LanguageUserKey = languageUser.UniqueKey,
+                LanguageUserId = languageUser.Id,
                 LanguageUser = languageUser,
                 Translation = translation,
                 Status = status,

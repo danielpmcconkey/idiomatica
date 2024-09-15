@@ -24,7 +24,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.Paragraphs.Where(x => x.UniqueKey == key)
+            var value = context.Paragraphs.Where(x => x.Id == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -47,7 +47,7 @@ namespace Model.DAL
                 return ParagraphsByPageId[key];
             }
             // read DB
-            var value = context.Paragraphs.Where(x => x.PageKey == key).OrderBy(x => x.Ordinal)
+            var value = context.Paragraphs.Where(x => x.PageId == key).OrderBy(x => x.Ordinal)
                 .ToList();
 
             // write the whole list to cache
@@ -56,7 +56,7 @@ namespace Model.DAL
             // write each item to cache
             foreach (var item in value) 
             {
-                ParagraphById[(Guid)item.UniqueKey] = item;
+                ParagraphById[(Guid)item.Id] = item;
             }
 
             return value;
@@ -81,17 +81,17 @@ namespace Model.DAL
                 INSERT INTO [Idioma].[Paragraph]
                       ([PageKey]
                       ,[Ordinal]
-                      ,[UniqueKey])
+                      ,[Id])
                 VALUES
-                      ({paragraph.PageKey}
+                      ({paragraph.PageId}
                       ,{paragraph.Ordinal}
-                      ,{paragraph.UniqueKey})
+                      ,{paragraph.Id})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Paragraph affected 0 rows");
             
             // add it to cache
-            ParagraphById[paragraph.UniqueKey] = paragraph;
+            ParagraphById[paragraph.Id] = paragraph;
 
             return paragraph;
         }

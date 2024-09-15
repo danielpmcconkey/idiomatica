@@ -12,14 +12,14 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("FlashCard", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(WordUserKey), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(WordUserId), IsUnique = true)]
     public class FlashCard
     {
         #region required data
 
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid WordUserKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid WordUserId { get; set; }
         public required WordUser WordUser { get; set; }
         [Required] public required AvailableFlashCardStatus Status { get; set; }
 

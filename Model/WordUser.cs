@@ -11,15 +11,15 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("WordUser", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(WordKey), nameof(LanguageUserKey), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(WordId), nameof(LanguageUserId), IsUnique = true)]
     public class WordUser
     {
         #region required data
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid WordKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid WordId { get; set; }
         public required Word Word { get; set; }
-        [Required] public required Guid LanguageUserKey { get; set; }
+        [Required] public required Guid LanguageUserId { get; set; }
         public required LanguageUser LanguageUser { get; set; }
         [Required] public required AvailableWordUserStatus Status { get; set; }
         [Required] public required DateTimeOffset Created { get; set; } = DateTimeOffset.Now;

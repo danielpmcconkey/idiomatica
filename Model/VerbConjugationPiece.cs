@@ -10,10 +10,10 @@ namespace Model
 {
 
     //[Table("VerbConjugationPiece", Schema = "Idioma")]
-    //[PrimaryKey(nameof(UniqueKey))]
+    //[PrimaryKey(nameof(Id))]
     public class VerbConjugationPiece
     {
-        public Guid? UniqueKey { get; set; }
+        public Guid? Id { get; set; }
 
 
         #region relationships

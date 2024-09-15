@@ -49,7 +49,7 @@ namespace Logic.Services
                 return;
             }
             _loggedInUser = loggedInUser;
-            _uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(context, loggedInUser.UniqueKey);
+            _uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(context, loggedInUser.Id);
             if (_uiLanguage is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -92,7 +92,7 @@ namespace Logic.Services
             if (matchingUser is null) return null;
 
             _loggedInUser = matchingUser;
-            _uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(context, matchingUser.UniqueKey);
+            _uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(context, matchingUser.Id);
             if (_uiLanguage == null) _uiLanguage = GetDefaultUiLanguage(context);
             if (_uiLanguage == null) { ErrorHandler.LogAndThrow(); return null; }
                     

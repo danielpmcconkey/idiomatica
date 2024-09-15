@@ -195,14 +195,14 @@
 
             
             Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
-                context, (Guid)_loggedInUser.UniqueKey, _titleInput,
+                context, (Guid)_loggedInUser.Id, _titleInput,
                 (AvailableLanguageCode)_languageCodeInput, _sourceURIInput, textInput);
             if (book is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            _newBookId = (Guid)book.UniqueKey;
+            _newBookId = (Guid)book.Id;
 
             // finally commit the write
             await context.Database.CommitTransactionAsync();

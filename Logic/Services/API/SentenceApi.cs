@@ -40,8 +40,8 @@ namespace Logic.Services.API
             if (string.IsNullOrEmpty(text)) ErrorHandler.LogAndThrow();
             var newSentence = new Sentence()
             {
-                UniqueKey = Guid.NewGuid(),
-                ParagraphKey = paragraph.UniqueKey,
+                Id = Guid.NewGuid(),
+                ParagraphId = paragraph.Id,
                 Paragraph = paragraph,
                 Text = text,
                 Ordinal = ordinal,

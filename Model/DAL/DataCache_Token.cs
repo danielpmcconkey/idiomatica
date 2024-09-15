@@ -22,23 +22,23 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Token]
-                      ([WordKey]
+                      ([WordId]
                       ,[SentenceKey]
                       ,[Display]
                       ,[Ordinal]
-                      ,[UniqueKey])
+                      ,[Id])
                 VALUES
-                      ({token.WordKey}
-                      ,{token.SentenceKey}
+                      ({token.WordId}
+                      ,{token.SentenceId}
                       ,{token.Display}
                       ,{token.Ordinal}
-                      ,{token.UniqueKey})
+                      ,{token.Id})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Token affected 0 rows");
             
             // add it to cache
-            TokenById[token.UniqueKey] = token;
+            TokenById[token.Id] = token;
 
             return token;
         }
@@ -58,7 +58,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.Tokens.Where(x => x.UniqueKey == key)
+            var value = context.Tokens.Where(x => x.Id == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -82,10 +82,10 @@ namespace Model.DAL
             }
             // read DB
             var groups = (from p in context.Pages
-                          join pp in context.Paragraphs on p.UniqueKey equals pp.PageKey
-                          join s in context.Sentences on pp.UniqueKey equals s.ParagraphKey
-                          join t in context.Tokens on s.UniqueKey equals t.SentenceKey
-                          where (p.UniqueKey == key)
+                          join pp in context.Paragraphs on p.Id equals pp.PageId
+                          join s in context.Sentences on pp.Id equals s.ParagraphId
+                          join t in context.Tokens on s.Id equals t.SentenceId
+                          where (p.Id == key)
                           group t by t into g
                           select new { token = g.Key });
             List<Token> value = new List<Token>();
@@ -116,7 +116,7 @@ namespace Model.DAL
 
             // read DB
             var value = context.Tokens
-                .Where(x => x.SentenceKey == key)
+                .Where(x => x.SentenceId == key)
                 .OrderBy(x => x.Ordinal)
                 .ToList();
             // write to cache
@@ -141,7 +141,7 @@ namespace Model.DAL
             // read DB
             var value = context.Tokens
                 .Include(x => x.Word)
-                .Where(x => x.SentenceKey == key)
+                .Where(x => x.SentenceId == key)
                 .OrderBy(x => x.Ordinal)
                 .ToList();
             // write to cache
@@ -149,7 +149,7 @@ namespace Model.DAL
             TokensBySentenceId[key] = value;
             foreach (var t in value)
             {
-                TokenById[(Guid)t.UniqueKey] = t;
+                TokenById[(Guid)t.Id] = t;
             }
             return value;
         }
@@ -165,7 +165,7 @@ namespace Model.DAL
         #region delete
         public static void TokenBySentenceIdDelete(Guid key, IdiomaticaContext context)
         {
-            var existingList = context.Tokens.Where(x => x.SentenceKey == key);
+            var existingList = context.Tokens.Where(x => x.SentenceId == key);
             foreach (var existingItem in existingList)
             {
                 context.Tokens.Remove(existingItem);

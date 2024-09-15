@@ -43,8 +43,8 @@ namespace TestDataPopulator
                 if (word.language == "English") language = _englishLanguage;
                 var modelWord = new Word()
                 {
-                    UniqueKey = wordKey,
-                    LanguageKey = language.UniqueKey,
+                    Id = wordKey,
+                    LanguageId = language.Id,
                     Language = language,
                     Text = word.word,
                     TextLowerCase = word.word,
@@ -52,10 +52,10 @@ namespace TestDataPopulator
                 };
                 context.Words.Add(modelWord);
                 context.WordRanks.Add(new Model.WordRank() {
-                    UniqueKey = Guid.NewGuid(),
-                    LanguageKey = language.UniqueKey,
+                    Id = Guid.NewGuid(),
+                    LanguageId = language.Id,
                     Language = language,
-                    WordKey = wordKey,
+                    WordId = wordKey,
                     Word = modelWord,
                     DifficultyScore = word.difficulty,
                     Ordinal = word.ordinal

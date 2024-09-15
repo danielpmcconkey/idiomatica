@@ -12,14 +12,14 @@ namespace Model
 {
 	
     [Table("Page", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(BookKey), nameof(Ordinal), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(BookId), nameof(Ordinal), IsUnique = true)]
     public class Page
     {
         #region required data
 
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid BookKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid BookId { get; set; }
         public required Book Book { get; set; }
         [Required] public required int Ordinal { get; set; }
         [Column(TypeName = "TEXT")]

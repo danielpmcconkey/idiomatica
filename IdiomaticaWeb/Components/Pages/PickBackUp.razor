@@ -65,13 +65,13 @@ else
             var breadCrumb = await UserApi.UserBreadCrumbReadLatestAsync(context, (Guid)UserId);
             if (breadCrumb is not null)
             {
-                var page = await PageApi.PageReadByIdAsync(context, (Guid)breadCrumb.PageKey);
+                var page = await PageApi.PageReadByIdAsync(context, (Guid)breadCrumb.PageId);
                 if (page is null) return;
-                var book = await BookApi.BookReadAsync(context, (Guid)page.BookKey);
+                var book = await BookApi.BookReadAsync(context, (Guid)page.BookId);
                 if (book is null || string.IsNullOrEmpty(book.Title)) return;
 
                 Title = FormatTitle(book.Title);
-                BookUri = $"/Book/{book.UniqueKey}/Read";
+                BookUri = $"/Book/{book.Id}/Read";
                 PageNum = page.Ordinal;
 
                 _hasCrumbs = true;

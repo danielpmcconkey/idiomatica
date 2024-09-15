@@ -21,12 +21,12 @@ namespace Logic.Services.API
         {
             var token = new Token()
             {
-                UniqueKey = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 Display = display,
-                SentenceKey = sentence.UniqueKey,
+                SentenceId = sentence.Id,
                 Sentence = sentence,
                 Ordinal = ordinal,
-                WordKey = word.UniqueKey,
+                WordId = word.Id,
                 Word = word,
             };
             token =  DataCache.TokenCreate(token, context);
@@ -73,7 +73,7 @@ namespace Logic.Services.API
                 return (null, null);
             }
             var wu = await DataCache.WordUserByWordIdAndUserIdReadAsync(
-                (t.WordKey, languageUser.UserKey), context);
+                (t.WordId, languageUser.UserId), context);
             if (wu is null)
             {
                 // create it
@@ -103,7 +103,7 @@ namespace Logic.Services.API
             Sentence sentence, Language language)
         {
             // check if any already exist. there shouldn't be any but whateves
-            DataCache.TokenBySentenceIdDelete(sentence.UniqueKey, context);
+            DataCache.TokenBySentenceIdDelete(sentence.Id, context);
 
             // create the words first
             List<(Word? word, int? ordinal, string? tokenDisplay)> words = 

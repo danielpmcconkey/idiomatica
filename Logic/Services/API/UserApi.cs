@@ -19,7 +19,7 @@ namespace Logic.Services.API
         {
             var user = new User()
             {
-                UniqueKey = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 ApplicationUserId = applicationUserId,
                 Name = name,
             };
@@ -33,7 +33,7 @@ namespace Logic.Services.API
         {
             var user = new User()
             {
-                UniqueKey = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 ApplicationUserId = applicationUserId,
                 Name = name,
             };
@@ -45,10 +45,10 @@ namespace Logic.Services.API
         public static UserBreadCrumb? UserBreadCrumbCreate(IdiomaticaContext context, User user, Page page)
         {
             UserBreadCrumb crumb = new() {
-                UniqueKey = Guid.NewGuid(),
-                UserKey = user.UniqueKey, 
+                Id = Guid.NewGuid(),
+                UserId = user.Id, 
                 User = user,
-                PageKey = page.UniqueKey,
+                PageId = page.Id,
                 Page = page,
                 ActionDateTime = DateTime.Now
             };
@@ -70,7 +70,7 @@ namespace Logic.Services.API
 
         public static UserBreadCrumb? UserBreadCrumbReadLatest(IdiomaticaContext context, Guid userId)
         {
-            var list = DataCache.UserBreadCrumbReadByFilter((x => x.UserKey == userId), 1, context);
+            var list = DataCache.UserBreadCrumbReadByFilter((x => x.UserId == userId), 1, context);
             if(list.Count < 1) return null;
             return list[0];
         }

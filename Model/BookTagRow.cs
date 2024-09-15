@@ -16,10 +16,9 @@ namespace Model
     [NotMapped]
     public record BookTagRow
     {
-        public Guid? UniqueKey { get; set; }
-        public Guid? BookKey { get; set; }
+        public Guid? BookId { get; set; }
         public Book? Book { get; set; }
-        public Guid? UserKey { get; set; }
+        public Guid? UserId { get; set; }
         public User? User { get; set; }
         public DateTimeOffset? Created { get; set; }
         public string? Tag { get; set; }

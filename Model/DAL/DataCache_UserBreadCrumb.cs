@@ -22,15 +22,15 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                 
                 INSERT INTO [Idioma].UserBreadCrumb
-                           ([UniqueKey]
+                           ([Id]
                            ,[UserKey]
                            ,[PageKey]
                            ,[ActionDateTime]
                            )
                      VALUES
-                           ({value.UniqueKey}
-                           ,{value.UserKey}
-                           ,{value.PageKey}
+                           ({value.Id}
+                           ,{value.UserId}
+                           ,{value.PageId}
                            ,{value.ActionDateTime}
                            )
         

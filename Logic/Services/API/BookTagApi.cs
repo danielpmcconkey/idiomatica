@@ -22,23 +22,23 @@ namespace Logic.Services.API
             DateTimeOffset created = DateTimeOffset.UtcNow;
             // check if this user already saved this tag
             var existingTag = context.BookTags.Where(x =>
-                    x.BookKey == book.UniqueKey &&
-                    x.UserKey == user.UniqueKey &&
+                    x.BookId == book.Id &&
+                    x.UserId == user.Id &&
                     x.Tag == trimmedTag)
                 .FirstOrDefault();
             if (existingTag != null) return;
             var newTag = new BookTag()
             {
-                UniqueKey = Guid.NewGuid(),
-                BookKey = book.UniqueKey,
+                Id = Guid.NewGuid(),
+                BookId = book.Id,
                 Book = book,
-                UserKey = user.UniqueKey,
+                UserId = user.Id,
                 User = user,
                 Tag = trimmedTag,
                 Created = created,
             };
             newTag = DataCache.BookTagCreate(newTag, context);
-            if (newTag is null || newTag.UniqueKey is null)
+            if (newTag is null || newTag.Id is null)
             {
                 ErrorHandler.LogAndThrow();
             }

@@ -156,7 +156,7 @@
 
 
         _bookListDataPacket = await BookApi.BookListReadAsync(
-            context, (Guid)_loggedInUser.UniqueKey, _bookListDataPacket);
+            context, (Guid)_loggedInUser.Id, _bookListDataPacket);
 
     }
 
@@ -173,13 +173,13 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(context, bookId, (Guid)_loggedInUser.UniqueKey);
+            var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(context, bookId, (Guid)_loggedInUser.Id);
             if (bookUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            await BookUserApi.BookUserArchiveAsync(context, (Guid)bookUser.UniqueKey);
+            await BookUserApi.BookUserArchiveAsync(context, (Guid)bookUser.Id);
             // now pull a fresh copy of the book list
             await ResetBookListAsync();
             await t_delay;
@@ -216,7 +216,7 @@
             var bookUser = Task.Run(() =>
             {
                 return OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                context, bookId, (Guid)_loggedInUser.UniqueKey);
+                context, bookId, (Guid)_loggedInUser.Id);
             }).Result;
             if (bookUser is null)
             {

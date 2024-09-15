@@ -69,7 +69,7 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow();
                 return null;
             }
-            var languageUser = LanguageUserApi.LanguageUserGet(context, (Guid)book.LanguageKey, userId);
+            var languageUser = LanguageUserApi.LanguageUserGet(context, (Guid)book.LanguageId, userId);
 
             if (languageUser is null)
             {
@@ -91,11 +91,11 @@ namespace Logic.Services.API
 
             var bookUser = DataCache.BookUserCreate(new BookUser()
             {
-                UniqueKey = Guid.NewGuid(),
-                BookKey = bookId,
+                Id = Guid.NewGuid(),
+                BookId = bookId,
                 Book = book,
-                CurrentPageKey = firstPage.UniqueKey,
-                LanguageUserKey = languageUser.UniqueKey,
+                CurrentPageId = firstPage.Id,
+                LanguageUserId = languageUser.Id,
                 LanguageUser = languageUser,
             }, context);
             if (bookUser is null)
@@ -124,7 +124,7 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            bookUser.CurrentPageKey = currentPageId;
+            bookUser.CurrentPageId = currentPageId;
             DataCache.BookUserUpdate(bookUser, context);
         }
         public static async Task BookUserUpdateBookmarkAsync(

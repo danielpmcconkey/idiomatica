@@ -33,7 +33,7 @@ namespace Model.DAL
             if (value is null) return null;
             // write to cache
             LanguageByCode[key] = value;
-            LanguageById[(Guid)value.UniqueKey] = value;
+            LanguageById[(Guid)value.Id] = value;
             return value;
         }
         public static async Task<Language?> LanguageByCodeReadAsync(
@@ -54,7 +54,7 @@ namespace Model.DAL
             }
             // read DB
             var value = context.Languages
-                .Where(l => l.UniqueKey == key)
+                .Where(l => l.Id == key)
                 .FirstOrDefault();
 
             if (value is null) return null;

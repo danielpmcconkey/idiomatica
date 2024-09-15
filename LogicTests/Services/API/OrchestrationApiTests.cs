@@ -40,7 +40,7 @@ namespace Logic.Services.API.Tests
 
                 if (user is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(
                     context, CommonFunctions.GetSpanishLanguage(context), user);
@@ -49,14 +49,14 @@ namespace Logic.Services.API.Tests
                 // create the book
                 Book? book = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
                     context,
-                    (Guid)user.UniqueKey,
+                    (Guid)user.Id,
                     TestConstants.NewBookTitle,
                     TestConstants.NewBookLanguageCode,
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText);
                 if (book is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)book.UniqueKey;
+                bookId = (Guid)book.Id;
 
                 // read the book stats
                 var totalPagesStat = book.BookStats
@@ -82,7 +82,7 @@ namespace Logic.Services.API.Tests
 
                 // pull the book user
                 var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
-                    context, (Guid)book.UniqueKey, (Guid)user.UniqueKey);
+                    context, (Guid)book.Id, (Guid)user.Id);
 
                 // assert
                 Assert.IsNotNull(book.BookStats);
@@ -90,7 +90,7 @@ namespace Logic.Services.API.Tests
                 Assert.AreEqual(totalWordCountExpected, totalWordCountActual);
                 Assert.AreEqual(distinctWordCountExpected, distinctWordCountActual);
                 Assert.IsNotNull(bookUser);
-                Assert.IsNotNull(bookUser.UniqueKey);
+                Assert.IsNotNull(bookUser.Id);
             }
             finally
             {
@@ -124,7 +124,7 @@ namespace Logic.Services.API.Tests
 
                 if (user is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
                     context, CommonFunctions.GetSpanishLanguage(context), user);
@@ -133,14 +133,14 @@ namespace Logic.Services.API.Tests
                 // create the book
                 Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
                     context,
-                    (Guid)user.UniqueKey,
+                    (Guid)user.Id,
                     TestConstants.NewBookTitle,
                     TestConstants.NewBookLanguageCode,
                     TestConstants.NewBookUrl,
                     TestConstants.NewBookText);
                 if (book is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)book.UniqueKey;
+                bookId = (Guid)book.Id;
 
                 // read the book stats
                 var totalPagesStat = book.BookStats
@@ -166,7 +166,7 @@ namespace Logic.Services.API.Tests
 
                 // pull the book user
                 var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(
-                    context, (Guid)book.UniqueKey, (Guid)user.UniqueKey);
+                    context, (Guid)book.Id, (Guid)user.Id);
 
                 // assert
                 Assert.IsNotNull(book.BookStats);
@@ -174,7 +174,7 @@ namespace Logic.Services.API.Tests
                 Assert.AreEqual(totalWordCountExpected, totalWordCountActual);
                 Assert.AreEqual(distinctWordCountExpected, distinctWordCountActual);
                 Assert.IsNotNull(bookUser);
-                Assert.IsNotNull(bookUser.UniqueKey);
+                Assert.IsNotNull(bookUser.Id);
             }
             finally
             {
@@ -207,7 +207,7 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, language, user);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
@@ -223,14 +223,14 @@ namespace Logic.Services.API.Tests
                 if (!readDataPacket.AllWordsInPage.TryGetValue(wordToLookUp, out foundWordBefore))
                 { ErrorHandler.LogAndThrow(); return; }
                 WordUser? foundUserBefore = foundWordBefore.WordUsers
-                    .Where(x => x.LanguageUserKey == languageUser.UniqueKey)
+                    .Where(x => x.LanguageUserId == languageUser.Id)
                     .FirstOrDefault();
                 if (foundUserBefore is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 var statusBeforeActual = foundUserBefore.Status;
 
                 // pull the current page ID before moving so you can later look up its wordUsers
-                Guid origPageId = (Guid)readDataPacket.CurrentPageUser.PageKey;
+                Guid origPageId = (Guid)readDataPacket.CurrentPageUser.PageId;
 
                 // clear the unknown words and move to the new page
                 var newReadDataPacket = OrchestrationApi.OrchestrateClearPageAndMove(context, readDataPacket, 2);
@@ -242,7 +242,7 @@ namespace Logic.Services.API.Tests
 
                 // pull the previous page's wordUser list
                 var priorPageWordDict = WordUserApi.WordUsersDictByPageIdAndUserIdRead(
-                    context, origPageId, (Guid)user.UniqueKey);
+                    context, origPageId, (Guid)user.Id);
                 if (priorPageWordDict is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 WordUser? foundUserAfter = null;
@@ -287,7 +287,7 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, language, user);
                 Assert.IsNotNull(languageUser);
@@ -304,14 +304,14 @@ namespace Logic.Services.API.Tests
                 if (!readDataPacket.AllWordsInPage.TryGetValue(wordToLookUp, out foundWordBefore))
                 { ErrorHandler.LogAndThrow(); return; }
                 WordUser? foundUserBefore = foundWordBefore.WordUsers
-                    .Where(x => x.LanguageUserKey == languageUser.UniqueKey)
+                    .Where(x => x.LanguageUserId == languageUser.Id)
                     .FirstOrDefault();
                 if (foundUserBefore is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 var statusBeforeActual = foundUserBefore.Status;
 
                 // pull the current page ID before moving so you can later look up its wordUsers
-                Guid origPageId = (Guid)readDataPacket.CurrentPageUser.PageKey;
+                Guid origPageId = (Guid)readDataPacket.CurrentPageUser.PageId;
 
                 // clear the unknown words and move to the new page
                 var newReadDataPacket = await OrchestrationApi.OrchestrateClearPageAndMoveAsync(context, readDataPacket, 2);
@@ -323,7 +323,7 @@ namespace Logic.Services.API.Tests
 
                 // pull the previous page's wordUser list
                 var priorPageWordDict = await WordUserApi.WordUsersDictByPageIdAndUserIdReadAsync(
-                    context, origPageId, (Guid)user.UniqueKey);
+                    context, origPageId, (Guid)user.Id);
                 if (priorPageWordDict is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 WordUser? foundUserAfter = null;
@@ -367,17 +367,17 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
                     context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
-                Guid languageUserId = (Guid)languageUser.UniqueKey;
+                Guid languageUserId = (Guid)languageUser.Id;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (Guid)user.UniqueKey);
+                    context, bookId, (Guid)user.Id);
                 if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
@@ -387,13 +387,13 @@ namespace Logic.Services.API.Tests
 
                 // need to update the wordUsers' status so they show up on flash cardS
                 var wordUsers = context.WordUsers
-                    .Where(x => x.LanguageUserKey == languageUser.UniqueKey)
+                    .Where(x => x.LanguageUserId == languageUser.Id)
                     .Take(10)
                     .ToList();
                 foreach (var wordUser in wordUsers)
                 {
                     WordUserApi.WordUserUpdate(
-                        context, (Guid)wordUser.UniqueKey, AvailableWordUserStatus.LEARNING3, "test");
+                        context, (Guid)wordUser.Id, AvailableWordUserStatus.LEARNING3, "test");
                 }
 
                 // create deck 1
@@ -404,9 +404,9 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(dataPacket1.Deck);
                 Assert.IsTrue(dataPacket1.CardCount == numNew); // there are no review cards yet
                 Assert.IsNotNull(dataPacket1.CurrentCard);
-                Assert.IsNotNull(dataPacket1.CurrentCard.UniqueKey);
+                Assert.IsNotNull(dataPacket1.CurrentCard.Id);
 
-                Guid firstCardId = (Guid)dataPacket1.CurrentCard.UniqueKey;
+                Guid firstCardId = (Guid)dataPacket1.CurrentCard.Id;
 
                 // disposition the current card and advance
                 var dataPacket2 = OrchestrationApi.OrchestrateFlashCardDispositionAndAdvance(
@@ -415,16 +415,16 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(dataPacket2);
                 Assert.IsNotNull(dataPacket2.Deck);
                 Assert.IsNotNull(dataPacket2.CurrentCard);
-                Assert.IsNotNull(dataPacket2.CurrentCard.UniqueKey);
+                Assert.IsNotNull(dataPacket2.CurrentCard.Id);
 
-                Guid secondCardId = (Guid)dataPacket2.CurrentCard.UniqueKey;
+                Guid secondCardId = (Guid)dataPacket2.CurrentCard.Id;
 
                 Assert.AreNotEqual(firstCardId, secondCardId);
 
                 // pull card1 from the DB
                 var firstCardRead = FlashCardApi.FlashCardReadById(context, firstCardId);
                 // pull the attempt
-                var attempt = context.FlashCardAttempts.Where(x => x.FlashCardKey == firstCardId).FirstOrDefault();
+                var attempt = context.FlashCardAttempts.Where(x => x.FlashCardId == firstCardId).FirstOrDefault();
 
                 Assert.IsNotNull(firstCardRead);
                 Assert.IsNotNull(firstCardRead.Status);
@@ -459,17 +459,17 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
                     context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
-                Guid languageUserId = (Guid)languageUser.UniqueKey;
+                Guid languageUserId = (Guid)languageUser.Id;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (Guid)user.UniqueKey);
+                    context, bookId, (Guid)user.Id);
                 if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
@@ -479,13 +479,13 @@ namespace Logic.Services.API.Tests
 
                 // need to update the wordUsers' status so they show up on flash cardS
                 var wordUsers = context.WordUsers
-                    .Where(x => x.LanguageUserKey == languageUser.UniqueKey)
+                    .Where(x => x.LanguageUserId == languageUser.Id)
                     .Take(10)
                     .ToList();
                 foreach (var wordUser in wordUsers)
                 {
                     await WordUserApi.WordUserUpdateAsync(
-                        context, (Guid)wordUser.UniqueKey, AvailableWordUserStatus.LEARNING3, "test");
+                        context, (Guid)wordUser.Id, AvailableWordUserStatus.LEARNING3, "test");
                 }
 
                 // create deck 1
@@ -496,9 +496,9 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(dataPacket1.Deck);
                 Assert.IsTrue(dataPacket1.CardCount == numNew); // there are no review cards yet
                 Assert.IsNotNull(dataPacket1.CurrentCard);
-                Assert.IsNotNull(dataPacket1.CurrentCard.UniqueKey);
+                Assert.IsNotNull(dataPacket1.CurrentCard.Id);
 
-                Guid firstCardId = (Guid)dataPacket1.CurrentCard.UniqueKey;
+                Guid firstCardId = (Guid)dataPacket1.CurrentCard.Id;
 
                 // disposition the current card and advance
                 var dataPacket2 = await OrchestrationApi.OrchestrateFlashCardDispositionAndAdvanceAsync(
@@ -507,16 +507,16 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(dataPacket2);
                 Assert.IsNotNull(dataPacket2.Deck);
                 Assert.IsNotNull(dataPacket2.CurrentCard);
-                Assert.IsNotNull(dataPacket2.CurrentCard.UniqueKey);
+                Assert.IsNotNull(dataPacket2.CurrentCard.Id);
 
-                Guid secondCardId = (Guid)dataPacket2.CurrentCard.UniqueKey;
+                Guid secondCardId = (Guid)dataPacket2.CurrentCard.Id;
 
                 Assert.AreNotEqual(firstCardId, secondCardId);
 
                 // pull card1 from the DB
                 var firstCardRead = await FlashCardApi.FlashCardReadByIdAsync(context, firstCardId);
                 // pull the attempt
-                var attempt = context.FlashCardAttempts.Where(x => x.FlashCardKey == firstCardId).FirstOrDefault();
+                var attempt = context.FlashCardAttempts.Where(x => x.FlashCardId == firstCardId).FirstOrDefault();
 
                 Assert.IsNotNull(firstCardRead);
                 Assert.IsNotNull(firstCardRead.Status);
@@ -552,16 +552,16 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
-                Guid languageUserId = (Guid)languageUser.UniqueKey;
+                Guid languageUserId = (Guid)languageUser.Id;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (Guid)user.UniqueKey);
+                    context, bookId, (Guid)user.Id);
                 if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
@@ -570,11 +570,11 @@ namespace Logic.Services.API.Tests
                 //WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
 
                 // need to update the wordUsers' status so they show up on flash cardS
-                var wordUsers = context.WordUsers.Where(x => x.LanguageUserKey == languageUser.UniqueKey).Take(10).ToList();
+                var wordUsers = context.WordUsers.Where(x => x.LanguageUserId == languageUser.Id).Take(10).ToList();
                 foreach (var wordUser in wordUsers)
                 {
                     WordUserApi.WordUserUpdate(
-                        context, (Guid)wordUser.UniqueKey, AvailableWordUserStatus.LEARNING3, "test");
+                        context, (Guid)wordUser.Id, AvailableWordUserStatus.LEARNING3, "test");
                 }
 
                 // create deck 1
@@ -585,7 +585,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(dataPacket1.Deck);
                 Assert.IsTrue(dataPacket1.CardCount == numNew); // there are no review cards yet
                 Assert.IsNotNull(dataPacket1.CurrentCard);
-                Assert.IsNotNull(dataPacket1.CurrentCard.UniqueKey);
+                Assert.IsNotNull(dataPacket1.CurrentCard.Id);
 
 
                 // manually update card 1 to do not use, and next review date in
@@ -594,21 +594,21 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(dataPacket1);
                 var cardToUpdate1 = dataPacket1.Deck[1];
                 Assert.IsNotNull(cardToUpdate1);
-                Assert.IsNotNull(cardToUpdate1.UniqueKey);
-                Assert.IsNotNull(cardToUpdate1.WordUserKey);
-                FlashCardApi.FlashCardUpdate(context, (Guid)cardToUpdate1.UniqueKey,
-                    (Guid)cardToUpdate1.WordUserKey, AvailableFlashCardStatus.DONTUSE,
-                    DateTime.Now.AddHours(-1), (Guid)cardToUpdate1.UniqueKey);
+                Assert.IsNotNull(cardToUpdate1.Id);
+                Assert.IsNotNull(cardToUpdate1.WordUserId);
+                FlashCardApi.FlashCardUpdate(context, (Guid)cardToUpdate1.Id,
+                    (Guid)cardToUpdate1.WordUserId, AvailableFlashCardStatus.DONTUSE,
+                    DateTime.Now.AddHours(-1), (Guid)cardToUpdate1.Id);
 
                 // manually update card 2's next review date so it shows up in the next deck creation
                 Assert.IsNotNull(dataPacket1);
                 var cardToUpdate = dataPacket1.Deck[1];
                 Assert.IsNotNull(cardToUpdate);
-                Assert.IsNotNull(cardToUpdate.UniqueKey);
-                Assert.IsNotNull(cardToUpdate.WordUserKey);
-                FlashCardApi.FlashCardUpdate(context, (Guid)cardToUpdate.UniqueKey,
-                    (Guid)cardToUpdate.WordUserKey, AvailableFlashCardStatus.ACTIVE,
-                    DateTime.Now.AddHours(-1), (Guid)cardToUpdate.UniqueKey);
+                Assert.IsNotNull(cardToUpdate.Id);
+                Assert.IsNotNull(cardToUpdate.WordUserId);
+                FlashCardApi.FlashCardUpdate(context, (Guid)cardToUpdate.Id,
+                    (Guid)cardToUpdate.WordUserId, AvailableFlashCardStatus.ACTIVE,
+                    DateTime.Now.AddHours(-1), (Guid)cardToUpdate.Id);
 
                 // create deck 2
                 var dataPacket2 = OrchestrationApi.OrchestrateFlashCardDeckCreation(
@@ -645,17 +645,17 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
                     context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
-                Guid languageUserId = (Guid)languageUser.UniqueKey;
+                Guid languageUserId = (Guid)languageUser.Id;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (Guid)user.UniqueKey);
+                    context, bookId, (Guid)user.Id);
                 if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
@@ -664,12 +664,12 @@ namespace Logic.Services.API.Tests
                 //WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
 
                 // need to update the wordUsers' status so they show up on flash cardS
-                var wordUsers = context.WordUsers.Where(x => x.LanguageUserKey == languageUser.UniqueKey)
+                var wordUsers = context.WordUsers.Where(x => x.LanguageUserId == languageUser.Id)
                     .Take(10).ToList();
                 foreach (var wordUser in wordUsers)
                 {
                     await WordUserApi.WordUserUpdateAsync(
-                        context, (Guid)wordUser.UniqueKey, AvailableWordUserStatus.LEARNING3, "test");
+                        context, (Guid)wordUser.Id, AvailableWordUserStatus.LEARNING3, "test");
                 }
 
                 // create deck 1
@@ -680,7 +680,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(dataPacket1.Deck);
                 Assert.IsTrue(dataPacket1.CardCount == numNew); // there are no review cards yet
                 Assert.IsNotNull(dataPacket1.CurrentCard);
-                Assert.IsNotNull(dataPacket1.CurrentCard.UniqueKey);
+                Assert.IsNotNull(dataPacket1.CurrentCard.Id);
 
                 
                 // manually update card 1 to do not use, and next review date in
@@ -689,21 +689,21 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(dataPacket1);
                 var cardToUpdate1 = dataPacket1.Deck[1];
                 Assert.IsNotNull(cardToUpdate1);
-                Assert.IsNotNull(cardToUpdate1.UniqueKey);
-                Assert.IsNotNull(cardToUpdate1.WordUserKey);
-                await FlashCardApi.FlashCardUpdateAsync(context, (Guid)cardToUpdate1.UniqueKey,
-                    (Guid)cardToUpdate1.WordUserKey, AvailableFlashCardStatus.DONTUSE,
-                    DateTime.Now.AddHours(-1), (Guid)cardToUpdate1.UniqueKey);
+                Assert.IsNotNull(cardToUpdate1.Id);
+                Assert.IsNotNull(cardToUpdate1.WordUserId);
+                await FlashCardApi.FlashCardUpdateAsync(context, (Guid)cardToUpdate1.Id,
+                    (Guid)cardToUpdate1.WordUserId, AvailableFlashCardStatus.DONTUSE,
+                    DateTime.Now.AddHours(-1), (Guid)cardToUpdate1.Id);
 
                 // manually update card 2's next review date so it shows up in the next deck creation
                 Assert.IsNotNull(dataPacket1); 
                 var cardToUpdate = dataPacket1.Deck[1];
                 Assert.IsNotNull(cardToUpdate);
-                Assert.IsNotNull(cardToUpdate.UniqueKey);
-                Assert.IsNotNull(cardToUpdate.WordUserKey);
-                await FlashCardApi.FlashCardUpdateAsync(context, (Guid)cardToUpdate.UniqueKey,
-                    (Guid)cardToUpdate.WordUserKey, AvailableFlashCardStatus.ACTIVE,
-                    DateTime.Now.AddHours(-1), (Guid)cardToUpdate.UniqueKey);
+                Assert.IsNotNull(cardToUpdate.Id);
+                Assert.IsNotNull(cardToUpdate.WordUserId);
+                await FlashCardApi.FlashCardUpdateAsync(context, (Guid)cardToUpdate.Id,
+                    (Guid)cardToUpdate.WordUserId, AvailableFlashCardStatus.ACTIVE,
+                    DateTime.Now.AddHours(-1), (Guid)cardToUpdate.Id);
 
                 // create deck 2
                 var dataPacket2 = await OrchestrationApi.OrchestrateFlashCardDeckCreationAsync(
@@ -744,7 +744,7 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create the languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, language, user);
@@ -797,7 +797,7 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create the languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, language, user);
@@ -855,7 +855,7 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
@@ -904,7 +904,7 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
@@ -955,7 +955,7 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create the languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
@@ -974,7 +974,7 @@ namespace Logic.Services.API.Tests
                 // now pretend to move the page forward and reset
                 int targetPageNum = 2;
 
-                PageUserApi.PageUserMarkAsRead(context, (Guid)readDataPacket.CurrentPageUser.UniqueKey);
+                PageUserApi.PageUserMarkAsRead(context, (Guid)readDataPacket.CurrentPageUser.Id);
 
                 // create the new page user
 
@@ -992,7 +992,7 @@ namespace Logic.Services.API.Tests
 
                 //finally, we get to reset the data
                 var newReadDataPacket = OrchestrationApi.OrchestrateResetReadDataForNewPage(
-                    context, readDataPacket, (Guid)readDataPacket.CurrentPageUser.PageKey);
+                    context, readDataPacket, (Guid)readDataPacket.CurrentPageUser.PageId);
                 if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
                     newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.AllWordsInPage is null ||
@@ -1030,7 +1030,7 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create the languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
@@ -1049,7 +1049,7 @@ namespace Logic.Services.API.Tests
                 // now pretend to move the page forward and reset
                 int targetPageNum = 2;
 
-                await PageUserApi.PageUserMarkAsReadAsync(context, (Guid)readDataPacket.CurrentPageUser.UniqueKey);
+                await PageUserApi.PageUserMarkAsReadAsync(context, (Guid)readDataPacket.CurrentPageUser.Id);
 
                 // create the new page user
 
@@ -1067,7 +1067,7 @@ namespace Logic.Services.API.Tests
 
                 //finally, we get to reset the data
                 var newReadDataPacket = await OrchestrationApi.OrchestrateResetReadDataForNewPageAsync(
-                    context, readDataPacket, (Guid)readDataPacket.CurrentPageUser.PageKey);
+                    context, readDataPacket, (Guid)readDataPacket.CurrentPageUser.PageId);
                 if (newReadDataPacket is null || newReadDataPacket.BookUser is null ||
                     newReadDataPacket.CurrentPageUser is null ||
                     newReadDataPacket.AllWordsInPage is null ||

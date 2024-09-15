@@ -11,16 +11,16 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("BookTag", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(UserKey), nameof(BookKey), nameof(Tag), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(UserId), nameof(BookId), nameof(Tag), IsUnique = true)]
     public class BookTag
     {
         #region required data
 
-        [Required] public required Guid? UniqueKey { get; set; }
-        [Required] public required Guid BookKey { get; set; }
+        [Required] public required Guid? Id { get; set; }
+        [Required] public required Guid BookId { get; set; }
         public required Book Book { get; set; }
-        [Required] public required Guid UserKey { get; set; }
+        [Required] public required Guid UserId { get; set; }
         public required User User { get; set; }
         [Required] public required DateTimeOffset Created { get; set; }
 

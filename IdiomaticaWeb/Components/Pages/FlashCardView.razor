@@ -171,7 +171,7 @@
 
         var context = DbContextFactory.CreateDbContext();
         var ppExample = ParagraphApi.ParagraphExamplePullRandomByFlashCardId(
-            context, (Guid)FlashCardDataPacket.CurrentCard.UniqueKey, (AvailableLanguageCode)UiLanguageCode);
+            context, (Guid)FlashCardDataPacket.CurrentCard.Id, (AvailableLanguageCode)UiLanguageCode);
         ExampleParagraph = ppExample.example;
         ParagraphTranslation = ppExample.translation;
 
@@ -183,7 +183,7 @@
         CustomTranslation = FlashCardDataPacket.CurrentCard.WordUser.Translation;
 
         DefaultTranslations = WordApi.WordTranslationsReadByWordId(
-            context, (Guid)FlashCardDataPacket.CurrentCard.WordUser.Word.UniqueKey);
+            context, (Guid)FlashCardDataPacket.CurrentCard.WordUser.Word.Id);
     }
     private async Task OnShowAnswerClick()
     {

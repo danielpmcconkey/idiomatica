@@ -11,14 +11,15 @@ namespace Model
 {
     
     [Table("Book", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
+    [PrimaryKey(nameof(Id))]
     public class Book
     {
         #region required data
 
-        [Required] public required Guid UniqueKey { get; set; }
+        [Required] public required Guid Id
+        { get; set; }
 
-        [Required] public required Guid LanguageKey { get; set; }
+        [Required] public required Guid LanguageId { get; set; }
         public required Language Language { get; set; }
         
         [StringLength(250)]

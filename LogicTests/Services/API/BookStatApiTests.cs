@@ -32,7 +32,7 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookText
                     );
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)newBook.UniqueKey;
+                bookId = (Guid)newBook.Id;
 
                 BookStatApi.BookStatsCreateAndSave(context, bookId);
 
@@ -63,7 +63,7 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookText
                     );
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)newBook.UniqueKey;
+                bookId = (Guid)newBook.Id;
 
                 await BookStatApi.BookStatsCreateAndSaveAsync(context, bookId);
 
@@ -96,7 +96,7 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookText
                     );
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)newBook.UniqueKey;
+                bookId = (Guid)newBook.Id;
 
                 BookStatApi.BookStatsCreateAndSave(context, bookId);
                 var difficultyStat = DataCache.BookStatByBookIdAndStatKeyRead(
@@ -130,7 +130,7 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookText
                     );
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)newBook.UniqueKey;
+                bookId = (Guid)newBook.Id;
 
                 await BookStatApi.BookStatsCreateAndSaveAsync(context, bookId);
                 var difficultyStat = await DataCache.BookStatByBookIdAndStatKeyReadAsync(

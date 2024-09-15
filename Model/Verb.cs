@@ -6,12 +6,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Model
 {
     [Table("Verb", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
+    [PrimaryKey(nameof(Id))]
     public class Verb
     {
         #region required data
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid LanguageKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid LanguageId { get; set; }
         public required Language Language { get; set; }
 
         [StringLength(2000)]

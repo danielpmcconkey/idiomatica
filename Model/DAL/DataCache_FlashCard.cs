@@ -28,19 +28,19 @@ namespace Model.DAL
                       ([WordUserKey]
                       ,[Status]
                       ,[NextReview]
-                      ,[UniqueKey])
+                      ,[Id])
                 VALUES
-                      ({flashCard.WordUserKey}
+                      ({flashCard.WordUserId}
                       ,{flashCard.Status}
                       ,{flashCard.NextReview}
-                      ,{flashCard.UniqueKey})
+                      ,{flashCard.Id})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
             
 
             // add it to cache
-            FlashCardById[flashCard.UniqueKey] = flashCard; ;
+            FlashCardById[flashCard.Id] = flashCard; ;
 
             return flashCard;
         }
@@ -63,7 +63,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.FlashCards.Where(x => x.UniqueKey == key).FirstOrDefault();
+            var value = context.FlashCards.Where(x => x.Id == key).FirstOrDefault();
             if (value == null) return null;
             // write to cache
             FlashCardById[key] = value;
@@ -86,7 +86,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.FlashCards.Where(x => x.WordUserKey == key).FirstOrDefault();
+            var value = context.FlashCards.Where(x => x.WordUserId == key).FirstOrDefault();
             if (value == null) return null;
             // write to cache
             FlashCardByWordUserId[key] = value;
@@ -110,7 +110,7 @@ namespace Model.DAL
             }
 
             // read DB
-            value = context.FlashCards.Where(x => x.UniqueKey == key)
+            value = context.FlashCards.Where(x => x.Id == key)
                 .Include(fc => fc.WordUser)
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                     .ThenInclude(wu => wu.Word)
@@ -176,11 +176,11 @@ namespace Model.DAL
         {
             int numRows = context.Database.ExecuteSql($"""
                         UPDATE [Idioma].[FlashCard]
-                        SET [WordUserKey] = {flashCard.WordUserKey}
+                        SET [WordUserKey] = {flashCard.WordUserId}
                            ,[Status] = {flashCard.Status}
                            ,[NextReview] = {flashCard.NextReview}
-                           ,[UniqueKey] = {flashCard.UniqueKey}
-                        where UniqueKey = {flashCard.UniqueKey}
+                           ,[Id] = {flashCard.Id}
+                        where Id = {flashCard.Id}
                         ;
                         """);
             if (numRows < 1)
@@ -207,29 +207,29 @@ namespace Model.DAL
 
         private static bool doesFlashCardListContainId(List<FlashCard> list, Guid key)
         {
-            return list.Where(x => x.UniqueKey == key).Any();
+            return list.Where(x => x.Id == key).Any();
         }
         private static List<FlashCard> FlashCardsListGetUpdated(List<FlashCard> list, FlashCard value)
         {
             List<FlashCard> newList = new List<FlashCard>();
             foreach (var fc in list)
             {
-                if (fc.UniqueKey == value.UniqueKey) newList.Add(value);
+                if (fc.Id == value.Id) newList.Add(value);
                 else newList.Add(fc);
             }
             return newList;
         }
         private static void FlashCardUpdateAllCaches(FlashCard value)
         {
-            FlashCardById[(Guid)value.UniqueKey] = value;
+            FlashCardById[(Guid)value.Id] = value;
 
             // FlashCardAndFullRelationshipsById
             FlashCard? cachedFull = null;
-            FlashCardAndFullRelationshipsById.TryGetValue((Guid)value.UniqueKey, out cachedFull);
+            FlashCardAndFullRelationshipsById.TryGetValue((Guid)value.Id, out cachedFull);
             if (cachedFull != null)
             {
                 cachedFull.NextReview = value.NextReview;
-                cachedFull.WordUserKey = value.WordUserKey;
+                cachedFull.WordUserId = value.WordUserId;
                 cachedFull.Status = value.Status;
             }
             

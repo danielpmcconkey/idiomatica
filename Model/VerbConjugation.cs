@@ -9,17 +9,17 @@ using Model.Enums;
 namespace Model
 {
     //[Table("VerbConjugation", Schema = "Idioma")]
-    //[PrimaryKey(nameof(UniqueKey))]
+    //[PrimaryKey(nameof(Id))]
     public class VerbConjugation
     {
-        public Guid? UniqueKey { get; set; }
+        public Guid? Id { get; set; }
 
 
         #region relationships
 
         public Verb? Verb { get; set; }
         public List<VerbConjugationPiece> Pieces { get; set; } = [];
-        public Guid? WordKey { get; set; }
+        public Guid? WordId { get; set; }
         public Word? Word { get; set; }
 
         #endregion

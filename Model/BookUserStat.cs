@@ -11,14 +11,14 @@ using Model.Enums;
 namespace Model
 {
     [Table("BookUserStat", Schema = "Idioma")]
-    [PrimaryKey(nameof(BookKey), nameof(LanguageUserKey), nameof(Key))]
+    [PrimaryKey(nameof(BookId), nameof(LanguageUserId), nameof(Key))]
     public class BookUserStat
     {
         #region required data
 
-        [Required] public required Guid BookKey { get; set; }
+        [Required] public required Guid BookId { get; set; }
         public required Book Book { get; set; }
-        [Required] public required Guid LanguageUserKey { get; set; }
+        [Required] public required Guid LanguageUserId { get; set; }
         public required LanguageUser LanguageUser { get; set; }
         [Required] public required AvailableBookUserStat Key { get; set; }
 

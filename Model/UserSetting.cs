@@ -13,12 +13,12 @@ namespace Model
     
     
     [Table("UserSetting", Schema = "Idioma")]
-    [PrimaryKey(nameof(Key), nameof(UserKey))]
+    [PrimaryKey(nameof(Key), nameof(UserId))]
     public class UserSetting
     {
         #region required data
         [Required] public required AvailableUserSetting Key { get; set; }
-        [Required] public required Guid UserKey { get; set; }
+        [Required] public required Guid UserId { get; set; }
         public required User User { get; set; }
 
         [StringLength(1000)]

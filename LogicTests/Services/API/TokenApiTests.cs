@@ -28,65 +28,65 @@ namespace Logic.Services.API.Tests
             {
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                Assert.IsNotNull(language); Assert.IsNotNull(language.UniqueKey);
+                Assert.IsNotNull(language); Assert.IsNotNull(language.Id);
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageId = (Guid)language.Id,
                     Language = language,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                Assert.IsNotNull(book); Assert.IsNotNull(book.UniqueKey);
-                bookId = (Guid)book.UniqueKey;
+                Assert.IsNotNull(book); Assert.IsNotNull(book.Id);
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookKey = book.UniqueKey,
+                    BookId = book.Id,
                     Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                Assert.IsNotNull(page); Assert.IsNotNull(page.UniqueKey);
+                Assert.IsNotNull(page); Assert.IsNotNull(page.Id);
 
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
-                    PageKey = page.UniqueKey,
+                    PageId = page.Id,
                     Page = page,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 paragraph = DataCache.ParagraphCreate(paragraph, context);
-                Assert.IsNotNull(paragraph); Assert.IsNotNull(paragraph.UniqueKey);
+                Assert.IsNotNull(paragraph); Assert.IsNotNull(paragraph.Id);
 
                 // create an empty sentence
                 Sentence? sentence = new()
                 {
-                    ParagraphKey = paragraph.UniqueKey,
+                    ParagraphId = paragraph.Id,
                     Paragraph = paragraph,
                     Text = sentenceText,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 sentence = DataCache.SentenceCreate(sentence, context);
-                Assert.IsNotNull(sentence); Assert.IsNotNull(sentence.UniqueKey);
+                Assert.IsNotNull(sentence); Assert.IsNotNull(sentence.Id);
 
-                // read the word to get the Word.UniqueKey
-                var word = WordApi.WordReadByLanguageIdAndText(context, (Guid)language.UniqueKey, wordText);
-                Assert.IsNotNull(word); Assert.IsNotNull(word.UniqueKey);
+                // read the word to get the Word.Id
+                var word = WordApi.WordReadByLanguageIdAndText(context, (Guid)language.Id, wordText);
+                Assert.IsNotNull(word); Assert.IsNotNull(word.Id);
 
                 // now create the tokens
                 var token = TokenApi.TokenCreate(context, wordDisplay, sentence, 0, word);
 
                 // token assertions
                 Assert.IsNotNull(token);
-                Assert.IsNotNull(token.UniqueKey);
+                Assert.IsNotNull(token.Id);
                 Assert.AreEqual(wordDisplay, token.Display);
             }
             finally
@@ -108,65 +108,65 @@ namespace Logic.Services.API.Tests
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                Assert.IsNotNull(language); Assert.IsNotNull(language.UniqueKey);
+                Assert.IsNotNull(language); Assert.IsNotNull(language.Id);
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageId = (Guid)language.Id,
                     Language = language,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 book = await DataCache.BookCreateAsync(book, context);
-                Assert.IsNotNull(book); Assert.IsNotNull(book.UniqueKey);
-                bookId = (Guid)book.UniqueKey;
+                Assert.IsNotNull(book); Assert.IsNotNull(book.Id);
+                bookId = (Guid)book.Id;
                 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookKey = book.UniqueKey,
+                    BookId = book.Id,
                     Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 page = await DataCache.PageCreateAsync(page, context);
-                Assert.IsNotNull(page); Assert.IsNotNull(page.UniqueKey);
+                Assert.IsNotNull(page); Assert.IsNotNull(page.Id);
 
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
-                    PageKey = page.UniqueKey,
+                    PageId = page.Id,
                     Page = page,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 paragraph = await DataCache.ParagraphCreateAsync(paragraph, context);
-                Assert.IsNotNull(paragraph); Assert.IsNotNull(paragraph.UniqueKey);
+                Assert.IsNotNull(paragraph); Assert.IsNotNull(paragraph.Id);
 
                 // create an empty sentence
                 Sentence? sentence = new()
                 {
-                    ParagraphKey = paragraph.UniqueKey,
+                    ParagraphId = paragraph.Id,
                     Paragraph = paragraph,
                     Text = sentenceText,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 sentence = await DataCache.SentenceCreateAsync(sentence, context);
-                Assert.IsNotNull(sentence); Assert.IsNotNull(sentence.UniqueKey);
+                Assert.IsNotNull(sentence); Assert.IsNotNull(sentence.Id);
 
-                // read the word to get the Word.UniqueKey
-                var word = await WordApi.WordReadByLanguageIdAndTextAsync(context, (Guid)language.UniqueKey, wordText);
-                Assert.IsNotNull(word); Assert.IsNotNull(word.UniqueKey);
+                // read the word to get the Word.Id
+                var word = await WordApi.WordReadByLanguageIdAndTextAsync(context, (Guid)language.Id, wordText);
+                Assert.IsNotNull(word); Assert.IsNotNull(word.Id);
 
                 // now create the tokens
                 var token = await TokenApi.TokenCreateAsync(context, wordDisplay, sentence, 0, word);
                 
                 // token assertions
                 Assert.IsNotNull(token); 
-                Assert.IsNotNull(token.UniqueKey);
+                Assert.IsNotNull(token.Id);
                 Assert.AreEqual(wordDisplay, token.Display);
             }
             finally
@@ -193,7 +193,7 @@ namespace Logic.Services.API.Tests
             Assert.IsNotNull(tokenAndChildren.t.Word);
             Assert.AreEqual(expectedWordText, tokenAndChildren.t.Word.Text);
             Assert.IsNotNull(tokenAndChildren.wu);
-            Assert.AreEqual(expectedWordUserId, tokenAndChildren.wu.UniqueKey);
+            Assert.AreEqual(expectedWordUserId, tokenAndChildren.wu.Id);
         }
         [TestMethod()]
         public async Task TokenGetChildObjectsAsyncTest()
@@ -210,7 +210,7 @@ namespace Logic.Services.API.Tests
             Assert.IsNotNull(tokenAndChildren.t.Word);
             Assert.AreEqual(expectedWordText, tokenAndChildren.t.Word.Text);
             Assert.IsNotNull(tokenAndChildren.wu);
-            Assert.AreEqual(expectedWordUserId, tokenAndChildren.wu.UniqueKey);
+            Assert.AreEqual(expectedWordUserId, tokenAndChildren.wu.Id);
         }
 
 
@@ -264,54 +264,54 @@ namespace Logic.Services.API.Tests
             {
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                Assert.IsNotNull(language); Assert.IsNotNull(language.UniqueKey);
+                Assert.IsNotNull(language); Assert.IsNotNull(language.Id);
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = language.UniqueKey,
+                    LanguageId = language.Id,
                     Language = language,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                Assert.IsNotNull(book); Assert.IsNotNull(book.UniqueKey);
-                bookId = (Guid)book.UniqueKey;
+                Assert.IsNotNull(book); Assert.IsNotNull(book.Id);
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookKey = book.UniqueKey,
+                    BookId = book.Id,
                     Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                Assert.IsNotNull(page); Assert.IsNotNull(page.UniqueKey);
+                Assert.IsNotNull(page); Assert.IsNotNull(page.Id);
 
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
-                    PageKey = page.UniqueKey,
+                    PageId = page.Id,
                     Page = page,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 paragraph = DataCache.ParagraphCreate(paragraph, context);
-                Assert.IsNotNull(paragraph); Assert.IsNotNull(paragraph.UniqueKey);
+                Assert.IsNotNull(paragraph); Assert.IsNotNull(paragraph.Id);
 
                 // create an empty sentence
                 Sentence? sentence = new()
                 {
-                    ParagraphKey = paragraph.UniqueKey,
+                    ParagraphId = paragraph.Id,
                     Paragraph = paragraph,
                     Text = sentenceText,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 sentence = DataCache.SentenceCreate(sentence, context);
-                Assert.IsNotNull(sentence); Assert.IsNotNull(sentence.UniqueKey);
+                Assert.IsNotNull(sentence); Assert.IsNotNull(sentence.Id);
 
                 // now create the tokens
                 var tokens = TokenApi.TokensCreateFromSentence(
@@ -347,54 +347,54 @@ namespace Logic.Services.API.Tests
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                Assert.IsNotNull(language); Assert.IsNotNull(language.UniqueKey);
+                Assert.IsNotNull(language); Assert.IsNotNull(language.Id);
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = language.UniqueKey,
+                    LanguageId = language.Id,
                     Language = language,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 book = await DataCache.BookCreateAsync(book, context);
-                Assert.IsNotNull(book); Assert.IsNotNull(book.UniqueKey);
-                bookId = (Guid)book.UniqueKey;
+                Assert.IsNotNull(book); Assert.IsNotNull(book.Id);
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookKey = book.UniqueKey,
+                    BookId = book.Id,
                     Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 page = await DataCache.PageCreateAsync(page, context);
-                Assert.IsNotNull(page); Assert.IsNotNull(page.UniqueKey);
+                Assert.IsNotNull(page); Assert.IsNotNull(page.Id);
 
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
-                    PageKey = page.UniqueKey,
+                    PageId = page.Id,
                     Page = page,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 paragraph = await DataCache.ParagraphCreateAsync(paragraph, context);
-                Assert.IsNotNull(paragraph); Assert.IsNotNull(paragraph.UniqueKey);
+                Assert.IsNotNull(paragraph); Assert.IsNotNull(paragraph.Id);
 
                 // create an empty sentence
                 Sentence? sentence = new()
                 {
-                    ParagraphKey = paragraph.UniqueKey,
+                    ParagraphId = paragraph.Id,
                     Paragraph = paragraph,
                     Text = sentenceText,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 sentence = await DataCache.SentenceCreateAsync(sentence, context);
-                Assert.IsNotNull(sentence); Assert.IsNotNull(sentence.UniqueKey);
+                Assert.IsNotNull(sentence); Assert.IsNotNull(sentence.Id);
 
                 // now create the tokens
                 var tokens = await TokenApi.TokensCreateFromSentenceAsync(
@@ -432,7 +432,7 @@ namespace Logic.Services.API.Tests
             Assert.IsNotNull(tokens);
             Assert.AreEqual(expectedCount, tokens.Count);
             var targetToken = tokens
-                .Where(x => x.SentenceKey == sentenceId && x.Ordinal == tokenOrdinal)
+                .Where(x => x.SentenceId == sentenceId && x.Ordinal == tokenOrdinal)
                 .FirstOrDefault();
             Assert.IsNotNull(targetToken);
             Assert.AreEqual(expectedDisplay, targetToken.Display);
@@ -451,7 +451,7 @@ namespace Logic.Services.API.Tests
             Assert.IsNotNull(tokens);
             Assert.AreEqual(expectedCount, tokens.Count);
             var targetToken = tokens
-                .Where(x => x.SentenceKey == sentenceId && x.Ordinal == tokenOrdinal)
+                .Where(x => x.SentenceId == sentenceId && x.Ordinal == tokenOrdinal)
                 .FirstOrDefault();
             Assert.IsNotNull(targetToken);
             Assert.AreEqual(expectedDisplay, targetToken.Display);

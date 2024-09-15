@@ -11,16 +11,16 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("FlashCardParagraphTranslationBridge", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(ParagraphTranslationKey), nameof(FlashCardKey), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(ParagraphTranslationId), nameof(FlashCardId), IsUnique = true)]
     public class FlashCardParagraphTranslationBridge
     {
         #region required data
 
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid FlashCardKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid FlashCardId { get; set; }
         public required FlashCard FlashCard { get; set; }
-        [Required] public required Guid ParagraphTranslationKey { get; set; }
+        [Required] public required Guid ParagraphTranslationId { get; set; }
         public required ParagraphTranslation ParagraphTranslation { get; set; }
 
 

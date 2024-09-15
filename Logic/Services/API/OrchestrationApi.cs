@@ -31,7 +31,7 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow();
                 return null;
             }
-            Guid bookId = (Guid)book.UniqueKey;
+            Guid bookId = (Guid)book.Id;
             // add the book stats
             BookStatApi.BookStatsCreateAndSave(context, bookId);
             // now create the book user for the logged in user
@@ -66,7 +66,7 @@ namespace Logic.Services.API
             // create the wordUsers
             WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
             // update bookUserStats
-            BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (Guid)bookUser.UniqueKey);
+            BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (Guid)bookUser.Id);
 
             return bookUser;
         }
@@ -89,7 +89,7 @@ namespace Logic.Services.API
                 return null;
             }
             // update all unknowns to well known
-            PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (Guid)readDataPacket.CurrentPageUser.UniqueKey);
+            PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (Guid)readDataPacket.CurrentPageUser.Id);
             // now move forward, if there's another page
             if (targetPageNum <= readDataPacket.BookTotalPageCount) // remember pages are 1-indexed
             {
@@ -98,7 +98,7 @@ namespace Logic.Services.API
                     ErrorHandler.LogAndThrow();
                     return null;
                 }
-                outPacket = OrchestrateMovePage(context, readDataPacket, (Guid)readDataPacket.Book.UniqueKey, targetPageNum);
+                outPacket = OrchestrateMovePage(context, readDataPacket, (Guid)readDataPacket.Book.Id, targetPageNum);
                 if (outPacket is null)
                 {
                     ErrorHandler.LogAndThrow();
@@ -108,7 +108,7 @@ namespace Logic.Services.API
             else
             {
                 // mark the previous page as read because you didn't do it in the PageMove function
-                PageUserApi.PageUserMarkAsRead(context, readDataPacket.CurrentPageUser.UniqueKey);
+                PageUserApi.PageUserMarkAsRead(context, readDataPacket.CurrentPageUser.Id);
                 // refresh the word user cache
                 if (outPacket is null || outPacket.CurrentPageUser is null)
                 {
@@ -116,7 +116,7 @@ namespace Logic.Services.API
                     return null;
                 }
                 outPacket = OrchestrateResetReadDataForNewPage(
-                    context, readDataPacket, (Guid)outPacket.CurrentPageUser.UniqueKey);
+                    context, readDataPacket, (Guid)outPacket.CurrentPageUser.Id);
             }
             return outPacket;
         }
@@ -167,8 +167,8 @@ namespace Logic.Services.API
                     break;
             }
             var card = FlashCardApi.FlashCardUpdate(
-                context, (Guid)dataPacket.CurrentCard.UniqueKey, (Guid)dataPacket.CurrentCard.WordUserKey,
-                newStatus, nextReview, (Guid)dataPacket.CurrentCard.UniqueKey);
+                context, (Guid)dataPacket.CurrentCard.Id, (Guid)dataPacket.CurrentCard.WordUserId,
+                newStatus, nextReview, (Guid)dataPacket.CurrentCard.Id);
 
             if (card is not null && previousCardsStatus == AvailableFlashCardAttemptStatus.WRONG)
             {
@@ -215,12 +215,12 @@ namespace Logic.Services.API
             var language = DataCache.LanguageByCodeRead(learningLanguageCode, context);
             if (language is null) { ErrorHandler.LogAndThrow(); return null; }
             var languageUser = DataCache.LanguageUserByLanguageIdAndUserIdRead(
-                (language.UniqueKey, userId), context);
+                (language.Id, userId), context);
             if (languageUser is null) { ErrorHandler.LogAndThrow(); return null; }
 
             // pull cards that are ready for their next review
             Expression<Func<FlashCard, bool>> predicate = fc => fc.WordUser != null
-                    && fc.WordUser.LanguageUserKey == languageUser.UniqueKey
+                    && fc.WordUser.LanguageUserId == languageUser.Id
                     && fc.Status == AvailableFlashCardStatus.ACTIVE
                     && fc.NextReview != null
                     && fc.NextReview <= DateTime.Now;
@@ -233,7 +233,7 @@ namespace Logic.Services.API
 
             // pull cards that have already been created, but never reviewed
             Expression<Func<FlashCard, bool>> predicate2 = fc => fc.WordUser != null
-                    && fc.WordUser.LanguageUserKey == languageUser.UniqueKey
+                    && fc.WordUser.LanguageUserId == languageUser.Id
                     && fc.Status == AvailableFlashCardStatus.ACTIVE
                     && fc.NextReview == null;
 
@@ -252,7 +252,7 @@ namespace Logic.Services.API
             {
                 int numToCreate = numNew - numReadyForReviewReturned;
                 var newCards = FlashCardApi.FlashCardsCreate(
-                    context, (Guid)languageUser.UniqueKey, numToCreate, uiLanguage.Code);
+                    context, (Guid)languageUser.Id, numToCreate, uiLanguage.Code);
                 if (newCards is not null && newCards.Count > 0)
                     newDataPacket.Deck.AddRange(newCards);
             }
@@ -309,7 +309,7 @@ namespace Logic.Services.API
 
             // mark the previous page as read if moving forward
             if (targetPageNum > readDataPacket.CurrentPage.Ordinal)
-                PageUserApi.PageUserMarkAsRead(context, (Guid)readDataPacket.CurrentPageUser.UniqueKey);
+                PageUserApi.PageUserMarkAsRead(context, (Guid)readDataPacket.CurrentPageUser.Id);
 
             if (targetPageNum < 1) return null;
             if (targetPageNum > readDataPacket.BookTotalPageCount)
@@ -317,7 +317,7 @@ namespace Logic.Services.API
 
             // reload the current page user with the new target
             readDataPacket.CurrentPageUser = PageUserApi.PageUserReadByOrderWithinBook(
-                context, (Guid)readDataPacket.LanguageUser.UniqueKey, targetPageNum, bookId);
+                context, (Guid)readDataPacket.LanguageUser.Id, targetPageNum, bookId);
 
             // create the page user if it hasn't been created already
             if (readDataPacket.CurrentPageUser is null)
@@ -340,7 +340,7 @@ namespace Logic.Services.API
 
 
             var newReadDataPacket = OrchestrateResetReadDataForNewPage(
-                context, readDataPacket, (Guid)readDataPacket.CurrentPageUser.PageKey);
+                context, readDataPacket, (Guid)readDataPacket.CurrentPageUser.PageId);
             if (newReadDataPacket is null || newReadDataPacket.BookUser is null
                 || newReadDataPacket.CurrentPageUser is null)
             {
@@ -349,7 +349,7 @@ namespace Logic.Services.API
             }
             readDataPacket = newReadDataPacket;
             BookUserApi.BookUserUpdateBookmark(
-                context, (Guid)readDataPacket.BookUser.UniqueKey, (Guid)readDataPacket.CurrentPageUser.PageKey);
+                context, (Guid)readDataPacket.BookUser.Id, (Guid)readDataPacket.CurrentPageUser.PageId);
 
             return readDataPacket;
         }
@@ -391,17 +391,17 @@ namespace Logic.Services.API
 
             // tier 1 tasks, dependent on tier 0
             readDataPacket.BookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
-                context, (Guid)readDataPacket.Book.UniqueKey, (Guid)readDataPacket.LoggedInUser.UniqueKey);
+                context, (Guid)readDataPacket.Book.Id, (Guid)readDataPacket.LoggedInUser.Id);
             readDataPacket.LanguageUser = LanguageUserApi.LanguageUserGet(
-                context, (Guid)readDataPacket.Book.LanguageKey, (Guid)readDataPacket.LoggedInUser.UniqueKey);
-            readDataPacket.Language = LanguageApi.LanguageRead(context, (Guid)readDataPacket.Book.LanguageKey);
+                context, (Guid)readDataPacket.Book.LanguageId, (Guid)readDataPacket.LoggedInUser.Id);
+            readDataPacket.Language = LanguageApi.LanguageRead(context, (Guid)readDataPacket.Book.LanguageId);
 
 
             if (readDataPacket.BookUser is null)
             {
                 // create it, I guess
                 readDataPacket.BookUser = OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookId, (Guid)readDataPacket.LoggedInUser.UniqueKey);
+                    context, bookId, (Guid)readDataPacket.LoggedInUser.Id);
             }
             if (readDataPacket.BookUser is null)
             {
@@ -421,9 +421,9 @@ namespace Logic.Services.API
             }
             // tier 2, dependent on tier 1
             readDataPacket.BookUserStats = BookUserStatApi.BookUserStatsRead(
-                context, (Guid)readDataPacket.Book.UniqueKey, (Guid)readDataPacket.LoggedInUser.UniqueKey);
+                context, (Guid)readDataPacket.Book.Id, (Guid)readDataPacket.LoggedInUser.Id);
             readDataPacket.CurrentPageUser = PageUserApi.PageUserReadBookmarkedOrFirst(
-                context, (Guid)readDataPacket.BookUser.UniqueKey);
+                context, (Guid)readDataPacket.BookUser.Id);
             readDataPacket.LanguageFromCode = LanguageApi.LanguageReadByCode(
                 context, readDataPacket.Language.Code);
 
@@ -446,7 +446,7 @@ namespace Logic.Services.API
             {
                 // just pull the current page
                 readDataPacket.CurrentPage = PageApi.PageReadById(
-                    context, readDataPacket.CurrentPageUser.PageKey);
+                    context, readDataPacket.CurrentPageUser.PageId);
             }
             if (readDataPacket.CurrentPage is null)
             {
@@ -456,7 +456,7 @@ namespace Logic.Services.API
 
             // tier 3, dependent on tier 2
             var resetDataPacket = OrchestrateResetReadDataForNewPage(
-                context, readDataPacket, readDataPacket.CurrentPage.UniqueKey);
+                context, readDataPacket, readDataPacket.CurrentPage.Id);
             if (resetDataPacket is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -505,7 +505,7 @@ namespace Logic.Services.API
             readDataPacket.Paragraphs = ParagraphApi.ParagraphsReadByPageId(context, newPageId);
             readDataPacket.AllWordsInPage = WordApi
                 .WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
-                context, newPageId, (Guid)readDataPacket.LanguageUser.UniqueKey);
+                context, newPageId, (Guid)readDataPacket.LanguageUser.Id);
             readDataPacket.Sentences = SentenceApi.SentencesReadByPageId(context, newPageId);
             readDataPacket.Tokens = TokenApi.TokensReadByPageId(context, newPageId);
 
@@ -527,20 +527,20 @@ namespace Logic.Services.API
             {
                 if (readDataPacket.Sentences is null || readDataPacket.Sentences.Count < 1) continue;
                 p.Sentences = [.. readDataPacket.Sentences
-                    .Where(s => s.ParagraphKey == p.UniqueKey)
+                    .Where(s => s.ParagraphId == p.Id)
                     .OrderBy(s => s.Ordinal)];
 
                 foreach (var s in p.Sentences)
                 {
                     if (readDataPacket.Tokens is null || readDataPacket.Tokens.Count < 1) continue;
                     s.Tokens = [.. readDataPacket.Tokens
-                        .Where(t => t.SentenceKey == s.UniqueKey)
+                        .Where(t => t.SentenceId == s.Id)
                         .OrderBy(t => t.Ordinal)];
 
                     foreach (var t in s.Tokens)
                     {
                         var wordEntry = readDataPacket.AllWordsInPage
-                            .Where(w => w.Value.UniqueKey == t.WordKey)
+                            .Where(w => w.Value.Id == t.WordId)
                             .FirstOrDefault();
                         if (wordEntry.Value != null)
                         {

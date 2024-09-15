@@ -11,12 +11,12 @@ namespace Model
 {
 
     [Table("User", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
+    [PrimaryKey(nameof(Id))]
     [Index(nameof(ApplicationUserId), IsUnique = true)]
     public class User
     {
         #region required data
-        [Required] public required Guid UniqueKey { get; set; }
+        [Required] public required Guid Id { get; set; }
 
         // not a strict EF Core relationship
         [Required] public required string ApplicationUserId { get; set; }

@@ -11,14 +11,14 @@ namespace Model
 {
     
     [Table("Paragraph", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(PageKey), nameof(Ordinal), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(PageId), nameof(Ordinal), IsUnique = true)]
     public class Paragraph
     {
         #region required data
 
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid PageKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid PageId { get; set; }
         public required Page Page { get; set; }
         [Required] public required int Ordinal { get; set; }
 

@@ -14,8 +14,8 @@ namespace Model
     {
         public Int64? RowNumber { get; set; }
         public bool? IsInShelf { get; set; }
-        public Guid? UserKey { get; set; }
-        public Guid? BookKey { get; set; }
+        public Guid? UserId { get; set; }
+        public Guid? BookId { get; set; }
         public string? LanguageName { get; set; }
         public string? IsComplete { get; set; }
         public string? Title { get; set; }

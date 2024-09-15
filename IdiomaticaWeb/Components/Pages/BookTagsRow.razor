@@ -16,7 +16,7 @@ else
 
             @foreach (var tag in _tags)
             {
-                <TagBadge BookId="BookKey" BookTag="tag" OnRefreshRowAsync="RefreshTags" />
+                <TagBadge BookId="BookId" BookTag="tag" OnRefreshRowAsync="RefreshTags" />
             }
 
         </div>
@@ -36,7 +36,7 @@ else
 }
 @code {
     [Parameter]
-    public Guid? BookKey { get; set; }
+    public Guid? BookId { get; set; }
     private List<BookTagRow> _tags = [];
     private string? _addTagInput;
     private User? _loggedInUser;
@@ -58,9 +58,9 @@ else
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (BookKey is not null)
+            if (BookId is not null)
             {
-                _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (Guid)BookKey, (Guid)_loggedInUser.UniqueKey);
+                _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (Guid)BookId, (Guid)_loggedInUser.Id);
             }
             
             await t_delay;
@@ -97,10 +97,10 @@ else
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (BookKey is not null)
+            if (BookId is not null)
             {
                 _tags = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(
-                    context, (Guid)BookKey, (Guid)_loggedInUser.UniqueKey);
+                    context, (Guid)BookId, (Guid)_loggedInUser.Id);
             }
             await t_delay;
             _isLoading = false;
@@ -131,19 +131,19 @@ else
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (BookKey is null)
+            if (BookId is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var book = BookApi.BookRead(context, (Guid)BookKey);
+            var book = BookApi.BookRead(context, (Guid)BookId);
             if (book is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
             BookTagApi.BookTagAdd(context, book, _loggedInUser, sanitized);
-            _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (Guid)BookKey, (Guid)_loggedInUser.UniqueKey);
+            _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (Guid)BookId, (Guid)_loggedInUser.Id);
             await t_delay;
             _isLoading = false;
         }

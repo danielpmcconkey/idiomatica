@@ -36,7 +36,7 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var languageUser = DataCache.LanguageUserByIdRead((Guid)bookUser.LanguageUserKey, context);
+            var languageUser = DataCache.LanguageUserByIdRead((Guid)bookUser.LanguageUserId, context);
             if (languageUser is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -44,17 +44,17 @@ namespace Logic.Services.API
             }
             
             // delete the booklistrows cache for this user
-            DataCache.BookListRowsByUserIdDelete((Guid)languageUser.UniqueKey, context);
+            DataCache.BookListRowsByUserIdDelete((Guid)languageUser.Id, context);
             // delete the actual stats from teh database and bookuserstats cache
-            DataCache.BookUserStatsByBookIdAndUserIdDelete(((Guid)bookUser.BookKey, (Guid)languageUser.UserKey), context);
+            DataCache.BookUserStatsByBookIdAndUserIdDelete(((Guid)bookUser.BookId, (Guid)languageUser.UserId), context);
 
-            var allWordsInBook = DataCache.WordsByBookIdRead((Guid)bookUser.BookKey, context);
+            var allWordsInBook = DataCache.WordsByBookIdRead((Guid)bookUser.BookId, context);
            
             var allWordUsersInBook = DataCache.WordUsersByBookIdAndLanguageUserIdRead(
-                ((Guid)bookUser.BookKey, (Guid)bookUser.LanguageUserKey), context, true);
+                ((Guid)bookUser.BookId, (Guid)bookUser.LanguageUserId), context, true);
             var pageUsers = DataCache.PageUsersByBookUserIdRead(bookUserId, context, true);
-            var pages = DataCache.PagesByBookIdRead((Guid)bookUser.BookKey, context);
-            var bookStats = DataCache.BookStatsByBookIdRead((Guid)bookUser.BookKey, context);
+            var pages = DataCache.PagesByBookIdRead((Guid)bookUser.BookId, context);
+            var bookStats = DataCache.BookStatsByBookIdRead((Guid)bookUser.BookId, context);
             if (bookStats is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -65,7 +65,7 @@ namespace Logic.Services.API
             var totalWordsStatline = bookStats.Where(x => x.Key == AvailableBookStat.TOTALWORDCOUNT).FirstOrDefault();
             var totalDistinctWordsStatline = bookStats.Where(x => x.Key == AvailableBookStat.DISTINCTWORDCOUNT).FirstOrDefault();
             var readPages = (from pu in pageUsers
-                             join p in pages on pu.PageKey equals p.UniqueKey
+                             join p in pages on pu.PageId equals p.Id
                              where pu.ReadDate != null
                              orderby p.Ordinal descending
                              select p)
@@ -122,8 +122,8 @@ namespace Logic.Services.API
                 Key = AvailableBookUserStat.ISCOMPLETE,
                 Book = bookUser.Book,
                 LanguageUser = bookUser.LanguageUser,
-                BookKey = bookUser.BookKey,
-                LanguageUserKey = bookUser.LanguageUserKey,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
                 ValueString = isComplete.ToString(),
             });
             stats.Add(new BookUserStat()
@@ -131,8 +131,8 @@ namespace Logic.Services.API
                 Key = AvailableBookUserStat.LASTPAGEREAD,
                 Book = bookUser.Book,
                 LanguageUser = bookUser.LanguageUser,
-                BookKey = bookUser.BookKey,
-                LanguageUserKey = bookUser.LanguageUserKey,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
                 ValueNumeric = lastPageRead,
             });
             stats.Add(new BookUserStat()
@@ -140,8 +140,8 @@ namespace Logic.Services.API
                 Key = AvailableBookUserStat.PROGRESS,
                 Book = bookUser.Book,
                 LanguageUser = bookUser.LanguageUser,
-                BookKey = bookUser.BookKey,
-                LanguageUserKey = bookUser.LanguageUserKey,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
                 ValueString = progress,
             });
             stats.Add(new BookUserStat()
@@ -149,8 +149,8 @@ namespace Logic.Services.API
                 Key = AvailableBookUserStat.PROGRESSPERCENT,
                 Book = bookUser.Book,
                 LanguageUser = bookUser.LanguageUser,
-                BookKey = bookUser.BookKey,
-                LanguageUserKey = bookUser.LanguageUserKey,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
                 ValueNumeric = progressPercent,
             });
             stats.Add(new BookUserStat()
@@ -158,8 +158,8 @@ namespace Logic.Services.API
                 Key = AvailableBookUserStat.DISTINCTKNOWNPERCENT,
                 Book = bookUser.Book,
                 LanguageUser = bookUser.LanguageUser,
-                BookKey = bookUser.BookKey,
-                LanguageUserKey = bookUser.LanguageUserKey,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
                 ValueNumeric = distinctKnownPercent,
             });
             stats.Add(new BookUserStat()
@@ -167,8 +167,8 @@ namespace Logic.Services.API
                 Key = AvailableBookUserStat.DISTINCTWORDCOUNT,
                 Book = bookUser.Book,
                 LanguageUser = bookUser.LanguageUser,
-                BookKey = bookUser.BookKey,
-                LanguageUserKey = bookUser.LanguageUserKey,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
                 ValueNumeric = distinctWordCount,
             });
             stats.Add(new BookUserStat()
@@ -176,8 +176,8 @@ namespace Logic.Services.API
                 Key = AvailableBookUserStat.TOTALWORDCOUNT,
                 Book = bookUser.Book,
                 LanguageUser = bookUser.LanguageUser,
-                BookKey = bookUser.BookKey,
-                LanguageUserKey = bookUser.LanguageUserKey,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
                 ValueNumeric = totalWordCount,
             });
             stats.Add(new BookUserStat()
@@ -185,8 +185,8 @@ namespace Logic.Services.API
                 Key = AvailableBookUserStat.TOTALKNOWNPERCENT,
                 Book = bookUser.Book,
                 LanguageUser = bookUser.LanguageUser,
-                BookKey = bookUser.BookKey,
-                LanguageUserKey = bookUser.LanguageUserKey,
+                BookId = bookUser.BookId,
+                LanguageUserId = bookUser.LanguageUserId,
                 ValueString = null,
                 ValueNumeric = null,
             });
@@ -194,7 +194,7 @@ namespace Logic.Services.API
             
             // add the new stats
             DataCache.BookUserStatsByBookIdAndUserIdCreate(
-                ((Guid)bookUser.BookKey, (Guid)languageUser.UserKey), stats, context);
+                ((Guid)bookUser.BookId, (Guid)languageUser.UserId), stats, context);
             
 
         }

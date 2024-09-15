@@ -37,10 +37,10 @@ namespace Logic.Services.API
             // add the book to the DB so you can save pages using its ID
             Book? book = new ()
             {
-                UniqueKey = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 Title = titleT,
                 SourceURI = urlT,
-                LanguageKey = language.UniqueKey,
+                LanguageId = language.Id,
                 Language = language,
             };
             book = DataCache.BookCreate(book, context);
@@ -129,7 +129,7 @@ namespace Logic.Services.API
                     bookListDataPacket.SkipRecords,
                     bookListDataPacket.ShouldShowOnlyInShelf,
                     bookListDataPacket.TagsFilter,
-                    bookListDataPacket.LcFilter?.UniqueKey,
+                    bookListDataPacket.LcFilter?.Id,
                     bookListDataPacket.TitleFilter,
                     bookListDataPacket.SortProperty,
                     bookListDataPacket.ShouldSortAscending,
@@ -149,7 +149,7 @@ namespace Logic.Services.API
                     bookListDataPacket.SkipRecords,
                     bookListDataPacket.ShouldShowOnlyInShelf,
                     bookListDataPacket.TagsFilter,
-                    bookListDataPacket.LcFilter?.UniqueKey,
+                    bookListDataPacket.LcFilter?.Id,
                     bookListDataPacket.TitleFilter,
                     bookListDataPacket.SortProperty,
                     bookListDataPacket.ShouldSortAscending,

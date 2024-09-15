@@ -24,7 +24,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.Pages.Where(x => x.UniqueKey == key).FirstOrDefault();
+            var value = context.Pages.Where(x => x.Id == key).FirstOrDefault();
             if (value == null) return null;
             // write to cache
             PageById[key] = value;
@@ -48,13 +48,13 @@ namespace Model.DAL
             // read DB
             var value = context.Pages
                 .Where(p => p.Ordinal == key.ordinal
-                    && p.BookKey == key.bookId)
+                    && p.BookId == key.bookId)
                 .FirstOrDefault();
 
             if (value == null) return null;
             // write to cache
             PageByOrdinalAndBookId[key] = value;
-            PageById[(Guid)value.UniqueKey] = value;
+            PageById[(Guid)value.Id] = value;
             return value;
         }
         public static async Task<Page?> PageByOrdinalAndBookIdReadAsync(
@@ -74,7 +74,7 @@ namespace Model.DAL
                 return PagesByBookId[key];
             }
             // read DB
-            var value = context.Pages.Where(x => x.BookKey == key).OrderBy(x => x.Ordinal)
+            var value = context.Pages.Where(x => x.BookId == key).OrderBy(x => x.Ordinal)
                 .ToList();
 
             // write to cache
@@ -83,7 +83,7 @@ namespace Model.DAL
             foreach (var item in value)
             {
                 if (item is null) continue;
-                PageById[(Guid)item.UniqueKey] = item;
+                PageById[(Guid)item.Id] = item;
             }
 
             return value;
@@ -106,15 +106,15 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Page]
-                      ([BookKey]
+                      ([BookId]
                       ,[Ordinal]
                       ,[OriginalText]
-                      ,[UniqueKey])
+                      ,[Id])
                 VALUES
-                      ({page.BookKey}
+                      ({page.BookId}
                       ,{page.Ordinal}
                       ,{page.OriginalText}
-                      ,{page.UniqueKey})
+                      ,{page.Id})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Page affected 0 rows");
@@ -122,7 +122,7 @@ namespace Model.DAL
 
 
             // add it to cache
-            PageById[page.UniqueKey] = page; ;
+            PageById[page.Id] = page; ;
 
             return page;
         }

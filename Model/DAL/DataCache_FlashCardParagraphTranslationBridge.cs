@@ -28,8 +28,8 @@ namespace Model.DAL
 
             // read DB
             var bridges = (from fcptb in context.FlashCardParagraphTranslationBridges
-                          join pt in context.ParagraphTranslations on fcptb.ParagraphTranslationKey equals pt.UniqueKey
-                          where pt.LanguageKey == key.uiLanguageKey && fcptb.FlashCardKey == key.flashCardId
+                          join pt in context.ParagraphTranslations on fcptb.ParagraphTranslationId equals pt.Id
+                          where pt.LanguageId == key.uiLanguageKey && fcptb.FlashCardId == key.flashCardId
                           select fcptb).ToList();
             FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode[key] = bridges;
             return bridges;
@@ -46,7 +46,7 @@ namespace Model.DAL
 
             // read DB
             var value = context.FlashCardParagraphTranslationBridges
-                .Where(x => x.UniqueKey == key)
+                .Where(x => x.Id == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -72,17 +72,17 @@ namespace Model.DAL
             INSERT INTO [Idioma].[FlashCardParagraphTranslationBridge]
                         ([FlashCardKey]
                         ,[ParagraphTranslationKey]
-                        ,[UniqueKey])
+                        ,[Id])
                     VALUES
-                        ({fcptb.FlashCardKey}
-                        ,{fcptb.ParagraphTranslationKey}
-                        ,{fcptb.UniqueKey})
+                        ({fcptb.FlashCardId}
+                        ,{fcptb.ParagraphTranslationId}
+                        ,{fcptb.Id})
             """);
             
             if (numRows < 1) throw new InvalidDataException("creating FlashCardParagraphTranslationBridge affected 0 rows");
             
             // add it to cache
-            FlashCardParagraphTranslationBridgeById[fcptb.UniqueKey] = fcptb;
+            FlashCardParagraphTranslationBridgeById[fcptb.Id] = fcptb;
 
             return fcptb;
         }

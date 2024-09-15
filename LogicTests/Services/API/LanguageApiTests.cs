@@ -57,7 +57,7 @@ namespace Logic.Services.API.Tests
             if (language == null)
             { ErrorHandler.LogAndThrow(); return; }
 
-            Assert.AreEqual(expectedId, language.UniqueKey);
+            Assert.AreEqual(expectedId, language.Id);
             
         }
 
@@ -71,7 +71,7 @@ namespace Logic.Services.API.Tests
             if (language == null)
                 { ErrorHandler.LogAndThrow(); return; }
 
-            Assert.AreEqual(expectedId, language.UniqueKey);
+            Assert.AreEqual(expectedId, language.Id);
         }
 
         [TestMethod()]
@@ -182,14 +182,14 @@ namespace Logic.Services.API.Tests
                 // create the user
                 var user = UserApi.UserCreate(applicationUserId, name, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = user.UniqueKey;
+                userId = user.Id;
 
                 UserSetting Setting = new()
                 {
                     Key = AvailableUserSetting.UILANGUAGE,
-                    UserKey = userId,
+                    UserId = userId,
                     User = user,
-                    Value = language.UniqueKey.ToString(),
+                    Value = language.Id.ToString(),
                 };
 
                 var uiLanguageSetting = UserApi.UserSettingUiLanguagReadByUserId(context, userId);
@@ -221,14 +221,14 @@ namespace Logic.Services.API.Tests
                 // create the user
                 var user = await UserApi.UserCreateAsync(applicationUserId, name, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = user.UniqueKey;
+                userId = user.Id;
 
                 UserSetting Setting = new()
                 {
                     Key = AvailableUserSetting.UILANGUAGE,
-                    UserKey = userId,
+                    UserId = userId,
                     User = user,
-                    Value = language.UniqueKey.ToString(),
+                    Value = language.Id.ToString(),
                 };
 
                 var uiLanguageSetting = await UserApi.UserSettingUiLanguagReadByUserIdAsync(context, userId);

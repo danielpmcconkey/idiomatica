@@ -12,14 +12,14 @@ namespace Model
 {
     
     [Table("Sentence", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(ParagraphKey), nameof(Ordinal), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(ParagraphId), nameof(Ordinal), IsUnique = true)]
     public class Sentence
     {
         #region required data
 
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid ParagraphKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid ParagraphId { get; set; }
         public required Paragraph Paragraph { get; set; }
         [Required] public required int Ordinal { get; set; }
         [Column(TypeName = "TEXT")]

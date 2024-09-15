@@ -13,18 +13,18 @@ namespace Model
 {
 
     [Table("WordRank", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(LanguageKey), nameof(WordKey), IsUnique = true)]
-    [Index(nameof(LanguageKey), nameof(Ordinal), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(LanguageId), nameof(WordId), IsUnique = true)]
+    [Index(nameof(LanguageId), nameof(Ordinal), IsUnique = true)]
     public class WordRank
     {
         #region required data
 
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid LanguageKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid LanguageId { get; set; }
         public required Language Language { get; set; }
 
-        [Required] public required Guid WordKey { get; set; }
+        [Required] public required Guid WordId { get; set; }
         public required Word Word { get; set; }
 
         [Column(TypeName = "numeric(8,2)")]

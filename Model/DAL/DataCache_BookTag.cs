@@ -21,17 +21,17 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                 
                 INSERT INTO [Idioma].[BookTag]
-                           ([BookKey]
+                           ([BookId]
                            ,[UserKey]
                            ,[Tag]
                            ,[Created]
-                           ,[UniqueKey])
+                           ,[Id])
                      VALUES
-                           ({bookTag.BookKey}
-                           ,{bookTag.UserKey}
+                           ({bookTag.BookId}
+                           ,{bookTag.UserId}
                            ,{bookTag.Tag}
                            ,{bookTag.Created}
-                           ,{bookTag.UniqueKey})
+                           ,{bookTag.Id})
                 """);
             if (numRows < 1) throw new InvalidDataException("BookTag create affected 0 rows");
             
@@ -54,12 +54,12 @@ namespace Model.DAL
         {
             // pull all tags from cache
             var allTags = BookTagsByBookIdRead(key.bookId, context);
-            var personalTags = allTags.Where(x => x.UserKey == key.userId);
+            var personalTags = allTags.Where(x => x.UserId == key.userId);
 
             // read community created tags from the DB 
             var communityTags = allTags
                 .GroupBy(x => x.Tag, (tagKey, g) => new BookTagRow { 
-                    Tag = tagKey, Count = g.Count(), UserKey = key.userId })
+                    Tag = tagKey, Count = g.Count(), UserId = key.userId })
                 .ToList();
 
             // stitch them together
@@ -69,10 +69,10 @@ namespace Model.DAL
                        orderby ((subgroup == null) ? false : true) descending, ct.Count descending
                        select new BookTagRow
                        {
-                           BookKey = key.bookId,
+                           BookId = key.bookId,
                            Tag = ct.Tag,
                            Count = ct.Count,
-                           UserKey = key.userId,
+                           UserId = key.userId,
                            IsPersonal = (subgroup == null) ? false : true,
                        };
 
@@ -97,7 +97,7 @@ namespace Model.DAL
                 return BookTagsByBookId[key];
             }
             var value = context.BookTags
-                .Where(x => x.BookKey == key)
+                .Where(x => x.BookId == key)
                 .ToList();
 
             // write to cache
@@ -125,8 +125,8 @@ namespace Model.DAL
             if (trimmed == null) return;
             // make sure this tag actually exists
             var existingTags = context.BookTags.Where(x =>
-                    x.BookKey == key.bookId &&
-                    x.UserKey == key.userId &&
+                    x.BookId == key.bookId &&
+                    x.UserId == key.userId &&
                     x.Tag == trimmed);
             if (existingTags.Any() == false) return;
 
@@ -138,7 +138,7 @@ namespace Model.DAL
             }
             int numRows = context.Database.ExecuteSql($"""
                 delete from Idioma.BookTag
-                where BookKey = {key.bookId}
+                where BookId = {key.bookId}
                 and UserKey = {key.userId}
                 and Tag = {trimmed}
                 """);
@@ -151,33 +151,33 @@ namespace Model.DAL
         {
             // is there an existing cache
             List<BookTag>? existingList;
-            if (!BookTagsByBookId.TryGetValue((Guid)t.BookKey, out existingList))
+            if (!BookTagsByBookId.TryGetValue((Guid)t.BookId, out existingList))
             {
                 // I don't think we should ever get here, but better to be safe than sorry
                 return;
             }
             // is the offensive tag present?
-            var existingValue = existingList.Where(x => x.UniqueKey == t.UniqueKey).FirstOrDefault();
+            var existingValue = existingList.Where(x => x.Id == t.Id).FirstOrDefault();
             if (existingValue == null) return;
             // pull a list without the tag
-            var listWithoutTag = existingList.Where(x => x.UniqueKey != t.UniqueKey).ToList();
+            var listWithoutTag = existingList.Where(x => x.Id != t.Id).ToList();
             // and write it to cache
-            BookTagsByBookId[(Guid)t.BookKey] = listWithoutTag;
+            BookTagsByBookId[(Guid)t.BookId] = listWithoutTag;
             return;
         }
         private static void BookTagAddToCache(BookTag t)
         {
             // is there an existing cache
             List<BookTag>? existingList = null;
-            if (!BookTagsByBookId.TryGetValue((Guid)t.BookKey, out existingList))
+            if (!BookTagsByBookId.TryGetValue((Guid)t.BookId, out existingList))
             {
                 existingList = new List<BookTag>() { t };
-                BookTagsByBookId[(Guid)t.BookKey] = existingList;
+                BookTagsByBookId[(Guid)t.BookId] = existingList;
                 return;
             }
             
             // is the offensive tag present?
-            var existingValue = existingList.Where(x => x.UniqueKey == t.UniqueKey).FirstOrDefault();
+            var existingValue = existingList.Where(x => x.Id == t.Id).FirstOrDefault();
             if (existingValue != null) return;
             // add it
             existingList.Add(t);

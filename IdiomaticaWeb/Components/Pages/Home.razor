@@ -75,10 +75,10 @@
         var context = await DbContextFactory.CreateDbContextAsync();
         var loggedInUser = UserService.GetLoggedInUser(context);
         if (loggedInUser is null) return;
-        UserId = loggedInUser.UniqueKey;
+        UserId = loggedInUser.Id;
         _wordCountCardTitle = UserService.GetUILabel("homeWordCountsHeader");
         _wordsReadCountList = WordApi.WordsGetListOfReadCount(
-            context, (Guid)loggedInUser.UniqueKey);
+            context, (Guid)loggedInUser.Id);
 
         _bookshelfButtonText = UserService.GetUILabel("homeBookshelfButtonText");
 

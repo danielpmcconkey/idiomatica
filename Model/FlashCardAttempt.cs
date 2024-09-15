@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("FlashCardAttempt", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
+    [PrimaryKey(nameof(Id))]
     public class FlashCardAttempt
     {
         #region required data
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid FlashCardKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid FlashCardId { get; set; }
         public required FlashCard FlashCard { get; set; }
         [Required] public required AvailableFlashCardAttemptStatus Status { get; set; }
         [Required] public required DateTimeOffset AttemptedWhen { get; set; }

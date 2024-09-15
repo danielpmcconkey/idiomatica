@@ -11,18 +11,18 @@ namespace Model
 {
     
     [Table("Token", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(SentenceKey), nameof(Ordinal), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(SentenceId), nameof(Ordinal), IsUnique = true)]
     /// <summary>
     /// This is used to assist UI in writing sentences on the screen easier
     /// </summary>
     public class Token
     {
         #region required data
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid WordKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid WordId { get; set; }
         public required Word Word { get; set; }
-        [Required] public required Guid SentenceKey { get; set; }
+        [Required] public required Guid SentenceId { get; set; }
         public required Sentence Sentence { get; set; }
 
         /// <summary>

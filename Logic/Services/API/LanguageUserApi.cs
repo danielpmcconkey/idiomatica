@@ -17,10 +17,10 @@ namespace Logic.Services.API
         {
             var languageUser = new LanguageUser()
             {
-                UniqueKey = Guid.NewGuid(),
-                LanguageKey = language.UniqueKey,
+                Id = Guid.NewGuid(),
+                LanguageId = language.Id,
                 Language = language,
-                UserKey = user.UniqueKey,
+                UserId = user.Id,
                 User = user,
                 TotalWordsRead = 0
             };

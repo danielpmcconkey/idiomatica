@@ -25,16 +25,16 @@ namespace Model.DAL
                            ([LanguageKey]
                            ,[UserKey]
                            ,[TotalWordsRead]
-                           ,[UniqueKey])
+                           ,[Id])
                      VALUES
-                           ({languageUser.LanguageKey}
-                           ,{languageUser.UserKey}
+                           ({languageUser.LanguageId}
+                           ,{languageUser.UserId}
                            ,{languageUser.TotalWordsRead}
                            ,{guid})
                 
                 """);
             if (numRows < 1) throw new InvalidDataException("creating LanguageUser affected 0 rows");
-            var newEntity = context.LanguageUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
+            var newEntity = context.LanguageUsers.Where(x => x.Id == guid).FirstOrDefault();
             if (newEntity is null)
             {
                 throw new InvalidDataException("newEntity is null in LanguageUserCreate");
@@ -64,7 +64,7 @@ namespace Model.DAL
 
             // read DB
             var value = context.LanguageUsers
-                .Where(x => x.UniqueKey == key)
+                .Where(x => x.Id == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -90,7 +90,7 @@ namespace Model.DAL
 
             // read DB
             var value = context.LanguageUsers
-                .Where(x => x.LanguageKey == key.languageId && x.UserKey == key.userId)
+                .Where(x => x.LanguageId == key.languageId && x.UserId == key.userId)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -116,7 +116,7 @@ namespace Model.DAL
 
             // read DB
             var value = context.LanguageUsers
-                .Where(x => x.UserKey == key && x.Language != null)
+                .Where(x => x.UserId == key && x.Language != null)
                 .Include(lu => lu.Language)
                 .OrderBy(x => x.Language)
                 .ToList();
@@ -142,9 +142,9 @@ namespace Model.DAL
 
         private static void LanguageUserUpdateCache(LanguageUser languageUser, IdiomaticaContext context)
         {
-            Guid id = languageUser.UniqueKey;
-            Guid userId = languageUser.UserKey;
-            Guid languageId = languageUser.LanguageKey;
+            Guid id = languageUser.Id;
+            Guid userId = languageUser.UserId;
+            Guid languageId = languageUser.LanguageId;
             LanguageUserById[id] = languageUser;
             LanguageUserByLanguageIdAndUserId[(languageId, userId)] = languageUser;
             var readLanguage = DataCache.LanguageByIdRead(languageId, context);
@@ -154,7 +154,7 @@ namespace Model.DAL
             {
                 var list = LanguageUsersAndLanguageByUserId[userId];
                 // grab the entries in the list that are NOT this language
-                var newList = list.Where(x => x.LanguageKey != languageId).ToList();
+                var newList = list.Where(x => x.LanguageId != languageId).ToList();
                 newList.Add(languageUser);
                 LanguageUsersAndLanguageByUserId[userId] = newList;
             }

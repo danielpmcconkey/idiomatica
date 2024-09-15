@@ -32,7 +32,7 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
@@ -40,7 +40,7 @@ namespace Logic.Services.API.Tests
                 if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a word
-                var word = context.Words.Where(x => x.LanguageKey == learningLanguage.UniqueKey).Take(1).FirstOrDefault();
+                var word = context.Words.Where(x => x.LanguageId == learningLanguage.Id).Take(1).FirstOrDefault();
                 if (word is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create a WordUser
@@ -48,9 +48,9 @@ namespace Logic.Services.API.Tests
                     context, word, languageUser, null, AvailableWordUserStatus.UNKNOWN);
                 if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
 
-                FlashCard? card = FlashCardApi.FlashCardCreate(context, (Guid)wordUser.UniqueKey, uiLanguageCode);
+                FlashCard? card = FlashCardApi.FlashCardCreate(context, (Guid)wordUser.Id, uiLanguageCode);
                 Assert.IsNotNull(card);
-                Assert.IsNotNull(card.UniqueKey);
+                Assert.IsNotNull(card.Id);
             }
             finally
             {
@@ -73,7 +73,7 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
@@ -81,7 +81,7 @@ namespace Logic.Services.API.Tests
                 if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // pull a word
-                var word = context.Words.Where(x => x.LanguageKey == learningLanguage.UniqueKey).Take(1).FirstOrDefault();
+                var word = context.Words.Where(x => x.LanguageId == learningLanguage.Id).Take(1).FirstOrDefault();
                 if (word is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create a WordUser
@@ -89,9 +89,9 @@ namespace Logic.Services.API.Tests
                     context, word, languageUser, null, AvailableWordUserStatus.UNKNOWN);
                 if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
 
-                FlashCard? card = await FlashCardApi.FlashCardCreateAsync(context, (Guid)wordUser.UniqueKey, uiLanguageCode);
+                FlashCard? card = await FlashCardApi.FlashCardCreateAsync(context, (Guid)wordUser.Id, uiLanguageCode);
                 Assert.IsNotNull(card);
-                Assert.IsNotNull(card.UniqueKey);
+                Assert.IsNotNull(card.Id);
             }
             finally
             {
@@ -119,8 +119,8 @@ namespace Logic.Services.API.Tests
                 string newKey = "";
                 foreach (var card in deck)
                 {
-                    Assert.IsNotNull(card.UniqueKey);
-                    newKey = $"{newKey}{card.UniqueKey}";
+                    Assert.IsNotNull(card.Id);
+                    newKey = $"{newKey}{card.Id}";
                 }
                 if (keys.Contains(newKey)) numDuplicates++;
                 else keys.Add(newKey);
@@ -145,8 +145,8 @@ namespace Logic.Services.API.Tests
                 string newKey = "";
                 foreach (var card in deck)
                 {
-                    Assert.IsNotNull(card.UniqueKey);
-                    newKey = $"{newKey}{card.UniqueKey}";
+                    Assert.IsNotNull(card.Id);
+                    newKey = $"{newKey}{card.Id}";
                 }
                 if (keys.Contains(newKey)) numDuplicates++;
                 else keys.Add(newKey);
@@ -173,7 +173,7 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
@@ -182,7 +182,7 @@ namespace Logic.Services.API.Tests
 
                 // pull a bunch of words
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey)
+                    .Where(x => x.LanguageId == learningLanguage.Id)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -198,7 +198,7 @@ namespace Logic.Services.API.Tests
 
                 // create cards
                 var cards = FlashCardApi.FlashCardsCreate(
-                    context, (Guid)languageUser.UniqueKey, numCards, uiLanguageCode);
+                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
 
@@ -206,14 +206,14 @@ namespace Logic.Services.API.Tests
                 foreach (var card in cards)
                 {
                     // pull the card again
-                    var cardAfter = FlashCardApi.FlashCardReadById(context, (Guid)card.UniqueKey);
+                    var cardAfter = FlashCardApi.FlashCardReadById(context, (Guid)card.Id);
                     Assert.IsNotNull(cardAfter);
-                    Assert.IsNotNull(cardAfter.UniqueKey);
+                    Assert.IsNotNull(cardAfter.Id);
                     Assert.AreEqual(card.NextReview, cardAfter.NextReview);
                     Assert.AreEqual(card.Status, cardAfter.Status);
-                    Assert.AreEqual(card.UniqueKey, cardAfter.UniqueKey);
-                    Assert.AreEqual(card.UniqueKey, cardAfter.UniqueKey);
-                    Assert.AreEqual(card.WordUserKey, cardAfter.WordUserKey);
+                    Assert.AreEqual(card.Id, cardAfter.Id);
+                    Assert.AreEqual(card.Id, cardAfter.Id);
+                    Assert.AreEqual(card.WordUserId, cardAfter.WordUserId);
                 }
             }
             finally
@@ -239,7 +239,7 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
@@ -248,7 +248,7 @@ namespace Logic.Services.API.Tests
 
                 // pull a bunch of words
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey)
+                    .Where(x => x.LanguageId == learningLanguage.Id)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -264,7 +264,7 @@ namespace Logic.Services.API.Tests
 
                 // create cards
                 var cards = await FlashCardApi.FlashCardsCreateAsync(
-                    context, (Guid)languageUser.UniqueKey, numCards, uiLanguageCode);
+                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
 
@@ -272,14 +272,14 @@ namespace Logic.Services.API.Tests
                 foreach (var card in cards)
                 {
                     // pull the card again
-                    var cardAfter = await FlashCardApi.FlashCardReadByIdAsync(context, (Guid)card.UniqueKey);
+                    var cardAfter = await FlashCardApi.FlashCardReadByIdAsync(context, (Guid)card.Id);
                     Assert.IsNotNull(cardAfter);
-                    Assert.IsNotNull(cardAfter.UniqueKey);
+                    Assert.IsNotNull(cardAfter.Id);
                     Assert.AreEqual(card.NextReview, cardAfter.NextReview);
                     Assert.AreEqual(card.Status, cardAfter.Status);
-                    Assert.AreEqual(card.UniqueKey, cardAfter.UniqueKey);
-                    Assert.AreEqual(card.UniqueKey, cardAfter.UniqueKey);
-                    Assert.AreEqual(card.WordUserKey, cardAfter.WordUserKey);
+                    Assert.AreEqual(card.Id, cardAfter.Id);
+                    Assert.AreEqual(card.Id, cardAfter.Id);
+                    Assert.AreEqual(card.WordUserId, cardAfter.WordUserId);
                 }
             }
             finally
@@ -307,7 +307,7 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
@@ -319,7 +319,7 @@ namespace Logic.Services.API.Tests
                 // to translate and the assertion on the
                 // FlashCardParagraphTranslationBridges.Count will fail
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey && x.Tokens.Count > 0)
+                    .Where(x => x.LanguageId == learningLanguage.Id && x.Tokens.Count > 0)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -335,17 +335,17 @@ namespace Logic.Services.API.Tests
 
 
                 var cards = FlashCardApi.FlashCardsCreate(
-                    context, (Guid)languageUser.UniqueKey, numCards, uiLanguageCode);
+                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
                 foreach (var card in cards)
                 {
                     Assert.IsNotNull(card);
-                    Assert.IsNotNull(card.UniqueKey);
+                    Assert.IsNotNull(card.Id);
                     Assert.IsNotNull(card.FlashCardParagraphTranslationBridges);
                     Assert.IsTrue(card.FlashCardParagraphTranslationBridges.Count > 0);
                     Assert.IsNotNull(card.Status);
-                    Assert.IsNotNull(card.UniqueKey);
+                    Assert.IsNotNull(card.Id);
                 }
 
             }
@@ -372,7 +372,7 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
@@ -384,7 +384,7 @@ namespace Logic.Services.API.Tests
                 // to translate and the assertion on the
                 // FlashCardParagraphTranslationBridges.Count will fail
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey && x.Tokens.Count > 0)
+                    .Where(x => x.LanguageId == learningLanguage.Id && x.Tokens.Count > 0)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -400,17 +400,17 @@ namespace Logic.Services.API.Tests
 
 
                 var cards = await FlashCardApi.FlashCardsCreateAsync(
-                    context, (Guid)languageUser.UniqueKey, numCards, uiLanguageCode);
+                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
                 foreach (var card in cards)
                 {
                     Assert.IsNotNull(card);
-                    Assert.IsNotNull(card.UniqueKey);
+                    Assert.IsNotNull(card.Id);
                     Assert.IsNotNull(card.FlashCardParagraphTranslationBridges);
                     Assert.IsTrue(card.FlashCardParagraphTranslationBridges.Count > 0);
                     Assert.IsNotNull(card.Status);
-                    Assert.IsNotNull(card.UniqueKey);
+                    Assert.IsNotNull(card.Id);
                 }
 
             }
@@ -439,7 +439,7 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
@@ -451,7 +451,7 @@ namespace Logic.Services.API.Tests
                 // to translate and the assertion on the
                 // FlashCardParagraphTranslationBridges.Count will fail
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey && x.Tokens.Count > 0)
+                    .Where(x => x.LanguageId == learningLanguage.Id && x.Tokens.Count > 0)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -467,21 +467,21 @@ namespace Logic.Services.API.Tests
 
                 // create cards
                 var cards = FlashCardApi.FlashCardsCreate(
-                    context, (Guid)languageUser.UniqueKey, numCards, uiLanguageCode);
+                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
                 foreach (var card in cards)
                 {
                     // update next review to 5 mins ago, so we can pull them
                     FlashCardApi.FlashCardUpdate(
-                        context, (Guid)card.UniqueKey, (Guid)card.WordUserKey,
+                        context, (Guid)card.Id, (Guid)card.WordUserId,
                         AvailableFlashCardStatus.ACTIVE, DateTime.Now.AddMinutes(-5),
-                        (Guid)card.UniqueKey);
+                        (Guid)card.Id);
                 }
 
                 // now pull them 
                 Expression<Func<FlashCard, bool>> predicate = fc => fc.WordUser != null
-                    && fc.WordUser.LanguageUserKey == languageUser.UniqueKey
+                    && fc.WordUser.LanguageUserId == languageUser.Id
                     && fc.Status == AvailableFlashCardStatus.ACTIVE
                     && fc.NextReview != null
                     && fc.NextReview <= DateTime.Now;
@@ -494,12 +494,12 @@ namespace Logic.Services.API.Tests
                 foreach (var card in cardsPulled)
                 {
                     Assert.IsNotNull(card);
-                    Assert.IsNotNull(card.UniqueKey);
+                    Assert.IsNotNull(card.Id);
                     Assert.IsNotNull(card.FlashCardParagraphTranslationBridges);
                     Assert.IsTrue(card.FlashCardParagraphTranslationBridges.Count > 0);
                     Assert.IsNotNull(card.Status);
                     Assert.IsNotNull(card.NextReview);
-                    Assert.IsNotNull(card.UniqueKey);
+                    Assert.IsNotNull(card.Id);
                 }
 
             }
@@ -526,7 +526,7 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
@@ -538,7 +538,7 @@ namespace Logic.Services.API.Tests
                 // to translate and the assertion on the
                 // FlashCardParagraphTranslationBridges.Count will fail
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey && x.Tokens.Count > 0)
+                    .Where(x => x.LanguageId == learningLanguage.Id && x.Tokens.Count > 0)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -554,21 +554,21 @@ namespace Logic.Services.API.Tests
 
                 // create cards
                 var cards = await FlashCardApi.FlashCardsCreateAsync(
-                    context, (Guid)languageUser.UniqueKey, numCards, uiLanguageCode);
+                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
                 foreach (var card in cards)
                 {
                     // update next review to 5 mins ago, so we can pull them
                     await FlashCardApi.FlashCardUpdateAsync(
-                        context, (Guid)card.UniqueKey, (Guid)card.WordUserKey,
+                        context, (Guid)card.Id, (Guid)card.WordUserId,
                         AvailableFlashCardStatus.ACTIVE, DateTime.Now.AddMinutes(-5),
-                        (Guid)card.UniqueKey);
+                        (Guid)card.Id);
                 }
 
                 // now pull them 
                 Expression<Func<FlashCard, bool>> predicate = fc => fc.WordUser != null
-                    && fc.WordUser.LanguageUserKey == languageUser.UniqueKey
+                    && fc.WordUser.LanguageUserId == languageUser.Id
                     && fc.Status == AvailableFlashCardStatus.ACTIVE
                     && fc.NextReview != null
                     && fc.NextReview <= DateTime.Now;
@@ -581,12 +581,12 @@ namespace Logic.Services.API.Tests
                 foreach (var card in cardsPulled)
                 {
                     Assert.IsNotNull(card);
-                    Assert.IsNotNull(card.UniqueKey);
+                    Assert.IsNotNull(card.Id);
                     Assert.IsNotNull(card.FlashCardParagraphTranslationBridges);
                     Assert.IsTrue(card.FlashCardParagraphTranslationBridges.Count > 0);
                     Assert.IsNotNull(card.Status);
                     Assert.IsNotNull(card.NextReview);
-                    Assert.IsNotNull(card.UniqueKey);
+                    Assert.IsNotNull(card.Id);
                 }
 
             }
@@ -615,7 +615,7 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
@@ -624,7 +624,7 @@ namespace Logic.Services.API.Tests
 
                 // pull a bunch of words
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey)
+                    .Where(x => x.LanguageId == learningLanguage.Id)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -640,7 +640,7 @@ namespace Logic.Services.API.Tests
 
                 // create cards
                 var cards = FlashCardApi.FlashCardsCreate(
-                    context, (Guid)languageUser.UniqueKey, numCards, uiLanguageCode);
+                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
 
@@ -650,14 +650,14 @@ namespace Logic.Services.API.Tests
                 foreach (var card in cards)
                 {
                     // update card
-                    FlashCardApi.FlashCardUpdate(context, (Guid)card.UniqueKey,
-                        (Guid)card.WordUserKey, AvailableFlashCardStatus.DONTUSE,
-                        futureTime, (Guid)card.UniqueKey);
+                    FlashCardApi.FlashCardUpdate(context, (Guid)card.Id,
+                        (Guid)card.WordUserId, AvailableFlashCardStatus.DONTUSE,
+                        futureTime, (Guid)card.Id);
 
                     // pull the card again
-                    var cardAfter = FlashCardApi.FlashCardReadById(context, (Guid)card.UniqueKey);
+                    var cardAfter = FlashCardApi.FlashCardReadById(context, (Guid)card.Id);
                     Assert.IsNotNull(cardAfter);
-                    Assert.IsNotNull(cardAfter.UniqueKey);
+                    Assert.IsNotNull(cardAfter.Id);
                     Assert.AreEqual(futureTime, cardAfter.NextReview);
                     Assert.AreEqual(AvailableFlashCardStatus.DONTUSE, cardAfter.Status);
                 }
@@ -686,7 +686,7 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
@@ -695,7 +695,7 @@ namespace Logic.Services.API.Tests
 
                 // pull a bunch of words
                 var words = context.Words
-                    .Where(x => x.LanguageKey == learningLanguage.UniqueKey)
+                    .Where(x => x.LanguageId == learningLanguage.Id)
                     .Take(numWords)
                     .ToList();
                 if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
@@ -711,7 +711,7 @@ namespace Logic.Services.API.Tests
 
                 // create cards
                 var cards = await FlashCardApi.FlashCardsCreateAsync(
-                    context, (Guid)languageUser.UniqueKey, numCards, uiLanguageCode);
+                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count() == numCards);
 
@@ -721,14 +721,14 @@ namespace Logic.Services.API.Tests
                 foreach (var card in cards)
                 {
                     // update card
-                    await FlashCardApi.FlashCardUpdateAsync(context, (Guid)card.UniqueKey,
-                        (Guid)card.WordUserKey, AvailableFlashCardStatus.DONTUSE,
-                        futureTime, (Guid)card.UniqueKey);
+                    await FlashCardApi.FlashCardUpdateAsync(context, (Guid)card.Id,
+                        (Guid)card.WordUserId, AvailableFlashCardStatus.DONTUSE,
+                        futureTime, (Guid)card.Id);
 
                     // pull the card again
-                    var cardAfter = await FlashCardApi.FlashCardReadByIdAsync(context, (Guid)card.UniqueKey);
+                    var cardAfter = await FlashCardApi.FlashCardReadByIdAsync(context, (Guid)card.Id);
                     Assert.IsNotNull(cardAfter);
-                    Assert.IsNotNull(cardAfter.UniqueKey);
+                    Assert.IsNotNull(cardAfter.Id);
                     Assert.AreEqual(futureTime, cardAfter.NextReview);
                     Assert.AreEqual(AvailableFlashCardStatus.DONTUSE, cardAfter.Status);
                 }
@@ -748,9 +748,9 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             Language language = CommonFunctions.GetSpanishLanguage(context);
-            Guid languageId = language.UniqueKey;
+            Guid languageId = language.Id;
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            Guid wordId = CommonFunctions.GetWordKeyByTextLower(context, languageId, "dice");
+            Guid wordId = CommonFunctions.GetWordIdByTextLower(context, languageId, "dice");
             var word = WordApi.WordGetById(context, wordId);
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
 
@@ -762,28 +762,28 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                Assert.IsNotNull(user); Assert.IsNotNull(user.UniqueKey);
-                userId = (Guid)user.UniqueKey;
+                Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
+                userId = (Guid)user.Id;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(
                     context, language, user);
-                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
+                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
 
                 // create the wordUser
                 var wordUser = WordUserApi.WordUserCreate(
                     context, word, languageUser, null, status);
-                Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.UniqueKey);
-                Assert.AreEqual(wordId, wordUser.WordKey);
+                Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
+                Assert.AreEqual(wordId, wordUser.WordId);
 
                 // create the flashcard
-                FlashCardApi.FlashCardCreate(context, (Guid)wordUser.UniqueKey, uiLanguageCode);
+                FlashCardApi.FlashCardCreate(context, (Guid)wordUser.Id, uiLanguageCode);
 
                 // read the flashcard
-                var flashCard = FlashCardApi.FlashCardReadByWordUserId(context, (Guid)wordUser.UniqueKey);
+                var flashCard = FlashCardApi.FlashCardReadByWordUserId(context, (Guid)wordUser.Id);
 
                 Assert.IsNotNull(flashCard);
-                Assert.IsNotNull(flashCard.UniqueKey);
-                Assert.AreEqual(wordUser.UniqueKey, flashCard.WordUserKey);
+                Assert.IsNotNull(flashCard.Id);
+                Assert.AreEqual(wordUser.Id, flashCard.WordUserId);
             }
             finally
             {
@@ -797,9 +797,9 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             Language language = CommonFunctions.GetSpanishLanguage(context);
-            Guid languageId = language.UniqueKey;
+            Guid languageId = language.Id;
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            Guid wordId = CommonFunctions.GetWordKeyByTextLower(context, languageId, "dice");
+            Guid wordId = CommonFunctions.GetWordIdByTextLower(context, languageId, "dice");
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
             var word = WordApi.WordGetById(context, wordId);
 
@@ -811,28 +811,28 @@ namespace Logic.Services.API.Tests
                 var userService = CommonFunctions.CreateUserService();
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
-                Assert.IsNotNull(user); Assert.IsNotNull(user.UniqueKey);
-                userId = (Guid)user.UniqueKey;
+                Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
+                userId = (Guid)user.Id;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(
                     context, language, user);
-                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.UniqueKey);
+                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
 
                 // create the wordUser
                 var wordUser = WordUserApi.WordUserCreate(
                     context, word, languageUser, null, status);
-                Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.UniqueKey);
-                Assert.AreEqual(wordId, wordUser.WordKey);
+                Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
+                Assert.AreEqual(wordId, wordUser.WordId);
 
                 // create the flashcard
-                await FlashCardApi.FlashCardCreateAsync(context, (Guid)wordUser.UniqueKey, uiLanguageCode);
+                await FlashCardApi.FlashCardCreateAsync(context, (Guid)wordUser.Id, uiLanguageCode);
 
                 // read the flashcard
-                var flashCard = await FlashCardApi.FlashCardReadByWordUserIdAsync(context, (Guid)wordUser.UniqueKey);
+                var flashCard = await FlashCardApi.FlashCardReadByWordUserIdAsync(context, (Guid)wordUser.Id);
                 
                 Assert.IsNotNull(flashCard);
-                Assert.IsNotNull(flashCard.UniqueKey);
-                Assert.AreEqual(wordUser.UniqueKey, flashCard.WordUserKey);
+                Assert.IsNotNull(flashCard.Id);
+                Assert.AreEqual(wordUser.Id, flashCard.WordUserId);
             }
             finally
             {

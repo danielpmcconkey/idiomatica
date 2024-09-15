@@ -106,7 +106,7 @@ else
         if (ReadDataPacket is null || ReadDataPacket.LanguageUser is null) return "statusUNKNOWN";
 
         var wordUser = token.Word.WordUsers
-            .Where(x => x.LanguageUserKey == (Guid)ReadDataPacket.LanguageUser.UniqueKey)
+            .Where(x => x.LanguageUserId == (Guid)ReadDataPacket.LanguageUser.Id)
             .FirstOrDefault();
         if (wordUser is null) return "statusUNKNOWN";
         return $"status{wordUser.Status}";
@@ -122,7 +122,7 @@ else
         if (ReadDataPacket is not null && ReadDataPacket.LanguageUser is not null)
         {
             var wordUser = token.Word.WordUsers
-                .Where(x => x.LanguageUserKey == (Guid)ReadDataPacket.LanguageUser.UniqueKey)
+                .Where(x => x.LanguageUserId == (Guid)ReadDataPacket.LanguageUser.Id)
                 .FirstOrDefault();
 
             if (wordUser is not null && !string.IsNullOrEmpty(wordUser.Translation))
@@ -147,7 +147,7 @@ else
     private async Task<List<Token>> GetSentenceTokens(Sentence sentence)
     {
         var context = DbContextFactory.CreateDbContext();
-        sentence.Tokens = await TokenApi.TokensAndWordsReadBySentenceIdAsync(context, (Guid)sentence.UniqueKey);
+        sentence.Tokens = await TokenApi.TokensAndWordsReadBySentenceIdAsync(context, (Guid)sentence.Id);
         return sentence.Tokens;
         
     }

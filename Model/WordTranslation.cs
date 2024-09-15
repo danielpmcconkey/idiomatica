@@ -9,17 +9,17 @@ namespace Model
 {
 
     [Table("WordTranslation", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
+    [PrimaryKey(nameof(Id))]
     public class WordTranslation
     {
         #region required data
 
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid LanguageToKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid LanguageToId { get; set; }
         public required Language LanguageTo { get; set; }
-        [Required] public required Guid WordKey { get; set; }
+        [Required] public required Guid WordId { get; set; }
         public required Word Word { get; set; }
-        [Required] public required Guid VerbKey { get; set; }
+        [Required] public required Guid VerbId { get; set; }
         [Required] public required string Translation { get; set; }
         [Required] public required AvailablePartOfSpeech PartOfSpeech { get; set; }
 

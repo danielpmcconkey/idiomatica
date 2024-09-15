@@ -24,7 +24,7 @@ namespace Model.DAL
             }
             // read DB
             var value = context.BookStats
-                .Where(x => x.BookKey == key.bookId && x.Key == key.statKey)
+                .Where(x => x.BookId == key.bookId && x.Key == key.statKey)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -49,7 +49,7 @@ namespace Model.DAL
             }
             // read DB
             var value = context.BookStats
-                .Where(x => x.BookKey == key).ToList();
+                .Where(x => x.BookId == key).ToList();
             if (value == null) return null;
             // write to cache
             BookStatsByBookId[key] = value;

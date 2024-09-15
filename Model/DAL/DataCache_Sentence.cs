@@ -26,7 +26,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.Sentences.Where(x => x.UniqueKey == key)
+            var value = context.Sentences.Where(x => x.Id == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -52,10 +52,10 @@ namespace Model.DAL
             }
             // read DB
             var value = (from p in context.Pages
-                         join pp in context.Paragraphs on p.UniqueKey equals pp.PageKey
-                         join s in context.Sentences on pp.UniqueKey equals s.ParagraphKey
+                         join pp in context.Paragraphs on p.Id equals pp.PageId
+                         join s in context.Sentences on pp.Id equals s.ParagraphId
                          orderby pp.Ordinal, s.Ordinal
-                         where (p.UniqueKey == key)
+                         where (p.Id == key)
                          select s
 
                           ).ToList();
@@ -85,7 +85,7 @@ namespace Model.DAL
 
             // read DB
             var value = context.Sentences
-                .Where(x => x.ParagraphKey == key)
+                .Where(x => x.ParagraphId == key)
                 .ToList();
             // write to cache
             SentencesByParagraphId[key] = value;
@@ -114,16 +114,16 @@ namespace Model.DAL
                       ([ParagraphKey]
                       ,[Ordinal]
                       ,[Text]
-                      ,[UniqueKey])
+                      ,[Id])
                 VALUES
-                      ({sentence.ParagraphKey}
+                      ({sentence.ParagraphId}
                       ,{sentence.Ordinal}
                       ,{sentence.Text}
                       ,{guid})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Sentence affected 0 rows");
-            var newEntity = context.Sentences.Where(x => x.UniqueKey == guid).FirstOrDefault();
+            var newEntity = context.Sentences.Where(x => x.Id == guid).FirstOrDefault();
             if (newEntity is null)
             {
                 throw new InvalidDataException("newEntity is null in SentenceCreate");
@@ -131,7 +131,7 @@ namespace Model.DAL
 
 
             // add it to cache
-            SentenceById[(Guid)newEntity.UniqueKey] = newEntity;
+            SentenceById[(Guid)newEntity.Id] = newEntity;
 
             return newEntity;
         }

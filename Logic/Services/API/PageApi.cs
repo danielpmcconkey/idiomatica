@@ -25,8 +25,8 @@ namespace Logic.Services.API
             
             var newPage = new Page()
             {
-                UniqueKey = Guid.NewGuid(),
-                BookKey = book.UniqueKey,
+                Id = Guid.NewGuid(),
+                BookId = book.Id,
                 Book = book,
                 Ordinal = ordinal,
                 OriginalText = textTrimmed

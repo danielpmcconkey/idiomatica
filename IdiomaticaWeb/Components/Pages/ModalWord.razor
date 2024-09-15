@@ -154,12 +154,12 @@
         {
             var context = await DbContextFactory.CreateDbContextAsync();
 
-            if (thisToken == null || thisToken.UniqueKey == null)
+            if (thisToken == null || thisToken.Id == null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (thisToken.WordKey == null)
+            if (thisToken.WordId == null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -176,7 +176,7 @@
                 return;
             }
             _wordUser = _word.WordUsers
-               .Where(x => x.LanguageUserKey == (Guid)ReadDataPacket.LanguageUser.UniqueKey)
+               .Where(x => x.LanguageUserId == (Guid)ReadDataPacket.LanguageUser.Id)
                .FirstOrDefault();
             _token = thisToken;
 
@@ -196,7 +196,7 @@
             _selectedStatus = UserService.GetUILabel($"statusLabel{(int)_wordUser.Status}");
 
             // check to display the "create card" button
-            var existingCard = FlashCardApi.FlashCardReadByWordUserId(context, (Guid)_wordUser.UniqueKey);
+            var existingCard = FlashCardApi.FlashCardReadByWordUserId(context, (Guid)_wordUser.Id);
             if (existingCard is null) _doesFlashCardExist = false;
             else _doesFlashCardExist = true;
 
@@ -266,7 +266,7 @@
             var context = await DbContextFactory.CreateDbContextAsync();
 
             await WordUserApi.WordUserUpdateAsync(
-                context, (Guid)_wordUser.UniqueKey, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
+                context, (Guid)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
             if (Parent is not null) Parent.RefreshState();
             await modal.HideAsync();
         }
@@ -359,10 +359,10 @@
 
         // save the wordUser first
         await WordUserApi.WordUserUpdateAsync(
-                context, (Guid)_wordUser.UniqueKey, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
+                context, (Guid)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
 
         // now make the card
-        await FlashCardApi.FlashCardCreateAsync(context, (Guid)_wordUser.UniqueKey, uiLanguage.Code);
+        await FlashCardApi.FlashCardCreateAsync(context, (Guid)_wordUser.Id, uiLanguage.Code);
 
         _isSavingFlashCard = false;
         _doesFlashCardExist = true;

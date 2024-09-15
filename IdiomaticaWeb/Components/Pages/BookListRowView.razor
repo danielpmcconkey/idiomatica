@@ -159,7 +159,7 @@
         </div>
         <div class="card-footer">
             <div class="container">
-                <BookTagsRow BookKey="@Row.BookKey" />
+                <BookTagsRow BookId="@Row.BookId" />
             </div>
             
         </div>
@@ -196,7 +196,7 @@
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
             _loggedInUser = await UserService.GetLoggedInUserAsync(context);
-            _bookId = Row.BookKey;
+            _bookId = Row.BookId;
 
             await t_delay;
             _isLoading = false;
@@ -475,15 +475,15 @@
         }
         var context = DbContextFactory.CreateDbContext();
         var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
-            context, (Guid)_bookId, (Guid)_loggedInUser.UniqueKey);
+            context, (Guid)_bookId, (Guid)_loggedInUser.Id);
         if (bookUser is null)
         {
             ErrorHandler.LogAndThrow();
             return;
         }
-        BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (Guid)bookUser.UniqueKey);
+        BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (Guid)bookUser.Id);
         // re-load the row
-        var newRow = BookApi.BookListRowByBookIdAndUserIdRead(context, (Guid)_bookId, (Guid)_loggedInUser.UniqueKey);
+        var newRow = BookApi.BookListRowByBookIdAndUserIdRead(context, (Guid)_bookId, (Guid)_loggedInUser.Id);
         if (newRow is not null) Row = newRow;
     }
     private async Task OnClickRefresh()

@@ -21,13 +21,13 @@ namespace Model.DAL
                 context.Database.ExecuteSql($"""
                     INSERT INTO [Idioma].[BookUserStat]
                                ([LanguageUserKey]
-                               ,[BookKey]
+                               ,[BookId]
                                ,[Key]
                                ,[ValueString]
                                ,[ValueNumeric])
                          VALUES
-                               ({item.LanguageUserKey}
-                               ,{item.BookKey}
+                               ({item.LanguageUserId}
+                               ,{item.BookId}
                                ,{item.Key}
                                ,{item.ValueString}
                                ,{item.ValueNumeric})
@@ -60,8 +60,8 @@ namespace Model.DAL
             // read DB
             var value = context.BookUserStats
                 .Where(x => x.LanguageUser != null &&
-                    x.LanguageUser.UserKey == key.userId &&
-                    x.BookKey == key.bookId)
+                    x.LanguageUser.UserId == key.userId &&
+                    x.BookId == key.bookId)
                 .ToList();
             // write to cache
             BookUserStatsByBookIdAndUserId[key] = value;
@@ -85,9 +85,9 @@ namespace Model.DAL
 
             // remove from context
             var existingList = context.BookUserStats
-                .Where(x => x.BookKey == key.bookId 
+                .Where(x => x.BookId == key.bookId 
                     && x.LanguageUser != null &&
-                    x.LanguageUser.UserKey == key.userId);
+                    x.LanguageUser.UserId == key.userId);
             foreach (var existingItem in existingList)
             {
                 context.BookUserStats.Remove(existingItem);
@@ -97,8 +97,8 @@ namespace Model.DAL
             context.Database.ExecuteSql($"""
                 delete bus
                 from [Idioma].[BookUserStat] bus
-                left join [Idioma].[LanguageUser] lu on bus.LanguageUserKey = lu.UniqueKey
-                where bus.BookKey = {key.bookId}
+                left join [Idioma].[LanguageUser] lu on bus.LanguageUserKey = lu.Id
+                where bus.BookId = {key.bookId}
                 and lu.UserKey = {key.userId}
                 """);
             // remove from cache

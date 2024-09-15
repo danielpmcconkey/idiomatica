@@ -13,13 +13,13 @@ namespace Model
 {
     
     [Table("Word", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(LanguageKey), nameof(TextLowerCase), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(LanguageId), nameof(TextLowerCase), IsUnique = true)]
     public class Word
     {
         #region required data
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid LanguageKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid LanguageId { get; set; }
         public required Language Language { get; set; }
 
         [StringLength(250)]

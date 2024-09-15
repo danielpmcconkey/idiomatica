@@ -10,17 +10,17 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("ParagraphTranslation", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(ParagraphKey), nameof(LanguageKey), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(ParagraphId), nameof(LanguageId), IsUnique = true)]
     public class ParagraphTranslation
     {
         #region required data
 
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid ParagraphKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid ParagraphId { get; set; }
         public required Paragraph Paragraph { get; set; }
         [Required] public required string TranslationText { get; set; }
-        [Required] public required Guid LanguageKey { get; set; }
+        [Required] public required Guid LanguageId { get; set; }
         public required Language Language { get; set; }
 
         #endregion

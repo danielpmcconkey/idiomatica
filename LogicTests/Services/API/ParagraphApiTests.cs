@@ -38,23 +38,23 @@ namespace Logic.Services.API.Tests
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = language.UniqueKey,
+                    LanguageId = language.Id,
                     Language = language,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
                 if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)book.UniqueKey;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookKey = book.UniqueKey,
+                    BookId = book.Id,
                     Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
                 if (page is null)
@@ -110,23 +110,23 @@ namespace Logic.Services.API.Tests
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = language.UniqueKey,
+                    LanguageId = language.Id,
                     Language = language,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
                 if (book is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)book.UniqueKey;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookKey = book.UniqueKey,
+                    BookId = book.Id,
                     Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
                 if (page is null)
@@ -297,23 +297,23 @@ namespace Logic.Services.API.Tests
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = language.UniqueKey,
+                    LanguageId = language.Id,
                     Language = language,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
                 if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)book.UniqueKey;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookKey = book.UniqueKey,
+                    BookId = book.Id,
                     Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
                 if (page is null)
@@ -358,23 +358,23 @@ namespace Logic.Services.API.Tests
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = language.UniqueKey,
+                    LanguageId = language.Id,
                     Language = language,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
                 if (book is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)book.UniqueKey;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookKey = book.UniqueKey,
+                    BookId = book.Id,
                     Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
                 if (page is null)
@@ -416,9 +416,9 @@ namespace Logic.Services.API.Tests
             Assert.IsNotNull(paragraphs);
             var seventhParagraph = paragraphs.Where(x => x.Ordinal == ppOrd).FirstOrDefault();
             Assert.IsNotNull(seventhParagraph);
-            Assert.IsNotNull(seventhParagraph.UniqueKey);
+            Assert.IsNotNull(seventhParagraph.Id);
             var sentences = SentenceApi.SentencesReadByParagraphId(
-                context, seventhParagraph.UniqueKey);
+                context, seventhParagraph.Id);
             Assert.IsNotNull(sentences);
             seventhParagraph.Sentences = sentences;
             Assert.IsNotNull(seventhParagraph.Sentences);
@@ -441,9 +441,9 @@ namespace Logic.Services.API.Tests
             Assert.IsNotNull(paragraphs);
             var seventhParagraph = paragraphs.Where(x => x.Ordinal == ppOrd).FirstOrDefault();
             Assert.IsNotNull(seventhParagraph);
-            Assert.IsNotNull(seventhParagraph.UniqueKey);
+            Assert.IsNotNull(seventhParagraph.Id);
             var sentences = await SentenceApi.SentencesReadByParagraphIdAsync(
-                context, (Guid)seventhParagraph.UniqueKey);
+                context, (Guid)seventhParagraph.Id);
             Assert.IsNotNull(sentences);
             seventhParagraph.Sentences = sentences;
             Assert.IsNotNull(seventhParagraph.Sentences);
@@ -460,7 +460,7 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
             Guid paragraphId = CommonFunctions.GetParagraph14590Id(context);
-            var paragraph = context.Paragraphs.Where(x => x.UniqueKey == paragraphId).FirstOrDefault();
+            var paragraph = context.Paragraphs.Where(x => x.Id == paragraphId).FirstOrDefault();
             Assert.IsNotNull(paragraph);
             AvailableLanguageCode fromCode = AvailableLanguageCode.ES;
             AvailableLanguageCode toCode = AvailableLanguageCode.EN_US;
@@ -487,7 +487,7 @@ namespace Logic.Services.API.Tests
         {
             var context = CommonFunctions.CreateContext();
             Guid paragraphId = CommonFunctions.GetParagraph14590Id(context);
-            var paragraph = context.Paragraphs.Where(x => x.UniqueKey == paragraphId).FirstOrDefault();
+            var paragraph = context.Paragraphs.Where(x => x.Id == paragraphId).FirstOrDefault();
             Assert.IsNotNull(paragraph);
             AvailableLanguageCode fromCode = AvailableLanguageCode.ES;
             AvailableLanguageCode toCode = AvailableLanguageCode.EN_US;
@@ -527,23 +527,23 @@ namespace Logic.Services.API.Tests
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = language.UniqueKey,
+                    LanguageId = language.Id,
                     Language = language,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
                 if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)book.UniqueKey;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookKey = book.UniqueKey,
+                    BookId = book.Id,
                     Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
                 if (page is null)
@@ -587,23 +587,23 @@ namespace Logic.Services.API.Tests
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = language.UniqueKey,
+                    LanguageId = language.Id,
                     Language = language,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
                 if (book is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)book.UniqueKey;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookKey = book.UniqueKey,
+                    BookId = book.Id,
                     Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
                 if (page is null)

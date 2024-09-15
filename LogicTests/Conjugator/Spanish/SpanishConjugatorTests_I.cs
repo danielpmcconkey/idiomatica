@@ -23,7 +23,7 @@ namespace Logic.Conjugator.Spanish.Tests
         {
             var context = CommonFunctions.CreateContext();
             string conjugatorName = "Logic.Conjugator.Spanish._Ar";
-            var spanishVerb = context.Verbs.Where(x => x.LanguageKey == CommonFunctions.GetSpanishLanguageKey(context) && x.Conjugator == conjugatorName && x.Infinitive == "imaginar").FirstOrDefault();
+            var spanishVerb = context.Verbs.Where(x => x.LanguageId == CommonFunctions.GetSpanishLanguageKey(context) && x.Conjugator == conjugatorName && x.Infinitive == "imaginar").FirstOrDefault();
             Assert.IsNotNull(spanishVerb);
             var conjugator = Logic.Conjugator.Factory.Get(conjugatorName, null, spanishVerb, null);
             Assert.IsNotNull(conjugator);
@@ -96,7 +96,7 @@ namespace Logic.Conjugator.Spanish.Tests
         {
             var context = CommonFunctions.CreateContext();
             string conjugatorName = "Logic.Conjugator.Spanish._Ar";
-            var spanishVerb = context.Verbs.Where(x => x.LanguageKey == CommonFunctions.GetSpanishLanguageKey(context) && x.Conjugator == conjugatorName && x.Infinitive == "importar").FirstOrDefault();
+            var spanishVerb = context.Verbs.Where(x => x.LanguageId == CommonFunctions.GetSpanishLanguageKey(context) && x.Conjugator == conjugatorName && x.Infinitive == "importar").FirstOrDefault();
             Assert.IsNotNull(spanishVerb);
             var conjugator = Logic.Conjugator.Factory.Get(conjugatorName, null, spanishVerb, null);
             Assert.IsNotNull(conjugator);
@@ -169,7 +169,7 @@ namespace Logic.Conjugator.Spanish.Tests
         {
             var context = CommonFunctions.CreateContext();
             string conjugatorName = "Logic.Conjugator.Spanish._Ar";
-            var spanishVerb = context.Verbs.Where(x => x.LanguageKey == CommonFunctions.GetSpanishLanguageKey(context) && x.Conjugator == conjugatorName && x.Infinitive == "interesar").FirstOrDefault();
+            var spanishVerb = context.Verbs.Where(x => x.LanguageId == CommonFunctions.GetSpanishLanguageKey(context) && x.Conjugator == conjugatorName && x.Infinitive == "interesar").FirstOrDefault();
             Assert.IsNotNull(spanishVerb);
             var conjugator = Logic.Conjugator.Factory.Get(conjugatorName, null, spanishVerb, null);
             Assert.IsNotNull(conjugator);
@@ -242,7 +242,7 @@ namespace Logic.Conjugator.Spanish.Tests
         {
             var context = CommonFunctions.CreateContext();
             string conjugatorName = "Logic.Conjugator.Spanish.Ir";
-            var spanishVerb = context.Verbs.Where(x => x.LanguageKey == CommonFunctions.GetSpanishLanguageKey(context) && x.Conjugator == conjugatorName && x.Infinitive == "ir").FirstOrDefault();
+            var spanishVerb = context.Verbs.Where(x => x.LanguageId == CommonFunctions.GetSpanishLanguageKey(context) && x.Conjugator == conjugatorName && x.Infinitive == "ir").FirstOrDefault();
             Assert.IsNotNull(spanishVerb);
             var conjugator = Logic.Conjugator.Factory.Get(conjugatorName, null, spanishVerb, null);
             Assert.IsNotNull(conjugator);

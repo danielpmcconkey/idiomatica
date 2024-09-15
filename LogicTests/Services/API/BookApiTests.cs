@@ -33,10 +33,10 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookText
                     );
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)newBook.UniqueKey;
+                bookId = (Guid)newBook.Id;
 
-                var newBookFromDb = BookApi.BookRead(context, (Guid)newBook.UniqueKey);
-                var newPageFromDb = PageApi.PageReadFirstByBookId(context, (Guid)newBook.UniqueKey);
+                var newBookFromDb = BookApi.BookRead(context, (Guid)newBook.Id);
+                var newPageFromDb = PageApi.PageReadFirstByBookId(context, (Guid)newBook.Id);
 
                 // assert
                 Assert.IsNotNull(newBookFromDb);
@@ -66,10 +66,10 @@ namespace Logic.Services.API.Tests
                     TestConstants.NewBookText
                     );
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)newBook.UniqueKey;
+                bookId = (Guid)newBook.Id;
 
-                var newBookFromDb = await BookApi.BookReadAsync(context, (Guid)newBook.UniqueKey);
-                var newPageFromDb = await PageApi.PageReadFirstByBookIdAsync(context, (Guid)newBook.UniqueKey);
+                var newBookFromDb = await BookApi.BookReadAsync(context, (Guid)newBook.Id);
+                var newPageFromDb = await PageApi.PageReadFirstByBookIdAsync(context, (Guid)newBook.Id);
 
                 Assert.IsNotNull(newBookFromDb);
                 Assert.IsNotNull(newPageFromDb);

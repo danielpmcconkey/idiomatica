@@ -23,16 +23,16 @@ namespace Logic.Services.API
 
             FlashCard? card = new ()
             {
-                UniqueKey = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 WordUser = wordUser,
-                WordUserKey = wordUserId,
+                WordUserId = wordUserId,
                 Status = AvailableFlashCardStatus.ACTIVE,
             };
             card = DataCache.FlashCardCreate(card, context);
             if (card is null) { ErrorHandler.LogAndThrow(); return null; }
             
             List<Word> wordUsages = DataCache.WordsAndTokensAndSentencesAndParagraphsByWordIdRead(
-                (Guid)wordUser.WordKey, context);
+                (Guid)wordUser.WordId, context);
 
             int maxPptPerCard = 5;
             int currentPptThisCard = 0;
@@ -52,7 +52,7 @@ namespace Logic.Services.API
                     // pull paragraph translations here in case the same
                     // word is used more than once in the same paragraph
                     var paragraphTranslations = DataCache.ParagraphTranslationsByParargraphIdRead(
-                        (Guid)paragraph.UniqueKey, context);
+                        (Guid)paragraph.Id, context);
 
                     ParagraphTranslation? ppts = null;
                     if (paragraphTranslations.Count > 0)
@@ -80,17 +80,17 @@ namespace Logic.Services.API
                             return null;
                         }
                         // create it
-                        string input = ParagraphApi.ParagraphReadAllText(context, paragraph.UniqueKey);
+                        string input = ParagraphApi.ParagraphReadAllText(context, paragraph.Id);
                         Language? toLang = LanguageApi.LanguageReadByCode(context, uiLanguageCode);
                         if (toLang is null) { ErrorHandler.LogAndThrow(); return null; }
                         AvailableLanguageCode fromLangCode = wordUser.LanguageUser.Language.Code;
                         string translation = DeepLService.Translate(input, fromLangCode, toLang.Code);
                         ppts = new ()
                         {
-                            UniqueKey = Guid.NewGuid(),
-                            ParagraphKey = paragraph.UniqueKey,
+                            Id = Guid.NewGuid(),
+                            ParagraphId = paragraph.Id,
                             Paragraph = paragraph,
-                            LanguageKey = toLang.UniqueKey,
+                            LanguageId = toLang.Id,
                             Language = toLang,
                             TranslationText = translation
                         };
@@ -102,10 +102,10 @@ namespace Logic.Services.API
                     // now bridge it to the flash card
                     FlashCardParagraphTranslationBridge? fcptb = new ()
                     {
-                        UniqueKey = Guid.NewGuid(),
-                        ParagraphTranslationKey = ppts.UniqueKey,
+                        Id = Guid.NewGuid(),
+                        ParagraphTranslationId = ppts.Id,
                         ParagraphTranslation = ppts,
-                        FlashCardKey = card.UniqueKey,
+                        FlashCardId = card.Id,
                         FlashCard = card,
                     };
                     fcptb = DataCache.FlashCardParagraphTranslationBridgeCreate(fcptb, context);
@@ -186,11 +186,11 @@ namespace Logic.Services.API
             // ordered by recent status change
             var wordUsers = (
                         from wu in context.WordUsers
-                        join w in context.Words on wu.WordKey equals w.UniqueKey
-                        join fc in context.FlashCards on wu.UniqueKey equals fc.WordUserKey into grouping
+                        join w in context.Words on wu.WordId equals w.Id
+                        join fc in context.FlashCards on wu.Id equals fc.WordUserId into grouping
                         from fc in grouping.DefaultIfEmpty()
                         where (
-                            wu.LanguageUserKey == languageUserId
+                            wu.LanguageUserId == languageUserId
                             && fc == null
                             && wu.Status != AvailableWordUserStatus.LEARNED
                             && wu.Status != AvailableWordUserStatus.IGNORED
@@ -210,7 +210,7 @@ namespace Logic.Services.API
             foreach (var wordUser in wordUsers)
             {
                 if(wordUser is null) continue;
-                var card = FlashCardCreate(context, (Guid)wordUser.UniqueKey, uiLanguageCode);
+                var card = FlashCardCreate(context, (Guid)wordUser.Id, uiLanguageCode);
                 if (card != null) cards.Add(card);
             }
             return cards;
@@ -247,10 +247,10 @@ namespace Logic.Services.API
         {
             var card = DataCache.FlashCardByIdRead(cardId, context);
             if (card == null) { ErrorHandler.LogAndThrow(); return null; }
-            card.WordUserKey = wordUserId;
+            card.WordUserId = wordUserId;
             card.NextReview = nextReview;
             card.Status = status;
-            card.UniqueKey = uniqueKey;
+            card.Id = uniqueKey;
             DataCache.FlashCardUpdate(card, context);
             return card;
         }

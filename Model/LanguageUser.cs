@@ -12,16 +12,16 @@ namespace Model
 {
     
     [Table("LanguageUser", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
-    [Index(nameof(LanguageKey), nameof(UserKey), IsUnique = true)]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(LanguageId), nameof(UserId), IsUnique = true)]
     public class LanguageUser
     {
         #region required data
 
-        [Required] public required Guid UniqueKey { get; set; }
-        [Required] public required Guid LanguageKey { get; set; }
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid LanguageId { get; set; }
         public required Language Language { get; set; }
-        [Required] public required Guid UserKey { get; set; }
+        [Required] public required Guid UserId { get; set; }
         public required User User { get; set; }
 
         #endregion

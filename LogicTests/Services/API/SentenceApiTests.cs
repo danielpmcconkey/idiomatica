@@ -67,23 +67,23 @@ namespace Logic.Services.API.Tests
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageId = (Guid)language.Id,
                     Language = language,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
                 if (book is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)book.UniqueKey;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookKey = book.UniqueKey,
+                    BookId = book.Id,
                     Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
                 if (page is null)
@@ -92,10 +92,10 @@ namespace Logic.Services.API.Tests
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
-                    PageKey = page.UniqueKey,
+                    PageId = page.Id,
                     Page = page,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 paragraph = DataCache.ParagraphCreate(paragraph, context);
                 if (paragraph is null)
@@ -107,7 +107,7 @@ namespace Logic.Services.API.Tests
                     context, sentence2, language, 1, paragraph);
                 // read all the sentences
                 var sentencesRead = SentenceApi.SentencesReadByParagraphId(
-                    context, (Guid)paragraph.UniqueKey);
+                    context, (Guid)paragraph.Id);
                 if (sentencesRead is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 var secondSentenceRead = sentencesRead.Where(x => x.Ordinal == 1).FirstOrDefault();
@@ -141,23 +141,23 @@ namespace Logic.Services.API.Tests
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageKey = (Guid)language.UniqueKey,
+                    LanguageId = (Guid)language.Id,
                     Language = language,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
                 if (book is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                bookId = (Guid)book.UniqueKey;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
-                    BookKey = book.UniqueKey,
+                    BookId = book.Id,
                     Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
                 if (page is null)
@@ -165,10 +165,10 @@ namespace Logic.Services.API.Tests
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
-                    PageKey = page.UniqueKey,
+                    PageId = page.Id,
                     Page = page,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
                 paragraph = DataCache.ParagraphCreate(paragraph, context);
                 if (paragraph is null)
@@ -180,7 +180,7 @@ namespace Logic.Services.API.Tests
                     context, sentence2, language, 1, paragraph);
                 // read all the sentences
                 var sentencesRead = await SentenceApi.SentencesReadByParagraphIdAsync(
-                    context, (Guid)paragraph.UniqueKey);
+                    context, (Guid)paragraph.Id);
                 if(sentencesRead is null)
                     { ErrorHandler.LogAndThrow(); return; }
                 var secondSentenceRead = sentencesRead.Where(x => x.Ordinal == 1).FirstOrDefault();

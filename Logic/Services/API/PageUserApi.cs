@@ -16,14 +16,14 @@ namespace Logic.Services.API
         public static PageUser? PageUserCreateForPageIdAndUserId(
             IdiomaticaContext context, Page page, User user)
         {
-            var book = DataCache.BookByIdRead((Guid)page.BookKey, context);
+            var book = DataCache.BookByIdRead((Guid)page.BookId, context);
             if (book is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
             }
             var languageUser = DataCache.LanguageUserByLanguageIdAndUserIdRead(
-                (book.LanguageKey, user.UniqueKey), context);
+                (book.LanguageId, user.Id), context);
             if (languageUser is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -32,13 +32,13 @@ namespace Logic.Services.API
 
             // make sure it doesn't already exist
             var existingPageUser = DataCache.PageUserByPageIdAndLanguageUserIdRead(
-                (page.UniqueKey, languageUser.UniqueKey), context);
+                (page.Id, languageUser.Id), context);
             if (existingPageUser is not null) return existingPageUser;
 
             // nope, definitely create it
             // but first, more stuff to look up
             var bookUser = DataCache.BookUserByBookIdAndUserIdRead(
-                (book.UniqueKey, user.UniqueKey), context);
+                (book.Id, user.Id), context);
             if (bookUser is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -47,10 +47,10 @@ namespace Logic.Services.API
             // save it for real
             var pageUser = new PageUser()
             {
-                UniqueKey = Guid.NewGuid(),
-                BookUserKey = bookUser.UniqueKey,
+                Id = Guid.NewGuid(),
+                BookUserId = bookUser.Id,
                 BookUser = bookUser,
-                PageKey = page.UniqueKey,
+                PageId = page.Id,
                 Page = page,
             };
             pageUser = DataCache.PageUserCreate(pageUser, context);
@@ -102,14 +102,14 @@ namespace Logic.Services.API
             }
 
             // try to pull the bookmarked page
-            if (bookUser.CurrentPageKey is not null)
+            if (bookUser.CurrentPageId is not null)
             {
                 return PageUserReadByPageIdAndLanguageUserId(
-                    context, (Guid)bookUser.CurrentPageKey, (Guid)bookUser.LanguageUserKey);
+                    context, (Guid)bookUser.CurrentPageId, (Guid)bookUser.LanguageUserId);
             }
             // no bookmark, pull page 1
             return PageUserReadByOrderWithinBook(
-                context, (Guid)bookUser.LanguageUserKey, 1, (Guid)bookUser.BookKey);
+                context, (Guid)bookUser.LanguageUserId, 1, (Guid)bookUser.BookId);
         }
         public static async Task<PageUser?> PageUserReadBookmarkedOrFirstAsync(
             IdiomaticaContext context, Guid bookUserId)

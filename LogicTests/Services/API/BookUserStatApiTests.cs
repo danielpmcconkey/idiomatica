@@ -40,9 +40,9 @@ namespace Logic.Services.API.Tests
                 // grab the expected language user ID
                 var lu = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(context, userId);
                 if (lu is null || lu.Count < 1) { ErrorHandler.LogAndThrow(); return; }
-                var l = lu.Where(x => x.LanguageKey == languageId).FirstOrDefault();
+                var l = lu.Where(x => x.LanguageId == languageId).FirstOrDefault();
                 if (l is null) { ErrorHandler.LogAndThrow(); return; }
-                Guid expectedLanguageUserId = (Guid)l.UniqueKey;
+                Guid expectedLanguageUserId = (Guid)l.Id;
 
 
                 // carry on with the test
@@ -58,7 +58,7 @@ namespace Logic.Services.API.Tests
                 // assert
 
                 Assert.AreEqual(expectedStatsCount, actualStatsCount);
-                Assert.AreEqual(expectedLanguageUserId, progressStat.LanguageUserKey);
+                Assert.AreEqual(expectedLanguageUserId, progressStat.LanguageUserId);
                 Assert.AreEqual(expectedProgress, actualProgress);
             }
             finally
@@ -91,9 +91,9 @@ namespace Logic.Services.API.Tests
                 // grab the expected language user ID
                 var lu = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(context, userId);
                 if (lu is null || lu.Count < 1) { ErrorHandler.LogAndThrow(); return; }
-                var l = lu.Where(x => x.LanguageKey == languageId).FirstOrDefault();
+                var l = lu.Where(x => x.LanguageId == languageId).FirstOrDefault();
                 if (l is null) { ErrorHandler.LogAndThrow(); return; }
-                Guid expectedLanguageUserId = (Guid)l.UniqueKey;
+                Guid expectedLanguageUserId = (Guid)l.Id;
 
 
                 // carry on with the test
@@ -109,7 +109,7 @@ namespace Logic.Services.API.Tests
                 // assert
                 
                 Assert.AreEqual(expectedStatsCount, actualStatsCount);
-                Assert.AreEqual(expectedLanguageUserId, progressStat.LanguageUserKey);
+                Assert.AreEqual(expectedLanguageUserId, progressStat.LanguageUserId);
                 Assert.AreEqual(expectedProgress, actualProgress);
             }
             finally
@@ -137,17 +137,17 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null)
                     { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookId, (Guid)user.UniqueKey);
+                    context, bookId, (Guid)user.Id);
                 if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // carry on with the test
-                var bookUserStats = BookUserStatApi.BookUserStatsRead(context, bookId, (Guid)user.UniqueKey);
+                var bookUserStats = BookUserStatApi.BookUserStatsRead(context, bookId, (Guid)user.Id);
                 // checking total word count here because we already tested progress
                 // it's good to mix these up so we eventually get coverage
                 BookUserStat? totalWordCountStat = bookUserStats is null ? null :
@@ -165,17 +165,17 @@ namespace Logic.Services.API.Tests
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // update all unknowns to well known
-                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (Guid)pageUser.UniqueKey);
+                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (Guid)pageUser.Id);
                 // mark the first page as read
-                PageUserApi.PageUserMarkAsRead(context, (Guid)pageUser.UniqueKey);
+                PageUserApi.PageUserMarkAsRead(context, (Guid)pageUser.Id);
                 // now move forward to page 2
                 var newPageUser = PageUserApi.PageUserReadByOrderWithinBook(
-                    context, (Guid)bookUser.LanguageUserKey, 2, bookId);
+                    context, (Guid)bookUser.LanguageUserId, 2, bookId);
 
                 // now we need to regen the stats
-                BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (Guid)bookUser.UniqueKey);
+                BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (Guid)bookUser.Id);
                 // finally, re-pull the stats
-                var newStats = BookUserStatApi.BookUserStatsRead(context, bookId, (Guid)user.UniqueKey);
+                var newStats = BookUserStatApi.BookUserStatsRead(context, bookId, (Guid)user.Id);
                 BookUserStat? distinctKnownPercentStat = newStats is null ? null :
                     newStats.Where(x => x.Key == AvailableBookUserStat.DISTINCTKNOWNPERCENT).FirstOrDefault();
                 if (distinctKnownPercentStat is null || distinctKnownPercentStat.ValueNumeric is null)
@@ -208,17 +208,17 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 var languageUser = LanguageUserApi.LanguageUserCreate(context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) ErrorHandler.LogAndThrow();
 
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookId, (Guid)user.UniqueKey);
+                    context, bookId, (Guid)user.Id);
                 if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // carry on with the test
-                var bookUserStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (Guid)user.UniqueKey);
+                var bookUserStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (Guid)user.Id);
                 // checking total word count here because we already tested progress
                 // it's good to mix these up so we eventually get coverage
                 BookUserStat? totalWordCountStat = bookUserStats is null ? null :
@@ -237,17 +237,17 @@ namespace Logic.Services.API.Tests
 
 
                 // update all unknowns to well known
-                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (Guid)pageUser.UniqueKey);
+                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (Guid)pageUser.Id);
                 // mark the first page as read
-                await PageUserApi.PageUserMarkAsReadAsync(context, (Guid)pageUser.UniqueKey);
+                await PageUserApi.PageUserMarkAsReadAsync(context, (Guid)pageUser.Id);
                 // now move forward to page 2
                 var newPageUser = await PageUserApi.PageUserReadByOrderWithinBookAsync(
-                    context, (Guid)bookUser.LanguageUserKey, 2, bookId);
+                    context, (Guid)bookUser.LanguageUserId, 2, bookId);
 
                 // now we need to regen the stats
-                BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (Guid)bookUser.UniqueKey);
+                BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (Guid)bookUser.Id);
                 // finally, re-pull the stats
-                var newStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (Guid)user.UniqueKey);
+                var newStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (Guid)user.Id);
                 BookUserStat? distinctKnownPercentStat = newStats is null ? null :
                     newStats.Where(x => x.Key == AvailableBookUserStat.DISTINCTKNOWNPERCENT).FirstOrDefault();
                 if (distinctKnownPercentStat is null || distinctKnownPercentStat.ValueNumeric is null)

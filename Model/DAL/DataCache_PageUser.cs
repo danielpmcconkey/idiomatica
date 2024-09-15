@@ -27,12 +27,12 @@ namespace Model.DAL
                       ([BookUserKey]
                       ,[PageKey]
                       ,[ReadDate]
-                      ,[UniqueKey])
+                      ,[Id])
                 VALUES
-                      ({pageUser.BookUserKey}
-                      ,{pageUser.PageKey}
+                      ({pageUser.BookUserId}
+                      ,{pageUser.PageId}
                       ,{pageUser.ReadDate}
-                      ,{pageUser.UniqueKey})
+                      ,{pageUser.Id})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
@@ -61,7 +61,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.PageUsers.Where(x => x.UniqueKey == key)
+            var value = context.PageUsers.Where(x => x.Id == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // now update the cache
@@ -86,10 +86,10 @@ namespace Model.DAL
             // read DB
             var value = context.PageUsers
                 .Where(pu => pu.BookUser != null 
-                    && pu.BookUser.LanguageUserKey == key.languageUserId
+                    && pu.BookUser.LanguageUserId == key.languageUserId
                     && pu.Page != null
                     && pu.Page.Ordinal == key.ordinal
-                    && pu.Page.BookKey == key.bookId)
+                    && pu.Page.BookId == key.bookId)
                 .FirstOrDefault();
 
             if (value == null) return null;
@@ -117,8 +117,8 @@ namespace Model.DAL
             // read DB
             var value = context.PageUsers
                 .Where(pu => pu.BookUser != null
-                    && pu.BookUser.LanguageUserKey == key.languageUserId
-                    && pu.PageKey == key.pageId)
+                    && pu.BookUser.LanguageUserId == key.languageUserId
+                    && pu.PageId == key.pageId)
                 .FirstOrDefault();
 
             if (value == null) return null;
@@ -145,8 +145,8 @@ namespace Model.DAL
             }
             // read DB
             var value = (from bu in context.BookUsers
-                         join pu in context.PageUsers on bu.UniqueKey equals pu.BookUserKey
-                         where (bu.UniqueKey == key)
+                         join pu in context.PageUsers on bu.Id equals pu.BookUserId
+                         where (bu.Id == key)
                          select pu)
                 .ToList();
 
@@ -176,11 +176,11 @@ namespace Model.DAL
             int numRows = context.Database.ExecuteSql($"""
                                 
                 UPDATE [Idioma].[PageUser]
-                   SET [BookUserKey] = {value.BookUserKey}
-                      ,[PageKey] = {value.PageKey}
+                   SET [BookUserKey] = {value.BookUserId}
+                      ,[PageKey] = {value.PageId}
                       ,[ReadDate] = {value.ReadDate}
-                      ,[UniqueKey] = {value.UniqueKey}
-                 WHERE UniqueKey = {value.UniqueKey}
+                      ,[Id] = {value.Id}
+                 WHERE Id = {value.Id}
 
                 """);
 
@@ -198,35 +198,35 @@ namespace Model.DAL
 
         private static bool doesPageUserListContainPageUserId(List<PageUser> list, Guid key)
         {
-            return list.Where(x => x.UniqueKey == key).Any();
+            return list.Where(x => x.Id == key).Any();
         }
         private static List<PageUser> PageUsersListGetUpdated(List<PageUser> list, PageUser value)
         {
             List<PageUser> newList = new List<PageUser>();
             foreach (var pu in list)
             {
-                if (pu.UniqueKey == value.UniqueKey) newList.Add(value);
+                if (pu.Id == value.Id) newList.Add(value);
                 else newList.Add(pu);
             }
             return newList;
         }
         private static void PageUserUpdateAllCaches(PageUser value)
         {
-            PageUserById[(Guid)value.UniqueKey] = value;
+            PageUserById[(Guid)value.Id] = value;
 
-            var cachedItem1 = PageUserByPageIdAndLanguageUserId.Where(x => x.Value.UniqueKey == value.UniqueKey).FirstOrDefault();
+            var cachedItem1 = PageUserByPageIdAndLanguageUserId.Where(x => x.Value.Id == value.Id).FirstOrDefault();
             if (cachedItem1.Value != null)
             {
                 PageUserByPageIdAndLanguageUserId[cachedItem1.Key] = value;
             }
-            var cachedItem2 = PageUserByLanguageUserIdOrdinalAndBookId.Where(x => x.Value.UniqueKey == value.UniqueKey).FirstOrDefault();
+            var cachedItem2 = PageUserByLanguageUserIdOrdinalAndBookId.Where(x => x.Value.Id == value.Id).FirstOrDefault();
             if (cachedItem2.Value != null)
             {
                 PageUserByLanguageUserIdOrdinalAndBookId[cachedItem2.Key] = value;
             }
 
             var cachedList3 = PageUsersByBookUserId
-                .Where(x => doesPageUserListContainPageUserId(x.Value, (Guid)value.UniqueKey));
+                .Where(x => doesPageUserListContainPageUserId(x.Value, (Guid)value.Id));
             var cachedList3Array = cachedList3.ToArray();
             for (int i = 0; i < cachedList3Array.Length; i++)
             {

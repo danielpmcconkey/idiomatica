@@ -37,7 +37,7 @@ namespace Logic.Services.API.Tests
 
                 var book = BookApi.BookRead(context, bookId);
                 Assert.IsNotNull(book);
-                var user = context.Users.Where(x => x.UniqueKey == userId).FirstOrDefault();
+                var user = context.Users.Where(x => x.Id == userId).FirstOrDefault();
                 Assert.IsNotNull(book);
                 Assert.IsNotNull(user);
 
@@ -80,7 +80,7 @@ namespace Logic.Services.API.Tests
 
                 var book = BookApi.BookRead(context, bookId);
                 Assert.IsNotNull(book);
-                var user = context.Users.Where(x => x.UniqueKey == userId).FirstOrDefault();
+                var user = context.Users.Where(x => x.Id == userId).FirstOrDefault();
                 Assert.IsNotNull(book);
                 Assert.IsNotNull(user);
 
@@ -127,7 +127,7 @@ namespace Logic.Services.API.Tests
 
                 var book = BookApi.BookRead(context, bookId);
                 Assert.IsNotNull(book);
-                var user = context.Users.Where(x => x.UniqueKey == userId).FirstOrDefault();
+                var user = context.Users.Where(x => x.Id == userId).FirstOrDefault();
                 Assert.IsNotNull(book);
                 Assert.IsNotNull(user);
 
@@ -181,7 +181,7 @@ namespace Logic.Services.API.Tests
 
                 var book = BookApi.BookRead(context, bookId);
                 Assert.IsNotNull(book);
-                var user = context.Users.Where(x => x.UniqueKey == userId).FirstOrDefault();
+                var user = context.Users.Where(x => x.Id == userId).FirstOrDefault();
                 Assert.IsNotNull(book);
                 Assert.IsNotNull(user);
 

@@ -24,9 +24,9 @@ namespace Logic.Services.API
 
             var paragraph = new Paragraph()
             {
-                UniqueKey = Guid.NewGuid(),
+                Id = Guid.NewGuid(),
                 Ordinal = ordinal,
-                PageKey = page.UniqueKey,
+                PageId = page.Id,
                 Page = page,
             };
             paragraph = DataCache.ParagraphCreate(paragraph, context);
@@ -57,7 +57,7 @@ namespace Logic.Services.API
                 // paragraph ID. so only add it if not there already
                 if (paragraph.Sentences is null) paragraph.Sentences = [];
                 else if (paragraph.Sentences
-                    .Where(x => x.UniqueKey == sentence.UniqueKey)
+                    .Where(x => x.Id == sentence.Id)
                     .FirstOrDefault() is null)
                 {
                     paragraph.Sentences.Add(sentence);
@@ -92,7 +92,7 @@ namespace Logic.Services.API
             // pull all bridges for this card with this language code
             var bridges = DataCache
                 .FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCodeRead(
-                    (flashCardId, uiLanguage.UniqueKey), context);
+                    (flashCardId, uiLanguage.Id), context);
             if (bridges is null || bridges.Count == 0) return (example, translation);
             
             // select a random bridge
@@ -102,15 +102,15 @@ namespace Logic.Services.API
 
             // pull the paragraphtranslation
             var paragraphTranslation = DataCache.ParagraphTranslationByIdRead(
-                (Guid)bridge.ParagraphTranslationKey, context);
+                (Guid)bridge.ParagraphTranslationId, context);
             if (paragraphTranslation is null || paragraphTranslation.TranslationText is null) 
                 return (example, translation);
             translation = paragraphTranslation.TranslationText;
 
             // pull the orig text
-            var paragraph = DataCache.ParagraphByIdRead((Guid)paragraphTranslation.ParagraphKey, context);
+            var paragraph = DataCache.ParagraphByIdRead((Guid)paragraphTranslation.ParagraphId, context);
             if (paragraph is null) return (example, translation);
-            example = ParagraphApi.ParagraphReadAllText(context, (Guid) paragraph.UniqueKey);
+            example = ParagraphApi.ParagraphReadAllText(context, (Guid) paragraph.Id);
 
             return (example, translation);
         }
@@ -201,7 +201,7 @@ namespace Logic.Services.API
             IdiomaticaContext context, Paragraph paragraph,
             AvailableLanguageCode fromCode, AvailableLanguageCode toCode)
         {
-            string input = await ParagraphReadAllTextAsync(context, paragraph.UniqueKey);
+            string input = await ParagraphReadAllTextAsync(context, paragraph.Id);
             string output = "";
 
 
@@ -212,12 +212,12 @@ namespace Logic.Services.API
 
             // see if the translation already exists
             var existingTranslations = await DataCache.ParagraphTranslationsByParargraphIdReadAsync(
-                    paragraph.UniqueKey, context);
+                    paragraph.Id, context);
             if (existingTranslations is not null && existingTranslations.Count > 0)
             {
                 // are any in the right language?
                 var currentTranslation = existingTranslations
-                    .Where(x => x.LanguageKey == languageTo.UniqueKey)
+                    .Where(x => x.LanguageId == languageTo.Id)
                     .FirstOrDefault();
                 if (currentTranslation != null && currentTranslation.TranslationText != null)
                 {
@@ -234,10 +234,10 @@ namespace Logic.Services.API
                 // add to the DB
                 var ppt = new ParagraphTranslation()
                 {
-                    UniqueKey = Guid.NewGuid(),
-                    ParagraphKey = paragraph.UniqueKey,
+                    Id = Guid.NewGuid(),
+                    ParagraphId = paragraph.Id,
                     Paragraph = paragraph,
-                    LanguageKey = languageTo.UniqueKey,
+                    LanguageId = languageTo.Id,
                     Language = languageTo,
                     TranslationText = deeplResult
                 };

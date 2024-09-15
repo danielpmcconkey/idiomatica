@@ -29,17 +29,17 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context,
                     CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
-                Guid languageUserId = (Guid)languageUser.UniqueKey;
+                Guid languageUserId = (Guid)languageUser.Id;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (Guid)user.UniqueKey);
+                    context, bookId, (Guid)user.Id);
                 if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
@@ -51,10 +51,10 @@ namespace Logic.Services.API.Tests
                 UserApi.UserAndAllChildrenDelete(context, userId);
 
                 // now try to pull anything
-                var userRead = context.Users.Where(x => x.UniqueKey == userId).FirstOrDefault();
-                var languageUserRead = context.LanguageUsers.Where(x => x.UserKey == userId).FirstOrDefault();
-                var bookUserRead = context.BookUsers.Where(x => x.LanguageUserKey == languageUserId).FirstOrDefault();
-                var wordUserRead = context.WordUsers.Where(x => x.LanguageUserKey == languageUserId).FirstOrDefault();
+                var userRead = context.Users.Where(x => x.Id == userId).FirstOrDefault();
+                var languageUserRead = context.LanguageUsers.Where(x => x.UserId == userId).FirstOrDefault();
+                var bookUserRead = context.BookUsers.Where(x => x.LanguageUserId == languageUserId).FirstOrDefault();
+                var wordUserRead = context.WordUsers.Where(x => x.LanguageUserId == languageUserId).FirstOrDefault();
 
                 Assert.IsNull(userRead);
                 Assert.IsNull(languageUserRead);
@@ -83,17 +83,17 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(context,
                     CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
-                Guid languageUserId = (Guid)languageUser.UniqueKey;
+                Guid languageUserId = (Guid)languageUser.Id;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (Guid)user.UniqueKey);
+                    context, bookId, (Guid)user.Id);
                 if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
@@ -105,10 +105,10 @@ namespace Logic.Services.API.Tests
                 await UserApi.UserAndAllChildrenDeleteAsync(context, userId);
 
                 // now try to pull anything
-                var userRead = context.Users.Where(x => x.UniqueKey == userId).FirstOrDefault();
-                var languageUserRead = context.LanguageUsers.Where(x => x.UserKey == userId).FirstOrDefault();
-                var bookUserRead = context.BookUsers.Where(x => x.LanguageUserKey == languageUserId).FirstOrDefault();
-                var wordUserRead = context.WordUsers.Where(x => x.LanguageUserKey == languageUserId).FirstOrDefault();
+                var userRead = context.Users.Where(x => x.Id == userId).FirstOrDefault();
+                var languageUserRead = context.LanguageUsers.Where(x => x.UserId == userId).FirstOrDefault();
+                var bookUserRead = context.BookUsers.Where(x => x.LanguageUserId == languageUserId).FirstOrDefault();
+                var wordUserRead = context.WordUsers.Where(x => x.LanguageUserId == languageUserId).FirstOrDefault();
 
                 Assert.IsNull(userRead);
                 Assert.IsNull(languageUserRead);
@@ -136,10 +136,10 @@ namespace Logic.Services.API.Tests
                 // create the user
                 var user = UserApi.UserCreate(applicationUserId, name, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
-                Assert.IsNotNull(user.UniqueKey);
-                var ukString = user.UniqueKey.ToString();
+                Assert.IsNotNull(user.Id);
+                var ukString = user.Id.ToString();
                 Assert.IsTrue(ukString.Trim().Length > 0);
             }
             finally
@@ -162,10 +162,10 @@ namespace Logic.Services.API.Tests
                 // create the user
                 var user = await UserApi.UserCreateAsync(applicationUserId, name, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
-                Assert.IsNotNull(user.UniqueKey);
-                var ukString = user.UniqueKey.ToString();
+                Assert.IsNotNull(user.Id);
+                var ukString = user.Id.ToString();
                 Assert.IsTrue(ukString.Trim().Length > 0);
             }
             finally
@@ -188,18 +188,18 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
                     context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                Guid languageUserId = (Guid)languageUser.UniqueKey;
+                Guid languageUserId = (Guid)languageUser.Id;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (Guid)user.UniqueKey);
+                    context, bookId, (Guid)user.Id);
                 if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
@@ -220,8 +220,8 @@ namespace Logic.Services.API.Tests
                 var crumb1 = UserApi.UserBreadCrumbReadLatest(context, userId);
 
                 Assert.IsNotNull(crumb1);
-                Assert.IsNotNull(crumb1.UniqueKey);
-                Assert.IsTrue(crumb1.PageKey == page1.UniqueKey);
+                Assert.IsNotNull(crumb1.Id);
+                Assert.IsTrue(crumb1.PageId == page1.Id);
                 Assert.IsTrue(crumb1.ActionDateTime > time1);
 
                 // take a reading of time before you make the first crumb
@@ -241,8 +241,8 @@ namespace Logic.Services.API.Tests
                 var crumb2 = UserApi.UserBreadCrumbReadLatest(context, userId);
 
                 Assert.IsNotNull(crumb2);
-                Assert.IsNotNull(crumb2.UniqueKey);
-                Assert.IsTrue(crumb2.PageKey == page2.UniqueKey);
+                Assert.IsNotNull(crumb2.Id);
+                Assert.IsTrue(crumb2.PageId == page2.Id);
                 Assert.IsTrue(crumb2.ActionDateTime > time2);
             }
             finally
@@ -266,18 +266,18 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
                     context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                Guid languageUserId = (Guid)languageUser.UniqueKey;
+                Guid languageUserId = (Guid)languageUser.Id;
 
                 // craete a bookUser
                 var bookUser = await BookUserApi.BookUserCreateAsync(
-                    context, bookId, (Guid)user.UniqueKey);
+                    context, bookId, (Guid)user.Id);
                 if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
@@ -298,8 +298,8 @@ namespace Logic.Services.API.Tests
                 var crumb1 = await UserApi.UserBreadCrumbReadLatestAsync(context, userId);
 
                 Assert.IsNotNull(crumb1);
-                Assert.IsNotNull(crumb1.UniqueKey);
-                Assert.IsTrue(crumb1.PageKey == page1.UniqueKey);
+                Assert.IsNotNull(crumb1.Id);
+                Assert.IsTrue(crumb1.PageId == page1.Id);
                 Assert.IsTrue(crumb1.ActionDateTime > time1);
 
                 // take a reading of time before you make the first crumb
@@ -319,8 +319,8 @@ namespace Logic.Services.API.Tests
                 var crumb2 = await UserApi.UserBreadCrumbReadLatestAsync(context, userId);
 
                 Assert.IsNotNull(crumb2);
-                Assert.IsNotNull(crumb2.UniqueKey);
-                Assert.IsTrue(crumb2.PageKey == page2.UniqueKey);
+                Assert.IsNotNull(crumb2.Id);
+                Assert.IsTrue(crumb2.PageId == page2.Id);
                 Assert.IsTrue(crumb2.ActionDateTime > time2);
             }
             finally
@@ -344,18 +344,18 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = LanguageUserApi.LanguageUserCreate(
                     context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                Guid languageUserId = (Guid)languageUser.UniqueKey;
+                Guid languageUserId = (Guid)languageUser.Id;
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (Guid)user.UniqueKey);
+                    context, bookId, (Guid)user.Id);
                 if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
@@ -369,7 +369,7 @@ namespace Logic.Services.API.Tests
                 var crumb = UserApi.UserBreadCrumbCreate(context, user, page);
 
                 Assert.IsNotNull(crumb);
-                Assert.IsNotNull(crumb.UniqueKey);
+                Assert.IsNotNull(crumb.Id);
                 Assert.IsNotNull(crumb.ActionDateTime);
             }
             finally
@@ -393,18 +393,18 @@ namespace Logic.Services.API.Tests
                 if (userService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.UniqueKey;
+                userId = (Guid)user.Id;
 
                 // create a languageUser
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
                     context, CommonFunctions.GetSpanishLanguage(context), user);
                 if (languageUser is null) 
                     { ErrorHandler.LogAndThrow(); return; }
-                Guid languageUserId = (Guid)languageUser.UniqueKey;
+                Guid languageUserId = (Guid)languageUser.Id;
 
                 // craete a bookUser
                 var bookUser = await BookUserApi.BookUserCreateAsync(
-                    context, bookId, (Guid)user.UniqueKey);
+                    context, bookId, (Guid)user.Id);
                 if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
@@ -418,7 +418,7 @@ namespace Logic.Services.API.Tests
                 var crumb = await UserApi.UserBreadCrumbCreateAsync(context, user, page);
 
                 Assert.IsNotNull(crumb);
-                Assert.IsNotNull(crumb.UniqueKey);
+                Assert.IsNotNull(crumb.Id);
                 Assert.IsNotNull(crumb.ActionDateTime);
             }
             finally

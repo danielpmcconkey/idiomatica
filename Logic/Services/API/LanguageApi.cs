@@ -44,7 +44,7 @@ namespace Logic.Services.API
                 foreach (var l in options)
                 {
                     if (l is null) continue;
-                    returnDict.Add(l.UniqueKey, l);
+                    returnDict.Add(l.Id, l);
                 }
             }
             return returnDict;

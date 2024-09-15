@@ -13,12 +13,12 @@ namespace Model
 {
     
     [Table("Language", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
+    [PrimaryKey(nameof(Id))]
     [Index(nameof(Code), IsUnique = true)]
     public class Language
     {
         #region required data
-        [Required] public required Guid UniqueKey { get; set; }
+        [Required] public required Guid Id { get; set; }
 
         [StringLength(250)]
         [Required] public required string Name { get; set; }
@@ -42,7 +42,6 @@ namespace Model
         public List<Verb> Verbs { get; set; } = [];
         public List<WordRank> WordRanks { get; set; } = [];
         public List<ParagraphTranslation> ParagraphTranslations { get; set; } = [];
-        //public List<User> Users { get; set; } = [];
 
     }
 }

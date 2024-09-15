@@ -26,12 +26,12 @@ namespace Model.DAL
                       ([ParagraphKey]
                       ,[LanguageKey]
                       ,[TranslationText]
-                      ,[UniqueKey])
+                      ,[Id])
                 VALUES
-                      ({paragraphTranslation.ParagraphKey}
-                      ,{paragraphTranslation.LanguageKey}
+                      ({paragraphTranslation.ParagraphId}
+                      ,{paragraphTranslation.LanguageId}
                       ,{paragraphTranslation.TranslationText}
-                      ,{paragraphTranslation.UniqueKey})
+                      ,{paragraphTranslation.Id})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating ParagraphTranslation affected 0 rows");
@@ -59,7 +59,7 @@ namespace Model.DAL
             }
 
             // read DB
-            var value = context.ParagraphTranslations.Where(x => x.UniqueKey == key)
+            var value = context.ParagraphTranslations.Where(x => x.Id == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -75,14 +75,14 @@ namespace Model.DAL
                 return ParagraphTranslationsByParagraphId[key];
             }
             // read DB
-            var value = context.ParagraphTranslations.Where(x => x.ParagraphKey == key).ToList();
+            var value = context.ParagraphTranslations.Where(x => x.ParagraphId == key).ToList();
 
             // write to cache
             ParagraphTranslationsByParagraphId[key] = value;
             // write each item to cache
             foreach (var item in value)
             {
-                ParagraphTranslationById[(Guid)item.UniqueKey] = item;
+                ParagraphTranslationById[(Guid)item.Id] = item;
             }
 
             return value;
@@ -121,12 +121,12 @@ namespace Model.DAL
         private static void ParagraphTranslationUpdateCache(ParagraphTranslation value)
         {
             // write to the ID cache
-            ParagraphTranslationById[(Guid)value.UniqueKey] = value;
+            ParagraphTranslationById[(Guid)value.Id] = value;
 
             // are there any lists with this one's paragraph already cached?
-            if (ParagraphTranslationsByParagraphId.ContainsKey((Guid)value.ParagraphKey))
+            if (ParagraphTranslationsByParagraphId.ContainsKey((Guid)value.ParagraphId))
             {
-                var cachedList = ParagraphTranslationsByParagraphId[(Guid)value.ParagraphKey];
+                var cachedList = ParagraphTranslationsByParagraphId[(Guid)value.ParagraphId];
                 if (cachedList != null)
                 {
                     cachedList.Add(value);

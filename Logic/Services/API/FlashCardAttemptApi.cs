@@ -18,8 +18,8 @@ namespace Logic.Services.API
         {
             FlashCardAttempt? attempt = new ()
             {
-                UniqueKey = Guid.NewGuid(),
-                FlashCardKey = flashCard.UniqueKey,
+                Id = Guid.NewGuid(),
+                FlashCardId = flashCard.Id,
                 FlashCard = flashCard,
                 AttemptedWhen = DateTime.Now,
                 Status = status,

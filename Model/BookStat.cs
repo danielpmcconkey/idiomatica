@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("BookStat", Schema = "Idioma")]
-    [PrimaryKey(nameof(BookKey), nameof(Key))]
+    [PrimaryKey(nameof(BookId), nameof(Key))]
     public class BookStat
     {
         #region required data
 
-        [Required] public required Guid BookKey { get; set; }
+        [Required] public required Guid BookId { get; set; }
         public required Book Book { get; set; }
         [Required] public required AvailableBookStat Key { get; set; }
 

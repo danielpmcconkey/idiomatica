@@ -23,7 +23,7 @@ namespace Logic.Services.API
             // look up the existing word
             var word = context.Words
                 .Where(x => x.TextLowerCase == wordTextLower &&
-                    x.LanguageKey == fromLanguage.UniqueKey)
+                    x.LanguageId == fromLanguage.Id)
                 .FirstOrDefault();
             if (word is null)
             {
@@ -37,14 +37,14 @@ namespace Logic.Services.API
             }
             WordTranslation? wordTranslation = new ()
             {
-                UniqueKey = Guid.NewGuid(),
-                LanguageToKey = toLanguage.UniqueKey,
+                Id = Guid.NewGuid(),
+                LanguageToId = toLanguage.Id,
                 LanguageTo = toLanguage,
-                WordKey = word.UniqueKey,
+                WordId = word.Id,
                 Word = word,
                 PartOfSpeech = AvailablePartOfSpeech.VERB,
                 Translation = translation.Trim(),
-                VerbKey = verb.UniqueKey,
+                VerbId = verb.Id,
                 Verb = verb,
                 Ordinal = ordinal,
             };
@@ -61,20 +61,20 @@ namespace Logic.Services.API
             // be used for adding new word translations manually by system admins;
             var englishLang = LanguageApi.LanguageReadByCode(context, AvailableLanguageCode.EN_US);
             if (englishLang == null) { ErrorHandler.LogAndThrow(); return null; }
-            Guid englishLangId = englishLang.UniqueKey;
+            Guid englishLangId = englishLang.Id;
 
 
             // save the learning verb object
             // but only if it doesn't already exist
             Verb? verbToUse = context.Verbs
-                .Where(x=>x.LanguageKey == learningVerb.LanguageKey &&
+                .Where(x=>x.LanguageId == learningVerb.LanguageId &&
                     x.Conjugator == learningVerb.Conjugator &&
                     x.Infinitive == learningVerb.Infinitive)
                 .FirstOrDefault();
             if (verbToUse is null)
             {
                 verbToUse = learningVerb;
-                verbToUse.UniqueKey = Guid.NewGuid();
+                verbToUse.Id = Guid.NewGuid();
                 context.Verbs.Add(verbToUse);
                 context.SaveChanges();
             }
@@ -93,7 +93,7 @@ namespace Logic.Services.API
             {
                 // save the gerund translation
                 var gerundTranslation = translationVerb.Gerund;
-                if (translationVerb.LanguageKey == englishLangId)
+                if (translationVerb.LanguageId == englishLangId)
                 {
                     gerundTranslation = $"{translationVerb.Gerund}: gerund of {learningVerb.Infinitive}";
                 }
@@ -106,7 +106,7 @@ namespace Logic.Services.API
             {
                 // save the past participle translation
                 var participleTranslation = translationVerb.PastParticiple;
-                if (translationVerb.LanguageKey == englishLangId)
+                if (translationVerb.LanguageId == englishLangId)
                 {
                     participleTranslation = $"{translationVerb.PastParticiple}: past participle of {learningVerb.Infinitive}";
                 }
@@ -135,8 +135,8 @@ namespace Logic.Services.API
         {
             var newWord = new Word()
             {
-                UniqueKey = Guid.NewGuid(),
-                LanguageKey = language.UniqueKey,
+                Id = Guid.NewGuid(),
+                LanguageId = language.Id,
                 Language = language,
                 Romanization = romanization,
                 Text = text.ToLower(),
@@ -195,7 +195,7 @@ namespace Logic.Services.API
             List<(Word? word, int? ordinal, string? tokenDisplay)> outList = [];
 
             // check if any already exist. there shouldn't be any but whateves
-            DataCache.TokenBySentenceIdDelete(sentence.UniqueKey, context);
+            DataCache.TokenBySentenceIdDelete(sentence.Id, context);
             
             var parser = LanguageParser.Factory.GetLanguageParser(language);
             if (parser is null) { ErrorHandler.LogAndThrow(); return []; }
@@ -210,7 +210,7 @@ namespace Logic.Services.API
                 string? tokenDisplay = wordsSplits[i];
                 var cleanWord = parser.TextToLower(parser.StipNonWordCharacters(tokenDisplay));
                 word = DataCache.WordByLanguageIdAndTextLowerRead(
-                    (language.UniqueKey, cleanWord), context);
+                    (language.Id, cleanWord), context);
                 if (word is null)
                 {
                     // word doesn't exist; create it
@@ -275,14 +275,14 @@ namespace Logic.Services.API
             {
                 if (languageUser.Language == null || languageUser.Language.Name == null) continue;
                 var count = (from lu in context.LanguageUsers
-                             join bu in context.BookUsers on lu.UniqueKey equals bu.LanguageUserKey
-                             join pu in context.PageUsers on bu.UniqueKey equals pu.BookUserKey
-                             join p in context.Pages on pu.PageKey equals p.UniqueKey
-                             join pp in context.Paragraphs on p.UniqueKey equals pp.PageKey
-                             join s in context.Sentences on pp.UniqueKey equals s.ParagraphKey
-                             join t in context.Tokens on s.UniqueKey equals t.SentenceKey
+                             join bu in context.BookUsers on lu.Id equals bu.LanguageUserId
+                             join pu in context.PageUsers on bu.Id equals pu.BookUserId
+                             join p in context.Pages on pu.PageId equals p.Id
+                             join pp in context.Paragraphs on p.Id equals pp.PageId
+                             join s in context.Sentences on pp.Id equals s.ParagraphId
+                             join t in context.Tokens on s.Id equals t.SentenceId
                              where pu.ReadDate != null
-                                && lu.UniqueKey == languageUser.UniqueKey
+                                && lu.Id == languageUser.Id
                              select t).Count();
                 returnList.Add((languageUser.Language.Name, count));
             }

@@ -297,7 +297,7 @@
             if (NumOldCardsInput is null) NumOldCardsInput = 0;
 
             FlashCardDataPacket = OrchestrationApi.OrchestrateFlashCardDeckCreation(
-                context, LoggedInUser.UniqueKey,
+                context, LoggedInUser.Id,
                 (AvailableLanguageCode)LanguageInput, (int)NumNewCardsInput,
                 (int)NumOldCardsInput);
 

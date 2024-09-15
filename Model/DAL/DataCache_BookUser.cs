@@ -20,22 +20,22 @@ namespace Model.DAL
         {
             int numRows = context.Database.ExecuteSql($"""
                         INSERT INTO [Idioma].[BookUser]
-                              ([BookKey]
+                              ([BookId]
                               ,[LanguageUserKey]
                               ,[IsArchived]
                               ,[CurrentPageKey]
-                              ,[UniqueKey])
+                              ,[Id])
                         VALUES
-                              ({bookUser.BookKey}
-                              ,{bookUser.LanguageUserKey}
+                              ({bookUser.BookId}
+                              ,{bookUser.LanguageUserId}
                               ,{bookUser.IsArchived}
-                              ,{bookUser.CurrentPageKey}
-                              ,{bookUser.UniqueKey})
+                              ,{bookUser.CurrentPageId}
+                              ,{bookUser.Id})
                         """);
             if (numRows < 1) throw new InvalidDataException("creating BookUser affected 0 rows");
 
             // add it to cache
-            BookUserById[bookUser.UniqueKey] = bookUser;
+            BookUserById[bookUser.Id] = bookUser;
             return bookUser;
         }
         public static async Task<BookUser?> BookUserCreateAsync(BookUser value, IdiomaticaContext context)
@@ -58,7 +58,7 @@ namespace Model.DAL
             }
 
             // read DB
-            value = context.BookUsers.Where(x => x.UniqueKey == key)
+            value = context.BookUsers.Where(x => x.Id == key)
                 .FirstOrDefault();
             if (value == null) return null;
             // write to cache
@@ -84,13 +84,13 @@ namespace Model.DAL
             // read DB
             var value = context.BookUsers
                 .Where(x => x.LanguageUser != null &&
-                    x.LanguageUser.UserKey == key.userId &&
-                    x.BookKey == key.bookId)
+                    x.LanguageUser.UserId == key.userId &&
+                    x.BookId == key.bookId)
                 .FirstOrDefault();
             if (value is null) return null;
             // write to cache
             BookUserByBookIdAndUserId[key] = value;
-            BookUserById[(Guid)value.UniqueKey] = value;
+            BookUserById[(Guid)value.Id] = value;
             return value;
         }
         public static async Task<BookUser?> BookUserByBookIdAndUserIdReadAsync(
@@ -108,11 +108,11 @@ namespace Model.DAL
         {
             int numRows = context.Database.ExecuteSql($"""
                         update [Idioma].[BookUser]
-                              set [BookKey] = {bookUser.BookKey}
-                              ,[LanguageUserKey] = {bookUser.LanguageUserKey}
+                              set [BookId] = {bookUser.BookId}
+                              ,[LanguageUserKey] = {bookUser.LanguageUserId}
                               ,[IsArchived] = {bookUser.IsArchived}
-                              ,[CurrentPageKey] = {bookUser.CurrentPageKey}
-                        where UniqueKey = {bookUser.UniqueKey}
+                              ,[CurrentPageKey] = {bookUser.CurrentPageId}
+                        where Id = {bookUser.Id}
                         ;
                         """);
             if (numRows < 1)
@@ -120,9 +120,9 @@ namespace Model.DAL
                 throw new InvalidDataException("BookUser update affected 0 rows");
             };
             // now update the cache
-            BookUserById[(Guid)bookUser.UniqueKey] = bookUser;
+            BookUserById[(Guid)bookUser.Id] = bookUser;
 
-            var cachedItem1 = BookUserByBookIdAndUserId.Where(x => x.Value.UniqueKey == bookUser.UniqueKey).FirstOrDefault();
+            var cachedItem1 = BookUserByBookIdAndUserId.Where(x => x.Value.Id == bookUser.Id).FirstOrDefault();
             if (cachedItem1.Value != null)
             {
                 BookUserByBookIdAndUserId[cachedItem1.Key] = bookUser;
