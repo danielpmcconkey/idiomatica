@@ -12,7 +12,7 @@ namespace Model
     /// <summary>
     /// this is purely the user login
     /// </summary>
-    [Table("AspNetUsers", Schema = "dbo")]
+    //[Table("AspNetUsers", Schema = "dbo")]
     public class ApplicationUser : IdentityUser
     {
         

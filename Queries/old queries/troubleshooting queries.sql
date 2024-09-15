@@ -1,8 +1,8 @@
 select distinct
 	b.Id as BookId
-	--,b.Title
+	,b.Title
 	, p.Id as PageId
-	--,p.Ordinal as PageOrd
+	,p.Ordinal as PageOrd
 	--, p.OriginalText as PageText
 	--, lu.Id as LanguageUserId
 	--, bu.Id as BookUserId
@@ -18,9 +18,9 @@ select distinct
 	--, t.Id as TokenId
 	--, t.Display
 	--, t.Ordinal as TokenOrdinal
-	, w.Id
+	--, w.Id
 	, w.TextLowerCase
-	, w.Text
+	--, w.Text
 	--, wu.Id as WordUserId
 	--, wu.Translation
 	--, wu.Status
@@ -42,10 +42,10 @@ and p.BookId = 11
 and p.Ordinal = 1
 --and pu.Id is not null
 --and lu.Id = 1
-and p.Id = 378
+--and p.Id = 378
 --and w.Id = 39
---and pp.Id = 14706
---and s.Id = 14187
+--and pp.Id = 14594
+--and s.Id = 24380
 --and t.Id = 94322
 --group by b.Id, wu.Id
 --order by p.Ordinal, pp.Ordinal, s.Ordinal--, t.Ordinal
@@ -70,4 +70,12 @@ and p.Id = 378
 
 --update [Idioma].[BookUser] set CurrentPageID = 275 where Id = 10
 
+
+
+
+--select * from [Idioma].[Word] where Id = 39
+--select * from [Idioma].[WordUser] where Id = 1545
+
+--select * from [Idioma].[Word] where TextLowerCase = 'vivían'
+--select * from Idioma.WordUser where WordId = 1545
 
