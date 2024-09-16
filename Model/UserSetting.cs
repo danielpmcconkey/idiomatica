@@ -19,7 +19,6 @@ namespace Model
         #region required data
         [Required] public required AvailableUserSetting Key { get; set; }
         [Required] public required Guid UserId { get; set; }
-        public required User User { get; set; }
 
         [StringLength(1000)]
         [Required] public required string Value { get; set; }
@@ -27,6 +26,7 @@ namespace Model
 
         #endregion
 
+        public User? User { get; set; }
 
 
 

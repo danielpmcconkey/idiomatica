@@ -18,7 +18,7 @@ namespace Logic.Services.API
     {
         public static WordTranslation? VerbWordTranslationSave(IdiomaticaContext context, 
             Verb verb, Language fromLanguage, Language toLanguage,
-            string wordTextLower, string translation, int ordinal)
+            string wordTextLower, string translation, int ordinal, bool saveContext = true)
         {
             // look up the existing word
             var word = context.Words
@@ -39,17 +39,17 @@ namespace Logic.Services.API
             {
                 Id = Guid.NewGuid(),
                 LanguageToId = toLanguage.Id,
-                LanguageTo = toLanguage,
+                //LanguageTo = toLanguage,
                 WordId = word.Id,
-                Word = word,
+                //Word = word,
                 PartOfSpeech = AvailablePartOfSpeech.VERB,
                 Translation = translation.Trim(),
                 VerbId = verb.Id,
-                Verb = verb,
+                //Verb = verb,
                 Ordinal = ordinal,
             };
             context.WordTranslations.Add(wordTranslation);
-            context.SaveChanges();
+            if (saveContext) context.SaveChanges(); // this gets called a bunch, so maybe don't save inside the function
             return wordTranslation;
         }
         public static Verb? VerbCreateAndSaveTranslations(IdiomaticaContext context,
@@ -64,32 +64,20 @@ namespace Logic.Services.API
             Guid englishLangId = englishLang.Id;
 
 
-            // save the learning verb object
-            // but only if it doesn't already exist
-            Verb? verbToUse = context.Verbs
-                .Where(x=>x.LanguageId == learningVerb.LanguageId &&
-                    x.Conjugator == learningVerb.Conjugator &&
-                    x.Infinitive == learningVerb.Infinitive)
-                .FirstOrDefault();
-            if (verbToUse is null)
-            {
-                verbToUse = learningVerb;
-                verbToUse.Id = Guid.NewGuid();
-                context.Verbs.Add(verbToUse);
-                context.SaveChanges();
-            }
-            if (verbToUse is null)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-            
-            // save the infinitive translation
-            VerbWordTranslationSave(context, verbToUse,
-                verbToUse.Language, translationVerb.Language,
-                verbToUse.Infinitive, translationVerb.Infinitive, 1);
+            context.Verbs.Add(learningVerb);
+            context.SaveChanges();
 
-            if (verbToUse.Gerund is not null && translationVerb.Gerund is not null)
+            var languageLearning = LanguageApi.LanguageRead(context, learningVerb.LanguageId);
+            if (languageLearning is null) { ErrorHandler.LogAndThrow(); return null; }
+            var languageTranslation = LanguageApi.LanguageRead(context, translationVerb.LanguageId);
+            if (languageTranslation is null) { ErrorHandler.LogAndThrow(); return null; }
+
+            // save the infinitive translation
+            VerbWordTranslationSave(context, learningVerb,
+                languageLearning, languageTranslation,
+                learningVerb.Infinitive, translationVerb.Infinitive, 1, false);
+
+            if (learningVerb.Gerund is not null && translationVerb.Gerund is not null)
             {
                 // save the gerund translation
                 var gerundTranslation = translationVerb.Gerund;
@@ -98,11 +86,11 @@ namespace Logic.Services.API
                     gerundTranslation = $"{translationVerb.Gerund}: gerund of {learningVerb.Infinitive}";
                 }
 
-                VerbWordTranslationSave(context, verbToUse,
-                    verbToUse.Language, translationVerb.Language,
-                    verbToUse.Gerund, gerundTranslation, 100);
+                VerbWordTranslationSave(context, learningVerb,
+                    languageLearning, languageTranslation,
+                    learningVerb.Gerund, gerundTranslation, 100, false);
             }
-            if (verbToUse.PastParticiple is not null && translationVerb.PastParticiple is not null)
+            if (learningVerb.PastParticiple is not null && translationVerb.PastParticiple is not null)
             {
                 // save the past participle translation
                 var participleTranslation = translationVerb.PastParticiple;
@@ -110,9 +98,9 @@ namespace Logic.Services.API
                 {
                     participleTranslation = $"{translationVerb.PastParticiple}: past participle of {learningVerb.Infinitive}";
                 }
-                VerbWordTranslationSave(context, verbToUse,
-                    verbToUse.Language, translationVerb.Language,
-                    verbToUse.PastParticiple, participleTranslation, 100);
+                VerbWordTranslationSave(context, learningVerb,
+                    languageLearning, languageTranslation,
+                    learningVerb.PastParticiple, participleTranslation, 100, false);
             }
             // save the conjugation translations
             foreach (var conjugation in conjugations)
@@ -123,12 +111,12 @@ namespace Logic.Services.API
                     { ErrorHandler.LogAndThrow(); return null; }
                 if (string.IsNullOrEmpty(wordInKnownLang))
                     { ErrorHandler.LogAndThrow(); return null; }
-                VerbWordTranslationSave(context, verbToUse,
-                    verbToUse.Language, translationVerb.Language,
-                    wordInLearningLang, wordInKnownLang, conjugation.Ordinal);
+                VerbWordTranslationSave(context, learningVerb,
+                    languageLearning, languageTranslation,
+                    wordInLearningLang, wordInKnownLang, conjugation.Ordinal, false);
             }
-
-            return verbToUse;
+            context.SaveChanges();
+            return learningVerb;
         }
         public static Word? WordCreate(IdiomaticaContext context,
             Language language, string text, string romanization)

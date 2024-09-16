@@ -12,7 +12,6 @@ namespace Model
         #region required data
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid LanguageId { get; set; }
-        public required Language Language { get; set; }
 
         [StringLength(2000)]
         [Required] public required string Conjugator { get; set; }
@@ -26,6 +25,7 @@ namespace Model
 
         
 
+        public Language? Language { get; set; }
 
         [NotMapped]
         public List<VerbConjugation> VerbConjugations { get; set; } = [];

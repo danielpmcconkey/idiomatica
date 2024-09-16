@@ -17,7 +17,7 @@ namespace TestDataPopulator.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -269,7 +269,7 @@ namespace TestDataPopulator.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ApplicationUsers");
+                    b.ToTable("AspNetUsers", "dbo");
                 });
 
             modelBuilder.Entity("Model.Book", b =>
@@ -526,6 +526,42 @@ namespace TestDataPopulator.Migrations
                         .IsUnique();
 
                     b.ToTable("LanguageUser", "Idioma");
+                });
+
+            modelBuilder.Entity("Model.LogMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Detail")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("Logged")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("MemberName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("MessageType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SourceFilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SourceLineNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LogMessage", "dbo");
                 });
 
             modelBuilder.Entity("Model.Page", b =>

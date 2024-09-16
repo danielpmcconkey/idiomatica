@@ -7,7 +7,8 @@ namespace TestDataPopulator
         
         static void Main(string[] args)
         {
-            
+            TestDataPopulator testDataPopulator = new ();
+            testDataPopulator.PopulateData();
         }
     }
 }

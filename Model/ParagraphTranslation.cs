@@ -18,13 +18,13 @@ namespace Model
 
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid ParagraphId { get; set; }
-        public required Paragraph Paragraph { get; set; }
         [Required] public required string TranslationText { get; set; }
         [Required] public required Guid LanguageId { get; set; }
-        public required Language Language { get; set; }
 
         #endregion
 
+        public Paragraph? Paragraph { get; set; }
+        public Language? Language { get; set; }
 
         
         [StringLength(8000)]

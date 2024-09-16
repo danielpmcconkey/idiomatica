@@ -22,10 +22,7 @@ namespace Model
 
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid LanguageId { get; set; }
-        public required Language Language { get; set; }
-
         [Required] public required Guid WordId { get; set; }
-        public required Word Word { get; set; }
 
         [Column(TypeName = "numeric(8,2)")]
         [Required] public required decimal DifficultyScore { get; set; }
@@ -33,6 +30,8 @@ namespace Model
 
         #endregion
 
+        public Language? Language { get; set; }
+        public Word? Word { get; set; }
 
     }
 }

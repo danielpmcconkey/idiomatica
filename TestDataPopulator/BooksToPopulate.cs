@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TestDataPopulator
 {
-    internal static class Book
+    internal static class BooksToPopulate
     {
         internal static (string language, string title, string? Uri, string text)[] books = [
 

@@ -49,7 +49,7 @@ namespace LogicTests
         }
         internal static IdiomaticaContext CreateContext()
         {
-            var connectionstring = "Server=localhost;Database=Idiomatica_test;Trusted_Connection=True;TrustServerCertificate=true;";
+            var connectionstring = "Server=localhost;Database=IdiomaticaFresh;Trusted_Connection=True;TrustServerCertificate=true;";
             var optionsBuilder = new DbContextOptionsBuilder<IdiomaticaContext>();
             optionsBuilder.UseSqlServer(connectionstring);
             return new IdiomaticaContext(optionsBuilder.Options);

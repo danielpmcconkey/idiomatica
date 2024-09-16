@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Model.DAL
 {
@@ -72,6 +73,7 @@ namespace Model.DAL
         public DbSet<IdentityUserLogin<string>> IdentityUserLogins { get; set; }
         public DbSet<IdentityUserRole<string>> IdentityUserRoles { get; set; }
         public DbSet<IdentityUserToken<string>> IdentityUserTokens { get; set; }
+        public DbSet<LogMessage> LogMessages { get; set; }
 
         #endregion
 
@@ -84,7 +86,9 @@ namespace Model.DAL
         {
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity<Book>(e => {
+            #region our tables
+            modelBuilder.Entity<Book>(e =>
+            {
                 e.HasKey(b => b.Id);
                 e.HasOne(b => b.Language).WithMany(l => l.Books).HasForeignKey(b => b.LanguageId)
                     .OnDelete(DeleteBehavior.Cascade);
@@ -93,13 +97,15 @@ namespace Model.DAL
                 e.HasMany(b => b.BookUsers).WithOne(bu => bu.Book).HasForeignKey(bu => bu.BookId);
                 e.HasMany(b => b.BookTags).WithOne(bt => bt.Book).HasForeignKey(bt => bt.BookId);
             });
-            modelBuilder.Entity<BookStat>(e => {
+            modelBuilder.Entity<BookStat>(e =>
+            {
                 e.HasKey(bs => new { bs.BookId, bs.Key });
                 e.HasOne(bs => bs.Book).WithMany(b => b.BookStats).HasForeignKey(bs => bs.BookId)
                     .OnDelete(DeleteBehavior.Cascade);
                 e.Property(bs => bs.Key).HasConversion<int>();
             });
-            modelBuilder.Entity<BookTag>(e => {
+            modelBuilder.Entity<BookTag>(e =>
+            {
                 e.HasKey(bt => bt.Id);
                 e.HasOne(bt => bt.Book).WithMany(b => b.BookTags)
                     .HasForeignKey(bt => bt.BookId).OnDelete(DeleteBehavior.Cascade);
@@ -107,7 +113,8 @@ namespace Model.DAL
                     .HasForeignKey(bt => bt.UserId).OnDelete(DeleteBehavior.Cascade);
                 e.HasIndex(bt => new { bt.UserId, bt.BookId, bt.Tag }).IsUnique();
             });
-            modelBuilder.Entity<BookUser>(e => {
+            modelBuilder.Entity<BookUser>(e =>
+            {
                 e.HasKey(bu => bu.Id);
                 e.HasOne(bu => bu.Book).WithMany(b => b.BookUsers)
                     .HasForeignKey(bu => bu.BookId).OnDelete(DeleteBehavior.NoAction);
@@ -119,30 +126,34 @@ namespace Model.DAL
                     .HasForeignKey(bu => bu.CurrentPageId).OnDelete(DeleteBehavior.NoAction);
                 e.HasIndex(bu => new { bu.BookId, bu.LanguageUserId }).IsUnique();
             });
-            modelBuilder.Entity<BookUserStat>(e => {
-                e.HasKey(bus => new {bus.BookId, bus.LanguageUserId, bus.Key});
+            modelBuilder.Entity<BookUserStat>(e =>
+            {
+                e.HasKey(bus => new { bus.BookId, bus.LanguageUserId, bus.Key });
                 e.HasOne(bus => bus.Book).WithMany(b => b.BookUserStats)
                     .HasForeignKey(bus => bus.BookId).OnDelete(DeleteBehavior.NoAction);
                 e.HasOne(bus => bus.LanguageUser).WithMany(lu => lu.BookUsersStats)
                     .HasForeignKey(bus => bus.LanguageUserId).OnDelete(DeleteBehavior.Cascade);
             });
-            modelBuilder.Entity<FlashCard>(e => {
+            modelBuilder.Entity<FlashCard>(e =>
+            {
                 e.HasKey(fc => fc.Id);
                 e.HasOne(fc => fc.WordUser).WithOne(wu => wu.FlashCard)
-                    .HasForeignKey<FlashCard>(fc => fc.WordUserId).OnDelete(DeleteBehavior.Cascade);  
+                    .HasForeignKey<FlashCard>(fc => fc.WordUserId).OnDelete(DeleteBehavior.Cascade);
                 e.HasMany(fc => fc.FlashCardParagraphTranslationBridges).WithOne(fcptb => fcptb.FlashCard)
                     .HasForeignKey(fcpbt => fcpbt.FlashCardId);
                 e.HasMany(fc => fc.Attempts).WithOne(fca => fca.FlashCard).HasForeignKey(fca => fca.FlashCardId);
                 e.Property(fc => fc.Status).HasConversion<int>();
                 e.HasIndex(fc => fc.WordUserId).IsUnique();
             });
-            modelBuilder.Entity<FlashCardAttempt>(e => {
+            modelBuilder.Entity<FlashCardAttempt>(e =>
+            {
                 e.HasKey(fca => fca.Id);
                 e.HasOne(fca => fca.FlashCard).WithMany(fc => fc.Attempts)
                     .HasForeignKey(fca => fca.FlashCardId).OnDelete(DeleteBehavior.Cascade);
                 e.Property(fca => fca.Status).HasConversion<int>();
             });
-            modelBuilder.Entity<FlashCardParagraphTranslationBridge>(e => {
+            modelBuilder.Entity<FlashCardParagraphTranslationBridge>(e =>
+            {
                 e.HasKey(fcptb => fcptb.Id);
                 e.HasOne(fcptb => fcptb.FlashCard).WithMany(fc => fc.FlashCardParagraphTranslationBridges)
                     .HasForeignKey(fcptb => fcptb.FlashCardId).OnDelete(DeleteBehavior.Cascade);
@@ -150,7 +161,8 @@ namespace Model.DAL
                     .HasForeignKey(fcptb => fcptb.ParagraphTranslationId).OnDelete(DeleteBehavior.NoAction);
                 e.HasIndex(fcptb => new { fcptb.ParagraphTranslationId, fcptb.FlashCardId }).IsUnique();
             });
-            modelBuilder.Entity<Language>(e => {
+            modelBuilder.Entity<Language>(e =>
+            {
                 e.HasKey(l => l.Id);
                 e.HasMany(l => l.LanguageUsers).WithOne(lu => lu.Language)
                     .HasForeignKey(lu => lu.LanguageId);
@@ -162,7 +174,8 @@ namespace Model.DAL
                 e.Property(l => l.Code).HasConversion<int>();
                 e.HasIndex(l => l.Code).IsUnique();
             });
-            modelBuilder.Entity<LanguageUser>(e => {
+            modelBuilder.Entity<LanguageUser>(e =>
+            {
                 e.HasKey(lu => lu.Id);
                 e.HasOne(lu => lu.User).WithMany(u => u.LanguageUsers)
                     .HasForeignKey(lu => lu.UserId).OnDelete(DeleteBehavior.Cascade);
@@ -174,7 +187,13 @@ namespace Model.DAL
                     .HasForeignKey(w => w.LanguageUserId);
                 e.HasIndex(lu => new { lu.LanguageId, lu.UserId }).IsUnique();
             });
-            modelBuilder.Entity<Page>(e => {
+            modelBuilder.Entity<LogMessage>(e =>
+            {
+                e.HasKey(lm => lm.Id);
+                e.Property(lm => lm.MessageType).HasConversion<int>();
+            });
+            modelBuilder.Entity<Page>(e =>
+            {
                 e.HasKey(p => p.Id);
                 e.HasOne(p => p.Book).WithMany(b => b.Pages)
                     .HasForeignKey(p => p.BookId).OnDelete(DeleteBehavior.Cascade);
@@ -186,7 +205,8 @@ namespace Model.DAL
                     .HasForeignKey(bu => bu.CurrentPageId);
                 e.HasIndex(p => new { p.BookId, p.Ordinal }).IsUnique();
             });
-            modelBuilder.Entity<PageUser>(e => {
+            modelBuilder.Entity<PageUser>(e =>
+            {
                 e.HasKey(pu => pu.Id);
                 e.HasOne(pu => pu.BookUser).WithMany(bu => bu.PageUsers)
                     .HasForeignKey(pu => pu.BookUserId).OnDelete(DeleteBehavior.Cascade);
@@ -194,7 +214,8 @@ namespace Model.DAL
                     .HasForeignKey(pu => pu.PageId).OnDelete(DeleteBehavior.NoAction);
                 e.HasIndex(pu => new { pu.PageId, pu.BookUserId }).IsUnique();
             });
-            modelBuilder.Entity<Paragraph>(e => {
+            modelBuilder.Entity<Paragraph>(e =>
+            {
                 e.HasKey(pp => pp.Id);
                 e.HasOne(pp => pp.Page).WithMany(p => p.Paragraphs)
                     .HasForeignKey(pp => pp.PageId).OnDelete(DeleteBehavior.Cascade);
@@ -215,14 +236,16 @@ namespace Model.DAL
                     .HasForeignKey(ppt => ppt.ParagraphId).OnDelete(DeleteBehavior.Cascade);
                 e.HasIndex(ppt => new { ppt.ParagraphId, ppt.LanguageId }).IsUnique();
             });
-            modelBuilder.Entity<Sentence>(e => {
+            modelBuilder.Entity<Sentence>(e =>
+            {
                 e.HasKey(s => s.Id);
                 e.HasOne(s => s.Paragraph).WithMany(pp => pp.Sentences)
                     .HasForeignKey(s => s.ParagraphId).OnDelete(DeleteBehavior.Cascade);
                 e.HasMany(s => s.Tokens).WithOne(t => t.Sentence).HasForeignKey(t => t.SentenceId);
                 e.HasIndex(s => new { s.ParagraphId, s.Ordinal }).IsUnique();
             });
-            modelBuilder.Entity<Token>(e => {
+            modelBuilder.Entity<Token>(e =>
+            {
                 e.HasKey(t => t.Id);
                 e.HasOne(t => t.Sentence).WithMany(t => t.Tokens)
                     .HasForeignKey(t => t.SentenceId).OnDelete(DeleteBehavior.Cascade);
@@ -230,7 +253,8 @@ namespace Model.DAL
                     .HasForeignKey(t => t.WordId).OnDelete(DeleteBehavior.NoAction);
                 e.HasIndex(t => new { t.SentenceId, t.Ordinal }).IsUnique();
             });
-            modelBuilder.Entity<User>(e => {
+            modelBuilder.Entity<User>(e =>
+            {
                 e.HasKey(u => u.Id);
                 e.HasMany(u => u.LanguageUsers).WithOne(lu => lu.User).HasForeignKey(u => u.UserId);
                 e.HasMany(u => u.UserSettings).WithOne(us => us.User).HasForeignKey(us => us.UserId);
@@ -245,19 +269,22 @@ namespace Model.DAL
                 e.HasOne(ubc => ubc.Page).WithMany(p => p.UserBreadCrumbs)
                     .HasForeignKey(ubc => ubc.PageId).OnDelete(DeleteBehavior.Cascade);
             });
-            modelBuilder.Entity<UserSetting>(e => {
+            modelBuilder.Entity<UserSetting>(e =>
+            {
                 e.HasKey(us => new { us.UserId, us.Key });
                 e.HasOne(us => us.User).WithMany(u => u.UserSettings).HasForeignKey(us => us.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
                 e.Property(bs => bs.Key).HasConversion<int>();
             });
-            modelBuilder.Entity<Verb>(e => {
+            modelBuilder.Entity<Verb>(e =>
+            {
                 e.HasKey(v => v.Id);
                 e.HasOne(v => v.Language).WithMany(l => l.Verbs)
-                    .HasForeignKey(v => v.LanguageId).OnDelete(DeleteBehavior.Cascade); 
+                    .HasForeignKey(v => v.LanguageId).OnDelete(DeleteBehavior.Cascade);
                 e.HasMany(v => v.WordTranslations).WithOne(wt => wt.Verb).HasForeignKey(wt => wt.VerbId);
             });
-            modelBuilder.Entity<Word>(e => {
+            modelBuilder.Entity<Word>(e =>
+            {
                 e.HasKey(w => w.Id);
                 e.HasOne(w => w.Language).WithMany(l => l.Words)
                     .HasForeignKey(w => w.LanguageId).OnDelete(DeleteBehavior.Cascade);
@@ -277,7 +304,8 @@ namespace Model.DAL
                 e.HasIndex(wr => new { wr.LanguageId, wr.WordId }).IsUnique();
                 e.HasIndex(wr => new { wr.LanguageId, wr.Ordinal }).IsUnique();
             });
-            modelBuilder.Entity<WordTranslation>(e => {
+            modelBuilder.Entity<WordTranslation>(e =>
+            {
                 e.HasKey(wt => wt.Id);
                 e.HasOne(wt => wt.LanguageTo).WithMany(l => l.WordTranslations)
                     .HasForeignKey(wt => wt.LanguageToId).OnDelete(DeleteBehavior.Cascade);
@@ -287,7 +315,8 @@ namespace Model.DAL
                     .HasForeignKey(wt => wt.VerbId).OnDelete(DeleteBehavior.NoAction);
                 e.Property(wt => wt.PartOfSpeech).HasConversion<int>();
             });
-            modelBuilder.Entity<WordUser>(e => {
+            modelBuilder.Entity<WordUser>(e =>
+            {
                 e.HasKey(wu => wu.Id);
                 e.HasOne(wu => wu.LanguageUser).WithMany(lu => lu.WordUsers)
                     .HasForeignKey(w => w.LanguageUserId).OnDelete(DeleteBehavior.Cascade);
@@ -296,8 +325,17 @@ namespace Model.DAL
                 e.Property(wu => wu.Status).HasConversion<int>();
                 e.HasIndex(wu => new { wu.WordId, wu.LanguageUserId }).IsUnique();
             });
+            #endregion
 
-            // created by Microsoft.AspNetCore.Identity.EntityFrameworkCore
+            #region Identity (tables built by MSFT Identity stuff
+#pragma warning disable 612, 618, CS8600
+
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
             modelBuilder.Entity("ApplicationUser", b =>
             {
                 b.Property<string>("Id")
@@ -360,9 +398,7 @@ namespace Model.DAL
                     .HasDatabaseName("UserNameIndex")
                     .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetUsers", (string)null);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -389,9 +425,7 @@ namespace Model.DAL
                     .HasDatabaseName("RoleNameIndex")
                     .HasFilter("[NormalizedName] IS NOT NULL");
 
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetRoles", (string)null);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -416,9 +450,7 @@ namespace Model.DAL
 
                 b.HasIndex("RoleId");
 
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetRoleClaims", (string)null);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -443,9 +475,7 @@ namespace Model.DAL
 
                 b.HasIndex("UserId");
 
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetUserClaims", (string)null);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -467,9 +497,7 @@ namespace Model.DAL
 
                 b.HasIndex("UserId");
 
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetUserLogins", (string)null);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -484,9 +512,7 @@ namespace Model.DAL
 
                 b.HasIndex("RoleId");
 
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetUserRoles", (string)null);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -505,9 +531,7 @@ namespace Model.DAL
 
                 b.HasKey("UserId", "LoginProvider", "Name");
 
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 b.ToTable("AspNetUserTokens", (string)null);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -560,7 +584,10 @@ namespace Model.DAL
                     .OnDelete(DeleteBehavior.Cascade)
                     .IsRequired();
             });
+#pragma warning restore 612, 618, CS8600
+            #endregion
 
+           
         }
     }
 }

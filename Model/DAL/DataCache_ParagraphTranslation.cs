@@ -75,7 +75,9 @@ namespace Model.DAL
                 return ParagraphTranslationsByParagraphId[key];
             }
             // read DB
-            var value = context.ParagraphTranslations.Where(x => x.ParagraphId == key).ToList();
+            var value = context.ParagraphTranslations
+                .Where(x => x.ParagraphId == key)
+                .ToList();
 
             // write to cache
             ParagraphTranslationsByParagraphId[key] = value;

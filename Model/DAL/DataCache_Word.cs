@@ -341,7 +341,6 @@ namespace Model.DAL
                            ,[Text]
                            ,[TextLowerCase]
                            ,[Romanization]
-                           ,[TokenCount]
                            ,[Id])
                      VALUES
                            ({word.LanguageId}

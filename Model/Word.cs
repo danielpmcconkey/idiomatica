@@ -20,13 +20,13 @@ namespace Model
         #region required data
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid LanguageId { get; set; }
-        public required Language Language { get; set; }
 
         [StringLength(250)]
         [Required] public required string TextLowerCase { get; set; }
 
 
         #endregion
+        public Language? Language { get; set; }
 
 
         

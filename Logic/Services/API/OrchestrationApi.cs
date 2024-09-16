@@ -11,6 +11,7 @@ using System.Net;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Linq.Expressions;
 using Model.Enums;
+using Logic.Conjugator.English;
 
 namespace Logic.Services.API
 {
@@ -576,6 +577,11 @@ namespace Logic.Services.API
         {
             if (learningVerb.Conjugator is null) { ErrorHandler.LogAndThrow(); return null; }
             Logic.Conjugator.English.EnglishVerbTranslator translator = new();
+            if (translationVerb.Conjugator == "InvariableVerbTranslator")
+            {
+                translator = new InvariableVerbTranslator();
+            }
+
             var conjugator = Logic.Conjugator.Factory.Get(
                 learningVerb.Conjugator, translator, learningVerb, translationVerb);
             if (conjugator is null) { ErrorHandler.LogAndThrow(); return null; }

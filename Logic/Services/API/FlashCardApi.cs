@@ -21,6 +21,9 @@ namespace Logic.Services.API
             var wordUser = DataCache.WordUserAndLanguageUserAndLanguageByIdRead(wordUserId, context);
             if (wordUser == null) { ErrorHandler.LogAndThrow(); return null; }
 
+            var uiLanguage = LanguageApi.LanguageReadByCode(context, uiLanguageCode);
+            if (uiLanguage == null) { ErrorHandler.LogAndThrow(); return null; }
+
             FlashCard? card = new ()
             {
                 Id = Guid.NewGuid(),
@@ -30,12 +33,22 @@ namespace Logic.Services.API
             };
             card = DataCache.FlashCardCreate(card, context);
             if (card is null) { ErrorHandler.LogAndThrow(); return null; }
+
+            ErrorHandler.LogMessage(
+                AvailableLogMessageTypes.DEBUG, $"created flash card {card.Id} for wordUser.Id {wordUser.Id}.", context);
             
             List<Word> wordUsages = DataCache.WordsAndTokensAndSentencesAndParagraphsByWordIdRead(
                 (Guid)wordUser.WordId, context);
 
             int maxPptPerCard = 5;
             int currentPptThisCard = 0;
+
+            // we create a hashset of paragraphs already used in this card
+            // because sometimes, the same word apprears multiple times in a
+            // paragraph and that would cause a violation of the unique
+            // constraint between a flashcard and a paragraph translation in
+            // the bridge object
+            HashSet<Guid> paragraphsAlreadyChecked = [];
 
             foreach (var wordUsage in wordUsages)
             {
@@ -49,6 +62,11 @@ namespace Logic.Services.API
                     if (sentence.Paragraph is null) 
                         { ErrorHandler.LogAndThrow(); return null; }
                     var paragraph = sentence.Paragraph;
+                    if (paragraphsAlreadyChecked.Contains(paragraph.Id)) continue;
+                    ErrorHandler.LogMessage(
+                        AvailableLogMessageTypes.DEBUG, $"paragraph {paragraph.Id} has been checked.", context);
+
+
                     // pull paragraph translations here in case the same
                     // word is used more than once in the same paragraph
                     var paragraphTranslations = DataCache.ParagraphTranslationsByParargraphIdRead(
@@ -57,17 +75,25 @@ namespace Logic.Services.API
                     ParagraphTranslation? ppts = null;
                     if (paragraphTranslations.Count > 0)
                     {
+                        ErrorHandler.LogMessage(
+                            AvailableLogMessageTypes.DEBUG, $"there are paragraph translations for {paragraph.Id}.", context);
+
+                        ErrorHandler.LogMessage(
+                            AvailableLogMessageTypes.DEBUG, $"UI language code is {uiLanguageCode}.", context);
+
+
                         // are they the right language?
                         ppts = paragraphTranslations
                             .Where(
-                                ppt => ppt != null
-                                && ppt.Language != null
-                                && ppt.Language.Code == uiLanguageCode)
+                                ppt => ppt.LanguageId == uiLanguage.Id)
                             .FirstOrDefault();
                         if (ppts is null)
                         {
                             // not the right language
                             // reset to null so the code below will create it
+                            ErrorHandler.LogMessage(
+                                AvailableLogMessageTypes.DEBUG, "No paragraphs with the right language.", context);
+
                             ppts = null;
                         }
                     }
@@ -80,6 +106,9 @@ namespace Logic.Services.API
                             return null;
                         }
                         // create it
+                        ErrorHandler.LogMessage(
+                            AvailableLogMessageTypes.DEBUG, $"Creating a paragraph translation for {paragraph.Id}.", context);
+
                         string input = ParagraphApi.ParagraphReadAllText(context, paragraph.Id);
                         Language? toLang = LanguageApi.LanguageReadByCode(context, uiLanguageCode);
                         if (toLang is null) { ErrorHandler.LogAndThrow(); return null; }
@@ -110,6 +139,7 @@ namespace Logic.Services.API
                     };
                     fcptb = DataCache.FlashCardParagraphTranslationBridgeCreate(fcptb, context);
                     if(fcptb is null) { ErrorHandler.LogAndThrow(); return null; }
+                    paragraphsAlreadyChecked.Add(paragraph.Id); // keep it from adding this same PP twice
                     fcptb.FlashCard = card;
                     fcptb.ParagraphTranslation = ppts;
                     card.FlashCardParagraphTranslationBridges.Add(fcptb);

@@ -16,50 +16,50 @@ namespace Logic.Services.API
         {
             int numRows = context.Database.ExecuteSql($"""
             with allPages as (
-            	SELECT b.Id as bookKey, p.Id as pageKey, p.Ordinal as pageOrdinal
+            	SELECT b.Id as BookId, p.Id as PageId, p.Ordinal as PageOrdinal
             	FROM [Idioma].[Book] b
             	left join [Idioma].[Page] p on p.BookId = b.Id
             ), allParagraphs as (
-            	select bookKey, p.pageKey, pageOrdinal, pp.Id as paragraphKey, pp.Ordinal as paragraphOrdinal
+            	select BookId, p.PageId, PageOrdinal, pp.Id as ParagraphId, pp.Ordinal as ParagraphOrdinal
             	from [Idioma].[Paragraph] pp
-            	left join allPages p on pp.PageKey = p.pageKey
+            	left join allPages p on pp.PageId = p.PageId
             ), allSentences as (
-            	select bookKey, pageKey, pageOrdinal, pp.paragraphKey, paragraphOrdinal, s.Id as sentenceKey, s.Ordinal as sentenceOrdinal
+            	select BookId, PageId, PageOrdinal, pp.ParagraphId, ParagraphOrdinal, s.Id as SentenceId, s.Ordinal as SentenceOrdinal
             	from allParagraphs pp
-            	join [Idioma].[Sentence] s on s.ParagraphKey = pp.paragraphKey
+            	join [Idioma].[Sentence] s on s.ParagraphId = pp.ParagraphId
             ), allTokens as (
-            	select bookKey, pageKey, pageOrdinal, paragraphKey, paragraphOrdinal, s.sentenceKey, sentenceOrdinal, t.Id as tokenKey, t.Ordinal as tokenOrdinal, t.WordId as wordKey
+            	select BookId, PageId, PageOrdinal, ParagraphId, ParagraphOrdinal, s.SentenceId, SentenceOrdinal, t.Id as TokenId, t.Ordinal as TokenOrdinal, t.WordId as WordId
             	from allSentences s
-            	left join [Idioma].[Token] t on t.SentenceKey = s.sentenceKey
+            	left join [Idioma].[Token] t on t.SentenceId = s.SentenceId
             ), allWords as (
-            	select bookKey, pageKey, pageOrdinal, paragraphKey, paragraphOrdinal, sentenceKey, sentenceOrdinal, t.tokenKey, tokenOrdinal, w.TextLowerCase as wordText
+            	select BookId, PageId, PageOrdinal, ParagraphId, ParagraphOrdinal, SentenceId, SentenceOrdinal, t.TokenId, TokenOrdinal, w.TextLowerCase as WordText
             	from allTokens t
-            	left join [Idioma].[Word] w on t.wordKey = w.Id
+            	left join [Idioma].[Word] w on t.WordId = w.Id
             ), distinctWords as (
-            	select bookKey, wordText, count(*) as numInstances
+            	select BookId, WordText, count(*) as numInstances
             	from allWords
-            	group by bookKey, wordText
+            	group by BookId, WordText
             ), totalPageCount as (
             	select 
-                      bookKey as BookId
+                      BookId as BookId
                     , {(int)AvailableBookStat.TOTALPAGES} as [Key]
                     , FORMAT(count(*),'#') as [Value]
             	from allPages
-            	group by bookKey
+            	group by BookId
             ), totalWordCount as (
             	select 
-                      bookKey as BookId
+                      BookId as BookId
                     , {(int)AvailableBookStat.TOTALWORDCOUNT} as [Key]
                     , FORMAT (sum(numInstances),'#') as [Value]
             	from distinctWords
-            	group by bookKey
+            	group by BookId
             ), distinctWordCount as (
             	select 
-                      bookKey as BookId
+                      BookId as BookId
                     , {(int)AvailableBookStat.DISTINCTWORDCOUNT} as [Key]
-                    , FORMAT (count(wordText),'#') as [Value]
+                    , FORMAT (count(WordText),'#') as [Value]
             	from distinctWords
-            	group by bookKey
+            	group by BookId
             ), difficultyScore as (
                 select
             	    b.Id as BookId
@@ -67,12 +67,12 @@ namespace Logic.Services.API
             	    , FORMAT (avg(case when wr.WordId is null then 65000 else wr.[DifficultyScore] end) / 650, '##.##') as [Value]
                 from [Idioma].[Page] p
                 left join [Idioma].[Book] b on p.BookId = b.Id
-                left join [Idioma].[Language] l on b.LanguageKey = l.Id
-                left join [Idioma].[Paragraph] pp on p.Id = pp.PageKey
-                left join [Idioma].[Sentence] s on pp.Id = s.ParagraphKey
-                left join [Idioma].[Token] t on s.Id = t.SentenceKey
+                left join [Idioma].[Language] l on b.LanguageId = l.Id
+                left join [Idioma].[Paragraph] pp on p.Id = pp.PageId
+                left join [Idioma].[Sentence] s on pp.Id = s.ParagraphId
+                left join [Idioma].[Token] t on s.Id = t.SentenceId
                 left join [Idioma].[Word] w on t.WordId = w.Id
-                left join [Idioma].[WordRank] wr on l.Id = wr.[LanguageKey] and w.Id = wr.[WordId]
+                left join [Idioma].[WordRank] wr on l.Id = wr.[LanguageId] and w.Id = wr.[WordId]
                 where b.Id = {bookId}
                 group by b.Id
             ), bookStatQueries as (

@@ -20,15 +20,15 @@ namespace Model
 
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid LanguageId { get; set; }
-        public required Language Language { get; set; }
         [Required] public required Guid UserId { get; set; }
-        public required User User { get; set; }
 
         #endregion
 
 
 
        
+        public Language? Language { get; set; }
+        public User? User { get; set; }
         public List<BookUser> BookUsers { get; set; } = new List<BookUser>();
         public List<WordUser> WordUsers { get; set; } = new List<WordUser>();
         public List<BookUserStat> BookUsersStats { get; set; } = new List<BookUserStat>();
