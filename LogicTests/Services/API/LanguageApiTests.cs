@@ -184,13 +184,10 @@ namespace Logic.Services.API.Tests
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = user.Id;
 
-                UserSetting Setting = new()
-                {
-                    Key = AvailableUserSetting.UILANGUAGE,
-                    UserId = userId,
-                    User = user,
-                    Value = language.Id.ToString(),
-                };
+                // create the setting
+
+                UserApi.UserSettingCreate(
+                    context, AvailableUserSetting.UILANGUAGE, userId, language.Id.ToString());
 
                 var uiLanguageSetting = UserApi.UserSettingUiLanguagReadByUserId(context, userId);
                 if (uiLanguageSetting is null) { ErrorHandler.LogAndThrow(); return; }
@@ -223,13 +220,10 @@ namespace Logic.Services.API.Tests
                 if (user is null) { ErrorHandler.LogAndThrow(); return; }
                 userId = user.Id;
 
-                UserSetting Setting = new()
-                {
-                    Key = AvailableUserSetting.UILANGUAGE,
-                    UserId = userId,
-                    User = user,
-                    Value = language.Id.ToString(),
-                };
+                // create the setting
+                
+                await UserApi.UserSettingCreateAsync(
+                    context, AvailableUserSetting.UILANGUAGE, userId, language.Id.ToString());
 
                 var uiLanguageSetting = await UserApi.UserSettingUiLanguagReadByUserIdAsync(context, userId);
                 if (uiLanguageSetting is null) { ErrorHandler.LogAndThrow(); return; }

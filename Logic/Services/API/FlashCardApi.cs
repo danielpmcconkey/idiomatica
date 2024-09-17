@@ -16,8 +16,10 @@ namespace Logic.Services.API
     public static class FlashCardApi
     {
         public static FlashCard? FlashCardCreate(
-            IdiomaticaContext context, Guid wordUserId, AvailableLanguageCode uiLanguageCode)
+            DiContainer diContainer, Guid wordUserId, AvailableLanguageCode uiLanguageCode)
         {
+            var context = diContainer.DbContextFactory.CreateDbContext();
+
             var wordUser = DataCache.WordUserAndLanguageUserAndLanguageByIdRead(wordUserId, context);
             if (wordUser == null) { ErrorHandler.LogAndThrow(); return null; }
 
@@ -150,11 +152,11 @@ namespace Logic.Services.API
             return card;
         }
         public static async Task<FlashCard?> FlashCardCreateAsync(
-            IdiomaticaContext context, Guid wordUserId, AvailableLanguageCode uiLanguageCode)
+            DiContainer diContainer, Guid wordUserId, AvailableLanguageCode uiLanguageCode)
         {
             return await Task<FlashCard?>.Run(() =>
             {
-                return FlashCardCreate(context, wordUserId, uiLanguageCode);
+                return FlashCardCreate(diContainer, wordUserId, uiLanguageCode);
             });
         }
 
@@ -205,10 +207,11 @@ namespace Logic.Services.API
 
 
         public static List<FlashCard>? FlashCardsCreate(
-            IdiomaticaContext context, Guid languageUserId, int numCards,
+            DiContainer diContainer, Guid languageUserId, int numCards,
             AvailableLanguageCode uiLanguageCode)
         {
             if (numCards < 1) { return new List<FlashCard>(); }
+            var context = diContainer.DbContextFactory.CreateDbContext();
             
             List<FlashCard> cards = new List<FlashCard>();
 
@@ -240,17 +243,17 @@ namespace Logic.Services.API
             foreach (var wordUser in wordUsers)
             {
                 if(wordUser is null) continue;
-                var card = FlashCardCreate(context, (Guid)wordUser.Id, uiLanguageCode);
+                var card = FlashCardCreate(diContainer, (Guid)wordUser.Id, uiLanguageCode);
                 if (card != null) cards.Add(card);
             }
             return cards;
         }
         public static async Task<List<FlashCard>?> FlashCardsCreateAsync(
-            IdiomaticaContext context, Guid languageUserId, int numCards, AvailableLanguageCode uiLanguageCode)
+            DiContainer diContainer, Guid languageUserId, int numCards, AvailableLanguageCode uiLanguageCode)
         {
             return await Task<FlashCard?>.Run(() =>
             {
-                return FlashCardsCreate(context, languageUserId, numCards, uiLanguageCode);
+                return FlashCardsCreate(diContainer, languageUserId, numCards, uiLanguageCode);
             });
         }
 

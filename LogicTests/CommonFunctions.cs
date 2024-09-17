@@ -223,7 +223,7 @@ namespace LogicTests
                 ErrorHandler.LogAndThrow();
                 return null;
             }
-            //context.Users.Add(user);
+            LanguageUserApi.LanguageUserCreate(context, GetSpanishLanguage(context), user);
             UserApi.UserSettingCreate(context, AvailableUserSetting.UILANGUAGE,
                 user.Id, uiLanguageId.ToString());
             UserApi.UserSettingCreate(context, AvailableUserSetting.CURRENTLEARNINGLANGUAGE,

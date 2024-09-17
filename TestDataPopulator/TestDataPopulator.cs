@@ -12,6 +12,7 @@ using Model.Enums;
 using Logic.Services.API;
 using Xunit;
 using Logic.Telemetry;
+using Logic;
 
 namespace TestDataPopulator
 {
@@ -419,7 +420,11 @@ namespace TestDataPopulator
 
             string[] wordsToUse = ["de", "la", "que", "el", "en"];
 
-            var context = CreateContext();
+            var contextFactory = new DataPopualatorDbContextFactory();
+            DiContainer diContainer = new DiContainer(contextFactory);
+
+            var context = diContainer.DbContextFactory.CreateDbContext();
+
 
             foreach (var w in wordsToUse)
             {
@@ -433,7 +438,7 @@ namespace TestDataPopulator
                     .FirstOrDefault();
                 if (wordUser is null) throw new InvalidDataException();
 
-                FlashCardApi.FlashCardCreate(context, wordUser.Id, _englishLanguage.Code);
+                FlashCardApi.FlashCardCreate(diContainer, wordUser.Id, _englishLanguage.Code);
             }
             return true;
         }

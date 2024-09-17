@@ -199,11 +199,13 @@ namespace Logic.Services.API
 
 
         public static FlashCardDataPacket? OrchestrateFlashCardDeckCreation(
-            IdiomaticaContext context, Guid userId, AvailableLanguageCode learningLanguageCode,
+            DiContainer diContainer, Guid userId, AvailableLanguageCode learningLanguageCode,
             int numNew, int numReview)
         {
             if (numNew < 0) { ErrorHandler.LogAndThrow(); return null; }
             if (numReview < 0) { ErrorHandler.LogAndThrow(); return null; }
+
+            var context = diContainer.DbContextFactory.CreateDbContext();
 
             FlashCardDataPacket newDataPacket = new ();
             newDataPacket.LearningLanguageCode = learningLanguageCode;
@@ -253,7 +255,7 @@ namespace Logic.Services.API
             {
                 int numToCreate = numNew - numReadyForReviewReturned;
                 var newCards = FlashCardApi.FlashCardsCreate(
-                    context, (Guid)languageUser.Id, numToCreate, uiLanguage.Code);
+                    diContainer, (Guid)languageUser.Id, numToCreate, uiLanguage.Code);
                 if (newCards is not null && newCards.Count > 0)
                     newDataPacket.Deck.AddRange(newCards);
             }
@@ -269,12 +271,12 @@ namespace Logic.Services.API
             return newDataPacket;
         }
         public static async Task<FlashCardDataPacket?> OrchestrateFlashCardDeckCreationAsync(
-            IdiomaticaContext context, Guid userId, AvailableLanguageCode learningLanguageCode,
+            DiContainer diContainer, Guid userId, AvailableLanguageCode learningLanguageCode,
             int numNew, int numReview)
         {
             return await Task<FlashCardDataPacket?>.Run(() =>
             {
-                return OrchestrateFlashCardDeckCreation(context, userId, learningLanguageCode, numNew, numReview);
+                return OrchestrateFlashCardDeckCreation(diContainer, userId, learningLanguageCode, numNew, numReview);
             });
         }
 

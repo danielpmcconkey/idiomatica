@@ -19,7 +19,9 @@ namespace Logic.Services.API.Tests
         public void FlashCardAttemptCreateTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
 
@@ -47,7 +49,7 @@ namespace Logic.Services.API.Tests
                 if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the card
-                FlashCard? card = FlashCardApi.FlashCardCreate(context, (Guid)wordUser.Id, uiLanguageCode);
+                FlashCard? card = FlashCardApi.FlashCardCreate(diContainer, (Guid)wordUser.Id, uiLanguageCode);
                 if (card is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the attempt
@@ -67,7 +69,9 @@ namespace Logic.Services.API.Tests
         public async Task FlashCardAttemptCreateAsyncTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
 
@@ -95,7 +99,7 @@ namespace Logic.Services.API.Tests
                 if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the card
-                FlashCard? card = await FlashCardApi.FlashCardCreateAsync(context, (Guid)wordUser.Id, uiLanguageCode);
+                FlashCard? card = await FlashCardApi.FlashCardCreateAsync(diContainer, (Guid)wordUser.Id, uiLanguageCode);
                 if (card is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create the attempt

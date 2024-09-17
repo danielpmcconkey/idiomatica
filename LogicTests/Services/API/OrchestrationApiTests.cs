@@ -352,7 +352,9 @@ namespace Logic.Services.API.Tests
         public void OrchestrateFlashCardDispositionAndAdvanceTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             Guid bookId = CommonFunctions.GetBook17Id(context);
             int numNew = 4;
             int numOld = 3;
@@ -398,7 +400,7 @@ namespace Logic.Services.API.Tests
 
                 // create deck 1
                 var dataPacket1 = OrchestrationApi.OrchestrateFlashCardDeckCreation(
-                    context, userId, learningLanguageCode, numNew, numOld);
+                    diContainer, userId, learningLanguageCode, numNew, numOld);
 
                 Assert.IsNotNull(dataPacket1);
                 Assert.IsNotNull(dataPacket1.Deck);
@@ -444,7 +446,9 @@ namespace Logic.Services.API.Tests
         public async Task OrchestrateFlashCardDispositionAndAdvanceAsyncTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             Guid bookId = CommonFunctions.GetBook17Id(context);
             int numNew = 4;
             int numOld = 3;
@@ -490,7 +494,7 @@ namespace Logic.Services.API.Tests
 
                 // create deck 1
                 var dataPacket1 = await OrchestrationApi.OrchestrateFlashCardDeckCreationAsync(
-                    context, userId, learningLanguageCode, numNew, numOld);
+                    diContainer, userId, learningLanguageCode, numNew, numOld);
 
                 Assert.IsNotNull(dataPacket1);
                 Assert.IsNotNull(dataPacket1.Deck);
@@ -539,7 +543,9 @@ namespace Logic.Services.API.Tests
         {
             //Guid userId = Guid.NewGuid();
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             Guid bookId = CommonFunctions.GetBook17Id(context);
             int numNew = 4;
             int numOld = 3;
@@ -579,7 +585,7 @@ namespace Logic.Services.API.Tests
 
                 // create deck 1
                 var dataPacket1 = OrchestrationApi.OrchestrateFlashCardDeckCreation(
-                    context, userId, learningLanguageCode, numNew, numOld);
+                    diContainer, userId, learningLanguageCode, numNew, numOld);
 
                 Assert.IsNotNull(dataPacket1);
                 Assert.IsNotNull(dataPacket1.Deck);
@@ -612,7 +618,7 @@ namespace Logic.Services.API.Tests
 
                 // create deck 2
                 var dataPacket2 = OrchestrationApi.OrchestrateFlashCardDeckCreation(
-                    context, userId, learningLanguageCode, numNew, numOld);
+                    diContainer, userId, learningLanguageCode, numNew, numOld);
 
                 int expectedCount = 1 // prior review card
                     + 4 // numNew
@@ -632,7 +638,9 @@ namespace Logic.Services.API.Tests
         public async Task OrchestrateFlashCardDeckCreationAsyncTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             Guid bookId = CommonFunctions.GetBook17Id(context);
             int numNew = 4;
             int numOld = 3;
@@ -674,7 +682,7 @@ namespace Logic.Services.API.Tests
 
                 // create deck 1
                 var dataPacket1 = await OrchestrationApi.OrchestrateFlashCardDeckCreationAsync(
-                    context, userId, learningLanguageCode, numNew, numOld);
+                    diContainer, userId, learningLanguageCode, numNew, numOld);
 
                 Assert.IsNotNull(dataPacket1);
                 Assert.IsNotNull(dataPacket1.Deck);
@@ -707,7 +715,7 @@ namespace Logic.Services.API.Tests
 
                 // create deck 2
                 var dataPacket2 = await OrchestrationApi.OrchestrateFlashCardDeckCreationAsync(
-                    context, userId, learningLanguageCode, numNew, numOld);
+                    diContainer, userId, learningLanguageCode, numNew, numOld);
 
                 int expectedCount = 1 // prior review card
                     + 4 // numNew

@@ -21,7 +21,9 @@ namespace Logic.Services.API.Tests
         public void FlashCardCreateTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
 
@@ -48,7 +50,7 @@ namespace Logic.Services.API.Tests
                     context, word, languageUser, null, AvailableWordUserStatus.UNKNOWN);
                 if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
 
-                FlashCard? card = FlashCardApi.FlashCardCreate(context, (Guid)wordUser.Id, uiLanguageCode);
+                FlashCard? card = FlashCardApi.FlashCardCreate(diContainer, (Guid)wordUser.Id, uiLanguageCode);
                 Assert.IsNotNull(card);
                 Assert.IsNotNull(card.Id);
             }
@@ -62,7 +64,9 @@ namespace Logic.Services.API.Tests
         public async Task FlashCardCreateAsyncTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
 
@@ -89,7 +93,7 @@ namespace Logic.Services.API.Tests
                     context, word, languageUser, null, AvailableWordUserStatus.UNKNOWN);
                 if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
 
-                FlashCard? card = await FlashCardApi.FlashCardCreateAsync(context, (Guid)wordUser.Id, uiLanguageCode);
+                FlashCard? card = await FlashCardApi.FlashCardCreateAsync(diContainer, (Guid)wordUser.Id, uiLanguageCode);
                 Assert.IsNotNull(card);
                 Assert.IsNotNull(card.Id);
             }
@@ -160,7 +164,9 @@ namespace Logic.Services.API.Tests
         public void FlashCardReadByIdTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 5;
@@ -198,7 +204,7 @@ namespace Logic.Services.API.Tests
 
                 // create cards
                 var cards = FlashCardApi.FlashCardsCreate(
-                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
+                    diContainer, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
 
@@ -226,7 +232,9 @@ namespace Logic.Services.API.Tests
         public async Task FlashCardReadByIdAsyncTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 5;
@@ -264,7 +272,7 @@ namespace Logic.Services.API.Tests
 
                 // create cards
                 var cards = await FlashCardApi.FlashCardsCreateAsync(
-                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
+                    diContainer, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
 
@@ -294,7 +302,9 @@ namespace Logic.Services.API.Tests
         public void FlashCardsCreateTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext(); ;
             var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 20;
@@ -335,7 +345,7 @@ namespace Logic.Services.API.Tests
 
 
                 var cards = FlashCardApi.FlashCardsCreate(
-                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
+                    diContainer, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
                 foreach (var card in cards)
@@ -359,7 +369,9 @@ namespace Logic.Services.API.Tests
         public async Task FlashCardsCreateAsyncTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 20;
@@ -400,7 +412,7 @@ namespace Logic.Services.API.Tests
 
 
                 var cards = await FlashCardApi.FlashCardsCreateAsync(
-                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
+                    diContainer, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
                 foreach (var card in cards)
@@ -426,7 +438,9 @@ namespace Logic.Services.API.Tests
         public void FlashCardsFetchByNextReviewDateByPredicateTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 20;
@@ -467,9 +481,9 @@ namespace Logic.Services.API.Tests
 
                 // create cards
                 var cards = FlashCardApi.FlashCardsCreate(
-                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
+                    diContainer, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
-                Assert.IsTrue(cards.Count == numCards);
+                Assert.AreEqual(numCards, cards.Count);
                 foreach (var card in cards)
                 {
                     // update next review to 5 mins ago, so we can pull them
@@ -484,13 +498,13 @@ namespace Logic.Services.API.Tests
                     && fc.WordUser.LanguageUserId == languageUser.Id
                     && fc.Status == AvailableFlashCardStatus.ACTIVE
                     && fc.NextReview != null
-                    && fc.NextReview <= DateTime.Now;
+                    && fc.NextReview <= DateTimeOffset.Now;
 
                 var cardsPulled = FlashCardApi.FlashCardsFetchByNextReviewDateByPredicate(
                     context, predicate, numCards);
 
                 Assert.IsNotNull(cardsPulled);
-                Assert.IsTrue(cardsPulled.Count == numCards);
+                Assert.AreEqual(numCards, cardsPulled.Count);
                 foreach (var card in cardsPulled)
                 {
                     Assert.IsNotNull(card);
@@ -513,7 +527,9 @@ namespace Logic.Services.API.Tests
         public async Task FlashCardsFetchByNextReviewDateByPredicateAsyncTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 20;
@@ -554,9 +570,9 @@ namespace Logic.Services.API.Tests
 
                 // create cards
                 var cards = await FlashCardApi.FlashCardsCreateAsync(
-                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
+                    diContainer, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
-                Assert.IsTrue(cards.Count == numCards);
+                Assert.AreEqual(numCards, cards.Count);
                 foreach (var card in cards)
                 {
                     // update next review to 5 mins ago, so we can pull them
@@ -571,13 +587,13 @@ namespace Logic.Services.API.Tests
                     && fc.WordUser.LanguageUserId == languageUser.Id
                     && fc.Status == AvailableFlashCardStatus.ACTIVE
                     && fc.NextReview != null
-                    && fc.NextReview <= DateTime.Now;
+                    && fc.NextReview <= DateTimeOffset.Now;
 
                 var cardsPulled = await FlashCardApi.FlashCardsFetchByNextReviewDateByPredicateAsync(
                     context, predicate, numCards);
 
                 Assert.IsNotNull(cardsPulled);
-                Assert.IsTrue(cardsPulled.Count == numCards);
+                Assert.AreEqual(numCards, cardsPulled.Count);
                 foreach (var card in cardsPulled)
                 {
                     Assert.IsNotNull(card);
@@ -602,7 +618,9 @@ namespace Logic.Services.API.Tests
         public void FlashCardUpdateTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 5;
@@ -640,7 +658,7 @@ namespace Logic.Services.API.Tests
 
                 // create cards
                 var cards = FlashCardApi.FlashCardsCreate(
-                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
+                    diContainer, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count == numCards);
 
@@ -673,7 +691,9 @@ namespace Logic.Services.API.Tests
         public async Task FlashCardUpdateAsyncTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             var learningLanguage = CommonFunctions.GetSpanishLanguage(context);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 5;
@@ -711,7 +731,7 @@ namespace Logic.Services.API.Tests
 
                 // create cards
                 var cards = await FlashCardApi.FlashCardsCreateAsync(
-                    context, (Guid)languageUser.Id, numCards, uiLanguageCode);
+                    diContainer, (Guid)languageUser.Id, numCards, uiLanguageCode);
                 Assert.IsNotNull(cards);
                 Assert.IsTrue(cards.Count() == numCards);
 
@@ -746,7 +766,9 @@ namespace Logic.Services.API.Tests
         public void FlashCardReadByWordUserIdTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             Language language = CommonFunctions.GetSpanishLanguage(context);
             Guid languageId = language.Id;
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
@@ -776,7 +798,7 @@ namespace Logic.Services.API.Tests
                 Assert.AreEqual(wordId, wordUser.WordId);
 
                 // create the flashcard
-                FlashCardApi.FlashCardCreate(context, (Guid)wordUser.Id, uiLanguageCode);
+                FlashCardApi.FlashCardCreate(diContainer, (Guid)wordUser.Id, uiLanguageCode);
 
                 // read the flashcard
                 var flashCard = FlashCardApi.FlashCardReadByWordUserId(context, (Guid)wordUser.Id);
@@ -795,7 +817,9 @@ namespace Logic.Services.API.Tests
         public async Task FlashCardReadByWordUserIdAsyncTest()
         {
             Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            TestDbContextFactory dbContextFactory = new TestDbContextFactory();
+            DiContainer diContainer = new DiContainer(dbContextFactory);
+            var context = diContainer.DbContextFactory.CreateDbContext();
             Language language = CommonFunctions.GetSpanishLanguage(context);
             Guid languageId = language.Id;
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
@@ -825,7 +849,7 @@ namespace Logic.Services.API.Tests
                 Assert.AreEqual(wordId, wordUser.WordId);
 
                 // create the flashcard
-                await FlashCardApi.FlashCardCreateAsync(context, (Guid)wordUser.Id, uiLanguageCode);
+                await FlashCardApi.FlashCardCreateAsync(diContainer, (Guid)wordUser.Id, uiLanguageCode);
 
                 // read the flashcard
                 var flashCard = await FlashCardApi.FlashCardReadByWordUserIdAsync(context, (Guid)wordUser.Id);

@@ -260,15 +260,17 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(userService, context);
                 if (user is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                userId = (Guid)user.Id;
+                userId = user.Id;
 
                 var languageUsersBefore = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
-                    context, (Guid)user.Id);
+                    context, user.Id);
+                Assert.IsNotNull(languageUsersBefore);
+
                 var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, language, user);
 
                 // act
                 var languageUsersAfter = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
-                    context, (Guid)user.Id);
+                    context, user.Id);
 
                 if (languageUsersAfter is null)
                 { ErrorHandler.LogAndThrow(); return; }
@@ -277,9 +279,9 @@ namespace Logic.Services.API.Tests
                     .Where(x => x.LanguageId == languageId)
                     .FirstOrDefault();
 
-                if (matchingLanguageUser is null || matchingLanguageUser.Language is null
-                    || matchingLanguageUser.Language.Name is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(matchingLanguageUser);
+                Assert.IsNotNull(matchingLanguageUser.Language);
+                Assert.IsNotNull(matchingLanguageUser.Language.Name);
 
                 string actualResult = matchingLanguageUser.Language.Name;
                 
