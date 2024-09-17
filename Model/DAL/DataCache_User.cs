@@ -25,19 +25,22 @@ namespace Model.DAL
         {
             if (user.ApplicationUserId is null) throw new ArgumentNullException(nameof(user.ApplicationUserId));
 
-            int numRows = context.Database.ExecuteSql($"""
+            //int numRows = context.Database.ExecuteSql($"""
                 
-                INSERT INTO [Idioma].[User]
-                           ([Name]
-                           ,[ApplicationUserId]
-                           ,[Id])
-                     VALUES
-                           ({user.Name}
-                           ,{user.ApplicationUserId}
-                           ,{user.Id})
+            //    INSERT INTO [Idioma].[User]
+            //               ([Name]
+            //               ,[ApplicationUserId]
+            //               ,[Id])
+            //         VALUES
+            //               ({user.Name}
+            //               ,{user.ApplicationUserId}
+            //               ,{user.Id})
         
-                """);
-            if (numRows < 1) throw new InvalidDataException("creating User affected 0 rows");
+            //    """);
+            //if (numRows < 1) throw new InvalidDataException("creating User affected 0 rows");
+
+            context.Users.Add(user);
+            context.SaveChanges();
             
 
 
@@ -49,6 +52,27 @@ namespace Model.DAL
         public static async Task<User?> UserCreateAsync(User value, IdiomaticaContext context)
         {
             return await Task.Run(() => { return UserCreate(value, context); });
+        }
+
+
+        public static UserSetting? UserSettingCreate(
+            AvailableUserSetting key, Guid userId, string value, IdiomaticaContext context)
+        {
+            UserSetting userSettingUiLang = new()
+            {
+                Key = key,
+                UserId = userId,
+                Value = value
+            };
+            context.Add(userSettingUiLang);
+            context.SaveChanges();
+
+            return userSettingUiLang;
+        }
+        public static async Task<UserSetting?> UserSettingCreateAsync(
+            AvailableUserSetting key, Guid userId, string value, IdiomaticaContext context)
+        {
+            return await Task.Run(() => { return UserSettingCreate(key, userId, value, context); });
         }
         #endregion
 

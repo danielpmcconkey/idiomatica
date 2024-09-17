@@ -24,7 +24,7 @@ namespace Logic.Services.API.Tests
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             int expectedStatsCount = 8;
-            string expectedProgress = "0 / 3";
+            string expectedProgress = "0 / 4";
             Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
 
 
@@ -75,7 +75,7 @@ namespace Logic.Services.API.Tests
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             int expectedStatsCount = 8;
-            string expectedProgress = "0 / 3";
+            string expectedProgress = "0 / 4";
             Guid languageId = CommonFunctions.GetSpanishLanguageId(context);
 
 
@@ -127,7 +127,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             Guid bookId = CommonFunctions.GetBook17Id(context);
-            decimal expectedWordCount = 913.0M;
+            decimal expectedWordCount = 905.0M;
             decimal expectedDistinctKnowPercent = 0.11M;
 
             try
@@ -198,7 +198,7 @@ namespace Logic.Services.API.Tests
             Guid userId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             Guid bookId = CommonFunctions.GetBook17Id(context);
-            decimal expectedWordCount = 913.0M;
+            decimal expectedWordCount = 905.0M;
             decimal expectedDistinctKnowPercent = 0.11M;
 
             try

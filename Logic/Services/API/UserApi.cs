@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DeepL;
+using Model.Enums;
 
 namespace Logic.Services.API
 {
@@ -42,7 +43,8 @@ namespace Logic.Services.API
         }
 
 
-        public static UserBreadCrumb? UserBreadCrumbCreate(IdiomaticaContext context, User user, Page page)
+        public static UserBreadCrumb? UserBreadCrumbCreate(IdiomaticaContext context,
+            User user, Page page)
         {
             UserBreadCrumb crumb = new() {
                 Id = Guid.NewGuid(),
@@ -60,6 +62,21 @@ namespace Logic.Services.API
             return await Task.Run(() =>
             {
                 return UserBreadCrumbCreate(context, user, page);
+            });
+        }
+
+
+        public static UserSetting? UserSettingCreate(IdiomaticaContext context,
+            AvailableUserSetting key, Guid userId, string value)
+        {
+            return DataCache.UserSettingCreate(key, userId, value, context);
+        }
+        public static async Task<UserSetting?> UserSettingCreateAsync(
+            IdiomaticaContext context, AvailableUserSetting key, Guid userId, string value)
+        {
+            return await Task.Run(() =>
+            {
+                return UserSettingCreate(context, key, userId, value);
             });
         }
 

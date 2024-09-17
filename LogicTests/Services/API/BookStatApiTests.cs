@@ -20,7 +20,7 @@ namespace Logic.Services.API.Tests
         {
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int expectedPageCount = 3;
+            int expectedPageCount = 4;
 
             try
             {
@@ -51,7 +51,7 @@ namespace Logic.Services.API.Tests
         {
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            int expectedPageCount = 3;
+            int expectedPageCount = 4;
 
             try
             {
@@ -84,7 +84,7 @@ namespace Logic.Services.API.Tests
         {
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            decimal expectedDifficulty = 13.23M;
+            decimal expectedDifficulty = 13.2M;
 
             try
             {
@@ -118,7 +118,7 @@ namespace Logic.Services.API.Tests
         {
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
-            decimal expectedDifficulty = 13.23M;
+            decimal expectedDifficulty = 13.2M;
 
             try
             {

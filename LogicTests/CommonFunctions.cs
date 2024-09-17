@@ -148,11 +148,20 @@ namespace LogicTests
         {
             Guid languageId = GetLanguageId(context, AvailableLanguageCode.ES);
             var languageUser = context.LanguageUsers
-                .Where(x => x.LanguageId == languageId && x.User != null && x.User.Name == "Dev Test user")
+                .Where(x => x.LanguageId == languageId && x.User != null && x.User.Name == "Test / Dev user")
                 .FirstOrDefault();
             Assert.IsNotNull(languageUser);
             Assert.IsNotNull(languageUser.Id);
             return (Guid)languageUser.Id;
+        }
+        internal static Guid GetTestUserId(IdiomaticaContext context)
+        {
+            var user = context.Users
+                .Where(x => x.Name == "Test / Dev user")
+                .FirstOrDefault();
+            Assert.IsNotNull(user);
+            Assert.IsNotNull(user.Id);
+            return (Guid)user.Id;
         }
 
         internal static (Guid userId, Guid bookId, Guid bookUserId) CreateUserAndBookAndBookUser(
@@ -166,6 +175,11 @@ namespace LogicTests
 
 
             var user = CreateNewTestUser(userService, context);
+
+            
+
+
+
 
             if (user is null)
             { ErrorHandler.LogAndThrow(); return (userId, bookId, Guid.NewGuid()); }
@@ -200,6 +214,8 @@ namespace LogicTests
         internal static User? CreateNewTestUser(UserService userService, IdiomaticaContext context)
         {
             var applicationUserId = Guid.NewGuid().ToString();
+            var uiLanguageId = GetEnglishLanguageId(context);
+            var learningLanguageId = GetSpanishLanguageId(context);
             var name = "Auto gen tester 2";
             var user = UserApi.UserCreate(applicationUserId, name, context);
             if (user is null)
@@ -207,7 +223,11 @@ namespace LogicTests
                 ErrorHandler.LogAndThrow();
                 return null;
             }
-            context.Users.Add(user);
+            //context.Users.Add(user);
+            UserApi.UserSettingCreate(context, AvailableUserSetting.UILANGUAGE,
+                user.Id, uiLanguageId.ToString());
+            UserApi.UserSettingCreate(context, AvailableUserSetting.CURRENTLEARNINGLANGUAGE,
+                user.Id, learningLanguageId.ToString());
 #if DEBUG
             SetLoggedInUser(user, userService, context);
 #endif
@@ -232,6 +252,13 @@ namespace LogicTests
         internal static Guid GetBook11Id(IdiomaticaContext context)
         {
             var book = context.Books.Where(x => x.Title == "Rapunzel").FirstOrDefault();
+            Assert.IsNotNull(book);
+            Assert.IsNotNull(book.Id);
+            return (Guid)book.Id;
+        }
+        internal static Guid GetBook13Id(IdiomaticaContext context)
+        {
+            var book = context.Books.Where(x => x.Title == "Cenicienta").FirstOrDefault();
             Assert.IsNotNull(book);
             Assert.IsNotNull(book.Id);
             return (Guid)book.Id;

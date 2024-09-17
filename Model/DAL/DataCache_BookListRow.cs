@@ -200,7 +200,7 @@ namespace Model.DAL
             {
                 sb.Append($"""
 
-                        and b.Id = {bookIdOverride}
+                        and b.Id = '{bookIdOverride}'
                     """);
             }
             if (shouldShowOnlyInShelf && bookIdOverride is null)
