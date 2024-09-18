@@ -33,7 +33,7 @@ namespace LogicTests
             
         }
 
-        private static IServiceProvider Provider()
+        private static ServiceProvider GetServiceProvider()
         {
             var connectionstring = "Server=localhost;Database=IdiomaticaFresh;Trusted_Connection=True;TrustServerCertificate=true;";
 
@@ -44,10 +44,17 @@ namespace LogicTests
             });
             return services.BuildServiceProvider();
         }
-        public static T GetRequiredService<T>()
+        /// <summary>
+        /// The GetRequiredService method was taken from this guide
+        /// https://gkama.medium.com/dependency-injection-di-in-net-core-and-net-5-c-unit-tests-935651a99a2d .
+        /// This will also be needed for the test data population project, too. So centralize it someday?
+        /// </summary>
+        public static T GetRequiredService<T>() where T : notnull
         {
-            var provider = Provider();
-            return provider.GetRequiredService<T>();
+            var provider = GetServiceProvider();
+            var service = provider.GetRequiredService<T>();
+            Assert.IsNotNull(service);
+            return service;
         }
         
 
