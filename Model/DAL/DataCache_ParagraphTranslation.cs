@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Model.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -101,16 +102,16 @@ namespace Model.DAL
 
         #region delete
         public static void ParagraphTranslationDeleteByParagraphIdAndLanguageCode(
-            (Guid paragraphId, string code) key, IdiomaticaContext context)
+            (Guid paragraphId, AvailableLanguageCode code) key, IdiomaticaContext context)
         {
             int numRows = context.Database.ExecuteSql($"""
                 delete from [Idioma].[ParagraphTranslation]
                 where [ParagraphId] = {key.paragraphId}
-                and [LanguageCode] = {key.code}
+                and [LanguageCode] = {key.code.ToString()}
                 """);
         }
         public static async Task ParagraphTranslationDeleteByParagraphIdAndLanguageCodeAsync(
-            (Guid paragraphId, string code) key, IdiomaticaContext context)
+            (Guid paragraphId, AvailableLanguageCode code) key, IdiomaticaContext context)
         {
             await Task.Run(() =>
             {

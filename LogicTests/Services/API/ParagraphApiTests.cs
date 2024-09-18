@@ -24,27 +24,16 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void ParagraphCreateFromSplitTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
             string expectedText = "Era un jardín grande";
 
             try
             {
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(language);
 
                 // create an empty book
                 Book? book = new()
@@ -55,8 +44,7 @@ namespace Logic.Services.API.Tests
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(book);
                 bookId = (Guid)book.Id;
 
                 // create an empty page
@@ -69,20 +57,17 @@ namespace Logic.Services.API.Tests
                     Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(page);
 
                 // create the paragraph splits
                 var paragraphSplits = ParagraphApi.PotentialParagraphsSplitFromText(
                    context, TestConstants.NewPageText, language);
-                if (paragraphSplits is null || paragraphSplits.Length < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(paragraphSplits);
+                Assert.IsFalse(paragraphSplits.Length < 1);
                 var fifthSplit = paragraphSplits[4];
-                if (string.IsNullOrEmpty(fifthSplit))
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsFalse(string.IsNullOrEmpty(fifthSplit));
                 var fifthSplitTrimmed = fifthSplit.Trim();
-                if (string.IsNullOrEmpty(fifthSplitTrimmed))
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsFalse(string.IsNullOrEmpty(fifthSplitTrimmed));
 
 
                 var paragraph = ParagraphApi.ParagraphCreateFromSplit(context,
@@ -107,27 +92,16 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task ParagraphCreateFromSplitAsyncTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
             string expectedText = "Era un jardín grande";
 
             try
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(language);
 
                 // create an empty book
                 Book? book = new()
@@ -138,8 +112,7 @@ namespace Logic.Services.API.Tests
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(book);
                 bookId = (Guid)book.Id;
 
                 // create an empty page
@@ -152,20 +125,17 @@ namespace Logic.Services.API.Tests
                     Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(page);
 
                 // create the paragraph splits
                 var paragraphSplits = await ParagraphApi.PotentialParagraphsSplitFromTextAsync(
                    context, TestConstants.NewPageText, language);
-                if (paragraphSplits is null || paragraphSplits.Length < 1)
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(paragraphSplits);
+                Assert.IsFalse(paragraphSplits.Length < 1);
                 var fifthSplit = paragraphSplits[4];
-                if (string.IsNullOrEmpty(fifthSplit))
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsFalse(string.IsNullOrEmpty(fifthSplit));
                 var fifthSplitTrimmed = fifthSplit.Trim();
-                if (string.IsNullOrEmpty(fifthSplitTrimmed))
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsFalse(string.IsNullOrEmpty(fifthSplitTrimmed));
 
                 
                 var paragraph = await ParagraphApi.ParagraphCreateFromSplitAsync(context,
@@ -184,7 +154,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -192,18 +162,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void ParagraphExamplePullRandomByFlashCardIdTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            var context = CommonFunctions.CreateContext();
             var languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
             Guid flashCardId = CommonFunctions.GetFlashCard1Id(context, languageUserId);
             AvailableLanguageCode uiLangugaeCode = AvailableLanguageCode.EN_US;
@@ -213,13 +173,12 @@ namespace Logic.Services.API.Tests
             int translationDuplicates = 0;
             int exampleDuplicates = 0;
             float threshold = 0.75f;
-
-            
             /* 
-                * we run this many times to test that we get a random 
-                * paragraphtranslation back 
-                * 
-                */
+             * 
+             * we run this many times to test that we get a random 
+             * paragraphtranslation back 
+             * 
+             */
             for (int i = 0; i < numTries; i++)
             {
                 var result = ParagraphApi.ParagraphExamplePullRandomByFlashCardId(
@@ -228,7 +187,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsTrue(string.IsNullOrEmpty(result.example) == false);
                 Assert.IsTrue(string.IsNullOrEmpty(result.translation) == false);
                 Assert.IsTrue(result.translation != result.example);
-                    
+
                 if (examples.Contains(result.example))
                 {
                     exampleDuplicates++;
@@ -241,23 +200,13 @@ namespace Logic.Services.API.Tests
                 else translations.Add(result.translation);
             }
             float percentDups = exampleDuplicates / (float)numTries;
-            Assert.IsTrue(percentDups < threshold);            
+            Assert.IsTrue(percentDups < threshold);
         }
         [TestMethod()]
         public async Task ParagraphExamplePullRandomByFlashCardIdAsyncTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            var context = CommonFunctions.CreateContext();
             var languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
             Guid flashCardId = CommonFunctions.GetFlashCard1Id(context, languageUserId);
             AvailableLanguageCode uiLangugaeCode = AvailableLanguageCode.EN_US;
@@ -268,10 +217,11 @@ namespace Logic.Services.API.Tests
             int exampleDuplicates = 0;
             float threshold = 0.75f;
             /* 
-                * we run this many times to test that we get a random 
-                * paragraphtranslation back 
-                * 
-                */
+             * 
+             * we run this many times to test that we get a random 
+             * paragraphtranslation back 
+             * 
+             */
             for (int i = 0; i < numTries; i++)
             {
                 var result = await ParagraphApi.ParagraphExamplePullRandomByFlashCardIdAsync(
@@ -293,54 +243,27 @@ namespace Logic.Services.API.Tests
                 else translations.Add(result.translation);
             }
             float percentDups = exampleDuplicates / (float)numTries;
-            Assert.IsTrue(percentDups < threshold);
-            
+            Assert.IsTrue(percentDups < threshold);            
         }
 
 
         [TestMethod()]
         public void ParagraphReadAllTextTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            var context = CommonFunctions.CreateContext();
             Guid paragraphId = CommonFunctions.GetParagraph14706Id(context);
             string expectedValue = "África del Norte, África septentrional o África norsahariana (a veces llamada África Blanca) es la subregión norte de África. Está compuesta por cinco países: Argelia, Egipto, Libia, Marruecos y Túnez. Además, incluye a la República Árabe Saharaui Democrática (que es un Estado con reconocimiento limitado) y otros territorios que dependen de países externos a la subregión: Canarias, Ceuta y Melilla (que dependen de España), Madeira (de Portugal) y Lampedusa e Linosa (de Italia).";
-
-
             string actualValue = ParagraphApi.ParagraphReadAllText(context, paragraphId);
-
             Assert.AreEqual(expectedValue, actualValue);
         }
         [TestMethod()]
         public async Task ParagraphReadAllTextAsyncTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            var context = CommonFunctions.CreateContext();
             Guid paragraphId = CommonFunctions.GetParagraph14706Id(context);
             string expectedValue = "África del Norte, África septentrional o África norsahariana (a veces llamada África Blanca) es la subregión norte de África. Está compuesta por cinco países: Argelia, Egipto, Libia, Marruecos y Túnez. Además, incluye a la República Árabe Saharaui Democrática (que es un Estado con reconocimiento limitado) y otros territorios que dependen de países externos a la subregión: Canarias, Ceuta y Melilla (que dependen de España), Madeira (de Portugal) y Lampedusa e Linosa (de Italia).";
-
-            
-
             string actualValue = await ParagraphApi.ParagraphReadAllTextAsync(context, paragraphId);
             Assert.AreEqual(expectedValue, actualValue);            
         }
@@ -349,27 +272,16 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void ParagraphsCreateFromPageTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
             string expectedText = "Era un jardín grande";
 
             try
             {
                 var language = LanguageApi.LanguageReadByCode(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(language);
 
                 // create an empty book
                 Book? book = new()
@@ -380,8 +292,7 @@ namespace Logic.Services.API.Tests
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(book);
                 bookId = (Guid)book.Id;
 
                 // create an empty page
@@ -394,19 +305,21 @@ namespace Logic.Services.API.Tests
                     Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(page);
 
                 // create the paragraphs
                 var paragraphs = ParagraphApi.ParagraphsCreateFromPage(
                     context, page, language);
-                if (paragraphs is null || paragraphs.Count < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(paragraphs);
+                Assert.IsFalse(paragraphs.Count < 1);
                 var fifthParagraph = paragraphs.Where(x => x.Ordinal == 4).FirstOrDefault();
-                if (fifthParagraph is null || fifthParagraph.Sentences is null || fifthParagraph.Sentences.Count < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(fifthParagraph);
+                Assert.IsNotNull(fifthParagraph.Sentences);
+                Assert.IsFalse(fifthParagraph.Sentences.Count < 1);
 
-                var thirdSentence = fifthParagraph.Sentences.Where(s => s.Ordinal == 2).FirstOrDefault();
+                var thirdSentence = fifthParagraph.Sentences
+                    .Where(s => s.Ordinal == 2)
+                    .FirstOrDefault();
                 Assert.IsNotNull(thirdSentence);
                 Assert.IsNotNull(thirdSentence.Text);
                 var actualText = thirdSentence.Text[..20];
@@ -421,27 +334,16 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task ParagraphsCreateFromPageAsyncTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
             string expectedText = "Era un jardín grande";
 
             try
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
                     context, TestConstants.NewBookLanguageCode);
-                if (language is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(language);
 
                 // create an empty book
                 Book? book = new()
@@ -452,8 +354,7 @@ namespace Logic.Services.API.Tests
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(book);
                 bookId = (Guid)book.Id;
 
                 // create an empty page
@@ -466,19 +367,21 @@ namespace Logic.Services.API.Tests
                     Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(page);
 
                 // create the paragraphs
                 var paragraphs = await ParagraphApi.ParagraphsCreateFromPageAsync(
                     context, page, language);
-                if (paragraphs is null || paragraphs.Count < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(paragraphs);
+                Assert.IsFalse(paragraphs.Count < 1);
                 var fifthParagraph = paragraphs.Where(x => x.Ordinal == 4).FirstOrDefault();
-                if (fifthParagraph is null || fifthParagraph.Sentences is null || fifthParagraph.Sentences.Count < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(fifthParagraph);
+                Assert.IsNotNull(fifthParagraph.Sentences);
+                Assert.IsFalse(fifthParagraph.Sentences.Count < 1);
 
-                var thirdSentence = fifthParagraph.Sentences.Where(s => s.Ordinal == 2).FirstOrDefault();
+                var thirdSentence = fifthParagraph.Sentences
+                    .Where(s => s.Ordinal == 2)
+                    .FirstOrDefault();
                 Assert.IsNotNull(thirdSentence);
                 Assert.IsNotNull(thirdSentence.Text);
                 var actualText = thirdSentence.Text[..20];
@@ -487,7 +390,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -495,30 +398,20 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void ParagraphsReadByPageIdTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            var context = CommonFunctions.CreateContext();
             Guid pageId = CommonFunctions.GetPage400Id(context);
             int ppOrd = 0;
             int sentenceOrdinal = 1;
             string expectedValue = "Está compuesta por cinco países: Argelia, Egipto, Libia, Marruecos y Túnez.";
-            
+
             var paragraphs = ParagraphApi.ParagraphsReadByPageId(context, pageId);
             Assert.IsNotNull(paragraphs);
             var seventhParagraph = paragraphs.Where(x => x.Ordinal == ppOrd).FirstOrDefault();
             Assert.IsNotNull(seventhParagraph);
             Assert.IsNotNull(seventhParagraph.Id);
             var sentences = SentenceApi.SentencesReadByParagraphId(
-                context, seventhParagraph.Id);
+                context, (Guid)seventhParagraph.Id);
             Assert.IsNotNull(sentences);
             seventhParagraph.Sentences = sentences;
             Assert.IsNotNull(seventhParagraph.Sentences);
@@ -531,18 +424,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task ParagraphsReadByPageIdAsyncTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            var context = CommonFunctions.CreateContext();
             Guid pageId = CommonFunctions.GetPage400Id(context);
             int ppOrd = 0;
             int sentenceOrdinal = 1;
@@ -569,18 +452,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void ParagraphTranslateTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            var context = CommonFunctions.CreateContext();
             Guid paragraphId = CommonFunctions.GetParagraph14590Id(context);
             var paragraph = context.Paragraphs.Where(x => x.Id == paragraphId).FirstOrDefault();
             Assert.IsNotNull(paragraph);
@@ -599,26 +472,14 @@ namespace Logic.Services.API.Tests
             string actualInput = result.input;
             string actualTranslation = result.output;
 
-            // assert
-
             Assert.AreEqual(expectedInput, actualInput);
             Assert.AreEqual(expectedTranslation, actualTranslation);
         }
         [TestMethod()]
         public async Task ParagraphTranslateAsyncTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            var context = CommonFunctions.CreateContext();
             Guid paragraphId = CommonFunctions.GetParagraph14590Id(context);
             var paragraph = context.Paragraphs.Where(x => x.Id == paragraphId).FirstOrDefault();
             Assert.IsNotNull(paragraph);
@@ -645,39 +506,24 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PotentialParagraphsFromSplitTextTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
             string expectedText = "Cada tarde, después de la escuela. Los niños iban a jugar al jardín del gigante. Era un jardín grande y bonito.";
 
             try
             {
-                var language = LanguageApi.LanguageReadByCode(
-                    context, TestConstants.NewBookLanguageCode);
-                if (language is null)
-                { ErrorHandler.LogAndThrow(); return; }
-
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = language.Id,
-                    Language = language,
+                    LanguageId = learningLanguage.Id,
+                    Language = learningLanguage,
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(book);
                 bookId = (Guid)book.Id;
 
                 // create an empty page
@@ -690,20 +536,17 @@ namespace Logic.Services.API.Tests
                     Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(page);
 
                 // create the paragraph splits
                 var paragraphSplits = ParagraphApi.PotentialParagraphsSplitFromText(
-                   context, TestConstants.NewPageText, language);
-                if (paragraphSplits is null || paragraphSplits.Length < 1)
-                    { ErrorHandler.LogAndThrow(); return; }
+                   context, TestConstants.NewPageText, learningLanguage);
+                Assert.IsNotNull(paragraphSplits);
+                Assert.IsFalse(paragraphSplits.Length < 1);
                 var fifthSplit = paragraphSplits[4];
-                if (string.IsNullOrEmpty(fifthSplit))
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsFalse(string.IsNullOrEmpty(fifthSplit));
                 var fifthSplitTrimmed = fifthSplit.Trim();
-                if (string.IsNullOrEmpty(fifthSplitTrimmed))
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsFalse(string.IsNullOrEmpty(fifthSplitTrimmed));
 
                 Assert.AreEqual(expectedText, fifthSplitTrimmed);
             }
@@ -716,39 +559,24 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task PotentialParagraphsFromSplitTextTestAsync()
         {
-            // boilerplate begin
-            Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
             string expectedText = "Cada tarde, después de la escuela. Los niños iban a jugar al jardín del gigante. Era un jardín grande y bonito.";
 
             try
             {
-                var language = await LanguageApi.LanguageReadByCodeAsync(
-                    context, TestConstants.NewBookLanguageCode);
-                if (language is null)
-                    { ErrorHandler.LogAndThrow(); return; }
-
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = language.Id,
-                    Language = language,
+                    LanguageId = learningLanguage.Id,
+                    Language = learningLanguage,
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, context);
-                if (book is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(book);
                 bookId = (Guid)book.Id;
 
                 // create an empty page
@@ -761,27 +589,24 @@ namespace Logic.Services.API.Tests
                     Id = Guid.NewGuid()
                 };
                 page = DataCache.PageCreate(page, context);
-                if (page is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(page);
 
                 // create the paragraph splits
                 var paragraphSplits = await ParagraphApi.PotentialParagraphsSplitFromTextAsync(
-                   context, TestConstants.NewPageText, language);
-                if (paragraphSplits is null || paragraphSplits.Length < 1)
-                    { ErrorHandler.LogAndThrow(); return; }
+                   context, TestConstants.NewPageText, learningLanguage);
+                Assert.IsNotNull(paragraphSplits);
+                Assert.IsFalse(paragraphSplits.Length < 1);
                 var fifthSplit = paragraphSplits[4];
-                if (string.IsNullOrEmpty(fifthSplit))
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsFalse(string.IsNullOrEmpty(fifthSplit));
                 var fifthSplitTrimmed = fifthSplit.Trim();
-                if (string.IsNullOrEmpty(fifthSplitTrimmed))
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsFalse(string.IsNullOrEmpty(fifthSplitTrimmed));
 
                 Assert.AreEqual(expectedText, fifthSplitTrimmed);
             }
             finally
             {
                 // clean-up
-                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
     }

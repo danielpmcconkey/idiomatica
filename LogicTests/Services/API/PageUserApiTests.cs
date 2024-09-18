@@ -21,36 +21,29 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserCreateForPageIdAndUserIdTest()
         {
-            // boilerplate begin
             Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            Guid? userId = null;
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
             var startDateTime = DateTime.Now;
 
             try
             {
-                Assert.IsNotNull(loginService);
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(
+                    context, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
-                User? user = userService.GetLoggedInUser(context);
+                User? user = loginService.GetLoggedInUser(context);
                 Assert.IsNotNull(user);
 
                 // get the second page of the book
-                var page = context.Pages.Where(x => x.BookId == bookId && x.Ordinal == 1).FirstOrDefault();
-                if (page is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                var page = context.Pages
+                    .Where(x => x.BookId == bookId && x.Ordinal == 1)
+                    .FirstOrDefault();
+                Assert.IsNotNull(page);
 
                 // create the pageUser
                 var pageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
@@ -71,37 +64,29 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task PageUserCreateForPageIdAndUserIdAsyncTest()
         {
-            // boilerplate begin
             Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            Guid? userId = null;
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
             var startDateTime = DateTime.Now;
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(
+                    context, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
-                User? user = userService.GetLoggedInUser(context);
+                User? user = loginService.GetLoggedInUser(context);
                 Assert.IsNotNull(user);
 
                 // get the second page of the book
-                var page = context.Pages.Where(x => x.BookId == bookId && x.Ordinal == 1).FirstOrDefault();
-                if (page is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                var page = context.Pages
+                    .Where(x => x.BookId == bookId && x.Ordinal == 1)
+                    .FirstOrDefault();
+                Assert.IsNotNull(page);
                 
                 // create the pageUser
                 var pageUser = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
@@ -124,55 +109,42 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserMarkAsReadTest()
         {
-            // boilerplate begin
             Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            Guid? userId = null;
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
             var startDateTime = DateTime.Now;
 
             try
             {
-                Assert.IsNotNull(loginService);
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(
+                    context, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
-                User? user = userService.GetLoggedInUser(context);
+                User? user = loginService.GetLoggedInUser(context);
                 Assert.IsNotNull(user);
 
-                // pull the languageUser
-                var language = LanguageApi.LanguageReadByCode(
-                    context, TestConstants.NewBookLanguageCode);
-                if (language is null) { ErrorHandler.LogAndThrow(); return; }
-                var languageUser = LanguageUserApi.LanguageUserGet(context, (Guid)language.Id, userId);
-                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
+                // fetch the languageUser
+                var languageUser = LanguageUserApi.LanguageUserGet(
+                    context, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // create the page 1 page user
-                var page1 = PageApi.PageReadByOrdinalAndBookId(context, 1, bookId);
-                if (page1 is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                var page1 = PageApi.PageReadByOrdinalAndBookId(context, 1, (Guid)bookId);
+                Assert.IsNotNull(page1);
                 Guid page1Id = (Guid)page1.Id;
                 var pageUserBefore = PageUserApi.PageUserCreateForPageIdAndUserId(
                     context, page1, user);
-                if (pageUserBefore is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(pageUserBefore);
 
                 PageUserApi.PageUserMarkAsRead(context, (Guid)pageUserBefore.Id);
                 var pageUserAfter = PageUserApi.PageUserReadByPageIdAndLanguageUserId(
                     context, page1Id, (Guid)languageUser.Id);
-                if (pageUserAfter is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(pageUserAfter);
 
                 Assert.IsNotNull(pageUserAfter.ReadDate);
                 Assert.IsTrue(startDateTime <= pageUserAfter.ReadDate);
@@ -187,56 +159,42 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task PageUserMarkAsReadAsyncTest()
         {
-            // boilerplate begin
             Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            Guid? userId = null;
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
             var startDateTime = DateTime.Now;
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(context, userService);
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(
+                    context, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
-                User? user = userService.GetLoggedInUser(context);
+                User? user = loginService.GetLoggedInUser(context);
                 Assert.IsNotNull(user);
 
-                // pull the languageUser
-                var language = await LanguageApi.LanguageReadByCodeAsync(
-                    context, TestConstants.NewBookLanguageCode);
-                if(language is null) { ErrorHandler.LogAndThrow(); return; }
-                var languageUser = await LanguageUserApi.LanguageUserGetAsync(context, (Guid)language.Id, userId);
-                if (languageUser is null) { ErrorHandler.LogAndThrow(); return; }
+                // fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
+                    context, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // create the page 1 page user
-                var page1 = await PageApi.PageReadByOrdinalAndBookIdAsync(context, 1, bookId);
-                if (page1 is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                var page1 = await PageApi.PageReadByOrdinalAndBookIdAsync(context, 1, (Guid)bookId);
+                Assert.IsNotNull(page1);
                 Guid page1Id = (Guid)page1.Id;
                 var pageUserBefore = await PageUserApi.PageUserCreateForPageIdAndUserIdAsync(
                     context, page1, user);
-                if (pageUserBefore is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(pageUserBefore);
                 
                 await PageUserApi.PageUserMarkAsReadAsync(context, (Guid)pageUserBefore.Id);
                 var pageUserAfter = await PageUserApi.PageUserReadByPageIdAndLanguageUserIdAsync(
                     context, page1Id, (Guid)languageUser.Id);
-                if (pageUserAfter is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(pageUserAfter);
 
                 Assert.IsNotNull(pageUserAfter.ReadDate);
                 Assert.IsTrue(startDateTime <= pageUserAfter.ReadDate);
