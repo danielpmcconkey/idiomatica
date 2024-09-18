@@ -1,7 +1,7 @@
 ﻿@page "/PickBackUp"
 @rendermode InteractiveServer
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
-@inject UserService UserService;
+@inject LoginService UserService;
 @using Logic.Services.API
 
 @if (_isLoading)

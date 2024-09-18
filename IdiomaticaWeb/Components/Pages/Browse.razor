@@ -1,6 +1,6 @@
 ﻿@page "/Books/Browse"
 @rendermode InteractiveServer
-@inject UserService UserService;
+@inject LoginService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory 
 
 <h3>@UserService.GetUILabel("navBrowse")</h3>

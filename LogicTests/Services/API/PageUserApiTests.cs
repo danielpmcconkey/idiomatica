@@ -10,6 +10,8 @@ using Logic.Telemetry;
 using Model;
 using System.Net;
 using Model.Enums;
+using Microsoft.EntityFrameworkCore;
+using Model.DAL;
 
 namespace Logic.Services.API.Tests
 {
@@ -19,16 +21,26 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserCreateForPageIdAndUserIdTest()
         {
-            Guid userId = Guid.NewGuid();
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
+            Guid? userId = null;
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             var startDateTime = DateTime.Now;
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                Assert.IsNotNull(loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
@@ -52,14 +64,25 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task PageUserCreateForPageIdAndUserIdAsyncTest()
         {
-            Guid userId = Guid.NewGuid();
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
+            Guid? userId = null;
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             var startDateTime = DateTime.Now;
@@ -93,7 +116,7 @@ namespace Logic.Services.API.Tests
             {
                 // clean-up
                 await CommonFunctions.CleanUpUserAsync(userId, context);
-                await CommonFunctions.CleanUpBookAsync(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -101,16 +124,26 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserMarkAsReadTest()
         {
-            Guid userId = Guid.NewGuid();
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
+            Guid? userId = null;
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             var startDateTime = DateTime.Now;
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                Assert.IsNotNull(loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
@@ -147,14 +180,25 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task PageUserMarkAsReadAsyncTest()
         {
-            Guid userId = Guid.NewGuid();
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
+            Guid? userId = null;
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             var startDateTime = DateTime.Now;
@@ -201,7 +245,7 @@ namespace Logic.Services.API.Tests
             {
                 // clean-up
                 await CommonFunctions.CleanUpUserAsync(userId, context);
-                await CommonFunctions.CleanUpBookAsync(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -209,7 +253,18 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserReadBookmarkedOrFirstTest()
         {
-            Guid userId = Guid.NewGuid();
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
+            Guid? userId = null;
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             int ordinalBeforeExpected = 1;
@@ -217,9 +272,8 @@ namespace Logic.Services.API.Tests
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                Assert.IsNotNull(loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
@@ -281,14 +335,25 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task PageUserReadBookmarkedOrFirstAsyncTest()
         {
-            Guid userId = Guid.NewGuid();
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
+            Guid? userId = null;
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             int ordinalBeforeExpected = 1;
@@ -361,7 +426,7 @@ namespace Logic.Services.API.Tests
             {
                 // clean-up
                 await CommonFunctions.CleanUpUserAsync(userId, context);
-                await CommonFunctions.CleanUpBookAsync(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -369,16 +434,26 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserReadByOrderWithinBookTest()
         {
-            Guid userId = Guid.NewGuid();
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
+            Guid? userId = null;
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             int ordinalExpected = 2;
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                Assert.IsNotNull(loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
@@ -421,14 +496,25 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task PageUserReadByOrderWithinBookAsyncTest()
         {
-            Guid userId = Guid.NewGuid();
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
+            Guid? userId = null;
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             int ordinalExpected = 2;
@@ -481,7 +567,7 @@ namespace Logic.Services.API.Tests
             {
                 // clean-up
                 await CommonFunctions.CleanUpUserAsync(userId, context);
-                await CommonFunctions.CleanUpBookAsync(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -489,6 +575,17 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserReadByPageIdAndLanguageUserIdTest()
         {
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
             var context = CommonFunctions.CreateContext();
             Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
             Guid pageId = CommonFunctions.GetPage384Id(context);
@@ -505,6 +602,17 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task PageUserReadByPageIdAndLanguageUserIdAsyncTest()
         {
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
             var context = CommonFunctions.CreateContext();
             Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
             Guid pageId = CommonFunctions.GetPage384Id(context);
@@ -523,16 +631,26 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserUpdateReadDateTest()
         {
-            Guid userId = Guid.NewGuid();
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
+            Guid? userId = null;
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             var startDateTime = DateTime.Now;
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                Assert.IsNotNull(loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
 
@@ -572,14 +690,25 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task PageUserUpdateReadDateAsyncTest()
         {
-            Guid userId = Guid.NewGuid();
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
+            Guid? userId = null;
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             var startDateTime = DateTime.Now;
@@ -629,7 +758,7 @@ namespace Logic.Services.API.Tests
             {
                 // clean-up
                 await CommonFunctions.CleanUpUserAsync(userId, context);
-                await CommonFunctions.CleanUpBookAsync(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -637,7 +766,18 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageUserUpdateUnknowWordsToWellKnownTest()
         {
-            Guid userId = Guid.NewGuid();
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
+            Guid? userId = null;
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             decimal expectedWordCount = 784.0M;
@@ -645,9 +785,8 @@ namespace Logic.Services.API.Tests
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                Assert.IsNotNull(loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
@@ -708,14 +847,25 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task PageUserUpdateUnknowWordsToWellKnownAsyncTest()
         {
-            Guid userId = Guid.NewGuid();
+            // boilerplate begin
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
+            // boilerplate end
+
+
+            Guid? userId = null;
             Guid bookId = Guid.NewGuid();
             var context = CommonFunctions.CreateContext();
             decimal expectedWordCount = 784.0M;
@@ -787,7 +937,7 @@ namespace Logic.Services.API.Tests
             {
                 // clean-up
                 await CommonFunctions.CleanUpUserAsync(userId, context);
-                await CommonFunctions.CleanUpBookAsync(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
     }

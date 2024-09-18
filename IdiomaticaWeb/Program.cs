@@ -32,7 +32,7 @@ builder.Services.AddAuthentication(options =>
 })
     .AddIdentityCookies();
 
-builder.Services.AddTransient<UserService>();
+builder.Services.AddTransient<LoginService>();
 
 var connection = String.Empty;
 if (builder.Environment.IsDevelopment())

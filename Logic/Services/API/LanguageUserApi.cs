@@ -19,9 +19,9 @@ namespace Logic.Services.API
             {
                 Id = Guid.NewGuid(),
                 LanguageId = language.Id,
-                Language = language,
+                //Language = language,
                 UserId = user.Id,
-                User = user,
+                //User = user,
                 TotalWordsRead = 0
             };
             languageUser = DataCache.LanguageUserCreate(languageUser, context);

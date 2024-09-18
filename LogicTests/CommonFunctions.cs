@@ -24,41 +24,39 @@ namespace LogicTests
 {
     internal static class CommonFunctions
     {
-        private static ServiceProvider _serviceProvider;
-
-
+        
 
         #region setup functions
 
         static CommonFunctions()
         {
             
-            _serviceProvider = new ServiceCollection()
-                .AddLogging()
-                .AddScoped<AuthenticationStateProvider, RevalidatingProviderForUnitTesting>()
-                .AddTransient<UserService>()
-                .BuildServiceProvider();
         }
 
-
-        
-        internal static UserService? CreateUserService()
-        {
-            if(_serviceProvider is null) { ErrorHandler.LogAndThrow(); return null; }
-            return _serviceProvider.GetService<UserService>();
-        }
-        internal static IdiomaticaContext CreateContext()
+        private static IServiceProvider Provider()
         {
             var connectionstring = "Server=localhost;Database=IdiomaticaFresh;Trusted_Connection=True;TrustServerCertificate=true;";
-            var optionsBuilder = new DbContextOptionsBuilder<IdiomaticaContext>();
-            optionsBuilder.UseSqlServer(connectionstring);
-            return new IdiomaticaContext(optionsBuilder.Options);
+
+            var services = new ServiceCollection();
+            services.AddTransient<LoginService>();
+            services.AddDbContextFactory<IdiomaticaContext>(options => {
+                options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("TestDataPopulator"));
+            });
+            return services.BuildServiceProvider();
+        }
+        public static T GetRequiredService<T>()
+        {
+            var provider = Provider();
+            return provider.GetRequiredService<T>();
         }
         
+
+
+        
 #if DEBUG
-        internal static void SetLoggedInUser(Model.User user, UserService userService, IdiomaticaContext context)
+        internal static void SetLoggedInUser(Model.User user, LoginService loginService, IdiomaticaContext context)
         {
-            userService.SetLoggedInUserForTestBench(user, context);
+            loginService.SetLoggedInUserForTestBench(user, context);
         }
 #endif
         #endregion
@@ -165,80 +163,86 @@ namespace LogicTests
         }
 
         internal static (Guid userId, Guid bookId, Guid bookUserId) CreateUserAndBookAndBookUser(
-            IdiomaticaContext context, UserService userService)
+            IdiomaticaContext context, LoginService userService)
         {
-            Guid userId = Guid.NewGuid();
-            Guid bookId = Guid.NewGuid();
-            Guid? bookUserId;
-
-            
-
+            Guid? userId = null;
+            Guid? bookId = null;
+            Guid? bookUserId = null;
 
             var user = CreateNewTestUser(userService, context);
+            Assert.IsNotNull(user);
+            userId = user.Id;
 
-            
-
-
-
-
-            if (user is null)
-            { ErrorHandler.LogAndThrow(); return (userId, bookId, Guid.NewGuid()); }
-            userId = (Guid)user.Id;
-            var languageUser = LanguageUserApi.LanguageUserCreate(context, GetSpanishLanguage(context),
-                user);
+            var languageUser = LanguageUserApi.LanguageUserGet(
+                context, GetSpanishLanguageId(context), (Guid)userId);
+                
             if (languageUser is null) ErrorHandler.LogAndThrow();
 
 
             Book? book = CreateBook(context, (Guid)user.Id);
             if (book is null)
-            { ErrorHandler.LogAndThrow(); return (userId, bookId, Guid.NewGuid()); }
+                { ErrorHandler.LogAndThrow(); return (Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()); }
             bookId = (Guid)book.Id;
 
             var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
                 context, (Guid)book.Id, (Guid)user.Id);
             if (bookUser is null)
-            { ErrorHandler.LogAndThrow(); return (userId, bookId, Guid.NewGuid()); }
+            { ErrorHandler.LogAndThrow(); return (Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()); }
             bookUserId = (Guid)bookUser.Id;
 
-            return (userId, bookId, (Guid)bookUserId);
+            return ((Guid)userId, (Guid)bookId, (Guid)bookUserId);
         }
         internal static async Task<(Guid userId, Guid bookId, Guid bookUserId)> CreateUserAndBookAndBookUserAsync(
-            IdiomaticaContext context, UserService userService)
+            IdiomaticaContext context, LoginService userService)
         {
             return await Task<(Guid userId, Guid bookId, Guid bookUserId)>.Run(() =>
             {
                 return CreateUserAndBookAndBookUser(context, userService);
             });
         }
-
-        internal static User? CreateNewTestUser(UserService userService, IdiomaticaContext context)
+        internal static User? CreateNewTestUser(
+            LoginService loginService, IdiomaticaContext context,
+            AvailableLanguageCode learningLanguageCode, AvailableLanguageCode uiLanguageCode)
         {
             var applicationUserId = Guid.NewGuid().ToString();
-            var uiLanguageId = GetEnglishLanguageId(context);
-            var learningLanguageId = GetSpanishLanguageId(context);
-            var name = "Auto gen tester 2";
+
+            var uiLang = LanguageApi.LanguageReadByCode(context, uiLanguageCode);
+            Assert.IsNotNull(uiLang);
+            var uiLanguageId = uiLang.Id;
+
+            var learningLang = LanguageApi.LanguageReadByCode(context, learningLanguageCode);
+            Assert.IsNotNull(learningLang);
+            var learningLanguageId = learningLang.Id;
+
+            var name = "Auto gen tester";
             var user = UserApi.UserCreate(applicationUserId, name, context);
             if (user is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
             }
-            LanguageUserApi.LanguageUserCreate(context, GetSpanishLanguage(context), user);
+            LanguageUserApi.LanguageUserCreate(context, learningLang, user);
             UserApi.UserSettingCreate(context, AvailableUserSetting.UILANGUAGE,
                 user.Id, uiLanguageId.ToString());
             UserApi.UserSettingCreate(context, AvailableUserSetting.CURRENTLEARNINGLANGUAGE,
                 user.Id, learningLanguageId.ToString());
 #if DEBUG
-            SetLoggedInUser(user, userService, context);
+            SetLoggedInUser(user, loginService, context);
 #endif
             return user;
         }
+
+        internal static User? CreateNewTestUser(LoginService loginService, IdiomaticaContext context)
+        {
+            return CreateNewTestUser(
+                loginService, context, AvailableLanguageCode.ES, AvailableLanguageCode.EN_US);
+        }
         internal static async Task<User?> CreateNewTestUserAsync(
-            UserService userService, IdiomaticaContext context)
+            LoginService loginService, IdiomaticaContext context)
         {
             return await Task<User?>.Run(() =>
             {
-                return CreateNewTestUser(userService, context);
+                return CreateNewTestUser(loginService, context);
             });
         }
 

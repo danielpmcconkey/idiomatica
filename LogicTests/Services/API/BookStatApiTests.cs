@@ -7,8 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using LogicTests;
 using Logic.Telemetry;
+using Model;
 using Model.DAL;
 using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API.Tests
 {
@@ -18,8 +20,11 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookStatsCreateAndSaveTest()
         {
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            
+
             int expectedPageCount = 4;
 
             try
@@ -34,23 +39,24 @@ namespace Logic.Services.API.Tests
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.Id;
 
-                BookStatApi.BookStatsCreateAndSave(context, bookId);
+                BookStatApi.BookStatsCreateAndSave(context, (Guid)bookId);
 
-                int actualPageCount = BookApi.BookReadPageCount(context, bookId);
+                int actualPageCount = BookApi.BookReadPageCount(context, (Guid)bookId);
 
                 Assert.AreEqual(expectedPageCount, actualPageCount);
             }
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task BookStatsCreateAndSaveAsyncTest()
         {
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             int expectedPageCount = 4;
 
             try
@@ -65,16 +71,16 @@ namespace Logic.Services.API.Tests
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.Id;
 
-                await BookStatApi.BookStatsCreateAndSaveAsync(context, bookId);
+                await BookStatApi.BookStatsCreateAndSaveAsync(context, (Guid)bookId);
 
-                int actualPageCount = await BookApi.BookReadPageCountAsync(context, bookId);
+                int actualPageCount = await BookApi.BookReadPageCountAsync(context, (Guid)bookId);
 
                 Assert.AreEqual(expectedPageCount, actualPageCount);
             }
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
             }
         }
 
@@ -82,8 +88,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookStatsCreateAndSaveMakesDifficultyScoreTest()
         {
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             decimal expectedDifficulty = 13.2M;
 
             try
@@ -98,9 +105,9 @@ namespace Logic.Services.API.Tests
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.Id;
 
-                BookStatApi.BookStatsCreateAndSave(context, bookId);
+                BookStatApi.BookStatsCreateAndSave(context, (Guid)bookId);
                 var difficultyStat = DataCache.BookStatByBookIdAndStatKeyRead(
-                    (bookId, AvailableBookStat.DIFFICULTYSCORE), context);
+                    ((Guid)bookId, AvailableBookStat.DIFFICULTYSCORE), context);
 
                 Assert.IsNotNull(difficultyStat);
                 Assert.IsNotNull(difficultyStat.Value);
@@ -110,14 +117,15 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task BookStatsCreateAndSaveMakesDifficultyScoreAsyncTest()
         {
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             decimal expectedDifficulty = 13.2M;
 
             try
@@ -132,9 +140,9 @@ namespace Logic.Services.API.Tests
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.Id;
 
-                await BookStatApi.BookStatsCreateAndSaveAsync(context, bookId);
+                await BookStatApi.BookStatsCreateAndSaveAsync(context, (Guid)bookId);
                 var difficultyStat = await DataCache.BookStatByBookIdAndStatKeyReadAsync(
-                    (bookId, AvailableBookStat.DIFFICULTYSCORE), context);
+                    ((Guid)bookId, AvailableBookStat.DIFFICULTYSCORE), context);
 
                 Assert.IsNotNull(difficultyStat);
                 Assert.IsNotNull(difficultyStat.Value);
@@ -144,7 +152,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
             }
         }
     }

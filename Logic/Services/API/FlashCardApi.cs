@@ -10,15 +10,16 @@ using System.Net;
 using DeepL;
 using System.Linq.Expressions;
 using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class FlashCardApi
     {
-        public static FlashCard? FlashCardCreate(
-            DiContainer diContainer, Guid wordUserId, AvailableLanguageCode uiLanguageCode)
+        public static FlashCard? FlashCardCreate(IDbContextFactory<IdiomaticaContext> dbContextFactory,
+            Guid wordUserId, AvailableLanguageCode uiLanguageCode)
         {
-            var context = diContainer.DbContextFactory.CreateDbContext();
+            var context = dbContextFactory.CreateDbContext();
 
             var wordUser = DataCache.WordUserAndLanguageUserAndLanguageByIdRead(wordUserId, context);
             if (wordUser == null) { ErrorHandler.LogAndThrow(); return null; }
@@ -152,11 +153,12 @@ namespace Logic.Services.API
             return card;
         }
         public static async Task<FlashCard?> FlashCardCreateAsync(
-            DiContainer diContainer, Guid wordUserId, AvailableLanguageCode uiLanguageCode)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid wordUserId,
+            AvailableLanguageCode uiLanguageCode)
         {
             return await Task<FlashCard?>.Run(() =>
             {
-                return FlashCardCreate(diContainer, wordUserId, uiLanguageCode);
+                return FlashCardCreate(dbContextFactory, wordUserId, uiLanguageCode);
             });
         }
 
@@ -207,11 +209,11 @@ namespace Logic.Services.API
 
 
         public static List<FlashCard>? FlashCardsCreate(
-            DiContainer diContainer, Guid languageUserId, int numCards,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid languageUserId, int numCards,
             AvailableLanguageCode uiLanguageCode)
         {
             if (numCards < 1) { return new List<FlashCard>(); }
-            var context = diContainer.DbContextFactory.CreateDbContext();
+            var context = dbContextFactory.CreateDbContext();
             
             List<FlashCard> cards = new List<FlashCard>();
 
@@ -243,17 +245,18 @@ namespace Logic.Services.API
             foreach (var wordUser in wordUsers)
             {
                 if(wordUser is null) continue;
-                var card = FlashCardCreate(diContainer, (Guid)wordUser.Id, uiLanguageCode);
+                var card = FlashCardCreate(dbContextFactory, (Guid)wordUser.Id, uiLanguageCode);
                 if (card != null) cards.Add(card);
             }
             return cards;
         }
         public static async Task<List<FlashCard>?> FlashCardsCreateAsync(
-            DiContainer diContainer, Guid languageUserId, int numCards, AvailableLanguageCode uiLanguageCode)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, 
+            Guid languageUserId, int numCards, AvailableLanguageCode uiLanguageCode)
         {
             return await Task<FlashCard?>.Run(() =>
             {
-                return FlashCardsCreate(diContainer, languageUserId, numCards, uiLanguageCode);
+                return FlashCardsCreate(dbContextFactory, languageUserId, numCards, uiLanguageCode);
             });
         }
 

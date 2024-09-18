@@ -22,23 +22,24 @@ namespace Model.DAL
         public static FlashCard? FlashCardCreate(FlashCard flashCard, IdiomaticaContext context)
         {
             
-            int numRows = context.Database.ExecuteSql($"""
+            //int numRows = context.Database.ExecuteSql($"""
                         
-                INSERT INTO [Idioma].[FlashCard]
-                      ([WordUserId]
-                      ,[Status]
-                      ,[NextReview]
-                      ,[Id])
-                VALUES
-                      ({flashCard.WordUserId}
-                      ,{flashCard.Status}
-                      ,{flashCard.NextReview}
-                      ,{flashCard.Id})
+            //    INSERT INTO [Idioma].[FlashCard]
+            //          ([WordUserId]
+            //          ,[Status]
+            //          ,[NextReview]
+            //          ,[Id])
+            //    VALUES
+            //          ({flashCard.WordUserId}
+            //          ,{flashCard.Status}
+            //          ,{flashCard.NextReview}
+            //          ,{flashCard.Id})
         
-                """);
-            if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
+            //    """);
+            //if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
             
-
+            context.FlashCards.Add(flashCard);
+            context.SaveChanges();
             // add it to cache
             FlashCardById[flashCard.Id] = flashCard; ;
 

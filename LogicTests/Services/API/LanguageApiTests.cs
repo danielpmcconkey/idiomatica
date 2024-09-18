@@ -10,6 +10,8 @@ using LogicTests;
 using Model;
 using Model.Enums;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using Model.DAL;
 
 namespace Logic.Services.API.Tests
 {
@@ -19,7 +21,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void LanguageReadTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
 
             Guid languageId = CommonFunctions.GetEnglishLanguageId(context);
             AvailableLanguageCode expectedCode = AvailableLanguageCode.EN_US;
@@ -34,7 +37,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task LanguageReadAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             Guid languageId = CommonFunctions.GetEnglishLanguageId(context);
             AvailableLanguageCode expectedCode = AvailableLanguageCode.EN_US;
 
@@ -46,10 +50,12 @@ namespace Logic.Services.API.Tests
             
         }
 
+
         [TestMethod()]
         public void LanguageReadByCodeTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             AvailableLanguageCode code = AvailableLanguageCode.EN_US;
             Guid expectedId = CommonFunctions.GetEnglishLanguageId(context);
 
@@ -64,7 +70,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task LanguageReadByCodeAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             AvailableLanguageCode code = AvailableLanguageCode.EN_US;
             Guid expectedId = CommonFunctions.GetEnglishLanguageId(context);
             var language = await LanguageApi.LanguageReadByCodeAsync(context, code);
@@ -74,11 +81,12 @@ namespace Logic.Services.API.Tests
             Assert.AreEqual(expectedId, language.Id);
         }
 
+
         [TestMethod()]
         public void LanguageOptionsReadTest()
         {
-
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
 
             Expression<Func<Language, bool>> filter1 = (x => x.IsImplementedForLearning == true);
             Expression<Func<Language, bool>> filter2 = (x => x.IsImplementedForUI == true);
@@ -108,8 +116,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task LanguageOptionsReadAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
-
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            
             Expression<Func<Language, bool>> filter1 = (x => x.IsImplementedForLearning == true);
             Expression<Func<Language, bool>> filter2 = (x => x.IsImplementedForUI == true);
             Expression<Func<Language, bool>> filter3 = (x => x.IsImplementedForTranslation == true);
@@ -136,103 +145,113 @@ namespace Logic.Services.API.Tests
             Assert.AreEqual("English (American)", englishFrom3.Value.Name);
         }
 
-
+        /// <summary>
+        /// the name of LanguageReadByCodeTest2 is an artifact of when I merged
+        /// the language and language code classes. They each had separate read
+        /// by code methods and their own tests. I decided to keep the second test.
+        /// </summary>
         [TestMethod()]
         public void LanguageReadByCodeTest2()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             AvailableLanguageCode code = AvailableLanguageCode.HU;
             string expectedName = "Hungarian";
-
             var Language = LanguageApi.LanguageReadByCode(context, code);
-            if (Language == null)
-            { ErrorHandler.LogAndThrow(); return; }
-
+            Assert.IsNotNull(Language);
             Assert.AreEqual(expectedName, Language.Name);
         }
-
         [TestMethod()]
         public async Task LanguageReadByCodeAsyncTest2()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             AvailableLanguageCode code = AvailableLanguageCode.HU;
             string expectedName = "Hungarian";
-
             var Language = await LanguageApi.LanguageReadByCodeAsync(context, code);
-            if (Language == null)
-            { ErrorHandler.LogAndThrow(); return; }
-
+            Assert.IsNotNull(Language);
             Assert.AreEqual(expectedName, Language.Name);
         }
+
 
         [TestMethod()]
         public void LanguageUserInterfacePreferenceReadByUserIdTest()
         {
-            Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
             AvailableLanguageCode code = AvailableLanguageCode.HU;
             var language = LanguageApi.LanguageReadByCode(context, code);
             Assert.IsNotNull(language);
             string expectedName = "Hungarian";
             var applicationUserId = Guid.NewGuid().ToString();
-            var name = "Auto gen tester 3";
 
             try
             {
-                // create the user
-                var user = UserApi.UserCreate(applicationUserId, name, context);
-                if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = user.Id;
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, context,
+                    AvailableLanguageCode.ES, AvailableLanguageCode.HU);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
+
 
                 // create the setting
 
                 UserApi.UserSettingCreate(
-                    context, AvailableUserSetting.UILANGUAGE, userId, language.Id.ToString());
+                    context, AvailableUserSetting.UILANGUAGE, (Guid)userId, language.Id.ToString());
 
-                var uiLanguageSetting = UserApi.UserSettingUiLanguagReadByUserId(context, userId);
-                if (uiLanguageSetting is null) { ErrorHandler.LogAndThrow(); return; }
+                var uiLanguageSetting = UserApi.UserSettingUiLanguagReadByUserId(
+                    context, (Guid)userId);
+                Assert.IsNotNull(uiLanguageSetting);
 
                 Assert.AreEqual(expectedName, uiLanguageSetting.Name);
             }
             finally
             {
-                CommonFunctions.CleanUpUser(userId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
             }
         }
-
-
         [TestMethod()]
         public async Task LanguageUserInterfacePreferenceReadByUserIdAsyncTest()
         {
-            Guid userId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
             AvailableLanguageCode code = AvailableLanguageCode.HU;
             var language = await LanguageApi.LanguageReadByCodeAsync(context, code);
             Assert.IsNotNull(language);
             string expectedName = "Hungarian";
             var applicationUserId = Guid.NewGuid().ToString();
-            var name = "Auto gen tester 3";
 
             try
             {
-                // create the user
-                var user = await UserApi.UserCreateAsync(applicationUserId, name, context);
-                if (user is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = user.Id;
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, context,
+                    AvailableLanguageCode.ES, AvailableLanguageCode.HU);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
+
 
                 // create the setting
-                
-                await UserApi.UserSettingCreateAsync(
-                    context, AvailableUserSetting.UILANGUAGE, userId, language.Id.ToString());
 
-                var uiLanguageSetting = await UserApi.UserSettingUiLanguagReadByUserIdAsync(context, userId);
-                if (uiLanguageSetting is null) { ErrorHandler.LogAndThrow(); return; }
+                await UserApi.UserSettingCreateAsync(
+                    context, AvailableUserSetting.UILANGUAGE, (Guid)userId, language.Id.ToString());
+
+                var uiLanguageSetting = await UserApi.UserSettingUiLanguagReadByUserIdAsync(
+                    context, (Guid)userId);
+                Assert.IsNotNull(uiLanguageSetting);
 
                 Assert.AreEqual(expectedName, uiLanguageSetting.Name);
             }
             finally
             {
-                CommonFunctions.CleanUpUser(userId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, context);
             }
         }
     }

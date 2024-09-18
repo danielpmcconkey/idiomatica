@@ -8,8 +8,10 @@ using System.Threading.Tasks;
 using LogicTests;
 using System.Net;
 using Logic.Telemetry;
-
+using Model;
 using Model.Enums;
+using Microsoft.EntityFrameworkCore;
+using Model.DAL;
 
 namespace Logic.Services.API.Tests
 {
@@ -19,8 +21,11 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookCreateAndSaveTest()
         {
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            
+
             string expectedTitle = TestConstants.NewBookTitle;
 
             try
@@ -46,14 +51,15 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task BookCreateAndSaveAsyncTest()
         {
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             string expectedTitle = TestConstants.NewBookTitle;
 
             try
@@ -78,7 +84,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await CommonFunctions.CleanUpBookAsync(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -86,10 +92,13 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookListReadTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             var originalPacket = new BookListDataPacket(context, true);
             int expectedCount = originalPacket.BookListRowsToDisplay;
-            Guid loggedInUserId = Guid.NewGuid(); 
+            Guid loggedInUserId = Guid.NewGuid(); // this shouldn't work
+            throw new NotImplementedException("figure out why this worked with a new guid. Is this returning all books regardless?");
+
             int originalRowCount = originalPacket.BookListRows is null ? 0 : originalPacket.BookListRows.Count;
             var newPacket = BookApi.BookListRead(context, loggedInUserId, originalPacket);
 
@@ -100,11 +109,15 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task BookListReadAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+
             var originalPacket = new BookListDataPacket(context, true);
             int expectedCount = originalPacket.BookListRowsToDisplay;
 
-            Guid loggedInUserId = Guid.NewGuid(); 
+            Guid loggedInUserId = CommonFunctions.GetTestUserId(context);
+
+            throw new NotImplementedException("figure out why this worked with a new guid. Is this returning all books regardless?");
 
             int originalRowCount = originalPacket.BookListRows is null ? 0 : originalPacket.BookListRows.Count;
             var newPacket = await BookApi.BookListReadAsync(context, loggedInUserId, originalPacket);
@@ -120,7 +133,10 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task BookListReadSortByDifficultyAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            
+
             var originalPacket = new BookListDataPacket(context, false);
             originalPacket.OrderBy = (int)AvailableBookListSortProperties.DIFFICULTY;
             originalPacket.ShouldSortAscending = true;
@@ -145,7 +161,11 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookListReadSortByDifficultyTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            
+
+
             var originalPacket = new BookListDataPacket(context, false);
             originalPacket.OrderBy = (int)AvailableBookListSortProperties.DIFFICULTY;
             originalPacket.ShouldSortAscending = true;
@@ -172,31 +192,39 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookListRowByBookIdAndUserIdReadTest()
         {
-            Guid userId = Guid.NewGuid();
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            
+
+
             string expectedTitle = TestConstants.NewBookTitle;
             string secondProgressExpected = "1 / 4";
 
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if(userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                if(loginService is null) { ErrorHandler.LogAndThrow(); return; }
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(
+                    context, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
                 
                 // take the first row -- should be pretty empty
-                var firstRow = BookApi.BookListRowByBookIdAndUserIdRead(context, bookId, userId);
-                if (firstRow is null || firstRow.Title is null) { ErrorHandler.LogAndThrow(); return; }
-
+                var firstRow = BookApi.BookListRowByBookIdAndUserIdRead(
+                    context, (Guid)bookId, (Guid)userId);
+                Assert.IsNotNull(firstRow);
+                Assert.IsNotNull(firstRow.Title);
+                
                 string actualTitle = firstRow.Title;
 
                 // start reading it
-                var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(context, userService, bookId);
-                if (readDataPacket is null) { ErrorHandler.LogAndThrow(); return; }
+                var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(
+                    context, loginService, (Guid)bookId);
+                Assert.IsNotNull (readDataPacket);
                 
                 // clear page and move forward
                 OrchestrationApi.OrchestrateClearPageAndMove(context, readDataPacket, 2);
@@ -205,9 +233,9 @@ namespace Logic.Services.API.Tests
                 BookUserStatApi.BookUserStatsUpdateByBookUserId(context, bookUserId);
 
                 // grab the row again -- expect it to be new
-                var secondRow = BookApi.BookListRowByBookIdAndUserIdRead(context, bookId, userId);
-                if (secondRow is null || secondRow.Progress is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                var secondRow = BookApi.BookListRowByBookIdAndUserIdRead(context, (Guid)bookId, (Guid)userId);
+                Assert.IsNotNull(secondRow);
+                Assert.IsNotNull(secondRow.Progress);
                 
                 string secondProgressActual = secondRow.Progress;
 
@@ -218,42 +246,47 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
             }
         }
         [TestMethod()]
         public async Task BookListRowByBookIdAndUserIdReadAsyncTest()
         {
-            Guid userId = Guid.NewGuid();
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+
+
+
             string expectedTitle = TestConstants.NewBookTitle;
             string secondProgressExpected = "1 / 4";
 
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                if (loginService is null) { ErrorHandler.LogAndThrow(); return; }
+                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(
+                    context, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
-                
-                // take the first row -- should be pretty empty
 
+                // take the first row -- should be pretty empty
                 var firstRow = await BookApi.BookListRowByBookIdAndUserIdReadAsync(
-                    context, bookId, userId);
-                if (firstRow is null || firstRow.Title is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                    context, (Guid)bookId, (Guid)userId);
+                Assert.IsNotNull(firstRow);
+                Assert.IsNotNull(firstRow.Title);
+
                 string actualTitle = firstRow.Title;
 
                 // start reading it
                 var readDataPacket = await OrchestrationApi.OrchestrateReadDataInitAsync(
-                    context, userService, bookId);
-                if (readDataPacket is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                    context, loginService, (Guid)bookId);
+                Assert.IsNotNull(readDataPacket);
+
                 // clear page and move forward
                 await OrchestrationApi.OrchestrateClearPageAndMoveAsync(context, readDataPacket, 2);
 
@@ -261,10 +294,10 @@ namespace Logic.Services.API.Tests
                 await BookUserStatApi.BookUserStatsUpdateByBookUserIdAsync(context, bookUserId);
 
                 // grab the row again -- expect it to be new
-                var secondRow = await BookApi.BookListRowByBookIdAndUserIdReadAsync(
-                    context, bookId, userId);
-                if (secondRow is null || secondRow.Progress is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                var secondRow = await BookApi.BookListRowByBookIdAndUserIdReadAsync(context, (Guid)bookId, (Guid)userId);
+                Assert.IsNotNull(secondRow);
+                Assert.IsNotNull(secondRow.Progress);
+
                 string secondProgressActual = secondRow.Progress;
 
                 // assert
@@ -274,8 +307,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                await CommonFunctions.CleanUpBookAsync(bookId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -283,20 +316,24 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookReadTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             var bookId = CommonFunctions.GetBook13Id(context);
+
             string expectedTitle = "Cenicienta";
             var book = BookApi.BookRead(context, bookId);
-            
+
             Assert.IsNotNull(book);
             Assert.AreEqual(expectedTitle, book.Title);
-            
         }
         [TestMethod()]
         public async Task BookReadAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
+            
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             var bookId = CommonFunctions.GetBook13Id(context);
+
             string expectedTitle = "Cenicienta";
             var book = await BookApi.BookReadAsync(context, bookId);
 
@@ -309,7 +346,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookReadPageCountTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+
             Guid bookId = CommonFunctions.GetBook17Id(context);
             int expectedPageCount = 5;
             int actualPageCount = BookApi.BookReadPageCount(context, bookId);
@@ -319,7 +358,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task BookReadPageCountAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            
             Guid bookId = CommonFunctions.GetBook17Id(context);
             int expectedPageCount = 5;
             int actualPageCount = await BookApi.BookReadPageCountAsync(context, bookId);

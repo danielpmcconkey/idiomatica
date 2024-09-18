@@ -2,7 +2,7 @@
 @using Logic.Services.API
 @using Model.Enums
 @rendermode InteractiveServer
-@inject UserService UserService;
+@inject LoginService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 
 <Modal @ref="modal" Title="@_title" Size="ModalSize.Large">

@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace LogicTests
 {
-    public class TestDbContextFactory : IDbContextFactory<IdiomaticaContext>
-    {
-        public IdiomaticaContext CreateDbContext()
-        {
-            var connectionstring = "Server=localhost;Database=IdiomaticaFresh;Trusted_Connection=True;TrustServerCertificate=true;";
-            var optionsBuilder = new DbContextOptionsBuilder<IdiomaticaContext>();
-            optionsBuilder.UseSqlServer(connectionstring);
-            return new IdiomaticaContext(optionsBuilder.Options);
-        }
-    }
+    //public class TestDbContextFactory : IDbContextFactory<IdiomaticaContext>
+    //{
+    //    public IdiomaticaContext CreateDbContext()
+    //    {
+    //        var connectionstring = "Server=localhost;Database=IdiomaticaFresh;Trusted_Connection=True;TrustServerCertificate=true;";
+    //        var optionsBuilder = new DbContextOptionsBuilder<IdiomaticaContext>();
+    //        optionsBuilder.UseSqlServer(connectionstring);
+    //        return new IdiomaticaContext(optionsBuilder.Options);
+    //    }
+    //}
 }

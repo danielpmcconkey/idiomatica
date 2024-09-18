@@ -16,7 +16,7 @@ using Model.Enums;
 
 namespace Logic.Services
 {
-    public class UserService
+    public class LoginService
     {
         private ClaimsPrincipal? _loggedInUserClaimsPrincipal;
         private User? _loggedInUser;
@@ -31,7 +31,7 @@ namespace Logic.Services
 
 
         private AuthenticationStateProvider _authenticationStateProvider;
-        public UserService(
+        public LoginService(
             AuthenticationStateProvider AuthenticationStateProvider)
         {
             _authenticationStateProvider = AuthenticationStateProvider;
