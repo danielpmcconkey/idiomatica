@@ -859,7 +859,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await CommonFunctions.CleanUpUserAsync(userId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, context);
                 if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }

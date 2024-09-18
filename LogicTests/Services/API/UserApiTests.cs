@@ -395,7 +395,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // shouldn't really need to, but just in case
-                await CommonFunctions.CleanUpUserAsync(userId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, context);
             }
         }
 
@@ -516,7 +516,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // shouldn't really need to, but just in case
-                await CommonFunctions.CleanUpUserAsync(userId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, context);
             }
         }
     }

@@ -163,41 +163,37 @@ namespace LogicTests
         }
 
         internal static (Guid userId, Guid bookId, Guid bookUserId) CreateUserAndBookAndBookUser(
-            IdiomaticaContext context, LoginService userService)
+            IdiomaticaContext context, LoginService loginService)
         {
             Guid? userId = null;
             Guid? bookId = null;
             Guid? bookUserId = null;
 
-            var user = CreateNewTestUser(userService, context);
+            var user = CreateNewTestUser(loginService, context);
             Assert.IsNotNull(user);
             userId = user.Id;
 
             var languageUser = LanguageUserApi.LanguageUserGet(
                 context, GetSpanishLanguageId(context), (Guid)userId);
-                
-            if (languageUser is null) ErrorHandler.LogAndThrow();
-
+            Assert.IsNotNull(languageUser);
 
             Book? book = CreateBook(context, (Guid)user.Id);
-            if (book is null)
-                { ErrorHandler.LogAndThrow(); return (Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()); }
+            Assert.IsNotNull(book);
             bookId = (Guid)book.Id;
 
             var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
                 context, (Guid)book.Id, (Guid)user.Id);
-            if (bookUser is null)
-            { ErrorHandler.LogAndThrow(); return (Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()); }
+            Assert.IsNotNull(bookUser);
             bookUserId = (Guid)bookUser.Id;
 
             return ((Guid)userId, (Guid)bookId, (Guid)bookUserId);
         }
         internal static async Task<(Guid userId, Guid bookId, Guid bookUserId)> CreateUserAndBookAndBookUserAsync(
-            IdiomaticaContext context, LoginService userService)
+            IdiomaticaContext context, LoginService loginService)
         {
             return await Task<(Guid userId, Guid bookId, Guid bookUserId)>.Run(() =>
             {
-                return CreateUserAndBookAndBookUser(context, userService);
+                return CreateUserAndBookAndBookUser(context, loginService);
             });
         }
         internal static User? CreateNewTestUser(
