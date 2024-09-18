@@ -13,6 +13,9 @@ using Logic.Services.API;
 using Xunit;
 using Logic.Telemetry;
 using Logic;
+using Logic.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace TestDataPopulator
 {
@@ -53,6 +56,31 @@ namespace TestDataPopulator
 
                 throw;
             }
+        }
+        private ServiceProvider GetServiceProvider()
+        {
+            var connectionstring = "Server=localhost;Database=IdiomaticaFresh;Trusted_Connection=True;TrustServerCertificate=true;";
+
+            var services = new ServiceCollection();
+            services.AddTransient<LoginService>();
+            services.AddDbContextFactory<IdiomaticaContext>(options => {
+                options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("TestDataPopulator"));
+            });
+            return services.BuildServiceProvider();
+        }
+        /// <summary>
+        /// The GetRequiredService method was taken from this guide
+        /// https://gkama.medium.com/dependency-injection-di-in-net-core-and-net-5-c-unit-tests-935651a99a2d .
+        /// This is copied from the test project. So centralize it someday?
+        /// </summary>
+        public T GetRequiredService<T>() where T : notnull
+        {
+            var provider = GetServiceProvider();
+            var service = provider.GetRequiredService<T>();
+            if (service is null) { ErrorHandler.LogAndThrow(); }
+#pragma warning disable CS8603 // Possible null reference return.
+            return service;
+#pragma warning restore CS8603 // Possible null reference return.
         }
         internal IdiomaticaContext CreateContext()
         {
@@ -420,10 +448,8 @@ namespace TestDataPopulator
 
             string[] wordsToUse = ["de", "la", "que", "el", "en"];
 
-            var contextFactory = new DataPopualatorDbContextFactory();
-            DiContainer diContainer = new DiContainer(contextFactory);
-
-            var context = diContainer.DbContextFactory.CreateDbContext();
+            var dbContextFactory = GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
 
 
             foreach (var w in wordsToUse)
@@ -438,7 +464,8 @@ namespace TestDataPopulator
                     .FirstOrDefault();
                 if (wordUser is null) throw new InvalidDataException();
 
-                FlashCardApi.FlashCardCreate(diContainer, wordUser.Id, _englishLanguage.Code);
+
+                FlashCardApi.FlashCardCreate(dbContextFactory, wordUser.Id, _englishLanguage.Code);
             }
             return true;
         }

@@ -147,7 +147,6 @@
     </NotAuthorized>
 </AuthorizeView>
 @code {
-    private DiContainer? diContainer;
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private int LoadingDelayMiliseconds = 500;
     User? LoggedInUser = null;
@@ -232,8 +231,8 @@
     {
         try
         {
-            diContainer = new DiContainer(DbContextFactory);
-            var context = diContainer.DbContextFactory.CreateDbContext();
+            
+            var context = DbContextFactory.CreateDbContext();
 
             if (IsDataInit == false)
             {
@@ -296,12 +295,11 @@
         {
             if (LoggedInUser is null) { ErrorHandler.LogAndThrow(); return; }
             if (LanguageInput is null) { ErrorHandler.LogAndThrow(); return; }
-            if (diContainer is null) { ErrorHandler.LogAndThrow(); return; }
             if (NumNewCardsInput is null) NumNewCardsInput = 0;
             if (NumOldCardsInput is null) NumOldCardsInput = 0;
 
             FlashCardDataPacket = OrchestrationApi.OrchestrateFlashCardDeckCreation(
-                diContainer, LoggedInUser.Id,
+                DbContextFactory, LoggedInUser.Id,
                 (AvailableLanguageCode)LanguageInput, (int)NumNewCardsInput,
                 (int)NumOldCardsInput);
 

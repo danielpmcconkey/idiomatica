@@ -20,18 +20,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PotentialSentencesSplitFromTextTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            var context = CommonFunctions.CreateContext();
             string expectedValue = "Los niños iban a jugar al jardín del gigante.";
 
             var language = LanguageApi.LanguageReadByCode(
@@ -47,18 +37,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task PotentialSentencesSplitFromTextAsyncTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            var context = CommonFunctions.CreateContext();
             string expectedValue = "Los niños iban a jugar al jardín del gigante.";
             var language = await LanguageApi.LanguageReadByCodeAsync(
                 context, TestConstants.NewBookLanguageCode);
@@ -75,19 +55,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void SentenceCreateTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
             string sentence1 = "Cada tarde, después de la escuela.";
             string sentence2 = "Los niños iban a jugar al jardín del gigante.";
 
@@ -161,19 +131,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task SentenceCreateAsyncTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            Guid bookId = Guid.NewGuid();
-            var context = CommonFunctions.CreateContext();
             string sentence1 = "Cada tarde, después de la escuela.";
             string sentence2 = "Los niños iban a jugar al jardín del gigante.";
 
@@ -238,7 +198,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, context);
             }
         }
 
@@ -246,18 +206,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void SentencesReadByPageIdTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            var context = CommonFunctions.CreateContext();
             Guid pageId = CommonFunctions.GetPage378Id(context);
             int expectedCount = 18;
             string expectedText = "El príncipe aprendió las palabras mágicas y visitó a Rapunzel en secreto.";
@@ -273,18 +223,8 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task SentencesReadByPageIdAsyncTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
-
-
-            var context = CommonFunctions.CreateContext();
             Guid pageId = CommonFunctions.GetPage378Id(context);
             int expectedCount = 18;
             string expectedText = "El príncipe aprendió las palabras mágicas y visitó a Rapunzel en secreto.";
@@ -300,18 +240,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void SentencesReadByParagraphIdTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
 
-
-            var context = CommonFunctions.CreateContext();
             Guid paragraphId = CommonFunctions.GetParagraph14594Id(context);
             int expectedCount = 3;
             int sentenceOrdinal = 2;
@@ -328,18 +259,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task SentencesReadByParagraphIdAsyncTest()
         {
-            // boilerplate begin
-            Guid? userId = null;
-            Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
-            var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            // boilerplate end
+            var context = dbContextFactory.CreateDbContext();            
 
-
-            var context = CommonFunctions.CreateContext();
             Guid paragraphId = CommonFunctions.GetParagraph14594Id(context);
             int expectedCount = 3;
             int sentenceOrdinal = 2;

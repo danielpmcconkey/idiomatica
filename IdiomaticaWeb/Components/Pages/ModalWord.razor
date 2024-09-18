@@ -129,7 +129,6 @@
     [Parameter]
     public ReadDataPacket ReadDataPacket { get; set; } = new();
 
-    private DiContainer? diContainer;
 
     private Modal modal = default!;
     private Token? _token = null;
@@ -151,7 +150,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        diContainer = new DiContainer(DbContextFactory);
+        
     }
 
     public async Task OnShowModalClick(Token thisToken)
@@ -346,8 +345,7 @@
         _isSavingFlashCard = true;
         if (_doesFlashCardExist) return;
 
-        if (diContainer is null) { ErrorHandler.LogAndThrow(); return; }
-
+        
         if (_wordUser is null)
         {
             ErrorHandler.LogAndThrow();
@@ -370,7 +368,7 @@
                 context, (Guid)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
 
         // now make the card
-        await FlashCardApi.FlashCardCreateAsync(diContainer, (Guid)_wordUser.Id, uiLanguage.Code);
+        await FlashCardApi.FlashCardCreateAsync(DbContextFactory, (Guid)_wordUser.Id, uiLanguage.Code);
 
         _isSavingFlashCard = false;
         _doesFlashCardExist = true;

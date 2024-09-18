@@ -9,7 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Logic\Logic.csproj" />
     <ProjectReference Include="..\Model\Model.csproj" />
-    <ProjectReference Include="..\TestDataPopulator\TestDataPopulator.csproj" />
   </ItemGroup>
 
   <ItemGroup>
