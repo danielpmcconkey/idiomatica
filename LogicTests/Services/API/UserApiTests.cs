@@ -25,7 +25,7 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
 
             try
@@ -80,7 +80,7 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
 
             try
@@ -195,7 +195,7 @@ namespace Logic.Services.API.Tests
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
 
 
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
             try
             {
@@ -272,7 +272,7 @@ namespace Logic.Services.API.Tests
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             
 
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
             try
             {
@@ -349,7 +349,7 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
             try
             {
@@ -396,7 +396,7 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
             try
             {

@@ -20,7 +20,6 @@ namespace Model
 
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid ParagraphId { get; set; }
-        public required Paragraph Paragraph { get; set; }
         [Required] public required int Ordinal { get; set; }
         [Column(TypeName = "TEXT")]
         [Required] public required string Text { get; set; }
@@ -30,6 +29,7 @@ namespace Model
         
 
         #region relationships
+        public Paragraph? Paragraph { get; set; }
         public List<Token> Tokens { get; set; } = new List<Token>();
         #endregion
 

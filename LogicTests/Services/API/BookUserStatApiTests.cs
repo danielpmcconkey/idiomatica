@@ -144,7 +144,7 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Guid bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookEspañaId(dbContextFactory);
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             decimal expectedWordCount = 905.0M;
             decimal expectedDistinctKnowPercent = 0.11M;
@@ -221,7 +221,7 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Guid bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookEspañaId(dbContextFactory);
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             decimal expectedWordCount = 905.0M;
             decimal expectedDistinctKnowPercent = 0.11M;

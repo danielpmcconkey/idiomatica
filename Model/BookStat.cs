@@ -17,14 +17,14 @@ namespace Model
         #region required data
 
         [Required] public required Guid BookId { get; set; }
-        public required Book Book { get; set; }
         [Required] public required AvailableBookStat Key { get; set; }
+        [StringLength(250)]
+        public required string Value { get; set; }
 
 
         #endregion
         
+        public  Book? Book { get; set; }
 
-        [StringLength(250)]
-        public required string Value { get; set; }
     }
 }

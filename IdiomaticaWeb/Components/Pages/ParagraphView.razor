@@ -146,8 +146,8 @@ else
     }
     private async Task<List<Token>> GetSentenceTokens(Sentence sentence)
     {
-        var context = DbContextFactory.CreateDbContext();
-        sentence.Tokens = await TokenApi.TokensAndWordsReadBySentenceIdAsync(context, (Guid)sentence.Id);
+        sentence.Tokens = await TokenApi.TokensAndWordsReadBySentenceIdAsync(
+            DbContextFactory, (Guid)sentence.Id);
         return sentence.Tokens;
         
     }

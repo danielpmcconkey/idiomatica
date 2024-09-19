@@ -24,27 +24,25 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void PageCreateFromPageSplitTest()
         {
-            Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             var context = dbContextFactory.CreateDbContext();
-            string expectedResult = "alió un hermosa flor";
+            string expectedResult = "tro éramos felices.\"";
 
             try
             {
-                Assert.IsNotNull(loginService);
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(
-                    dbContextFactory, loginService);
-                userId = createResult.userId;
-                bookId = createResult.bookId;
-
-                Book? book = BookApi.BookRead(dbContextFactory, (Guid)bookId);
-                Assert.IsNotNull(book);
-
-                // pull language from the db
-                var language = DataCache.LanguageByCodeRead(TestConstants.NewBookLanguageCode, dbContextFactory);
-                Assert.IsNotNull(language);
+                Book? book = new()
+                {
+                    Title = TestConstants.NewBookTitle,
+                    LanguageId = language.Id,
+                    //Language = language,
+                    Id = Guid.NewGuid()
+                };
+                book = DataCache.BookCreate(book, dbContextFactory);
+                if (book is null)
+                { ErrorHandler.LogAndThrow(); return; }
+                bookId = (Guid)book.Id;
 
                 // divide text into paragraphs
                 string[] paragraphSplits = ParagraphApi.PotentialParagraphsSplitFromText(
@@ -73,34 +71,31 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
                 if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
         [TestMethod()]
         public async Task PageCreateFromPageSplitAsyncTest()
         {
-            Guid? userId = null;
             Guid? bookId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             var context = dbContextFactory.CreateDbContext();
-            string expectedResult = "alió un hermosa flor";
+            string expectedResult = "tro éramos felices.\"";
 
             try
             {
-                Assert.IsNotNull(loginService);
-                var createResult = await CommonFunctions.CreateUserAndBookAndBookUserAsync(
-                    dbContextFactory, loginService);
-                userId = createResult.userId;
-                bookId = createResult.bookId;
-
-                Book? book = BookApi.BookRead(dbContextFactory, (Guid)bookId);
-                Assert.IsNotNull(book);
-
-                // pull language from the db
-                var language = await DataCache.LanguageByCodeReadAsync(TestConstants.NewBookLanguageCode, dbContextFactory);
-                Assert.IsNotNull(language);
+                Book? book = new()
+                {
+                    Title = TestConstants.NewBookTitle,
+                    LanguageId = language.Id,
+                    //Language = language,
+                    Id = Guid.NewGuid()
+                };
+                book = DataCache.BookCreate(book, dbContextFactory);
+                if (book is null)
+                { ErrorHandler.LogAndThrow(); return; }
+                bookId = (Guid)book.Id;
 
                 // divide text into paragraphs
                 string[] paragraphSplits = await ParagraphApi.PotentialParagraphsSplitFromTextAsync(
@@ -129,7 +124,6 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
                 if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, dbContextFactory);
             }
         }
@@ -141,7 +135,7 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
             Guid pageId = CommonFunctions.GetPage392Id(dbContextFactory);
-            string expectedResult = "erías pirenaicas.33?"; // the right-most 20 chars
+            string expectedResult = "facerías pirenaicas."; // the right-most 20 chars
 
             var page = PageApi.PageReadById(dbContextFactory, pageId);
             Assert.IsNotNull(page);
@@ -156,7 +150,7 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
             Guid pageId = CommonFunctions.GetPage392Id(dbContextFactory);
-            string expectedResult = "erías pirenaicas.33?"; // the right-most 20 chars
+            string expectedResult = "facerías pirenaicas."; // the right-most 20 chars
 
             var page = await PageApi.PageReadByIdAsync(dbContextFactory, pageId);
             Assert.IsNotNull(page);
@@ -172,7 +166,7 @@ namespace Logic.Services.API.Tests
         {
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
             int ordinal = 2;
             string expectedResult = "riunfa sobre el mal."; // the right-most 20 chars
 
@@ -189,7 +183,7 @@ namespace Logic.Services.API.Tests
         {
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
             int ordinal = 2;
             string expectedResult = "riunfa sobre el mal."; // the right-most 20 chars
             
@@ -208,8 +202,8 @@ namespace Logic.Services.API.Tests
         {
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
-            string expectedResult = "n lugar de Rapunzel."; // the right-most 20 chars
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
+            string expectedResult = "él cuando regresara."; // the right-most 20 chars
 
             var page = PageApi.PageReadFirstByBookId(dbContextFactory, bookId);
             Assert.IsNotNull(page);
@@ -223,8 +217,8 @@ namespace Logic.Services.API.Tests
         {
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
-            string expectedResult = "n lugar de Rapunzel."; // the right-most 20 chars
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
+            string expectedResult = "él cuando regresara."; // the right-most 20 chars
 
             var page = await PageApi.PageReadFirstByBookIdAsync(dbContextFactory, bookId);
             Assert.IsNotNull(page);
@@ -245,7 +239,7 @@ namespace Logic.Services.API.Tests
             var context = dbContextFactory.CreateDbContext();
 
 
-            string expectedResult = "a una escena hermosa";
+            string expectedResult = "egado la primavera.\"";
 
             try
             {
@@ -291,7 +285,7 @@ namespace Logic.Services.API.Tests
             var context = dbContextFactory.CreateDbContext();
 
 
-            string expectedResult = "a una escena hermosa";
+            string expectedResult = "egado la primavera.\"";
 
             try
             {

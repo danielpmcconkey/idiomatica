@@ -82,7 +82,7 @@
     {
         get
         {
-            var user = UserService.GetLoggedInUser(DbContextFactory.CreateDbContext());
+            var user = UserService.GetLoggedInUser(DbContextFactory);
             if (user == null) return null;
             return user.Name;
         }

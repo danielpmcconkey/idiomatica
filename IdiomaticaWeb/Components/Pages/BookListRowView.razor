@@ -195,7 +195,7 @@
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            _loggedInUser = await UserService.GetLoggedInUserAsync(context);
+            _loggedInUser = await UserService.GetLoggedInUserAsync(DbContextFactory);
             _bookId = Row.BookId;
 
             await t_delay;
@@ -473,17 +473,16 @@
             ErrorHandler.LogAndThrow();
             return;
         }
-        var context = DbContextFactory.CreateDbContext();
         var bookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
-            context, (Guid)_bookId, (Guid)_loggedInUser.Id);
+            DbContextFactory, (Guid)_bookId, (Guid)_loggedInUser.Id);
         if (bookUser is null)
         {
             ErrorHandler.LogAndThrow();
             return;
         }
-        BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (Guid)bookUser.Id);
+        BookUserStatApi.BookUserStatsUpdateByBookUserId(DbContextFactory, (Guid)bookUser.Id);
         // re-load the row
-        var newRow = BookApi.BookListRowByBookIdAndUserIdRead(context, (Guid)_bookId, (Guid)_loggedInUser.Id);
+        var newRow = BookApi.BookListRowByBookIdAndUserIdRead(DbContextFactory, (Guid)_bookId, (Guid)_loggedInUser.Id);
         if (newRow is not null) Row = newRow;
     }
     private async Task OnClickRefresh()

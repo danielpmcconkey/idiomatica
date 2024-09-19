@@ -32,9 +32,9 @@ namespace Logic.Services.API.Tests
              * bookUser, all in one call
              * */
 
-            string totalPagesExpected = "3";
+            string totalPagesExpected = "4";
             string totalWordCountExpected = "784";
-            string distinctWordCountExpected = "241";
+            string distinctWordCountExpected = "239";
 
             try
             {
@@ -117,9 +117,9 @@ namespace Logic.Services.API.Tests
              * bookUser, all in one call
              * */
 
-            string totalPagesExpected = "3";
+            string totalPagesExpected = "4";
             string totalWordCountExpected = "784";
-            string distinctWordCountExpected = "241";
+            string distinctWordCountExpected = "239";
 
             try
             {
@@ -197,10 +197,10 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            Guid bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookEspañaId(dbContextFactory); // España
             int totalPageCount = 5;
             Guid languageId = learningLanguage.Id;
-            int wordCount = 137;
+            int wordCount = 135; // distinct words in page 2
             int paragraphCount = 1;
             string wordToLookUp = "país";
             AvailableWordUserStatus statusBeforeExpected = AvailableWordUserStatus.UNKNOWN;
@@ -282,10 +282,10 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            Guid bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookEspañaId(dbContextFactory); // España
             int totalPageCount = 5;
             Guid languageId = learningLanguage.Id;
-            int wordCount = 137;
+            int wordCount = 135; // distinct words in page 2
             int paragraphCount = 1;
             string wordToLookUp = "país";
             AvailableWordUserStatus statusBeforeExpected = AvailableWordUserStatus.UNKNOWN;
@@ -370,7 +370,7 @@ namespace Logic.Services.API.Tests
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             AvailableLanguageCode learningLanguageCode = AvailableLanguageCode.ES;
-            Guid bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookEspañaId(dbContextFactory);
             int numNew = 4;
             int numOld = 3;
             var attemptStatus = AvailableFlashCardAttemptStatus.EASY;
@@ -468,7 +468,7 @@ namespace Logic.Services.API.Tests
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             AvailableLanguageCode learningLanguageCode = AvailableLanguageCode.ES;
-            Guid bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookEspañaId(dbContextFactory);
             int numNew = 4;
             int numOld = 3;
             var attemptStatus = AvailableFlashCardAttemptStatus.EASY;
@@ -567,7 +567,7 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            Guid bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookEspañaId(dbContextFactory);
             int numNew = 4;
             int numOld = 3;
             AvailableLanguageCode learningLanguageCode = AvailableLanguageCode.ES;
@@ -603,10 +603,13 @@ namespace Logic.Services.API.Tests
                 foreach (var wordUser in wordUsers)
                 {
                     WordUserApi.WordUserUpdate(
-                        dbContextFactory, (Guid)wordUser.Id, AvailableWordUserStatus.LEARNING3, "test");
+                        dbContextFactory, (Guid)wordUser.Id,
+                        AvailableWordUserStatus.LEARNING3, "test");
                 }
 
                 // create deck 1
+                // requesting 4 new and 3 old
+                // it'll have 4 new and 0 old, since there are no old cards yet
                 var dataPacket1 = OrchestrationApi.OrchestrateFlashCardDeckCreation(
                     dbContextFactory, (Guid)userId, learningLanguageCode, numNew, numOld);
 
@@ -627,7 +630,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(cardToUpdate1.WordUserId);
                 FlashCardApi.FlashCardUpdate(dbContextFactory, (Guid)cardToUpdate1.Id,
                     (Guid)cardToUpdate1.WordUserId, AvailableFlashCardStatus.DONTUSE,
-                    DateTime.Now.AddHours(-1), (Guid)cardToUpdate1.Id);
+                    DateTimeOffset.Now.AddHours(-1), (Guid)cardToUpdate1.Id);
 
                 // manually update card 2's next review date so it shows up in the next deck creation
                 Assert.IsNotNull(dataPacket1);
@@ -637,9 +640,12 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(cardToUpdate.WordUserId);
                 FlashCardApi.FlashCardUpdate(dbContextFactory, (Guid)cardToUpdate.Id,
                     (Guid)cardToUpdate.WordUserId, AvailableFlashCardStatus.ACTIVE,
-                    DateTime.Now.AddHours(-1), (Guid)cardToUpdate.Id);
+                    DateTimeOffset.Now.AddHours(-1), (Guid)cardToUpdate.Id);
 
                 // create deck 2
+                // requesting 4 new and 3 old again
+                // it'll have 4 new and 1 old, since two cards meet the date
+                // req's but one of those is deactivated
                 var dataPacket2 = OrchestrationApi.OrchestrateFlashCardDeckCreation(
                     dbContextFactory, (Guid)userId, learningLanguageCode, numNew, numOld);
 
@@ -665,7 +671,7 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            Guid bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookEspañaId(dbContextFactory);
             int numNew = 4;
             int numOld = 3;
             AvailableLanguageCode learningLanguageCode = AvailableLanguageCode.ES;
@@ -701,10 +707,13 @@ namespace Logic.Services.API.Tests
                 foreach (var wordUser in wordUsers)
                 {
                     await WordUserApi.WordUserUpdateAsync(
-                        dbContextFactory, (Guid)wordUser.Id, AvailableWordUserStatus.LEARNING3, "test");
+                        dbContextFactory, (Guid)wordUser.Id,
+                        AvailableWordUserStatus.LEARNING3, "test");
                 }
 
                 // create deck 1
+                // requesting 4 new and 3 old
+                // it'll have 4 new and 0 old, since there are no old cards yet
                 var dataPacket1 = await OrchestrationApi.OrchestrateFlashCardDeckCreationAsync(
                     dbContextFactory, (Guid)userId, learningLanguageCode, numNew, numOld);
 
@@ -725,7 +734,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(cardToUpdate1.WordUserId);
                 await FlashCardApi.FlashCardUpdateAsync(dbContextFactory, (Guid)cardToUpdate1.Id,
                     (Guid)cardToUpdate1.WordUserId, AvailableFlashCardStatus.DONTUSE,
-                    DateTime.Now.AddHours(-1), (Guid)cardToUpdate1.Id);
+                    DateTimeOffset.Now.AddHours(-1), (Guid)cardToUpdate1.Id);
 
                 // manually update card 2's next review date so it shows up in the next deck creation
                 Assert.IsNotNull(dataPacket1); 
@@ -735,9 +744,12 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(cardToUpdate.WordUserId);
                 await FlashCardApi.FlashCardUpdateAsync(dbContextFactory, (Guid)cardToUpdate.Id,
                     (Guid)cardToUpdate.WordUserId, AvailableFlashCardStatus.ACTIVE,
-                    DateTime.Now.AddHours(-1), (Guid)cardToUpdate.Id);
+                    DateTimeOffset.Now.AddHours(-1), (Guid)cardToUpdate.Id);
 
                 // create deck 2
+                // requesting 4 new and 3 old again
+                // it'll have 4 new and 1 old, since two cards meet the date
+                // req's but one of those is deactivated
                 var dataPacket2 = await OrchestrationApi.OrchestrateFlashCardDeckCreationAsync(
                     dbContextFactory, (Guid)userId, learningLanguageCode, numNew, numOld);
 
@@ -765,10 +777,10 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            var bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            var bookId = CommonFunctions.GetBookEspañaId(dbContextFactory); // 'España'
             Guid languageId = CommonFunctions.GetSpanishLanguageId(dbContextFactory);
             Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            int wordCount = 137;
+            int wordCount = 135; // distinct words on page 2
             int paragraphCount = 1;
 
             try
@@ -823,10 +835,10 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            var bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            var bookId = CommonFunctions.GetBookEspañaId(dbContextFactory); // 'España'
             Guid languageId = CommonFunctions.GetSpanishLanguageId(dbContextFactory);
             Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            int wordCount = 137;
+            int wordCount = 135; // distinct words on page 2
             int paragraphCount = 1;
 
             try
@@ -883,9 +895,9 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            var bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            var bookId = CommonFunctions.GetBookEspañaId(dbContextFactory); // España
             Guid languageId = learningLanguage.Id;
-            int wordCount = 51; // distinct words on the first page
+            int wordCount = 49; // distinct words on the first page
             int paragraphCount = 1;
             int bookUserStatsCount = 8;
 
@@ -897,10 +909,10 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
 
-                // create languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(
-                    dbContextFactory, learningLanguage, user);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // fetch the languageUser
+                var languageUser = LanguageUserApi.LanguageUserGet(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // simulate read data init
                 var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(
@@ -933,9 +945,9 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            var bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            var bookId = CommonFunctions.GetBookEspañaId(dbContextFactory); // España
             Guid languageId = learningLanguage.Id;
-            int wordCount = 51; // distinct words on the first page
+            int wordCount = 49; // distinct words on the first page
             int paragraphCount = 1;
             int bookUserStatsCount = 8;
 
@@ -947,11 +959,11 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
 
-                // create languageUser
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    dbContextFactory, learningLanguage, user);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
-                
+                // fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
+
                 // simulate read data init
                 var readDataPacket = await OrchestrationApi.OrchestrateReadDataInitAsync(
                     dbContextFactory, loginService, bookId);
@@ -984,9 +996,9 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            var bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            var bookId = CommonFunctions.GetBookEspañaId(dbContextFactory);
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            int wordCount = 137; // distinct words on the second page
+            int wordCount = 135; // distinct words on the second page
             int paragraphCount = 1;
 
             try
@@ -1060,9 +1072,9 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            var bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            var bookId = CommonFunctions.GetBookEspañaId(dbContextFactory);
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            int wordCount = 137; // distinct words on the second page
+            int wordCount = 135; // distinct words on the second page
             int paragraphCount = 1;
 
             try

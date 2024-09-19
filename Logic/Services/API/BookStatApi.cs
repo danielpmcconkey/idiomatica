@@ -7,12 +7,13 @@ using Model.DAL;
 using Logic.Telemetry;
 using Microsoft.EntityFrameworkCore;
 using Model.Enums;
+using Model;
 
 namespace Logic.Services.API
 {
     public static class BookStatApi
     {
-        public static void BookStatsCreateAndSave(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
+        public static List<BookStat> BookStatsCreateAndSave(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
             var context = dbContextFactory.CreateDbContext();
             int numRows = context.Database.ExecuteSql($"""
@@ -93,10 +94,17 @@ namespace Logic.Services.API
             {
                 ErrorHandler.LogAndThrow();
             }
+            var list = DataCache.BookStatsByBookIdRead(bookId, dbContextFactory);
+            if (list is null) { ErrorHandler.LogAndThrow(); return []; }
+            return list;
         }
-        public static async Task BookStatsCreateAndSaveAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
+        public static async Task<List<BookStat>> BookStatsCreateAndSaveAsync(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
-            await Task.Run(() => BookStatsCreateAndSave(dbContextFactory, bookId));
+            return await Task< List<BookStat>>.Run(() =>
+            {
+                return BookStatsCreateAndSave(dbContextFactory, bookId);
+            });
         }
     }
 }

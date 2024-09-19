@@ -28,7 +28,7 @@ namespace Logic.Services.API
             {
                 Id = Guid.NewGuid(),
                 BookId = book.Id,
-                Book = book,
+                //Book = book,
                 Ordinal = ordinal,
                 OriginalText = textTrimmed
             };

@@ -105,9 +105,9 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
-            Guid pageId = CommonFunctions.GetPage378Id(dbContextFactory);
-            int expectedCount = 122;
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
+            Guid pageId = CommonFunctions.GetRapunzelPage1Id(dbContextFactory);
+            int expectedCount = 107;
 
             try
             {
@@ -141,9 +141,9 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
-            Guid pageId = CommonFunctions.GetPage378Id(dbContextFactory);
-            int expectedCount = 122;
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
+            Guid pageId = CommonFunctions.GetRapunzelPage1Id(dbContextFactory);
+            int expectedCount = 107;
 
             try
             {
@@ -179,10 +179,10 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
-            Guid pageId = CommonFunctions.GetPage378Id(dbContextFactory);
-            int expectedCount = 122;
-            string wordToCheck = "exploradores";
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
+            Guid pageId = CommonFunctions.GetRapunzelPage1Id(dbContextFactory);
+            int expectedCount = 107;
+            string wordToCheck = "cautivado";
 
             try
             {
@@ -225,10 +225,10 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
-            Guid pageId = CommonFunctions.GetPage378Id(dbContextFactory);
-            int expectedCount = 122;
-            string wordToCheck = "exploradores";
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
+            Guid pageId = CommonFunctions.GetRapunzelPage1Id(dbContextFactory);
+            int expectedCount = 107;
+            string wordToCheck = "cautivado";
 
             try
             {
@@ -369,9 +369,9 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
             Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(dbContextFactory);
-            Guid wordUserId = CommonFunctions.GetWordUser(dbContextFactory, languageUserId, "vivían");
+            Guid wordUserId = CommonFunctions.GetWordUser(dbContextFactory, languageUserId, "niña");
             AvailableWordUserStatus status = AvailableWordUserStatus.LEARNED;
-            string translation = "they were living (imperfect)";
+            string translation = "girl";
 
             var wordUser = WordUserApi.WordUserReadById(dbContextFactory, wordUserId);
             Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
@@ -384,9 +384,9 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
             Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(dbContextFactory);
-            Guid wordUserId = CommonFunctions.GetWordUser(dbContextFactory, languageUserId, "vivían");
+            Guid wordUserId = CommonFunctions.GetWordUser(dbContextFactory, languageUserId, "niña");
             AvailableWordUserStatus status = AvailableWordUserStatus.LEARNED;
-            string translation = "they were living (imperfect)";
+            string translation = "girl";
 
             var wordUser = await WordUserApi.WordUserReadByIdAsync(dbContextFactory, wordUserId);
             Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);

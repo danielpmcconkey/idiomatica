@@ -279,7 +279,7 @@ namespace Logic.Services.API
 
         public static FlashCard? FlashCardUpdate(
             IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid cardId, Guid wordUserId, 
-            AvailableFlashCardStatus status, DateTime nextReview, Guid id)
+            AvailableFlashCardStatus status, DateTimeOffset nextReview, Guid id)
         {
             var card = DataCache.FlashCardByIdRead(cardId, dbContextFactory);
             if (card == null) { ErrorHandler.LogAndThrow(); return null; }
@@ -292,7 +292,7 @@ namespace Logic.Services.API
         }
         public static async Task<FlashCard?> FlashCardUpdateAsync(
             IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid cardId, Guid wordUserId, 
-            AvailableFlashCardStatus status, DateTime nextReview, Guid id)
+            AvailableFlashCardStatus status, DateTimeOffset nextReview, Guid id)
         {
             return await Task<FlashCard?>.Run(() =>
             {

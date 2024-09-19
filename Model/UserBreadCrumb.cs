@@ -18,15 +18,15 @@ namespace Model
         #region required data
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid UserId { get; set; }
-        public required User User { get; set; }
         [Required] public required Guid PageId { get; set; }
-        public required Page Page { get; set; }
         [Required] public required DateTimeOffset ActionDateTime { get; set; }
 
 
 
         #endregion
 
+        public User? User { get; set; }
+        public Page? Page { get; set; }
         
 
 

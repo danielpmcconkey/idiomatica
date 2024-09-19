@@ -82,20 +82,21 @@ namespace Model.DAL
         {
             var context = dbContextFactory.CreateDbContext();
 
-            int numRows = context.Database.ExecuteSql($"""
+            //int numRows = context.Database.ExecuteSql($"""
                         
-                INSERT INTO [Idioma].[Paragraph]
-                      ([PageId]
-                      ,[Ordinal]
-                      ,[Id])
-                VALUES
-                      ({paragraph.PageId}
-                      ,{paragraph.Ordinal}
-                      ,{paragraph.Id})
+            //    INSERT INTO [Idioma].[Paragraph]
+            //          ([PageId]
+            //          ,[Ordinal]
+            //          ,[Id])
+            //    VALUES
+            //          ({paragraph.PageId}
+            //          ,{paragraph.Ordinal}
+            //          ,{paragraph.Id})
         
-                """);
-            if (numRows < 1) throw new InvalidDataException("creating Paragraph affected 0 rows");
-            
+            //    """);
+            //if (numRows < 1) throw new InvalidDataException("creating Paragraph affected 0 rows");
+            context.Paragraphs.Add(paragraph);
+            context.SaveChanges();
             // add it to cache
             ParagraphById[paragraph.Id] = paragraph;
 

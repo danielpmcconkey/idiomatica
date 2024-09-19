@@ -42,7 +42,7 @@ namespace Logic.Services.API
                 Title = titleT,
                 SourceURI = urlT,
                 LanguageId = language.Id,
-                Language = language,
+                //Language = language,
             };
             book = DataCache.BookCreate(book, dbContextFactory);
             if (book is null)

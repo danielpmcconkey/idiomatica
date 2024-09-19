@@ -238,7 +238,7 @@
             {
                 _isLoading = true;
                 var t_delay = Task.Delay(LoadingDelayMiliseconds);
-                var t_init = Task.Run(() => InitData(context));
+                var t_init = Task.Run(() => InitData());
 
                 _shouldHideCard = true;
                 await t_delay;
@@ -263,10 +263,10 @@
             return;
         }
     }
-    private void InitData(IdiomaticaContext context)
+    private void InitData()
     {
-        LoggedInUser = UserService.GetLoggedInUser(context);
-        LanguageOptions = LanguageApi.LanguageOptionsRead(context,
+        LoggedInUser = UserService.GetLoggedInUser(DbContextFactory);
+        LanguageOptions = LanguageApi.LanguageOptionsRead(DbContextFactory,
                 (x => x.IsImplementedForLearning == true));
         var lcObject = UserService.GetUiLanguageCode();
         if(lcObject is null) { ErrorHandler.LogAndThrow(); return; }

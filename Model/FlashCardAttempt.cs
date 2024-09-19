@@ -17,13 +17,13 @@ namespace Model
         #region required data
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid FlashCardId { get; set; }
-        public required FlashCard FlashCard { get; set; }
         [Required] public required AvailableFlashCardAttemptStatus Status { get; set; }
         [Required] public required DateTimeOffset AttemptedWhen { get; set; }
 
 
 
         #endregion
+        public FlashCard? FlashCard { get; set; }
 
     }
 }

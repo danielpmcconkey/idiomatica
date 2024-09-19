@@ -19,13 +19,13 @@ namespace Model
 
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid PageId { get; set; }
-        public required Page Page { get; set; }
         [Required] public required int Ordinal { get; set; }
 
         #endregion
 
 
         #region relationships
+        public Page? Page { get; set; }
         public List<Sentence> Sentences { get; set; } = [];
 
         // warning, do not auto create the ParagraphTranslations list or you'll

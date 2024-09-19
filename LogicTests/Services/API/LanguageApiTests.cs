@@ -198,11 +198,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(userId);
 
 
-                // create the setting
-
-                UserApi.UserSettingCreate(
-                    dbContextFactory, AvailableUserSetting.UILANGUAGE, (Guid)userId, language.Id.ToString());
-
+                
                 var uiLanguageSetting = UserApi.UserSettingUiLanguagReadByUserId(
                     dbContextFactory, (Guid)userId);
                 Assert.IsNotNull(uiLanguageSetting);
@@ -238,11 +234,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(userId);
 
 
-                // create the setting
-
-                await UserApi.UserSettingCreateAsync(
-                    dbContextFactory, AvailableUserSetting.UILANGUAGE, (Guid)userId, language.Id.ToString());
-
+                
                 var uiLanguageSetting = await UserApi.UserSettingUiLanguagReadByUserIdAsync(
                     dbContextFactory, (Guid)userId);
                 Assert.IsNotNull(uiLanguageSetting);

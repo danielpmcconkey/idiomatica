@@ -28,7 +28,7 @@ namespace Logic.Services.API
                 Id = Guid.NewGuid(),
                 Ordinal = ordinal,
                 PageId = page.Id,
-                Page = page,
+                //Page = page,
             };
             paragraph = DataCache.ParagraphCreate(paragraph, dbContextFactory);
             if (paragraph is null)

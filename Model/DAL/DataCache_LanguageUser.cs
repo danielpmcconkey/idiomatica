@@ -20,33 +20,34 @@ namespace Model.DAL
         {
             var context = dbContextFactory.CreateDbContext();
 
-            Guid guid = Guid.NewGuid();
-            int numRows = context.Database.ExecuteSql($"""
+            //int numRows = context.Database.ExecuteSql($"""
                                 
-                INSERT INTO [Idioma].[LanguageUser]
-                           ([LanguageId]
-                           ,[UserId]
-                           ,[TotalWordsRead]
-                           ,[Id])
-                     VALUES
-                           ({languageUser.LanguageId}
-                           ,{languageUser.UserId}
-                           ,{languageUser.TotalWordsRead}
-                           ,{guid})
+            //    INSERT INTO [Idioma].[LanguageUser]
+            //               ([LanguageId]
+            //               ,[UserId]
+            //               ,[TotalWordsRead]
+            //               ,[Id])
+            //         VALUES
+            //               ({languageUser.LanguageId}
+            //               ,{languageUser.UserId}
+            //               ,{languageUser.TotalWordsRead}
+            //               ,{guid})
                 
-                """);
-            if (numRows < 1) throw new InvalidDataException("creating LanguageUser affected 0 rows");
-            var newEntity = context.LanguageUsers.Where(x => x.Id == guid).FirstOrDefault();
-            if (newEntity is null)
-            {
-                throw new InvalidDataException("newEntity is null in LanguageUserCreate");
-            }
+            //    """);
+            //if (numRows < 1) throw new InvalidDataException("creating LanguageUser affected 0 rows");
+            //var newEntity = context.LanguageUsers.Where(x => x.Id == guid).FirstOrDefault();
+            //if (newEntity is null)
+            //{
+            //    throw new InvalidDataException("newEntity is null in LanguageUserCreate");
+            //}
+            context.LanguageUsers.Add(languageUser);
+            context.SaveChanges();
             
 
             // add it to cache
-            LanguageUserUpdateCache(newEntity, dbContextFactory);
+            LanguageUserUpdateCache(languageUser, dbContextFactory);
 
-            return newEntity;
+            return languageUser;
         }
         public static async Task<LanguageUser?> LanguageUserCreateAsync(LanguageUser value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {

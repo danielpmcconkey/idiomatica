@@ -54,14 +54,16 @@ namespace Logic.Services.API
             if (saveContext) context.SaveChanges(); // this gets called a bunch, so maybe don't save inside the function
             return wordTranslation;
         }
-        public static Verb? VerbCreateAndSaveTranslations(IDbContextFactory<IdiomaticaContext> dbContextFactory,
+        public static Verb? VerbCreateAndSaveTranslations(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory,
             Verb learningVerb, Verb translationVerb, List<VerbConjugation> conjugations)
         {
 
             // note, it's not right to directly query frmo the API. But this
             // isn't a normal method, used by the app (I hope). It should only
             // be used for adding new word translations manually by system admins;
-            var englishLang = LanguageApi.LanguageReadByCode(dbContextFactory, AvailableLanguageCode.EN_US);
+            var englishLang = LanguageApi.LanguageReadByCode(
+                dbContextFactory, AvailableLanguageCode.EN_US);
             if (englishLang == null) { ErrorHandler.LogAndThrow(); return null; }
             Guid englishLangId = englishLang.Id;
 

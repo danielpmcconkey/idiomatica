@@ -157,8 +157,7 @@
     {
         try
         {
-            var context = await DbContextFactory.CreateDbContextAsync();
-
+            
             if (thisToken == null || thisToken.Id == null)
             {
                 ErrorHandler.LogAndThrow();
@@ -188,7 +187,7 @@
             if (_wordUser is null)
             {
                 // it shouldn't be, but create it if so
-                _wordUser = WordUserApi.WordUserCreate(context, _word,
+                _wordUser = WordUserApi.WordUserCreate(DbContextFactory, _word,
                     ReadDataPacket.LanguageUser, "", AvailableWordUserStatus.UNKNOWN);
             }
             if (_wordUser is null)
@@ -201,7 +200,7 @@
             _selectedStatus = UserService.GetUILabel($"statusLabel{(int)_wordUser.Status}");
 
             // check to display the "create card" button
-            var existingCard = FlashCardApi.FlashCardReadByWordUserId(context, (Guid)_wordUser.Id);
+            var existingCard = FlashCardApi.FlashCardReadByWordUserId(DbContextFactory, (Guid)_wordUser.Id);
             if (existingCard is null) _doesFlashCardExist = false;
             else _doesFlashCardExist = true;
 
@@ -271,7 +270,8 @@
             var context = await DbContextFactory.CreateDbContextAsync();
 
             await WordUserApi.WordUserUpdateAsync(
-                context, (Guid)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
+                DbContextFactory, (Guid)_wordUser.Id, 
+                (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
             if (Parent is not null) Parent.RefreshState();
             await modal.HideAsync();
         }
@@ -296,12 +296,11 @@
             {
                 _wordUser.Translation = string.Empty;
             }
-            var context = await DbContextFactory.CreateDbContextAsync();
-
+            
             if (ReadDataPacket.LanguageToCode is not null)
             {
                 var formattedTranslation = await WordUserApi.WordUserTranslationFormatAsync(
-                    context, _wordUser.Translation, ReadDataPacket.LanguageToCode.Code);
+                    DbContextFactory, _wordUser.Translation, ReadDataPacket.LanguageToCode.Code);
                 if (formattedTranslation is not null) _wordUser.Translation = formattedTranslation;
             }
         }
@@ -365,7 +364,8 @@
 
         // save the wordUser first
         await WordUserApi.WordUserUpdateAsync(
-                context, (Guid)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
+                DbContextFactory, (Guid)_wordUser.Id,
+                (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
 
         // now make the card
         await FlashCardApi.FlashCardCreateAsync(DbContextFactory, (Guid)_wordUser.Id, uiLanguage.Code);

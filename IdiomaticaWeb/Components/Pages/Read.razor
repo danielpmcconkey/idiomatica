@@ -205,7 +205,8 @@
     {
         var context = DbContextFactory.CreateDbContext();
         if (BookId is null) { ErrorHandler.LogAndThrow(); return; }
-        var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(context, UserService, (Guid)BookId);
+        var readDataPacket = OrchestrationApi.OrchestrateReadDataInit(
+            DbContextFactory, UserService, (Guid)BookId);
         if(readDataPacket is null)
         {
             ErrorHandler.LogAndThrow();
@@ -293,7 +294,7 @@
             var context = await DbContextFactory.CreateDbContextAsync();
             var newReadDataPacket = await Task.Run(() =>
             {
-                return OrchestrationApi.OrchestrateClearPageAndMove(context, ReadDataPacket, targetPageNum);
+                return OrchestrationApi.OrchestrateClearPageAndMove(DbContextFactory, ReadDataPacket, targetPageNum);
             });
             if (newReadDataPacket is null)
             {
@@ -328,7 +329,7 @@
     {
         _isDataInitRead = false;
         if (BookId is null) { ErrorHandler.LogAndThrow(); return; }
-        var newReadDataPacket = OrchestrationApi.OrchestrateMovePage(context,
+        var newReadDataPacket = OrchestrationApi.OrchestrateMovePage(DbContextFactory,
             ReadDataPacket, (Guid)BookId, targetPageNum);
         if (newReadDataPacket is null)
         {

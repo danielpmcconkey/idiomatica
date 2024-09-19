@@ -19,14 +19,14 @@ namespace Model
 
         [Required] public required Guid? Id { get; set; }
         [Required] public required Guid BookId { get; set; }
-        public required Book Book { get; set; }
         [Required] public required Guid UserId { get; set; }
-        public required User User { get; set; }
         [Required] public required DateTimeOffset Created { get; set; }
 
         [StringLength(250)]
         [Required] public required string Tag { get; set; }
         
         #endregion
+        public Book? Book { get; set; }
+        public User? User { get; set; }
     }
 }

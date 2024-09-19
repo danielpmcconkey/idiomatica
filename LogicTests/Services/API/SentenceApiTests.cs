@@ -73,7 +73,7 @@ namespace Logic.Services.API.Tests
                 {
                     Title = TestConstants.NewBookTitle,
                     LanguageId = (Guid)language.Id,
-                    Language = language,
+                    //Language = language,
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, dbContextFactory);
@@ -85,7 +85,7 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookId = book.Id,
-                    Book = book,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     Id = Guid.NewGuid()
@@ -98,7 +98,7 @@ namespace Logic.Services.API.Tests
                 Paragraph? paragraph = new()
                 {
                     PageId = page.Id,
-                    Page = page,
+                    //Page = page,
                     Ordinal = 1,
                     Id = Guid.NewGuid()
                 };
@@ -148,7 +148,7 @@ namespace Logic.Services.API.Tests
                 {
                     Title = TestConstants.NewBookTitle,
                     LanguageId = (Guid)language.Id,
-                    Language = language,
+                    //Language = language,
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, dbContextFactory);
@@ -160,7 +160,7 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookId = book.Id,
-                    Book = book,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     Id = Guid.NewGuid()
@@ -172,7 +172,7 @@ namespace Logic.Services.API.Tests
                 Paragraph? paragraph = new()
                 {
                     PageId = page.Id,
-                    Page = page,
+                    //Page = page,
                     Ordinal = 1,
                     Id = Guid.NewGuid()
                 };
@@ -208,8 +208,8 @@ namespace Logic.Services.API.Tests
         {
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
-            Guid pageId = CommonFunctions.GetPage378Id(dbContextFactory);
-            int expectedCount = 18;
+            Guid pageId = CommonFunctions.GetRapunzelPage1Id(dbContextFactory);
+            int expectedCount = 14;
             string expectedText = "El príncipe aprendió las palabras mágicas y visitó a Rapunzel en secreto.";
 
 
@@ -225,8 +225,8 @@ namespace Logic.Services.API.Tests
         {
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
-            Guid pageId = CommonFunctions.GetPage378Id(dbContextFactory);
-            int expectedCount = 18;
+            Guid pageId = CommonFunctions.GetRapunzelPage1Id(dbContextFactory);
+            int expectedCount = 14;
             string expectedText = "El príncipe aprendió las palabras mágicas y visitó a Rapunzel en secreto.";
             
             var sentences = await SentenceApi.SentencesReadByPageIdAsync(dbContextFactory, pageId);

@@ -72,13 +72,12 @@
 
     private async Task InitData()
     {
-        var context = await DbContextFactory.CreateDbContextAsync();
-        var loggedInUser = UserService.GetLoggedInUser(context);
+        var loggedInUser = UserService.GetLoggedInUser(DbContextFactory);
         if (loggedInUser is null) return;
         UserId = loggedInUser.Id;
         _wordCountCardTitle = UserService.GetUILabel("homeWordCountsHeader");
         _wordsReadCountList = WordApi.WordsGetListOfReadCount(
-            context, (Guid)loggedInUser.Id);
+            DbContextFactory, (Guid)loggedInUser.Id);
 
         _bookshelfButtonText = UserService.GetUILabel("homeBookshelfButtonText");
 

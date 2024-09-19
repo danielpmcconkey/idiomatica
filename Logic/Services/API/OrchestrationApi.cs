@@ -35,10 +35,11 @@ namespace Logic.Services.API
             }
             Guid bookId = (Guid)book.Id;
             // add the book stats
-            BookStatApi.BookStatsCreateAndSave(dbContextFactory, bookId);
+            book.BookStats = BookStatApi.BookStatsCreateAndSave(dbContextFactory, bookId);
             // now create the book user for the logged in user
             var bookUser = OrchestrateBookUserCreationAndSubProcesses(dbContextFactory, bookId, userId);
-
+            if (bookUser is null) { ErrorHandler.LogAndThrow(); return null; }
+            book.BookUsers.Add(bookUser);
 
             return book;
         }
@@ -228,7 +229,7 @@ namespace Logic.Services.API
                     && fc.WordUser.LanguageUserId == languageUser.Id
                     && fc.Status == AvailableFlashCardStatus.ACTIVE
                     && fc.NextReview != null
-                    && fc.NextReview <= DateTime.Now;
+                    && fc.NextReview <= DateTimeOffset.Now;
 
             var oldCards = FlashCardApi.FlashCardsFetchByNextReviewDateByPredicate(
                 dbContextFactory, predicate, numReview);

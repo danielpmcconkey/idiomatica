@@ -258,7 +258,7 @@ namespace LogicTests
             });
         }
 
-        internal static Guid GetBook17Id(IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        internal static Guid GetBookEspañaId(IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             var context = dbContextFactory.CreateDbContext();
             var book = context.Books.Where(x => x.Title == "España").FirstOrDefault();
@@ -266,7 +266,7 @@ namespace LogicTests
             Assert.IsNotNull(book.Id);
             return (Guid)book.Id;
         }
-        internal static Guid GetBook11Id(IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        internal static Guid GetBookRapunzelId(IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             var context = dbContextFactory.CreateDbContext();
             var book = context.Books.Where(x => x.Title == "Rapunzel").FirstOrDefault();
@@ -274,7 +274,15 @@ namespace LogicTests
             Assert.IsNotNull(book.Id);
             return (Guid)book.Id;
         }
-        internal static Guid GetBook13Id(IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        internal static Guid GetBookSelfishGiantId(IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            var context = dbContextFactory.CreateDbContext();
+            var book = context.Books.Where(x => x.Title == "The Selfish Giant").FirstOrDefault();
+            Assert.IsNotNull(book);
+            Assert.IsNotNull(book.Id);
+            return (Guid)book.Id;
+        }
+        internal static Guid GetBookCenicientaId(IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             var context = dbContextFactory.CreateDbContext();
             var book = context.Books.Where(x => x.Title == "Cenicienta").FirstOrDefault();
@@ -314,7 +322,7 @@ namespace LogicTests
             Assert.IsNotNull(page.Id);
             return (Guid)page.Id;
         }
-        internal static Guid GetPage384Id(IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        internal static Guid GetGuionParaPage1Id(IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             var context = dbContextFactory.CreateDbContext();
             var book = context.Books.Where(x => x.Title == "[GUION PARA VIDEO: EXPLICACIÓN DE \"COMPREHENSIBLE INPUT\" EN 5 MINUTOS]").Include(x => x.Pages).FirstOrDefault();
@@ -324,7 +332,7 @@ namespace LogicTests
             Assert.IsNotNull(page.Id);
             return (Guid)page.Id;
         }
-        internal static Guid GetPage378Id(IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        internal static Guid GetRapunzelPage1Id(IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             var context = dbContextFactory.CreateDbContext();
             var book = context.Books
@@ -390,12 +398,12 @@ namespace LogicTests
             Assert.IsNotNull(book);
             var page = book.Pages.Where(x => x.Ordinal == 1).FirstOrDefault();
             Assert.IsNotNull(page);
-            var BookUser = context.BookUsers
+            var bookUser = context.BookUsers
                 .Where(x => x.BookId == book.Id && x.LanguageUserId == languageUserId)
                 .FirstOrDefault();
-            Assert.IsNotNull(BookUser);
+            Assert.IsNotNull(bookUser);
             var pageUser = context.PageUsers
-                .Where(x => x.BookUserId == book.Id && x.PageId == page.Id)
+                .Where(x => x.BookUserId == bookUser.Id && x.PageId == page.Id)
                 .FirstOrDefault();
             Assert.IsNotNull(pageUser);
             Assert.IsNotNull(pageUser.Id);

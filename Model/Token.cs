@@ -21,9 +21,7 @@ namespace Model
         #region required data
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid WordId { get; set; }
-        public required Word Word { get; set; }
         [Required] public required Guid SentenceId { get; set; }
-        public required Sentence Sentence { get; set; }
 
         /// <summary>
         /// the text only component, regardless of status, includes any punctuation
@@ -39,5 +37,7 @@ namespace Model
 
         #endregion
 
+        public Word? Word { get; set; }
+        public Sentence? Sentence { get; set; }
     }
 }

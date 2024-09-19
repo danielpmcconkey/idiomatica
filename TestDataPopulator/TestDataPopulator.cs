@@ -17,6 +17,7 @@ using Logic.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Net;
 
 namespace TestDataPopulator
 {
@@ -85,14 +86,7 @@ namespace TestDataPopulator
             return service;
 #pragma warning restore CS8603 // Possible null reference return.
         }
-        internal IdiomaticaContext CreateContext()
-        {
-            var connectionstring = "Server=localhost;Database=IdiomaticaFresh;Trusted_Connection=True;TrustServerCertificate=true;";
-            var optionsBuilder = new DbContextOptionsBuilder<IdiomaticaContext>();
-            optionsBuilder.UseSqlServer(connectionstring);
-            optionsBuilder.EnableSensitiveDataLogging();
-            return new IdiomaticaContext(optionsBuilder.Options);
-        }
+        
         internal void LogMessage(string message)
         {
             Console.WriteLine($"{DateTime.Now}: {message}");
@@ -102,7 +96,8 @@ namespace TestDataPopulator
             if (_spanishLanguage is null) throw new InvalidDataException();
             if (_englishLanguage is null) throw new InvalidDataException();
 
-            var context = CreateContext();
+            var dbContextFactory = GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
 
             var spanishLanguage = context.Languages.Where(x => x.Id == _spanishLanguage.Id).FirstOrDefault();
             var englishLanguage = context.Languages.Where(x => x.Id == _englishLanguage.Id).FirstOrDefault();
@@ -136,7 +131,8 @@ namespace TestDataPopulator
         }
         private bool BuildLanguages()
         {
-            var context = CreateContext();
+            var dbContextFactory = GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             foreach (var l in LanguagesToPopulate.languages)
             {
                 var newLang = new Language()
@@ -161,7 +157,8 @@ namespace TestDataPopulator
             if (_spanishLanguage is null) throw new InvalidDataException();
             if (_englishLanguage is null) throw new InvalidDataException();
 
-            var context = CreateContext();
+            var dbContextFactory = GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             ApplicationUser appUser = new ApplicationUser()
             {
                 Id = "603daac1-43a2-436b-b133-28c2a516f9f3",
@@ -236,14 +233,25 @@ namespace TestDataPopulator
             if (_englishLanguage is null) throw new InvalidDataException();
             if (_user is null) throw new InvalidDataException();
 
-            var context = CreateContext();
+            var dbContextFactory = GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+
             foreach (var book in BooksToPopulate.books)
             {
                 AvailableLanguageCode code = AvailableLanguageCode.ES;
                 if (book.language == "English") code = AvailableLanguageCode.EN_US;
                 var newBook = OrchestrationApi.OrchestrateBookCreationAndSubProcesses(
-                    context, _user.Id, book.title, code, book.Uri, book.text);
+                    dbContextFactory, _user.Id, book.title, code, book.Uri, book.text);
                 if (newBook is null) throw new Exception("book creation returned null");
+
+                // build the page user for page 1 to pass unit tests
+                var firstPage = PageApi.PageReadFirstByBookId(dbContextFactory, newBook.Id);
+                if (firstPage is null)
+                {
+                    ErrorHandler.LogAndThrow();
+                    return false;
+                }
+                PageUserApi.PageUserCreateForPageIdAndUserId(
+                    dbContextFactory, firstPage, _user);
             }
             return true;
         }
@@ -253,7 +261,7 @@ namespace TestDataPopulator
             if (_englishLanguage is null) throw new InvalidDataException();
             if (_user is null) throw new InvalidDataException();
 
-            var context = CreateContext();
+            var dbContextFactory = GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             for (int i = 0; i < VerbsToPopulate.verbs.Length; i++)
             {
                 var v = VerbsToPopulate.verbs[i];
@@ -294,7 +302,7 @@ namespace TestDataPopulator
                     PastParticiple = v.en_PastParticiple,
                 };
                 OrchestrationApi.OrchestrateVerbConjugationAndTranslationSpanishToEnglish(
-                    context, spanishVerb, englishVerb);
+                    dbContextFactory, spanishVerb, englishVerb);
 
                 if ((i + 1) % 20 == 0)
                 {
@@ -338,7 +346,8 @@ namespace TestDataPopulator
             string pp14601 = "—Aladino, entra en la cueva y trae la lámpara que está dentro—, dijo el mago.";
             string pp14601Translation = "\"Aladdin, go into the cave and bring the lamp that is inside,\" said the magician.";
             
-            var context = CreateContext();
+            var dbContextFactory = GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
 
             Paragraph paragraph14590 = GetParagraph14590(context);            
             context.ParagraphTranslations.Add(new ParagraphTranslation()
@@ -457,10 +466,10 @@ namespace TestDataPopulator
 
             foreach (var w in wordsToUse)
             {
-                var word = WordApi.WordReadByLanguageIdAndText(context, _spanishLanguage.Id, w);
+                var word = WordApi.WordReadByLanguageIdAndText(dbContextFactory, _spanishLanguage.Id, w);
                 if (word is null) throw new InvalidDataException();
                 ErrorHandler.LogMessage(
-                    AvailableLogMessageTypes.DEBUG, $"About to create a flash card for {word.TextLowerCase}.", context);
+                    AvailableLogMessageTypes.DEBUG, $"About to create a flash card for {word.TextLowerCase}.", dbContextFactory);
 
                 var wordUser = context.WordUsers
                     .Where(x => x.WordId == word.Id && x.LanguageUserId == _spanishLanguageUser.Id)
@@ -470,6 +479,25 @@ namespace TestDataPopulator
 
                 FlashCardApi.FlashCardCreate(dbContextFactory, wordUser.Id, _englishLanguage.Code);
             }
+            return true;
+        }
+        private bool AugmentWordUsers()
+        {
+            var dbContextFactory = GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+
+            var wordUser = context.WordUsers
+                .Where(x => x.Word != null && 
+                    x.Word.TextLowerCase == "niña" &&
+                    x.LanguageUser != null &&
+                    x.LanguageUser.Language != null &&
+                    x.LanguageUser.Language.Code == AvailableLanguageCode.ES
+                    )
+                .FirstOrDefault();
+            if (wordUser is null ) throw new InvalidDataException();
+            wordUser.Status = AvailableWordUserStatus.LEARNED;
+            wordUser.Translation = "girl";
+            context.SaveChanges();
             return true;
         }
         private Book GetBookByTitle(IdiomaticaContext context, string title)

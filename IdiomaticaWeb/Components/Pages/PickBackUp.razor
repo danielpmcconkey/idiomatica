@@ -61,13 +61,12 @@ else
             }
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
-            var context = await DbContextFactory.CreateDbContextAsync();
-            var breadCrumb = await UserApi.UserBreadCrumbReadLatestAsync(context, (Guid)UserId);
+            var breadCrumb = await UserApi.UserBreadCrumbReadLatestAsync(DbContextFactory, (Guid)UserId);
             if (breadCrumb is not null)
             {
-                var page = await PageApi.PageReadByIdAsync(context, (Guid)breadCrumb.PageId);
+                var page = await PageApi.PageReadByIdAsync(DbContextFactory, (Guid)breadCrumb.PageId);
                 if (page is null) return;
-                var book = await BookApi.BookReadAsync(context, (Guid)page.BookId);
+                var book = await BookApi.BookReadAsync(DbContextFactory, (Guid)page.BookId);
                 if (book is null || string.IsNullOrEmpty(book.Title)) return;
 
                 Title = FormatTitle(book.Title);

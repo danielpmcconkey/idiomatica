@@ -313,7 +313,7 @@ namespace Logic.Services.API.Tests
         {
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
-            var bookId = CommonFunctions.GetBook13Id(dbContextFactory);
+            var bookId = CommonFunctions.GetBookCenicientaId(dbContextFactory);
 
             string expectedTitle = "Cenicienta";
             var book = BookApi.BookRead(dbContextFactory, bookId);
@@ -327,7 +327,7 @@ namespace Logic.Services.API.Tests
             
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
-            var bookId = CommonFunctions.GetBook13Id(dbContextFactory);
+            var bookId = CommonFunctions.GetBookCenicientaId(dbContextFactory);
 
             string expectedTitle = "Cenicienta";
             var book = await BookApi.BookReadAsync(dbContextFactory, bookId);
@@ -344,7 +344,7 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
 
-            Guid bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookEspañaId(dbContextFactory);
             int expectedPageCount = 5;
             int actualPageCount = BookApi.BookReadPageCount(dbContextFactory, bookId);
             Assert.AreEqual(expectedPageCount, actualPageCount);
@@ -356,7 +356,7 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
             
-            Guid bookId = CommonFunctions.GetBook17Id(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookEspañaId(dbContextFactory);
             int expectedPageCount = 5;
             int actualPageCount = await BookApi.BookReadPageCountAsync(dbContextFactory, bookId);
             Assert.AreEqual(expectedPageCount, actualPageCount);

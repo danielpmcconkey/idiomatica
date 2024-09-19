@@ -26,11 +26,11 @@ namespace Model
 
 
         #endregion
+
+
+        
+        
         public Language? Language { get; set; }
-
-
-        
-        
         public List<Token> Tokens { get; set; } = [];
         public List<WordUser> WordUsers { get; set; } = [];
         public List<WordTranslation> WordTranslations { get; set; } = [];

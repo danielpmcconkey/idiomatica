@@ -18,7 +18,6 @@ namespace Model
 
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid BookUserId { get; set; }
-        public required BookUser BookUser { get; set; }
         [Required] public required Guid PageId { get; set; }
         public required Page Page { get; set; }
 
@@ -26,6 +25,7 @@ namespace Model
         
 
         
+        public BookUser? BookUser { get; set; }
         public DateTimeOffset? ReadDate { get; set; }
     }
 }

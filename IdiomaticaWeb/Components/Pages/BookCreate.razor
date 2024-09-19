@@ -158,8 +158,8 @@
         try
         {
             var context = await DbContextFactory.CreateDbContextAsync();
-            _loggedInUser = await UserService.GetLoggedInUserAsync(context);
-            BookListDataPacket = new (context, false);
+            _loggedInUser = await UserService.GetLoggedInUserAsync(DbContextFactory);
+            BookListDataPacket = new(DbContextFactory, false);
         }
         catch (IdiomaticaException ex)
         {
@@ -189,13 +189,11 @@
         var context = await DbContextFactory.CreateDbContextAsync();
         try
         {
-            await context.Database.BeginTransactionAsync();
-
             string textInput = await _largeVolumeTextArea.GetTextValue();
 
             
             Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
-                context, (Guid)_loggedInUser.Id, _titleInput,
+                DbContextFactory, (Guid)_loggedInUser.Id, _titleInput,
                 (AvailableLanguageCode)_languageCodeInput, _sourceURIInput, textInput);
             if (book is null)
             {

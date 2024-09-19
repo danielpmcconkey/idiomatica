@@ -40,7 +40,7 @@ namespace Logic.Services.API.Tests
                 {
                     Title = TestConstants.NewBookTitle,
                     LanguageId = language.Id,
-                    Language = language,
+                    //Language = language,
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, dbContextFactory);
@@ -51,7 +51,7 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookId = book.Id,
-                    Book = book,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     Id = Guid.NewGuid()
@@ -108,7 +108,7 @@ namespace Logic.Services.API.Tests
                 {
                     Title = TestConstants.NewBookTitle,
                     LanguageId = language.Id,
-                    Language = language,
+                    //Language = language,
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, dbContextFactory);
@@ -119,7 +119,7 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookId = book.Id,
-                    Book = book,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     Id = Guid.NewGuid()
@@ -288,7 +288,7 @@ namespace Logic.Services.API.Tests
                 {
                     Title = TestConstants.NewBookTitle,
                     LanguageId = language.Id,
-                    Language = language,
+                    //Language = language,
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, dbContextFactory);
@@ -299,7 +299,7 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookId = book.Id,
-                    Book = book,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     Id = Guid.NewGuid()
@@ -350,7 +350,7 @@ namespace Logic.Services.API.Tests
                 {
                     Title = TestConstants.NewBookTitle,
                     LanguageId = language.Id,
-                    Language = language,
+                    //Language = language,
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, dbContextFactory);
@@ -361,7 +361,7 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookId = book.Id,
-                    Book = book,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     Id = Guid.NewGuid()
@@ -519,7 +519,7 @@ namespace Logic.Services.API.Tests
                 {
                     Title = TestConstants.NewBookTitle,
                     LanguageId = learningLanguage.Id,
-                    Language = learningLanguage,
+                    //Language = learningLanguage,
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, dbContextFactory);
@@ -530,7 +530,7 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookId = book.Id,
-                    Book = book,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     Id = Guid.NewGuid()
@@ -572,7 +572,7 @@ namespace Logic.Services.API.Tests
                 {
                     Title = TestConstants.NewBookTitle,
                     LanguageId = learningLanguage.Id,
-                    Language = learningLanguage,
+                    //Language = learningLanguage,
                     Id = Guid.NewGuid()
                 };
                 book = DataCache.BookCreate(book, dbContextFactory);
@@ -583,7 +583,7 @@ namespace Logic.Services.API.Tests
                 Page? page = new()
                 {
                     BookId = book.Id,
-                    Book = book,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
                     Id = Guid.NewGuid()

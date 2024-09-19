@@ -169,9 +169,8 @@
         if (FlashCardDataPacket.CurrentCard is null) return;
         if (UiLanguageCode is null) return;
 
-        var context = DbContextFactory.CreateDbContext();
         var ppExample = ParagraphApi.ParagraphExamplePullRandomByFlashCardId(
-            context, (Guid)FlashCardDataPacket.CurrentCard.Id, (AvailableLanguageCode)UiLanguageCode);
+            DbContextFactory, (Guid)FlashCardDataPacket.CurrentCard.Id, (AvailableLanguageCode)UiLanguageCode);
         ExampleParagraph = ppExample.example;
         ParagraphTranslation = ppExample.translation;
 
@@ -183,7 +182,7 @@
         CustomTranslation = FlashCardDataPacket.CurrentCard.WordUser.Translation;
 
         DefaultTranslations = WordApi.WordTranslationsReadByWordId(
-            context, (Guid)FlashCardDataPacket.CurrentCard.WordUser.Word.Id);
+            DbContextFactory, (Guid)FlashCardDataPacket.CurrentCard.WordUser.Word.Id);
     }
     private async Task OnShowAnswerClick()
     {
@@ -212,9 +211,8 @@
     }
     private void ProcessAndAdvance(AvailableFlashCardAttemptStatus previousCardsStatus)
     {
-        var context = DbContextFactory.CreateDbContext();
         FlashCardDataPacket = OrchestrationApi.OrchestrateFlashCardDispositionAndAdvance(
-            context, FlashCardDataPacket, previousCardsStatus);
+            DbContextFactory, FlashCardDataPacket, previousCardsStatus);
         if (FlashCardDataPacket is null)
         {
             ErrorHandler.LogAndThrow();

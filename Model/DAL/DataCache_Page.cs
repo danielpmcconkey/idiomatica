@@ -111,23 +111,24 @@ namespace Model.DAL
         {
             var context = dbContextFactory.CreateDbContext();
 
-            int numRows = context.Database.ExecuteSql($"""
-                        
-                INSERT INTO [Idioma].[Page]
-                      ([BookId]
-                      ,[Ordinal]
-                      ,[OriginalText]
-                      ,[Id])
-                VALUES
-                      ({page.BookId}
-                      ,{page.Ordinal}
-                      ,{page.OriginalText}
-                      ,{page.Id})
-        
-                """);
-            if (numRows < 1) throw new InvalidDataException("creating Page affected 0 rows");
-            
+            //int numRows = context.Database.ExecuteSql($"""
 
+            //    INSERT INTO [Idioma].[Page]
+            //          ([BookId]
+            //          ,[Ordinal]
+            //          ,[OriginalText]
+            //          ,[Id])
+            //    VALUES
+            //          ({page.BookId}
+            //          ,{page.Ordinal}
+            //          ,{page.OriginalText}
+            //          ,{page.Id})
+
+            //    """);
+            //if (numRows < 1) throw new InvalidDataException("creating Page affected 0 rows");
+
+            context.Pages.Add(page);
+            context.SaveChanges();
 
             // add it to cache
             PageById[page.Id] = page; ;

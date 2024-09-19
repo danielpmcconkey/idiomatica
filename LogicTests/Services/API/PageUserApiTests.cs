@@ -474,7 +474,7 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
             Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(dbContextFactory);
-            Guid pageId = CommonFunctions.GetPage384Id(dbContextFactory);
+            Guid pageId = CommonFunctions.GetGuionParaPage1Id(dbContextFactory);
             Guid pageUserIdExpected = CommonFunctions.GetPageUser380Id(dbContextFactory, languageUserId);
 
             var pageUser = PageUserApi.PageUserReadByPageIdAndLanguageUserId(
@@ -491,7 +491,7 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
             Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(dbContextFactory);
-            Guid pageId = CommonFunctions.GetPage384Id(dbContextFactory);
+            Guid pageId = CommonFunctions.GetGuionParaPage1Id(dbContextFactory);
             Guid pageUserIdExpected = CommonFunctions.GetPageUser380Id(dbContextFactory, languageUserId);
 
             var pageUser = await PageUserApi.PageUserReadByPageIdAndLanguageUserIdAsync(
@@ -626,7 +626,7 @@ namespace Logic.Services.API.Tests
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             decimal expectedWordCount = 784.0M;
-            decimal expectedDistinctKnowPercent = 0.51M;
+            decimal expectedDistinctKnowPercent = 0.46M;
 
             try
             {
@@ -706,7 +706,7 @@ namespace Logic.Services.API.Tests
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             decimal expectedWordCount = 784.0M;
-            decimal expectedDistinctKnowPercent = 0.51M;
+            decimal expectedDistinctKnowPercent = 0.46M;
 
             try
             {

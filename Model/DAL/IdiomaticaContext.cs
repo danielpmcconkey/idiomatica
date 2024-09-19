@@ -4,39 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Model.DAL
 {
-    /*
-     * 
-     * you are here and are about to go to toronto
-     * 
-     * you are in the middle of ripping off the band-aid and complete
-     * refactoring the database. You've done a few things already. You've
-     * already changed the prod DB over to use GUIDs. But your various local
-     * DBs are in various states of disarray.
-     * 
-     * your ultimate goal is to have a database that can be maintained via
-     * dotnet migrations (need to test if we can still do that in prod) and
-     * have a "build a fresh DB" script that new devs can run from their
-     * desktop.
-     * 
-     * you've started on the script but got distracted with the DB migration
-     * stuff. you dove into a major refactor and have finally fixed the build
-     * errors.
-     * 
-     * order of operations
-     *     2. get this running in a new DB (probably by finishing the fresh DB
-     *        script)
-     *     3. get all unit tests to pass
-     *     4. finish the fresh db if you haven't
-     *     5. figure out what to do about prod options are:
-     *          a. figure out the deltas and manually apply them (might be 
-     *             needed anyway if you can't get migrations to work)
-     *          b. rename the existing db and install a new one, then migrate
-     *             data
-     *     6. figure out whether you can go back to context.save
-     *     7. update documentation and archi for justin
-     * 
-     * 
-     * */
+    
     public class IdiomaticaContext : DbContext
     {
         #region DBSets
@@ -82,6 +50,41 @@ namespace Model.DAL
         {
         }
 
+        public override int SaveChanges()
+        {
+            var maxRetries = 3;
+            var retries = 0;
+            while (retries < maxRetries)
+            {
+                try
+                {
+                    return base.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    retries++;
+                    if (retries >= maxRetries) throw;
+                    foreach (var entry in ex.Entries)
+                    {
+                        var proposedValues = entry.CurrentValues;
+                        var databaseValues = entry.GetDatabaseValues();
+
+                        foreach (var property in proposedValues.Properties)
+                        {
+                            var proposedValue = proposedValues[property];
+                            var databaseValue = databaseValues[property];
+
+                            // TODO: decide which value should be written to database
+                            // proposedValues[property] = <value to be saved>;
+                        }
+                    }
+                }
+                catch {
+                    throw;
+                }
+            }
+            throw new InvalidDataException("Unknown data issues while saving context");
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);

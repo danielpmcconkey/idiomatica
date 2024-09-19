@@ -68,6 +68,9 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow();
                 return (null, null);
             }
+            var w = await DataCache.WordByIdReadAsync(t.WordId, dbContextFactory);
+            if (w is null) { ErrorHandler.LogAndThrow(); return (null, null); }
+            t.Word = w;
             if (t.Word == null)
             {
                 ErrorHandler.LogAndThrow();

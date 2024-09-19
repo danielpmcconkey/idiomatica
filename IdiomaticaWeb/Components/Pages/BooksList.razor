@@ -119,9 +119,8 @@
                 _isLoading = true;
 
                 var t_delay = Task.Delay(LoadingDelayMiliseconds);
-                var context = await DbContextFactory.CreateDbContextAsync();
-                _bookListDataPacket = new BookListDataPacket(context, IsBrowse);
-                _loggedInUser = await UserService.GetLoggedInUserAsync(context);
+                _bookListDataPacket = new BookListDataPacket(DbContextFactory, IsBrowse);
+                _loggedInUser = await UserService.GetLoggedInUserAsync(DbContextFactory);
                 await ResetBookListAsync();
                 _isDataInitBookList = true;
                 await t_delay;
@@ -156,7 +155,7 @@
 
 
         _bookListDataPacket = await BookApi.BookListReadAsync(
-            context, (Guid)_loggedInUser.Id, _bookListDataPacket);
+            DbContextFactory, (Guid)_loggedInUser.Id, _bookListDataPacket);
 
     }
 
@@ -173,13 +172,15 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(context, bookId, (Guid)_loggedInUser.Id);
+            var bookUser = await BookUserApi.BookUserByBookIdAndUserIdReadAsync(
+                DbContextFactory, bookId, (Guid)_loggedInUser.Id);
             if (bookUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            await BookUserApi.BookUserArchiveAsync(context, (Guid)bookUser.Id);
+            await BookUserApi.BookUserArchiveAsync(
+                DbContextFactory, (Guid)bookUser.Id);
             // now pull a fresh copy of the book list
             await ResetBookListAsync();
             await t_delay;
@@ -216,7 +217,7 @@
             var bookUser = Task.Run(() =>
             {
                 return OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                context, bookId, (Guid)_loggedInUser.Id);
+                    DbContextFactory, bookId, (Guid)_loggedInUser.Id);
             }).Result;
             if (bookUser is null)
             {

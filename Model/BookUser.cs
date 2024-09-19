@@ -19,13 +19,13 @@ namespace Model
 
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid BookId { get; set; }
-        public required Book Book { get; set; }
         [Required] public required Guid LanguageUserId { get; set; }
-        public required LanguageUser LanguageUser { get; set; }
 
         #endregion
 
         
+        public Book? Book { get; set; }
+        public LanguageUser? LanguageUser { get; set; }
         public List<PageUser> PageUsers { get; set; } = new List<PageUser>();
         public Guid? CurrentPageId { get; set; } // bookmark to the current page
         public Page? CurrentPage { get; set; } // bookmark to the current page

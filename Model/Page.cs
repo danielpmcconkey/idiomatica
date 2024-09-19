@@ -20,7 +20,6 @@ namespace Model
 
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid BookId { get; set; }
-        public required Book Book { get; set; }
         [Required] public required int Ordinal { get; set; }
         [Column(TypeName = "TEXT")]
         [Required] public required string OriginalText { get; set; }
@@ -28,6 +27,7 @@ namespace Model
         #endregion
         
 
+        public Book? Book { get; set; }
         
         public List<Paragraph> Paragraphs { get; set; } = [];
         public List<PageUser> PageUsers { get; set; } = [];
