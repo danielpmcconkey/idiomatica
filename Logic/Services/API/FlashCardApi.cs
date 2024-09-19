@@ -30,7 +30,7 @@ namespace Logic.Services.API
             FlashCard? card = new ()
             {
                 Id = Guid.NewGuid(),
-                WordUser = wordUser,
+                //WordUser = wordUser,
                 WordUserId = wordUserId,
                 Status = AvailableFlashCardStatus.ACTIVE,
             };
@@ -121,9 +121,9 @@ namespace Logic.Services.API
                         {
                             Id = Guid.NewGuid(),
                             ParagraphId = paragraph.Id,
-                            Paragraph = paragraph,
+                            //Paragraph = paragraph,
                             LanguageId = toLang.Id,
-                            Language = toLang,
+                            //Language = toLang,
                             TranslationText = translation
                         };
                         ppts = DataCache.ParagraphTranslationCreate(ppts, dbContextFactory);
@@ -136,9 +136,9 @@ namespace Logic.Services.API
                     {
                         Id = Guid.NewGuid(),
                         ParagraphTranslationId = ppts.Id,
-                        ParagraphTranslation = ppts,
+                        //ParagraphTranslation = ppts,
                         FlashCardId = card.Id,
-                        FlashCard = card,
+                        //FlashCard = card,
                     };
                     fcptb = DataCache.FlashCardParagraphTranslationBridgeCreate(fcptb, dbContextFactory);
                     if(fcptb is null) { ErrorHandler.LogAndThrow(); return null; }

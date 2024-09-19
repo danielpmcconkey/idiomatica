@@ -90,7 +90,8 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(languageUser);
 
                 // pull a word
-                var word = context.Words.Where(x => x.LanguageId == learningLanguage.Id).Take(1).FirstOrDefault();
+                var word = context.Words.Where(x => x.LanguageId == learningLanguage.Id)
+                    .Take(1).FirstOrDefault();
                 if (word is null) { ErrorHandler.LogAndThrow(); return; }
 
                 // create a WordUser
@@ -804,9 +805,10 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(user.Id);
                 userId = (Guid)user.Id;
 
-                var languageUser = LanguageUserApi.LanguageUserCreate(
-                    dbContextFactory, language, user);
-                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+                // fetch the languageUser
+                var languageUser = LanguageUserApi.LanguageUserGet(
+                    dbContextFactory, languageId, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // create the wordUser
                 var wordUser = WordUserApi.WordUserCreate(
@@ -854,9 +856,10 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(user); Assert.IsNotNull(user.Id);
                 userId = (Guid)user.Id;
 
-                var languageUser = LanguageUserApi.LanguageUserCreate(
-                    dbContextFactory, language, user);
-                Assert.IsNotNull(languageUser); Assert.IsNotNull(languageUser.Id);
+                // fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
+                    dbContextFactory, languageId, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // create the wordUser
                 var wordUser = WordUserApi.WordUserCreate(

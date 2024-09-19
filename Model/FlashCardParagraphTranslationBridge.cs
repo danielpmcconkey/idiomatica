@@ -19,12 +19,12 @@ namespace Model
 
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid FlashCardId { get; set; }
-        public required FlashCard FlashCard { get; set; }
         [Required] public required Guid ParagraphTranslationId { get; set; }
-        public required ParagraphTranslation ParagraphTranslation { get; set; }
 
 
         #endregion
+        public  FlashCard? FlashCard { get; set; }
+        public ParagraphTranslation? ParagraphTranslation { get; set; }
 
     }
 }

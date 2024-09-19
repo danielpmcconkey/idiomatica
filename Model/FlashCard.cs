@@ -20,11 +20,11 @@ namespace Model
 
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid WordUserId { get; set; }
-        public required WordUser WordUser { get; set; }
         [Required] public required AvailableFlashCardStatus Status { get; set; }
 
         #endregion
 
+        public WordUser? WordUser { get; set; }
 
         public List<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridges 
             { get; set; }  = [];

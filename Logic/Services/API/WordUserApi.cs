@@ -29,9 +29,9 @@ namespace Logic.Services.API
             {
                 Id = Guid.NewGuid(),
                 WordId = word.Id,
-                Word = word,
+                //Word = word,
                 LanguageUserId = languageUser.Id,
-                LanguageUser = languageUser,
+                //LanguageUser = languageUser,
                 Translation = translation,
                 Status = status,
                 Created = DateTime.Now,

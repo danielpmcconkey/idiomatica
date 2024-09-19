@@ -47,7 +47,7 @@ namespace Logic.Services.API.Tests
                 var lu = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(
                     dbContextFactory, (Guid)userId);
                 Assert.IsNotNull(lu);
-                Assert.IsTrue(lu.Count < 1);
+                Assert.IsFalse(lu.Count < 1);
                 var l = lu.Where(x => x.LanguageId == languageId).FirstOrDefault();
                 Assert.IsNotNull(l);
                 Guid expectedLanguageUserId = (Guid)l.Id;
@@ -105,7 +105,7 @@ namespace Logic.Services.API.Tests
                 var lu = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
                     dbContextFactory, (Guid)userId);
                 Assert.IsNotNull(lu);
-                Assert.IsTrue(lu.Count < 1);
+                Assert.IsFalse(lu.Count < 1);
                 var l = lu.Where(x => x.LanguageId == languageId).FirstOrDefault();
                 Assert.IsNotNull(l);
                 Guid expectedLanguageUserId = (Guid)l.Id;
@@ -156,9 +156,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
 
-                var languageUser = LanguageUserApi.LanguageUserCreate(
-                    dbContextFactory, learningLanguage, user);
-                Assert.IsNotNull(languageUser);
+               
 
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     dbContextFactory, bookId, (Guid)user.Id);
@@ -235,9 +233,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
 
-                var languageUser = LanguageUserApi.LanguageUserCreate(
-                    dbContextFactory, learningLanguage, user);
-                Assert.IsNotNull(languageUser);
+                
 
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
                     dbContextFactory, bookId, (Guid)user.Id);

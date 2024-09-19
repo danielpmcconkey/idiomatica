@@ -18,9 +18,7 @@ namespace Model
         #region required data
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid WordId { get; set; }
-        public required Word Word { get; set; }
         [Required] public required Guid LanguageUserId { get; set; }
-        public required LanguageUser LanguageUser { get; set; }
         [Required] public required AvailableWordUserStatus Status { get; set; }
         [Required] public required DateTimeOffset Created { get; set; } = DateTimeOffset.Now;
         [Required] public required DateTimeOffset StatusChanged { get; set; } = DateTimeOffset.Now;
@@ -31,6 +29,8 @@ namespace Model
 
        
 
+        public Word? Word { get; set; }
+        public LanguageUser? LanguageUser { get; set; }
         public FlashCard? FlashCard { get; set; }
 
        

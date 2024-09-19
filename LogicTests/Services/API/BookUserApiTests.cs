@@ -194,7 +194,7 @@ namespace Logic.Services.API.Tests
                 // grab the expected language user ID
                 var lu = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(dbContextFactory, (Guid)userId);
                 Assert.IsNotNull(lu);
-                Assert.IsTrue(lu.Count < 1);
+                Assert.IsFalse(lu.Count < 1);
                 var l = lu.Where(x => x.LanguageId == languageId).FirstOrDefault();
                 Assert.IsNotNull(l);
                 Guid expectedLanguageUserId = (Guid)l.Id;
@@ -239,7 +239,7 @@ namespace Logic.Services.API.Tests
                 // grab the expected language user ID
                 var lu = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(dbContextFactory, (Guid)userId);
                 Assert.IsNotNull(lu);
-                Assert.IsTrue(lu.Count < 1);
+                Assert.IsFalse(lu.Count < 1);
                 var l = lu.Where(x => x.LanguageId == languageId).FirstOrDefault();
                 Assert.IsNotNull(l);
                 Guid expectedLanguageUserId = (Guid)l.Id;
@@ -281,10 +281,10 @@ namespace Logic.Services.API.Tests
 
                 userId = (Guid)user.Id;
 
-                // create the languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(
-                    dbContextFactory, learningLanguage, user);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // fetch the languageUser
+                var languageUser = LanguageUserApi.LanguageUserGet(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // create the book
                 var book = CommonFunctions.CreateBook(dbContextFactory, (Guid)userId);
@@ -327,10 +327,10 @@ namespace Logic.Services.API.Tests
 
                 userId = (Guid)user.Id;
 
-                // create the languageUser
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    dbContextFactory, learningLanguage, user);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
+                // fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // create the book
                 var book = CommonFunctions.CreateBook(dbContextFactory, (Guid)userId);
@@ -374,9 +374,9 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
 
-                // create the languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(
-                    dbContextFactory, learningLanguage, user);
+                // fetch the languageUser
+                var languageUser = LanguageUserApi.LanguageUserGet(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
 
                 // create the book
@@ -430,9 +430,9 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
 
-                // create the languageUser
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    dbContextFactory, learningLanguage, user);
+                // fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
 
                 // create the book
