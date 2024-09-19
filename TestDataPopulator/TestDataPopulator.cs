@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net;
+using Logic.Conjugator.English;
 
 namespace TestDataPopulator
 {
@@ -31,13 +32,11 @@ namespace TestDataPopulator
 
         internal bool PopulateData()
         {
-            
-            // need to create a book in english, use in WordApiTest.cs
             try
             {
                 LogMessage("Beginning data population");
                 if (!BuildLanguages()) return false;
-                LogMessage("Languages populated"); 
+                LogMessage("Languages populated");
                 if (!BuildWordsAndWordRanks()) return false;
                 LogMessage("Words populated");
                 if (!BuildUser()) return false;
@@ -51,6 +50,8 @@ namespace TestDataPopulator
                 LogMessage("About to build verb conjugations...this may take a while.");
                 if (!BuildVerbs()) return false;
                 LogMessage("Verbs populated");
+                if (!AugmentWordUsers()) return false;
+                LogMessage("Word users augmented");
                 return true;
             }
             catch (Exception ex)
@@ -301,7 +302,7 @@ namespace TestDataPopulator
                     Gerund = v.en_Gerund,
                     PastParticiple = v.en_PastParticiple,
                 };
-                OrchestrationApi.OrchestrateVerbConjugationAndTranslationSpanishToEnglish(
+                OrchestrateVerbConjugationAndTranslationSpanishToEnglish(
                     dbContextFactory, spanishVerb, englishVerb);
 
                 if ((i + 1) % 20 == 0)
@@ -606,6 +607,145 @@ namespace TestDataPopulator
             if (pp is null) throw new InvalidDataException();
             return pp;
         }
+
+        private WordTranslation? VerbWordTranslationSave(
+            IdiomaticaContext context,
+            Verb verb, Language fromLanguage, Language toLanguage, string wordTextLower,
+            string translation, int ordinal, bool saveContext = true)
+        {
+            // look up the existing word
+            var word = context.Words
+                .Where(x => x.TextLowerCase == wordTextLower &&
+                    x.LanguageId == fromLanguage.Id)
+                .FirstOrDefault();
+            if (word is null)
+            {
+                // create it
+                word = new Word()
+                {
+                    Id = Guid.NewGuid(),
+                    LanguageId = fromLanguage.Id,
+                    TextLowerCase = wordTextLower,
+                    Romanization = wordTextLower
+                };
+                context.Words.Add(word);
+
+            }
+            if (word is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return null;
+            }
+            WordTranslation? wordTranslation = new()
+            {
+                Id = Guid.NewGuid(),
+                LanguageToId = toLanguage.Id,
+                WordId = word.Id,
+                PartOfSpeech = AvailablePartOfSpeech.VERB,
+                Translation = translation.Trim(),
+                VerbId = verb.Id,
+                Ordinal = ordinal,
+            };
+            context.WordTranslations.Add(wordTranslation);
+            return wordTranslation;
+        }
+        public Verb? OrchestrateVerbConjugationAndTranslationSpanishToEnglish(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory,
+            Verb learningVerb, Verb translationVerb)
+        {
+            if (learningVerb.Conjugator is null) { ErrorHandler.LogAndThrow(); return null; }
+            Logic.Conjugator.English.EnglishVerbTranslator translator = new();
+            if (translationVerb.Conjugator == "InvariableVerbTranslator")
+            {
+                translator = new InvariableVerbTranslator();
+            }
+
+            var conjugator = Logic.Conjugator.Factory.Get(
+                learningVerb.Conjugator, translator, learningVerb, translationVerb);
+            if (conjugator is null) { ErrorHandler.LogAndThrow(); return null; }
+
+            var conjugations = conjugator.Conjugate();
+            if (conjugations.Count < 1)
+            {
+                ErrorHandler.LogAndThrow(); return null;
+            }
+            var verb = VerbCreateAndSaveTranslations(
+                dbContextFactory, learningVerb, translationVerb, conjugations);
+            if (verb is null)
+            {
+                ErrorHandler.LogAndThrow(); return null;
+            }
+            return verb;
+        }
+
+        public Verb? VerbCreateAndSaveTranslations(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory,
+            Verb learningVerb, Verb translationVerb, List<VerbConjugation> conjugations)
+        {
+            var englishLang = LanguageApi.LanguageReadByCode(
+                dbContextFactory, AvailableLanguageCode.EN_US);
+            if (englishLang == null) { ErrorHandler.LogAndThrow(); return null; }
+            Guid englishLangId = englishLang.Id;
+
+            var context = dbContextFactory.CreateDbContext();
+
+            context.Verbs.Add(learningVerb);
+            context.SaveChanges();
+
+            var languageLearning = LanguageApi.LanguageRead(dbContextFactory, learningVerb.LanguageId);
+            if (languageLearning is null) { ErrorHandler.LogAndThrow(); return null; }
+            var languageTranslation = LanguageApi.LanguageRead(dbContextFactory, translationVerb.LanguageId);
+            if (languageTranslation is null) { ErrorHandler.LogAndThrow(); return null; }
+
+            // save the infinitive translation
+            VerbWordTranslationSave(context, learningVerb,
+                languageLearning, languageTranslation,
+                learningVerb.Infinitive, translationVerb.Infinitive, 1, false);
+
+            if (learningVerb.Gerund is not null && translationVerb.Gerund is not null)
+            {
+                // save the gerund translation
+                var gerundTranslation = translationVerb.Gerund;
+                if (translationVerb.LanguageId == englishLangId)
+                {
+                    gerundTranslation = $"{translationVerb.Gerund}: gerund of {learningVerb.Infinitive}";
+                }
+
+                VerbWordTranslationSave(context, learningVerb,
+                    languageLearning, languageTranslation,
+                    learningVerb.Gerund, gerundTranslation, 100, false);
+            }
+            if (learningVerb.PastParticiple is not null && translationVerb.PastParticiple is not null)
+            {
+                // save the past participle translation
+                var participleTranslation = translationVerb.PastParticiple;
+                if (translationVerb.LanguageId == englishLangId)
+                {
+                    participleTranslation = $"{translationVerb.PastParticiple}: past participle of {learningVerb.Infinitive}";
+                }
+                VerbWordTranslationSave(context, learningVerb,
+                    languageLearning, languageTranslation,
+                    learningVerb.PastParticiple, participleTranslation, 100, false);
+            }
+            context.SaveChanges();
+            // save the conjugation translations
+            foreach (var conjugation in conjugations)
+            {
+                var wordInLearningLang = conjugation.ToString();
+                var wordInKnownLang = conjugation.Translation;
+                if (string.IsNullOrEmpty(wordInLearningLang))
+                { ErrorHandler.LogAndThrow(); return null; }
+                if (string.IsNullOrEmpty(wordInKnownLang))
+                { ErrorHandler.LogAndThrow(); return null; }
+                VerbWordTranslationSave(context, learningVerb,
+                    languageLearning, languageTranslation,
+                    wordInLearningLang, wordInKnownLang, conjugation.Ordinal, false);
+                context.SaveChanges();
+            }
+            context.SaveChanges();
+            return learningVerb;
+        }
+
     }
-    
+
 }

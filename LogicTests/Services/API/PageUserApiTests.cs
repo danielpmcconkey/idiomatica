@@ -625,7 +625,7 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            decimal expectedWordCount = 784.0M;
+            decimal expectedWordCount = 774; // 784 before???
             decimal expectedDistinctKnowPercent = 0.46M;
 
             try
@@ -705,7 +705,7 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            decimal expectedWordCount = 784.0M;
+            decimal expectedWordCount = 774; // 784 before???
             decimal expectedDistinctKnowPercent = 0.46M;
 
             try

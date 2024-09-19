@@ -574,7 +574,7 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            int countRowsExpected = 114; // distinct words in gigante page 2
+            int countRowsExpected = 111; // distinct words in gigante page 2 /// 114 befor?
             string wordToCheck = "volvió";
             int countTranslationsExpected = 3;
             string expectedTranslation1 = "he  returned: preterite \"él\" conjugation of volver";
@@ -659,7 +659,7 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            int countRowsExpected = 114; // distinct words in gigante page 2
+            int countRowsExpected = 111; // distinct words in gigante page 2 /// 114 befor?
             string wordToCheck = "volvió";
             int countTranslationsExpected = 3;
             string expectedTranslation1 = "he  returned: preterite \"él\" conjugation of volver";

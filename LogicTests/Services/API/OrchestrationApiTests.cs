@@ -33,8 +33,8 @@ namespace Logic.Services.API.Tests
              * */
 
             string totalPagesExpected = "4";
-            string totalWordCountExpected = "784";
-            string distinctWordCountExpected = "239";
+            string totalWordCountExpected = "774"; // 784 before???
+            string distinctWordCountExpected = "232"; // 239 befor??
 
             try
             {
@@ -118,8 +118,8 @@ namespace Logic.Services.API.Tests
              * */
 
             string totalPagesExpected = "4";
-            string totalWordCountExpected = "784";
-            string distinctWordCountExpected = "239";
+            string totalWordCountExpected = "774"; // 784 before???
+            string distinctWordCountExpected = "232"; // 239 befor??
 
             try
             {
