@@ -16,6 +16,7 @@ using Logic;
 using Logic.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace TestDataPopulator
 {
@@ -62,7 +63,9 @@ namespace TestDataPopulator
             var connectionstring = "Server=localhost;Database=IdiomaticaFresh;Trusted_Connection=True;TrustServerCertificate=true;";
 
             var services = new ServiceCollection();
-            services.AddTransient<LoginService>();
+            services.AddLogging();
+            services.AddScoped<AuthenticationStateProvider, RevalidatingProviderForUnitTesting>();
+            services.AddScoped<LoginService>();
             services.AddDbContextFactory<IdiomaticaContext>(options => {
                 options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("TestDataPopulator"));
             });

@@ -24,7 +24,7 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
 
 
@@ -33,14 +33,14 @@ namespace Logic.Services.API.Tests
             {
                 // create a user
                 Assert.IsNotNull(loginService);
-                var user = CommonFunctions.CreateNewTestUser(loginService, context);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
 
                 // pull the languageUser
                 Assert.IsNotNull(userId);
                 var languageUser = LanguageUserApi.LanguageUserGet(
-                    context, learningLanguage.Id, (Guid)userId);
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
 
                 // pull a word
@@ -52,7 +52,7 @@ namespace Logic.Services.API.Tests
 
                 // create a WordUser
                 var wordUser = WordUserApi.WordUserCreate(
-                    context, word, languageUser, null, AvailableWordUserStatus.UNKNOWN);
+                    dbContextFactory, word, languageUser, null, AvailableWordUserStatus.UNKNOWN);
                 Assert.IsNotNull(wordUser);
 
                 // create the card
@@ -62,14 +62,14 @@ namespace Logic.Services.API.Tests
 
                 // create the attempt
                 var attempt = FlashCardAttemptApi.FlashCardAttemptCreate(
-                    context, card, AvailableFlashCardAttemptStatus.HARD);
+                    dbContextFactory, card, AvailableFlashCardAttemptStatus.HARD);
                 Assert.IsNotNull(attempt);
                 Assert.IsNotNull(attempt.Id);
             }
             finally
             {
                 // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
 
@@ -80,7 +80,7 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             
 
@@ -89,14 +89,14 @@ namespace Logic.Services.API.Tests
             {
                 // create a user
                 Assert.IsNotNull(loginService);
-                var user = CommonFunctions.CreateNewTestUser(loginService, context);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
 
                 // pull the languageUser
                 Assert.IsNotNull(userId);
                 var languageUser = LanguageUserApi.LanguageUserGet(
-                    context, learningLanguage.Id, (Guid)userId);
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
 
                 // pull a word
@@ -108,7 +108,7 @@ namespace Logic.Services.API.Tests
 
                 // create a WordUser
                 var wordUser = await WordUserApi.WordUserCreateAsync(
-                    context, word, languageUser, null, AvailableWordUserStatus.UNKNOWN);
+                    dbContextFactory, word, languageUser, null, AvailableWordUserStatus.UNKNOWN);
                 Assert.IsNotNull(wordUser);
 
                 // create the card
@@ -118,14 +118,14 @@ namespace Logic.Services.API.Tests
 
                 // create the attempt
                 var attempt = await FlashCardAttemptApi.FlashCardAttemptCreateAsync(
-                    context, card, AvailableFlashCardAttemptStatus.HARD);
+                    dbContextFactory, card, AvailableFlashCardAttemptStatus.HARD);
                 Assert.IsNotNull(attempt);
                 Assert.IsNotNull(attempt.Id);
             }
             finally
             {
                 // clean-up
-                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
         }
     }

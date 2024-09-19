@@ -15,13 +15,15 @@ namespace Model.DAL
 
 
         #region read
-        public static Paragraph? ParagraphByIdRead(Guid key, IdiomaticaContext context)
+        public static Paragraph? ParagraphByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (ParagraphById.ContainsKey(key))
             {
                 return ParagraphById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.Paragraphs.Where(x => x.Id == key)
@@ -31,21 +33,23 @@ namespace Model.DAL
             ParagraphById[key] = value;
             return value;
         }
-        public static async Task<Paragraph?> ParagraphByIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<Paragraph?> ParagraphByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Paragraph?>.Run(() =>
             {
-                return ParagraphByIdRead(key, context);
+                return ParagraphByIdRead(key, dbContextFactory);
             });
         }
         public static List<Paragraph> ParagraphsByPageIdRead(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (ParagraphsByPageId.ContainsKey(key))
             {
                 return ParagraphsByPageId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = context.Paragraphs.Where(x => x.PageId == key).OrderBy(x => x.Ordinal)
                 .ToList();
@@ -62,11 +66,11 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<Paragraph>> ParagraphsByPageIdReadAsync(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<Paragraph>>.Run(() =>
             {
-                return ParagraphsByPageIdRead(key, context);
+                return ParagraphsByPageIdRead(key, dbContextFactory);
             });
         }
         #endregion
@@ -74,8 +78,10 @@ namespace Model.DAL
         #region create
 
 
-        public static Paragraph? ParagraphCreate(Paragraph paragraph, IdiomaticaContext context)
+        public static Paragraph? ParagraphCreate(Paragraph paragraph, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Paragraph]
@@ -95,9 +101,9 @@ namespace Model.DAL
 
             return paragraph;
         }
-        public static async Task<Paragraph?> ParagraphCreateAsync(Paragraph value, IdiomaticaContext context)
+        public static async Task<Paragraph?> ParagraphCreateAsync(Paragraph value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return ParagraphCreate(value, context); });
+            return await Task.Run(() => { return ParagraphCreate(value, dbContextFactory); });
         }
         
         #endregion

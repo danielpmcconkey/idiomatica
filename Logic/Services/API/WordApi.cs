@@ -16,10 +16,12 @@ namespace Logic.Services.API
 {
     public static class WordApi
     {
-        public static WordTranslation? VerbWordTranslationSave(IdiomaticaContext context, 
-            Verb verb, Language fromLanguage, Language toLanguage,
-            string wordTextLower, string translation, int ordinal, bool saveContext = true)
+        public static WordTranslation? VerbWordTranslationSave(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, 
+            Verb verb, Language fromLanguage, Language toLanguage, string wordTextLower,
+            string translation, int ordinal, bool saveContext = true)
         {
+            var context = dbContextFactory.CreateDbContext();
             // look up the existing word
             var word = context.Words
                 .Where(x => x.TextLowerCase == wordTextLower &&
@@ -28,7 +30,7 @@ namespace Logic.Services.API
             if (word is null)
             {
                 // create it
-                word = WordCreate(context, fromLanguage, wordTextLower, wordTextLower);
+                word = WordCreate(dbContextFactory, fromLanguage, wordTextLower, wordTextLower);
             }
             if (word is null)
             {
@@ -52,28 +54,29 @@ namespace Logic.Services.API
             if (saveContext) context.SaveChanges(); // this gets called a bunch, so maybe don't save inside the function
             return wordTranslation;
         }
-        public static Verb? VerbCreateAndSaveTranslations(IdiomaticaContext context,
+        public static Verb? VerbCreateAndSaveTranslations(IDbContextFactory<IdiomaticaContext> dbContextFactory,
             Verb learningVerb, Verb translationVerb, List<VerbConjugation> conjugations)
         {
 
             // note, it's not right to directly query frmo the API. But this
             // isn't a normal method, used by the app (I hope). It should only
             // be used for adding new word translations manually by system admins;
-            var englishLang = LanguageApi.LanguageReadByCode(context, AvailableLanguageCode.EN_US);
+            var englishLang = LanguageApi.LanguageReadByCode(dbContextFactory, AvailableLanguageCode.EN_US);
             if (englishLang == null) { ErrorHandler.LogAndThrow(); return null; }
             Guid englishLangId = englishLang.Id;
 
+            var context = dbContextFactory.CreateDbContext();
 
             context.Verbs.Add(learningVerb);
             context.SaveChanges();
 
-            var languageLearning = LanguageApi.LanguageRead(context, learningVerb.LanguageId);
+            var languageLearning = LanguageApi.LanguageRead(dbContextFactory, learningVerb.LanguageId);
             if (languageLearning is null) { ErrorHandler.LogAndThrow(); return null; }
-            var languageTranslation = LanguageApi.LanguageRead(context, translationVerb.LanguageId);
+            var languageTranslation = LanguageApi.LanguageRead(dbContextFactory, translationVerb.LanguageId);
             if (languageTranslation is null) { ErrorHandler.LogAndThrow(); return null; }
 
             // save the infinitive translation
-            VerbWordTranslationSave(context, learningVerb,
+            VerbWordTranslationSave(dbContextFactory, learningVerb,
                 languageLearning, languageTranslation,
                 learningVerb.Infinitive, translationVerb.Infinitive, 1, false);
 
@@ -86,7 +89,7 @@ namespace Logic.Services.API
                     gerundTranslation = $"{translationVerb.Gerund}: gerund of {learningVerb.Infinitive}";
                 }
 
-                VerbWordTranslationSave(context, learningVerb,
+                VerbWordTranslationSave(dbContextFactory, learningVerb,
                     languageLearning, languageTranslation,
                     learningVerb.Gerund, gerundTranslation, 100, false);
             }
@@ -98,7 +101,7 @@ namespace Logic.Services.API
                 {
                     participleTranslation = $"{translationVerb.PastParticiple}: past participle of {learningVerb.Infinitive}";
                 }
-                VerbWordTranslationSave(context, learningVerb,
+                VerbWordTranslationSave(dbContextFactory, learningVerb,
                     languageLearning, languageTranslation,
                     learningVerb.PastParticiple, participleTranslation, 100, false);
             }
@@ -111,14 +114,14 @@ namespace Logic.Services.API
                     { ErrorHandler.LogAndThrow(); return null; }
                 if (string.IsNullOrEmpty(wordInKnownLang))
                     { ErrorHandler.LogAndThrow(); return null; }
-                VerbWordTranslationSave(context, learningVerb,
+                VerbWordTranslationSave(dbContextFactory, learningVerb,
                     languageLearning, languageTranslation,
                     wordInLearningLang, wordInKnownLang, conjugation.Ordinal, false);
             }
             context.SaveChanges();
             return learningVerb;
         }
-        public static Word? WordCreate(IdiomaticaContext context,
+        public static Word? WordCreate(IDbContextFactory<IdiomaticaContext> dbContextFactory,
             Language language, string text, string romanization)
         {
             var newWord = new Word()
@@ -130,7 +133,7 @@ namespace Logic.Services.API
                 Text = text.ToLower(),
                 TextLowerCase = text.ToLower(),
             };
-            newWord = DataCache.WordCreate(newWord, context);
+            newWord = DataCache.WordCreate(newWord, dbContextFactory);
             if (newWord is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -138,52 +141,52 @@ namespace Logic.Services.API
             }
             return newWord;
         }        
-        public static async Task<Word?> WordCreateAsync(IdiomaticaContext context,
+        public static async Task<Word?> WordCreateAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory,
             Language language, string text, string romanization)
         {
             return await Task<Word?>.Run(() =>
             {
-                return WordCreate(context, language, text, romanization);
+                return WordCreate(dbContextFactory, language, text, romanization);
             });
         }
 
 
-        public static Word? WordGetById(IdiomaticaContext context, Guid wordId)
+        public static Word? WordGetById(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid wordId)
         {
-            return DataCache.WordByIdRead(wordId, context);
+            return DataCache.WordByIdRead(wordId, dbContextFactory);
         }
-        public static async Task<Word?> WordGetByIdAsync(IdiomaticaContext context, Guid wordId)
+        public static async Task<Word?> WordGetByIdAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid wordId)
         {
             return await Task<Word?>.Run(() =>
             {
-                return WordGetById(context, wordId);
+                return WordGetById(dbContextFactory, wordId);
             });
         }
 
 
         public static Word? WordReadByLanguageIdAndText(
-            IdiomaticaContext context, Guid languageId, string text)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid languageId, string text)
         {
             if (string.IsNullOrEmpty(text)) ErrorHandler.LogAndThrow();
-            return DataCache.WordByLanguageIdAndTextLowerRead((languageId, text), context);
+            return DataCache.WordByLanguageIdAndTextLowerRead((languageId, text), dbContextFactory);
         }
         public static async Task<Word?> WordReadByLanguageIdAndTextAsync(
-            IdiomaticaContext context, Guid languageId, string text)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid languageId, string text)
         {
             return await Task<Word?>.Run(() =>
             {
-                return WordReadByLanguageIdAndText(context, languageId, text);
+                return WordReadByLanguageIdAndText(dbContextFactory, languageId, text);
             });
         }
 
 
         public static List<(Word? word, int? ordinal, string? tokenDisplay)> WordsCreateOrderedFromSentenceId(
-            IdiomaticaContext context, Language language, Sentence sentence)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Language language, Sentence sentence)
         {
             List<(Word? word, int? ordinal, string? tokenDisplay)> outList = [];
 
             // check if any already exist. there shouldn't be any but whateves
-            DataCache.TokenBySentenceIdDelete(sentence.Id, context);
+            DataCache.TokenBySentenceIdDelete(sentence.Id, dbContextFactory);
             
             var parser = LanguageParser.Factory.GetLanguageParser(language);
             if (parser is null) { ErrorHandler.LogAndThrow(); return []; }
@@ -198,12 +201,12 @@ namespace Logic.Services.API
                 string? tokenDisplay = wordsSplits[i];
                 var cleanWord = parser.TextToLower(parser.StipNonWordCharacters(tokenDisplay));
                 word = DataCache.WordByLanguageIdAndTextLowerRead(
-                    (language.Id, cleanWord), context);
+                    (language.Id, cleanWord), dbContextFactory);
                 if (word is null)
                 {
                     // word doesn't exist; create it
                     word = WordApi.WordCreate(
-                        context, language, cleanWord, cleanWord);
+                        dbContextFactory, language, cleanWord, cleanWord);
                 }
                 
                 outList.Add((word, i, tokenDisplay));
@@ -212,53 +215,56 @@ namespace Logic.Services.API
         }
         public static async Task<List<(Word? word, int? ordinal, string? tokenDisplay)>> 
             WordsCreateOrderedFromSentenceIdAsync(
-                IdiomaticaContext context, Language language, Sentence sentence)
+                IDbContextFactory<IdiomaticaContext> dbContextFactory, Language language, Sentence sentence)
         {
             return await Task<List<(Word? word, int? ordinal, string? tokenDisplay)>>.Run(() =>
             {
-                return WordsCreateOrderedFromSentenceId(context, language, sentence);
+                return WordsCreateOrderedFromSentenceId(dbContextFactory, language, sentence);
             });
         }
 
         
         public static Dictionary<string, Word>? WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
-            IdiomaticaContext context, Guid pageId, Guid languageUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId, Guid languageUserId)
         {
             return DataCache
                 .WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
-                (pageId, languageUserId), context);
+                (pageId, languageUserId), dbContextFactory);
         }
         public static async Task<Dictionary<string, Word>?> WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdReadAsync(
-            IdiomaticaContext context, Guid pageId, Guid languageUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId, Guid languageUserId)
         {
             return await Task<List<(Word? word, int? ordinal, string? tokenDisplay)>>.Run(() =>
             {
                 return WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
-                    context, pageId, languageUserId);
+                    dbContextFactory, pageId, languageUserId);
             });
         }
 
         public static Dictionary<string, Word>? WordsDictReadByPageId(
-            IdiomaticaContext context, Guid pageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId)
         {
-            return DataCache.WordsDictByPageIdRead(pageId, context);
+            return DataCache.WordsDictByPageIdRead(pageId, dbContextFactory);
         }
         public static async Task<Dictionary<string, Word>?> WordsDictReadByPageIdAsync(
-            IdiomaticaContext context, Guid pageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId)
         {
-            return await DataCache.WordsDictByPageIdReadAsync(pageId, context);
+            return await DataCache.WordsDictByPageIdReadAsync(pageId, dbContextFactory);
         }
 
 
         public static List<(string language, int wordCount)> WordsGetListOfReadCount(
-            IdiomaticaContext context, Guid userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
         {
             List<(string language, int wordCount)> returnList = new List<(string language, int wordCount)>();
-            var languageUsers = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(context, userId);
+            var languageUsers = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(dbContextFactory, userId);
             if (languageUsers is null)
             {
                 return new();
             }
+
+            var context = dbContextFactory.CreateDbContext();
+
             foreach (var languageUser in languageUsers)
             {
                 if (languageUser.Language == null || languageUser.Language.Name == null) continue;
@@ -277,18 +283,18 @@ namespace Logic.Services.API
             return returnList;
         }
         public static async Task<List<(string language, int wordCount)>> WordsGetListOfReadCountAsync(
-           IdiomaticaContext context, Guid userId)
+           IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
         {
             return await Task<List<(string language, int wordCount)>>.Run(() =>
             {
-                return WordsGetListOfReadCount(context, userId);
+                return WordsGetListOfReadCount(dbContextFactory, userId);
             });
         }
 
         public static List<WordTranslation> WordTranslationsReadByWordId(
-            IdiomaticaContext context, Guid wordId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid wordId)
         {
-            return DataCache.WordTranslationsByWordIdRead(wordId, context);
+            return DataCache.WordTranslationsByWordIdRead(wordId, dbContextFactory);
         }
     }
 }

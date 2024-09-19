@@ -7,18 +7,19 @@ using Model;
 using Model.DAL;
 using Logic.Telemetry;
 using System.Reflection.Metadata.Ecma335;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class BookTagApi
     {
         public static void BookTagAdd(
-            IdiomaticaContext context, Book book, User user, string tag)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Book book, User user, string tag)
         {
             string trimmedTag = tag.Trim().ToLower();
             if (trimmedTag == string.Empty) return;
 
-            
+            var context = dbContextFactory.CreateDbContext();
             DateTimeOffset created = DateTimeOffset.UtcNow;
             // check if this user already saved this tag
             var existingTag = context.BookTags.Where(x =>
@@ -37,47 +38,47 @@ namespace Logic.Services.API
                 Tag = trimmedTag,
                 Created = created,
             };
-            newTag = DataCache.BookTagCreate(newTag, context);
+            newTag = DataCache.BookTagCreate(newTag, dbContextFactory);
             if (newTag is null || newTag.Id is null)
             {
                 ErrorHandler.LogAndThrow();
             }
         }
         public static async Task BookTagAddAsync(
-            IdiomaticaContext context, Book book, User user, string tag)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Book book, User user, string tag)
         {
-            await Task.Run(() => BookTagAdd(context, book, user, tag));
+            await Task.Run(() => BookTagAdd(dbContextFactory, book, user, tag));
         }
 
 
         public static void BookTagRemove(
-            IdiomaticaContext context, Guid bookId, Guid userId, string tag)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId, string tag)
         {
 
             string trimmedTag = tag.Trim().ToLower();
             if (trimmedTag == string.Empty) return;
 
-            DataCache.BookTagDelete((bookId, userId, trimmedTag), context);
+            DataCache.BookTagDelete((bookId, userId, trimmedTag), dbContextFactory);
         }
         public static async Task BookTagRemoveAsync(
-            IdiomaticaContext context, Guid bookId, Guid userId, string tag)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId, string tag)
         {
-            await Task.Run(() => BookTagRemove(context, bookId, userId, tag));
+            await Task.Run(() => BookTagRemove(dbContextFactory, bookId, userId, tag));
         }
 
 
         public static List<BookTagRow> BookTagsGetByBookIdAndUserId(
-            IdiomaticaContext context, Guid bookId, Guid userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId)
         {
-            var tags = DataCache.BookTagsByBookAndUserRead((bookId, userId), context);
+            var tags = DataCache.BookTagsByBookAndUserRead((bookId, userId), dbContextFactory);
             return tags;
         }
         public static async Task<List<BookTagRow>> BookTagsGetByBookIdAndUserIdAsync(
-            IdiomaticaContext context, Guid bookId, Guid userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId)
         {
             return await Task<List<BookTag>>.Run(() =>
             {
-                return BookTagsGetByBookIdAndUserId(context, bookId, userId);
+                return BookTagsGetByBookIdAndUserId(dbContextFactory, bookId, userId);
             });
         }
     }

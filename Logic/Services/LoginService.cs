@@ -41,7 +41,7 @@ namespace Logic.Services
         /// <summary>
         /// this is used so that the test bench can be used without needing to go through front-end login
         /// </summary>
-        public void SetLoggedInUserForTestBench(User loggedInUser, IdiomaticaContext context)
+        public void SetLoggedInUserForTestBench(User loggedInUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             if (loggedInUser is null)
             {
@@ -49,7 +49,7 @@ namespace Logic.Services
                 return;
             }
             _loggedInUser = loggedInUser;
-            _uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(context, loggedInUser.Id);
+            _uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(dbContextFactory, loggedInUser.Id);
             if (_uiLanguage is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -59,17 +59,17 @@ namespace Logic.Services
             _loggedInUserOverride = true;
         }
 #endif
-        public User? GetLoggedInUser(IdiomaticaContext context)
+        public User? GetLoggedInUser(IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
 #if DEBUG
             /// this is used so that the test bench can be used without needing to go through front-end login
             if ( _loggedInUserOverride) return _loggedInUser;
 #endif
-            var t = Task.Run(() => GetLoggedInUserAsync(context));
+            var t = Task.Run(() => GetLoggedInUserAsync(dbContextFactory));
             t.Wait();
             return t.Result;
         }
-        public async Task<User?> GetLoggedInUserAsync(IdiomaticaContext context)
+        public async Task<User?> GetLoggedInUserAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
 
 #if DEBUG
@@ -77,9 +77,9 @@ namespace Logic.Services
             if (_loggedInUserOverride) return _loggedInUser;
 #endif
             _loggedInUserClaimsPrincipal = await GetAppUserClaimsPrincipalAsync();
-            return ProcessUserFromClaimPrincipal(context);
+            return ProcessUserFromClaimPrincipal(dbContextFactory);
         }
-        private User? ProcessUserFromClaimPrincipal(IdiomaticaContext context)
+        private User? ProcessUserFromClaimPrincipal(IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             if (_loggedInUserClaimsPrincipal == null) return null;
             if (_loggedInUserClaimsPrincipal.Identity is null) return null;
@@ -88,21 +88,21 @@ namespace Logic.Services
             var appUserId = _loggedInUserClaimsPrincipal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (appUserId == null) return null;
            
-            var matchingUser = DataCache.UserByApplicationUserIdRead(appUserId, context);
+            var matchingUser = DataCache.UserByApplicationUserIdRead(appUserId, dbContextFactory);
             if (matchingUser is null) return null;
 
             _loggedInUser = matchingUser;
-            _uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(context, matchingUser.Id);
-            if (_uiLanguage == null) _uiLanguage = GetDefaultUiLanguage(context);
+            _uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(dbContextFactory, matchingUser.Id);
+            if (_uiLanguage == null) _uiLanguage = GetDefaultUiLanguage(dbContextFactory);
             if (_uiLanguage == null) { ErrorHandler.LogAndThrow(); return null; }
                     
             _uiLabels = UILabels.Factory.GetUILabels(_uiLanguage.Code);
             return _loggedInUser;
         }
 
-        private Language? GetDefaultUiLanguage(IdiomaticaContext context)
+        private Language? GetDefaultUiLanguage(IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return LanguageApi.LanguageReadByCode(context, AvailableLanguageCode.EN_US);
+            return LanguageApi.LanguageReadByCode(dbContextFactory, AvailableLanguageCode.EN_US);
         }
 
         /// <summary>

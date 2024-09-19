@@ -10,13 +10,14 @@ using DeepL;
 using static System.Net.Mime.MediaTypeNames;
 using System.Net;
 using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class ParagraphApi
     {
         public static Paragraph? ParagraphCreateFromSplit(
-            IdiomaticaContext context, string splitText, Page page,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string splitText, Page page,
             int ordinal, Language language)
         {
             if (splitText.Trim() == string.Empty) return null;
@@ -29,7 +30,7 @@ namespace Logic.Services.API
                 PageId = page.Id,
                 Page = page,
             };
-            paragraph = DataCache.ParagraphCreate(paragraph, context);
+            paragraph = DataCache.ParagraphCreate(paragraph, dbContextFactory);
             if (paragraph is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -38,7 +39,7 @@ namespace Logic.Services.API
 
             // now create the sentences
             var sentenceSplits = SentenceApi.PotentialSentencesSplitFromText(
-                context, splitText, language);
+                dbContextFactory, splitText, language);
             int sentenceOrdinal = 0;
             foreach (var sentenceSplit in sentenceSplits)
             {
@@ -46,7 +47,7 @@ namespace Logic.Services.API
                 var trimmedSentenceSplit = sentenceSplit.Trim();
                 if (string.IsNullOrEmpty(trimmedSentenceSplit)) continue;
                 var sentence = SentenceApi.SentenceCreate(
-                    context, trimmedSentenceSplit, language, sentenceOrdinal, paragraph);
+                    dbContextFactory, trimmedSentenceSplit, language, sentenceOrdinal, paragraph);
                 if (sentence is null)
                 {
                     ErrorHandler.LogAndThrow();
@@ -68,12 +69,12 @@ namespace Logic.Services.API
             return paragraph;
         }
         public static async Task<Paragraph?> ParagraphCreateFromSplitAsync(
-            IdiomaticaContext context, string splitText, Page page,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string splitText, Page page,
             int ordinal, Language language)
         {
             return await Task<Paragraph?>.Run(() =>
             {
-                return ParagraphCreateFromSplit(context, splitText, page, ordinal, language);
+                return ParagraphCreateFromSplit(dbContextFactory, splitText, page, ordinal, language);
             });
         }
 
@@ -81,18 +82,18 @@ namespace Logic.Services.API
         ///  chooses a random ParagraphTranslationBridge from a card, translated to the user's UI preferred language
         /// </summary>
         public static (string example, string translation) ParagraphExamplePullRandomByFlashCardId(
-            IdiomaticaContext context, Guid flashCardId, AvailableLanguageCode uiLanguageCode)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid flashCardId, AvailableLanguageCode uiLanguageCode)
         {
             var example = string.Empty;
             var translation = string.Empty;
 
-            var uiLanguage = LanguageApi.LanguageReadByCode(context, uiLanguageCode);
+            var uiLanguage = LanguageApi.LanguageReadByCode(dbContextFactory, uiLanguageCode);
             if (uiLanguage is null) { ErrorHandler.LogAndThrow(); return (example, translation); }
             
             // pull all bridges for this card with this language code
             var bridges = DataCache
                 .FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCodeRead(
-                    (flashCardId, uiLanguage.Id), context);
+                    (flashCardId, uiLanguage.Id), dbContextFactory);
             if (bridges is null || bridges.Count == 0) return (example, translation);
             
             // select a random bridge
@@ -102,37 +103,37 @@ namespace Logic.Services.API
 
             // pull the paragraphtranslation
             var paragraphTranslation = DataCache.ParagraphTranslationByIdRead(
-                (Guid)bridge.ParagraphTranslationId, context);
+                (Guid)bridge.ParagraphTranslationId, dbContextFactory);
             if (paragraphTranslation is null || paragraphTranslation.TranslationText is null) 
                 return (example, translation);
             translation = paragraphTranslation.TranslationText;
 
             // pull the orig text
-            var paragraph = DataCache.ParagraphByIdRead((Guid)paragraphTranslation.ParagraphId, context);
+            var paragraph = DataCache.ParagraphByIdRead((Guid)paragraphTranslation.ParagraphId, dbContextFactory);
             if (paragraph is null) return (example, translation);
-            example = ParagraphApi.ParagraphReadAllText(context, (Guid) paragraph.Id);
+            example = ParagraphApi.ParagraphReadAllText(dbContextFactory, (Guid) paragraph.Id);
 
             return (example, translation);
         }
         public static async Task<(string example, string translation)> ParagraphExamplePullRandomByFlashCardIdAsync(
-            IdiomaticaContext context, Guid flashCardId, AvailableLanguageCode uiLanguageCode)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid flashCardId, AvailableLanguageCode uiLanguageCode)
         {
             return await Task<(string example, string translation)>.Run(() =>
             {
-                return ParagraphExamplePullRandomByFlashCardId(context, flashCardId, uiLanguageCode);
+                return ParagraphExamplePullRandomByFlashCardId(dbContextFactory, flashCardId, uiLanguageCode);
             });
         }
 
 
         public static string ParagraphReadAllText(
-            IdiomaticaContext context, Guid paragraphId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid paragraphId)
         {
-            return ParagraphReadAllTextAsync(context, paragraphId).Result;
+            return ParagraphReadAllTextAsync(dbContextFactory, paragraphId).Result;
         }
         public static async Task<string> ParagraphReadAllTextAsync(
-            IdiomaticaContext context, Guid paragraphId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid paragraphId)
         {
-            var sentences = await DataCache.SentencesByParagraphIdReadAsync(paragraphId, context);
+            var sentences = await DataCache.SentencesByParagraphIdReadAsync(paragraphId, dbContextFactory);
             if (sentences is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -149,17 +150,17 @@ namespace Logic.Services.API
 
 
         public static List<Paragraph> ParagraphsCreateFromPage(
-            IdiomaticaContext context, Page page, Language language)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Page page, Language language)
         {
             var paragraphs = new List<Paragraph>();
             var paragraphSplits = PotentialParagraphsSplitFromText(
-                context, page.OriginalText, language);
+                dbContextFactory, page.OriginalText, language);
             int paragraphOrdinal = 0;
             foreach (var paragraphSplit in paragraphSplits)
             {
                 var paragraphSplitTrimmed = paragraphSplit.Trim();
                 if (string.IsNullOrEmpty(paragraphSplitTrimmed)) continue;
-                var paragraph = ParagraphCreateFromSplit(context,
+                var paragraph = ParagraphCreateFromSplit(dbContextFactory,
                     paragraphSplitTrimmed, page, paragraphOrdinal, language);
                 if (paragraph is not null)
                 {
@@ -170,49 +171,49 @@ namespace Logic.Services.API
             return paragraphs;
         }
         public static async Task<List<Paragraph>> ParagraphsCreateFromPageAsync(
-            IdiomaticaContext context, Page page, Language language)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Page page, Language language)
         {
             return await Task<List<Paragraph>>.Run(() =>
             {
-                return ParagraphsCreateFromPage(context, page, language);
+                return ParagraphsCreateFromPage(dbContextFactory, page, language);
             });
         }
 
 
         public static List<Paragraph>? ParagraphsReadByPageId(
-            IdiomaticaContext context, Guid pageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId)
         {
-            return DataCache.ParagraphsByPageIdRead(pageId, context);
+            return DataCache.ParagraphsByPageIdRead(pageId, dbContextFactory);
         }
         public static async Task<List<Paragraph>?> ParagraphsReadByPageIdAsync(
-            IdiomaticaContext context, Guid pageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId)
         {
-            return await DataCache.ParagraphsByPageIdReadAsync(pageId, context);
+            return await DataCache.ParagraphsByPageIdReadAsync(pageId, dbContextFactory);
         }
 
 
         public static (string input, string output) ParagraphTranslate(
-            IdiomaticaContext context, Paragraph paragraph,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Paragraph paragraph,
             AvailableLanguageCode fromCode, AvailableLanguageCode toCode)
         {
-            return ParagraphTranslateAsync(context, paragraph, fromCode, toCode).Result;
+            return ParagraphTranslateAsync(dbContextFactory, paragraph, fromCode, toCode).Result;
         }
         public static async Task<(string input, string output)> ParagraphTranslateAsync(
-            IdiomaticaContext context, Paragraph paragraph,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Paragraph paragraph,
             AvailableLanguageCode fromCode, AvailableLanguageCode toCode)
         {
-            string input = await ParagraphReadAllTextAsync(context, paragraph.Id);
+            string input = await ParagraphReadAllTextAsync(dbContextFactory, paragraph.Id);
             string output = "";
 
 
-            var languageFrom = LanguageApi.LanguageReadByCode(context, fromCode);
-            var languageTo = LanguageApi.LanguageReadByCode(context, toCode);
+            var languageFrom = LanguageApi.LanguageReadByCode(dbContextFactory, fromCode);
+            var languageTo = LanguageApi.LanguageReadByCode(dbContextFactory, toCode);
 
             if (languageFrom == null || languageTo == null) { ErrorHandler.LogAndThrow(); return (input, output); }
 
             // see if the translation already exists
             var existingTranslations = await DataCache.ParagraphTranslationsByParargraphIdReadAsync(
-                    paragraph.Id, context);
+                    paragraph.Id, dbContextFactory);
             if (existingTranslations is not null && existingTranslations.Count > 0)
             {
                 // are any in the right language?
@@ -241,7 +242,7 @@ namespace Logic.Services.API
                     Language = languageTo,
                     TranslationText = deeplResult
                 };
-                ppt = await DataCache.ParagraphTranslationCreateAsync(ppt, context);
+                ppt = await DataCache.ParagraphTranslationCreateAsync(ppt, dbContextFactory);
                 if (ppt is null)
                 {
                     ErrorHandler.LogAndThrow();
@@ -259,7 +260,7 @@ namespace Logic.Services.API
         /// creating page and paragraph objects
         /// </summary>
         public static string[] PotentialParagraphsSplitFromText(
-            IdiomaticaContext context, string text, Language language)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string text, Language language)
         {
             if (string.IsNullOrEmpty(text)) { ErrorHandler.LogAndThrow(); return []; }
             var textSanitized = text.Trim().Replace('\u00A0', ' ');
@@ -274,11 +275,11 @@ namespace Logic.Services.API
             return paragraphSplitsRaw;
         }
         public static async Task<string[]> PotentialParagraphsSplitFromTextAsync(
-            IdiomaticaContext context, string text, Language language)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string text, Language language)
         {
             return await Task<string[]>.Run(() =>
             {
-                return PotentialParagraphsSplitFromText(context, text, language);
+                return PotentialParagraphsSplitFromText(dbContextFactory, text, language);
             });
 
         }

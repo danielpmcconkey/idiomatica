@@ -17,8 +17,10 @@ namespace Model.DAL
 
         #region create
 
-        public static Token? TokenCreate(Token token, IdiomaticaContext context)
+        public static Token? TokenCreate(Token token, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Token]
@@ -42,20 +44,22 @@ namespace Model.DAL
 
             return token;
         }
-        public static async Task<Token?> TokenCreateAsync(Token value, IdiomaticaContext context)
+        public static async Task<Token?> TokenCreateAsync(Token value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return TokenCreate(value, context); });
+            return await Task.Run(() => { return TokenCreate(value, dbContextFactory); });
         }
         #endregion
 
         #region read
-        public static Token? TokenByIdRead(Guid key, IdiomaticaContext context)
+        public static Token? TokenByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (TokenById.ContainsKey(key))
             {
                 return TokenById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.Tokens.Where(x => x.Id == key)
@@ -65,21 +69,23 @@ namespace Model.DAL
             TokenById[key] = value;
             return value;
         }
-        public static async Task<Token?> TokenByIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<Token?> TokenByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Token?>.Run(() =>
             {
-                return TokenByIdRead(key, context);
+                return TokenByIdRead(key, dbContextFactory);
             });
         }
         public static List<Token> TokensByPageIdRead(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (TokensByPageId.ContainsKey(key))
             {
                 return TokensByPageId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var groups = (from p in context.Pages
                           join pp in context.Paragraphs on p.Id equals pp.PageId
@@ -99,20 +105,22 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<Token>> TokensByPageIdReadAsync(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<Token>>.Run(() =>
             {
-                return TokensByPageIdRead(key, context);
+                return TokensByPageIdRead(key, dbContextFactory);
             });
         }
-        public static List<Token> TokensBySentenceIdRead(Guid key, IdiomaticaContext context)
+        public static List<Token> TokensBySentenceIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (TokensBySentenceId.ContainsKey(key))
             {
                 return TokensBySentenceId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.Tokens
@@ -123,20 +131,22 @@ namespace Model.DAL
             TokensBySentenceId[key] = value;
             return value;
         }
-        public static async Task<List<Token>> TokensBySentenceIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<List<Token>> TokensBySentenceIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<Token>>.Run(() =>
             {
-                return TokensBySentenceIdRead(key, context);
+                return TokensBySentenceIdRead(key, dbContextFactory);
             });
         }
-        public static List<Token> TokensAndWordsBySentenceIdRead(Guid key, IdiomaticaContext context)
+        public static List<Token> TokensAndWordsBySentenceIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (TokensAndWordsBySentenceId.ContainsKey(key))
             {
                 return TokensAndWordsBySentenceId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.Tokens
@@ -153,18 +163,20 @@ namespace Model.DAL
             }
             return value;
         }
-        public static async Task<List<Token>> TokensAndWordsBySentenceIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<List<Token>> TokensAndWordsBySentenceIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<Token>>.Run(() =>
             {
-                return TokensAndWordsBySentenceIdRead(key, context);
+                return TokensAndWordsBySentenceIdRead(key, dbContextFactory);
             });
         }
         #endregion
 
         #region delete
-        public static void TokenBySentenceIdDelete(Guid key, IdiomaticaContext context)
+        public static void TokenBySentenceIdDelete(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             var existingList = context.Tokens.Where(x => x.SentenceId == key);
             foreach (var existingItem in existingList)
             {
@@ -184,11 +196,11 @@ namespace Model.DAL
                       WHERE SentenceId = {key}
                 """);
         }
-        public static async Task TokenBySentenceIdDeleteAsync(Guid key, IdiomaticaContext context)
+        public static async Task TokenBySentenceIdDeleteAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             await Task.Run(() =>
             {
-                TokenBySentenceIdDelete(key, context);
+                TokenBySentenceIdDelete(key, dbContextFactory);
             });
         }
 

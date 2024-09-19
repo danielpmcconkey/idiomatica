@@ -14,21 +14,21 @@
 //{
 //    public static class LanguageCodeApi
 //    {
-//        public static LanguageCode? LanguageCodeReadByCode(IdiomaticaContext context, string code)
+//        public static LanguageCode? LanguageCodeReadByCode(IDbContextFactory<IdiomaticaContext> dbContextFactory, string code)
 //        {
 //            if (string.IsNullOrEmpty(code)) ErrorHandler.LogAndThrow();
-//            return DataCache.LanguageCodeByCodeRead(code, context);
+//            return DataCache.LanguageCodeByCodeRead(code, dbContextFactory);
 //        }
 //        public static async Task<LanguageCode?> LanguageCodeReadByCodeAsync(
-//            IdiomaticaContext context, string code)
+//            IDbContextFactory<IdiomaticaContext> dbContextFactory, string code)
 //        {
 //            if (string.IsNullOrEmpty(code)) ErrorHandler.LogAndThrow();
-//            return await DataCache.LanguageCodeByCodeReadAsync(code, context);
+//            return await DataCache.LanguageCodeByCodeReadAsync(code, dbContextFactory);
 //        }
 
 
 //        public static Dictionary<string, LanguageCode> LanguageCodeOptionsRead(
-//            IdiomaticaContext context, Expression<Func<LanguageCode, bool>> filter)
+//            IDbContextFactory<IdiomaticaContext> dbContextFactory, Expression<Func<LanguageCode, bool>> filter)
 //        {
 //            var options = context.LanguageCodes
 //                .Where(filter).OrderBy(x => x.LanguageName).ToList();
@@ -44,17 +44,17 @@
 //            return returnDict;
 //        }
 //        public static async Task<Dictionary<string, LanguageCode>> LanguageCodeOptionsReadAsync(
-//            IdiomaticaContext context, Expression<Func<LanguageCode, bool>> filter)
+//            IDbContextFactory<IdiomaticaContext> dbContextFactory, Expression<Func<LanguageCode, bool>> filter)
 //        {
 //            return await Task<Dictionary<string, LanguageCode>>.Run(() =>
 //            {
-//                return LanguageCodeOptionsRead(context, filter);
+//                return LanguageCodeOptionsRead(dbContextFactory, filter);
 //            });
 
 //        }
 
 //        public static LanguageCode? LanguageCodeUserInterfacePreferenceReadByUserId(
-//            IdiomaticaContext context, Guid userId)
+//            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
 //        {
 
 
@@ -65,19 +65,19 @@
 
 
 
-//            var languageCode = DataCache.LanguageCodeUserInterfacePreferenceByUserIdRead(userId, context);
+//            var languageCode = DataCache.LanguageCodeUserInterfacePreferenceByUserIdRead(userId, dbContextFactory);
 //            if (languageCode is null)
 //            {
-//                return LanguageCodeReadByCode(context, "EN-US");
+//                return LanguageCodeReadByCode(dbContextFactory, "EN-US");
 //            }
 //            return languageCode;
 //        }
 //        public static async Task<LanguageCode?> LanguageCodeUserInterfacePreferenceReadByUserIdAsync(
-//            IdiomaticaContext context, Guid userId)
+//            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
 //        {
 //            return await Task<LanguageCode?>.Run(() =>
 //            {
-//                return LanguageCodeUserInterfacePreferenceReadByUserId(context, userId);
+//                return LanguageCodeUserInterfacePreferenceReadByUserId(dbContextFactory, userId);
 //            });
 //        }
 //    }

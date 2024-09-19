@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Telemetry
 {
@@ -25,20 +26,21 @@ namespace Logic.Telemetry
             ThrowError(memberName, sourceFilePath, sourceLineNumber);
         }
         public static void LogMessage(
-            AvailableLogMessageTypes type, string message, IdiomaticaContext? context = null,
+            AvailableLogMessageTypes type, string message, 
+            IDbContextFactory<IdiomaticaContext> dbContextFactory = null,
             [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
             [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
             [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
             )
         {
             LogMessage(AvailableLogMessageTypes.ERROR,
-                memberName, sourceFilePath, sourceLineNumber, message, null, context);
+                memberName, sourceFilePath, sourceLineNumber, message, null, dbContextFactory);
         }
         private static void LogMessage(AvailableLogMessageTypes type,
             string memberName, string sourceFilePath, int sourceLineNumber, string message,
-            Exception? ex, IdiomaticaContext? context = null)
+            Exception? ex, IDbContextFactory<IdiomaticaContext> dbContextFactory = null)
         {
-            if (context is null) return;
+            if (dbContextFactory is null) return;
 
             var shouldWriteLog = false;
             if (type == AvailableLogMessageTypes.FATAL || type == AvailableLogMessageTypes.ERROR
@@ -53,6 +55,8 @@ namespace Logic.Telemetry
             shouldWriteLog = true;
 #endif
             if (!shouldWriteLog) return;
+
+            var context = dbContextFactory.CreateDbContext();
 
             context.LogMessages.Add(new LogMessage() { 
                 Id = Guid.NewGuid(),

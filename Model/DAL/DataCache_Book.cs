@@ -14,8 +14,10 @@ namespace Model.DAL
 
 
         #region read
-        public static Book? BookByIdRead(Guid key, IdiomaticaContext context)
+        public static Book? BookByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // check cache
             if (BookById.ContainsKey(key))
             {
@@ -30,19 +32,21 @@ namespace Model.DAL
             BookById[key] = value;
             return value;
         }
-        public static async Task<Book?> BookByIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<Book?> BookByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Book?>.Run(() =>
             {
-                return BookByIdRead(key, context);
+                return BookByIdRead(key, dbContextFactory);
             });
         }
 
         #endregion
 
         #region create
-        public static Book? BookCreate(Book book, IdiomaticaContext context)
+        public static Book? BookCreate(Book book, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                                 
                 INSERT INTO [Idioma].[Book]
@@ -62,15 +66,17 @@ namespace Model.DAL
             BookById[(Guid)book.Id] = book;
             return book;
         }
-        public static async Task<Book?> BookCreateAsync(Book value, IdiomaticaContext context)
+        public static async Task<Book?> BookCreateAsync(Book value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return BookCreate(value, context); });
+            return await Task.Run(() => { return BookCreate(value, dbContextFactory); });
         }
         #endregion
 
         #region delete
-        public static void BookAndAllChildrenDelete(Guid bookId, IdiomaticaContext context)
+        public static void BookAndAllChildrenDelete(Guid bookId, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             Guid guid = Guid.NewGuid();
             context.Database.ExecuteSql($"""
 

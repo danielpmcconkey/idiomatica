@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DeepL;
 using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
@@ -16,7 +17,7 @@ namespace Logic.Services.API
         #region create
 
         public static User? UserCreate(
-            string applicationUserId, string name, IdiomaticaContext context)
+            string applicationUserId, string name, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             var user = new User()
             {
@@ -24,13 +25,13 @@ namespace Logic.Services.API
                 ApplicationUserId = applicationUserId,
                 Name = name,
             };
-            user = DataCache.UserCreate(user, context);
+            user = DataCache.UserCreate(user, dbContextFactory);
             if (user is null) { ErrorHandler.LogAndThrow(); return null; }
 
             return user;
         }
         public static async Task<User?> UserCreateAsync(
-            string applicationUserId, string name, IdiomaticaContext context)
+            string applicationUserId, string name, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             var user = new User()
             {
@@ -38,12 +39,12 @@ namespace Logic.Services.API
                 ApplicationUserId = applicationUserId,
                 Name = name,
             };
-            user = await DataCache.UserCreateAsync(user, context);
+            user = await DataCache.UserCreateAsync(user, dbContextFactory);
             return user;
         }
 
 
-        public static UserBreadCrumb? UserBreadCrumbCreate(IdiomaticaContext context,
+        public static UserBreadCrumb? UserBreadCrumbCreate(IDbContextFactory<IdiomaticaContext> dbContextFactory,
             User user, Page page)
         {
             UserBreadCrumb crumb = new() {
@@ -54,29 +55,29 @@ namespace Logic.Services.API
                 Page = page,
                 ActionDateTime = DateTime.Now
             };
-            return DataCache.UserBreadCrumbCreate(crumb, context);
+            return DataCache.UserBreadCrumbCreate(crumb, dbContextFactory);
         }
         public static async Task<UserBreadCrumb?> UserBreadCrumbCreateAsync(
-            IdiomaticaContext context, User user, Page page)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, User user, Page page)
         {
             return await Task.Run(() =>
             {
-                return UserBreadCrumbCreate(context, user, page);
+                return UserBreadCrumbCreate(dbContextFactory, user, page);
             });
         }
 
 
-        public static UserSetting? UserSettingCreate(IdiomaticaContext context,
+        public static UserSetting? UserSettingCreate(IDbContextFactory<IdiomaticaContext> dbContextFactory,
             AvailableUserSetting key, Guid userId, string value)
         {
-            return DataCache.UserSettingCreate(key, userId, value, context);
+            return DataCache.UserSettingCreate(key, userId, value, dbContextFactory);
         }
         public static async Task<UserSetting?> UserSettingCreateAsync(
-            IdiomaticaContext context, AvailableUserSetting key, Guid userId, string value)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, AvailableUserSetting key, Guid userId, string value)
         {
             return await Task.Run(() =>
             {
-                return UserSettingCreate(context, key, userId, value);
+                return UserSettingCreate(dbContextFactory, key, userId, value);
             });
         }
 
@@ -85,45 +86,45 @@ namespace Logic.Services.API
 
         #region read
 
-        public static UserBreadCrumb? UserBreadCrumbReadLatest(IdiomaticaContext context, Guid userId)
+        public static UserBreadCrumb? UserBreadCrumbReadLatest(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
         {
-            var list = DataCache.UserBreadCrumbReadByFilter((x => x.UserId == userId), 1, context);
+            var list = DataCache.UserBreadCrumbReadByFilter((x => x.UserId == userId), 1, dbContextFactory);
             if(list.Count < 1) return null;
             return list[0];
         }
         public static async Task<UserBreadCrumb?> UserBreadCrumbReadLatestAsync(
-            IdiomaticaContext context, Guid userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
         {
             return await Task.Run(() =>
             {
-                return UserBreadCrumbReadLatest(context, userId);
+                return UserBreadCrumbReadLatest(dbContextFactory, userId);
             });
         }
 
         public static Language? UserSettingUiLanguagReadByUserId(
-            IdiomaticaContext context, Guid userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
         {
-            return DataCache.UserSettingUiLanguageByUserIdRead(userId, context);
+            return DataCache.UserSettingUiLanguageByUserIdRead(userId, dbContextFactory);
         }
         public static async Task<Language?> UserSettingUiLanguagReadByUserIdAsync(
-            IdiomaticaContext context, Guid userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
         {
-            return await DataCache.UserSettingUiLanguageByUserIdReadAsync(userId, context);
+            return await DataCache.UserSettingUiLanguageByUserIdReadAsync(userId, dbContextFactory);
         }
 
         #endregion
 
         #region delete
 
-        public static void UserAndAllChildrenDelete(IdiomaticaContext context, Guid userId)
+        public static void UserAndAllChildrenDelete(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
         {
-            DataCache.UserAndAllChildrenDelete(userId, context);
+            DataCache.UserAndAllChildrenDelete(userId, dbContextFactory);
         }
-        public static async Task UserAndAllChildrenDeleteAsync(IdiomaticaContext context, Guid userId)
+        public static async Task UserAndAllChildrenDeleteAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
         {
             await Task.Run(() =>
             {
-                UserAndAllChildrenDelete(context, userId);
+                UserAndAllChildrenDelete(dbContextFactory, userId);
             });
         }
 

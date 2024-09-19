@@ -19,11 +19,13 @@ namespace Model.DAL
 
         #region create
 
-        public static FlashCard? FlashCardCreate(FlashCard flashCard, IdiomaticaContext context)
+        public static FlashCard? FlashCardCreate(FlashCard flashCard, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            
+            var context = dbContextFactory.CreateDbContext();
+
+
             //int numRows = context.Database.ExecuteSql($"""
-                        
+
             //    INSERT INTO [Idioma].[FlashCard]
             //          ([WordUserId]
             //          ,[Status]
@@ -34,10 +36,10 @@ namespace Model.DAL
             //          ,{flashCard.Status}
             //          ,{flashCard.NextReview}
             //          ,{flashCard.Id})
-        
+
             //    """);
             //if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
-            
+
             context.FlashCards.Add(flashCard);
             context.SaveChanges();
             // add it to cache
@@ -45,9 +47,9 @@ namespace Model.DAL
 
             return flashCard;
         }
-        public static async Task<FlashCard?> FlashCardCreateAsync(FlashCard value, IdiomaticaContext context)
+        public static async Task<FlashCard?> FlashCardCreateAsync(FlashCard value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return FlashCardCreate(value, context); });
+            return await Task.Run(() => { return FlashCardCreate(value, dbContextFactory); });
         }
 
 
@@ -55,13 +57,15 @@ namespace Model.DAL
         #endregion
 
         #region read
-        public static FlashCard? FlashCardByIdRead(Guid key, IdiomaticaContext context)
+        public static FlashCard? FlashCardByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (FlashCardById.ContainsKey(key))
             {
                 return FlashCardById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.FlashCards.Where(x => x.Id == key).FirstOrDefault();
@@ -70,21 +74,23 @@ namespace Model.DAL
             FlashCardById[key] = value;
             return value;
         }
-        public static async Task<FlashCard?> FlashCardByIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<FlashCard?> FlashCardByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<FlashCard?>.Run(() =>
             {
-                return FlashCardByIdRead(key, context);
+                return FlashCardByIdRead(key, dbContextFactory);
             });
         }
 
-        public static FlashCard? FlashCardByWordUserIdRead(Guid key, IdiomaticaContext context)
+        public static FlashCard? FlashCardByWordUserIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (FlashCardByWordUserId.ContainsKey(key))
             {
                 return FlashCardByWordUserId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.FlashCards.Where(x => x.WordUserId == key).FirstOrDefault();
@@ -93,22 +99,24 @@ namespace Model.DAL
             FlashCardByWordUserId[key] = value;
             return value;
         }
-        public static async Task<FlashCard?> FlashCardByWordUserIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<FlashCard?> FlashCardByWordUserIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<FlashCard?>.Run(() =>
             {
-                return FlashCardByWordUserIdRead(key, context);
+                return FlashCardByWordUserIdRead(key, dbContextFactory);
             });
         }
 
 
-        public static FlashCard? FlashCardAndFullRelationshipsByIdRead(Guid key, IdiomaticaContext context)
+        public static FlashCard? FlashCardAndFullRelationshipsByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (FlashCardAndFullRelationshipsById.TryGetValue(key, out FlashCard? value))
             {
                 return value;
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             value = context.FlashCards.Where(x => x.Id == key)
@@ -128,16 +136,18 @@ namespace Model.DAL
             FlashCardById[key] = value;
             return value;
         }
-        public static async Task<FlashCard?> FlashCardAndFullRelationshipsByIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<FlashCard?> FlashCardAndFullRelationshipsByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<FlashCard?>.Run(() =>
             {
-                return FlashCardAndFullRelationshipsByIdRead(key, context);
+                return FlashCardAndFullRelationshipsByIdRead(key, dbContextFactory);
             });
         }
         public static List<FlashCard>? FlashCardsActiveAndFullRelationshipsByPredicateRead(
-            Expression<Func<FlashCard, bool>> predicate, int take, IdiomaticaContext context)
+            Expression<Func<FlashCard, bool>> predicate, int take, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // don't check cache here. The statuses change and new cards get
             // created for the first time while this cache thinks there's a
             // null for the deck
@@ -173,8 +183,10 @@ namespace Model.DAL
 
         #region update
 
-        public static void FlashCardUpdate(FlashCard flashCard, IdiomaticaContext context)
+        public static void FlashCardUpdate(FlashCard flashCard, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                         UPDATE [Idioma].[FlashCard]
                         SET [WordUserId] = {flashCard.WordUserId}
@@ -193,11 +205,11 @@ namespace Model.DAL
 
             return;
         }
-        public static async Task FlashCardUpdateAsync(FlashCard value, IdiomaticaContext context)
+        public static async Task FlashCardUpdateAsync(FlashCard value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             await Task.Run(() =>
             {
-                FlashCardUpdate(value, context);
+                FlashCardUpdate(value, dbContextFactory);
             });
         }
 

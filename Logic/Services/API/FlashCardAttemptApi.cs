@@ -8,13 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class FlashCardAttemptApi
     {
         public static FlashCardAttempt? FlashCardAttemptCreate(
-            IdiomaticaContext context, FlashCard flashCard, AvailableFlashCardAttemptStatus status)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, FlashCard flashCard, AvailableFlashCardAttemptStatus status)
         {
             FlashCardAttempt? attempt = new ()
             {
@@ -24,7 +25,7 @@ namespace Logic.Services.API
                 AttemptedWhen = DateTime.Now,
                 Status = status,
             };
-            attempt = DataCache.FlashCardAttemptCreate(attempt, context);
+            attempt = DataCache.FlashCardAttemptCreate(attempt, dbContextFactory);
             if (attempt is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -33,11 +34,11 @@ namespace Logic.Services.API
             return attempt;
         }
         public static async Task<FlashCardAttempt?> FlashCardAttemptCreateAsync(
-            IdiomaticaContext context, FlashCard flashCard, AvailableFlashCardAttemptStatus status)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, FlashCard flashCard, AvailableFlashCardAttemptStatus status)
         {
             return await Task<FlashCardAttempt?>.Run(() =>
             {
-                return FlashCardAttemptCreate(context, flashCard, status);
+                return FlashCardAttemptCreate(dbContextFactory, flashCard, status);
             });
         }
     }

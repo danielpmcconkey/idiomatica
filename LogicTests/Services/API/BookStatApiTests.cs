@@ -30,7 +30,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var newBook = BookApi.BookCreateAndSave(
-                    context,
+                    dbContextFactory,
                     TestConstants.NewBookTitle,
                     TestConstants.NewBookLanguageCode,
                     TestConstants.NewBookUrl,
@@ -39,16 +39,16 @@ namespace Logic.Services.API.Tests
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.Id;
 
-                BookStatApi.BookStatsCreateAndSave(context, (Guid)bookId);
+                BookStatApi.BookStatsCreateAndSave(dbContextFactory, (Guid)bookId);
 
-                int actualPageCount = BookApi.BookReadPageCount(context, (Guid)bookId);
+                int actualPageCount = BookApi.BookReadPageCount(dbContextFactory, (Guid)bookId);
 
                 Assert.AreEqual(expectedPageCount, actualPageCount);
             }
             finally
             {
                 // clean-up
-                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
         [TestMethod()]
@@ -62,7 +62,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var newBook = await BookApi.BookCreateAndSaveAsync(
-                    context,
+                    dbContextFactory,
                     TestConstants.NewBookTitle,
                     TestConstants.NewBookLanguageCode,
                     TestConstants.NewBookUrl,
@@ -71,16 +71,16 @@ namespace Logic.Services.API.Tests
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.Id;
 
-                await BookStatApi.BookStatsCreateAndSaveAsync(context, (Guid)bookId);
+                await BookStatApi.BookStatsCreateAndSaveAsync(dbContextFactory, (Guid)bookId);
 
-                int actualPageCount = await BookApi.BookReadPageCountAsync(context, (Guid)bookId);
+                int actualPageCount = await BookApi.BookReadPageCountAsync(dbContextFactory, (Guid)bookId);
 
                 Assert.AreEqual(expectedPageCount, actualPageCount);
             }
             finally
             {
                 // clean-up
-                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
 
@@ -96,7 +96,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var newBook = BookApi.BookCreateAndSave(
-                    context,
+                    dbContextFactory,
                     TestConstants.NewBookTitle,
                     TestConstants.NewBookLanguageCode,
                     TestConstants.NewBookUrl,
@@ -105,9 +105,9 @@ namespace Logic.Services.API.Tests
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.Id;
 
-                BookStatApi.BookStatsCreateAndSave(context, (Guid)bookId);
+                BookStatApi.BookStatsCreateAndSave(dbContextFactory, (Guid)bookId);
                 var difficultyStat = DataCache.BookStatByBookIdAndStatKeyRead(
-                    ((Guid)bookId, AvailableBookStat.DIFFICULTYSCORE), context);
+                    ((Guid)bookId, AvailableBookStat.DIFFICULTYSCORE), dbContextFactory);
 
                 Assert.IsNotNull(difficultyStat);
                 Assert.IsNotNull(difficultyStat.Value);
@@ -117,7 +117,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
         [TestMethod()]
@@ -131,7 +131,7 @@ namespace Logic.Services.API.Tests
             try
             {
                 var newBook = await BookApi.BookCreateAndSaveAsync(
-                    context,
+                    dbContextFactory,
                     TestConstants.NewBookTitle,
                     TestConstants.NewBookLanguageCode,
                     TestConstants.NewBookUrl,
@@ -140,9 +140,9 @@ namespace Logic.Services.API.Tests
                 if (newBook is null) { ErrorHandler.LogAndThrow(); return; }
                 bookId = (Guid)newBook.Id;
 
-                await BookStatApi.BookStatsCreateAndSaveAsync(context, (Guid)bookId);
+                await BookStatApi.BookStatsCreateAndSaveAsync(dbContextFactory, (Guid)bookId);
                 var difficultyStat = await DataCache.BookStatByBookIdAndStatKeyReadAsync(
-                    ((Guid)bookId, AvailableBookStat.DIFFICULTYSCORE), context);
+                    ((Guid)bookId, AvailableBookStat.DIFFICULTYSCORE), dbContextFactory);
 
                 Assert.IsNotNull(difficultyStat);
                 Assert.IsNotNull(difficultyStat.Value);
@@ -152,7 +152,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
     }

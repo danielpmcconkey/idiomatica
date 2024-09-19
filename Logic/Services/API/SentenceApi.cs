@@ -8,13 +8,14 @@ using System.Threading.Tasks;
 using Logic.Telemetry;
 using DeepL;
 using System.Net;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class SentenceApi
     {
         public static string[] PotentialSentencesSplitFromText(
-            IdiomaticaContext context, string text, Language language)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string text, Language language)
         {
             if (string.IsNullOrEmpty(text)) ErrorHandler.LogAndThrow();
 
@@ -23,17 +24,17 @@ namespace Logic.Services.API
             return parser.SegmentTextBySentences(text);
         }
         public static async Task<string[]> PotentialSentencesSplitFromTextAsync(
-            IdiomaticaContext context, string text, Language language)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string text, Language language)
         {
             return await Task<string[]>.Run(() =>
             {
-                return PotentialSentencesSplitFromText(context, text, language);
+                return PotentialSentencesSplitFromText(dbContextFactory, text, language);
             });
         }
 
 
         public static Sentence? SentenceCreate(
-            IdiomaticaContext context, string text, Language language, int ordinal,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string text, Language language, int ordinal,
             Paragraph paragraph)
         {
             if (ordinal < 0) ErrorHandler.LogAndThrow();
@@ -46,45 +47,45 @@ namespace Logic.Services.API
                 Text = text,
                 Ordinal = ordinal,
             };
-            newSentence = DataCache.SentenceCreate(newSentence, context);
+            newSentence = DataCache.SentenceCreate(newSentence, dbContextFactory);
             if (newSentence is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
             }
-            newSentence.Tokens = TokenApi.TokensCreateFromSentence(context,
+            newSentence.Tokens = TokenApi.TokensCreateFromSentence(dbContextFactory,
                 newSentence, language);
             return newSentence;
         }
         public static async Task<Sentence?> SentenceCreateAsync(
-            IdiomaticaContext context, string text, Language language, int ordinal,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string text, Language language, int ordinal,
             Paragraph paragraph)
         {
             return await Task<Sentence?>.Run(() =>
             {
-                return SentenceCreate(context, text, language, ordinal, paragraph);
+                return SentenceCreate(dbContextFactory, text, language, ordinal, paragraph);
             });
         }
 
 
-        public static List<Sentence>? SentencesReadByPageId(IdiomaticaContext context, Guid pageId)
+        public static List<Sentence>? SentencesReadByPageId(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId)
         {
-            return DataCache.SentencesByPageIdRead(pageId, context);
+            return DataCache.SentencesByPageIdRead(pageId, dbContextFactory);
         }
-        public static async Task<List<Sentence>?> SentencesReadByPageIdAsync(IdiomaticaContext context, Guid pageId)
+        public static async Task<List<Sentence>?> SentencesReadByPageIdAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId)
         {
-            return await DataCache.SentencesByPageIdReadAsync(pageId, context);
+            return await DataCache.SentencesByPageIdReadAsync(pageId, dbContextFactory);
         }
 
 
-        public static List<Sentence>? SentencesReadByParagraphId(IdiomaticaContext context, Guid paragraphId)
+        public static List<Sentence>? SentencesReadByParagraphId(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid paragraphId)
         {
-            return DataCache.SentencesByParagraphIdRead(paragraphId, context);
+            return DataCache.SentencesByParagraphIdRead(paragraphId, dbContextFactory);
         }
         public static async Task<List<Sentence>?> SentencesReadByParagraphIdAsync(
-            IdiomaticaContext context, Guid paragraphId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid paragraphId)
         {
-            return await DataCache.SentencesByParagraphIdReadAsync(paragraphId, context);
+            return await DataCache.SentencesByParagraphIdReadAsync(paragraphId, dbContextFactory);
         }
 
     }

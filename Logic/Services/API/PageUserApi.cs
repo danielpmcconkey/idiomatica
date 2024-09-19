@@ -8,22 +8,23 @@ using System.Threading.Tasks;
 using Logic.Telemetry;
 using System.Net;
 using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class PageUserApi
     {
         public static PageUser? PageUserCreateForPageIdAndUserId(
-            IdiomaticaContext context, Page page, User user)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Page page, User user)
         {
-            var book = DataCache.BookByIdRead((Guid)page.BookId, context);
+            var book = DataCache.BookByIdRead((Guid)page.BookId, dbContextFactory);
             if (book is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
             }
             var languageUser = DataCache.LanguageUserByLanguageIdAndUserIdRead(
-                (book.LanguageId, user.Id), context);
+                (book.LanguageId, user.Id), dbContextFactory);
             if (languageUser is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -32,13 +33,13 @@ namespace Logic.Services.API
 
             // make sure it doesn't already exist
             var existingPageUser = DataCache.PageUserByPageIdAndLanguageUserIdRead(
-                (page.Id, languageUser.Id), context);
+                (page.Id, languageUser.Id), dbContextFactory);
             if (existingPageUser is not null) return existingPageUser;
 
             // nope, definitely create it
             // but first, more stuff to look up
             var bookUser = DataCache.BookUserByBookIdAndUserIdRead(
-                (book.Id, user.Id), context);
+                (book.Id, user.Id), dbContextFactory);
             if (bookUser is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -53,7 +54,7 @@ namespace Logic.Services.API
                 PageId = page.Id,
                 Page = page,
             };
-            pageUser = DataCache.PageUserCreate(pageUser, context);
+            pageUser = DataCache.PageUserCreate(pageUser, dbContextFactory);
             if (pageUser is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -62,26 +63,26 @@ namespace Logic.Services.API
             return pageUser;
         }
         public static async Task<PageUser?> PageUserCreateForPageIdAndUserIdAsync(
-            IdiomaticaContext context, Page page, User user)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Page page, User user)
         {
             return await Task<PageUser?>.Run(() =>
             {
-                return PageUserCreateForPageIdAndUserId(context, page, user);
+                return PageUserCreateForPageIdAndUserId(dbContextFactory, page, user);
             });
         }
 
 
         public static void PageUserMarkAsRead(
-            IdiomaticaContext context, Guid pageUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageUserId)
         {
             var readDate = DateTime.Now;
-            PageUserUpdateReadDate(context, pageUserId, readDate);
+            PageUserUpdateReadDate(dbContextFactory, pageUserId, readDate);
         }
         public static async Task PageUserMarkAsReadAsync(
-            IdiomaticaContext context, Guid pageUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageUserId)
         {
             var readDate = DateTime.Now;
-            await PageUserUpdateReadDateAsync(context, pageUserId, readDate);
+            await PageUserUpdateReadDateAsync(dbContextFactory, pageUserId, readDate);
         }
 
 
@@ -92,9 +93,9 @@ namespace Logic.Services.API
         /// page 1. If both of those return null, return null from this method
         /// </summary>
         public static PageUser? PageUserReadBookmarkedOrFirst(
-            IdiomaticaContext context, Guid bookUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookUserId)
         {
-            var bookUser = DataCache.BookUserByIdRead(bookUserId, context);
+            var bookUser = DataCache.BookUserByIdRead(bookUserId, dbContextFactory);
             if (bookUser is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -105,84 +106,84 @@ namespace Logic.Services.API
             if (bookUser.CurrentPageId is not null)
             {
                 return PageUserReadByPageIdAndLanguageUserId(
-                    context, (Guid)bookUser.CurrentPageId, (Guid)bookUser.LanguageUserId);
+                    dbContextFactory, (Guid)bookUser.CurrentPageId, (Guid)bookUser.LanguageUserId);
             }
             // no bookmark, pull page 1
             return PageUserReadByOrderWithinBook(
-                context, (Guid)bookUser.LanguageUserId, 1, (Guid)bookUser.BookId);
+                dbContextFactory, (Guid)bookUser.LanguageUserId, 1, (Guid)bookUser.BookId);
         }
         public static async Task<PageUser?> PageUserReadBookmarkedOrFirstAsync(
-            IdiomaticaContext context, Guid bookUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookUserId)
         {
             return await Task<PageUser?>.Run(() =>
             {
-                return PageUserReadBookmarkedOrFirst(context, bookUserId);
+                return PageUserReadBookmarkedOrFirst(dbContextFactory, bookUserId);
             });
         }
 
 
         public static PageUser? PageUserReadByOrderWithinBook(
-            IdiomaticaContext context, Guid languageUserId, int pageOrdinal, Guid bookId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid languageUserId, int pageOrdinal, Guid bookId)
         {
             return DataCache.PageUserByLanguageUserIdOrdinalAndBookIdRead(
-                (languageUserId, pageOrdinal, bookId), context);
+                (languageUserId, pageOrdinal, bookId), dbContextFactory);
         }
         public static async Task<PageUser?> PageUserReadByOrderWithinBookAsync(
-            IdiomaticaContext context, Guid languageUserId, int pageOrdinal, Guid bookId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid languageUserId, int pageOrdinal, Guid bookId)
         {
             return await DataCache.PageUserByLanguageUserIdOrdinalAndBookIdReadAsync(
-                (languageUserId, pageOrdinal, bookId), context);
+                (languageUserId, pageOrdinal, bookId), dbContextFactory);
         }
 
 
         public static PageUser? PageUserReadByPageIdAndLanguageUserId(
-            IdiomaticaContext context, Guid currentPageID, Guid languageUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid currentPageID, Guid languageUserId)
         {
             return DataCache.PageUserByPageIdAndLanguageUserIdRead(
-                    (currentPageID, languageUserId), context);
+                    (currentPageID, languageUserId), dbContextFactory);
         }
         public static async Task<PageUser?> PageUserReadByPageIdAndLanguageUserIdAsync(
-            IdiomaticaContext context, Guid currentPageID, Guid languageUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid currentPageID, Guid languageUserId)
         {
             return await Task<PageUser?>.Run(() =>
             {
-                return PageUserReadByPageIdAndLanguageUserId(context, currentPageID, languageUserId);
+                return PageUserReadByPageIdAndLanguageUserId(dbContextFactory, currentPageID, languageUserId);
             });
         }
 
 
         public static void PageUserUpdateReadDate(
-            IdiomaticaContext context, Guid id, DateTime readDate)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid id, DateTime readDate)
         {
-            var pu = DataCache.PageUserByIdRead(id, context);
+            var pu = DataCache.PageUserByIdRead(id, dbContextFactory);
             if (pu is null) { ErrorHandler.LogAndThrow(); return; }
             pu.ReadDate = readDate;
-            DataCache.PageUserUpdate(pu, context);
+            DataCache.PageUserUpdate(pu, dbContextFactory);
             return;
         }
         public static async Task PageUserUpdateReadDateAsync(
-            IdiomaticaContext context, Guid id, DateTime readDate)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid id, DateTime readDate)
         {
-            var pu = await DataCache.PageUserByIdReadAsync(id, context);
+            var pu = await DataCache.PageUserByIdReadAsync(id, dbContextFactory);
             if (pu is null) { ErrorHandler.LogAndThrow(); return; }
             pu.ReadDate = readDate;
-            await DataCache.PageUserUpdateAsync(pu, context);
+            await DataCache.PageUserUpdateAsync(pu, dbContextFactory);
             return;
         }
 
 
         public static void PageUserUpdateUnknowWordsToWellKnown(
-            IdiomaticaContext context, Guid pageUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageUserId)
         {
             DataCache.WordUsersUpdateStatusByPageUserIdAndStatus(
-                pageUserId, AvailableWordUserStatus.UNKNOWN, AvailableWordUserStatus.WELLKNOWN, context);
+                pageUserId, AvailableWordUserStatus.UNKNOWN, AvailableWordUserStatus.WELLKNOWN, dbContextFactory);
         }
         public static async Task PageUserUpdateUnknowWordsToWellKnownAsync(
-            IdiomaticaContext context, Guid pageUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageUserId)
         {
             await Task.Run(() =>
             {
-                PageUserUpdateUnknowWordsToWellKnown(context, pageUserId);
+                PageUserUpdateUnknowWordsToWellKnown(dbContextFactory, pageUserId);
             });
         }
     }

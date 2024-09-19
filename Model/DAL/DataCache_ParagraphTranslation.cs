@@ -19,8 +19,10 @@ namespace Model.DAL
 
 
         public static ParagraphTranslation? ParagraphTranslationCreate(
-            ParagraphTranslation paragraphTranslation, IdiomaticaContext context)
+            ParagraphTranslation paragraphTranslation, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[ParagraphTranslation]
@@ -42,22 +44,23 @@ namespace Model.DAL
 
             return paragraphTranslation;
         }
-        public static async Task<ParagraphTranslation?> ParagraphTranslationCreateAsync(ParagraphTranslation value, IdiomaticaContext context)
+        public static async Task<ParagraphTranslation?> ParagraphTranslationCreateAsync(ParagraphTranslation value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return ParagraphTranslationCreate(value, context); });
+            return await Task.Run(() => { return ParagraphTranslationCreate(value, dbContextFactory); });
         }
 
 
         #endregion
 
         #region read
-        public static ParagraphTranslation? ParagraphTranslationByIdRead(Guid key, IdiomaticaContext context)
+        public static ParagraphTranslation? ParagraphTranslationByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (ParagraphTranslationById.ContainsKey(key))
             {
                 return ParagraphTranslationById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
 
             // read DB
             var value = context.ParagraphTranslations.Where(x => x.Id == key)
@@ -68,13 +71,15 @@ namespace Model.DAL
             return value;
         }
         public static List<ParagraphTranslation> ParagraphTranslationsByParargraphIdRead(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (ParagraphTranslationsByParagraphId.ContainsKey(key))
             {
                 return ParagraphTranslationsByParagraphId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = context.ParagraphTranslations
                 .Where(x => x.ParagraphId == key)
@@ -91,19 +96,21 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<ParagraphTranslation>> ParagraphTranslationsByParargraphIdReadAsync(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<ParagraphTranslation>>.Run(() =>
             {
-                return ParagraphTranslationsByParargraphIdRead(key, context);
+                return ParagraphTranslationsByParargraphIdRead(key, dbContextFactory);
             });
         }
         #endregion
 
         #region delete
         public static void ParagraphTranslationDeleteByParagraphIdAndLanguageCode(
-            (Guid paragraphId, AvailableLanguageCode code) key, IdiomaticaContext context)
+            (Guid paragraphId, AvailableLanguageCode code) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                 delete from [Idioma].[ParagraphTranslation]
                 where [ParagraphId] = {key.paragraphId}
@@ -111,11 +118,11 @@ namespace Model.DAL
                 """);
         }
         public static async Task ParagraphTranslationDeleteByParagraphIdAndLanguageCodeAsync(
-            (Guid paragraphId, AvailableLanguageCode code) key, IdiomaticaContext context)
+            (Guid paragraphId, AvailableLanguageCode code) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             await Task.Run(() =>
             {
-                ParagraphTranslationDeleteByParagraphIdAndLanguageCode(key, context);
+                ParagraphTranslationDeleteByParagraphIdAndLanguageCode(key, dbContextFactory);
             });
         }
         #endregion

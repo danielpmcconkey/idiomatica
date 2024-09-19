@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Logic.Services.API;
 using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic
 {
@@ -16,7 +17,7 @@ namespace Logic
         {
 
         }
-        public BookListDataPacket(IdiomaticaContext context, bool isBrowse)
+        public BookListDataPacket(IDbContextFactory<IdiomaticaContext> dbContextFactory, bool isBrowse)
         {
             OrderByOptions[1] = "Difficulty";
             OrderByOptions[2] = "Language";
@@ -26,7 +27,7 @@ namespace Logic
             OrderByOptions[6] = "Total Word Count";
             OrderByOptions[7] = "Distinct Word Count";
 
-            LanguageOptions = LanguageApi.LanguageOptionsRead(context, 
+            LanguageOptions = LanguageApi.LanguageOptionsRead(dbContextFactory, 
                 (x => x.IsImplementedForLearning == true));
             
             ShouldShowOnlyInShelf = !isBrowse;

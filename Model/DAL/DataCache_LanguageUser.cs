@@ -16,8 +16,10 @@ namespace Model.DAL
         private static ConcurrentDictionary<Guid, List<LanguageUser>> LanguageUsersAndLanguageByUserId = new ConcurrentDictionary<Guid, List<LanguageUser>>();
 
         #region create
-        public static LanguageUser? LanguageUserCreate(LanguageUser languageUser, IdiomaticaContext context)
+        public static LanguageUser? LanguageUserCreate(LanguageUser languageUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                                 
@@ -42,25 +44,27 @@ namespace Model.DAL
             
 
             // add it to cache
-            LanguageUserUpdateCache(newEntity, context);
+            LanguageUserUpdateCache(newEntity, dbContextFactory);
 
             return newEntity;
         }
-        public static async Task<LanguageUser?> LanguageUserCreateAsync(LanguageUser value, IdiomaticaContext context)
+        public static async Task<LanguageUser?> LanguageUserCreateAsync(LanguageUser value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return LanguageUserCreate(value, context); });
+            return await Task.Run(() => { return LanguageUserCreate(value, dbContextFactory); });
         }
         #endregion
 
         #region read
         public static LanguageUser? LanguageUserByIdRead(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (LanguageUserById.ContainsKey(key))
             {
                 return LanguageUserById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.LanguageUsers
@@ -72,21 +76,23 @@ namespace Model.DAL
             return value;
         }
         public static async Task<LanguageUser?> LanguageUserByIdReadAsync(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<LanguageUser?>.Run(() =>
             {
-                return LanguageUserByIdRead(key, context);
+                return LanguageUserByIdRead(key, dbContextFactory);
             });
         }
         public static LanguageUser? LanguageUserByLanguageIdAndUserIdRead(
-            (Guid languageId, Guid userId) key, IdiomaticaContext context)
+            (Guid languageId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (LanguageUserByLanguageIdAndUserId.ContainsKey(key))
             {
                 return LanguageUserByLanguageIdAndUserId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.LanguageUsers
@@ -98,21 +104,23 @@ namespace Model.DAL
             return value;
         }
         public static async Task<LanguageUser?> LanguageUserByLanguageIdAndUserIdReadAsync(
-            (Guid languageId, Guid userId) key, IdiomaticaContext context)
+            (Guid languageId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<LanguageUser?>.Run(() =>
             {
-                return LanguageUserByLanguageIdAndUserIdRead(key, context);
+                return LanguageUserByLanguageIdAndUserIdRead(key, dbContextFactory);
             });
         }        
         public static List<LanguageUser>? LanguageUsersAndLanguageByUserIdRead(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (LanguageUsersAndLanguageByUserId.ContainsKey(key))
             {
                 return LanguageUsersAndLanguageByUserId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.LanguageUsers
@@ -125,29 +133,29 @@ namespace Model.DAL
             LanguageUsersAndLanguageByUserId[key] = value;
             foreach (var v in value)
             {
-                LanguageUserUpdateCache(v, context);
+                LanguageUserUpdateCache(v, dbContextFactory);
             }
             return value;
         }
         public static async Task<List<LanguageUser>?> LanguageUsersAndLanguageByUserIdReadAsync(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<LanguageUser>?>.Run(() =>
             {
-                return LanguageUsersAndLanguageByUserIdRead(key, context);
+                return LanguageUsersAndLanguageByUserIdRead(key, dbContextFactory);
             });
         }
         #endregion
 
 
-        private static void LanguageUserUpdateCache(LanguageUser languageUser, IdiomaticaContext context)
+        private static void LanguageUserUpdateCache(LanguageUser languageUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             Guid id = languageUser.Id;
             Guid userId = languageUser.UserId;
             Guid languageId = languageUser.LanguageId;
             LanguageUserById[id] = languageUser;
             LanguageUserByLanguageIdAndUserId[(languageId, userId)] = languageUser;
-            var readLanguage = DataCache.LanguageByIdRead(languageId, context);
+            var readLanguage = DataCache.LanguageByIdRead(languageId, dbContextFactory);
             if (readLanguage == null) return;
             languageUser.Language = readLanguage;
             if (LanguageUsersAndLanguageByUserId.ContainsKey(userId))

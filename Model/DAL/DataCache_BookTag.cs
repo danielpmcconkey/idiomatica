@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -16,8 +17,10 @@ namespace Model.DAL
         private static ConcurrentDictionary<Guid, List<BookTag>> BookTagsByBookId = new ConcurrentDictionary<Guid, List<BookTag>>();
 
         #region create
-        public static BookTag? BookTagCreate(BookTag bookTag, IdiomaticaContext context)
+        public static BookTag? BookTagCreate(BookTag bookTag, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                 
                 INSERT INTO [Idioma].[BookTag]
@@ -40,9 +43,9 @@ namespace Model.DAL
             return bookTag;
         }
 
-        public static async Task<BookTag?> BookTagCreateAsync(BookTag value, IdiomaticaContext context)
+        public static async Task<BookTag?> BookTagCreateAsync(BookTag value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return BookTagCreate(value, context); });
+            return await Task.Run(() => { return BookTagCreate(value, dbContextFactory); });
         }
 
         #endregion
@@ -50,10 +53,12 @@ namespace Model.DAL
         #region read
 
         public static List<BookTagRow> BookTagsByBookAndUserRead(
-            (Guid bookId, Guid userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverrideCache = false)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // pull all tags from cache
-            var allTags = BookTagsByBookIdRead(key.bookId, context);
+            var allTags = BookTagsByBookIdRead(key.bookId, dbContextFactory);
             var personalTags = allTags.Where(x => x.UserId == key.userId);
 
             // read community created tags from the DB 
@@ -81,16 +86,18 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<BookTagRow>> BookTagsByBookIdAndUserIdReadAsync(
-           (Guid bookId, Guid userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+           (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverrideCache = false)
         {
             return await Task<List<BookTagRow>>.Run(() =>
             {
-                return BookTagsByBookAndUserRead(key, context, shouldOverrideCache);
+                return BookTagsByBookAndUserRead(key, dbContextFactory, shouldOverrideCache);
             });
         }
         public static List<BookTag> BookTagsByBookIdRead(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // check cache
             if (BookTagsByBookId.ContainsKey(key))
             {
@@ -105,11 +112,11 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<BookTag>> BookTagsByBookIdReadAsync(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<BookTag>>.Run(() =>
             {
-                return BookTagsByBookIdRead(key, context);
+                return BookTagsByBookIdRead(key, dbContextFactory);
             });
         }
 
@@ -119,8 +126,10 @@ namespace Model.DAL
 
 
         public static void BookTagDelete(
-            (Guid bookId, Guid userId, string tag) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId, string tag) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             string trimmed = key.tag.Trim();
             if (trimmed == null) return;
             // make sure this tag actually exists

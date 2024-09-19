@@ -26,8 +26,10 @@ namespace Model.DAL
         #region create
 
 
-        public static WordUser? WordUserCreate(WordUser wordUser, IdiomaticaContext context)
+        public static WordUser? WordUserCreate(WordUser wordUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                 
                 INSERT INTO [Idioma].[WordUser]
@@ -55,14 +57,16 @@ namespace Model.DAL
 
             return wordUser;
         }
-        public static async Task<WordUser?> WordUserCreateAsync(WordUser value, IdiomaticaContext context)
+        public static async Task<WordUser?> WordUserCreateAsync(WordUser value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return WordUserCreate(value, context); });
+            return await Task.Run(() => { return WordUserCreate(value, dbContextFactory); });
         }
 
         public static void WordUsersCreateAllForBookIdAndUserId(
-            (Guid bookId, Guid userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // add all the worduser objects that might not exist
             context.Database.ExecuteSql($"""
                 insert into [Idioma].[WordUser] 
@@ -140,23 +144,25 @@ namespace Model.DAL
 
         }
         public static async Task WordUsersCreateAllForBookIdAndUserIdAsync(
-            (Guid bookId, Guid userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             await Task.Run(() =>
             {
-                WordUsersCreateAllForBookIdAndUserId(key, context);
+                WordUsersCreateAllForBookIdAndUserId(key, dbContextFactory);
             });
         }
         #endregion
 
         #region read
-        public static WordUser? WordUserByIdRead(Guid key, IdiomaticaContext context)
+        public static WordUser? WordUserByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (WordUserById.TryGetValue(key, out WordUser? value))
             {
                 return value;
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             value = context.WordUsers.Where(x => x.Id == key).FirstOrDefault();
@@ -166,22 +172,24 @@ namespace Model.DAL
             WordUserById[key] = value;
             return value;
         }
-        public static async Task<WordUser?> WordUserByIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<WordUser?> WordUserByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<WordUser?>.Run(() =>
             {
-                return WordUserByIdRead(key, context);
+                return WordUserByIdRead(key, dbContextFactory);
             });
         }
 
         public static WordUser? WordUserAndLanguageUserAndLanguageByIdRead(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (WordUserAndLanguageUserAndLanguageById.ContainsKey(key))
             {
                 return WordUserById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.WordUsers
@@ -198,23 +206,25 @@ namespace Model.DAL
             return value;
         }
         public static async Task<WordUser?> WordUserAndLanguageUserAndLanguageByIdReadAsync(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<WordUser?>.Run(() =>
             {
-                return WordUserAndLanguageUserAndLanguageByIdRead(key, context);
+                return WordUserAndLanguageUserAndLanguageByIdRead(key, dbContextFactory);
             });
         }
 
 
         public static WordUser? WordUserByWordIdAndUserIdRead(
-            (Guid wordId, Guid userId) key, IdiomaticaContext context)
+            (Guid wordId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (WordUserByWordIdAndUserId.TryGetValue(key, out WordUser? value))
             {
                 return value;
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             value = context.WordUsers
@@ -230,21 +240,23 @@ namespace Model.DAL
             return value;
         }
         public static async Task<WordUser?> WordUserByWordIdAndUserIdReadAsync(
-            (Guid wordId, Guid userId) key, IdiomaticaContext context)
+            (Guid wordId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<WordUser?>.Run(() =>
             {
-                return WordUserByWordIdAndUserIdRead(key, context);
+                return WordUserByWordIdAndUserIdRead(key, dbContextFactory);
             });
         }
         public static List<WordUser> WordUsersByBookIdAndLanguageUserIdRead(
-           (Guid bookId, Guid languageUserId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+           (Guid bookId, Guid languageUserId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverrideCache = false)
         {
             // check cache
             if (!shouldOverrideCache && WordUsersByBookIdAndLanguageUserId.TryGetValue(key, out List<WordUser>? value))
             {
                 return value;
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             value = [.. (from b in context.Books
                          join p in context.Pages on b.Id equals p.BookId
@@ -263,22 +275,24 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<WordUser>> WordUsersByBookIdAndLanguageUserIdReadAsync(
-           (Guid bookId, Guid languageUserId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+           (Guid bookId, Guid languageUserId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverrideCache = false)
         {
             return await Task<List<WordUser>>.Run(() =>
             {
-                return WordUsersByBookIdAndLanguageUserIdRead(key, context, shouldOverrideCache);
+                return WordUsersByBookIdAndLanguageUserIdRead(key, dbContextFactory, shouldOverrideCache);
             });
         }
 
         public static Dictionary<string, WordUser> WordUsersDictByBookIdAndUserIdRead(
-           (Guid bookId, Guid userId) key, IdiomaticaContext context)
+           (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (WordUsersDictByBookIdAndUserId.TryGetValue(key, out Dictionary<string, WordUser>? value))
             {
                 return value;
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var groups = (from b in context.Books
                           join p in context.Pages on b.Id equals p.BookId
@@ -310,17 +324,17 @@ namespace Model.DAL
             return value;
         }
         public static async Task<Dictionary<string, WordUser>> WordUsersDictByBookIdAndUserIdReadAsync(
-           (Guid bookId, Guid userId) key, IdiomaticaContext context)
+           (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Dictionary<string, WordUser>>.Run(() =>
             {
-                return WordUsersDictByBookIdAndUserIdRead(key, context);
+                return WordUsersDictByBookIdAndUserIdRead(key, dbContextFactory);
             });
         }
 
 
         public static Dictionary<string, WordUser>? WordUsersDictByPageIdAndUserIdRead(
-            (Guid pageId, Guid userId) key, IdiomaticaContext context, bool shouldOverwriteCache = false)
+            (Guid pageId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverwriteCache = false)
         {
             // check cache
             if (WordUsersDictByPageIdAndUserId.TryGetValue(key, out Dictionary<string, WordUser>? value) 
@@ -328,6 +342,8 @@ namespace Model.DAL
             {
                 return value;
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // add all the worduser objects that might not exist
             context.Database.ExecuteSql($"""
@@ -390,21 +406,23 @@ namespace Model.DAL
             return value;
         }
         public static async Task<Dictionary<string, WordUser>?> WordUsersDictByPageIdAndUserIdReadAsync(
-            (Guid pageId, Guid userId) key, IdiomaticaContext context, bool shouldOverwriteCache = false)
+            (Guid pageId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverwriteCache = false)
         {
             return await Task<Dictionary<string, WordUser>?>.Run(() =>
             {
-                return WordUsersDictByPageIdAndUserIdRead(key, context, shouldOverwriteCache);
+                return WordUsersDictByPageIdAndUserIdRead(key, dbContextFactory, shouldOverwriteCache);
             });
         }
         public static List<WordUser> WordUsersByUserIdAndLanguageIdRead(
-            (Guid userId, Guid languageId) key, IdiomaticaContext context)
+            (Guid userId, Guid languageId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if ( WordUsersByUserIdAndLanguageId.TryGetValue(key, out List<WordUser>? value))
             {
                 return value;
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             value = [.. context.WordUsers
@@ -422,19 +440,21 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<WordUser>> WordUsersByUserIdAndLanguageIdReadAsync(
-            (Guid userId, Guid languageId) key, IdiomaticaContext context)
+            (Guid userId, Guid languageId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<WordUser>>.Run(() =>
             {
-                return WordUsersByUserIdAndLanguageIdRead(key, context);
+                return WordUsersByUserIdAndLanguageIdRead(key, dbContextFactory);
             });
         }
         #endregion
 
         #region update
 
-        public static void WordUserUpdate(WordUser wordUser, IdiomaticaContext context)
+        public static void WordUserUpdate(WordUser wordUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                         UPDATE [Idioma].[WordUser]
                         SET [WordId] = {wordUser.WordId}
@@ -451,23 +471,25 @@ namespace Model.DAL
                 throw new InvalidDataException("WordUser update affected 0 rows");
             };
             // now update the cache
-            var languageUser = LanguageUserByIdRead((Guid)wordUser.LanguageUserId, context);
+            var languageUser = LanguageUserByIdRead((Guid)wordUser.LanguageUserId, dbContextFactory);
             if (languageUser is null) return;
             WordUserUpdateAllCaches(wordUser, (Guid)languageUser.UserId);
 
             return;
         }
-        public static async Task WordUserUpdateAsync(WordUser value, IdiomaticaContext context)
+        public static async Task WordUserUpdateAsync(WordUser value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             await Task.Run(() =>
             {
-                WordUserUpdate(value, context);
+                WordUserUpdate(value, dbContextFactory);
             });
         }
         public static void WordUsersUpdateStatusByPageIdAndUserIdAndStatus(
             Guid pageId, Guid userId, AvailableWordUserStatus statusToEdit,
-            AvailableWordUserStatus newStatus, IdiomaticaContext context)
+            AvailableWordUserStatus newStatus, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             var wordUsers = (from pu in context.PageUsers
                              join p in context.Pages on pu.PageId equals p.Id
                              join pp in context.Paragraphs on p.Id equals pp.PageId
@@ -490,8 +512,10 @@ namespace Model.DAL
         }
         public static void WordUsersUpdateStatusByPageUserIdAndStatus(
             Guid pageUserId, AvailableWordUserStatus statusToEdit,
-            AvailableWordUserStatus newStatus, IdiomaticaContext context)
+            AvailableWordUserStatus newStatus, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // update the DB
             int updateCount = context.Database.ExecuteSql($"""
                 update [Idioma].[WordUser]

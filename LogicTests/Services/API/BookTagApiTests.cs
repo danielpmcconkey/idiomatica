@@ -30,24 +30,25 @@ namespace Logic.Services.API.Tests
             try
             {
                 Assert.IsNotNull(loginService);
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(
+                    dbContextFactory, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
                 var originalTags = BookTagApi.BookTagsGetByBookIdAndUserId(
-                    context, (Guid)bookId, (Guid)userId);
+                    dbContextFactory, (Guid)bookId, (Guid)userId);
                 int originalCount = originalTags is null ? 0 : originalTags.Count;
                 int expectedNewCount = originalCount + 1;
 
-                var book = BookApi.BookRead(context, (Guid)bookId);
+                var book = BookApi.BookRead(dbContextFactory, (Guid)bookId);
                 Assert.IsNotNull(book);
                 var user = context.Users.Where(x => x.Id == userId).FirstOrDefault();
                 Assert.IsNotNull(book);
                 Assert.IsNotNull(user);
 
-                BookTagApi.BookTagAdd(context, book, user, tag);
-                var newTags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (Guid)bookId, (Guid)userId);
+                BookTagApi.BookTagAdd(dbContextFactory, book, user, tag);
+                var newTags = BookTagApi.BookTagsGetByBookIdAndUserId(dbContextFactory, (Guid)bookId, (Guid)userId);
                 int newCount = newTags is null ? 0 : newTags.Count;
 
                 Assert.IsNotNull(originalTags);
@@ -58,8 +59,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
-                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
         [TestMethod()]
@@ -75,24 +76,25 @@ namespace Logic.Services.API.Tests
             try
             {
                 Assert.IsNotNull(loginService);
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(
+                    dbContextFactory, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
                 var originalTags = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(
-                    context, (Guid)bookId, (Guid)userId);
+                    dbContextFactory, (Guid)bookId, (Guid)userId);
                 int originalCount = originalTags is null ? 0 : originalTags.Count;
                 int expectedNewCount = originalCount + 1;
 
-                var book = BookApi.BookRead(context, (Guid)bookId);
+                var book = BookApi.BookRead(dbContextFactory, (Guid)bookId);
                 Assert.IsNotNull(book);
                 var user = context.Users.Where(x => x.Id == userId).FirstOrDefault();
                 Assert.IsNotNull(book);
                 Assert.IsNotNull(user);
 
-                await BookTagApi.BookTagAddAsync(context, book, user, tag);
-                var newTags = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(context, (Guid)bookId, (Guid)userId);
+                await BookTagApi.BookTagAddAsync(dbContextFactory, book, user, tag);
+                var newTags = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(dbContextFactory, (Guid)bookId, (Guid)userId);
                 int newCount = newTags is null ? 0 : newTags.Count;
 
                 Assert.IsNotNull(originalTags);
@@ -103,8 +105,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
-                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
 
@@ -123,31 +125,32 @@ namespace Logic.Services.API.Tests
             try
             {
                 Assert.IsNotNull(loginService);
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(
+                    dbContextFactory, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
                 var originalTags = BookTagApi.BookTagsGetByBookIdAndUserId(
-                    context, (Guid)bookId, (Guid)userId);
+                    dbContextFactory, (Guid)bookId, (Guid)userId);
                 int originalCount = originalTags is null ? 0 : originalTags.Count;
                 int expectedNewCountFirst = originalCount + 2;
                 int expectedNewCountSecond = originalCount + 1;
 
-                var book = BookApi.BookRead(context, (Guid)bookId);
+                var book = BookApi.BookRead(dbContextFactory, (Guid)bookId);
                 Assert.IsNotNull(book);
                 var user = context.Users.Where(x => x.Id == userId).FirstOrDefault();
                 Assert.IsNotNull(book);
                 Assert.IsNotNull(user);
 
-                BookTagApi.BookTagAdd(context, book, user, tag1);
-                BookTagApi.BookTagAdd(context, book, user, tag2);
+                BookTagApi.BookTagAdd(dbContextFactory, book, user, tag1);
+                BookTagApi.BookTagAdd(dbContextFactory, book, user, tag2);
                 var newTagsFirst = BookTagApi.BookTagsGetByBookIdAndUserId(
-                    context, (Guid)bookId, (Guid)userId);
+                    dbContextFactory, (Guid)bookId, (Guid)userId);
                 int newCountFirst = newTagsFirst is null ? 0 : newTagsFirst.Count;
-                BookTagApi.BookTagRemove(context, (Guid)bookId, (Guid)userId, tag1);
+                BookTagApi.BookTagRemove(dbContextFactory, (Guid)bookId, (Guid)userId, tag1);
                 var newTagsSecond = BookTagApi.BookTagsGetByBookIdAndUserId(
-                    context, (Guid)bookId, (Guid)userId);
+                    dbContextFactory, (Guid)bookId, (Guid)userId);
                 int newCountSecond = newTagsFirst is null ? 0 : newTagsSecond.Count;
 
                 // assert
@@ -162,8 +165,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
-                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
 
@@ -181,31 +184,32 @@ namespace Logic.Services.API.Tests
             try
             {
                 Assert.IsNotNull(loginService);
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(
+                    dbContextFactory, loginService);
                 userId = createResult.userId;
                 bookId = createResult.bookId;
                 Guid bookUserId = createResult.bookUserId;
 
                 var originalTags = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(
-                    context, (Guid)bookId, (Guid)userId);
+                    dbContextFactory, (Guid)bookId, (Guid)userId);
                 int originalCount = originalTags is null ? 0 : originalTags.Count;
                 int expectedNewCountFirst = originalCount + 2;
                 int expectedNewCountSecond = originalCount + 1;
 
-                var book = BookApi.BookRead(context, (Guid)bookId);
+                var book = BookApi.BookRead(dbContextFactory, (Guid)bookId);
                 Assert.IsNotNull(book);
                 var user = context.Users.Where(x => x.Id == userId).FirstOrDefault();
                 Assert.IsNotNull(book);
                 Assert.IsNotNull(user);
 
-                await BookTagApi.BookTagAddAsync(context, book, user, tag1);
-                await BookTagApi.BookTagAddAsync(context, book, user, tag2);
+                await BookTagApi.BookTagAddAsync(dbContextFactory, book, user, tag1);
+                await BookTagApi.BookTagAddAsync(dbContextFactory, book, user, tag2);
                 var newTagsFirst = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(
-                    context, (Guid)bookId, (Guid)userId);
+                    dbContextFactory, (Guid)bookId, (Guid)userId);
                 int newCountFirst = newTagsFirst is null ? 0 : newTagsFirst.Count;
-                await BookTagApi.BookTagRemoveAsync(context, (Guid)bookId, (Guid)userId, tag1);
+                await BookTagApi.BookTagRemoveAsync(dbContextFactory, (Guid)bookId, (Guid)userId, tag1);
                 var newTagsSecond = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(
-                    context, (Guid)bookId, (Guid)userId);
+                    dbContextFactory, (Guid)bookId, (Guid)userId);
                 int newCountSecond = newTagsFirst is null ? 0 : newTagsSecond.Count;
 
                 // assert
@@ -220,8 +224,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
-                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
     }

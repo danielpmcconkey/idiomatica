@@ -15,13 +15,15 @@ namespace Model.DAL
         private static ConcurrentDictionary<Guid, List<Page>> PagesByBookId = [];
 
         #region read
-        public static Page? PageByIdRead(Guid key, IdiomaticaContext context)
+        public static Page? PageByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (PageById.ContainsKey(key))
             {
                 return PageById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.Pages.Where(x => x.Id == key).FirstOrDefault();
@@ -30,21 +32,23 @@ namespace Model.DAL
             PageById[key] = value;
             return value;
         }
-        public static async Task<Page?> PageByIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<Page?> PageByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Page?>.Run(() =>
             {
-                return PageByIdRead(key, context);
+                return PageByIdRead(key, dbContextFactory);
             });
         }
         public static Page? PageByOrdinalAndBookIdRead(
-            (int ordinal, Guid bookId) key, IdiomaticaContext context)
+            (int ordinal, Guid bookId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (PageByOrdinalAndBookId.ContainsKey(key))
             {
                 return PageByOrdinalAndBookId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = context.Pages
                 .Where(p => p.Ordinal == key.ordinal
@@ -58,21 +62,23 @@ namespace Model.DAL
             return value;
         }
         public static async Task<Page?> PageByOrdinalAndBookIdReadAsync(
-            (int ordinal, Guid bookId) key, IdiomaticaContext context)
+            (int ordinal, Guid bookId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Page?>.Run(() =>
             {
-                return PageByOrdinalAndBookIdRead(key, context);
+                return PageByOrdinalAndBookIdRead(key, dbContextFactory);
             });
         }
         public static List<Page> PagesByBookIdRead(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (PagesByBookId.ContainsKey(key))
             {
                 return PagesByBookId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = context.Pages.Where(x => x.BookId == key).OrderBy(x => x.Ordinal)
                 .ToList();
@@ -89,11 +95,11 @@ namespace Model.DAL
             return value;
         }        
         public static async Task<List<Page>> PagesByBookIdReadAsync(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<Page>>.Run(() =>
             {
-                return PagesByBookIdRead(key, context);
+                return PagesByBookIdRead(key, dbContextFactory);
             });
         }
         #endregion
@@ -101,8 +107,10 @@ namespace Model.DAL
         #region create
 
 
-        public static Page? PageCreate(Page page, IdiomaticaContext context)
+        public static Page? PageCreate(Page page, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[Page]
@@ -126,9 +134,9 @@ namespace Model.DAL
 
             return page;
         }
-        public static async Task<Page?> PageCreateAsync(Page value, IdiomaticaContext context)
+        public static async Task<Page?> PageCreateAsync(Page value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return PageCreate(value, context); });
+            return await Task.Run(() => { return PageCreate(value, dbContextFactory); });
         }
         #endregion
     }

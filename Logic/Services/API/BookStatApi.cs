@@ -12,8 +12,9 @@ namespace Logic.Services.API
 {
     public static class BookStatApi
     {
-        public static void BookStatsCreateAndSave(IdiomaticaContext context, Guid bookId)
+        public static void BookStatsCreateAndSave(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
+            var context = dbContextFactory.CreateDbContext();
             int numRows = context.Database.ExecuteSql($"""
             with allPages as (
             	SELECT b.Id as BookId, p.Id as PageId, p.Ordinal as PageOrdinal
@@ -93,9 +94,9 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow();
             }
         }
-        public static async Task BookStatsCreateAndSaveAsync(IdiomaticaContext context, Guid bookId)
+        public static async Task BookStatsCreateAndSaveAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
-            await Task.Run(() => BookStatsCreateAndSave(context, bookId));
+            await Task.Run(() => BookStatsCreateAndSave(dbContextFactory, bookId));
         }
     }
 }

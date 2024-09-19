@@ -18,13 +18,15 @@ namespace Model.DAL
         #region read
         public static List<FlashCardParagraphTranslationBridge>?
             FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCodeRead(
-            (Guid flashCardId, Guid uiLanguageId) key, IdiomaticaContext context)
+            (Guid flashCardId, Guid uiLanguageId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode.ContainsKey(key))
             {
                 return FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var bridges = (from fcptb in context.FlashCardParagraphTranslationBridges
@@ -36,13 +38,15 @@ namespace Model.DAL
         }
 
         public static FlashCardParagraphTranslationBridge? FlashCardParagraphTranslationBridgeByIdRead(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (FlashCardParagraphTranslationBridgeById.ContainsKey(key))
             {
                 return FlashCardParagraphTranslationBridgeById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.FlashCardParagraphTranslationBridges
@@ -54,11 +58,11 @@ namespace Model.DAL
             return value;
         }
         public static async Task<FlashCardParagraphTranslationBridge?> 
-            FlashCardParagraphTranslationBridgeByIdReadAsync(Guid key, IdiomaticaContext context)
+            FlashCardParagraphTranslationBridgeByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<FlashCardParagraphTranslationBridge?>.Run(() =>
             {
-                return FlashCardParagraphTranslationBridgeByIdRead(key, context);
+                return FlashCardParagraphTranslationBridgeByIdRead(key, dbContextFactory);
             });
         }
         #endregion
@@ -66,8 +70,10 @@ namespace Model.DAL
         #region create
 
         public static FlashCardParagraphTranslationBridge? FlashCardParagraphTranslationBridgeCreate(
-            FlashCardParagraphTranslationBridge fcptb, IdiomaticaContext context)
+            FlashCardParagraphTranslationBridge fcptb, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
             INSERT INTO [Idioma].[FlashCardParagraphTranslationBridge]
                         ([FlashCardId]
@@ -87,9 +93,9 @@ namespace Model.DAL
             return fcptb;
         }
         public static async Task<FlashCardParagraphTranslationBridge?> FlashCardParagraphTranslationBridgeCreateAsync(
-            FlashCardParagraphTranslationBridge value, IdiomaticaContext context)
+            FlashCardParagraphTranslationBridge value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return FlashCardParagraphTranslationBridgeCreate(value, context); });
+            return await Task.Run(() => { return FlashCardParagraphTranslationBridgeCreate(value, dbContextFactory); });
         }
         #endregion
     }

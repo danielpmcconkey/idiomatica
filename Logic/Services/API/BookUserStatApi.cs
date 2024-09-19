@@ -8,35 +8,36 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class BookUserStatApi
     {
         public static List<BookUserStat>? BookUserStatsRead(
-            IdiomaticaContext context, Guid bookId, Guid userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId)
         {
             return DataCache.BookUserStatsByBookIdAndUserIdRead(
-                    (bookId, userId), context);
+                    (bookId, userId), dbContextFactory);
         }
         public static async Task<List<BookUserStat>?> BookUserStatsReadAsync(
-            IdiomaticaContext context, Guid bookId, Guid userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId)
         {
             return await DataCache.BookUserStatsByBookIdAndUserIdReadAsync(
-                    (bookId, userId), context);
+                    (bookId, userId), dbContextFactory);
         }
 
 
-        public static void BookUserStatsUpdateByBookUserId(IdiomaticaContext context, Guid bookUserId)
+        public static void BookUserStatsUpdateByBookUserId(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookUserId)
         {
-            var bookUser = DataCache.BookUserByIdRead(bookUserId, context);
+            var bookUser = DataCache.BookUserByIdRead(bookUserId, dbContextFactory);
 
             if (bookUser == null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            var languageUser = DataCache.LanguageUserByIdRead((Guid)bookUser.LanguageUserId, context);
+            var languageUser = DataCache.LanguageUserByIdRead((Guid)bookUser.LanguageUserId, dbContextFactory);
             if (languageUser is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -44,17 +45,17 @@ namespace Logic.Services.API
             }
             
             // delete the booklistrows cache for this user
-            DataCache.BookListRowsByUserIdDelete((Guid)languageUser.Id, context);
+            DataCache.BookListRowsByUserIdDelete((Guid)languageUser.Id, dbContextFactory);
             // delete the actual stats from teh database and bookuserstats cache
-            DataCache.BookUserStatsByBookIdAndUserIdDelete(((Guid)bookUser.BookId, (Guid)languageUser.UserId), context);
+            DataCache.BookUserStatsByBookIdAndUserIdDelete(((Guid)bookUser.BookId, (Guid)languageUser.UserId), dbContextFactory);
 
-            var allWordsInBook = DataCache.WordsByBookIdRead((Guid)bookUser.BookId, context);
+            var allWordsInBook = DataCache.WordsByBookIdRead((Guid)bookUser.BookId, dbContextFactory);
            
             var allWordUsersInBook = DataCache.WordUsersByBookIdAndLanguageUserIdRead(
-                ((Guid)bookUser.BookId, (Guid)bookUser.LanguageUserId), context, true);
-            var pageUsers = DataCache.PageUsersByBookUserIdRead(bookUserId, context, true);
-            var pages = DataCache.PagesByBookIdRead((Guid)bookUser.BookId, context);
-            var bookStats = DataCache.BookStatsByBookIdRead((Guid)bookUser.BookId, context);
+                ((Guid)bookUser.BookId, (Guid)bookUser.LanguageUserId), dbContextFactory, true);
+            var pageUsers = DataCache.PageUsersByBookUserIdRead(bookUserId, dbContextFactory, true);
+            var pages = DataCache.PagesByBookIdRead((Guid)bookUser.BookId, dbContextFactory);
+            var bookStats = DataCache.BookStatsByBookIdRead((Guid)bookUser.BookId, dbContextFactory);
             if (bookStats is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -194,15 +195,15 @@ namespace Logic.Services.API
             
             // add the new stats
             DataCache.BookUserStatsByBookIdAndUserIdCreate(
-                ((Guid)bookUser.BookId, (Guid)languageUser.UserId), stats, context);
+                ((Guid)bookUser.BookId, (Guid)languageUser.UserId), stats, dbContextFactory);
             
 
         }
-        public static async Task BookUserStatsUpdateByBookUserIdAsync(IdiomaticaContext context, Guid bookUserId)
+        public static async Task BookUserStatsUpdateByBookUserIdAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookUserId)
         {
             await Task.Run(() =>
             {
-                BookUserStatsUpdateByBookUserId(context, bookUserId);
+                BookUserStatsUpdateByBookUserId(dbContextFactory, bookUserId);
             });
         }
     }

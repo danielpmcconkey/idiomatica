@@ -23,8 +23,10 @@ namespace Model.DAL
 
         #region read
         public static BookListRow? BookListRowByBookIdAndUserIdRead(
-            (Guid bookId, Guid userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverrideCache = false)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // check cache
             if (BookListRowByBookIdAndUserId.ContainsKey(key) && !shouldOverrideCache)
             {
@@ -40,11 +42,11 @@ namespace Model.DAL
             return value;
         }
         public static async Task<BookListRow?> BookListRowByBookIdAndUserIdReadAsync(
-            (Guid bookId, Guid userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverrideCache = false)
         {
             return await Task<BookListRow?>.Run(() =>
             {
-                return BookListRowByBookIdAndUserIdRead(key, context);
+                return BookListRowByBookIdAndUserIdRead(key, dbContextFactory);
             });
         }
 
@@ -52,14 +54,16 @@ namespace Model.DAL
         public static (long count, List<BookListRow> results) BookListRowsPowerQuery(
             Guid userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
             Guid? langIdFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
-            bool sortAscending, IdiomaticaContext context, Guid? bookIdOverride = null)
+            bool sortAscending, IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid? bookIdOverride = null)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             /*
              * note: none of the string fields are safe. and, since we don't 
              * use parameters, due to the way we're building the query, you must 
              * sanitize everything. No little Bobby Tables.
              * */
-            
+
 
             bool useTags = (tagsFilter != null && tagsFilter != string.Empty) ? true : false;
             int skipVal = (bookIdOverride is null) ? skip : 0;
@@ -311,12 +315,12 @@ namespace Model.DAL
         public static async Task<(long count, List<BookListRow> results)> BookListRowsPowerQueryAsync(
             Guid userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
             Guid? langIdFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
-            bool sortAscending, IdiomaticaContext context, Guid? bookIdOverride = null)
+            bool sortAscending, IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid? bookIdOverride = null)
         {
             return await Task<(long count, List<BookListRow> results)>.Run(() =>
             {
                 return BookListRowsPowerQuery(userId, numRecords, skip, shouldShowOnlyInShelf, tagsFilter,
-                    langIdFilter, titleFilter, orderBy, sortAscending, context, bookIdOverride);
+                    langIdFilter, titleFilter, orderBy, sortAscending, dbContextFactory, bookIdOverride);
             });
         }
         #endregion
@@ -326,7 +330,7 @@ namespace Model.DAL
         * since BookListRow is just a view, delete methods 
         * will only delete the cache
         * */
-        public static void BookListRowsByUserIdDelete( Guid key, IdiomaticaContext context)
+        public static void BookListRowsByUserIdDelete( Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             BookListRowsByUserId.TryRemove(key, out var deletedRow);
         }

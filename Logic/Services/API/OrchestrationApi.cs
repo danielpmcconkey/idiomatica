@@ -24,10 +24,10 @@ namespace Logic.Services.API
         /// book user stats for the creating user
         /// </summary>
         public static Book? OrchestrateBookCreationAndSubProcesses(
-            IdiomaticaContext context, Guid userId, string title, AvailableLanguageCode languageCode,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId, string title, AvailableLanguageCode languageCode,
             string? url, string text)
         {
-            Book? book = BookApi.BookCreateAndSave(context, title, languageCode, url, text);
+            Book? book = BookApi.BookCreateAndSave(dbContextFactory, title, languageCode, url, text);
             if (book is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -35,20 +35,20 @@ namespace Logic.Services.API
             }
             Guid bookId = (Guid)book.Id;
             // add the book stats
-            BookStatApi.BookStatsCreateAndSave(context, bookId);
+            BookStatApi.BookStatsCreateAndSave(dbContextFactory, bookId);
             // now create the book user for the logged in user
-            var bookUser = OrchestrateBookUserCreationAndSubProcesses(context, bookId, userId);
+            var bookUser = OrchestrateBookUserCreationAndSubProcesses(dbContextFactory, bookId, userId);
 
 
             return book;
         }
         public static async Task<Book?> OrchestrateBookCreationAndSubProcessesAsync(
-            IdiomaticaContext context, Guid userId, string title, AvailableLanguageCode languageCode,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId, string title, AvailableLanguageCode languageCode,
             string? url, string text)
         {
             return await Task<Book?>.Run(() =>
             {
-                return OrchestrateBookCreationAndSubProcesses(context, userId, title, languageCode, url, text);
+                return OrchestrateBookCreationAndSubProcesses(dbContextFactory, userId, title, languageCode, url, text);
             });
         }
 
@@ -57,32 +57,32 @@ namespace Logic.Services.API
         /// Create the book user, word users, and book user stats
         /// </summary>
         public static BookUser? OrchestrateBookUserCreationAndSubProcesses(
-            IdiomaticaContext context, Guid bookId, Guid userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId)
         {
-            var bookUser = BookUserApi.BookUserCreate(context, bookId, userId);
+            var bookUser = BookUserApi.BookUserCreate(dbContextFactory, bookId, userId);
             if (bookUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
             }
             // create the wordUsers
-            WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
+            WordUserApi.WordUsersCreateAllForBookIdAndUserId(dbContextFactory, bookId, userId);
             // update bookUserStats
-            BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (Guid)bookUser.Id);
+            BookUserStatApi.BookUserStatsUpdateByBookUserId(dbContextFactory, (Guid)bookUser.Id);
 
             return bookUser;
         }
         public static async Task<BookUser?> OrchestrateBookUserCreationAndSubProcessesAsync(
-            IdiomaticaContext context, Guid bookId, Guid userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId)
         {
             return await Task<BookUser?>.Run(() =>
             {
-                return OrchestrateBookUserCreationAndSubProcesses(context, bookId, userId);
+                return OrchestrateBookUserCreationAndSubProcesses(dbContextFactory, bookId, userId);
             });
         }
 
 
-        public static ReadDataPacket? OrchestrateClearPageAndMove(IdiomaticaContext context, ReadDataPacket readDataPacket, int targetPageNum)
+        public static ReadDataPacket? OrchestrateClearPageAndMove(IDbContextFactory<IdiomaticaContext> dbContextFactory, ReadDataPacket readDataPacket, int targetPageNum)
         {
             ReadDataPacket? outPacket = readDataPacket;
             if (readDataPacket.CurrentPageUser is null)
@@ -91,7 +91,7 @@ namespace Logic.Services.API
                 return null;
             }
             // update all unknowns to well known
-            PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (Guid)readDataPacket.CurrentPageUser.Id);
+            PageUserApi.PageUserUpdateUnknowWordsToWellKnown(dbContextFactory, (Guid)readDataPacket.CurrentPageUser.Id);
             // now move forward, if there's another page
             if (targetPageNum <= readDataPacket.BookTotalPageCount) // remember pages are 1-indexed
             {
@@ -100,7 +100,7 @@ namespace Logic.Services.API
                     ErrorHandler.LogAndThrow();
                     return null;
                 }
-                outPacket = OrchestrateMovePage(context, readDataPacket, (Guid)readDataPacket.Book.Id, targetPageNum);
+                outPacket = OrchestrateMovePage(dbContextFactory, readDataPacket, (Guid)readDataPacket.Book.Id, targetPageNum);
                 if (outPacket is null)
                 {
                     ErrorHandler.LogAndThrow();
@@ -110,7 +110,7 @@ namespace Logic.Services.API
             else
             {
                 // mark the previous page as read because you didn't do it in the PageMove function
-                PageUserApi.PageUserMarkAsRead(context, readDataPacket.CurrentPageUser.Id);
+                PageUserApi.PageUserMarkAsRead(dbContextFactory, readDataPacket.CurrentPageUser.Id);
                 // refresh the word user cache
                 if (outPacket is null || outPacket.CurrentPageUser is null)
                 {
@@ -118,16 +118,16 @@ namespace Logic.Services.API
                     return null;
                 }
                 outPacket = OrchestrateResetReadDataForNewPage(
-                    context, readDataPacket, (Guid)outPacket.CurrentPageUser.Id);
+                    dbContextFactory, readDataPacket, (Guid)outPacket.CurrentPageUser.Id);
             }
             return outPacket;
         }
         public static async Task<ReadDataPacket?> OrchestrateClearPageAndMoveAsync(
-            IdiomaticaContext context, ReadDataPacket readDataPacket, int targetPageNum)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, ReadDataPacket readDataPacket, int targetPageNum)
         {
             return await Task<ReadDataPacket?>.Run(() =>
             {
-                return OrchestrateClearPageAndMove(context, readDataPacket, targetPageNum);
+                return OrchestrateClearPageAndMove(dbContextFactory, readDataPacket, targetPageNum);
             });
         }
 
@@ -135,7 +135,7 @@ namespace Logic.Services.API
         ///  take the result of the last card, update the last card, and move the next card to the top
         /// </summary>
         public static FlashCardDataPacket? OrchestrateFlashCardDispositionAndAdvance(
-            IdiomaticaContext context, FlashCardDataPacket? dataPacket,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, FlashCardDataPacket? dataPacket,
             AvailableFlashCardAttemptStatus previousCardsStatus)
         {
             if (dataPacket is null || dataPacket.CurrentCard is null)
@@ -143,7 +143,7 @@ namespace Logic.Services.API
 
             // create the attempt object
             var attempt = FlashCardAttemptApi.FlashCardAttemptCreate(
-                context, dataPacket.CurrentCard, previousCardsStatus);
+                dbContextFactory, dataPacket.CurrentCard, previousCardsStatus);
 
             // update the current card
             DateTime nextReview = DateTime.Now;
@@ -169,7 +169,7 @@ namespace Logic.Services.API
                     break;
             }
             var card = FlashCardApi.FlashCardUpdate(
-                context, (Guid)dataPacket.CurrentCard.Id, (Guid)dataPacket.CurrentCard.WordUserId,
+                dbContextFactory, (Guid)dataPacket.CurrentCard.Id, (Guid)dataPacket.CurrentCard.WordUserId,
                 newStatus, nextReview, (Guid)dataPacket.CurrentCard.Id);
 
             if (card is not null && previousCardsStatus == AvailableFlashCardAttemptStatus.WRONG)
@@ -189,12 +189,12 @@ namespace Logic.Services.API
             return dataPacket;
         }
         public static async Task<FlashCardDataPacket?> OrchestrateFlashCardDispositionAndAdvanceAsync(
-            IdiomaticaContext context, FlashCardDataPacket? dataPacket,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, FlashCardDataPacket? dataPacket,
             AvailableFlashCardAttemptStatus previousCardsStatus)
         {
             return await Task<FlashCardDataPacket?>.Run(() =>
             {
-                return OrchestrateFlashCardDispositionAndAdvance(context, dataPacket, previousCardsStatus);
+                return OrchestrateFlashCardDispositionAndAdvance(dbContextFactory, dataPacket, previousCardsStatus);
             });
         }
 
@@ -211,16 +211,16 @@ namespace Logic.Services.API
 
             FlashCardDataPacket newDataPacket = new ();
             newDataPacket.LearningLanguageCode = learningLanguageCode;
-            var uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(context, userId);
+            var uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(dbContextFactory, userId);
             if (uiLanguage is null) 
                 { ErrorHandler.LogAndThrow(); return null; }
             newDataPacket.UILanguageCode = uiLanguage.Code;
 
             // pull the LanguageUserId
-            var language = DataCache.LanguageByCodeRead(learningLanguageCode, context);
+            var language = DataCache.LanguageByCodeRead(learningLanguageCode, dbContextFactory);
             if (language is null) { ErrorHandler.LogAndThrow(); return null; }
             var languageUser = DataCache.LanguageUserByLanguageIdAndUserIdRead(
-                (language.Id, userId), context);
+                (language.Id, userId), dbContextFactory);
             if (languageUser is null) { ErrorHandler.LogAndThrow(); return null; }
 
             // pull cards that are ready for their next review
@@ -231,7 +231,7 @@ namespace Logic.Services.API
                     && fc.NextReview <= DateTime.Now;
 
             var oldCards = FlashCardApi.FlashCardsFetchByNextReviewDateByPredicate(
-                context, predicate, numReview);
+                dbContextFactory, predicate, numReview);
 
             if (oldCards is not null && oldCards.Count > 0) 
                 newDataPacket.Deck.AddRange(oldCards);
@@ -243,7 +243,7 @@ namespace Logic.Services.API
                     && fc.NextReview == null;
 
             var readyForReviewCards = FlashCardApi.FlashCardsFetchByNextReviewDateByPredicate(
-                context, predicate2, numNew);
+                dbContextFactory, predicate2, numNew);
 
             int numReadyForReviewReturned = 0;
             if (readyForReviewCards is not null && readyForReviewCards.Count > 0)
@@ -285,7 +285,7 @@ namespace Logic.Services.API
 
 
         public static ReadDataPacket? OrchestrateMovePage(
-            IdiomaticaContext context, ReadDataPacket readDataPacket, Guid bookId, int targetPageNum)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, ReadDataPacket readDataPacket, Guid bookId, int targetPageNum)
         {
             if (readDataPacket.LanguageUser is null)
             {
@@ -315,7 +315,7 @@ namespace Logic.Services.API
 
             // mark the previous page as read if moving forward
             if (targetPageNum > readDataPacket.CurrentPage.Ordinal)
-                PageUserApi.PageUserMarkAsRead(context, (Guid)readDataPacket.CurrentPageUser.Id);
+                PageUserApi.PageUserMarkAsRead(dbContextFactory, (Guid)readDataPacket.CurrentPageUser.Id);
 
             if (targetPageNum < 1) return null;
             if (targetPageNum > readDataPacket.BookTotalPageCount)
@@ -323,20 +323,20 @@ namespace Logic.Services.API
 
             // reload the current page user with the new target
             readDataPacket.CurrentPageUser = PageUserApi.PageUserReadByOrderWithinBook(
-                context, (Guid)readDataPacket.LanguageUser.Id, targetPageNum, bookId);
+                dbContextFactory, (Guid)readDataPacket.LanguageUser.Id, targetPageNum, bookId);
 
             // create the page user if it hasn't been created already
             if (readDataPacket.CurrentPageUser is null)
             {
                 // but first need to pull the page
-                readDataPacket.CurrentPage = PageApi.PageReadByOrdinalAndBookId(context, targetPageNum, bookId);
+                readDataPacket.CurrentPage = PageApi.PageReadByOrdinalAndBookId(dbContextFactory, targetPageNum, bookId);
                 if (readDataPacket.CurrentPage is null)
                 {
                     ErrorHandler.LogAndThrow();
                     return null;
                 }
                 readDataPacket.CurrentPageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, readDataPacket.CurrentPage, readDataPacket.LoggedInUser);
+                    dbContextFactory, readDataPacket.CurrentPage, readDataPacket.LoggedInUser);
             }
             if (readDataPacket.CurrentPageUser is null)
             {
@@ -346,7 +346,7 @@ namespace Logic.Services.API
 
 
             var newReadDataPacket = OrchestrateResetReadDataForNewPage(
-                context, readDataPacket, (Guid)readDataPacket.CurrentPageUser.PageId);
+                dbContextFactory, readDataPacket, (Guid)readDataPacket.CurrentPageUser.PageId);
             if (newReadDataPacket is null || newReadDataPacket.BookUser is null
                 || newReadDataPacket.CurrentPageUser is null)
             {
@@ -355,28 +355,28 @@ namespace Logic.Services.API
             }
             readDataPacket = newReadDataPacket;
             BookUserApi.BookUserUpdateBookmark(
-                context, (Guid)readDataPacket.BookUser.Id, (Guid)readDataPacket.CurrentPageUser.PageId);
+                dbContextFactory, (Guid)readDataPacket.BookUser.Id, (Guid)readDataPacket.CurrentPageUser.PageId);
 
             return readDataPacket;
         }
         public static async Task<ReadDataPacket?> OrchestrateMovePageAsync(
-            IdiomaticaContext context, ReadDataPacket readDataPacket, Guid bookId, int targetPageNum)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, ReadDataPacket readDataPacket, Guid bookId, int targetPageNum)
         {
             return await Task<ReadDataPacket?>.Run(() =>
             {
-                return OrchestrateMovePage(context, readDataPacket, bookId, targetPageNum);
+                return OrchestrateMovePage(dbContextFactory, readDataPacket, bookId, targetPageNum);
             });
         }
 
 
         public static ReadDataPacket? OrchestrateReadDataInit(
-            IdiomaticaContext context, LoginService userService, Guid bookId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, LoginService userService, Guid bookId)
         {
             ReadDataPacket readDataPacket = new();
             // tier 0 tasks, not dependent on anything
-            readDataPacket.LoggedInUser = userService.GetLoggedInUser(context);
-            readDataPacket.Book = BookApi.BookRead(context, bookId);
-            readDataPacket.BookTotalPageCount = BookApi.BookReadPageCount(context, bookId);
+            readDataPacket.LoggedInUser = userService.GetLoggedInUser(dbContextFactory);
+            readDataPacket.Book = BookApi.BookRead(dbContextFactory, bookId);
+            readDataPacket.BookTotalPageCount = BookApi.BookReadPageCount(dbContextFactory, bookId);
             readDataPacket.LanguageToCode = userService.GetUiLanguageCode();
 
             if (readDataPacket.LoggedInUser is null)
@@ -397,17 +397,17 @@ namespace Logic.Services.API
 
             // tier 1 tasks, dependent on tier 0
             readDataPacket.BookUser = BookUserApi.BookUserByBookIdAndUserIdRead(
-                context, (Guid)readDataPacket.Book.Id, (Guid)readDataPacket.LoggedInUser.Id);
+                dbContextFactory, (Guid)readDataPacket.Book.Id, (Guid)readDataPacket.LoggedInUser.Id);
             readDataPacket.LanguageUser = LanguageUserApi.LanguageUserGet(
-                context, (Guid)readDataPacket.Book.LanguageId, (Guid)readDataPacket.LoggedInUser.Id);
-            readDataPacket.Language = LanguageApi.LanguageRead(context, (Guid)readDataPacket.Book.LanguageId);
+                dbContextFactory, (Guid)readDataPacket.Book.LanguageId, (Guid)readDataPacket.LoggedInUser.Id);
+            readDataPacket.Language = LanguageApi.LanguageRead(dbContextFactory, (Guid)readDataPacket.Book.LanguageId);
 
 
             if (readDataPacket.BookUser is null)
             {
                 // create it, I guess
                 readDataPacket.BookUser = OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookId, (Guid)readDataPacket.LoggedInUser.Id);
+                    dbContextFactory, bookId, (Guid)readDataPacket.LoggedInUser.Id);
             }
             if (readDataPacket.BookUser is null)
             {
@@ -427,11 +427,11 @@ namespace Logic.Services.API
             }
             // tier 2, dependent on tier 1
             readDataPacket.BookUserStats = BookUserStatApi.BookUserStatsRead(
-                context, (Guid)readDataPacket.Book.Id, (Guid)readDataPacket.LoggedInUser.Id);
+                dbContextFactory, (Guid)readDataPacket.Book.Id, (Guid)readDataPacket.LoggedInUser.Id);
             readDataPacket.CurrentPageUser = PageUserApi.PageUserReadBookmarkedOrFirst(
-                context, (Guid)readDataPacket.BookUser.Id);
+                dbContextFactory, (Guid)readDataPacket.BookUser.Id);
             readDataPacket.LanguageFromCode = LanguageApi.LanguageReadByCode(
-                context, readDataPacket.Language.Code);
+                dbContextFactory, readDataPacket.Language.Code);
 
 
 
@@ -439,20 +439,20 @@ namespace Logic.Services.API
             if (readDataPacket.CurrentPageUser is null)
             {
                 // but first need to pull the page
-                readDataPacket.CurrentPage = PageApi.PageReadFirstByBookId(context, bookId);
+                readDataPacket.CurrentPage = PageApi.PageReadFirstByBookId(dbContextFactory, bookId);
                 if (readDataPacket.CurrentPage is null)
                 {
                     ErrorHandler.LogAndThrow();
                     return null;
                 }
                 readDataPacket.CurrentPageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, readDataPacket.CurrentPage, readDataPacket.LoggedInUser);
+                    dbContextFactory, readDataPacket.CurrentPage, readDataPacket.LoggedInUser);
             }
             else
             {
                 // just pull the current page
                 readDataPacket.CurrentPage = PageApi.PageReadById(
-                    context, readDataPacket.CurrentPageUser.PageId);
+                    dbContextFactory, readDataPacket.CurrentPageUser.PageId);
             }
             if (readDataPacket.CurrentPage is null)
             {
@@ -462,7 +462,7 @@ namespace Logic.Services.API
 
             // tier 3, dependent on tier 2
             var resetDataPacket = OrchestrateResetReadDataForNewPage(
-                context, readDataPacket, readDataPacket.CurrentPage.Id);
+                dbContextFactory, readDataPacket, readDataPacket.CurrentPage.Id);
             if (resetDataPacket is null)
             {
                 ErrorHandler.LogAndThrow();
@@ -471,23 +471,23 @@ namespace Logic.Services.API
 
             // finally, update the breadcrumbs
             UserApi.UserBreadCrumbCreate(
-                context, readDataPacket.LoggedInUser, readDataPacket.CurrentPage);
+                dbContextFactory, readDataPacket.LoggedInUser, readDataPacket.CurrentPage);
             
             return resetDataPacket;
 
         }
         public static async Task<ReadDataPacket?> OrchestrateReadDataInitAsync(
-            IdiomaticaContext context, LoginService userService, Guid bookId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, LoginService userService, Guid bookId)
         {
             return await Task<ReadDataPacket?>.Run(() =>
             {
-                return OrchestrateReadDataInit(context, userService, bookId);
+                return OrchestrateReadDataInit(dbContextFactory, userService, bookId);
             });
         }
 
 
         public static ReadDataPacket? OrchestrateResetReadDataForNewPage(
-            IdiomaticaContext context, ReadDataPacket readDataPacket, Guid newPageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, ReadDataPacket readDataPacket, Guid newPageId)
         {
             if (readDataPacket.LanguageUser is null )
             {
@@ -507,13 +507,13 @@ namespace Logic.Services.API
             readDataPacket.Tokens = null;
 
             // and rebuild
-            readDataPacket.CurrentPage = PageApi.PageReadById(context, newPageId);
-            readDataPacket.Paragraphs = ParagraphApi.ParagraphsReadByPageId(context, newPageId);
+            readDataPacket.CurrentPage = PageApi.PageReadById(dbContextFactory, newPageId);
+            readDataPacket.Paragraphs = ParagraphApi.ParagraphsReadByPageId(dbContextFactory, newPageId);
             readDataPacket.AllWordsInPage = WordApi
                 .WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
-                context, newPageId, (Guid)readDataPacket.LanguageUser.Id);
-            readDataPacket.Sentences = SentenceApi.SentencesReadByPageId(context, newPageId);
-            readDataPacket.Tokens = TokenApi.TokensReadByPageId(context, newPageId);
+                dbContextFactory, newPageId, (Guid)readDataPacket.LanguageUser.Id);
+            readDataPacket.Sentences = SentenceApi.SentencesReadByPageId(dbContextFactory, newPageId);
+            readDataPacket.Tokens = TokenApi.TokensReadByPageId(dbContextFactory, newPageId);
 
             if (readDataPacket.AllWordsInPage is null)
             {
@@ -559,16 +559,16 @@ namespace Logic.Services.API
             if (readDataPacket.CurrentPage is null)
                 { ErrorHandler.LogAndThrow(); return null; }
             UserApi.UserBreadCrumbCreate(
-                context, readDataPacket.LoggedInUser, readDataPacket.CurrentPage);
+                dbContextFactory, readDataPacket.LoggedInUser, readDataPacket.CurrentPage);
             
             return readDataPacket;
         }
         public static async Task<ReadDataPacket?> OrchestrateResetReadDataForNewPageAsync(
-            IdiomaticaContext context, ReadDataPacket readDataPacket, Guid newPageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, ReadDataPacket readDataPacket, Guid newPageId)
         {
             return await Task<ReadDataPacket?>.Run(() =>
             {
-                return OrchestrateResetReadDataForNewPage(context, readDataPacket, newPageId);
+                return OrchestrateResetReadDataForNewPage(dbContextFactory, readDataPacket, newPageId);
             });
         }
 
@@ -578,7 +578,7 @@ namespace Logic.Services.API
         /// to the DB
         /// </summary>
         public static Verb? OrchestrateVerbConjugationAndTranslationSpanishToEnglish(
-            IdiomaticaContext context, Verb learningVerb, Verb translationVerb)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Verb learningVerb, Verb translationVerb)
         {
             if (learningVerb.Conjugator is null) { ErrorHandler.LogAndThrow(); return null; }
             Logic.Conjugator.English.EnglishVerbTranslator translator = new();
@@ -597,7 +597,7 @@ namespace Logic.Services.API
                 ErrorHandler.LogAndThrow(); return null;
             }
             var verb = WordApi.VerbCreateAndSaveTranslations(
-                context, learningVerb, translationVerb, conjugations);
+                dbContextFactory, learningVerb, translationVerb, conjugations);
             if (verb is null)
             {
                 ErrorHandler.LogAndThrow(); return null;

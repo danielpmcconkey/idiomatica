@@ -17,13 +17,15 @@ namespace Model.DAL
 
 
         #region read
-        public static Sentence? SentenceByIdRead(Guid key, IdiomaticaContext context)
+        public static Sentence? SentenceByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (SentenceById.ContainsKey(key))
             {
                 return SentenceById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.Sentences.Where(x => x.Id == key)
@@ -33,23 +35,25 @@ namespace Model.DAL
             SentenceById[key] = value;
             return value;
         }
-        public static async Task<Sentence?> SentenceByIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<Sentence?> SentenceByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Sentence?>.Run(() =>
             {
-                return SentenceByIdRead(key, context);
+                return SentenceByIdRead(key, dbContextFactory);
             });
         }
 
 
         public static List<Sentence> SentencesByPageIdRead(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (SentencesByPageId.ContainsKey(key))
             {
                 return SentencesByPageId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = (from p in context.Pages
                          join pp in context.Paragraphs on p.Id equals pp.PageId
@@ -66,22 +70,24 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<Sentence>> SentencesByPageIdReadAsync(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<Sentence>>.Run(() =>
             {
-                return SentencesByPageIdRead(key, context);
+                return SentencesByPageIdRead(key, dbContextFactory);
             });
         }
 
 
-        public static List<Sentence> SentencesByParagraphIdRead(Guid key, IdiomaticaContext context)
+        public static List<Sentence> SentencesByParagraphIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (SentencesByParagraphId.ContainsKey(key))
             {
                 return SentencesByParagraphId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.Sentences
@@ -91,11 +97,11 @@ namespace Model.DAL
             SentencesByParagraphId[key] = value;
             return value;
         }
-        public static async Task<List<Sentence>> SentencesByParagraphIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<List<Sentence>> SentencesByParagraphIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<Sentence>>.Run(() =>
             {
-                return SentencesByParagraphIdRead(key, context);
+                return SentencesByParagraphIdRead(key, dbContextFactory);
             });
         }
 
@@ -105,8 +111,10 @@ namespace Model.DAL
         #region create
 
 
-        public static Sentence? SentenceCreate(Sentence sentence, IdiomaticaContext context)
+        public static Sentence? SentenceCreate(Sentence sentence, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
@@ -135,9 +143,9 @@ namespace Model.DAL
 
             return newEntity;
         }
-        public static async Task<Sentence?> SentenceCreateAsync(Sentence value, IdiomaticaContext context)
+        public static async Task<Sentence?> SentenceCreateAsync(Sentence value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return SentenceCreate(value, context); });
+            return await Task.Run(() => { return SentenceCreate(value, dbContextFactory); });
         }
 
         #endregion

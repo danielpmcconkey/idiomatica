@@ -18,8 +18,9 @@ namespace Model.DAL
 
         #region read
         public static Language? LanguageByCodeRead(
-            AvailableLanguageCode key, IdiomaticaContext context)
+            AvailableLanguageCode key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
             // check cache
             if (LanguageByCode.ContainsKey(key))
             {
@@ -37,21 +38,23 @@ namespace Model.DAL
             return value;
         }
         public static async Task<Language?> LanguageByCodeReadAsync(
-            AvailableLanguageCode key, IdiomaticaContext context)
+            AvailableLanguageCode key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Language?>.Run(() =>
             {
-                return LanguageByCodeRead(key, context);
+                return LanguageByCodeRead(key, dbContextFactory);
             });
         }
 
-        public static Language? LanguageByIdRead(Guid key, IdiomaticaContext context)
+        public static Language? LanguageByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (LanguageById.ContainsKey(key))
             {
                 return LanguageById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = context.Languages
                 .Where(l => l.Id == key)
@@ -63,11 +66,11 @@ namespace Model.DAL
             LanguageByCode[value.Code] = value;
             return value;
         }
-        public static async Task<Language?> LanguageByIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<Language?> LanguageByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Language?>.Run(() =>
             {
-                return LanguageByIdRead(key, context);
+                return LanguageByIdRead(key, dbContextFactory);
             });
         }
         #endregion

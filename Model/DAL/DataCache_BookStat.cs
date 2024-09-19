@@ -15,8 +15,10 @@ namespace Model.DAL
         private static ConcurrentDictionary<Guid, List<BookStat>> BookStatsByBookId = [];
 
         public static BookStat? BookStatByBookIdAndStatKeyRead(
-            (Guid bookId, AvailableBookStat statKey) key, IdiomaticaContext context)
+            (Guid bookId, AvailableBookStat statKey) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // check cache
             if (BookStatByBookIdAndStatKey.ContainsKey(key))
             {
@@ -32,16 +34,18 @@ namespace Model.DAL
             return value;
         }
         public static async Task<BookStat?> BookStatByBookIdAndStatKeyReadAsync(
-            (Guid bookId, AvailableBookStat statKey) key, IdiomaticaContext context)
+            (Guid bookId, AvailableBookStat statKey) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<BookStat?>.Run(() =>
             {
-                return BookStatByBookIdAndStatKeyRead(key, context);
+                return BookStatByBookIdAndStatKeyRead(key, dbContextFactory);
             });
         }
         public static List<BookStat>? BookStatsByBookIdRead(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // check cache
             if (BookStatsByBookId.ContainsKey(key))
             {
@@ -56,11 +60,11 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<BookStat>?> BookStatsByBookIdReadAsync(
-            Guid key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<BookStat>?>.Run(() =>
             {
-                return BookStatsByBookIdRead(key, context);
+                return BookStatsByBookIdRead(key, dbContextFactory);
             });
         }
     }

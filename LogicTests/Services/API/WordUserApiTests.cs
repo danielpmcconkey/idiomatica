@@ -24,9 +24,9 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            Guid wordId = CommonFunctions.GetWordId(context, "dice", learningLanguage.Id);
-            Word? word = WordApi.WordGetById(context, wordId);
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid wordId = CommonFunctions.GetWordId(dbContextFactory, "dice", learningLanguage.Id);
+            Word? word = WordApi.WordGetById(dbContextFactory, wordId);
             Assert.IsNotNull(word);
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
 
@@ -34,26 +34,26 @@ namespace Logic.Services.API.Tests
             {
                 // create a user
                 Assert.IsNotNull(loginService);
-                var user = CommonFunctions.CreateNewTestUser(loginService, context);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
                 Assert.IsNotNull(userId);
 
                 // fetch the languageUser
                 var languageUser = LanguageUserApi.LanguageUserGet(
-                    context, learningLanguage.Id, (Guid)userId);
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
 
                 // create word user
                 var wordUser = WordUserApi.WordUserCreate(
-                    context, word, languageUser, null, status);
+                    dbContextFactory, word, languageUser, null, status);
                 Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
                 Assert.AreEqual(wordId, wordUser.WordId);
             }
             finally
             {
                 // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
         [TestMethod()]
@@ -63,9 +63,9 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            Guid wordId = CommonFunctions.GetWordId(context, "dice", learningLanguage.Id);
-            Word? word = WordApi.WordGetById(context, wordId);
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid wordId = CommonFunctions.GetWordId(dbContextFactory, "dice", learningLanguage.Id);
+            Word? word = WordApi.WordGetById(dbContextFactory, wordId);
             Assert.IsNotNull(word);
             AvailableWordUserStatus status = AvailableWordUserStatus.UNKNOWN;
 
@@ -73,26 +73,26 @@ namespace Logic.Services.API.Tests
             {
                 // create a user
                 Assert.IsNotNull(loginService);
-                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, context);
+                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
                 Assert.IsNotNull(userId);
 
                 // fetch the languageUser
                 var languageUser = await LanguageUserApi.LanguageUserGetAsync(
-                    context, learningLanguage.Id, (Guid)userId);
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
 
                 // create word user
                 var wordUser = await WordUserApi.WordUserCreateAsync(
-                    context, word, languageUser, null, status);
+                    dbContextFactory, word, languageUser, null, status);
                 Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
                 Assert.AreEqual(wordId, wordUser.WordId);
             }
             finally
             {
                 // clean-up
-                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
         }
 
@@ -104,33 +104,33 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            Guid bookId = CommonFunctions.GetBook11Id(context);
-            Guid pageId = CommonFunctions.GetPage378Id(context);
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
+            Guid pageId = CommonFunctions.GetPage378Id(dbContextFactory);
             int expectedCount = 122;
 
             try
             {
                 // create a user
                 Assert.IsNotNull(loginService);
-                var user = CommonFunctions.CreateNewTestUser(loginService, context);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
                 Assert.IsNotNull(userId);
 
                 // create the wordUsers
                 WordUserApi.WordUsersCreateAllForBookIdAndUserId(
-                    context, bookId, (Guid)user.Id);
+                    dbContextFactory, bookId, (Guid)user.Id);
                 // now read them back for one of the pages
                 var dict = WordUserApi.WordUsersDictByPageIdAndUserIdRead(
-                    context, pageId, (Guid)user.Id);
+                    dbContextFactory, pageId, (Guid)user.Id);
                 Assert.IsNotNull(dict);
                 Assert.AreEqual(expectedCount, dict.Count);
             }
             finally
             {
                 // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
         [TestMethod()]
@@ -140,33 +140,33 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            Guid bookId = CommonFunctions.GetBook11Id(context);
-            Guid pageId = CommonFunctions.GetPage378Id(context);
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
+            Guid pageId = CommonFunctions.GetPage378Id(dbContextFactory);
             int expectedCount = 122;
 
             try
             {
                 // create a user
                 Assert.IsNotNull(loginService);
-                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, context);
+                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
                 Assert.IsNotNull(userId);
                 
                 // create the wordUsers
                 await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(
-                    context, bookId, (Guid)user.Id);
+                    dbContextFactory, bookId, (Guid)user.Id);
                 // now read them back for one of the pages
                 var dict = await WordUserApi.WordUsersDictByPageIdAndUserIdReadAsync(
-                    context, pageId, (Guid)user.Id);
+                    dbContextFactory, pageId, (Guid)user.Id);
                 Assert.IsNotNull(dict);
                 Assert.AreEqual(expectedCount, dict.Count);
             }
             finally
             {
                 // clean-up
-                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
         }
 
@@ -178,9 +178,9 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            Guid bookId = CommonFunctions.GetBook11Id(context);
-            Guid pageId = CommonFunctions.GetPage378Id(context);
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
+            Guid pageId = CommonFunctions.GetPage378Id(dbContextFactory);
             int expectedCount = 122;
             string wordToCheck = "exploradores";
 
@@ -188,23 +188,23 @@ namespace Logic.Services.API.Tests
             {
                 // create a user
                 Assert.IsNotNull(loginService);
-                var user = CommonFunctions.CreateNewTestUser(loginService, context);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
                 Assert.IsNotNull(userId);
 
                 // fetch the languageUser
                 var languageUser = LanguageUserApi.LanguageUserGet(
-                    context, learningLanguage.Id, (Guid)userId);
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
 
                 // create the wordUsers
                 WordUserApi.WordUsersCreateAllForBookIdAndUserId(
-                    context, bookId, (Guid)user.Id);
+                    dbContextFactory, bookId, (Guid)user.Id);
 
                 // now read them back for one of the pages
                 var dict = WordUserApi.WordUsersDictByPageIdAndUserIdRead(
-                    context, pageId, (Guid)user.Id);
+                    dbContextFactory, pageId, (Guid)user.Id);
                 Assert.IsNotNull(dict);
                 Assert.AreEqual(expectedCount, dict.Count);
                 var wordUser = dict[wordToCheck];
@@ -214,7 +214,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
         [TestMethod()]
@@ -224,9 +224,9 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language learningLanguage = CommonFunctions.GetSpanishLanguage(context);
-            Guid bookId = CommonFunctions.GetBook11Id(context);
-            Guid pageId = CommonFunctions.GetPage378Id(context);
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBook11Id(dbContextFactory);
+            Guid pageId = CommonFunctions.GetPage378Id(dbContextFactory);
             int expectedCount = 122;
             string wordToCheck = "exploradores";
 
@@ -234,23 +234,23 @@ namespace Logic.Services.API.Tests
             {
                 // create a user
                 Assert.IsNotNull(loginService);
-                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, context);
+                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
                 Assert.IsNotNull(userId);
 
                 // fetch the languageUser
                 var languageUser = await LanguageUserApi.LanguageUserGetAsync(
-                    context, learningLanguage.Id, (Guid)userId);
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
 
                 // create the wordUsers
                 await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(
-                    context, bookId, (Guid)user.Id);
+                    dbContextFactory, bookId, (Guid)user.Id);
                 
                 // now read them back for one of the pages
                 var dict = await WordUserApi.WordUsersDictByPageIdAndUserIdReadAsync(
-                    context, pageId, (Guid)user.Id);
+                    dbContextFactory, pageId, (Guid)user.Id);
                 Assert.IsNotNull(dict);
                 Assert.AreEqual(expectedCount, dict.Count);
                 var wordUser = dict[wordToCheck];
@@ -260,7 +260,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
         }
 
@@ -272,9 +272,9 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language language = CommonFunctions.GetSpanishLanguage(context);
-            Guid wordId = CommonFunctions.GetWordId(context, "dice", language.Id);
-            Word? word = WordApi.WordGetById(context, wordId);
+            Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid wordId = CommonFunctions.GetWordId(dbContextFactory, "dice", language.Id);
+            Word? word = WordApi.WordGetById(dbContextFactory, wordId);
             Assert.IsNotNull(word);
             AvailableWordUserStatus statusBefore = AvailableWordUserStatus.UNKNOWN;
             AvailableWordUserStatus statusAfter = AvailableWordUserStatus.LEARNING3;
@@ -284,25 +284,25 @@ namespace Logic.Services.API.Tests
             {
                 // create a user
                 Assert.IsNotNull(loginService);
-                var user = CommonFunctions.CreateNewTestUser(loginService, context);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
                 Assert.IsNotNull(userId);
 
                 // fetch the languageUser
                 var languageUser = LanguageUserApi.LanguageUserGet(
-                    context, language.Id, (Guid)userId);
+                    dbContextFactory, language.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
 
                 var wordUserBefore = WordUserApi.WordUserCreate(
-                    context, word, languageUser, null, statusBefore);
+                    dbContextFactory, word, languageUser, null, statusBefore);
                 Assert.IsNotNull(wordUserBefore); Assert.IsNotNull(wordUserBefore.Id);
 
                 // update it
-                WordUserApi.WordUserUpdate(context, wordUserBefore.Id, statusAfter, translation);
+                WordUserApi.WordUserUpdate(dbContextFactory, wordUserBefore.Id, statusAfter, translation);
 
                 // read it back
-                var wordUserAfter = WordUserApi.WordUserReadById(context, wordUserBefore.Id);
+                var wordUserAfter = WordUserApi.WordUserReadById(dbContextFactory, wordUserBefore.Id);
                 Assert.IsNotNull(wordUserAfter); Assert.IsNotNull(wordUserAfter.Id);
                 Assert.AreEqual(statusAfter, wordUserAfter.Status);
                 Assert.AreEqual(translation, wordUserAfter.Translation);
@@ -310,7 +310,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
         [TestMethod()]
@@ -320,9 +320,9 @@ namespace Logic.Services.API.Tests
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
-            Language language = CommonFunctions.GetSpanishLanguage(context);
-            Guid wordId = CommonFunctions.GetWordId(context, "dice", language.Id);
-            Word? word = WordApi.WordGetById(context, wordId);
+            Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid wordId = CommonFunctions.GetWordId(dbContextFactory, "dice", language.Id);
+            Word? word = WordApi.WordGetById(dbContextFactory, wordId);
             Assert.IsNotNull(word);
             AvailableWordUserStatus statusBefore = AvailableWordUserStatus.UNKNOWN;
             AvailableWordUserStatus statusAfter = AvailableWordUserStatus.LEARNING3;
@@ -332,25 +332,25 @@ namespace Logic.Services.API.Tests
             {
                 // create a user
                 Assert.IsNotNull(loginService);
-                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, context);
+                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
                 Assert.IsNotNull(userId);
 
                 // fetch the languageUser
                 var languageUser = await LanguageUserApi.LanguageUserGetAsync(
-                    context, language.Id, (Guid)userId);
+                    dbContextFactory, language.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
 
                 var wordUserBefore = await WordUserApi.WordUserCreateAsync(
-                    context, word, languageUser, null, statusBefore);
+                    dbContextFactory, word, languageUser, null, statusBefore);
                 Assert.IsNotNull(wordUserBefore); Assert.IsNotNull(wordUserBefore.Id);
 
                 // update it
-                await WordUserApi.WordUserUpdateAsync(context, wordUserBefore.Id, statusAfter, translation);
+                await WordUserApi.WordUserUpdateAsync(dbContextFactory, wordUserBefore.Id, statusAfter, translation);
 
                 // read it back
-                var wordUserAfter = await WordUserApi.WordUserReadByIdAsync(context, wordUserBefore.Id);
+                var wordUserAfter = await WordUserApi.WordUserReadByIdAsync(dbContextFactory, wordUserBefore.Id);
                 Assert.IsNotNull(wordUserAfter); Assert.IsNotNull(wordUserAfter.Id);
                 Assert.AreEqual(statusAfter, wordUserAfter.Status);
                 Assert.AreEqual(translation, wordUserAfter.Translation);
@@ -358,7 +358,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
         }
 
@@ -368,12 +368,12 @@ namespace Logic.Services.API.Tests
         {
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
-            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
-            Guid wordUserId = CommonFunctions.GetWordUser(context, languageUserId, "vivían");
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(dbContextFactory);
+            Guid wordUserId = CommonFunctions.GetWordUser(dbContextFactory, languageUserId, "vivían");
             AvailableWordUserStatus status = AvailableWordUserStatus.LEARNED;
             string translation = "they were living (imperfect)";
 
-            var wordUser = WordUserApi.WordUserReadById(context, wordUserId);
+            var wordUser = WordUserApi.WordUserReadById(dbContextFactory, wordUserId);
             Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
             Assert.AreEqual(status, wordUser.Status);
             Assert.AreEqual(translation, wordUser.Translation);
@@ -383,12 +383,12 @@ namespace Logic.Services.API.Tests
         {
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var context = dbContextFactory.CreateDbContext();
-            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(context);
-            Guid wordUserId = CommonFunctions.GetWordUser(context, languageUserId, "vivían");
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(dbContextFactory);
+            Guid wordUserId = CommonFunctions.GetWordUser(dbContextFactory, languageUserId, "vivían");
             AvailableWordUserStatus status = AvailableWordUserStatus.LEARNED;
             string translation = "they were living (imperfect)";
 
-            var wordUser = await WordUserApi.WordUserReadByIdAsync(context, wordUserId);
+            var wordUser = await WordUserApi.WordUserReadByIdAsync(dbContextFactory, wordUserId);
             Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
             Assert.AreEqual(status, wordUser.Status);
             Assert.AreEqual(translation, wordUser.Translation);

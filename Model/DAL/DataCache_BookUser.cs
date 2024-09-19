@@ -16,8 +16,10 @@ namespace Model.DAL
 
         #region create
 
-        public static BookUser? BookUserCreate(BookUser bookUser, IdiomaticaContext context)
+        public static BookUser? BookUserCreate(BookUser bookUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                         INSERT INTO [Idioma].[BookUser]
                               ([BookId]
@@ -38,24 +40,26 @@ namespace Model.DAL
             BookUserById[bookUser.Id] = bookUser;
             return bookUser;
         }
-        public static async Task<BookUser?> BookUserCreateAsync(BookUser value, IdiomaticaContext context)
+        public static async Task<BookUser?> BookUserCreateAsync(BookUser value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<BookUser?>.Run(() =>
             {
-                return BookUserCreate(value, context);
+                return BookUserCreate(value, dbContextFactory);
             });
         }
 
         #endregion
 
         #region read
-        public static BookUser? BookUserByIdRead(Guid key, IdiomaticaContext context)
+        public static BookUser? BookUserByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (BookUserById.TryGetValue(key, out BookUser? value))
             {
                 return value;
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             value = context.BookUsers.Where(x => x.Id == key)
@@ -65,21 +69,23 @@ namespace Model.DAL
             BookUserById[key] = value;
             return value;
         }
-        public static async Task<BookUser?> BookUserByIdReadAsync(Guid key, IdiomaticaContext context)
+        public static async Task<BookUser?> BookUserByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<BookUser?>.Run(() =>
             {
-                return BookUserByIdRead(key, context);
+                return BookUserByIdRead(key, dbContextFactory);
             });
         }
         public static BookUser? BookUserByBookIdAndUserIdRead(
-            (Guid bookId, Guid userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (BookUserByBookIdAndUserId.ContainsKey(key))
             {
                 return BookUserByBookIdAndUserId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.BookUsers
@@ -94,18 +100,20 @@ namespace Model.DAL
             return value;
         }
         public static async Task<BookUser?> BookUserByBookIdAndUserIdReadAsync(
-            (Guid bookId, Guid userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<BookUser?>.Run(() =>
             {
-                return BookUserByBookIdAndUserIdRead(key, context);
+                return BookUserByBookIdAndUserIdRead(key, dbContextFactory);
             });
         }
         #endregion
 
         #region update
-        public static void BookUserUpdate(BookUser bookUser, IdiomaticaContext context)
+        public static void BookUserUpdate(BookUser bookUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                         update [Idioma].[BookUser]
                               set [BookId] = {bookUser.BookId}
@@ -129,11 +137,11 @@ namespace Model.DAL
             }
             return;
         }
-        public static async Task BookUserUpdateAsync(BookUser value, IdiomaticaContext context)
+        public static async Task BookUserUpdateAsync(BookUser value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             await Task.Run(() =>
             {
-                BookUserUpdate(value, context);
+                BookUserUpdate(value, dbContextFactory);
             });
         }
         #endregion
