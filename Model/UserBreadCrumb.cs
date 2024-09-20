@@ -12,20 +12,23 @@ namespace Model
 {
 
     [Table("UserBreadCrumb", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
+    [PrimaryKey(nameof(Id))]
     public class UserBreadCrumb
     {
-        public Guid? UniqueKey { get; set; } 
+        #region required data
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid UserId { get; set; }
+        [Required] public required Guid PageId { get; set; }
+        [Required] public required DateTimeOffset ActionDateTime { get; set; }
 
-        #region relationships
-        public int? UserId { get; set; }
-        public User? User { get; set; }
-        public int? PageId { get; set; }
-        public Page? Page { get; set; }
+
 
         #endregion
 
-        public DateTime? ActionDateTime { get; set; }
+        public User? User { get; set; }
+        public Page? Page { get; set; }
+        
+
 
     }
 }

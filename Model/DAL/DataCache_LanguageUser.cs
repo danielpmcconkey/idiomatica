@@ -11,59 +11,61 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, LanguageUser> LanguageUserById = new ConcurrentDictionary<int, LanguageUser>();
-        private static ConcurrentDictionary<(int languageId, int userId), LanguageUser> LanguageUserByLanguageIdAndUserId = new ConcurrentDictionary<(int languageId, int userId), LanguageUser>();
-        private static ConcurrentDictionary<int, List<LanguageUser>> LanguageUsersAndLanguageByUserId = new ConcurrentDictionary<int, List<LanguageUser>>();
+        private static ConcurrentDictionary<Guid, LanguageUser> LanguageUserById = new ConcurrentDictionary<Guid, LanguageUser>();
+        private static ConcurrentDictionary<(Guid languageId, Guid userId), LanguageUser> LanguageUserByLanguageIdAndUserId = new ConcurrentDictionary<(Guid languageId, Guid userId), LanguageUser>();
+        private static ConcurrentDictionary<Guid, List<LanguageUser>> LanguageUsersAndLanguageByUserId = new ConcurrentDictionary<Guid, List<LanguageUser>>();
 
         #region create
-        public static LanguageUser? LanguageUserCreate(LanguageUser languageUser, IdiomaticaContext context)
+        public static LanguageUser? LanguageUserCreate(LanguageUser languageUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (languageUser.LanguageId is null) throw new ArgumentNullException(nameof(languageUser.LanguageId));
-            if (languageUser.UserId is null) throw new ArgumentNullException(nameof(languageUser.UserId));
+            var context = dbContextFactory.CreateDbContext();
 
-            Guid guid = Guid.NewGuid();
-            int numRows = context.Database.ExecuteSql($"""
+            //int numRows = context.Database.ExecuteSql($"""
                                 
-                INSERT INTO [Idioma].[LanguageUser]
-                           ([LanguageId]
-                           ,[UserId]
-                           ,[TotalWordsRead]
-                           ,[UniqueKey])
-                     VALUES
-                           ({languageUser.LanguageId}
-                           ,{languageUser.UserId}
-                           ,{languageUser.TotalWordsRead}
-                           ,{guid})
+            //    INSERT INTO [Idioma].[LanguageUser]
+            //               ([LanguageId]
+            //               ,[UserId]
+            //               ,[TotalWordsRead]
+            //               ,[Id])
+            //         VALUES
+            //               ({languageUser.LanguageId}
+            //               ,{languageUser.UserId}
+            //               ,{languageUser.TotalWordsRead}
+            //               ,{guid})
                 
-                """);
-            if (numRows < 1) throw new InvalidDataException("creating LanguageUser affected 0 rows");
-            var newEntity = context.LanguageUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
-            {
-                throw new InvalidDataException("newEntity is null in LanguageUserCreate");
-            }
+            //    """);
+            //if (numRows < 1) throw new InvalidDataException("creating LanguageUser affected 0 rows");
+            //var newEntity = context.LanguageUsers.Where(x => x.Id == guid).FirstOrDefault();
+            //if (newEntity is null)
+            //{
+            //    throw new InvalidDataException("newEntity is null in LanguageUserCreate");
+            //}
+            context.LanguageUsers.Add(languageUser);
+            context.SaveChanges();
             
 
             // add it to cache
-            LanguageUserUpdateCache(newEntity, context);
+            LanguageUserUpdateCache(languageUser, dbContextFactory);
 
-            return newEntity;
+            return languageUser;
         }
-        public static async Task<LanguageUser?> LanguageUserCreateAsync(LanguageUser value, IdiomaticaContext context)
+        public static async Task<LanguageUser?> LanguageUserCreateAsync(LanguageUser value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return LanguageUserCreate(value, context); });
+            return await Task.Run(() => { return LanguageUserCreate(value, dbContextFactory); });
         }
         #endregion
 
         #region read
         public static LanguageUser? LanguageUserByIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (LanguageUserById.ContainsKey(key))
             {
                 return LanguageUserById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.LanguageUsers
@@ -75,21 +77,23 @@ namespace Model.DAL
             return value;
         }
         public static async Task<LanguageUser?> LanguageUserByIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<LanguageUser?>.Run(() =>
             {
-                return LanguageUserByIdRead(key, context);
+                return LanguageUserByIdRead(key, dbContextFactory);
             });
         }
         public static LanguageUser? LanguageUserByLanguageIdAndUserIdRead(
-            (int languageId, int userId) key, IdiomaticaContext context)
+            (Guid languageId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (LanguageUserByLanguageIdAndUserId.ContainsKey(key))
             {
                 return LanguageUserByLanguageIdAndUserId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.LanguageUsers
@@ -101,21 +105,23 @@ namespace Model.DAL
             return value;
         }
         public static async Task<LanguageUser?> LanguageUserByLanguageIdAndUserIdReadAsync(
-            (int languageId, int userId) key, IdiomaticaContext context)
+            (Guid languageId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<LanguageUser?>.Run(() =>
             {
-                return LanguageUserByLanguageIdAndUserIdRead(key, context);
+                return LanguageUserByLanguageIdAndUserIdRead(key, dbContextFactory);
             });
         }        
         public static List<LanguageUser>? LanguageUsersAndLanguageByUserIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (LanguageUsersAndLanguageByUserId.ContainsKey(key))
             {
                 return LanguageUsersAndLanguageByUserId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.LanguageUsers
@@ -128,36 +134,32 @@ namespace Model.DAL
             LanguageUsersAndLanguageByUserId[key] = value;
             foreach (var v in value)
             {
-                LanguageUserUpdateCache(v, context);
+                LanguageUserUpdateCache(v, dbContextFactory);
             }
             return value;
         }
         public static async Task<List<LanguageUser>?> LanguageUsersAndLanguageByUserIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<LanguageUser>?>.Run(() =>
             {
-                return LanguageUsersAndLanguageByUserIdRead(key, context);
+                return LanguageUsersAndLanguageByUserIdRead(key, dbContextFactory);
             });
         }
         #endregion
 
 
-        private static void LanguageUserUpdateCache(LanguageUser languageUser, IdiomaticaContext context)
+        private static void LanguageUserUpdateCache(LanguageUser languageUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (languageUser is null || languageUser.Id is null ||
-                languageUser.UserId is null || languageUser.LanguageId is null ||
-                languageUser.LanguageId < 1 || languageUser.UserId < 1)
-            {
-                return;
-            }
-            int id = (int)languageUser.Id;
-            int userId = (int)languageUser.UserId;
-            int languageId = (int)languageUser.LanguageId;
+            Guid id = languageUser.Id;
+            Guid userId = languageUser.UserId;
+            Guid languageId = languageUser.LanguageId;
             LanguageUserById[id] = languageUser;
             LanguageUserByLanguageIdAndUserId[(languageId, userId)] = languageUser;
-            languageUser.Language = DataCache.LanguageByIdRead(languageId, context);
-            if(LanguageUsersAndLanguageByUserId.ContainsKey(userId))
+            var readLanguage = DataCache.LanguageByIdRead(languageId, dbContextFactory);
+            if (readLanguage == null) return;
+            languageUser.Language = readLanguage;
+            if (LanguageUsersAndLanguageByUserId.ContainsKey(userId))
             {
                 var list = LanguageUsersAndLanguageByUserId[userId];
                 // grab the entries in the list that are NOT this language

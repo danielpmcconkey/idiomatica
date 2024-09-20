@@ -9,31 +9,49 @@ using System.Threading.Tasks;
 using System.Net;
 using DeepL;
 using System.Linq.Expressions;
+using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class FlashCardApi
     {
-        public static FlashCard? FlashCardCreate(IdiomaticaContext context, int wordUserId, string uiLanguageCode)
+        public static FlashCard? FlashCardCreate(IDbContextFactory<IdiomaticaContext> dbContextFactory,
+            Guid wordUserId, AvailableLanguageCode uiLanguageCode)
         {
-            if (string.IsNullOrEmpty(uiLanguageCode)) { ErrorHandler.LogAndThrow(); return null; }
-            FlashCard? card = new FlashCard();
-            var wordUser = DataCache.WordUserAndLanguageUserAndLanguageByIdRead(wordUserId, context);
+            var context = dbContextFactory.CreateDbContext();
 
-            if (wordUser == null || wordUser.Id < 1) { ErrorHandler.LogAndThrow(); return null; }
-            card.WordUser = wordUser;
-            card.WordUserId = wordUserId;
-            card.NextReview = null;
-            card.Status = AvailableFlashCardStatus.ACTIVE;
-            card = DataCache.FlashCardCreate(card, context);
-            if (card is null || card.Id is null || card.Id < 1) { ErrorHandler.LogAndThrow(); return null; }
-            if (wordUser.WordId is null || wordUser.WordId < 1) { ErrorHandler.LogAndThrow(); return null; }
+            var wordUser = DataCache.WordUserAndLanguageUserAndLanguageByIdRead(wordUserId, dbContextFactory);
+            if (wordUser == null) { ErrorHandler.LogAndThrow(); return null; }
 
+            var uiLanguage = LanguageApi.LanguageReadByCode(dbContextFactory, uiLanguageCode);
+            if (uiLanguage == null) { ErrorHandler.LogAndThrow(); return null; }
+
+            FlashCard? card = new ()
+            {
+                Id = Guid.NewGuid(),
+                //WordUser = wordUser,
+                WordUserId = wordUserId,
+                Status = AvailableFlashCardStatus.ACTIVE,
+            };
+            card = DataCache.FlashCardCreate(card, dbContextFactory);
+            if (card is null) { ErrorHandler.LogAndThrow(); return null; }
+
+            ErrorHandler.LogMessage(
+                AvailableLogMessageTypes.DEBUG, $"created flash card {card.Id} for wordUser.Id {wordUser.Id}.", dbContextFactory);
+            
             List<Word> wordUsages = DataCache.WordsAndTokensAndSentencesAndParagraphsByWordIdRead(
-                (int)wordUser.WordId, context);
+                (Guid)wordUser.WordId, dbContextFactory);
 
             int maxPptPerCard = 5;
             int currentPptThisCard = 0;
+
+            // we create a hashset of paragraphs already used in this card
+            // because sometimes, the same word apprears multiple times in a
+            // paragraph and that would cause a violation of the unique
+            // constraint between a flashcard and a paragraph translation in
+            // the bridge object
+            HashSet<Guid> paragraphsAlreadyChecked = [];
 
             foreach (var wordUsage in wordUsages)
             {
@@ -44,64 +62,87 @@ namespace Logic.Services.API
 
                     if (token.Sentence == null) { ErrorHandler.LogAndThrow(); return null; }
                     var sentence = token.Sentence;
-                    if (sentence.Paragraph == null || sentence.Paragraph.Id == null) 
+                    if (sentence.Paragraph is null) 
                         { ErrorHandler.LogAndThrow(); return null; }
                     var paragraph = sentence.Paragraph;
+                    if (paragraphsAlreadyChecked.Contains(paragraph.Id)) continue;
+                    ErrorHandler.LogMessage(
+                        AvailableLogMessageTypes.DEBUG, $"paragraph {paragraph.Id} has been checked.", dbContextFactory);
+
+
                     // pull paragraph translations here in case the same
                     // word is used more than once in the same paragraph
                     var paragraphTranslations = DataCache.ParagraphTranslationsByParargraphIdRead(
-                        (int)paragraph.Id, context);
+                        (Guid)paragraph.Id, dbContextFactory);
 
                     ParagraphTranslation? ppts = null;
                     if (paragraphTranslations.Count > 0)
                     {
+                        ErrorHandler.LogMessage(
+                            AvailableLogMessageTypes.DEBUG, $"there are paragraph translations for {paragraph.Id}.", dbContextFactory);
+
+                        ErrorHandler.LogMessage(
+                            AvailableLogMessageTypes.DEBUG, $"UI language code is {uiLanguageCode}.", dbContextFactory);
+
+
                         // are they the right language?
                         ppts = paragraphTranslations
                             .Where(
-                                ppt => ppt != null
-                                && ppt.LanguageCode != null
-                                && ppt.LanguageCode.Code == uiLanguageCode)
+                                ppt => ppt.LanguageId == uiLanguage.Id)
                             .FirstOrDefault();
-                        if (ppts == null || ppts.Id == null || ppts.Id == 0)
+                        if (ppts is null)
                         {
                             // not the right language
                             // reset to null so the code below will create it
+                            ErrorHandler.LogMessage(
+                                AvailableLogMessageTypes.DEBUG, "No paragraphs with the right language.", dbContextFactory);
+
                             ppts = null;
                         }
                     }
                     if (ppts == null)
                     {
                         if (wordUser.LanguageUser == null
-                            || wordUser.LanguageUser.Language == null
-                            || wordUser.LanguageUser.Language.Code == null)
+                            || wordUser.LanguageUser.Language is null)
                         {
-                            ErrorHandler.LogAndThrow(2500);
+                            ErrorHandler.LogAndThrow();
                             return null;
                         }
                         // create it
-                        string input = ParagraphApi.ParagraphReadAllText(context, (int)paragraph.Id);
-                        string toLang = uiLanguageCode;
-                        string fromLang = wordUser.LanguageUser.Language.Code;
-                        string translation = DeepLService.Translate(input, fromLang, toLang);
+                        ErrorHandler.LogMessage(
+                            AvailableLogMessageTypes.DEBUG, $"Creating a paragraph translation for {paragraph.Id}.", dbContextFactory);
+
+                        string input = ParagraphApi.ParagraphReadAllText(dbContextFactory, paragraph.Id);
+                        Language? toLang = LanguageApi.LanguageReadByCode(dbContextFactory, uiLanguageCode);
+                        if (toLang is null) { ErrorHandler.LogAndThrow(); return null; }
+                        AvailableLanguageCode fromLangCode = wordUser.LanguageUser.Language.Code;
+                        string translation = DeepLService.Translate(input, fromLangCode, toLang.Code);
                         ppts = new ()
                         {
-                            ParagraphId = (int)paragraph.Id,
-                            Code = toLang,
+                            Id = Guid.NewGuid(),
+                            ParagraphId = paragraph.Id,
+                            //Paragraph = paragraph,
+                            LanguageId = toLang.Id,
+                            //Language = toLang,
                             TranslationText = translation
                         };
-                        ppts = DataCache.ParagraphTranslationCreate(ppts, context);
+                        ppts = DataCache.ParagraphTranslationCreate(ppts, dbContextFactory);
                     }
 
-                    if (ppts is null || ppts.Id is null) { ErrorHandler.LogAndThrow(); return null; }
+                    if (ppts is null) { ErrorHandler.LogAndThrow(); return null; }
 
                     // now bridge it to the flash card
                     FlashCardParagraphTranslationBridge? fcptb = new ()
                     {
+                        Id = Guid.NewGuid(),
                         ParagraphTranslationId = ppts.Id,
-                        FlashCardId = (int)card.Id,
+                        //ParagraphTranslation = ppts,
+                        FlashCardId = card.Id,
+                        //FlashCard = card,
                     };
-                    fcptb = DataCache.FlashCardParagraphTranslationBridgeCreate(fcptb, context);
+                    fcptb = DataCache.FlashCardParagraphTranslationBridgeCreate(fcptb, dbContextFactory);
                     if(fcptb is null) { ErrorHandler.LogAndThrow(); return null; }
+                    paragraphsAlreadyChecked.Add(paragraph.Id); // keep it from adding this same PP twice
                     fcptb.FlashCard = card;
                     fcptb.ParagraphTranslation = ppts;
                     card.FlashCardParagraphTranslationBridges.Add(fcptb);
@@ -111,11 +152,13 @@ namespace Logic.Services.API
             
             return card;
         }
-        public static async Task<FlashCard?> FlashCardCreateAsync(IdiomaticaContext context, int wordUserId, string uiLanguageCode)
+        public static async Task<FlashCard?> FlashCardCreateAsync(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid wordUserId,
+            AvailableLanguageCode uiLanguageCode)
         {
             return await Task<FlashCard?>.Run(() =>
             {
-                return FlashCardCreate(context, wordUserId, uiLanguageCode);
+                return FlashCardCreate(dbContextFactory, wordUserId, uiLanguageCode);
             });
         }
 
@@ -144,33 +187,34 @@ namespace Logic.Services.API
 
 
         public static FlashCard? FlashCardReadById(
-           IdiomaticaContext context, int Id)
+           IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid Id)
         {
-            return DataCache.FlashCardByIdRead(Id, context);
+            return DataCache.FlashCardByIdRead(Id, dbContextFactory);
         }
         public static async Task<FlashCard?> FlashCardReadByIdAsync(
-           IdiomaticaContext context, int Id)
+           IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid Id)
         {
-            return await DataCache.FlashCardByIdReadAsync(Id, context);
+            return await DataCache.FlashCardByIdReadAsync(Id, dbContextFactory);
         }
         public static FlashCard? FlashCardReadByWordUserId(
-          IdiomaticaContext context, int wordUserId)
+          IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid wordUserId)
         {
-            return DataCache.FlashCardByWordUserIdRead(wordUserId, context);
+            return DataCache.FlashCardByWordUserIdRead(wordUserId, dbContextFactory);
         }
         public static async Task<FlashCard?> FlashCardReadByWordUserIdAsync(
-           IdiomaticaContext context, int wordUserId)
+           IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid wordUserId)
         {
-            return await DataCache.FlashCardByWordUserIdReadAsync(wordUserId, context);
+            return await DataCache.FlashCardByWordUserIdReadAsync(wordUserId, dbContextFactory);
         }
 
 
         public static List<FlashCard>? FlashCardsCreate(
-            IdiomaticaContext context, int languageUserId, int numCards, string uiLanguageCode)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid languageUserId, int numCards,
+            AvailableLanguageCode uiLanguageCode)
         {
             if (numCards < 1) { return new List<FlashCard>(); }
-            if (languageUserId < 1) { ErrorHandler.LogAndThrow(); return null; }
-
+            var context = dbContextFactory.CreateDbContext();
+            
             List<FlashCard> cards = new List<FlashCard>();
 
             // get word users that don't already have a flash card
@@ -182,7 +226,7 @@ namespace Logic.Services.API
                         from fc in grouping.DefaultIfEmpty()
                         where (
                             wu.LanguageUserId == languageUserId
-                            && fc.Id == null
+                            && fc == null
                             && wu.Status != AvailableWordUserStatus.LEARNED
                             && wu.Status != AvailableWordUserStatus.IGNORED
                             && wu.Status != AvailableWordUserStatus.WELLKNOWN
@@ -200,59 +244,59 @@ namespace Logic.Services.API
 
             foreach (var wordUser in wordUsers)
             {
-                if(wordUser is null || wordUser.Id is null) continue;
-                var card = FlashCardCreate(context, (int)wordUser.Id, uiLanguageCode);
+                if(wordUser is null) continue;
+                var card = FlashCardCreate(dbContextFactory, (Guid)wordUser.Id, uiLanguageCode);
                 if (card != null) cards.Add(card);
             }
             return cards;
         }
         public static async Task<List<FlashCard>?> FlashCardsCreateAsync(
-            IdiomaticaContext context, int languageUserId, int numCards, string uiLanguageCode)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, 
+            Guid languageUserId, int numCards, AvailableLanguageCode uiLanguageCode)
         {
             return await Task<FlashCard?>.Run(() =>
             {
-                return FlashCardsCreate(context, languageUserId, numCards, uiLanguageCode);
+                return FlashCardsCreate(dbContextFactory, languageUserId, numCards, uiLanguageCode);
             });
         }
 
 
         public static List<FlashCard>? FlashCardsFetchByNextReviewDateByPredicate(
-            IdiomaticaContext context, Expression<Func<FlashCard, bool>> predicate, int take)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Expression<Func<FlashCard, bool>> predicate, int take)
         {
             return DataCache.FlashCardsActiveAndFullRelationshipsByPredicateRead(
-                predicate, take, context);
+                predicate, take, dbContextFactory);
         }
         public static async Task<List<FlashCard>?> FlashCardsFetchByNextReviewDateByPredicateAsync(
-            IdiomaticaContext context, Expression<Func<FlashCard, bool>> predicate, int take)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Expression<Func<FlashCard, bool>> predicate, int take)
         {
             return await Task<List<FlashCard>?>.Run(() =>
             {
-                return FlashCardsFetchByNextReviewDateByPredicate(context, predicate, take);
+                return FlashCardsFetchByNextReviewDateByPredicate(dbContextFactory, predicate, take);
             });
         }
 
 
         public static FlashCard? FlashCardUpdate(
-            IdiomaticaContext context, int cardId, int wordUserId, 
-            AvailableFlashCardStatus status, DateTime nextReview, Guid uniqueKey)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid cardId, Guid wordUserId, 
+            AvailableFlashCardStatus status, DateTimeOffset nextReview, Guid id)
         {
-            if (cardId < 1) { ErrorHandler.LogAndThrow(); return null; }
-            var card = DataCache.FlashCardByIdRead(cardId, context);
+            var card = DataCache.FlashCardByIdRead(cardId, dbContextFactory);
             if (card == null) { ErrorHandler.LogAndThrow(); return null; }
             card.WordUserId = wordUserId;
             card.NextReview = nextReview;
             card.Status = status;
-            card.UniqueKey = uniqueKey;
-            DataCache.FlashCardUpdate(card, context);
+            card.Id = id;
+            DataCache.FlashCardUpdate(card, dbContextFactory);
             return card;
         }
         public static async Task<FlashCard?> FlashCardUpdateAsync(
-            IdiomaticaContext context, int cardId, int wordUserId, 
-            AvailableFlashCardStatus status, DateTime nextReview, Guid uniqueKey)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid cardId, Guid wordUserId, 
+            AvailableFlashCardStatus status, DateTimeOffset nextReview, Guid id)
         {
             return await Task<FlashCard?>.Run(() =>
             {
-                return FlashCardUpdate(context, cardId, wordUserId, status, nextReview, uniqueKey);
+                return FlashCardUpdate(dbContextFactory, cardId, wordUserId, status, nextReview, id);
             });
         }
     }

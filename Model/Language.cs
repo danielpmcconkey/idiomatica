@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Azure;
+using Microsoft.EntityFrameworkCore;
+using Model.Enums;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,45 +13,35 @@ namespace Model
 {
     
     [Table("Language", Schema = "Idioma")]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(Code), IsUnique = true)]
     public class Language
     {
-        public int? Id { get; set; }
+        #region required data
+        [Required] public required Guid Id { get; set; }
 
-        #region relationships
+        [StringLength(250)]
+        [Required] public required string Name { get; set; }
+
+        [Required] public required AvailableLanguageCode Code { get; set; }
+
+        [StringLength(250)]
+        [Required] public required string ParserType { get; set; } = "spacedel";
+        [Required] public required bool IsImplementedForLearning { get; set; }
+        [Required] public required bool IsImplementedForUI { get; set; }
+        [Required] public required bool IsImplementedForTranslation { get; set; }
+
+        #endregion
+        
+
+
         public List<Book> Books { get; set; } = [];
         public List<Word> Words { get; set; } = [];
         public List<LanguageUser> LanguageUsers { get; set; } = [];
-        [StringLength(25)]
-        [Column("LanguageCode")]
-        public string? Code { get; set; }
-        public LanguageCode? LanguageCode { get; set; }
         public List<WordTranslation> WordTranslations { get; set; } = [];
         public List<Verb> Verbs { get; set; } = [];
+        public List<WordRank> WordRanks { get; set; } = [];
+        public List<ParagraphTranslation> ParagraphTranslations { get; set; } = [];
 
-        #endregion
-
-        [StringLength(250)]
-        public string? Name { get; set; }
-        [StringLength(1000)]
-        public string? Dict1URI { get; set; }
-        [StringLength(1000)]
-        public string? Dict2URI { get; set; }
-        [StringLength(1000)]
-        public string? GoogleTranslateURI { get; set; }
-        [StringLength(250)]
-        public string? CharacterSubstitutions { get; set; }
-        [StringLength(250)]
-        public string? RegexpSplitSentences { get; set; }
-        [StringLength(250)]
-        public string? ExceptionsSplitSentences { get; set; }
-        [StringLength(250)]
-        public string? RegexpWordCharacters { get; set; }
-        public bool? RemoveSpaces { get; set; }
-        public bool? SplitEachChar { get; set; }
-        public bool? RightToLeft { get; set; }
-        public bool? ShowRomanization { get; set; } = false;
-        [StringLength(250)]
-        public string? ParserType { get; set; } = "spacedel";
-        
     }
 }

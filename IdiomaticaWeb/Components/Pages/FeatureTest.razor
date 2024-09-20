@@ -1,6 +1,6 @@
 ﻿@page "/FeatureTest"
 @rendermode InteractiveServer
-@inject UserService UserService;
+@inject LoginService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 
 <h3>FeatureTest</h3>
@@ -40,7 +40,7 @@
         {
             _isLoading = true;
             var context = DbContextFactory.CreateDbContext();
-            var words = DataCache.WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead((66, 1), context);
+            // var words = DataCache.WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead((66, 1), context);
             _isLoading = false;
         });
 

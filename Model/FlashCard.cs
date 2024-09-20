@@ -1,5 +1,9 @@
-﻿using System;
+﻿using Azure;
+using Microsoft.EntityFrameworkCore;
+using Model.Enums;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -8,24 +12,24 @@ using System.Threading.Tasks;
 namespace Model
 {
     [Table("FlashCard", Schema = "Idioma")]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(WordUserId), IsUnique = true)]
     public class FlashCard
     {
-        public int? Id { get; set; }
+        #region required data
 
-        #region relationships
-
-
-        public int? WordUserId { get; set; }
-        public WordUser? WordUser { get; set; }
-        public List<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridges 
-            { get; set; }  = new List<FlashCardParagraphTranslationBridge>();
-        public AvailableFlashCardStatus? Status { get; set; }
-        public List<FlashCardAttempt> Attempts { get; set; } = new List<FlashCardAttempt>();
-
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid WordUserId { get; set; }
+        [Required] public required AvailableFlashCardStatus Status { get; set; }
 
         #endregion
-        public DateTime? NextReview {  get; set; }
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
+
+        public WordUser? WordUser { get; set; }
+
+        public List<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridges 
+            { get; set; }  = [];
+        public List<FlashCardAttempt> Attempts { get; set; } = [];
+        public DateTimeOffset? NextReview {  get; set; }
 
     }
 }

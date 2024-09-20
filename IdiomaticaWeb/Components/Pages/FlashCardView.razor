@@ -1,7 +1,8 @@
 ﻿@rendermode InteractiveServer
-@inject UserService UserService;
+@inject LoginService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 @using Logic.Services.API;
+@using Model.Enums;
 
     
 <style>
@@ -132,7 +133,7 @@
 
 @code {
     [Parameter] public FlashCardDataPacket? FlashCardDataPacket { get; set; }
-    [Parameter] public string? UiLanguageCode { get; set; }
+    [Parameter] public AvailableLanguageCode? UiLanguageCode { get; set; }
     [Parameter] public string? CardCss { get; set; }
     [Parameter] public EventCallback<int> ResetFormFunction { get; set; }
 
@@ -165,25 +166,23 @@
         _shouldShowConjugationTable = false;
 
         if (FlashCardDataPacket is null) return;
-        if (FlashCardDataPacket.CurrentCard is null || FlashCardDataPacket.CurrentCard.Id is null) return;
+        if (FlashCardDataPacket.CurrentCard is null) return;
         if (UiLanguageCode is null) return;
 
-        var context = DbContextFactory.CreateDbContext();
         var ppExample = ParagraphApi.ParagraphExamplePullRandomByFlashCardId(
-            context, (int)FlashCardDataPacket.CurrentCard.Id, UiLanguageCode);
+            DbContextFactory, (Guid)FlashCardDataPacket.CurrentCard.Id, (AvailableLanguageCode)UiLanguageCode);
         ExampleParagraph = ppExample.example;
         ParagraphTranslation = ppExample.translation;
 
         if (FlashCardDataPacket.CurrentCard.WordUser is null) return;
         if (FlashCardDataPacket.CurrentCard.WordUser.Word is null) return;
-        CardTitle = $"{FlashCardDataPacket.CurrentCard.Id}: {FlashCardDataPacket.CurrentCard.WordUser.Word.TextLowerCase}";
+        CardTitle = $"{FlashCardDataPacket.CurrentCard.WordUser.Word.TextLowerCase}";
 
         if (FlashCardDataPacket.CurrentCard.WordUser.Translation is null) return;
         CustomTranslation = FlashCardDataPacket.CurrentCard.WordUser.Translation;
 
-        if (FlashCardDataPacket.CurrentCard.WordUser.Word.Id is null) return;
         DefaultTranslations = WordApi.WordTranslationsReadByWordId(
-            context, (int)FlashCardDataPacket.CurrentCard.WordUser.Word.Id);
+            DbContextFactory, (Guid)FlashCardDataPacket.CurrentCard.WordUser.Word.Id);
     }
     private async Task OnShowAnswerClick()
     {
@@ -212,9 +211,8 @@
     }
     private void ProcessAndAdvance(AvailableFlashCardAttemptStatus previousCardsStatus)
     {
-        var context = DbContextFactory.CreateDbContext();
         FlashCardDataPacket = OrchestrationApi.OrchestrateFlashCardDispositionAndAdvance(
-            context, FlashCardDataPacket, previousCardsStatus);
+            DbContextFactory, FlashCardDataPacket, previousCardsStatus);
         if (FlashCardDataPacket is null)
         {
             ErrorHandler.LogAndThrow();

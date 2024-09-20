@@ -11,18 +11,24 @@ namespace Model
 {
     [Table("ParagraphTranslation", Schema = "Idioma")]
     [PrimaryKey(nameof(Id))]
+    [Index(nameof(ParagraphId), nameof(LanguageId), IsUnique = true)]
     public class ParagraphTranslation
     {
-        public int? Id {  get; set; }
-        public int? ParagraphId { get; set; }
+        #region required data
+
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid ParagraphId { get; set; }
+        [Required] public required string TranslationText { get; set; }
+        [Required] public required Guid LanguageId { get; set; }
+
+        #endregion
+
         public Paragraph? Paragraph { get; set; }
-        [Column("LanguageCode")]
-        public string? Code { get; set; }
-        public LanguageCode? LanguageCode { get; set; }
+        public Language? Language { get; set; }
+
+        
         [StringLength(8000)]
-        public string? TranslationText { get; set; }
         public List<FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridges { get; set; } = new List<FlashCardParagraphTranslationBridge>();
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
 
     }
 }

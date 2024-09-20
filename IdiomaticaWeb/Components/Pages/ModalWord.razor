@@ -1,7 +1,8 @@
 ﻿@page "/ModalWord"
 @using Logic.Services.API
+@using Model.Enums
 @rendermode InteractiveServer
-@inject UserService UserService;
+@inject LoginService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 
 <Modal @ref="modal" Title="@_title" Size="ModalSize.Large">
@@ -128,6 +129,7 @@
     [Parameter]
     public ReadDataPacket ReadDataPacket { get; set; } = new();
 
+
     private Modal modal = default!;
     private Token? _token = null;
     private WordUser? _wordUser = null;
@@ -146,51 +148,51 @@
     private List<string> _defaultTranslations = [];
     private bool _shouldShowTranslationForm = false;
 
+    protected override async Task OnInitializedAsync()
+    {
+        
+    }
 
     public async Task OnShowModalClick(Token thisToken)
     {
         try
         {
-            var context = await DbContextFactory.CreateDbContextAsync();
-
-            if (thisToken == null || thisToken.Id == null || thisToken.Id < 1)
+            
+            if (thisToken == null || thisToken.Id == null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (thisToken.WordId == null || thisToken.WordId < 1)
+            if (thisToken.WordId == null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
             _word = thisToken.Word; 
-            if (_word == null || _word.Id is null || _word.Id < 1 || _word.TextLowerCase is null)
+            if (_word == null || _word.TextLowerCase is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (ReadDataPacket == null || ReadDataPacket.LanguageUser is null ||
-                ReadDataPacket.LanguageUser.Id is null)
+            if (ReadDataPacket == null || ReadDataPacket.LanguageUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
             _wordUser = _word.WordUsers
-               .Where(x => x.LanguageUserId == (int)ReadDataPacket.LanguageUser.Id)
+               .Where(x => x.LanguageUserId == (Guid)ReadDataPacket.LanguageUser.Id)
                .FirstOrDefault();
             _token = thisToken;
 
             if (_wordUser is null)
             {
                 // it shouldn't be, but create it if so
-                _wordUser = WordUserApi.WordUserCreate(context, (int)_word.Id,
-                    (int)ReadDataPacket.LanguageUser.Id, "", AvailableWordUserStatus.UNKNOWN);
+                _wordUser = WordUserApi.WordUserCreate(DbContextFactory, _word,
+                    ReadDataPacket.LanguageUser, "", AvailableWordUserStatus.UNKNOWN);
             }
-            if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
-            { ErrorHandler.LogAndThrow(); return; }
-
-            _wordUser.Status = _wordUser.Status is null ? AvailableWordUserStatus.UNKNOWN : _wordUser.Status;
-
+            if (_wordUser is null)
+                { ErrorHandler.LogAndThrow(); return; }
+            
             _title = (_word is null) ? "" : _word.TextLowerCase;
             _translation = _wordUser.Translation;
             _defaultTranslations = GetDefaultTranslations(thisToken);
@@ -198,7 +200,7 @@
             _selectedStatus = UserService.GetUILabel($"statusLabel{(int)_wordUser.Status}");
 
             // check to display the "create card" button
-            var existingCard = FlashCardApi.FlashCardReadByWordUserId(context, (int)_wordUser.Id);
+            var existingCard = FlashCardApi.FlashCardReadByWordUserId(DbContextFactory, (Guid)_wordUser.Id);
             if (existingCard is null) _doesFlashCardExist = false;
             else _doesFlashCardExist = true;
 
@@ -222,7 +224,7 @@
     }
     private List<string> GetDefaultTranslations(Token thisToken)
     {
-        if (thisToken == null || thisToken.Word == null || thisToken.Word.Id < 1)
+        if (thisToken == null || thisToken.Word == null)
         {
             ErrorHandler.LogAndThrow();
             return [];
@@ -243,7 +245,7 @@
     }
     private string GetTokenClassSelected(int statusToCheck)
     {
-        if (_wordUser is null || _wordUser.Status is null) return "unselectedWordStatus";
+        if (_wordUser is null) return "unselectedWordStatus";
         if ((int)_wordUser.Status == statusToCheck) return "selectedWordStatus";
         return "unselectedWordStatus";
     }
@@ -256,14 +258,10 @@
     {
         try
         {
-            if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+            if (_wordUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
-            }
-            if (_wordUser.Status is null)
-            {
-                _wordUser.Status = AvailableWordUserStatus.UNKNOWN;
             }
             if (_wordUser.Translation is null)
             {
@@ -272,7 +270,8 @@
             var context = await DbContextFactory.CreateDbContextAsync();
 
             await WordUserApi.WordUserUpdateAsync(
-                context, (int)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
+                DbContextFactory, (Guid)_wordUser.Id, 
+                (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
             if (Parent is not null) Parent.RefreshState();
             await modal.HideAsync();
         }
@@ -288,7 +287,7 @@
         try
         {
             _isFormattingTranslation = true;
-            if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+            if (_wordUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -297,12 +296,11 @@
             {
                 _wordUser.Translation = string.Empty;
             }
-            var context = await DbContextFactory.CreateDbContextAsync();
-
+            
             if (ReadDataPacket.LanguageToCode is not null)
             {
                 var formattedTranslation = await WordUserApi.WordUserTranslationFormatAsync(
-                    context, _wordUser.Translation, ReadDataPacket.LanguageToCode.Code);
+                    DbContextFactory, _wordUser.Translation, ReadDataPacket.LanguageToCode.Code);
                 if (formattedTranslation is not null) _wordUser.Translation = formattedTranslation;
             }
         }
@@ -346,20 +344,17 @@
         _isSavingFlashCard = true;
         if (_doesFlashCardExist) return;
 
-        if (_wordUser is null || _wordUser.Id is null || _wordUser.Id < 1)
+        
+        if (_wordUser is null)
         {
             ErrorHandler.LogAndThrow();
             return;
         }
         var uiLanguage = ReadDataPacket.LanguageToCode;
-        if (uiLanguage is null || string.IsNullOrEmpty(uiLanguage.Code))
+        if (uiLanguage is null)
         {
             ErrorHandler.LogAndThrow();
             return;
-        }
-        if (_wordUser.Status is null)
-        {
-            _wordUser.Status = AvailableWordUserStatus.UNKNOWN;
         }
         if (_wordUser.Translation is null)
         {
@@ -369,10 +364,11 @@
 
         // save the wordUser first
         await WordUserApi.WordUserUpdateAsync(
-                context, (int)_wordUser.Id, (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
+                DbContextFactory, (Guid)_wordUser.Id,
+                (AvailableWordUserStatus)_wordUser.Status, _wordUser.Translation);
 
         // now make the card
-        await FlashCardApi.FlashCardCreateAsync(context, (int)_wordUser.Id, uiLanguage.Code);
+        await FlashCardApi.FlashCardCreateAsync(DbContextFactory, (Guid)_wordUser.Id, uiLanguage.Code);
 
         _isSavingFlashCard = false;
         _doesFlashCardExist = true;

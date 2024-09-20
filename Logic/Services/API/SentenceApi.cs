@@ -8,96 +8,84 @@ using System.Threading.Tasks;
 using Logic.Telemetry;
 using DeepL;
 using System.Net;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class SentenceApi
     {
         public static string[] PotentialSentencesSplitFromText(
-            IdiomaticaContext context, string text, int languageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string text, Language language)
         {
-            if (languageId < 1) ErrorHandler.LogAndThrow();
             if (string.IsNullOrEmpty(text)) ErrorHandler.LogAndThrow();
 
-            var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null ||
-                language.Id is null or 0 ||
-                string.IsNullOrEmpty(language.Code))
-            {
-                ErrorHandler.LogAndThrow();
-                return [];
-            }
             var parser = LanguageParser.Factory.GetLanguageParser(language);
             if(parser is null) { ErrorHandler.LogAndThrow(); return []; }
             return parser.SegmentTextBySentences(text);
         }
         public static async Task<string[]> PotentialSentencesSplitFromTextAsync(
-            IdiomaticaContext context, string text, int languageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string text, Language language)
         {
             return await Task<string[]>.Run(() =>
             {
-                return PotentialSentencesSplitFromText(context, text, languageId);
+                return PotentialSentencesSplitFromText(dbContextFactory, text, language);
             });
         }
 
 
         public static Sentence? SentenceCreate(
-            IdiomaticaContext context, string text, int languageId, int ordinal,
-            int paragraphId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string text, Language language, int ordinal,
+            Paragraph paragraph)
         {
-            if (paragraphId < 1) ErrorHandler.LogAndThrow();
-            if (languageId < 1) ErrorHandler.LogAndThrow();
             if (ordinal < 0) ErrorHandler.LogAndThrow();
             if (string.IsNullOrEmpty(text)) ErrorHandler.LogAndThrow();
             var newSentence = new Sentence()
             {
-                ParagraphId = paragraphId,
+                Id = Guid.NewGuid(),
+                ParagraphId = paragraph.Id,
+                Paragraph = paragraph,
                 Text = text,
                 Ordinal = ordinal,
             };
-            newSentence = DataCache.SentenceCreate(newSentence, context);
-            if (newSentence is null || newSentence.Id is null || newSentence.Id < 1)
+            newSentence = DataCache.SentenceCreate(newSentence, dbContextFactory);
+            if (newSentence is null)
             {
-                ErrorHandler.LogAndThrow(2280);
+                ErrorHandler.LogAndThrow();
                 return null;
             }
-            newSentence.Tokens = TokenApi.TokensCreateFromSentence(context,
-                (int)newSentence.Id, languageId);
+            newSentence.Tokens = TokenApi.TokensCreateFromSentence(dbContextFactory,
+                newSentence, language);
             return newSentence;
         }
         public static async Task<Sentence?> SentenceCreateAsync(
-            IdiomaticaContext context, string text, int languageId, int ordinal,
-            int paragraphId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string text, Language language, int ordinal,
+            Paragraph paragraph)
         {
             return await Task<Sentence?>.Run(() =>
             {
-                return SentenceCreate(context, text, languageId, ordinal, paragraphId);
+                return SentenceCreate(dbContextFactory, text, language, ordinal, paragraph);
             });
         }
 
 
-        public static List<Sentence>? SentencesReadByPageId(IdiomaticaContext context, int pageId)
+        public static List<Sentence>? SentencesReadByPageId(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.SentencesByPageIdRead(pageId, context);
+            return DataCache.SentencesByPageIdRead(pageId, dbContextFactory);
         }
-        public static async Task<List<Sentence>?> SentencesReadByPageIdAsync(IdiomaticaContext context, int pageId)
+        public static async Task<List<Sentence>?> SentencesReadByPageIdAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.SentencesByPageIdReadAsync(pageId, context);
+            return await DataCache.SentencesByPageIdReadAsync(pageId, dbContextFactory);
         }
 
 
-        public static List<Sentence>? SentencesReadByParagraphId(IdiomaticaContext context, int paragraphId)
+        public static List<Sentence>? SentencesReadByParagraphId(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid paragraphId)
         {
-            if (paragraphId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.SentencesByParagraphIdRead(paragraphId, context);
+            return DataCache.SentencesByParagraphIdRead(paragraphId, dbContextFactory);
         }
         public static async Task<List<Sentence>?> SentencesReadByParagraphIdAsync(
-            IdiomaticaContext context, int paragraphId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid paragraphId)
         {
-            if (paragraphId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.SentencesByParagraphIdReadAsync(paragraphId, context);
+            return await DataCache.SentencesByParagraphIdReadAsync(paragraphId, dbContextFactory);
         }
 
     }

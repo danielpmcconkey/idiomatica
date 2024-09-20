@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,18 +14,13 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, List<BookTag>> BookTagsByBookId = new ConcurrentDictionary<int, List<BookTag>>();
+        private static ConcurrentDictionary<Guid, List<BookTag>> BookTagsByBookId = new ConcurrentDictionary<Guid, List<BookTag>>();
 
         #region create
-        public static BookTag? BookTagCreate(BookTag bookTag, IdiomaticaContext context)
+        public static BookTag? BookTagCreate(BookTag bookTag, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (bookTag.BookId == null || bookTag.UserId == null) 
-                throw new ArgumentNullException("bookTag.BookId == null || value.UserId == null during BookTagCreate");
-            if (bookTag.BookId < 1 || bookTag.UserId < 1) 
-                throw new ArgumentNullException("value.BookId < 1 || value.UserId < 1 during BookTagCreate");
-            
-            var guid = Guid.NewGuid();
-            
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                 
                 INSERT INTO [Idioma].[BookTag]
@@ -32,44 +28,43 @@ namespace Model.DAL
                            ,[UserId]
                            ,[Tag]
                            ,[Created]
-                           ,[UniqueKey])
+                           ,[Id])
                      VALUES
                            ({bookTag.BookId}
                            ,{bookTag.UserId}
                            ,{bookTag.Tag}
                            ,{bookTag.Created}
-                           ,{guid})
+                           ,{bookTag.Id})
                 """);
             if (numRows < 1) throw new InvalidDataException("BookTag create affected 0 rows");
-            // now read it into context
-            var newTag = context.BookTags.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newTag is null || newTag.Id is null || newTag.Id < 1)
-                throw new InvalidDataException("Reading new BookTag after creation returned null");
-
             
-            BookTagAddToCache(newTag);
-            return newTag;
+            // now read it into context
+            BookTagAddToCache(bookTag);
+            return bookTag;
         }
 
-        public static async Task<BookTag?> BookTagCreateAsync(BookTag value, IdiomaticaContext context)
+        public static async Task<BookTag?> BookTagCreateAsync(BookTag value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return BookTagCreate(value, context); });
+            return await Task.Run(() => { return BookTagCreate(value, dbContextFactory); });
         }
 
         #endregion
 
         #region read
 
-        public static List<BookTag> BookTagsByBookIdAndUserIdRead(
-            (int bookId, int userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+        public static List<BookTagRow> BookTagsByBookAndUserRead(
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverrideCache = false)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // pull all tags from cache
-            var allTags = BookTagsByBookIdRead(key.bookId, context);
+            var allTags = BookTagsByBookIdRead(key.bookId, dbContextFactory);
             var personalTags = allTags.Where(x => x.UserId == key.userId);
 
             // read community created tags from the DB 
             var communityTags = allTags
-                .GroupBy(x => x.Tag, (key, g) => new BookTag { Tag = key, Count = g.Count() })
+                .GroupBy(x => x.Tag, (tagKey, g) => new BookTagRow { 
+                    Tag = tagKey, Count = g.Count(), UserId = key.userId })
                 .ToList();
 
             // stitch them together
@@ -77,11 +72,12 @@ namespace Model.DAL
                        join pt in personalTags on ct.Tag equals pt.Tag into gj
                        from subgroup in gj.DefaultIfEmpty()
                        orderby ((subgroup == null) ? false : true) descending, ct.Count descending
-                       select new BookTag
+                       select new BookTagRow
                        {
                            BookId = key.bookId,
                            Tag = ct.Tag,
                            Count = ct.Count,
+                           UserId = key.userId,
                            IsPersonal = (subgroup == null) ? false : true,
                        };
 
@@ -89,17 +85,19 @@ namespace Model.DAL
             
             return value;
         }
-        public static async Task<List<BookTag>> BookTagsByBookIdAndUserIdReadAsync(
-           (int bookId, int userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+        public static async Task<List<BookTagRow>> BookTagsByBookIdAndUserIdReadAsync(
+           (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverrideCache = false)
         {
-            return await Task<List<BookTag>>.Run(() =>
+            return await Task<List<BookTagRow>>.Run(() =>
             {
-                return BookTagsByBookIdAndUserIdRead(key, context, shouldOverrideCache);
+                return BookTagsByBookAndUserRead(key, dbContextFactory, shouldOverrideCache);
             });
         }
         public static List<BookTag> BookTagsByBookIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // check cache
             if (BookTagsByBookId.ContainsKey(key))
             {
@@ -114,11 +112,11 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<BookTag>> BookTagsByBookIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<BookTag>>.Run(() =>
             {
-                return BookTagsByBookIdRead(key, context);
+                return BookTagsByBookIdRead(key, dbContextFactory);
             });
         }
 
@@ -128,8 +126,10 @@ namespace Model.DAL
 
 
         public static void BookTagDelete(
-            (int bookId, int userId, string tag) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId, string tag) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             string trimmed = key.tag.Trim();
             if (trimmed == null) return;
             // make sure this tag actually exists
@@ -158,10 +158,9 @@ namespace Model.DAL
 
         private static void BookTagRemoveFromCache(BookTag t)
         {
-            if (t.BookId == null || t.UserId == null || t.Id == null) return;
             // is there an existing cache
             List<BookTag>? existingList;
-            if (!BookTagsByBookId.TryGetValue((int)t.BookId, out existingList))
+            if (!BookTagsByBookId.TryGetValue((Guid)t.BookId, out existingList))
             {
                 // I don't think we should ever get here, but better to be safe than sorry
                 return;
@@ -172,18 +171,17 @@ namespace Model.DAL
             // pull a list without the tag
             var listWithoutTag = existingList.Where(x => x.Id != t.Id).ToList();
             // and write it to cache
-            BookTagsByBookId[(int)t.BookId] = listWithoutTag;
+            BookTagsByBookId[(Guid)t.BookId] = listWithoutTag;
             return;
         }
         private static void BookTagAddToCache(BookTag t)
         {
-            if (t.BookId == null || t.UserId == null || t.Id == null) return;
             // is there an existing cache
             List<BookTag>? existingList = null;
-            if (!BookTagsByBookId.TryGetValue((int)t.BookId, out existingList))
+            if (!BookTagsByBookId.TryGetValue((Guid)t.BookId, out existingList))
             {
                 existingList = new List<BookTag>() { t };
-                BookTagsByBookId[(int)t.BookId] = existingList;
+                BookTagsByBookId[(Guid)t.BookId] = existingList;
                 return;
             }
             

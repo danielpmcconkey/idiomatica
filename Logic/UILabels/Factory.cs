@@ -1,4 +1,5 @@
 ﻿using Model;
+using Model.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,9 @@ namespace Logic.UILabels
 	
 	public static class Factory
 	{
-		public static UILabels GetUILabels(AvailableLanguageCodes languageCodeEnum)
+		public static UILabels GetUILabels(AvailableLanguageCode languageCodeEnum)
 		{
-			if(languageCodeEnum == AvailableLanguageCodes.EN_US) return new Labels_EngUS();
+			if(languageCodeEnum == AvailableLanguageCode.EN_US) return new Labels_EngUS();
 			return new Labels_EngUS();
 		}
 	}

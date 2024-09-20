@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Model.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,12 +11,14 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<(int bookId, AvailableBookStat statKey), BookStat> BookStatByBookIdAndStatKey = new ConcurrentDictionary<(int bookId, AvailableBookStat statKey), BookStat>();
-        private static ConcurrentDictionary<int, List<BookStat>> BookStatsByBookId = new ConcurrentDictionary<int, List<BookStat>>();
+        private static ConcurrentDictionary<(Guid bookId, AvailableBookStat statKey), BookStat> BookStatByBookIdAndStatKey = [];
+        private static ConcurrentDictionary<Guid, List<BookStat>> BookStatsByBookId = [];
 
         public static BookStat? BookStatByBookIdAndStatKeyRead(
-            (int bookId, AvailableBookStat statKey) key, IdiomaticaContext context)
+            (Guid bookId, AvailableBookStat statKey) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // check cache
             if (BookStatByBookIdAndStatKey.ContainsKey(key))
             {
@@ -31,16 +34,18 @@ namespace Model.DAL
             return value;
         }
         public static async Task<BookStat?> BookStatByBookIdAndStatKeyReadAsync(
-            (int bookId, AvailableBookStat statKey) key, IdiomaticaContext context)
+            (Guid bookId, AvailableBookStat statKey) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<BookStat?>.Run(() =>
             {
-                return BookStatByBookIdAndStatKeyRead(key, context);
+                return BookStatByBookIdAndStatKeyRead(key, dbContextFactory);
             });
         }
         public static List<BookStat>? BookStatsByBookIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // check cache
             if (BookStatsByBookId.ContainsKey(key))
             {
@@ -55,11 +60,11 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<BookStat>?> BookStatsByBookIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<BookStat>?>.Run(() =>
             {
-                return BookStatsByBookIdRead(key, context);
+                return BookStatsByBookIdRead(key, dbContextFactory);
             });
         }
     }

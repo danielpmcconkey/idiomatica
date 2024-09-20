@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Model.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,62 +12,55 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, ParagraphTranslation> ParagraphTranslationById = new ConcurrentDictionary<int, ParagraphTranslation>();
-        private static ConcurrentDictionary<int, List<ParagraphTranslation>> ParagraphTranslationsByParagraphId = new ConcurrentDictionary<int, List<ParagraphTranslation>>();
+        private static ConcurrentDictionary<Guid, ParagraphTranslation> ParagraphTranslationById = [];
+        private static ConcurrentDictionary<Guid, List<ParagraphTranslation>> ParagraphTranslationsByParagraphId = [];
 
         #region create
 
 
         public static ParagraphTranslation? ParagraphTranslationCreate(
-            ParagraphTranslation paragraphTranslation, IdiomaticaContext context)
+            ParagraphTranslation paragraphTranslation, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (paragraphTranslation.ParagraphId is null) 
-                throw new ArgumentNullException(nameof(paragraphTranslation.ParagraphId));
+            var context = dbContextFactory.CreateDbContext();
 
-            Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[ParagraphTranslation]
                       ([ParagraphId]
-                      ,[LanguageCode]
+                      ,[LanguageId]
                       ,[TranslationText]
-                      ,[UniqueKey])
+                      ,[Id])
                 VALUES
                       ({paragraphTranslation.ParagraphId}
-                      ,{paragraphTranslation.Code}
+                      ,{paragraphTranslation.LanguageId}
                       ,{paragraphTranslation.TranslationText}
-                      ,{guid})
+                      ,{paragraphTranslation.Id})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating ParagraphTranslation affected 0 rows");
-            var newEntity = context.ParagraphTranslations.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
-            {
-                throw new InvalidDataException("newEntity is null in ParagraphTranslationCreate");
-            }
-
-
+            
             // add it to cache
-            ParagraphTranslationUpdateCache(newEntity);
+            ParagraphTranslationUpdateCache(paragraphTranslation);
 
-            return newEntity;
+            return paragraphTranslation;
         }
-        public static async Task<ParagraphTranslation?> ParagraphTranslationCreateAsync(ParagraphTranslation value, IdiomaticaContext context)
+        public static async Task<ParagraphTranslation?> ParagraphTranslationCreateAsync(ParagraphTranslation value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return ParagraphTranslationCreate(value, context); });
+            return await Task.Run(() => { return ParagraphTranslationCreate(value, dbContextFactory); });
         }
 
 
         #endregion
 
         #region read
-        public static ParagraphTranslation? ParagraphTranslationByIdRead(int key, IdiomaticaContext context)
+        public static ParagraphTranslation? ParagraphTranslationByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (ParagraphTranslationById.ContainsKey(key))
             {
                 return ParagraphTranslationById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
 
             // read DB
             var value = context.ParagraphTranslations.Where(x => x.Id == key)
@@ -77,53 +71,58 @@ namespace Model.DAL
             return value;
         }
         public static List<ParagraphTranslation> ParagraphTranslationsByParargraphIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (ParagraphTranslationsByParagraphId.ContainsKey(key))
             {
                 return ParagraphTranslationsByParagraphId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
-            var value = context.ParagraphTranslations.Where(x => x.ParagraphId == key).ToList();
+            var value = context.ParagraphTranslations
+                .Where(x => x.ParagraphId == key)
+                .ToList();
 
             // write to cache
             ParagraphTranslationsByParagraphId[key] = value;
             // write each item to cache
             foreach (var item in value)
             {
-                if (item.Id is null) continue;
-                ParagraphTranslationById[(int)item.Id] = item;
+                ParagraphTranslationById[(Guid)item.Id] = item;
             }
 
             return value;
         }
         public static async Task<List<ParagraphTranslation>> ParagraphTranslationsByParargraphIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<ParagraphTranslation>>.Run(() =>
             {
-                return ParagraphTranslationsByParargraphIdRead(key, context);
+                return ParagraphTranslationsByParargraphIdRead(key, dbContextFactory);
             });
         }
         #endregion
 
         #region delete
         public static void ParagraphTranslationDeleteByParagraphIdAndLanguageCode(
-            (int paragraphId, string code) key, IdiomaticaContext context)
+            (Guid paragraphId, AvailableLanguageCode code) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                 delete from [Idioma].[ParagraphTranslation]
                 where [ParagraphId] = {key.paragraphId}
-                and [LanguageCode] = {key.code}
+                and [LanguageCode] = {key.code.ToString()}
                 """);
         }
         public static async Task ParagraphTranslationDeleteByParagraphIdAndLanguageCodeAsync(
-            (int paragraphId, string code) key, IdiomaticaContext context)
+            (Guid paragraphId, AvailableLanguageCode code) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             await Task.Run(() =>
             {
-                ParagraphTranslationDeleteByParagraphIdAndLanguageCode(key, context);
+                ParagraphTranslationDeleteByParagraphIdAndLanguageCode(key, dbContextFactory);
             });
         }
         #endregion
@@ -131,18 +130,13 @@ namespace Model.DAL
         #region cache
         private static void ParagraphTranslationUpdateCache(ParagraphTranslation value)
         {
-            if (value.Id is null) return;
             // write to the ID cache
-            ParagraphTranslationById[(int)value.Id] = value;
+            ParagraphTranslationById[(Guid)value.Id] = value;
 
             // are there any lists with this one's paragraph already cached?
-            if (value.ParagraphId == null)
+            if (ParagraphTranslationsByParagraphId.ContainsKey((Guid)value.ParagraphId))
             {
-                return;
-            }
-            if (ParagraphTranslationsByParagraphId.ContainsKey((int)value.ParagraphId))
-            {
-                var cachedList = ParagraphTranslationsByParagraphId[(int)value.ParagraphId];
+                var cachedList = ParagraphTranslationsByParagraphId[(Guid)value.ParagraphId];
                 if (cachedList != null)
                 {
                     cachedList.Add(value);

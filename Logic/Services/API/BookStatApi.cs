@@ -3,67 +3,65 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Model;
 using Model.DAL;
 using Logic.Telemetry;
 using Microsoft.EntityFrameworkCore;
+using Model.Enums;
+using Model;
 
 namespace Logic.Services.API
 {
     public static class BookStatApi
     {
-        public static void BookStatsCreateAndSave(IdiomaticaContext context, int bookId)
+        public static List<BookStat> BookStatsCreateAndSave(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
-            if (bookId < 1)
-            {
-                ErrorHandler.LogAndThrow(1100);
-            }
+            var context = dbContextFactory.CreateDbContext();
             int numRows = context.Database.ExecuteSql($"""
             with allPages as (
-            	SELECT b.id as bookId, p.Id as pageId, p.Ordinal as pageOrdinal
-            	FROM [Idiomatica].[Idioma].[Book] b
+            	SELECT b.Id as BookId, p.Id as PageId, p.Ordinal as PageOrdinal
+            	FROM [Idioma].[Book] b
             	left join [Idioma].[Page] p on p.BookId = b.Id
             ), allParagraphs as (
-            	select bookId, p.pageId, pageOrdinal, pp.Id as paragraphId, pp.Ordinal as paragraphOrdinal
+            	select BookId, p.PageId, PageOrdinal, pp.Id as ParagraphId, pp.Ordinal as ParagraphOrdinal
             	from [Idioma].[Paragraph] pp
-            	left join allPages p on pp.PageId = p.pageId
+            	left join allPages p on pp.PageId = p.PageId
             ), allSentences as (
-            	select bookId, pageId, pageOrdinal, pp.paragraphId, paragraphOrdinal, s.Id as sentenceId, s.Ordinal as sentenceOrdinal
+            	select BookId, PageId, PageOrdinal, pp.ParagraphId, ParagraphOrdinal, s.Id as SentenceId, s.Ordinal as SentenceOrdinal
             	from allParagraphs pp
-            	join [Idioma].[Sentence] s on s.ParagraphId = pp.paragraphId
+            	join [Idioma].[Sentence] s on s.ParagraphId = pp.ParagraphId
             ), allTokens as (
-            	select bookId, pageId, pageOrdinal, paragraphId, paragraphOrdinal, s.sentenceId, sentenceOrdinal, t.Id as tokenId, t.Ordinal as tokenOrdinal, t.WordId as wordId
+            	select BookId, PageId, PageOrdinal, ParagraphId, ParagraphOrdinal, s.SentenceId, SentenceOrdinal, t.Id as TokenId, t.Ordinal as TokenOrdinal, t.WordId as WordId
             	from allSentences s
-            	left join [Idioma].[Token] t on t.SentenceId = s.sentenceId
+            	left join [Idioma].[Token] t on t.SentenceId = s.SentenceId
             ), allWords as (
-            	select bookId, pageId, pageOrdinal, paragraphId, paragraphOrdinal, sentenceId, sentenceOrdinal, t.tokenId, tokenOrdinal, w.TextLowerCase as wordText
+            	select BookId, PageId, PageOrdinal, ParagraphId, ParagraphOrdinal, SentenceId, SentenceOrdinal, t.TokenId, TokenOrdinal, w.TextLowerCase as WordText
             	from allTokens t
-            	left join [Idioma].[Word] w on t.wordId = w.Id
+            	left join [Idioma].[Word] w on t.WordId = w.Id
             ), distinctWords as (
-            	select bookId, wordText, count(*) as numInstances
+            	select BookId, WordText, count(*) as numInstances
             	from allWords
-            	group by bookId, wordText
+            	group by BookId, WordText
             ), totalPageCount as (
             	select 
-                      bookId as BookId
+                      BookId as BookId
                     , {(int)AvailableBookStat.TOTALPAGES} as [Key]
                     , FORMAT(count(*),'#') as [Value]
             	from allPages
-            	group by bookId
+            	group by BookId
             ), totalWordCount as (
             	select 
-                      bookId as BookId
+                      BookId as BookId
                     , {(int)AvailableBookStat.TOTALWORDCOUNT} as [Key]
                     , FORMAT (sum(numInstances),'#') as [Value]
             	from distinctWords
-            	group by bookId
+            	group by BookId
             ), distinctWordCount as (
             	select 
-                      bookId as BookId
+                      BookId as BookId
                     , {(int)AvailableBookStat.DISTINCTWORDCOUNT} as [Key]
-                    , FORMAT (count(wordText),'#') as [Value]
+                    , FORMAT (count(WordText),'#') as [Value]
             	from distinctWords
-            	group by bookId
+            	group by BookId
             ), difficultyScore as (
                 select
             	    b.Id as BookId
@@ -94,12 +92,19 @@ namespace Logic.Services.API
             """);
             if (numRows < 1)
             {
-                ErrorHandler.LogAndThrow(2110);
+                ErrorHandler.LogAndThrow();
             }
+            var list = DataCache.BookStatsByBookIdRead(bookId, dbContextFactory);
+            if (list is null) { ErrorHandler.LogAndThrow(); return []; }
+            return list;
         }
-        public static async Task BookStatsCreateAndSaveAsync(IdiomaticaContext context, int bookId)
+        public static async Task<List<BookStat>> BookStatsCreateAndSaveAsync(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
-            await Task.Run(() => BookStatsCreateAndSave(context, bookId));
+            return await Task< List<BookStat>>.Run(() =>
+            {
+                return BookStatsCreateAndSave(dbContextFactory, bookId);
+            });
         }
     }
 }

@@ -32,7 +32,7 @@ builder.Services.AddAuthentication(options =>
 })
     .AddIdentityCookies();
 
-builder.Services.AddTransient<UserService>();
+builder.Services.AddTransient<LoginService>();
 
 var connection = String.Empty;
 if (builder.Environment.IsDevelopment())
@@ -50,7 +50,7 @@ else
 }
 
 builder.Services.AddDbContextFactory<IdiomaticaContext>(options => {
-    options.UseSqlServer(connection, b => b.MigrationsAssembly("IdiomaticaWeb"));
+    options.UseSqlServer(connection, b => b.MigrationsAssembly("TestDataPopulator"));
     //options.EnableSensitiveDataLogging();
 });
 

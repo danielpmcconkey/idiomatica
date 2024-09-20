@@ -16,21 +16,21 @@ namespace Model.DAL
     public static partial class DataCache
     {
         #region create
-        public static UserBreadCrumb? UserBreadCrumbCreate(UserBreadCrumb value, IdiomaticaContext context)
+        public static UserBreadCrumb? UserBreadCrumbCreate(UserBreadCrumb value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // no sense caching this; it's too transient
-            Guid guid = Guid.NewGuid();
-            value.UniqueKey = guid;
             int numRows = context.Database.ExecuteSql($"""
                 
                 INSERT INTO [Idioma].UserBreadCrumb
-                           ([UniqueKey]
+                           ([Id]
                            ,[UserId]
                            ,[PageId]
                            ,[ActionDateTime]
                            )
                      VALUES
-                           ({guid}
+                           ({value.Id}
                            ,{value.UserId}
                            ,{value.PageId}
                            ,{value.ActionDateTime}
@@ -38,19 +38,20 @@ namespace Model.DAL
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating UserBreadCrumb affected 0 rows");
-
-
             return value;
         }
-        public static async Task<UserBreadCrumb?> UserCreateAsync(UserBreadCrumb value, IdiomaticaContext context)
+        public static async Task<UserBreadCrumb?> UserCreateAsync(UserBreadCrumb value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return UserBreadCrumbCreate(value, context); });
+            return await Task.Run(() => { return UserBreadCrumbCreate(value, dbContextFactory); });
         }
         #endregion
+
         #region read
         public static List<UserBreadCrumb> UserBreadCrumbReadByFilter(
-            Expression<Func<UserBreadCrumb, bool>> filter, int take, IdiomaticaContext context)
+            Expression<Func<UserBreadCrumb, bool>> filter, int take, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             return context.UserBreadCrumbs
                 .Where(filter)
                 .OrderByDescending(x => x.ActionDateTime)
@@ -58,9 +59,9 @@ namespace Model.DAL
                 .ToList();
         }
         public static async Task<List<UserBreadCrumb>> UserBreadCrumbReadByFilterAsync(
-            Expression<Func<UserBreadCrumb, bool>> filter, int take, IdiomaticaContext context)
+            Expression<Func<UserBreadCrumb, bool>> filter, int take, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return UserBreadCrumbReadByFilter(filter, take, context); });
+            return await Task.Run(() => { return UserBreadCrumbReadByFilter(filter, take, dbContextFactory); });
         }
         #endregion
     }

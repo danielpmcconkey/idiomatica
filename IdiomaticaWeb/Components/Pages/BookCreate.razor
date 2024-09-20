@@ -1,8 +1,9 @@
 ﻿@page "/Book/Create"
 @rendermode InteractiveServer
-@inject UserService UserService;
+@inject LoginService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 @using Logic.Services.API
+@using Model.Enums
 
 <h3>@UserService.GetUILabel("NewBook")</h3>
 <ErrorAlert ErrorState="errorState"></ErrorAlert>
@@ -62,7 +63,7 @@
                         <option selected disabled>@UserService.GetUILabel("bcSelectLanguage")</option>
                         @foreach (var (key, value) in BookListDataPacket.LanguageOptions)
                         {
-                            <option value="@key">@value.LanguageName</option>
+                            <option value="@key">@value.Name</option>
                         }
                     </InputSelect>
                 </div>
@@ -110,14 +111,14 @@
     private bool _isFormInValid { get
         {
             if (string.IsNullOrEmpty(_titleInput)) return true;
-            if (string.IsNullOrEmpty(_languageCodeInput)) return true;
+            if (_languageCodeInput is null) return true;
             //if (string.IsNullOrEmpty(_textInput)) return true;
             return false;
         }
     }
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
     private bool _isSaveSuccess = false;
-    private int _newBookId = 0;
+    private Guid? _newBookId = null;
     private string _newBookUrl
     {
         get { return $"/Book/{_newBookId}/Read/"; }
@@ -130,7 +131,7 @@
     private string? _titleInput;
     private string? _sourceURIInput;
     //private string _textInput { get { return _largeVolumeTextArea.TextValue; } }
-    private string? _languageCodeInput;
+    private AvailableLanguageCode? _languageCodeInput;
     private Alert successAlert = default!;
 
     private string _titleInputCss { get
@@ -143,7 +144,7 @@
     {
         get
         {
-            if (string.IsNullOrEmpty(_languageCodeInput)) return "form-select is-invalid";
+            if (_languageCodeInput is null) return "form-select is-invalid";
             return "form-select is-valid";
         }
     }
@@ -157,8 +158,8 @@
         try
         {
             var context = await DbContextFactory.CreateDbContextAsync();
-            _loggedInUser = await UserService.GetLoggedInUserAsync(context);
-            BookListDataPacket = new (context, false);
+            _loggedInUser = await UserService.GetLoggedInUserAsync(DbContextFactory);
+            BookListDataPacket = new(DbContextFactory, false);
         }
         catch (IdiomaticaException ex)
         {
@@ -177,30 +178,29 @@
     }
     private async Task OnSaveClickAsync()
     {
-        if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+        if (_loggedInUser is null)
             { ErrorHandler.LogAndThrow(); return; }
         if (string.IsNullOrEmpty(_titleInput))
             { ErrorHandler.LogAndThrow(); return; }
-        if (string.IsNullOrEmpty(_languageCodeInput))
+        if (_languageCodeInput is null)
             { ErrorHandler.LogAndThrow(); return; }
 
         _isSaving = true;
         var context = await DbContextFactory.CreateDbContextAsync();
         try
         {
-            await context.Database.BeginTransactionAsync();
-
             string textInput = await _largeVolumeTextArea.GetTextValue();
 
             
             Book? book = await OrchestrationApi.OrchestrateBookCreationAndSubProcessesAsync(
-                context, (int)_loggedInUser.Id, _titleInput, _languageCodeInput, _sourceURIInput, textInput);
-            if (book is null || book.Id is null || book.Id < 1)
+                DbContextFactory, (Guid)_loggedInUser.Id, _titleInput,
+                (AvailableLanguageCode)_languageCodeInput, _sourceURIInput, textInput);
+            if (book is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            _newBookId = (int)book.Id;
+            _newBookId = (Guid)book.Id;
 
             // finally commit the write
             await context.Database.CommitTransactionAsync();

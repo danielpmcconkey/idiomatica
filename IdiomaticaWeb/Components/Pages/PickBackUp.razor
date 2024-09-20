@@ -1,7 +1,7 @@
 ﻿@page "/PickBackUp"
 @rendermode InteractiveServer
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
-@inject UserService UserService;
+@inject LoginService UserService;
 @using Logic.Services.API
 
 @if (_isLoading)
@@ -39,10 +39,10 @@ else
 
 
 @code {
-    [Parameter] public int? UserId { get; set; }
+    [Parameter] public Guid? UserId { get; set; }
     [Parameter] public ErrorState? errorState { get; set; }
     string? Title;
-    int? BookId;
+    Guid? BookId;
     string? BookUri;
     int? PageNum;
     bool _isLoading = false;
@@ -54,21 +54,20 @@ else
     {
         try
         {
-            if (UserId is null || UserId < 1)
+            if (UserId is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
-            var context = await DbContextFactory.CreateDbContextAsync();
-            var breadCrumb = await UserApi.UserBreadCrumbReadLatestAsync(context, (int)UserId);
-            if (breadCrumb is not null && breadCrumb.PageId is not null)
+            var breadCrumb = await UserApi.UserBreadCrumbReadLatestAsync(DbContextFactory, (Guid)UserId);
+            if (breadCrumb is not null)
             {
-                var page = await PageApi.PageReadByIdAsync(context, (int)breadCrumb.PageId);
-                if (page is null || page.BookId is null || page.Ordinal is null) return;
-                var book = await BookApi.BookReadAsync(context, (int)page.BookId);
-                if (book is null || book.Id is null || string.IsNullOrEmpty(book.Title)) return;
+                var page = await PageApi.PageReadByIdAsync(DbContextFactory, (Guid)breadCrumb.PageId);
+                if (page is null) return;
+                var book = await BookApi.BookReadAsync(DbContextFactory, (Guid)page.BookId);
+                if (book is null || string.IsNullOrEmpty(book.Title)) return;
 
                 Title = FormatTitle(book.Title);
                 BookUri = $"/Book/{book.Id}/Read";

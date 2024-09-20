@@ -11,19 +11,21 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, Sentence> SentenceById = new ConcurrentDictionary<int, Sentence>();
-        private static ConcurrentDictionary<int, List<Sentence>> SentencesByPageId = new ConcurrentDictionary<int, List<Sentence>>();
-        private static ConcurrentDictionary<int, List<Sentence>> SentencesByParagraphId = new ConcurrentDictionary<int, List<Sentence>>();
+        private static ConcurrentDictionary<Guid, Sentence> SentenceById = [];
+        private static ConcurrentDictionary<Guid, List<Sentence>> SentencesByPageId = [];
+        private static ConcurrentDictionary<Guid, List<Sentence>> SentencesByParagraphId = [];
 
 
         #region read
-        public static Sentence? SentenceByIdRead(int key, IdiomaticaContext context)
+        public static Sentence? SentenceByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (SentenceById.ContainsKey(key))
             {
                 return SentenceById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.Sentences.Where(x => x.Id == key)
@@ -33,23 +35,25 @@ namespace Model.DAL
             SentenceById[key] = value;
             return value;
         }
-        public static async Task<Sentence?> SentenceByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<Sentence?> SentenceByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Sentence?>.Run(() =>
             {
-                return SentenceByIdRead(key, context);
+                return SentenceByIdRead(key, dbContextFactory);
             });
         }
 
 
         public static List<Sentence> SentencesByPageIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (SentencesByPageId.ContainsKey(key))
             {
                 return SentencesByPageId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = (from p in context.Pages
                          join pp in context.Paragraphs on p.Id equals pp.PageId
@@ -66,22 +70,24 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<Sentence>> SentencesByPageIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<Sentence>>.Run(() =>
             {
-                return SentencesByPageIdRead(key, context);
+                return SentencesByPageIdRead(key, dbContextFactory);
             });
         }
 
 
-        public static List<Sentence> SentencesByParagraphIdRead(int key, IdiomaticaContext context)
+        public static List<Sentence> SentencesByParagraphIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (SentencesByParagraphId.ContainsKey(key))
             {
                 return SentencesByParagraphId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.Sentences
@@ -91,11 +97,11 @@ namespace Model.DAL
             SentencesByParagraphId[key] = value;
             return value;
         }
-        public static async Task<List<Sentence>> SentencesByParagraphIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<List<Sentence>> SentencesByParagraphIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<Sentence>>.Run(() =>
             {
-                return SentencesByParagraphIdRead(key, context);
+                return SentencesByParagraphIdRead(key, dbContextFactory);
             });
         }
 
@@ -105,10 +111,9 @@ namespace Model.DAL
         #region create
 
 
-        public static Sentence? SentenceCreate(Sentence sentence, IdiomaticaContext context)
+        public static Sentence? SentenceCreate(Sentence sentence, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (sentence.ParagraphId is null) throw new ArgumentNullException(nameof(sentence.ParagraphId));
-            if (sentence.Ordinal is null) throw new ArgumentNullException(nameof(sentence.Ordinal));
+            var context = dbContextFactory.CreateDbContext();
 
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
@@ -117,7 +122,7 @@ namespace Model.DAL
                       ([ParagraphId]
                       ,[Ordinal]
                       ,[Text]
-                      ,[UniqueKey])
+                      ,[Id])
                 VALUES
                       ({sentence.ParagraphId}
                       ,{sentence.Ordinal}
@@ -126,21 +131,21 @@ namespace Model.DAL
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating Sentence affected 0 rows");
-            var newEntity = context.Sentences.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
+            var newEntity = context.Sentences.Where(x => x.Id == guid).FirstOrDefault();
+            if (newEntity is null)
             {
                 throw new InvalidDataException("newEntity is null in SentenceCreate");
             }
 
 
             // add it to cache
-            SentenceById[(int)newEntity.Id] = newEntity;
+            SentenceById[(Guid)newEntity.Id] = newEntity;
 
             return newEntity;
         }
-        public static async Task<Sentence?> SentenceCreateAsync(Sentence value, IdiomaticaContext context)
+        public static async Task<Sentence?> SentenceCreateAsync(Sentence value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return SentenceCreate(value, context); });
+            return await Task.Run(() => { return SentenceCreate(value, dbContextFactory); });
         }
 
         #endregion

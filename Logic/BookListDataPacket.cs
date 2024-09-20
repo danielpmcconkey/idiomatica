@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Logic.Services.API;
+using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic
 {
@@ -15,7 +17,7 @@ namespace Logic
         {
 
         }
-        public BookListDataPacket(IdiomaticaContext context, bool isBrowse)
+        public BookListDataPacket(IDbContextFactory<IdiomaticaContext> dbContextFactory, bool isBrowse)
         {
             OrderByOptions[1] = "Difficulty";
             OrderByOptions[2] = "Language";
@@ -25,27 +27,28 @@ namespace Logic
             OrderByOptions[6] = "Total Word Count";
             OrderByOptions[7] = "Distinct Word Count";
 
-            LanguageOptions = LanguageCodeApi.LanguageCodeOptionsRead(context, 
+            LanguageOptions = LanguageApi.LanguageOptionsRead(dbContextFactory, 
                 (x => x.IsImplementedForLearning == true));
             
             ShouldShowOnlyInShelf = !isBrowse;
         }
         public int BookListRowsToDisplay { get; set; } = 10;
         public Dictionary<int, string> OrderByOptions { get; set; } = [];
-        public Dictionary<string, LanguageCode> LanguageOptions { get; set; } = [];
+        public Dictionary<Guid, Language> LanguageOptions { get; set; } = [];
         public List<BookListRow>? BookListRows { get; set; } = null;
         public long? BookListTotalRowsAtCurrentFilter { get; set; } = null;
         public int SkipRecords { get; set; } = 0;
         public string? TagsFilter { get; set; } = null;
-        public string? LcFilterCode { get; set; } = null;
-        public LanguageCode? LcFilter
+        public AvailableLanguageCode? LcFilterCode { get; set; } = null;
+        public Language? LcFilter
         {
             get
             {
-                if (LcFilterCode is null) return null;
-                LanguageCode? lcFilterTry = null;
-                LanguageOptions.TryGetValue(LcFilterCode, out lcFilterTry);
-                return lcFilterTry;
+                if(LcFilterCode is null) return null;
+                var kvp = LanguageOptions
+                    .Where(x => x.Value.Code == LcFilterCode)
+                    .FirstOrDefault();
+                return kvp.Value;
             }
         }
         public AvailableBookListSortProperties SortProperty

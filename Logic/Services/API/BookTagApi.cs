@@ -7,81 +7,78 @@ using Model;
 using Model.DAL;
 using Logic.Telemetry;
 using System.Reflection.Metadata.Ecma335;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class BookTagApi
     {
         public static void BookTagAdd(
-            IdiomaticaContext context, int bookId, int userId, string tag)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Book book, User user, string tag)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
             string trimmedTag = tag.Trim().ToLower();
             if (trimmedTag == string.Empty) return;
 
-            
+            var context = dbContextFactory.CreateDbContext();
             DateTimeOffset created = DateTimeOffset.UtcNow;
             // check if this user already saved this tag
             var existingTag = context.BookTags.Where(x =>
-                    x.BookId == bookId &&
-                    x.UserId == userId &&
+                    x.BookId == book.Id &&
+                    x.UserId == user.Id &&
                     x.Tag == trimmedTag)
                 .FirstOrDefault();
             if (existingTag != null) return;
             var newTag = new BookTag()
             {
-                BookId = bookId,
-                UserId = userId,
+                Id = Guid.NewGuid(),
+                BookId = book.Id,
+                Book = book,
+                UserId = user.Id,
+                User = user,
                 Tag = trimmedTag,
                 Created = created,
-                IsPersonal = true
             };
-            newTag = DataCache.BookTagCreate(newTag, context);
-            if (newTag is null || newTag.Id is null || newTag.Id < 1)
+            newTag = DataCache.BookTagCreate(newTag, dbContextFactory);
+            if (newTag is null || newTag.Id is null)
             {
-                ErrorHandler.LogAndThrow(2440);
+                ErrorHandler.LogAndThrow();
             }
         }
         public static async Task BookTagAddAsync(
-            IdiomaticaContext context, int bookId, int userId, string tag)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Book book, User user, string tag)
         {
-            await Task.Run(() => BookTagAdd(context, bookId, userId, tag));
+            await Task.Run(() => BookTagAdd(dbContextFactory, book, user, tag));
         }
 
 
         public static void BookTagRemove(
-            IdiomaticaContext context, int bookId, int userId, string tag)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId, string tag)
         {
 
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
             string trimmedTag = tag.Trim().ToLower();
             if (trimmedTag == string.Empty) return;
 
-            DataCache.BookTagDelete((bookId, userId, trimmedTag), context);
+            DataCache.BookTagDelete((bookId, userId, trimmedTag), dbContextFactory);
         }
         public static async Task BookTagRemoveAsync(
-            IdiomaticaContext context, int bookId, int userId, string tag)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId, string tag)
         {
-            await Task.Run(() => BookTagRemove(context, bookId, userId, tag));
+            await Task.Run(() => BookTagRemove(dbContextFactory, bookId, userId, tag));
         }
 
 
-        public static List<BookTag> BookTagsGetByBookIdAndUserId(
-            IdiomaticaContext context, int bookId, int userId)
+        public static List<BookTagRow> BookTagsGetByBookIdAndUserId(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            var tags = DataCache.BookTagsByBookIdAndUserIdRead((bookId, userId), context);
+            var tags = DataCache.BookTagsByBookAndUserRead((bookId, userId), dbContextFactory);
             return tags;
         }
-        public static async Task<List<BookTag>> BookTagsGetByBookIdAndUserIdAsync(
-            IdiomaticaContext context, int bookId, int userId)
+        public static async Task<List<BookTagRow>> BookTagsGetByBookIdAndUserIdAsync(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId)
         {
             return await Task<List<BookTag>>.Run(() =>
             {
-                return BookTagsGetByBookIdAndUserId(context, bookId, userId);
+                return BookTagsGetByBookIdAndUserId(dbContextFactory, bookId, userId);
             });
         }
     }

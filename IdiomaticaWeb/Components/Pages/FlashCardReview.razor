@@ -1,8 +1,9 @@
 ﻿@page "/FlashCard/Review"
 @rendermode InteractiveServer
-@inject UserService UserService;
+@inject LoginService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 @using Logic.Services.API;
+@using Model.Enums
 
 
 <ErrorAlert ErrorState="errorState"></ErrorAlert>
@@ -47,9 +48,9 @@
                             <option value="" selected disabled>@UserService.GetUILabel("fcSelectLanguage")</option>
                             @foreach (var (key, value) in LanguageOptions)
                             {
-                                @if (value is not null && value.LanguageName is not null)
+                                @if (value is not null && value.Name is not null)
                                 {
-                                    <option value="@key">@value.LanguageName</option>
+                                    <option value="@key">@value.Name</option>
                                 }
 
                             }
@@ -155,7 +156,7 @@
     {
         get
         {
-            if (string.IsNullOrEmpty(LanguageInput)) return "form-select is-invalid";
+            if (LanguageInput is null) return "form-select is-invalid";
             return "form-select is-valid";
         }
     }
@@ -179,7 +180,7 @@
     {
         get
         {
-            if (string.IsNullOrEmpty(LanguageInput)) return true;
+            if (LanguageInput is null) return true;
             if (NumNewCardsInput < 0 || NumNewCardsInput > MaxNewCardsNew) return true;
             if (NumOldCardsInput < 0 || NumOldCardsInput > MaxNewCardsReview) return true;
             return false;
@@ -196,7 +197,7 @@
     }
     bool IsDataInit = false;
     FlashCardDataPacket? FlashCardDataPacket;
-    public string? UiLanguageCode { get; set; } = null;
+    public AvailableLanguageCode? UiLanguageCode { get; set; } = null;
     // public string? LanguageCodeLearning { get; set; } = null;
     public bool IsDeckDefined { get; set; } = false;
     public bool IsDeckComplete { get; set; } = false;
@@ -204,8 +205,8 @@
 
     #region deck building form fields
 
-    public string? LanguageInput { get; set; } = null;
-    public Dictionary<string, LanguageCode> LanguageOptions { get; set; } = [];
+    public AvailableLanguageCode? LanguageInput { get; set; } = null;
+    public Dictionary<Guid, Language> LanguageOptions { get; set; } = [];
     public int? NumNewCardsInput { get; set; } = null;
     public int? NumOldCardsInput { get; set; } = null;
     public List<int> NumNewCardOptions { get; set; } = new List<int>();
@@ -230,12 +231,14 @@
     {
         try
         {
+            
+            var context = DbContextFactory.CreateDbContext();
+
             if (IsDataInit == false)
             {
                 _isLoading = true;
                 var t_delay = Task.Delay(LoadingDelayMiliseconds);
-                var context = await DbContextFactory.CreateDbContextAsync();
-                var t_init = Task.Run(() => InitData(context));
+                var t_init = Task.Run(() => InitData());
 
                 _shouldHideCard = true;
                 await t_delay;
@@ -260,13 +263,13 @@
             return;
         }
     }
-    private void InitData(IdiomaticaContext context)
+    private void InitData()
     {
-        LoggedInUser = UserService.GetLoggedInUser(context);
-        LanguageOptions = LanguageCodeApi.LanguageCodeOptionsRead(context,
+        LoggedInUser = UserService.GetLoggedInUser(DbContextFactory);
+        LanguageOptions = LanguageApi.LanguageOptionsRead(DbContextFactory,
                 (x => x.IsImplementedForLearning == true));
         var lcObject = UserService.GetUiLanguageCode();
-        if(lcObject is null || lcObject.Code is null) { ErrorHandler.LogAndThrow(); return; }
+        if(lcObject is null) { ErrorHandler.LogAndThrow(); return; }
         UiLanguageCode = lcObject.Code;
         if (NumNewCardOptions.Count == 0)
         {
@@ -290,13 +293,15 @@
         using var transaction = context.Database.BeginTransaction();
         try
         {
-            if (LoggedInUser is null || LoggedInUser.Id is null) return;
-            if (string.IsNullOrEmpty(LanguageInput)) return;
+            if (LoggedInUser is null) { ErrorHandler.LogAndThrow(); return; }
+            if (LanguageInput is null) { ErrorHandler.LogAndThrow(); return; }
             if (NumNewCardsInput is null) NumNewCardsInput = 0;
             if (NumOldCardsInput is null) NumOldCardsInput = 0;
 
             FlashCardDataPacket = OrchestrationApi.OrchestrateFlashCardDeckCreation(
-                context, (int)LoggedInUser.Id, LanguageInput, (int)NumNewCardsInput, (int)NumOldCardsInput);
+                DbContextFactory, LoggedInUser.Id,
+                (AvailableLanguageCode)LanguageInput, (int)NumNewCardsInput,
+                (int)NumOldCardsInput);
 
             IsDeckDefined = true;
             IsDeckComplete = false;

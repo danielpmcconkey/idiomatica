@@ -8,39 +8,37 @@ using System.Threading.Tasks;
 using Logic.Telemetry;
 using System.ComponentModel.DataAnnotations;
 using Azure;
+using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class WordUserApi
     {
         public static WordUser? WordUserCreate(
-            IdiomaticaContext context, int wordId, int languageUserId, string? translation,
-            AvailableWordUserStatus? status)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Word word, LanguageUser languageUser, string? translation,
+            AvailableWordUserStatus status)
         {
-            return WordUserCreateAsync(context, wordId, languageUserId, translation, status).Result;
+            return WordUserCreateAsync(dbContextFactory, word, languageUser, translation, status).Result;
         }
         public static async Task<WordUser?> WordUserCreateAsync(
-            IdiomaticaContext context, int wordId, int languageUserId, string? translation,
-            AvailableWordUserStatus? status)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Word word, LanguageUser languageUser, string? translation,
+            AvailableWordUserStatus status)
         {
-            if (wordId < 1) ErrorHandler.LogAndThrow();
-            if (languageUserId < 1) ErrorHandler.LogAndThrow();
-            if (status is null) status = AvailableWordUserStatus.UNKNOWN;
-            if (wordId < 1) ErrorHandler.LogAndThrow();
-            if (wordId < 1) ErrorHandler.LogAndThrow();
-            if (wordId < 1) ErrorHandler.LogAndThrow();
-            
             WordUser? wu = new()
             {
-                WordId = wordId,
-                LanguageUserId = languageUserId,
+                Id = Guid.NewGuid(),
+                WordId = word.Id,
+                //Word = word,
+                LanguageUserId = languageUser.Id,
+                //LanguageUser = languageUser,
                 Translation = translation,
                 Status = status,
                 Created = DateTime.Now,
                 StatusChanged = DateTime.Now,
             };
-            wu = await DataCache.WordUserCreateAsync(wu, context);
-            if (wu is null || wu.Id is null || wu.Id < 1)
+            wu = await DataCache.WordUserCreateAsync(wu, dbContextFactory);
+            if (wu is null)
             {
                 ErrorHandler.LogAndThrow();
             }
@@ -48,61 +46,46 @@ namespace Logic.Services.API
         }
 
         public static WordUser? WordUserReadById(
-            IdiomaticaContext context, int wordUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid wordUserId)
         {
-            if (wordUserId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.WordUserByIdRead(wordUserId, context);
+            return DataCache.WordUserByIdRead(wordUserId, dbContextFactory);
         }
         public static async Task<WordUser?> WordUserReadByIdAsync(
-            IdiomaticaContext context, int wordUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid wordUserId)
         {
-            if (wordUserId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.WordUserByIdReadAsync(wordUserId, context);
+            return await DataCache.WordUserByIdReadAsync(wordUserId, dbContextFactory);
         }
 
 
         public static void WordUsersCreateAllForBookIdAndUserId(
-            IdiomaticaContext context, int bookId, int userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            DataCache.WordUsersCreateAllForBookIdAndUserId((bookId, userId), context);
+            DataCache.WordUsersCreateAllForBookIdAndUserId((bookId, userId), dbContextFactory);
         }
         public static async Task WordUsersCreateAllForBookIdAndUserIdAsync(
-            IdiomaticaContext context, int bookId, int userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            await DataCache.WordUsersCreateAllForBookIdAndUserIdAsync((bookId, userId), context);
+            await DataCache.WordUsersCreateAllForBookIdAndUserIdAsync((bookId, userId), dbContextFactory);
         }
 
 
         public static Dictionary<string, WordUser>? WordUsersDictByPageIdAndUserIdRead(
-            IdiomaticaContext context, int pageId, int userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId, Guid userId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.WordUsersDictByPageIdAndUserIdRead((pageId, userId), context);
+            return DataCache.WordUsersDictByPageIdAndUserIdRead((pageId, userId), dbContextFactory);
         }
         public static async Task<Dictionary<string, WordUser>?> WordUsersDictByPageIdAndUserIdReadAsync(
-            IdiomaticaContext context, int pageId, int userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId, Guid userId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.WordUsersDictByPageIdAndUserIdReadAsync((pageId, userId), context);
+            return await DataCache.WordUsersDictByPageIdAndUserIdReadAsync((pageId, userId), dbContextFactory);
         }
 
 
-        public static void WordUserUpdate(IdiomaticaContext context,
-            int id, AvailableWordUserStatus newStatus, string translation)
+        public static void WordUserUpdate(IDbContextFactory<IdiomaticaContext> dbContextFactory,
+            Guid id, AvailableWordUserStatus newStatus, string translation)
         {
-            if (id < 1)
-            {
-                ErrorHandler.LogAndThrow(1150);
-                return;
-            }
             // first pull the existing one from the database
-            var dbWordUser = DataCache.WordUserByIdRead(id, context);
+            var dbWordUser = DataCache.WordUserByIdRead(id, dbContextFactory);
             if (dbWordUser == null)
             {
                 ErrorHandler.LogAndThrow();
@@ -112,51 +95,46 @@ namespace Logic.Services.API
             dbWordUser.Status = newStatus;
             dbWordUser.Translation = translation;
             dbWordUser.StatusChanged = DateTime.Now;
-            DataCache.WordUserUpdate(dbWordUser, context);
+            DataCache.WordUserUpdate(dbWordUser, dbContextFactory);
 
         }        
-        public static async Task WordUserUpdateAsync(IdiomaticaContext context,
-            int id, AvailableWordUserStatus newStatus, string translation)
+        public static async Task WordUserUpdateAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory,
+            Guid id, AvailableWordUserStatus newStatus, string translation)
         {
-            if (id < 1)
-            {
-                ErrorHandler.LogAndThrow(1150);
-                return;
-            }
             // first pull the existing one from the database
-            var dbWordUser = await DataCache.WordUserByIdReadAsync(id, context);
+            var dbWordUser = await DataCache.WordUserByIdReadAsync(id, dbContextFactory);
             if (dbWordUser == null)
             {
-                ErrorHandler.LogAndThrow(2060);
+                ErrorHandler.LogAndThrow();
                 return;
             }
 
             dbWordUser.Status = newStatus;
             dbWordUser.Translation = translation;
             dbWordUser.StatusChanged = DateTime.Now;
-            await DataCache.WordUserUpdateAsync(dbWordUser, context);
+            await DataCache.WordUserUpdateAsync(dbWordUser, dbContextFactory);
         }
 
 
-        public static string? WordUserTranslationFormat(IdiomaticaContext context,
-            string? translation, string? translationLanguageCode)
+        public static string? WordUserTranslationFormat(IDbContextFactory<IdiomaticaContext> dbContextFactory,
+            string? translation, AvailableLanguageCode translationLanguageCode)
         {
-            if (string.IsNullOrEmpty(translation) || string.IsNullOrEmpty(translationLanguageCode))
+            if (string.IsNullOrEmpty(translation))
                 return translation;
             // get the language so we can use the right parser
-            var language = LanguageApi.LanguageReadByCode(context, translationLanguageCode);
+            var language = LanguageApi.LanguageReadByCode(dbContextFactory, translationLanguageCode);
             if (language is null) { ErrorHandler.LogAndThrow(); return translation; }
             var parser = LanguageParser.Factory.GetLanguageParser(language);
             if (parser is null) { ErrorHandler.LogAndThrow(); return translation; }
             return parser.FormatTranslation(translation);
 
         }
-        public static async Task<string?> WordUserTranslationFormatAsync(IdiomaticaContext context,
-            string? translation, string? translationLanguageCode)
+        public static async Task<string?> WordUserTranslationFormatAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory,
+            string? translation, AvailableLanguageCode translationLanguageCode)
         {
             return await Task<WordUser>.Run(() =>
             {
-                return WordUserTranslationFormat(context, translation, translationLanguageCode);
+                return WordUserTranslationFormat(dbContextFactory, translation, translationLanguageCode);
             });
         }
     }

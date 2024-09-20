@@ -10,18 +10,20 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, Page> PageById = new ConcurrentDictionary<int, Page>();
-        private static ConcurrentDictionary<(int ordinal, int bookId), Page> PageByOrdinalAndBookId = new ConcurrentDictionary<(int ordinal, int bookId), Page>();
-        private static ConcurrentDictionary<int, List<Page>> PagesByBookId = new ConcurrentDictionary<int, List<Page>>();
+        private static ConcurrentDictionary<Guid, Page> PageById = [];
+        private static ConcurrentDictionary<(int ordinal, Guid bookId), Page> PageByOrdinalAndBookId = [];
+        private static ConcurrentDictionary<Guid, List<Page>> PagesByBookId = [];
 
         #region read
-        public static Page? PageByIdRead(int key, IdiomaticaContext context)
+        public static Page? PageByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (PageById.ContainsKey(key))
             {
                 return PageById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.Pages.Where(x => x.Id == key).FirstOrDefault();
@@ -30,21 +32,23 @@ namespace Model.DAL
             PageById[key] = value;
             return value;
         }
-        public static async Task<Page?> PageByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<Page?> PageByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Page?>.Run(() =>
             {
-                return PageByIdRead(key, context);
+                return PageByIdRead(key, dbContextFactory);
             });
         }
         public static Page? PageByOrdinalAndBookIdRead(
-            (int ordinal, int bookId) key, IdiomaticaContext context)
+            (int ordinal, Guid bookId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (PageByOrdinalAndBookId.ContainsKey(key))
             {
                 return PageByOrdinalAndBookId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = context.Pages
                 .Where(p => p.Ordinal == key.ordinal
@@ -54,26 +58,27 @@ namespace Model.DAL
             if (value == null) return null;
             // write to cache
             PageByOrdinalAndBookId[key] = value;
-            if (value.Id is null) return value;
-            PageById[(int)value.Id] = value;
+            PageById[(Guid)value.Id] = value;
             return value;
         }
         public static async Task<Page?> PageByOrdinalAndBookIdReadAsync(
-            (int ordinal, int bookId) key, IdiomaticaContext context)
+            (int ordinal, Guid bookId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Page?>.Run(() =>
             {
-                return PageByOrdinalAndBookIdRead(key, context);
+                return PageByOrdinalAndBookIdRead(key, dbContextFactory);
             });
         }
         public static List<Page> PagesByBookIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (PagesByBookId.ContainsKey(key))
             {
                 return PagesByBookId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = context.Pages.Where(x => x.BookId == key).OrderBy(x => x.Ordinal)
                 .ToList();
@@ -83,18 +88,18 @@ namespace Model.DAL
             // write each item to cache
             foreach (var item in value)
             {
-                if (item is null || item.Id is null) continue;
-                PageById[(int)item.Id] = item;
+                if (item is null) continue;
+                PageById[(Guid)item.Id] = item;
             }
 
             return value;
         }        
         public static async Task<List<Page>> PagesByBookIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<Page>>.Run(() =>
             {
-                return PagesByBookIdRead(key, context);
+                return PagesByBookIdRead(key, dbContextFactory);
             });
         }
         #endregion
@@ -102,42 +107,37 @@ namespace Model.DAL
         #region create
 
 
-        public static Page? PageCreate(Page page, IdiomaticaContext context)
+        public static Page? PageCreate(Page page, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (page.BookId is null) throw new ArgumentNullException(nameof(page.BookId));
-            if (page.Ordinal is null) throw new ArgumentNullException(nameof(page.Ordinal));
+            var context = dbContextFactory.CreateDbContext();
 
-            Guid guid = Guid.NewGuid();
-            int numRows = context.Database.ExecuteSql($"""
-                        
-                INSERT INTO [Idioma].[Page]
-                      ([BookId]
-                      ,[Ordinal]
-                      ,[OriginalText]
-                      ,[UniqueKey])
-                VALUES
-                      ({page.BookId}
-                      ,{page.Ordinal}
-                      ,{page.OriginalText}
-                      ,{guid})
-        
-                """);
-            if (numRows < 1) throw new InvalidDataException("creating Page affected 0 rows");
-            var newEntity = context.Pages.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
-            {
-                throw new InvalidDataException("newEntity is null in FlashCardCreate");
-            }
+            //int numRows = context.Database.ExecuteSql($"""
 
+            //    INSERT INTO [Idioma].[Page]
+            //          ([BookId]
+            //          ,[Ordinal]
+            //          ,[OriginalText]
+            //          ,[Id])
+            //    VALUES
+            //          ({page.BookId}
+            //          ,{page.Ordinal}
+            //          ,{page.OriginalText}
+            //          ,{page.Id})
+
+            //    """);
+            //if (numRows < 1) throw new InvalidDataException("creating Page affected 0 rows");
+
+            context.Pages.Add(page);
+            context.SaveChanges();
 
             // add it to cache
-            PageById[(int)newEntity.Id] = newEntity; ;
+            PageById[page.Id] = page; ;
 
-            return newEntity;
+            return page;
         }
-        public static async Task<Page?> PageCreateAsync(Page value, IdiomaticaContext context)
+        public static async Task<Page?> PageCreateAsync(Page value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return PageCreate(value, context); });
+            return await Task.Run(() => { return PageCreate(value, dbContextFactory); });
         }
         #endregion
     }

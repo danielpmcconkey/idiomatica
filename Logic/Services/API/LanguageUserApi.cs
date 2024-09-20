@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Logic.Telemetry;
-using k8s.KubeConfigModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
@@ -14,18 +14,19 @@ namespace Logic.Services.API
     {
         #region create
         public static LanguageUser? LanguageUserCreate(
-            IdiomaticaContext context, int languageId, int userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Language language, User user)
         {
-            if (languageId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
             var languageUser = new LanguageUser()
             {
-                LanguageId = languageId,
-                UserId = userId,
+                Id = Guid.NewGuid(),
+                LanguageId = language.Id,
+                //Language = language,
+                UserId = user.Id,
+                //User = user,
                 TotalWordsRead = 0
             };
-            languageUser = DataCache.LanguageUserCreate(languageUser, context);
-            if (languageUser is null || languageUser.Id is null || languageUser.Id < 1)
+            languageUser = DataCache.LanguageUserCreate(languageUser, dbContextFactory);
+            if (languageUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
@@ -33,55 +34,35 @@ namespace Logic.Services.API
             return languageUser;
         }
         public static async Task<LanguageUser?> LanguageUserCreateAsync(
-            IdiomaticaContext context, int languageId, int userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Language language, User user)
         {
-            if (languageId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            var languageUser = new LanguageUser()
-            {
-                LanguageId = languageId,
-                UserId = userId,
-                TotalWordsRead = 0
-            };
-            languageUser = await DataCache.LanguageUserCreateAsync(languageUser, context);
-            if (languageUser is null || languageUser.Id is null || languageUser.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
-
-            return languageUser;
+            return await Task<LanguageUser?>.Run(() => { 
+                return LanguageUserCreate(dbContextFactory, language, user); });
         }
 
 
         #endregion
         public static LanguageUser? LanguageUserGet(
-            IdiomaticaContext context, int languageId, int userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid languageId, Guid userId)
         {
-            if (languageId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.LanguageUserByLanguageIdAndUserIdRead((languageId, userId), context);
+            return DataCache.LanguageUserByLanguageIdAndUserIdRead((languageId, userId), dbContextFactory);
         }
         public static async Task<LanguageUser?> LanguageUserGetAsync(
-            IdiomaticaContext context, int languageId, int userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid languageId, Guid userId)
         {
-            if (languageId < 1) ErrorHandler.LogAndThrow();
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync((languageId, userId), context);
+            return await DataCache.LanguageUserByLanguageIdAndUserIdReadAsync((languageId, userId), dbContextFactory);
         }
 
 
         public static List<LanguageUser>? LanguageUsersAndLanguageGetByUserId(
-            IdiomaticaContext context, int userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
         {
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.LanguageUsersAndLanguageByUserIdRead((int)userId, context);
+            return DataCache.LanguageUsersAndLanguageByUserIdRead((Guid)userId, dbContextFactory);
         }
         public static async Task<List<LanguageUser>?> LanguageUsersAndLanguageGetByUserIdAsync(
-            IdiomaticaContext context, int userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
         {
-            if (userId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.LanguageUsersAndLanguageByUserIdReadAsync((int)userId, context);
+            return await DataCache.LanguageUsersAndLanguageByUserIdReadAsync((Guid)userId, dbContextFactory);
         }
     }
 }

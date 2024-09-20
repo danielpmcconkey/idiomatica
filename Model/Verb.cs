@@ -6,28 +6,33 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Model
 {
     [Table("Verb", Schema = "Idioma")]
-    [PrimaryKey(nameof(UniqueKey))]
+    [PrimaryKey(nameof(Id))]
     public class Verb
     {
-        public Guid? UniqueKey { get; set; }
+        #region required data
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid LanguageId { get; set; }
 
+        [StringLength(2000)]
+        [Required] public required string Conjugator { get; set; }
 
-        #region relationships
+        [StringLength(2000)]
+        public required string Infinitive { get; set; }
 
-        public int? LanguageId { get; set; }
+        #endregion
+
+        
+
+        
+
         public Language? Language { get; set; }
 
         [NotMapped]
         public List<VerbConjugation> VerbConjugations { get; set; } = [];
         public List<WordTranslation> WordTranslations { get; set; } = [];
 
-        #endregion
-        [StringLength(2000)]
-        public string? Conjugator { get; set; }
         [StringLength(2000)]
         public string? DisplayName { get; set; }
-        [StringLength(2000)]
-        public string? Infinitive { get; set; }
         [StringLength(2000)]
         public string? Core1 { get; set; }
         [StringLength(2000)]

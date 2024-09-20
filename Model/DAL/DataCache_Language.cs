@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Model.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,13 +12,15 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<string, Language> LanguageByCode = new ConcurrentDictionary<string, Language>();
-        private static ConcurrentDictionary<int, Language> LanguageById = new ConcurrentDictionary<int, Language>();
+        private static ConcurrentDictionary<AvailableLanguageCode, Language> LanguageByCode = [];
+        private static ConcurrentDictionary<Guid, Language> LanguageById = [];
 
 
         #region read
-        public static Language? LanguageByCodeRead(string key, IdiomaticaContext context)
+        public static Language? LanguageByCodeRead(
+            AvailableLanguageCode key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
             // check cache
             if (LanguageByCode.ContainsKey(key))
             {
@@ -28,43 +31,46 @@ namespace Model.DAL
                 .Where(l => l.Code == key)
                 .FirstOrDefault();
 
-            if (value is null || value.Id is null or 0) return null;
+            if (value is null) return null;
             // write to cache
             LanguageByCode[key] = value;
-            LanguageById[(int)value.Id] = value;
+            LanguageById[(Guid)value.Id] = value;
             return value;
         }
-        public static async Task<Language?> LanguageByCodeReadAsync(string key, IdiomaticaContext context)
+        public static async Task<Language?> LanguageByCodeReadAsync(
+            AvailableLanguageCode key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Language?>.Run(() =>
             {
-                return LanguageByCodeRead(key, context);
+                return LanguageByCodeRead(key, dbContextFactory);
             });
         }
 
-        public static Language? LanguageByIdRead(int key, IdiomaticaContext context)
+        public static Language? LanguageByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (LanguageById.ContainsKey(key))
             {
                 return LanguageById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = context.Languages
                 .Where(l => l.Id == key)
                 .FirstOrDefault();
 
-            if (value is null || string.IsNullOrEmpty(value.Code)) return null;
+            if (value is null) return null;
             // write to cache
             LanguageById[key] = value;
             LanguageByCode[value.Code] = value;
             return value;
         }
-        public static async Task<Language?> LanguageByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<Language?> LanguageByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Language?>.Run(() =>
             {
-                return LanguageByIdRead(key, context);
+                return LanguageByIdRead(key, dbContextFactory);
             });
         }
         #endregion

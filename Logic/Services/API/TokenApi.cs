@@ -10,81 +10,79 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using DeepL;
 using static System.Net.Mime.MediaTypeNames;
 using System.Net;
+using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class TokenApi
     {
-        public static Token? TokenCreate(IdiomaticaContext context,
-           string display, int sentenceId, int ordinal, int wordId)
+        public static Token? TokenCreate(IDbContextFactory<IdiomaticaContext> dbContextFactory,
+           string display, Sentence sentence, int ordinal, Word word)
         {
             var token = new Token()
             {
+                Id = Guid.NewGuid(),
                 Display = display,
-                SentenceId = sentenceId,
+                SentenceId = sentence.Id,
+                Sentence = sentence,
                 Ordinal = ordinal,
-                WordId = wordId
+                WordId = word.Id,
+                Word = word,
             };
-            token =  DataCache.TokenCreate(token, context);
-            if (token is null || token.Id == null || token.Id == 0)
+            token =  DataCache.TokenCreate(token, dbContextFactory);
+            if (token is null)
             {
-                ErrorHandler.LogAndThrow(2290);
+                ErrorHandler.LogAndThrow();
                 return null;
             }
             return token;
         }
-        public static async Task<Token?> TokenCreateAsync(IdiomaticaContext context,
-           string display, int sentenceId, int ordinal, int wordId)
+        public static async Task<Token?> TokenCreateAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory,
+           string display, Sentence sentence, int ordinal, Word word)
         {
             return await Task<Token?>.Run(() =>
             {
-                return TokenCreate(context, display, sentenceId, ordinal, wordId);
+                return TokenCreate(dbContextFactory, display, sentence, ordinal, word);
             });
         }
 
 
         public static (Token? t, WordUser? wu) TokenGetChildObjects(
-            IdiomaticaContext context, int tokenId, int languageUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid tokenId, Guid languageUserId)
         {
-            return TokenGetChildObjectsAsync(context, tokenId, languageUserId).Result;
+            return TokenGetChildObjectsAsync(dbContextFactory, tokenId, languageUserId).Result;
         }
         public static async Task<(Token? t, WordUser? wu)> TokenGetChildObjectsAsync(
-            IdiomaticaContext context, int tokenId, int languageUserId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid tokenId, Guid languageUserId)
         {
-            Token? t = new();
-            WordUser? wu = new ();
-            if (tokenId < 1) ErrorHandler.LogAndThrow();
-            if (languageUserId < 1) ErrorHandler.LogAndThrow();
-            var languageUser = await DataCache.LanguageUserByIdReadAsync(languageUserId, context);
-            if (languageUser == null || languageUser.Id is null || languageUser.Id < 1)
+            var languageUser = await DataCache.LanguageUserByIdReadAsync(languageUserId, dbContextFactory);
+            if (languageUser == null)
             {
                 ErrorHandler.LogAndThrow();
-                return (t, wu);
+                return (null, null);
             }
-            if (languageUser.UserId == null || languageUser.UserId < 1)
+            var t = await DataCache.TokenByIdReadAsync(tokenId, dbContextFactory);
+            if (t == null)
             {
                 ErrorHandler.LogAndThrow();
-                return (t, wu);
+                return (null, null);
             }
-            t = await DataCache.TokenByIdReadAsync(tokenId, context);
-            if (t == null || t.WordId == null || t.WordId < 1)
+            var w = await DataCache.WordByIdReadAsync(t.WordId, dbContextFactory);
+            if (w is null) { ErrorHandler.LogAndThrow(); return (null, null); }
+            t.Word = w;
+            if (t.Word == null)
             {
                 ErrorHandler.LogAndThrow();
-                return (t, wu);
+                return (null, null);
             }
-            t.Word = await DataCache.WordByIdReadAsync((int)t.WordId, context);
-            if (t.Word == null || t.Word.Id == null || t.Word.Id < 1)
-            {
-                ErrorHandler.LogAndThrow();
-                return (t, wu);
-            }
-            wu = await DataCache.WordUserByWordIdAndUserIdReadAsync(
-                ((int)t.Word.Id, (int)languageUser.UserId), context);
+            var wu = await DataCache.WordUserByWordIdAndUserIdReadAsync(
+                (t.WordId, languageUser.UserId), dbContextFactory);
             if (wu is null)
             {
                 // create it
-                wu = await WordUserApi.WordUserCreateAsync(context, (int)t.Word.Id,
-                    (int)languageUser.Id, string.Empty, AvailableWordUserStatus.UNKNOWN);
+                wu = await WordUserApi.WordUserCreateAsync(dbContextFactory, t.Word,
+                    languageUser, string.Empty, AvailableWordUserStatus.UNKNOWN);
             }
             return (t, wu);
         }
@@ -94,45 +92,26 @@ namespace Logic.Services.API
         /// Returns the list of tokens plus child word
         /// </summary>
         public static async Task<List<Token>> TokensAndWordsReadBySentenceIdAsync(
-            IdiomaticaContext context, int sentenceId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid sentenceId)
         {
-            if (sentenceId < 1) ErrorHandler.LogAndThrow();
-
-            return await DataCache.TokensAndWordsBySentenceIdReadAsync(sentenceId, context);
+            return await DataCache.TokensAndWordsBySentenceIdReadAsync(sentenceId, dbContextFactory);
         }
         public static List<Token> TokensAndWordsReadBySentenceId(
-            IdiomaticaContext context, int sentenceId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid sentenceId)
         {
-            return TokensAndWordsReadBySentenceIdAsync(context, sentenceId).Result;
+            return TokensAndWordsReadBySentenceIdAsync(dbContextFactory, sentenceId).Result;
         }
 
 
-        public static List<Token> TokensCreateFromSentence(IdiomaticaContext context,
-            int sentenceId, int languageId)
+        public static List<Token> TokensCreateFromSentence(IDbContextFactory<IdiomaticaContext> dbContextFactory,
+            Sentence sentence, Language language)
         {
-            if (sentenceId < 1) ErrorHandler.LogAndThrow();
-            var sentence = DataCache.SentenceByIdRead(sentenceId, context);
-            if (sentence == null || string.IsNullOrEmpty(sentence.Text))
-            {
-                ErrorHandler.LogAndThrow();
-                return new List<Token>();
-            }
-
             // check if any already exist. there shouldn't be any but whateves
-            DataCache.TokenBySentenceIdDelete(sentenceId, context);
-
-            var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null ||
-                language.Id is null or 0 ||
-                string.IsNullOrEmpty(language.Code))
-            {
-                ErrorHandler.LogAndThrow();
-                return new List<Token>();
-            }
+            DataCache.TokenBySentenceIdDelete(sentence.Id, dbContextFactory);
 
             // create the words first
-            List<(Word? word, int? ordinal, string? tokenDisplay)> words = WordApi.WordsCreateOrderedFromSentenceId(
-                context, languageId, sentenceId);
+            List<(Word? word, int? ordinal, string? tokenDisplay)> words = 
+                WordApi.WordsCreateOrderedFromSentenceId(dbContextFactory, language, sentence);
 
             if (words.Count < 1) return new List<Token>();
 
@@ -140,16 +119,16 @@ namespace Logic.Services.API
             List<Token> tokens = [];
             foreach (var x in words)
             {
-                if (x.word is null || x.word.Id is null || x.word.Id < 1 ||
+                if (x.word is null ||
                     x.word.Text is null || x.ordinal is null || x.tokenDisplay is null) continue;
                 Token? newToken = TokenCreate(
-                    context,
-                    $"{x.tokenDisplay} ", // display; add the space that you previously took out
-                    sentenceId,
+                    dbContextFactory,
+                    $"{x.tokenDisplay} ", // add the space that you previously took out
+                    sentence,
                     (int)x.ordinal,
-                    (int)x.word.Id
+                    x.word
                     );
-                if(newToken is null || newToken.Id is null)
+                if(newToken is null)
                 {
                     ErrorHandler.LogAndThrow();
                     return [];
@@ -160,26 +139,24 @@ namespace Logic.Services.API
             return tokens;
         }
         public static async Task<List<Token>> TokensCreateFromSentenceAsync(
-            IdiomaticaContext context, int sentenceId, int languageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Sentence sentence, Language language)
         {
             return await Task<List<Token>>.Run(() =>
             {
-                return TokensCreateFromSentence(context, sentenceId, languageId);
+                return TokensCreateFromSentence(dbContextFactory, sentence, language);
             });
         }
 
 
         public static List<Token>? TokensReadByPageId(
-            IdiomaticaContext context, int pageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.TokensByPageIdRead(pageId, context);
+            return DataCache.TokensByPageIdRead(pageId, dbContextFactory);
         }
         public static async Task<List<Token>?> TokensReadByPageIdAsync(
-            IdiomaticaContext context, int pageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.TokensByPageIdReadAsync(pageId, context);
+            return await DataCache.TokensByPageIdReadAsync(pageId, dbContextFactory);
         }
     }
 }

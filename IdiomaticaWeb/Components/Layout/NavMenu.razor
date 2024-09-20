@@ -1,5 +1,5 @@
 ﻿@implements IDisposable
-@inject UserService UserService;
+@inject LoginService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 @inject NavigationManager NavigationManager;
 
@@ -82,7 +82,7 @@
     {
         get
         {
-            var user = UserService.GetLoggedInUser(DbContextFactory.CreateDbContext());
+            var user = UserService.GetLoggedInUser(DbContextFactory);
             if (user == null) return null;
             return user.Name;
         }

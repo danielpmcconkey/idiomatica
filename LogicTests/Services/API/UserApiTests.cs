@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 using Logic.Telemetry;
 using LogicTests;
 using Model;
+using Microsoft.EntityFrameworkCore;
+using Model.DAL;
+using Model.Enums;
 
 namespace Logic.Services.API.Tests
 {
@@ -17,43 +20,46 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void UserAndAllChildrenDeleteTest()
         {
-            int userId = 0;
-            var context = CommonFunctions.CreateContext();
-            int bookId = 1;
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
 
             try
             {
-                // create the user
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
 
-                // create a languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                int languageUserId = (int)languageUser.Id;
+                // fetch the languageUser
+                var languageUser = LanguageUserApi.LanguageUserGet(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                    dbContextFactory, bookId, (Guid)user.Id);
+                if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // create wordUsers
                 // create the wordUsers
-                WordUserApi.WordUsersCreateAllForBookIdAndUserId(context, bookId, userId);
+                WordUserApi.WordUsersCreateAllForBookIdAndUserId(dbContextFactory, bookId, (Guid)userId);
 
                 // now delete it all
-                UserApi.UserAndAllChildrenDelete(context, userId);
+                UserApi.UserAndAllChildrenDelete(dbContextFactory, (Guid)userId);
 
                 // now try to pull anything
                 var userRead = context.Users.Where(x => x.Id == userId).FirstOrDefault();
                 var languageUserRead = context.LanguageUsers.Where(x => x.UserId == userId).FirstOrDefault();
-                var bookUserRead = context.BookUsers.Where(x => x.LanguageUserId == languageUserId).FirstOrDefault();
-                var wordUserRead = context.WordUsers.Where(x => x.LanguageUserId == languageUserId).FirstOrDefault();
+                var bookUserRead = context.BookUsers.Where(x => x.LanguageUserId == languageUser.Id).FirstOrDefault();
+                var wordUserRead = context.WordUsers.Where(x => x.LanguageUserId == languageUser.Id).FirstOrDefault();
 
                 Assert.IsNull(userRead);
                 Assert.IsNull(languageUserRead);
@@ -62,51 +68,53 @@ namespace Logic.Services.API.Tests
             }
             finally
             {
-                // shouldn't really need to, but just in case
-                CommonFunctions.CleanUpUser(userId, context);
+                // clean-up
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
-
         [TestMethod()]
         public async Task UserAndAllChildrenDeleteAsyncTest()
         {
-            int userId = 0;
-            var context = CommonFunctions.CreateContext();
-            int bookId = 1;
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
 
             try
             {
-                // create the user
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
 
-                // create a languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                int languageUserId = (int)languageUser.Id;
+                // fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
+                    dbContextFactory, bookId, (Guid)user.Id);
+                if (bookUser is null)
                 { ErrorHandler.LogAndThrow(); }
 
                 // create wordUsers
                 // create the wordUsers
-                await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(context, bookId, userId);
+                await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(dbContextFactory, bookId, (Guid)userId);
 
                 // now delete it all
-                await UserApi.UserAndAllChildrenDeleteAsync(context, userId);
+                await UserApi.UserAndAllChildrenDeleteAsync(dbContextFactory, (Guid)userId);
 
                 // now try to pull anything
                 var userRead = context.Users.Where(x => x.Id == userId).FirstOrDefault();
                 var languageUserRead = context.LanguageUsers.Where(x => x.UserId == userId).FirstOrDefault();
-                var bookUserRead = context.BookUsers.Where(x => x.LanguageUserId == languageUserId).FirstOrDefault();
-                var wordUserRead = context.WordUsers.Where(x => x.LanguageUserId == languageUserId).FirstOrDefault();
+                var bookUserRead = context.BookUsers.Where(x => x.LanguageUserId == languageUser.Id).FirstOrDefault();
+                var wordUserRead = context.WordUsers.Where(x => x.LanguageUserId == languageUser.Id).FirstOrDefault();
 
                 Assert.IsNull(userRead);
                 Assert.IsNull(languageUserRead);
@@ -115,169 +123,175 @@ namespace Logic.Services.API.Tests
             }
             finally
             {
-                // shouldn't really need to, but just in case
-                CommonFunctions.CleanUpUser(userId, context);
+                // clean-up
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
+
 
         [TestMethod()]
         public void UserCreateTest()
         {
-            int userId = 0;
-            var context = CommonFunctions.CreateContext();
-            string code = "HU";
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
             var applicationUserId = Guid.NewGuid().ToString();
-            var name = "Auto gen tester 3";
+            var name = "Auto gen tester";
 
             try
             {
                 // create the user
-                var user = UserApi.UserCreate(applicationUserId, name, code, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                var user = UserApi.UserCreate(applicationUserId, name, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
 
-                Assert.IsNotNull(user.UniqueKey);
-                var ukString = user.UniqueKey.ToString();
+                Assert.IsNotNull(user.Id);
+                var ukString = user.Id.ToString();
                 Assert.IsTrue(ukString.Trim().Length > 0);
             }
             finally
             {
-                CommonFunctions.CleanUpUser(userId, context);
+                // clean-up
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
-
         [TestMethod()]
         public async Task UserCreateAsyncTest()
         {
-            int userId = 0;
-            var context = CommonFunctions.CreateContext();
-            string code = "HU";
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
             var applicationUserId = Guid.NewGuid().ToString();
-            var name = "Auto gen tester 3";
+            var name = "Auto gen tester";
 
             try
             {
                 // create the user
-                var user = await UserApi.UserCreateAsync(applicationUserId, name, code, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                var user = await UserApi.UserCreateAsync(applicationUserId, name, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
 
-                Assert.IsNotNull(user.UniqueKey);
-                var ukString = user.UniqueKey.ToString();
+                Assert.IsNotNull(user.Id);
+                var ukString = user.Id.ToString();
                 Assert.IsTrue(ukString.Trim().Length > 0);
             }
             finally
             {
-                CommonFunctions.CleanUpUser(userId, context);
+                // clean-up
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
         }
+
 
         [TestMethod()]
         public void UserBreadCrumbReadLatestTest()
         {
-            int userId = 0;
-            var context = CommonFunctions.CreateContext();
-            int bookId = 1;
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+
+
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
             try
             {
-                // create the user
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
 
-                // create a languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null)
-                { ErrorHandler.LogAndThrow(); return; }
-                int languageUserId = (int)languageUser.Id;
+                // fetch the languageUser
+                var languageUser = LanguageUserApi.LanguageUserGet(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-                { ErrorHandler.LogAndThrow(); }
+                    dbContextFactory, bookId, (Guid)user.Id);
+                Assert.IsNotNull(bookUser);
 
                 // take a reading of time before you make the first crumb
                 var time1 = DateTime.Now;
-                Thread.Sleep(500);
+                Task.Delay(500);
 
                 // get the first page
                 var page1 = PageApi.PageReadByOrdinalAndBookId(
-                    context, 1, bookId);
+                    dbContextFactory, 1, bookId);
+                Assert.IsNotNull(page1);
 
                 // create the first breadcrumb
-                if (page1 is null || page1.Id is null)
-                { ErrorHandler.LogAndThrow(); return; }
-                UserApi.UserBreadCrumbCreate(context, userId, (int)page1.Id);
+                UserApi.UserBreadCrumbCreate(dbContextFactory, user, page1);
 
                 // read it back
-                var crumb1 = UserApi.UserBreadCrumbReadLatest(context, userId);
+                var crumb1 = UserApi.UserBreadCrumbReadLatest(dbContextFactory, (Guid)userId);
 
                 Assert.IsNotNull(crumb1);
-                Assert.IsNotNull(crumb1.UniqueKey);
+                Assert.IsNotNull(crumb1.Id);
                 Assert.IsTrue(crumb1.PageId == page1.Id);
                 Assert.IsTrue(crumb1.ActionDateTime > time1);
 
                 // take a reading of time before you make the first crumb
                 var time2 = DateTime.Now;
-                Thread.Sleep(500);
+                Task.Delay(500);
 
                 // get the first page
                 var page2 = PageApi.PageReadByOrdinalAndBookId(
-                    context, 2, bookId);
+                    dbContextFactory, 2, bookId);
+                Assert.IsNotNull(page2);
 
                 // create the first breadcrumb
-                if (page2 is null || page2.Id is null)
-                { ErrorHandler.LogAndThrow(); return; }
-                UserApi.UserBreadCrumbCreate(context, userId, (int)page2.Id);
+                UserApi.UserBreadCrumbCreate(dbContextFactory, user, page2);
 
                 // read it back
-                var crumb2 = UserApi.UserBreadCrumbReadLatest(context, userId);
+                var crumb2 = UserApi.UserBreadCrumbReadLatest(dbContextFactory, (Guid)userId);
 
                 Assert.IsNotNull(crumb2);
-                Assert.IsNotNull(crumb2.UniqueKey);
+                Assert.IsNotNull(crumb2.Id);
                 Assert.IsTrue(crumb2.PageId == page2.Id);
                 Assert.IsTrue(crumb2.ActionDateTime > time2);
             }
             finally
             {
-                // shouldn't really need to, but just in case
-                CommonFunctions.CleanUpUser(userId, context);
+                // clean-up
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
-
         [TestMethod()]
         public async Task UserBreadCrumbReadLatestAsyncTest()
         {
-            int userId = 0;
-            var context = CommonFunctions.CreateContext();
-            int bookId = 1;
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            
+
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
             try
             {
-                // create the user
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
 
-                // create a languageUser
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null)
-                { ErrorHandler.LogAndThrow(); return; }
-                int languageUserId = (int)languageUser.Id;
+                // fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // craete a bookUser
                 var bookUser = await BookUserApi.BookUserCreateAsync(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-                { ErrorHandler.LogAndThrow(); }
+                    dbContextFactory, bookId, (Guid)user.Id);
+                Assert.IsNotNull(bookUser);
 
                 // take a reading of time before you make the first crumb
                 var time1 = DateTime.Now;
@@ -285,18 +299,17 @@ namespace Logic.Services.API.Tests
 
                 // get the first page
                 var page1 = await PageApi.PageReadByOrdinalAndBookIdAsync(
-                    context, 1, bookId);
+                    dbContextFactory, 1, bookId);
+                Assert.IsNotNull(page1);
 
                 // create the first breadcrumb
-                if (page1 is null || page1.Id is null)
-                { ErrorHandler.LogAndThrow(); return; }
-                await UserApi.UserBreadCrumbCreateAsync(context, userId, (int)page1.Id);
+                await UserApi.UserBreadCrumbCreateAsync(dbContextFactory, user, page1);
 
                 // read it back
-                var crumb1 = await UserApi.UserBreadCrumbReadLatestAsync(context, userId);
+                var crumb1 = await UserApi.UserBreadCrumbReadLatestAsync(dbContextFactory, (Guid)userId);
 
                 Assert.IsNotNull(crumb1);
-                Assert.IsNotNull(crumb1.UniqueKey);
+                Assert.IsNotNull(crumb1.Id);
                 Assert.IsTrue(crumb1.PageId == page1.Id);
                 Assert.IsTrue(crumb1.ActionDateTime > time1);
 
@@ -306,123 +319,120 @@ namespace Logic.Services.API.Tests
 
                 // get the first page
                 var page2 = await PageApi.PageReadByOrdinalAndBookIdAsync(
-                    context, 2, bookId);
+                    dbContextFactory, 2, bookId);
+                Assert.IsNotNull(page2);
 
                 // create the first breadcrumb
-                if (page2 is null || page2.Id is null)
-                { ErrorHandler.LogAndThrow(); return; }
-                await UserApi.UserBreadCrumbCreateAsync(context, userId, (int)page2.Id);
+                await UserApi.UserBreadCrumbCreateAsync(dbContextFactory, user, page2);
 
                 // read it back
-                var crumb2 = await UserApi.UserBreadCrumbReadLatestAsync(context, userId);
+                var crumb2 = await UserApi.UserBreadCrumbReadLatestAsync(dbContextFactory, (Guid)userId);
 
                 Assert.IsNotNull(crumb2);
-                Assert.IsNotNull(crumb2.UniqueKey);
+                Assert.IsNotNull(crumb2.Id);
                 Assert.IsTrue(crumb2.PageId == page2.Id);
                 Assert.IsTrue(crumb2.ActionDateTime > time2);
             }
             finally
             {
-                // shouldn't really need to, but just in case
-                await CommonFunctions.CleanUpUserAsync(userId, context);
+                // clean-up
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
         }
+
 
         [TestMethod()]
         public void UserBreadCrumbCreateTest()
         {
-            int userId = 0;
-            var context = CommonFunctions.CreateContext();
-            int bookId = 1;
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
             try
             {
-                // create the user
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
 
-                // create a languageUser
-                var languageUser = LanguageUserApi.LanguageUserCreate(
-                    context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null)
-                { ErrorHandler.LogAndThrow(); return; }
-                int languageUserId = (int)languageUser.Id;
+                /// fetch the languageUser
+                var languageUser = LanguageUserApi.LanguageUserGet(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // craete a bookUser
                 var bookUser = BookUserApi.BookUserCreate(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-                { ErrorHandler.LogAndThrow(); }
+                    dbContextFactory, bookId, (Guid)user.Id);
+                Assert.IsNotNull(bookUser);
 
                 // get the first page
                 var page = PageApi.PageReadByOrdinalAndBookId(
-                    context, 1, bookId);
+                    dbContextFactory, 1, bookId);
+                Assert.IsNotNull(page);
 
                 // create the breadcrumb
-                if (page is null || page.Id is null)
-                { ErrorHandler.LogAndThrow(); return; }
-                var crumb = UserApi.UserBreadCrumbCreate(context, userId, (int)page.Id);
+                var crumb = UserApi.UserBreadCrumbCreate(dbContextFactory, user, page);
 
                 Assert.IsNotNull(crumb);
-                Assert.IsNotNull(crumb.UniqueKey);
+                Assert.IsNotNull(crumb.Id);
                 Assert.IsNotNull(crumb.ActionDateTime);
             }
             finally
             {
-                // shouldn't really need to, but just in case
-                CommonFunctions.CleanUpUser(userId, context);
+                // clean-up
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
-
         [TestMethod()]
         public async Task UserBreadCrumbCreateAsyncTest()
         {
-            int userId = 0;
-            var context = CommonFunctions.CreateContext();
-            int bookId = 1;
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
             try
             {
-                // create the user
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
-                if (user is null || user.Id is null) { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
 
-                // create a languageUser
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(
-                    context, 1, (int)user.Id);
-                if (languageUser is null || languageUser.Id is null) 
-                    { ErrorHandler.LogAndThrow(); return; }
-                int languageUserId = (int)languageUser.Id;
+                /// fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
 
                 // craete a bookUser
                 var bookUser = await BookUserApi.BookUserCreateAsync(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.Id < 1)
-                { ErrorHandler.LogAndThrow(); }
+                    dbContextFactory, bookId, (Guid)user.Id);
+                Assert.IsNotNull(bookUser);
 
                 // get the first page
                 var page = await PageApi.PageReadByOrdinalAndBookIdAsync(
-                    context, 1, bookId);
+                    dbContextFactory, 1, bookId);
+                Assert.IsNotNull(page);
 
                 // create the breadcrumb
-                if (page is null || page.Id is null)
-                    { ErrorHandler.LogAndThrow(); return; }
-                var crumb = await UserApi.UserBreadCrumbCreateAsync(context, userId, (int)page.Id);
+                var crumb = await UserApi.UserBreadCrumbCreateAsync(dbContextFactory, user, page);
 
                 Assert.IsNotNull(crumb);
-                Assert.IsNotNull(crumb.UniqueKey);
+                Assert.IsNotNull(crumb.Id);
                 Assert.IsNotNull(crumb.ActionDateTime);
             }
             finally
             {
-                // shouldn't really need to, but just in case
-                await CommonFunctions.CleanUpUserAsync(userId, context);
+                // clean-up
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
         }
     }

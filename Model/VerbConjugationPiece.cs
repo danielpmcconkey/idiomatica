@@ -4,15 +4,16 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Model.Enums;
 
 namespace Model
 {
 
     //[Table("VerbConjugationPiece", Schema = "Idioma")]
-    //[PrimaryKey(nameof(UniqueKey))]
+    //[PrimaryKey(nameof(Id))]
     public class VerbConjugationPiece
     {
-        public Guid? UniqueKey { get; set; }
+        public Guid? Id { get; set; }
 
 
         #region relationships

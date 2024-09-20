@@ -5,8 +5,9 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using DeepL;
-using k8s.KubeConfigModels;
+
 using Logic.Telemetry;
+using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.DAL;
 
@@ -15,87 +16,73 @@ namespace Logic.Services.API
     public static class PageApi
     {
         public static Page? PageCreateFromPageSplit(
-            IdiomaticaContext context, int ordinal, string text,
-            int bookId, int languageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, int ordinal, string text,
+            Book book, Language language)
         {
             if (ordinal < 0) ErrorHandler.LogAndThrow();
-            if (bookId < 0) ErrorHandler.LogAndThrow();
-            if (languageId < 0) ErrorHandler.LogAndThrow();
             string textTrimmed = text.Trim();
             if (string.IsNullOrEmpty(textTrimmed)) ErrorHandler.LogAndThrow();
 
-            // pull language from the db
-            var language = DataCache.LanguageByIdRead(languageId, context);
-            if (language is null ||
-                language.Id is null or 0 ||
-                string.IsNullOrEmpty(language.Code))
+            
+            var newPage = new Page()
+            {
+                Id = Guid.NewGuid(),
+                BookId = book.Id,
+                //Book = book,
+                Ordinal = ordinal,
+                OriginalText = textTrimmed
+            };
+            newPage = DataCache.PageCreate(newPage, dbContextFactory);
+            if (newPage is null)
             {
                 ErrorHandler.LogAndThrow();
                 return null;
             }
-            var newPage = new Page()
-            {
-                BookId = bookId,
-                Ordinal = ordinal,
-                OriginalText = textTrimmed
-            };
-            newPage = DataCache.PageCreate(newPage, context);
-            if (newPage is null || newPage.Id is null || newPage.Id < 1)
-            {
-                ErrorHandler.LogAndThrow(2040);
-                return null;
-            }
             // create paragraphs
             newPage.Paragraphs = ParagraphApi.ParagraphsCreateFromPage(
-                context, (int)newPage.Id, languageId);
+                dbContextFactory, newPage, language);
             return newPage;
         }
         public static async Task<Page?> PageCreateFromPageSplitAsync(
-            IdiomaticaContext context, int ordinal, string text,
-            int bookId, int languageId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, int ordinal, string text,
+            Book book, Language language)
         {
             return await Task<Page?>.Run(() =>
             {
-                return PageCreateFromPageSplit(context, ordinal, text, bookId, languageId);
+                return PageCreateFromPageSplit(dbContextFactory, ordinal, text, book, language);
             });
         }
 
 
-        public static Page? PageReadById(IdiomaticaContext context, int pageId)
+        public static Page? PageReadById(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.PageByIdRead(pageId, context);
+            return DataCache.PageByIdRead(pageId, dbContextFactory);
         }
-        public static async Task<Page?> PageReadByIdAsync(IdiomaticaContext context, int pageId)
+        public static async Task<Page?> PageReadByIdAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid pageId)
         {
-            if (pageId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.PageByIdReadAsync(pageId, context);
+            return await DataCache.PageByIdReadAsync(pageId, dbContextFactory);
         }
 
 
-        public static Page? PageReadByOrdinalAndBookId(IdiomaticaContext context, int ordinal, int bookId)
+        public static Page? PageReadByOrdinalAndBookId(IDbContextFactory<IdiomaticaContext> dbContextFactory, int ordinal, Guid bookId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
             if (ordinal < 1) ErrorHandler.LogAndThrow();
-            return DataCache.PageByOrdinalAndBookIdRead((ordinal, bookId), context);
+            return DataCache.PageByOrdinalAndBookIdRead((ordinal, bookId), dbContextFactory);
         }
         public static async Task<Page?> PageReadByOrdinalAndBookIdAsync(
-            IdiomaticaContext context, int ordinal, int bookId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, int ordinal, Guid bookId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.PageByOrdinalAndBookIdReadAsync((ordinal, bookId), context);
+            return await DataCache.PageByOrdinalAndBookIdReadAsync((ordinal, bookId), dbContextFactory);
         }
 
 
-        public static Page? PageReadFirstByBookId(IdiomaticaContext context, int bookId)
+        public static Page? PageReadFirstByBookId(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            return DataCache.PageByOrdinalAndBookIdRead((1, bookId), context);
+            return DataCache.PageByOrdinalAndBookIdRead((1, bookId), dbContextFactory);
         }
-        public static async Task<Page?> PageReadFirstByBookIdAsync(IdiomaticaContext context, int bookId)
+        public static async Task<Page?> PageReadFirstByBookIdAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
-            if (bookId < 1) ErrorHandler.LogAndThrow();
-            return await DataCache.PageByOrdinalAndBookIdReadAsync((1, bookId), context);
+            return await DataCache.PageByOrdinalAndBookIdReadAsync((1, bookId), dbContextFactory);
         }
 
 

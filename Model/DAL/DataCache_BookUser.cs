@@ -11,64 +11,55 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, BookUser> BookUserById = new ConcurrentDictionary<int, BookUser>();
-        private static ConcurrentDictionary<(int bookId, int userId), BookUser> BookUserByBookIdAndUserId = new ConcurrentDictionary<(int bookId, int userId), BookUser>();
+        private static ConcurrentDictionary<Guid, BookUser> BookUserById = new ConcurrentDictionary<Guid, BookUser>();
+        private static ConcurrentDictionary<(Guid bookId, Guid userId), BookUser> BookUserByBookIdAndUserId = new ConcurrentDictionary<(Guid bookId, Guid userId), BookUser>();
 
         #region create
 
-        public static BookUser? BookUserCreate(BookUser bookUser, IdiomaticaContext context)
+        public static BookUser? BookUserCreate(BookUser bookUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            Guid guid = Guid.NewGuid();
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                         INSERT INTO [Idioma].[BookUser]
                               ([BookId]
                               ,[LanguageUserId]
                               ,[IsArchived]
-                              ,[CurrentPageID]
-                              ,[AudioBookmarks]
-                              ,[AudioCurrentPos]
-                              ,[UniqueKey])
+                              ,[CurrentPageId]
+                              ,[Id])
                         VALUES
                               ({bookUser.BookId}
                               ,{bookUser.LanguageUserId}
                               ,{bookUser.IsArchived}
-                              ,{bookUser.CurrentPageID}
-                              ,{bookUser.AudioBookmarks}
-                              ,{bookUser.AudioCurrentPos}
-                              ,{guid})
+                              ,{bookUser.CurrentPageId}
+                              ,{bookUser.Id})
                         """);
             if (numRows < 1) throw new InvalidDataException("creating BookUser affected 0 rows");
 
-
-            var newEntity = context.BookUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
-            {
-                throw new InvalidDataException("newEntity is null in BookUserCreate");
-            }
-
-
             // add it to cache
-            BookUserById[(int)newEntity.Id] = newEntity;
-            return newEntity;
+            BookUserById[bookUser.Id] = bookUser;
+            return bookUser;
         }
-        public static async Task<BookUser?> BookUserCreateAsync(BookUser value, IdiomaticaContext context)
+        public static async Task<BookUser?> BookUserCreateAsync(BookUser value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<BookUser?>.Run(() =>
             {
-                return BookUserCreate(value, context);
+                return BookUserCreate(value, dbContextFactory);
             });
         }
 
         #endregion
 
         #region read
-        public static BookUser? BookUserByIdRead(int key, IdiomaticaContext context)
+        public static BookUser? BookUserByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (BookUserById.TryGetValue(key, out BookUser? value))
             {
                 return value;
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             value = context.BookUsers.Where(x => x.Id == key)
@@ -78,21 +69,23 @@ namespace Model.DAL
             BookUserById[key] = value;
             return value;
         }
-        public static async Task<BookUser?> BookUserByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<BookUser?> BookUserByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<BookUser?>.Run(() =>
             {
-                return BookUserByIdRead(key, context);
+                return BookUserByIdRead(key, dbContextFactory);
             });
         }
         public static BookUser? BookUserByBookIdAndUserIdRead(
-            (int bookId, int userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (BookUserByBookIdAndUserId.ContainsKey(key))
             {
                 return BookUserByBookIdAndUserId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.BookUsers
@@ -100,36 +93,33 @@ namespace Model.DAL
                     x.LanguageUser.UserId == key.userId &&
                     x.BookId == key.bookId)
                 .FirstOrDefault();
-            if (value is null || value.Id is null) return null;
+            if (value is null) return null;
             // write to cache
             BookUserByBookIdAndUserId[key] = value;
-            BookUserById[(int)value.Id] = value;
+            BookUserById[(Guid)value.Id] = value;
             return value;
         }
         public static async Task<BookUser?> BookUserByBookIdAndUserIdReadAsync(
-            (int bookId, int userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<BookUser?>.Run(() =>
             {
-                return BookUserByBookIdAndUserIdRead(key, context);
+                return BookUserByBookIdAndUserIdRead(key, dbContextFactory);
             });
         }
         #endregion
 
         #region update
-        public static void BookUserUpdate(BookUser bookUser, IdiomaticaContext context)
+        public static void BookUserUpdate(BookUser bookUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (bookUser.Id == null || bookUser.Id < 1) 
-                throw new ArgumentException("ID cannot be null or 0 when updating");
-            
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                         update [Idioma].[BookUser]
                               set [BookId] = {bookUser.BookId}
                               ,[LanguageUserId] = {bookUser.LanguageUserId}
                               ,[IsArchived] = {bookUser.IsArchived}
-                              ,[CurrentPageID] = {bookUser.CurrentPageID}
-                              ,[AudioBookmarks] = {bookUser.AudioBookmarks}
-                              ,[AudioCurrentPos] = {bookUser.AudioCurrentPos}
+                              ,[CurrentPageId] = {bookUser.CurrentPageId}
                         where Id = {bookUser.Id}
                         ;
                         """);
@@ -138,7 +128,7 @@ namespace Model.DAL
                 throw new InvalidDataException("BookUser update affected 0 rows");
             };
             // now update the cache
-            BookUserById[(int)bookUser.Id] = bookUser;
+            BookUserById[(Guid)bookUser.Id] = bookUser;
 
             var cachedItem1 = BookUserByBookIdAndUserId.Where(x => x.Value.Id == bookUser.Id).FirstOrDefault();
             if (cachedItem1.Value != null)
@@ -147,11 +137,11 @@ namespace Model.DAL
             }
             return;
         }
-        public static async Task BookUserUpdateAsync(BookUser value, IdiomaticaContext context)
+        public static async Task BookUserUpdateAsync(BookUser value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             await Task.Run(() =>
             {
-                BookUserUpdate(value, context);
+                BookUserUpdate(value, dbContextFactory);
             });
         }
         #endregion

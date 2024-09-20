@@ -10,18 +10,20 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, Paragraph> ParagraphById = new ConcurrentDictionary<int, Paragraph>();
-        private static ConcurrentDictionary<int, List<Paragraph>> ParagraphsByPageId = new ConcurrentDictionary<int, List<Paragraph>>();
+        private static ConcurrentDictionary<Guid, Paragraph> ParagraphById = [];
+        private static ConcurrentDictionary<Guid, List<Paragraph>> ParagraphsByPageId = [];
 
 
         #region read
-        public static Paragraph? ParagraphByIdRead(int key, IdiomaticaContext context)
+        public static Paragraph? ParagraphByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (ParagraphById.ContainsKey(key))
             {
                 return ParagraphById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.Paragraphs.Where(x => x.Id == key)
@@ -31,21 +33,23 @@ namespace Model.DAL
             ParagraphById[key] = value;
             return value;
         }
-        public static async Task<Paragraph?> ParagraphByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<Paragraph?> ParagraphByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<Paragraph?>.Run(() =>
             {
-                return ParagraphByIdRead(key, context);
+                return ParagraphByIdRead(key, dbContextFactory);
             });
         }
         public static List<Paragraph> ParagraphsByPageIdRead(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (ParagraphsByPageId.ContainsKey(key))
             {
                 return ParagraphsByPageId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = context.Paragraphs.Where(x => x.PageId == key).OrderBy(x => x.Ordinal)
                 .ToList();
@@ -56,18 +60,17 @@ namespace Model.DAL
             // write each item to cache
             foreach (var item in value) 
             {
-                if (item.Id is null) continue;
-                ParagraphById[(int)item.Id] = item;
+                ParagraphById[(Guid)item.Id] = item;
             }
 
             return value;
         }
         public static async Task<List<Paragraph>> ParagraphsByPageIdReadAsync(
-            int key, IdiomaticaContext context)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<Paragraph>>.Run(() =>
             {
-                return ParagraphsByPageIdRead(key, context);
+                return ParagraphsByPageIdRead(key, dbContextFactory);
             });
         }
         #endregion
@@ -75,39 +78,33 @@ namespace Model.DAL
         #region create
 
 
-        public static Paragraph? ParagraphCreate(Paragraph paragraph, IdiomaticaContext context)
+        public static Paragraph? ParagraphCreate(Paragraph paragraph, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (paragraph.PageId is null) throw new ArgumentNullException(nameof(paragraph.PageId));
-            if (paragraph.Ordinal is null) throw new ArgumentNullException(nameof(paragraph.Ordinal));
+            var context = dbContextFactory.CreateDbContext();
 
-            Guid guid = Guid.NewGuid();
-            int numRows = context.Database.ExecuteSql($"""
+            //int numRows = context.Database.ExecuteSql($"""
                         
-                INSERT INTO [Idioma].[Paragraph]
-                      ([PageId]
-                      ,[Ordinal]
-                      ,[UniqueKey])
-                VALUES
-                      ({paragraph.PageId}
-                      ,{paragraph.Ordinal}
-                      ,{guid})
+            //    INSERT INTO [Idioma].[Paragraph]
+            //          ([PageId]
+            //          ,[Ordinal]
+            //          ,[Id])
+            //    VALUES
+            //          ({paragraph.PageId}
+            //          ,{paragraph.Ordinal}
+            //          ,{paragraph.Id})
         
-                """);
-            if (numRows < 1) throw new InvalidDataException("creating Paragraph affected 0 rows");
-            var newEntity = context.Paragraphs.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
-            {
-                throw new InvalidDataException("newEntity is null in ParagraphCreate");
-            }
-
+            //    """);
+            //if (numRows < 1) throw new InvalidDataException("creating Paragraph affected 0 rows");
+            context.Paragraphs.Add(paragraph);
+            context.SaveChanges();
             // add it to cache
-            ParagraphById[(int)newEntity.Id] = newEntity;
+            ParagraphById[paragraph.Id] = paragraph;
 
-            return newEntity;
+            return paragraph;
         }
-        public static async Task<Paragraph?> ParagraphCreateAsync(Paragraph value, IdiomaticaContext context)
+        public static async Task<Paragraph?> ParagraphCreateAsync(Paragraph value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return ParagraphCreate(value, context); });
+            return await Task.Run(() => { return ParagraphCreate(value, dbContextFactory); });
         }
         
         #endregion

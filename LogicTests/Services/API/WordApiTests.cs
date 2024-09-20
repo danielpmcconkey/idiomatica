@@ -10,6 +10,8 @@ using Logic.Telemetry;
 using Model;
 using System.Net;
 using Model.DAL;
+using Microsoft.EntityFrameworkCore;
+using Model.Enums;
 
 namespace Logic.Services.API.Tests
 {
@@ -19,16 +21,19 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordCreateTest()
         {
-            var word = new Word();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
 
-            var context = CommonFunctions.CreateContext();
-            int languageId = 2;
+
+            Word? word = null;
+
+            Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             string guid = Guid.NewGuid().ToString();
             string text = guid.ToLower();
             string romanization = guid;
             try
             {
-                word = WordApi.WordCreate(context, languageId, text, romanization);
+                word = WordApi.WordCreate(dbContextFactory, language, text, romanization);
 
                 Assert.IsNotNull(word);
                 Assert.IsNotNull(word.Id);
@@ -38,26 +43,29 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (word is not null && word.Id is not null)
+                if (word is not null)
                 {
-                    DataCache.WordDeleteById((int)word.Id, context);
+                    DataCache.WordDeleteById((Guid)word.Id, dbContextFactory);
                 }
             }
         }
         [TestMethod()]
         public async Task WordCreateAsyncTest()
         {
-            var word = new Word();
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            
 
-            int languageId = 2;
+            Word? word = null;
+
+            Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             string guid = Guid.NewGuid().ToString();
             string text = guid.ToLower();
             string romanization = guid;
 
             try
             {
-                word = await WordApi.WordCreateAsync(context, languageId, text, romanization);
+                word = await WordApi.WordCreateAsync(dbContextFactory, language, text, romanization);
                 // assert
                 Assert.IsNotNull(word);
                 Assert.IsNotNull(word.Id);
@@ -67,9 +75,9 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                if (word is not null && word.Id is not null)
+                if (word is not null)
                 {
-                    DataCache.WordDeleteById((int)word.Id, context);
+                    DataCache.WordDeleteById((Guid)word.Id, dbContextFactory);
                 }
             }
         }
@@ -78,13 +86,14 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordGetByIdTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
 
-            int wordId = 35;
             string expectedText = "cuerpo";
-            int expectedLanguageId = 1;
+            Guid expectedLanguageId = CommonFunctions.GetSpanishLanguageId(dbContextFactory);
+            Guid wordId = CommonFunctions.GetWordId(dbContextFactory, expectedText, expectedLanguageId);
 
-            var word = WordApi.WordGetById(context, wordId);
+            var word = WordApi.WordGetById(dbContextFactory, wordId);
 
             Assert.IsNotNull(word);
             Assert.AreEqual(wordId, word.Id);
@@ -94,13 +103,14 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task WordGetByIdAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
 
-            int wordId = 35;
             string expectedText = "cuerpo";
-            int expectedLanguageId = 1;
+            Guid expectedLanguageId = CommonFunctions.GetSpanishLanguageId(dbContextFactory);
+            Guid wordId = CommonFunctions.GetWordId(dbContextFactory, expectedText, expectedLanguageId);
 
-            var word = await WordApi.WordGetByIdAsync(context, wordId);
+            var word = await WordApi.WordGetByIdAsync(dbContextFactory, wordId);
 
             Assert.IsNotNull(word);
             Assert.AreEqual(wordId, word.Id);
@@ -112,13 +122,14 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordReadByLanguageIdAndTextTest()
         {
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
 
-            int expectedWordId = 35;
             string text = "cuerpo";
-            int languageId = 1;
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(dbContextFactory);
+            Guid expectedWordId = CommonFunctions.GetWordId(dbContextFactory, text, languageId);
 
-            var word = WordApi.WordReadByLanguageIdAndText(context, languageId, text);
+            var word = WordApi.WordReadByLanguageIdAndText(dbContextFactory, languageId, text);
 
             Assert.IsNotNull(word);
             Assert.AreEqual(expectedWordId, word.Id);
@@ -126,13 +137,14 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task WordReadByLanguageIdAndTextAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
-
-            int expectedWordId = 35;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            
             string text = "cuerpo";
-            int languageId = 1;
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(dbContextFactory);
+            Guid expectedWordId = CommonFunctions.GetWordId(dbContextFactory, text, languageId);
 
-            var word = await WordApi.WordReadByLanguageIdAndTextAsync(context, languageId, text);
+            var word = await WordApi.WordReadByLanguageIdAndTextAsync(dbContextFactory, languageId, text);
 
             Assert.IsNotNull(word);
             Assert.AreEqual(expectedWordId, word.Id);
@@ -142,8 +154,9 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordsCreateOrderedFromSentenceIdTest()
         {
-            int bookId = 0;
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            Guid? bookId = null;
             string sentence1 = "Cada tarde, después de la escuela.";
             int expectedCount = 6;
             string expectedWord = "después";
@@ -152,52 +165,55 @@ namespace Logic.Services.API.Tests
             try
             {
                 var language = LanguageApi.LanguageReadByCode(
-                    context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.Id is null || language.Id < 1)
+                    dbContextFactory, TestConstants.NewBookLanguageCode);
+                if (language is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = (int)language.Id,
-                    UniqueKey = Guid.NewGuid()
+                    LanguageId = language.Id,
+                    //Language = language,
+                    Id = Guid.NewGuid()
                 };
-                book = DataCache.BookCreate(book, context);
-                if (book is null || book.Id is null || book.Id < 1)
+                book = DataCache.BookCreate(book, dbContextFactory);
+                if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)book.Id;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
                     BookId = book.Id,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                page = DataCache.PageCreate(page, context);
-                if (page is null || page.Id is null || page.Id < 1)
+                page = DataCache.PageCreate(page, dbContextFactory);
+                if (page is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
                     PageId = page.Id,
+                    //Page = page,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                paragraph = DataCache.ParagraphCreate(paragraph, context);
-                if (paragraph is null || paragraph.Id is null || paragraph.Id < 1)
+                paragraph = DataCache.ParagraphCreate(paragraph, dbContextFactory);
+                if (paragraph is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create sentence
                 var sentence1created = SentenceApi.SentenceCreate(
-                    context, sentence1, (int)language.Id, 0, (int)paragraph.Id);
-                if (sentence1created is null || sentence1created.Id is null)
+                    dbContextFactory, sentence1, language, 0, paragraph);
+                if (sentence1created is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
 
                 var wordOrderPair = WordApi.WordsCreateOrderedFromSentenceId(
-                    context, (int)language.Id, (int)sentence1created.Id);
+                    dbContextFactory, language, sentence1created);
                 int actualCount = wordOrderPair.Count;
                 var checkedWord = wordOrderPair.Where(x => x.ordinal == wordOrdinalToCheck).FirstOrDefault();
                 if (checkedWord.word is null || checkedWord.word.TextLowerCase is null)
@@ -211,14 +227,15 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
         [TestMethod()]
         public async Task WordsCreateOrderedFromSentenceIdAsyncTest()
         {
-            int bookId = 0;
-            var context = CommonFunctions.CreateContext();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            Guid? bookId = null;
             string sentence1 = "Cada tarde, después de la escuela.";
             int expectedCount = 6;
             string expectedWord = "después";
@@ -227,54 +244,58 @@ namespace Logic.Services.API.Tests
             try
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
-                    context, TestConstants.NewBookLanguageCode);
-                if (language is null || language.Id is null || language.Id < 1)
+                    dbContextFactory, TestConstants.NewBookLanguageCode);
+                if (language is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = (int)language.Id,
-                    UniqueKey = Guid.NewGuid()
+                    LanguageId = language.Id,
+                    //Language = language,
+                    Id = Guid.NewGuid()
                 };
-                book = DataCache.BookCreate(book, context);
-                if (book is null || book.Id is null || book.Id < 1)
+                book = DataCache.BookCreate(book, dbContextFactory);
+                if (book is null)
                 { ErrorHandler.LogAndThrow(); return; }
-                bookId = (int)book.Id;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
                     BookId = book.Id,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                page = DataCache.PageCreate(page, context);
-                if (page is null || page.Id is null || page.Id < 1)
+                page = DataCache.PageCreate(page, dbContextFactory);
+                if (page is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
                     PageId = page.Id,
+                    //Page = page,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                paragraph = DataCache.ParagraphCreate(paragraph, context);
-                if (paragraph is null || paragraph.Id is null || paragraph.Id < 1)
+                paragraph = DataCache.ParagraphCreate(paragraph, dbContextFactory);
+                if (paragraph is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
                 // create sentence
                 var sentence1created = await SentenceApi.SentenceCreateAsync(
-                    context, sentence1, (int)language.Id, 0, (int)paragraph.Id);
-                if (sentence1created is null || sentence1created.Id is null)
+                    dbContextFactory, sentence1, language, 0, paragraph);
+                if (sentence1created is null)
                 { ErrorHandler.LogAndThrow(); return; }
 
 
                 var wordOrderPair = await WordApi.WordsCreateOrderedFromSentenceIdAsync(
-                    context, (int)language.Id, (int)sentence1created.Id);
+                    dbContextFactory, language, sentence1created);
                 int actualCount = wordOrderPair.Count;
-                var checkedWord = wordOrderPair.Where(x => x.ordinal == wordOrdinalToCheck).FirstOrDefault();
+                var checkedWord = wordOrderPair.Where(x => x.ordinal == wordOrdinalToCheck)
+                    .FirstOrDefault();
                 if (checkedWord.word is null || checkedWord.word.TextLowerCase is null)
                 { ErrorHandler.LogAndThrow(); return; }
                 string actualWord = checkedWord.word.TextLowerCase;
@@ -286,7 +307,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, dbContextFactory);
             }
         }
 
@@ -294,20 +315,22 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordsDictReadByPageIdTest()
         {
-            var context = CommonFunctions.CreateContext();
-            int pageId = 3;
-            int expectedCount = 142;
-            string wordToCheck = "ciencia";
-            int expectedId = 28;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            Guid pageId = CommonFunctions.GetRapunzelPage1Id(dbContextFactory);
+            int expectedCount = 107;
+            string wordToCheck = "nombre";
+            Guid languageKey = CommonFunctions.GetSpanishLanguageId(dbContextFactory);
+            Guid expectedId = CommonFunctions.GetWordId(dbContextFactory, wordToCheck, languageKey);
 
-            var dict = WordApi.WordsDictReadByPageId(context, pageId);
+            var dict = WordApi.WordsDictReadByPageId(dbContextFactory, pageId);
             if (dict is null)
             { ErrorHandler.LogAndThrow(); return; }
             int actualCount = dict.Count;
             var actualWord = dict[wordToCheck];
-            if (actualWord is null || actualWord.Id is null)
+            if (actualWord is null)
             { ErrorHandler.LogAndThrow(); return; }
-            int actualId = (int)actualWord.Id;
+            Guid actualId = (Guid)actualWord.Id;
 
             Assert.AreEqual(expectedId, actualId);
             Assert.AreEqual(expectedCount, actualCount);
@@ -315,20 +338,22 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task WordsDictReadByPageIdAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
-            int pageId = 3;
-            int expectedCount = 142;
-            string wordToCheck = "ciencia";
-            int expectedId = 28;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            Guid pageId = CommonFunctions.GetRapunzelPage1Id(dbContextFactory);
+            int expectedCount = 107; // distinct words
+            string wordToCheck = "nombre";
+            Guid languageKey = CommonFunctions.GetSpanishLanguageId(dbContextFactory);
+            Guid expectedId = CommonFunctions.GetWordId(dbContextFactory, wordToCheck, languageKey);
 
-            var dict = await WordApi.WordsDictReadByPageIdAsync(context, pageId);
+            var dict = await WordApi.WordsDictReadByPageIdAsync(dbContextFactory, pageId);
             if (dict is null)
             { ErrorHandler.LogAndThrow(); return; }
             int actualCount = dict.Count;
             var actualWord = dict[wordToCheck];
-            if (actualWord is null || actualWord.Id is null)
+            if (actualWord is null)
             { ErrorHandler.LogAndThrow(); return; }
-            int actualId = (int)actualWord.Id;
+            Guid actualId = (Guid)actualWord.Id;
 
             Assert.AreEqual(expectedId, actualId);
             Assert.AreEqual(expectedCount, actualCount);
@@ -338,18 +363,20 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void WordsGetListOfReadCountTest()
         {
-            int userId = 0;
-            var context = CommonFunctions.CreateContext();
-            //using var transaction = context.Database.BeginTransaction();
-            int language1 = 1;
-            int language2 = 2;
-            int bookIdSpanish = 6;
-            int bookIdEnglish = 22;
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+
+            Language language1 = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Language language2 = CommonFunctions.GetEnglishLanguage(dbContextFactory);
+            Guid bookIdSpanish = CommonFunctions.GetBookRapunzelId(dbContextFactory);
+            Guid bookIdEnglish = CommonFunctions.GetBookSelfishGiantId(dbContextFactory);
             int countRows1Expected = 1;
             int countRows2Expected = 2;
             int countSpanishWords1Expected = 0;
-            int countSpanishWords2Expected = 253;
-            int countEnglishWords2Expected = 208;
+            int countSpanishWords2Expected = 195;
+            int countEnglishWords2Expected = 236;
 
             try
             {
@@ -365,66 +392,62 @@ namespace Logic.Services.API.Tests
                  * check the counts
                  * */
 
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
-
-                var languageUser1 = LanguageUserApi.LanguageUserCreate(context, language1, (int)user.Id);
-                if (languageUser1 is null) ErrorHandler.LogAndThrow();
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
 
                 var bookUser1 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookIdSpanish, (int)user.Id);
-                if (bookUser1 is null || bookUser1.Id is null || bookUser1.LanguageUserId is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                    dbContextFactory, bookIdSpanish, (Guid)user.Id);
+                Assert.IsNotNull(bookUser1);
 
                 // pull the count
-                var list1 = WordApi.WordsGetListOfReadCount(context, (int)user.Id);
-                if (list1 is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                var list1 = WordApi.WordsGetListOfReadCount(dbContextFactory, (Guid)user.Id);
+                Assert.IsNotNull(list1);
                 int countRows1Actual = list1.Count;
                 int countSpanishWords1Actual = list1.Where(x => x.language == "Spanish").FirstOrDefault().wordCount;
 
                 // add the second language and bookUser
-                var languageUser2 = LanguageUserApi.LanguageUserCreate(context, language2, (int)user.Id);
-                if (languageUser2 is null) ErrorHandler.LogAndThrow();
+                var languageUser2 = LanguageUserApi.LanguageUserCreate(
+                    dbContextFactory, language2, user);
+                Assert.IsNotNull(languageUser2);
 
                 var bookUser2 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookIdEnglish, (int)user.Id);
-                if (bookUser2 is null || bookUser2.Id is null || bookUser2.LanguageUserId is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                    dbContextFactory, bookIdEnglish, (Guid)user.Id);
+                Assert.IsNotNull(bookUser2);
 
                 // read the first page of book 1
-                var firstPageBook1 = PageApi.PageReadFirstByBookId(context, bookIdSpanish);
-                if (firstPageBook1 is null || firstPageBook1.Id is null || firstPageBook1.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                var firstPageBook1 = PageApi.PageReadFirstByBookId(
+                    dbContextFactory, bookIdSpanish);
+                Assert.IsNotNull(firstPageBook1);
                 var pageUser1 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (int)firstPageBook1.Id, (int)user.Id);
-                if (pageUser1 is null || pageUser1.Id is null || pageUser1.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
-                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)pageUser1.Id);
-                PageUserApi.PageUserMarkAsRead(context, (int)pageUser1.Id);
+                    dbContextFactory, firstPageBook1, user);
+                Assert.IsNotNull(pageUser1);
+                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(dbContextFactory, (Guid)pageUser1.Id);
+                PageUserApi.PageUserMarkAsRead(dbContextFactory, (Guid)pageUser1.Id);
 
                 // read the first page of book 2
-                var firstPageBook2 = PageApi.PageReadFirstByBookId(context, bookIdEnglish);
-                if (firstPageBook2 is null || firstPageBook2.Id is null || firstPageBook2.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                var firstPageBook2 = PageApi.PageReadFirstByBookId(
+                    dbContextFactory, bookIdEnglish);
+                Assert.IsNotNull(firstPageBook2);
                 var pageUser2 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (int)firstPageBook2.Id, (int)user.Id);
-                if (pageUser2 is null || pageUser2.Id is null || pageUser2.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
-                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)pageUser2.Id);
-                PageUserApi.PageUserMarkAsRead(context, (int)pageUser2.Id);
+                    dbContextFactory, firstPageBook2, user);
+                Assert.IsNotNull(pageUser2);
+                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(dbContextFactory, (Guid)pageUser2.Id);
+                PageUserApi.PageUserMarkAsRead(dbContextFactory, (Guid)pageUser2.Id);
 
                 // re-run the word count query
-                var list2 = WordApi.WordsGetListOfReadCount(context, (int)user.Id);
-                if (list2 is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                var list2 = WordApi.WordsGetListOfReadCount(
+                    dbContextFactory, (Guid)user.Id);
+                Assert.IsNotNull(list2);
                 int countRows2Actual = list2.Count;
-                int countSpanishWords2Actual = list2.Where(x => x.language == "Spanish").FirstOrDefault().wordCount;
-                int countEnglishWords2Actual = list2.Where(x => x.language == "English").FirstOrDefault().wordCount;
+                int countSpanishWords2Actual = list2
+                    .Where(x => x.language == "Spanish")
+                    .FirstOrDefault()
+                    .wordCount;
+                int countEnglishWords2Actual = list2
+                    .Where(x => x.language == "English (American)")
+                    .FirstOrDefault().wordCount;
 
                 // assert
                 Assert.AreEqual(countRows1Expected, countRows1Actual);
@@ -436,23 +459,26 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
         [TestMethod()]
         public async Task WordsGetListOfReadCountAsyncTest()
         {
-            int userId = 0;
-            var context = CommonFunctions.CreateContext();
-            int language1 = 1;
-            int language2 = 2;
-            int bookIdSpanish = 6;
-            int bookIdEnglish = 22;
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+
+            Language language1 = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Language language2 = CommonFunctions.GetEnglishLanguage(dbContextFactory);
+            Guid bookIdSpanish = CommonFunctions.GetBookRapunzelId(dbContextFactory);
+            Guid bookIdEnglish = CommonFunctions.GetBookSelfishGiantId(dbContextFactory);
             int countRows1Expected = 1;
             int countRows2Expected = 2;
             int countSpanishWords1Expected = 0;
-            int countSpanishWords2Expected = 253;
-            int countEnglishWords2Expected = 208;
+            int countSpanishWords2Expected = 195;
+            int countEnglishWords2Expected = 236;
 
             try
             {
@@ -468,65 +494,62 @@ namespace Logic.Services.API.Tests
                  * check the counts
                  * */
 
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
-                var languageUser1 = LanguageUserApi.LanguageUserCreate(context, language1, (int)user.Id);
-                if (languageUser1 is null) ErrorHandler.LogAndThrow();
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
 
                 var bookUser1 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookIdSpanish, (int)user.Id);
-                if (bookUser1 is null || bookUser1.Id is null || bookUser1.LanguageUserId is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                    dbContextFactory, bookIdSpanish, (Guid)user.Id);
+                Assert.IsNotNull(bookUser1);
 
                 // pull the count
-                var list1 = await WordApi.WordsGetListOfReadCountAsync(context, (int)user.Id);
-                if (list1 is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                var list1 = await WordApi.WordsGetListOfReadCountAsync(dbContextFactory, (Guid)user.Id);
+                Assert.IsNotNull(list1);
                 int countRows1Actual = list1.Count;
                 int countSpanishWords1Actual = list1.Where(x => x.language == "Spanish").FirstOrDefault().wordCount;
 
                 // add the second language and bookUser
-                var languageUser2 = LanguageUserApi.LanguageUserCreate(context, language2, (int)user.Id);
-                if (languageUser2 is null) ErrorHandler.LogAndThrow();
+                var languageUser2 = LanguageUserApi.LanguageUserCreate(
+                    dbContextFactory, language2, user);
+                Assert.IsNotNull(languageUser2);
 
                 var bookUser2 = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookIdEnglish, (int)user.Id);
-                if (bookUser2 is null || bookUser2.Id is null || bookUser2.LanguageUserId is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                    dbContextFactory, bookIdEnglish, (Guid)user.Id);
+                Assert.IsNotNull(bookUser2);
 
                 // read the first page of book 1
-                var firstPageBook1 = await PageApi.PageReadFirstByBookIdAsync(context, bookIdSpanish);
-                if (firstPageBook1 is null || firstPageBook1.Id is null || firstPageBook1.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                var firstPageBook1 = await PageApi.PageReadFirstByBookIdAsync(
+                    dbContextFactory, bookIdSpanish);
+                Assert.IsNotNull(firstPageBook1);
                 var pageUser1 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (int)firstPageBook1.Id, (int)user.Id);
-                if (pageUser1 is null || pageUser1.Id is null || pageUser1.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
-                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)pageUser1.Id);
-                await PageUserApi.PageUserMarkAsReadAsync(context, (int)pageUser1.Id);
+                    dbContextFactory, firstPageBook1, user);
+                Assert.IsNotNull(pageUser1);
+                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(dbContextFactory, (Guid)pageUser1.Id);
+                await PageUserApi.PageUserMarkAsReadAsync(dbContextFactory, (Guid)pageUser1.Id);
 
                 // read the first page of book 2
-                var firstPageBook2 = await PageApi.PageReadFirstByBookIdAsync(context, bookIdEnglish);
-                if (firstPageBook2 is null || firstPageBook2.Id is null || firstPageBook2.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                var firstPageBook2 = await PageApi.PageReadFirstByBookIdAsync(
+                    dbContextFactory, bookIdEnglish);
+                Assert.IsNotNull(firstPageBook2);
                 var pageUser2 = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (int)firstPageBook2.Id, (int)user.Id);
-                if (pageUser2 is null || pageUser2.Id is null || pageUser2.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
-                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)pageUser2.Id);
-                await PageUserApi.PageUserMarkAsReadAsync(context, (int)pageUser2.Id);
+                    dbContextFactory, firstPageBook2, user);
+                Assert.IsNotNull(pageUser2);
+                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(dbContextFactory, (Guid)pageUser2.Id);
+                await PageUserApi.PageUserMarkAsReadAsync(dbContextFactory, (Guid)pageUser2.Id);
 
                 // re-run the word count query
-                var list2 = await WordApi.WordsGetListOfReadCountAsync(context, (int)user.Id);
-                if (list2 is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                var list2 = await WordApi.WordsGetListOfReadCountAsync(
+                    dbContextFactory, (Guid)user.Id);
+                Assert.IsNotNull(list2);
                 int countRows2Actual = list2.Count;
-                int countSpanishWords2Actual = list2.Where(x => x.language == "Spanish").FirstOrDefault().wordCount;
-                int countEnglishWords2Actual = list2.Where(x => x.language == "English").FirstOrDefault().wordCount;
+                int countSpanishWords2Actual = list2
+                    .Where(x => x.language == "Spanish")
+                    .FirstOrDefault()
+                    .wordCount;
+                int countEnglishWords2Actual = list2
+                    .Where(x => x.language == "English (American)")
+                    .FirstOrDefault().wordCount;
 
                 // assert
                 Assert.AreEqual(countRows1Expected, countRows1Actual);
@@ -538,18 +561,20 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
         }
 
         [TestMethod()]
         public void WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdReadTest()
         {
-            int userId = 0;
-            int bookId = 0;
-            var context = CommonFunctions.CreateContext();
-            int language = 1;
-            int countRowsExpected = 126;
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            int countRowsExpected = 111; // distinct words in gigante page 2 /// 114 befor?
             string wordToCheck = "volvió";
             int countTranslationsExpected = 3;
             string expectedTranslation1 = "he  returned: preterite \"él\" conjugation of volver";
@@ -565,7 +590,7 @@ namespace Logic.Services.API.Tests
                  * */
 
                 var newBook = BookApi.BookCreateAndSave(
-                    context,
+                    dbContextFactory,
                     TestConstants.NewBookTitle,
                     TestConstants.NewBookLanguageCode,
                     TestConstants.NewBookUrl,
@@ -573,21 +598,22 @@ namespace Logic.Services.API.Tests
                     );
                 Assert.IsNotNull(newBook);
                 Assert.IsNotNull(newBook.Id);
-                bookId = (int)newBook.Id;
+                bookId = (Guid)newBook.Id;
 
-                var userService = CommonFunctions.CreateUserService();
-                Assert.IsNotNull(userService);
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
-                Assert.IsNotNull(user.Id);
-                Assert.IsTrue(user.Id >= 1);
-                userId = (int)user.Id;
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, language, (int)user.Id);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
+
+                // fetch the languageUser
+                var languageUser = LanguageUserApi.LanguageUserGet(
+                    dbContextFactory, language.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
-                Assert.IsNotNull(languageUser.Id);
 
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookId, (int)user.Id);
+                    dbContextFactory, (Guid)bookId, (Guid)user.Id);
                 Assert.IsNotNull(bookUser);
                 Assert.IsNotNull(bookUser.Id);
                 Assert.IsNotNull(bookUser.LanguageUserId);
@@ -597,7 +623,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(page.Id);
                 var dict = WordApi
                     .WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead(
-                        context, (int)page.Id, (int)languageUser.Id);
+                        dbContextFactory, page.Id, languageUser.Id);
 
                 Assert.IsNotNull(dict);
                 Assert.AreEqual(countRowsExpected, dict.Count);
@@ -619,19 +645,21 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
 
         [TestMethod()]
         public async Task WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdReadAsyncTest()
         {
-            int userId = 0;
-            int bookId = 0;
-            var context = CommonFunctions.CreateContext();
-            int language = 1;
-            int countRowsExpected = 126;
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            int countRowsExpected = 111; // distinct words in gigante page 2 /// 114 befor?
             string wordToCheck = "volvió";
             int countTranslationsExpected = 3;
             string expectedTranslation1 = "he  returned: preterite \"él\" conjugation of volver";
@@ -647,7 +675,7 @@ namespace Logic.Services.API.Tests
                  * */
 
                 var newBook = await BookApi.BookCreateAndSaveAsync(
-                    context,
+                    dbContextFactory,
                     TestConstants.NewBookTitle,
                     TestConstants.NewBookLanguageCode,
                     TestConstants.NewBookUrl,
@@ -655,21 +683,22 @@ namespace Logic.Services.API.Tests
                     );
                 Assert.IsNotNull(newBook);
                 Assert.IsNotNull(newBook.Id);
-                bookId = (int)newBook.Id;
+                bookId = (Guid)newBook.Id;
 
-                var userService = CommonFunctions.CreateUserService();
-                Assert.IsNotNull(userService);
-                var user = await CommonFunctions.CreateNewTestUserAsync(userService, context);
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
-                Assert.IsNotNull(user.Id);
-                Assert.IsTrue(user.Id >= 1);
-                userId = (int)user.Id;
-                var languageUser = await LanguageUserApi.LanguageUserCreateAsync(context, language, (int)user.Id);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
+
+                // fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
+                    dbContextFactory, language.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
-                Assert.IsNotNull(languageUser.Id);
 
                 var bookUser = await OrchestrationApi.OrchestrateBookUserCreationAndSubProcessesAsync(
-                    context, bookId, (int)user.Id);
+                    dbContextFactory, (Guid)bookId, (Guid)user.Id);
                 Assert.IsNotNull(bookUser);
                 Assert.IsNotNull(bookUser.Id);
                 Assert.IsNotNull(bookUser.LanguageUserId);
@@ -679,7 +708,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(page.Id);
                 var dict = await WordApi
                     .WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdReadAsync(
-                        context, (int)page.Id, (int)languageUser.Id);
+                        dbContextFactory, page.Id, languageUser.Id);
 
                 Assert.IsNotNull(dict);
                 Assert.AreEqual(countRowsExpected, dict.Count);
@@ -701,15 +730,38 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                await CommonFunctions.CleanUpUserAsync(userId, context);
-                await CommonFunctions.CleanUpBookAsync(bookId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, dbContextFactory);
             }
         }
 
         [TestMethod()]
         public void WordTranslationsReadByWordIdTest()
         {
-            Assert.Fail();
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            var languageId = CommonFunctions.GetSpanishLanguageId(dbContextFactory);
+            string expectedTranslation1 = "he  says: present \"él\" conjugation of decir";
+            string expectedTranslation2 = "she  says: present \"ella\" conjugation of decir";
+            string expectedTranslation3 = "you  say: present \"usted\" conjugation of decir";
+
+            var wordId = CommonFunctions.GetWordIdByTextLower(dbContextFactory, languageId, "dice");
+            Assert.IsNotNull(wordId);
+
+            var translations = WordApi.WordTranslationsReadByWordId(dbContextFactory, wordId);
+            Assert.IsNotNull(translations);
+
+            var orderedTranslations = translations
+                .OrderBy(x => x.Ordinal)
+                .ToArray();
+
+            string actualTranslation1 = orderedTranslations[0].Translation;
+            string actualTranslation2 = orderedTranslations[1].Translation;
+            string actualTranslation3 = orderedTranslations[2].Translation;
+
+            Assert.AreEqual(expectedTranslation1, actualTranslation1);
+            Assert.AreEqual(expectedTranslation2, actualTranslation2);
+            Assert.AreEqual(expectedTranslation3, actualTranslation3);
         }
     }
 }

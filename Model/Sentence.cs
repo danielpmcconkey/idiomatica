@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -10,20 +12,27 @@ namespace Model
 {
     
     [Table("Sentence", Schema = "Idioma")]
+    [PrimaryKey(nameof(Id))]
+    [Index(nameof(ParagraphId), nameof(Ordinal), IsUnique = true)]
     public class Sentence
     {
-        public int? Id { get; set; }
+        #region required data
+
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid ParagraphId { get; set; }
+        [Required] public required int Ordinal { get; set; }
+        [Column(TypeName = "TEXT")]
+        [Required] public required string Text { get; set; }
+
+        #endregion
+
+        
 
         #region relationships
-        public int? ParagraphId { get; set; }
         public Paragraph? Paragraph { get; set; }
         public List<Token> Tokens { get; set; } = new List<Token>();
         #endregion
 
-        public int? Ordinal { get; set; }
-        [Column(TypeName = "TEXT")]
-        public string? Text { get; set; }
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
 
     }
 }

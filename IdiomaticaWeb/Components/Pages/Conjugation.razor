@@ -1,6 +1,7 @@
 ﻿@page "/Conjugation"
+@using Model.Enums
 @rendermode InteractiveServer
-@inject UserService UserService;
+@inject LoginService UserService;
 
 <div>
     @if (VerbConjugation is not null)
@@ -34,7 +35,7 @@
 
 @code {
     [Parameter]
-    public VerbConjugation VerbConjugation { get; set; } = new();
+    public VerbConjugation? VerbConjugation { get; set; }
     [Parameter]
     public bool ShouldShowTranslations {get; set; }
 

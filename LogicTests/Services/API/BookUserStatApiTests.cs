@@ -9,6 +9,9 @@ using LogicTests;
 using Model;
 using Logic.Telemetry;
 using System.Net;
+using Model.Enums;
+using Microsoft.EntityFrameworkCore;
+using Model.DAL;
 
 
 namespace Logic.Services.API.Tests
@@ -19,42 +22,49 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookUserStatsReadTest()
         {
-            int userId = 0;
-            int bookId = 0;
-            var context = CommonFunctions.CreateContext();
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             int expectedStatsCount = 8;
-            string expectedProgress = "0 / 3";
-            int languageId = 1;
+            string expectedProgress = "0 / 4";
+            Guid languageId = learningLanguage.Id;
 
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                Assert.IsNotNull(loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(
+                    dbContextFactory, loginService);
+
                 userId = createResult.userId;
                 bookId = createResult.bookId;
-                int bookUserId = createResult.bookUserId;
+                Guid bookUserId = createResult.bookUserId;
 
                 // grab the expected language user ID
-                var lu = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(context, userId);
-                if (lu is null || lu.Count < 1) { ErrorHandler.LogAndThrow(); return; }
+                var lu = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(
+                    dbContextFactory, (Guid)userId);
+                Assert.IsNotNull(lu);
+                Assert.IsFalse(lu.Count < 1);
                 var l = lu.Where(x => x.LanguageId == languageId).FirstOrDefault();
-                if (l is null || l.Id is null || l.Id < 1) { ErrorHandler.LogAndThrow(); return; }
-                int expectedLanguageUserId = (int)l.Id;
+                Assert.IsNotNull(l);
+                Guid expectedLanguageUserId = (Guid)l.Id;
 
 
                 // carry on with the test
-                var bookUserStats = BookUserStatApi.BookUserStatsRead(context, bookId, userId);
+                var bookUserStats = BookUserStatApi.BookUserStatsRead(
+                    dbContextFactory, (Guid)bookId, (Guid)userId);
                 int actualStatsCount = bookUserStats is null ? 0 : bookUserStats.Count;
                 BookUserStat? progressStat = bookUserStats is null ? null :
-                    bookUserStats.Where(x => x.Key == AvailableBookUserStat.PROGRESS).FirstOrDefault();
-                if (progressStat is null || progressStat.LanguageUserId is null || progressStat.ValueString is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                    bookUserStats
+                    .Where(x => x.Key == AvailableBookUserStat.PROGRESS).FirstOrDefault();
+                Assert.IsNotNull(progressStat);
+                Assert.IsNotNull(progressStat.ValueString);
                 string actualProgress = progressStat.ValueString;
 
 
-                // assert
 
                 Assert.AreEqual(expectedStatsCount, actualStatsCount);
                 Assert.AreEqual(expectedLanguageUserId, progressStat.LanguageUserId);
@@ -63,49 +73,56 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
         [TestMethod()]
         public async Task BookUserStatsReadAsyncTest()
         {
-            int userId = 0;
-            int bookId = 0;
-            var context = CommonFunctions.CreateContext();
+            Guid? userId = null;
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             int expectedStatsCount = 8;
-            string expectedProgress = "0 / 3";
-            int languageId = 1;
+            string expectedProgress = "0 / 4";
+            Guid languageId = learningLanguage.Id;
 
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(context, userService);
+                Assert.IsNotNull(loginService);
+                var createResult = CommonFunctions.CreateUserAndBookAndBookUser(
+                    dbContextFactory, loginService);
+
                 userId = createResult.userId;
                 bookId = createResult.bookId;
-                int bookUserId = createResult.bookUserId;
+                Guid bookUserId = createResult.bookUserId;
 
                 // grab the expected language user ID
-                var lu = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(context, userId);
-                if (lu is null || lu.Count < 1) { ErrorHandler.LogAndThrow(); return; }
+                var lu = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
+                    dbContextFactory, (Guid)userId);
+                Assert.IsNotNull(lu);
+                Assert.IsFalse(lu.Count < 1);
                 var l = lu.Where(x => x.LanguageId == languageId).FirstOrDefault();
-                if (l is null || l.Id is null || l.Id < 1) { ErrorHandler.LogAndThrow(); return; }
-                int expectedLanguageUserId = (int)l.Id;
+                Assert.IsNotNull(l);
+                Guid expectedLanguageUserId = (Guid)l.Id;
 
 
                 // carry on with the test
-                var bookUserStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, userId);
+                var bookUserStats = await BookUserStatApi.BookUserStatsReadAsync(
+                    dbContextFactory, (Guid)bookId, (Guid)userId);
                 int actualStatsCount = bookUserStats is null ? 0 : bookUserStats.Count;
                 BookUserStat? progressStat = bookUserStats is null ? null :
-                    bookUserStats.Where(x => x.Key == AvailableBookUserStat.PROGRESS).FirstOrDefault();
-                if (progressStat is null || progressStat.LanguageUserId is null || progressStat.ValueString is null)
-                    { ErrorHandler.LogAndThrow(); return; }
+                    bookUserStats
+                    .Where(x => x.Key == AvailableBookUserStat.PROGRESS).FirstOrDefault();
+                Assert.IsNotNull(progressStat);
+                Assert.IsNotNull(progressStat.ValueString);
                 string actualProgress = progressStat.ValueString;
 
 
-                // assert
                 
                 Assert.AreEqual(expectedStatsCount, actualStatsCount);
                 Assert.AreEqual(expectedLanguageUserId, progressStat.LanguageUserId);
@@ -114,8 +131,8 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, dbContextFactory);
             }
         }
 
@@ -123,63 +140,69 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void BookUserStatsUpdateByBookUserIdTest()
         {
-            int userId = 0;
-            int bookId = 6;
-            var context = CommonFunctions.CreateContext();
-            decimal expectedWordCount = 3046.0M;
-            decimal expectedDistinctKnowPercent = 0.18M;
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Guid bookId = CommonFunctions.GetBookEspañaId(dbContextFactory);
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            decimal expectedWordCount = 905.0M;
+            decimal expectedDistinctKnowPercent = 0.11M;
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
-                    { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
 
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
+               
 
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.LanguageUserId is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                    dbContextFactory, bookId, (Guid)user.Id);
+                Assert.IsNotNull(bookUser);
+
                 // carry on with the test
-                var bookUserStats = BookUserStatApi.BookUserStatsRead(context, bookId, (int)user.Id);
+                var bookUserStats = BookUserStatApi.BookUserStatsRead(
+                    dbContextFactory, bookId, (Guid)user.Id);
                 // checking total word count here because we already tested progress
                 // it's good to mix these up so we eventually get coverage
                 BookUserStat? totalWordCountStat = bookUserStats is null ? null :
-                    bookUserStats.Where(x => x.Key == AvailableBookUserStat.TOTALWORDCOUNT).FirstOrDefault();
+                    bookUserStats.Where(x => x.Key == AvailableBookUserStat.TOTALWORDCOUNT)
+                    .FirstOrDefault();
                 decimal actualWordCount = totalWordCountStat is null ? 0 :
-                    totalWordCountStat.ValueNumeric is null ? 0 : (decimal)totalWordCountStat.ValueNumeric;
+                    totalWordCountStat.ValueNumeric is null ? 0 :
+                    (decimal)totalWordCountStat.ValueNumeric;
 
                 // now move the page forward a couple of times as if we're reading it
-                var firstPage = PageApi.PageReadFirstByBookId(context, bookId);
-                if (firstPage is null || firstPage.Id is null || firstPage.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                var firstPage = PageApi.PageReadFirstByBookId(dbContextFactory, bookId);
+                Assert.IsNotNull(firstPage);
                 var pageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (int)firstPage.Id, (int)user.Id);
-                if (pageUser is null || pageUser.Id is null || pageUser.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                    dbContextFactory, firstPage, user);
+                Assert.IsNotNull(pageUser);
+
 
                 // update all unknowns to well known
-                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)pageUser.Id);
+                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(dbContextFactory, (Guid)pageUser.Id);
                 // mark the first page as read
-                PageUserApi.PageUserMarkAsRead(context, (int)pageUser.Id);
+                PageUserApi.PageUserMarkAsRead(dbContextFactory, (Guid)pageUser.Id);
                 // now move forward to page 2
                 var newPageUser = PageUserApi.PageUserReadByOrderWithinBook(
-                    context, (int)bookUser.LanguageUserId, 2, bookId);
+                    dbContextFactory, (Guid)bookUser.LanguageUserId, 2, bookId);
 
                 // now we need to regen the stats
-                BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (int)bookUser.Id);
+                BookUserStatApi.BookUserStatsUpdateByBookUserId(dbContextFactory, (Guid)bookUser.Id);
                 // finally, re-pull the stats
-                var newStats = BookUserStatApi.BookUserStatsRead(context, bookId, (int)user.Id);
+                var newStats = BookUserStatApi.BookUserStatsRead(
+                    dbContextFactory, bookId, (Guid)user.Id);
                 BookUserStat? distinctKnownPercentStat = newStats is null ? null :
-                    newStats.Where(x => x.Key == AvailableBookUserStat.DISTINCTKNOWNPERCENT).FirstOrDefault();
-                if (distinctKnownPercentStat is null || distinctKnownPercentStat.ValueNumeric is null)
-                { ErrorHandler.LogAndThrow(); return; }
-                decimal actualDistinctKnown = Math.Round((decimal)distinctKnownPercentStat.ValueNumeric, 2);
+                    newStats.Where(x => x.Key == AvailableBookUserStat.DISTINCTKNOWNPERCENT)
+                    .FirstOrDefault();
+                Assert.IsNotNull(distinctKnownPercentStat);
+                Assert.IsNotNull(distinctKnownPercentStat.ValueNumeric);
+
+                decimal actualDistinctKnown = Math.Round(
+                    (decimal)distinctKnownPercentStat.ValueNumeric, 2);
 
                 // assert
                 Assert.AreEqual(expectedWordCount, actualWordCount);
@@ -188,70 +211,75 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
         [TestMethod()]
         public async Task BookUserStatsUpdateByBookUserIdAsyncTest()
         {
-            int userId = 0;
-            int bookId = 6;
-            var context = CommonFunctions.CreateContext();
-            decimal expectedWordCount = 3046.0M;
-            decimal expectedDistinctKnowPercent = 0.18M;
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Guid bookId = CommonFunctions.GetBookEspañaId(dbContextFactory);
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            decimal expectedWordCount = 905.0M;
+            decimal expectedDistinctKnowPercent = 0.11M;
 
             try
             {
-                var userService = CommonFunctions.CreateUserService();
-                if (userService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = CommonFunctions.CreateNewTestUser(userService, context);
-                if (user is null || user.Id is null || user.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
-                userId = (int)user.Id;
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
 
-                var languageUser = LanguageUserApi.LanguageUserCreate(context, 1, (int)user.Id);
-                if (languageUser is null) ErrorHandler.LogAndThrow();
+                
 
                 var bookUser = OrchestrationApi.OrchestrateBookUserCreationAndSubProcesses(
-                    context, bookId, (int)user.Id);
-                if (bookUser is null || bookUser.Id is null || bookUser.LanguageUserId is null)
-                { ErrorHandler.LogAndThrow(); return; }
+                    dbContextFactory, bookId, (Guid)user.Id);
+                Assert.IsNotNull(bookUser);
+
                 // carry on with the test
-                var bookUserStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (int)user.Id);
+                var bookUserStats = await BookUserStatApi.BookUserStatsReadAsync(
+                    dbContextFactory, bookId, (Guid)user.Id);
                 // checking total word count here because we already tested progress
                 // it's good to mix these up so we eventually get coverage
                 BookUserStat? totalWordCountStat = bookUserStats is null ? null :
-                    bookUserStats.Where(x => x.Key == AvailableBookUserStat.TOTALWORDCOUNT).FirstOrDefault();
+                    bookUserStats.Where(x => x.Key == AvailableBookUserStat.TOTALWORDCOUNT)
+                    .FirstOrDefault();
                 decimal actualWordCount = totalWordCountStat is null ? 0 :
-                    totalWordCountStat.ValueNumeric is null ? 0 : (decimal)totalWordCountStat.ValueNumeric;
+                    totalWordCountStat.ValueNumeric is null ? 0 : 
+                    (decimal)totalWordCountStat.ValueNumeric;
 
                 // now move the page forward a couple of times as if we're reading it
-                var firstPage = await PageApi.PageReadFirstByBookIdAsync(context, bookId);
-                if (firstPage is null || firstPage.Id is null || firstPage.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                var firstPage = await PageApi.PageReadFirstByBookIdAsync(dbContextFactory, bookId);
+                Assert.IsNotNull(firstPage);
                 var pageUser = PageUserApi.PageUserCreateForPageIdAndUserId(
-                    context, (int)firstPage.Id, (int)user.Id);
-                if (pageUser is null || pageUser.Id is null || pageUser.Id < 1)
-                { ErrorHandler.LogAndThrow(); return; }
+                    dbContextFactory, firstPage, user);
+                Assert.IsNotNull(pageUser);
 
 
                 // update all unknowns to well known
-                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(context, (int)pageUser.Id);
+                PageUserApi.PageUserUpdateUnknowWordsToWellKnown(dbContextFactory, (Guid)pageUser.Id);
                 // mark the first page as read
-                await PageUserApi.PageUserMarkAsReadAsync(context, (int)pageUser.Id);
+                await PageUserApi.PageUserMarkAsReadAsync(dbContextFactory, (Guid)pageUser.Id);
                 // now move forward to page 2
                 var newPageUser = await PageUserApi.PageUserReadByOrderWithinBookAsync(
-                    context, (int)bookUser.LanguageUserId, 2, bookId);
+                    dbContextFactory, (Guid)bookUser.LanguageUserId, 2, bookId);
 
                 // now we need to regen the stats
-                BookUserStatApi.BookUserStatsUpdateByBookUserId(context, (int)bookUser.Id);
+                BookUserStatApi.BookUserStatsUpdateByBookUserId(dbContextFactory, (Guid)bookUser.Id);
                 // finally, re-pull the stats
-                var newStats = await BookUserStatApi.BookUserStatsReadAsync(context, bookId, (int)user.Id);
+                var newStats = await BookUserStatApi.BookUserStatsReadAsync(
+                    dbContextFactory, bookId, (Guid)user.Id);
                 BookUserStat? distinctKnownPercentStat = newStats is null ? null :
-                    newStats.Where(x => x.Key == AvailableBookUserStat.DISTINCTKNOWNPERCENT).FirstOrDefault();
-                if (distinctKnownPercentStat is null || distinctKnownPercentStat.ValueNumeric is null)
-                { ErrorHandler.LogAndThrow(); return; }
-                decimal actualDistinctKnown = Math.Round((decimal)distinctKnownPercentStat.ValueNumeric, 2);
+                    newStats.Where(x => x.Key == AvailableBookUserStat.DISTINCTKNOWNPERCENT)
+                    .FirstOrDefault();
+                Assert.IsNotNull(distinctKnownPercentStat);
+                Assert.IsNotNull(distinctKnownPercentStat.ValueNumeric);
+                
+                decimal actualDistinctKnown = Math.Round(
+                    (decimal)distinctKnownPercentStat.ValueNumeric, 2);
 
                 // assert
                 Assert.AreEqual(expectedWordCount, actualWordCount);
@@ -260,7 +288,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpUser(userId, context);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
         }
 

@@ -1,6 +1,6 @@
 ﻿@using Logic.Services.API
 @rendermode InteractiveServer
-@inject UserService UserService;
+@inject LoginService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 @inject ILogger<IdiomaticaLogger> Logger;
 
@@ -36,8 +36,8 @@ else
 }
 @code {
     [Parameter]
-    public int? BookId { get; set; }
-    private List<BookTag> _tags = new List<BookTag>();
+    public Guid? BookId { get; set; }
+    private List<BookTagRow> _tags = [];
     private string? _addTagInput;
     private User? _loggedInUser;
     public ErrorState errorState = new ErrorState() { isError = false, errorMessage = "" };
@@ -51,16 +51,16 @@ else
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
 
-            var context = await DbContextFactory.CreateDbContextAsync();
-            _loggedInUser = await UserService.GetLoggedInUserAsync(context);
-            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            _loggedInUser = await UserService.GetLoggedInUserAsync(DbContextFactory);
+            if (_loggedInUser is null)
             {
-                ErrorHandler.LogAndThrow(2450);
+                ErrorHandler.LogAndThrow();
                 return;
             }
             if (BookId is not null)
             {
-                _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (int)BookId, (int)_loggedInUser.Id);
+                _tags = BookTagApi.BookTagsGetByBookIdAndUserId(DbContextFactory,
+                    (Guid)BookId, (Guid)_loggedInUser.Id);
             }
             
             await t_delay;
@@ -84,7 +84,7 @@ else
     }
     private async Task RefreshTags()
     {
-        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1) return;
+        if (_loggedInUser is null) return;
         
 
         try
@@ -92,7 +92,7 @@ else
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            if (_loggedInUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -100,7 +100,7 @@ else
             if (BookId is not null)
             {
                 _tags = await BookTagApi.BookTagsGetByBookIdAndUserIdAsync(
-                    context, (int)BookId, (int)_loggedInUser.Id);
+                    DbContextFactory, (Guid)BookId, (Guid)_loggedInUser.Id);
             }
             await t_delay;
             _isLoading = false;
@@ -116,7 +116,7 @@ else
     }
     private async Task OnAddTagAsync()
     {
-        if (_loggedInUser == null || _loggedInUser.Id == null || _loggedInUser.Id < 1) return;
+        if (_loggedInUser == null) return;
         if (_addTagInput == null) return;
         var sanitized = _addTagInput.Trim().ToLower();
         if (sanitized == string.Empty) return;
@@ -126,18 +126,25 @@ else
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync();
-            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            if (_loggedInUser is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            if (BookId is null || BookId < 1)
+            if (BookId is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            BookTagApi.BookTagAdd(context, (int)BookId, (int)_loggedInUser.Id, sanitized);
-            _tags = BookTagApi.BookTagsGetByBookIdAndUserId(context, (int)BookId, (int)_loggedInUser.Id);
+            var book = BookApi.BookRead(DbContextFactory, (Guid)BookId);
+            if (book is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            BookTagApi.BookTagAdd(DbContextFactory, book, _loggedInUser, sanitized);
+            _tags = BookTagApi.BookTagsGetByBookIdAndUserId(
+                DbContextFactory, (Guid)BookId, (Guid)_loggedInUser.Id);
             await t_delay;
             _isLoading = false;
         }

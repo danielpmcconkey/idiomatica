@@ -10,18 +10,17 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, PageUser> PageUserById = new ConcurrentDictionary<int, PageUser>();
-        private static ConcurrentDictionary<(int pageId, int languageUserId), PageUser> PageUserByPageIdAndLanguageUserId = new ConcurrentDictionary<(int pageId, int languageUserId), PageUser>();
-        private static ConcurrentDictionary<(int languageUserId, int ordinal, int bookId), PageUser> PageUserByLanguageUserIdOrdinalAndBookId = new ConcurrentDictionary<(int languageUserId, int ordinal, int bookId), PageUser>();
-        private static ConcurrentDictionary<int, List<PageUser>> PageUsersByBookUserId = new ConcurrentDictionary<int, List<PageUser>>();
+        private static ConcurrentDictionary<Guid, PageUser> PageUserById = [];
+        private static ConcurrentDictionary<(Guid pageId, Guid languageUserId), PageUser> PageUserByPageIdAndLanguageUserId = [];
+        private static ConcurrentDictionary<(Guid languageUserId, int ordinal, Guid bookId), PageUser> PageUserByLanguageUserIdOrdinalAndBookId = []; 
+        private static ConcurrentDictionary<Guid, List<PageUser>> PageUsersByBookUserId = [];
 
         #region create
 
 
-        public static PageUser? PageUserCreate(PageUser pageUser, IdiomaticaContext context)
+        public static PageUser? PageUserCreate(PageUser pageUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (pageUser.BookUserId is null) throw new ArgumentNullException(nameof(pageUser.BookUserId));
-            if (pageUser.PageId is null) throw new ArgumentNullException(nameof(pageUser.PageId));
+            var context = dbContextFactory.CreateDbContext();
 
             Guid guid = Guid.NewGuid();
             int numRows = context.Database.ExecuteSql($"""
@@ -30,30 +29,24 @@ namespace Model.DAL
                       ([BookUserId]
                       ,[PageId]
                       ,[ReadDate]
-                      ,[UniqueKey])
+                      ,[Id])
                 VALUES
                       ({pageUser.BookUserId}
                       ,{pageUser.PageId}
                       ,{pageUser.ReadDate}
-                      ,{guid})
+                      ,{pageUser.Id})
         
                 """);
-            if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
-            var newEntity = context.PageUsers.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
-            {
-                throw new InvalidDataException("newEntity is null in FlashCardCreate");
-            }
-
-
+            if (numRows < 1) throw new InvalidDataException("creating PageUser affected 0 rows");
+            
             // add it to cache
-            PageUserUpdateAllCaches(newEntity);
+            PageUserUpdateAllCaches(pageUser);
 
-            return newEntity;
+            return pageUser;
         }
-        public static async Task<PageUser?> PageUserCreateAsync(PageUser value, IdiomaticaContext context)
+        public static async Task<PageUser?> PageUserCreateAsync(PageUser value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return PageUserCreate(value, context); });
+            return await Task.Run(() => { return PageUserCreate(value, dbContextFactory); });
         }
 
 
@@ -61,13 +54,15 @@ namespace Model.DAL
         #endregion
 
         #region read
-        public static PageUser? PageUserByIdRead(int key, IdiomaticaContext context)
+        public static PageUser? PageUserByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (PageUserById.ContainsKey(key))
             {
                 return PageUserById[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.PageUsers.Where(x => x.Id == key)
@@ -77,21 +72,23 @@ namespace Model.DAL
             PageUserUpdateAllCaches(value);
             return value;
         }
-        public static async Task<PageUser?> PageUserByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<PageUser?> PageUserByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<PageUser?>.Run(() =>
             {
-                return PageUserByIdRead(key, context);
+                return PageUserByIdRead(key, dbContextFactory);
             });
         }
         public static PageUser? PageUserByLanguageUserIdOrdinalAndBookIdRead(
-            (int languageUserId, int ordinal, int bookId) key, IdiomaticaContext context)
+            (Guid languageUserId, int ordinal, Guid bookId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (PageUserByLanguageUserIdOrdinalAndBookId.ContainsKey(key))
             {
                 return PageUserByLanguageUserIdOrdinalAndBookId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = context.PageUsers
                 .Where(pu => pu.BookUser != null 
@@ -108,21 +105,23 @@ namespace Model.DAL
             return value;
         }
         public static async Task<PageUser?> PageUserByLanguageUserIdOrdinalAndBookIdReadAsync(
-            (int languageUserId, int ordinal, int bookId) key, IdiomaticaContext context)
+            (Guid languageUserId, int ordinal, Guid bookId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<PageUser?>.Run(() =>
             {
-                return PageUserByLanguageUserIdOrdinalAndBookIdRead(key, context);
+                return PageUserByLanguageUserIdOrdinalAndBookIdRead(key, dbContextFactory);
             });
         }
         public static PageUser? PageUserByPageIdAndLanguageUserIdRead(
-            (int pageId, int languageUserId) key, IdiomaticaContext context)
+            (Guid pageId, Guid languageUserId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (PageUserByPageIdAndLanguageUserId.ContainsKey(key))
             {
                 return PageUserByPageIdAndLanguageUserId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = context.PageUsers
                 .Where(pu => pu.BookUser != null
@@ -136,22 +135,24 @@ namespace Model.DAL
             return value;
         }
         public static async Task<PageUser?> PageUserByPageIdAndLanguageUserIdReadAsync(
-            (int pageId, int languageUserId) key, IdiomaticaContext context)
+            (Guid pageId, Guid languageUserId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<PageUser?>.Run(() =>
             {
-                return PageUserByPageIdAndLanguageUserIdRead(key, context);
+                return PageUserByPageIdAndLanguageUserIdRead(key, dbContextFactory);
             });
         }
         
         public static List<PageUser> PageUsersByBookUserIdRead(
-            int key, IdiomaticaContext context, bool shouldOverrideCache = false)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverrideCache = false)
         {
             // check cache
             if (PageUsersByBookUserId.ContainsKey(key) && !shouldOverrideCache)
             {
                 return PageUsersByBookUserId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = (from bu in context.BookUsers
                          join pu in context.PageUsers on bu.Id equals pu.BookUserId
@@ -168,11 +169,11 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<PageUser>> PageUsersByBookUserIdReadAsync(
-            int key, IdiomaticaContext context, bool shouldOverrideCache = false)
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverrideCache = false)
         {
             return await Task<List<PageUser>>.Run(() =>
             {
-                return PageUsersByBookUserIdRead(key, context, shouldOverrideCache);
+                return PageUsersByBookUserIdRead(key, dbContextFactory, shouldOverrideCache);
             });
         }
 
@@ -180,11 +181,9 @@ namespace Model.DAL
 
         #region update
 
-        public static void PageUserUpdate(PageUser value, IdiomaticaContext context)
+        public static void PageUserUpdate(PageUser value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (value.Id == null || value.Id < 1) 
-                throw new ArgumentException("ID cannot be null or 0 when updating PageUser");
-
+            var context = dbContextFactory.CreateDbContext();
 
             int numRows = context.Database.ExecuteSql($"""
                                 
@@ -192,7 +191,7 @@ namespace Model.DAL
                    SET [BookUserId] = {value.BookUserId}
                       ,[PageId] = {value.PageId}
                       ,[ReadDate] = {value.ReadDate}
-                      ,[UniqueKey] = {value.UniqueKey}
+                      ,[Id] = {value.Id}
                  WHERE Id = {value.Id}
 
                 """);
@@ -203,13 +202,13 @@ namespace Model.DAL
             return;
         }
 
-        public static async Task PageUserUpdateAsync(PageUser value, IdiomaticaContext context)
+        public static async Task PageUserUpdateAsync(PageUser value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            await Task.Run(() => { PageUserUpdate(value, context); });
+            await Task.Run(() => { PageUserUpdate(value, dbContextFactory); });
         }
         #endregion
 
-        private static bool doesPageUserListContainPageUserId(List<PageUser> list, int key)
+        private static bool doesPageUserListContainPageUserId(List<PageUser> list, Guid key)
         {
             return list.Where(x => x.Id == key).Any();
         }
@@ -225,8 +224,7 @@ namespace Model.DAL
         }
         private static void PageUserUpdateAllCaches(PageUser value)
         {
-            if (value.Id is null || value.Id < 1) return;
-            PageUserById[(int)value.Id] = value;
+            PageUserById[(Guid)value.Id] = value;
 
             var cachedItem1 = PageUserByPageIdAndLanguageUserId.Where(x => x.Value.Id == value.Id).FirstOrDefault();
             if (cachedItem1.Value != null)
@@ -240,7 +238,7 @@ namespace Model.DAL
             }
 
             var cachedList3 = PageUsersByBookUserId
-                .Where(x => doesPageUserListContainPageUserId(x.Value, (int)value.Id));
+                .Where(x => doesPageUserListContainPageUserId(x.Value, (Guid)value.Id));
             var cachedList3Array = cachedList3.ToArray();
             for (int i = 0; i < cachedList3Array.Length; i++)
             {

@@ -10,61 +10,56 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<int, FlashCardAttempt?> FlashCardAttemptById = new ConcurrentDictionary<int, FlashCardAttempt?>();
-        private static ConcurrentDictionary<int, List<FlashCardAttempt>> FlashCardAttemptsByFlashCardId = new ConcurrentDictionary<int, List<FlashCardAttempt>>();
+        private static ConcurrentDictionary<Guid, FlashCardAttempt?> FlashCardAttemptById = new ConcurrentDictionary<Guid, FlashCardAttempt?>();
+        private static ConcurrentDictionary<Guid, List<FlashCardAttempt>> FlashCardAttemptsByFlashCardId = new ConcurrentDictionary<Guid, List<FlashCardAttempt>>();
 
 
         #region create
 
 
-        public static FlashCardAttempt? FlashCardAttemptCreate(FlashCardAttempt flashCardAttempt, IdiomaticaContext context)
+        public static FlashCardAttempt? FlashCardAttemptCreate(FlashCardAttempt flashCardAttempt, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (flashCardAttempt.FlashCardId is null) throw new ArgumentNullException(nameof(flashCardAttempt.FlashCardId));
-            
-            Guid guid = Guid.NewGuid();
+            var context = dbContextFactory.CreateDbContext();
+
             int numRows = context.Database.ExecuteSql($"""
                         
                 INSERT INTO [Idioma].[FlashCardAttempt]
                       ([FlashCardId]
                       ,[Status]
                       ,[AttemptedWhen]
-                      ,[UniqueKey])
+                      ,[Id])
                 VALUES
                       ({flashCardAttempt.FlashCardId}
                       ,{flashCardAttempt.Status}
                       ,{flashCardAttempt.AttemptedWhen}
-                      ,{guid})
+                      ,{flashCardAttempt.Id})
         
                 """);
             if (numRows < 1) throw new InvalidDataException("creating FlashCardAttempt affected 0 rows");
-            var newEntity = context.FlashCardAttempts.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
-            {
-                throw new InvalidDataException("newEntity is null in FlashCardAttemptCreate");
-            }
-
-
+            
             // add it to cache
-            FlashCardAttemptById[(int)newEntity.Id] = newEntity;
+            FlashCardAttemptById[flashCardAttempt.Id] = flashCardAttempt;
 
-            return newEntity;
+            return flashCardAttempt;
         }
-        public static async Task<FlashCardAttempt?> FlashCardAttemptCreateAsync(FlashCardAttempt value, IdiomaticaContext context)
+        public static async Task<FlashCardAttempt?> FlashCardAttemptCreateAsync(FlashCardAttempt value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return FlashCardAttemptCreate(value, context); });
+            return await Task.Run(() => { return FlashCardAttemptCreate(value, dbContextFactory); });
         }
 
 
         #endregion
 
         #region read
-        public static FlashCardAttempt? FlashCardAttemptByIdRead(int key, IdiomaticaContext context)
+        public static FlashCardAttempt? FlashCardAttemptByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (FlashCardAttemptById.TryGetValue(key, out FlashCardAttempt? value))
             {
                 return value;
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             value = context.FlashCardAttempts.Where(x => x.FlashCardId == key).FirstOrDefault();
@@ -73,11 +68,11 @@ namespace Model.DAL
             FlashCardAttemptById[key] = value;
             return value;
         }
-        public static async Task<FlashCardAttempt?> FlashCardAttemptByIdReadAsync(int key, IdiomaticaContext context)
+        public static async Task<FlashCardAttempt?> FlashCardAttemptByIdReadAsync(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<FlashCardAttempt>.Run(() =>
             {
-                return FlashCardAttemptByIdRead(key, context);
+                return FlashCardAttemptByIdRead(key, dbContextFactory);
             });
         }
 

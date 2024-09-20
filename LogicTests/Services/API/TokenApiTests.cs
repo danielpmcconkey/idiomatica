@@ -9,6 +9,9 @@ using LogicTests;
 using Logic.Telemetry;
 using Model.DAL;
 using Model;
+using Microsoft.EntityFrameworkCore;
+using Model.Enums;
+using System.Net;
 
 namespace Logic.Services.API.Tests
 {
@@ -18,8 +21,10 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void TokenCreateTest()
         {
-            int bookId = 0;
-            var context = CommonFunctions.CreateContext();
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+
             string sentenceText = "Cada tarde, después de la escuela.";
             string wordText = "cada";
             string wordDisplay = "Cada";
@@ -27,58 +32,62 @@ namespace Logic.Services.API.Tests
             try
             {
                 var language = LanguageApi.LanguageReadByCode(
-                    context, TestConstants.NewBookLanguageCode);
+                    dbContextFactory, TestConstants.NewBookLanguageCode);
                 Assert.IsNotNull(language); Assert.IsNotNull(language.Id);
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = (int)language.Id,
-                    UniqueKey = Guid.NewGuid()
+                    LanguageId = (Guid)language.Id,
+                    //Language = language,
+                    Id = Guid.NewGuid()
                 };
-                book = DataCache.BookCreate(book, context);
+                book = DataCache.BookCreate(book, dbContextFactory);
                 Assert.IsNotNull(book); Assert.IsNotNull(book.Id);
-                bookId = (int)book.Id;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
                     BookId = book.Id,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                page = DataCache.PageCreate(page, context);
+                page = DataCache.PageCreate(page, dbContextFactory);
                 Assert.IsNotNull(page); Assert.IsNotNull(page.Id);
 
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
                     PageId = page.Id,
+                    //Page = page,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                paragraph = DataCache.ParagraphCreate(paragraph, context);
+                paragraph = DataCache.ParagraphCreate(paragraph, dbContextFactory);
                 Assert.IsNotNull(paragraph); Assert.IsNotNull(paragraph.Id);
 
                 // create an empty sentence
                 Sentence? sentence = new()
                 {
                     ParagraphId = paragraph.Id,
+                    //Paragraph = paragraph,
                     Text = sentenceText,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                sentence = DataCache.SentenceCreate(sentence, context);
+                sentence = DataCache.SentenceCreate(sentence, dbContextFactory);
                 Assert.IsNotNull(sentence); Assert.IsNotNull(sentence.Id);
 
                 // read the word to get the Word.Id
-                var word = WordApi.WordReadByLanguageIdAndText(context, (int)language.Id, wordText);
+                var word = WordApi.WordReadByLanguageIdAndText(dbContextFactory, (Guid)language.Id, wordText);
                 Assert.IsNotNull(word); Assert.IsNotNull(word.Id);
 
                 // now create the tokens
-                var token = TokenApi.TokenCreate(context, wordDisplay, (int)sentence.Id, 0, (int)word.Id);
+                var token = TokenApi.TokenCreate(dbContextFactory, wordDisplay, sentence, 0, word);
 
                 // token assertions
                 Assert.IsNotNull(token);
@@ -88,14 +97,16 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
         [TestMethod()]
         public async Task TokenCreateAsyncTest()
         {
-            int bookId = 0;
-            var context = CommonFunctions.CreateContext();
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            
             string sentenceText = "Cada tarde, después de la escuela.";
             string wordText = "cada";
             string wordDisplay = "Cada";
@@ -103,58 +114,62 @@ namespace Logic.Services.API.Tests
             try
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
-                    context, TestConstants.NewBookLanguageCode);
+                    dbContextFactory, TestConstants.NewBookLanguageCode);
                 Assert.IsNotNull(language); Assert.IsNotNull(language.Id);
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = (int)language.Id,
-                    UniqueKey = Guid.NewGuid()
+                    LanguageId = (Guid)language.Id,
+                    //Language = language,
+                    Id = Guid.NewGuid()
                 };
-                book = await DataCache.BookCreateAsync(book, context);
+                book = await DataCache.BookCreateAsync(book, dbContextFactory);
                 Assert.IsNotNull(book); Assert.IsNotNull(book.Id);
-                bookId = (int)book.Id;
+                bookId = (Guid)book.Id;
                 
                 // create an empty page
                 Page? page = new()
                 {
                     BookId = book.Id,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                page = await DataCache.PageCreateAsync(page, context);
+                page = await DataCache.PageCreateAsync(page, dbContextFactory);
                 Assert.IsNotNull(page); Assert.IsNotNull(page.Id);
 
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
                     PageId = page.Id,
+                    //Page = page,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                paragraph = await DataCache.ParagraphCreateAsync(paragraph, context);
+                paragraph = await DataCache.ParagraphCreateAsync(paragraph, dbContextFactory);
                 Assert.IsNotNull(paragraph); Assert.IsNotNull(paragraph.Id);
 
                 // create an empty sentence
                 Sentence? sentence = new()
                 {
                     ParagraphId = paragraph.Id,
+                    //Paragraph = paragraph,
                     Text = sentenceText,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                sentence = await DataCache.SentenceCreateAsync(sentence, context);
+                sentence = await DataCache.SentenceCreateAsync(sentence, dbContextFactory);
                 Assert.IsNotNull(sentence); Assert.IsNotNull(sentence.Id);
 
                 // read the word to get the Word.Id
-                var word = WordApi.WordReadByLanguageIdAndTextAsync(context, (int)language.Id, wordText);
+                var word = await WordApi.WordReadByLanguageIdAndTextAsync(dbContextFactory, (Guid)language.Id, wordText);
                 Assert.IsNotNull(word); Assert.IsNotNull(word.Id);
 
                 // now create the tokens
-                var token = await TokenApi.TokenCreateAsync(context, wordDisplay, (int)sentence.Id, 0, (int)word.Id);
+                var token = await TokenApi.TokenCreateAsync(dbContextFactory, wordDisplay, sentence, 0, word);
                 
                 // token assertions
                 Assert.IsNotNull(token); 
@@ -164,7 +179,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, dbContextFactory);
             }
         }
 
@@ -172,14 +187,16 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void TokenGetChildObjectsTest()
         {
-            var context = CommonFunctions.CreateContext();
-            int tokenId = 4361;
-            int languageUserId = 1;
-            string expectedWordText = "mido";
-            int expectedWordUserId = 1;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+
+            Guid tokenId = CommonFunctions.GetToken94322Id(dbContextFactory);
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(dbContextFactory);
+            string expectedWordText = "había";
+            Guid expectedWordUserId = CommonFunctions.GetWordUser(dbContextFactory, languageUserId, expectedWordText);
 
             var tokenAndChildren = TokenApi.TokenGetChildObjects(
-                context, tokenId, languageUserId);
+                dbContextFactory, tokenId, languageUserId);
 
             Assert.IsNotNull(tokenAndChildren.t);
             Assert.IsNotNull(tokenAndChildren.t.Word);
@@ -190,14 +207,15 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task TokenGetChildObjectsAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
-            int tokenId = 4361;
-            int languageUserId = 1;
-            string expectedWordText = "mido";
-            int expectedWordUserId = 1;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            Guid tokenId = CommonFunctions.GetToken94322Id(dbContextFactory);
+            Guid languageUserId = CommonFunctions.GetSpanishLanguageUserId(dbContextFactory);
+            string expectedWordText = "había";
+            Guid expectedWordUserId = CommonFunctions.GetWordUser(dbContextFactory, languageUserId, expectedWordText);
 
             var tokenAndChildren = await TokenApi.TokenGetChildObjectsAsync(
-                context, tokenId, languageUserId);
+                dbContextFactory, tokenId, languageUserId);
             Assert.IsNotNull(tokenAndChildren.t);
             Assert.IsNotNull(tokenAndChildren.t.Word);
             Assert.AreEqual(expectedWordText, tokenAndChildren.t.Word.Text);
@@ -209,13 +227,14 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void TokensAndWordsReadBySentenceIdTest()
         {
-            var context = CommonFunctions.CreateContext();
-            int sentenceId = 14187;
-            int expectedCount = 14;
-            string expectedText = "metros";
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            Guid sentenceId = CommonFunctions.GetSentence24379Id(dbContextFactory);
+            int expectedCount = 9;
+            string expectedText = "pareja";
 
             var tokens = TokenApi.TokensAndWordsReadBySentenceId(
-                context, sentenceId);
+                dbContextFactory, sentenceId);
             Assert.IsNotNull(tokens);
             Assert.AreEqual(expectedCount, tokens.Count);
             var fifthToken = tokens.Where(x => x.Ordinal == 4).FirstOrDefault();
@@ -226,13 +245,15 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task TokensAndWordsReadBySentenceIdAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
-            int sentenceId = 14187;
-            int expectedCount = 14;
-            string expectedText = "metros";
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+
+            Guid sentenceId = CommonFunctions.GetSentence24379Id(dbContextFactory);
+            int expectedCount = 9;
+            string expectedText = "pareja";
 
             var tokens = await TokenApi.TokensAndWordsReadBySentenceIdAsync(
-                context, sentenceId);
+                dbContextFactory, sentenceId);
             Assert.IsNotNull(tokens);
             Assert.AreEqual(expectedCount, tokens.Count);
             var fifthToken = tokens.Where(x => x.Ordinal == 4).FirstOrDefault();
@@ -245,8 +266,10 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void TokensCreateFromSentenceTest()
         {
-            int bookId = 0;
-            var context = CommonFunctions.CreateContext();
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+
             string sentenceText = "Cada tarde, después de la escuela.";
             int expectedCount = 6;
             string expectedWordText = "después";
@@ -255,55 +278,59 @@ namespace Logic.Services.API.Tests
             try
             {
                 var language = LanguageApi.LanguageReadByCode(
-                    context, TestConstants.NewBookLanguageCode);
+                    dbContextFactory, TestConstants.NewBookLanguageCode);
                 Assert.IsNotNull(language); Assert.IsNotNull(language.Id);
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = (int)language.Id,
-                    UniqueKey = Guid.NewGuid()
+                    LanguageId = language.Id,
+                    //Language = language,
+                    Id = Guid.NewGuid()
                 };
-                book = DataCache.BookCreate(book, context);
+                book = DataCache.BookCreate(book, dbContextFactory);
                 Assert.IsNotNull(book); Assert.IsNotNull(book.Id);
-                bookId = (int)book.Id;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
                     BookId = book.Id,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                page = DataCache.PageCreate(page, context);
+                page = DataCache.PageCreate(page, dbContextFactory);
                 Assert.IsNotNull(page); Assert.IsNotNull(page.Id);
 
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
                     PageId = page.Id,
+                    //Page = page,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                paragraph = DataCache.ParagraphCreate(paragraph, context);
+                paragraph = DataCache.ParagraphCreate(paragraph, dbContextFactory);
                 Assert.IsNotNull(paragraph); Assert.IsNotNull(paragraph.Id);
 
                 // create an empty sentence
                 Sentence? sentence = new()
                 {
                     ParagraphId = paragraph.Id,
+                    //Paragraph = paragraph,
                     Text = sentenceText,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                sentence = DataCache.SentenceCreate(sentence, context);
+                sentence = DataCache.SentenceCreate(sentence, dbContextFactory);
                 Assert.IsNotNull(sentence); Assert.IsNotNull(sentence.Id);
 
                 // now create the tokens
                 var tokens = TokenApi.TokensCreateFromSentence(
-                    context, (int)sentence.Id, (int)language.Id);
+                    dbContextFactory, sentence, language);
 
                 // token assertions
                 Assert.IsNotNull(tokens);
@@ -318,14 +345,15 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) CommonFunctions.CleanUpBook(bookId, dbContextFactory);
             }
         }
         [TestMethod()]
         public async Task TokensCreateFromSentenceAsyncTest()
         {
-            int bookId = 0;
-            var context = CommonFunctions.CreateContext();
+            Guid? bookId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
             string sentenceText = "Cada tarde, después de la escuela.";
             int expectedCount = 6;
             string expectedWordText = "después";
@@ -334,55 +362,59 @@ namespace Logic.Services.API.Tests
             try
             {
                 var language = await LanguageApi.LanguageReadByCodeAsync(
-                    context, TestConstants.NewBookLanguageCode);
+                    dbContextFactory, TestConstants.NewBookLanguageCode);
                 Assert.IsNotNull(language); Assert.IsNotNull(language.Id);
 
                 // create an empty book
                 Book? book = new()
                 {
                     Title = TestConstants.NewBookTitle,
-                    LanguageId = (int)language.Id,
-                    UniqueKey = Guid.NewGuid()
+                    LanguageId = language.Id,
+                    //Language = language,
+                    Id = Guid.NewGuid()
                 };
-                book = await DataCache.BookCreateAsync(book, context);
+                book = await DataCache.BookCreateAsync(book, dbContextFactory);
                 Assert.IsNotNull(book); Assert.IsNotNull(book.Id);
-                bookId = (int)book.Id;
+                bookId = (Guid)book.Id;
 
                 // create an empty page
                 Page? page = new()
                 {
                     BookId = book.Id,
+                    //Book = book,
                     Ordinal = 1,
                     OriginalText = TestConstants.NewPageText,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                page = await DataCache.PageCreateAsync(page, context);
+                page = await DataCache.PageCreateAsync(page, dbContextFactory);
                 Assert.IsNotNull(page); Assert.IsNotNull(page.Id);
 
                 // create an empty paragraph
                 Paragraph? paragraph = new()
                 {
                     PageId = page.Id,
+                    //Page = page,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                paragraph = await DataCache.ParagraphCreateAsync(paragraph, context);
+                paragraph = await DataCache.ParagraphCreateAsync(paragraph, dbContextFactory);
                 Assert.IsNotNull(paragraph); Assert.IsNotNull(paragraph.Id);
 
                 // create an empty sentence
                 Sentence? sentence = new()
                 {
                     ParagraphId = paragraph.Id,
+                    //Paragraph = paragraph,
                     Text = sentenceText,
                     Ordinal = 1,
-                    UniqueKey = Guid.NewGuid()
+                    Id = Guid.NewGuid()
                 };
-                sentence = await DataCache.SentenceCreateAsync(sentence, context);
+                sentence = await DataCache.SentenceCreateAsync(sentence, dbContextFactory);
                 Assert.IsNotNull(sentence); Assert.IsNotNull(sentence.Id);
 
                 // now create the tokens
                 var tokens = await TokenApi.TokensCreateFromSentenceAsync(
-                    context, (int)sentence.Id, (int)language.Id);
+                    dbContextFactory, sentence, language);
 
                 // token assertions
                 Assert.IsNotNull(tokens);
@@ -397,7 +429,7 @@ namespace Logic.Services.API.Tests
             finally
             {
                 // clean-up
-                CommonFunctions.CleanUpBook(bookId, context);
+                if (bookId is not null) await CommonFunctions.CleanUpBookAsync(bookId, dbContextFactory);
             }
         }
 
@@ -405,14 +437,15 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public void TokensReadByPageIdTest()
         {
-            var context = CommonFunctions.CreateContext();
-            int pageId = 3;
-            int sentenceId = 14181;
-            int tokenOrdinal = 11;
-            int expectedCount = 247;
-            string expectedDisplay = "Londres. ";
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            Guid pageId = CommonFunctions.GetRapunzelPage1Id(dbContextFactory);
+            Guid sentenceId = CommonFunctions.GetSentence24380Id(dbContextFactory);
+            int tokenOrdinal = 4;
+            int expectedCount = 195;
+            string expectedDisplay = "esperando, ";
 
-            var tokens = TokenApi.TokensReadByPageId(context, pageId);
+            var tokens = TokenApi.TokensReadByPageId(dbContextFactory, pageId);
             Assert.IsNotNull(tokens);
             Assert.AreEqual(expectedCount, tokens.Count);
             var targetToken = tokens
@@ -424,14 +457,15 @@ namespace Logic.Services.API.Tests
         [TestMethod()]
         public async Task TokensReadByPageIdAsyncTest()
         {
-            var context = CommonFunctions.CreateContext();
-            int pageId = 3;
-            int sentenceId = 14181;
-            int tokenOrdinal = 11;
-            int expectedCount = 247;
-            string expectedDisplay = "Londres. ";
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var context = dbContextFactory.CreateDbContext();
+            Guid pageId = CommonFunctions.GetRapunzelPage1Id(dbContextFactory);
+            Guid sentenceId = CommonFunctions.GetSentence24380Id(dbContextFactory);
+            int tokenOrdinal = 4;
+            int expectedCount = 195;
+            string expectedDisplay = "esperando, ";
 
-            var tokens = await TokenApi.TokensReadByPageIdAsync(context, pageId);
+            var tokens = await TokenApi.TokensReadByPageIdAsync(dbContextFactory, pageId);
             Assert.IsNotNull(tokens);
             Assert.AreEqual(expectedCount, tokens.Count);
             var targetToken = tokens

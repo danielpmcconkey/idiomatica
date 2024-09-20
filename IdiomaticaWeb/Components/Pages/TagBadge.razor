@@ -1,6 +1,6 @@
 ﻿@using Logic.Services.API
 @rendermode InteractiveServer
-@inject UserService UserService;
+@inject LoginService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
 @inject ILogger<IdiomaticaLogger> Logger;
 
@@ -39,9 +39,9 @@
 
 @code {
     [Parameter]
-    public BookTag? BookTag { get; set; }
+    public BookTagRow? BookTag { get; set; }
     [Parameter]
-    public int? BookId { get; set; }
+    public Guid? BookId { get; set; }
     [Parameter]
     public EventCallback OnRefreshRowAsync { get; set; }
 
@@ -88,14 +88,13 @@
     {
         try
         {
-            var context = DbContextFactory.CreateDbContext();
-            _loggedInUser = UserService.GetLoggedInUser(context);
-            if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+            _loggedInUser = UserService.GetLoggedInUser(DbContextFactory);
+            if (_loggedInUser is null)
             {
-                ErrorHandler.LogAndThrow(2450);
+                ErrorHandler.LogAndThrow();
                 return;
             }
-            if (BookId is null || BookId < 1)
+            if (BookId is null)
             {
                 ErrorHandler.LogAndThrow();
                 return;
@@ -105,7 +104,13 @@
                 ErrorHandler.LogAndThrow();
                 return;
             }
-            BookTagApi.BookTagAdd(context, (int)BookId, (int)_loggedInUser.Id, BookTag.Tag);
+            var book = BookApi.BookRead(DbContextFactory, (Guid)BookId);
+            if (book is null)
+            {
+                ErrorHandler.LogAndThrow();
+                return;
+            }
+            BookTagApi.BookTagAdd(DbContextFactory, book, _loggedInUser, BookTag.Tag);
         }
         catch (IdiomaticaException ex)
         {
@@ -125,14 +130,13 @@
     }
     private void DownVote()
     {
-        var context = DbContextFactory.CreateDbContext();
-        _loggedInUser =UserService.GetLoggedInUser(context);
-        if (_loggedInUser is null || _loggedInUser.Id is null || _loggedInUser.Id < 1)
+        _loggedInUser = UserService.GetLoggedInUser(DbContextFactory);
+        if (_loggedInUser is null)
         {
-            ErrorHandler.LogAndThrow(2450);
+            ErrorHandler.LogAndThrow();
             return;
         }
-        if (BookId is null || BookId < 1)
+        if (BookId is null)
         {
             ErrorHandler.LogAndThrow();
             return;
@@ -142,7 +146,8 @@
             ErrorHandler.LogAndThrow();
             return;
         }
-        BookTagApi.BookTagRemove(context, (int)BookId, (int)_loggedInUser.Id, BookTag.Tag);
+        BookTagApi.BookTagRemove(DbContextFactory, (Guid)BookId,
+            (Guid)_loggedInUser.Id, BookTag.Tag);
     }
     private async Task OnDownVote()
     {

@@ -12,9 +12,9 @@ namespace Model
     /// <summary>
     /// this is purely the user login
     /// </summary>
+    // Add profile data for application users by adding properties to the ApplicationUser class
     [Table("AspNetUsers", Schema = "dbo")]
     public class ApplicationUser : IdentityUser
     {
-        
     }
 }

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Model.Enums;
 
 namespace Model.DAL
 {
@@ -16,56 +17,80 @@ namespace Model.DAL
     {
         
         private static ConcurrentDictionary<string, User> UserByApplicationUserId = new ConcurrentDictionary<string, User>();
+        private static ConcurrentDictionary<Guid, Language?> UserSettingUiLanguageByUserId = new();
+        private static ConcurrentDictionary<Guid, List<UserSetting>?> UserSettingsByUserId = new();
 
-        public static User? UserCreate(User user, IdiomaticaContext context)
+        #region create
+        public static User? UserCreate(User user, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             if (user.ApplicationUserId is null) throw new ArgumentNullException(nameof(user.ApplicationUserId));
+            var context = dbContextFactory.CreateDbContext();
 
-            Guid guid = Guid.NewGuid();
-            int numRows = context.Database.ExecuteSql($"""
-                
-                INSERT INTO [Idioma].[User]
-                           ([Name]
-                           ,[ApplicationUserId]
-                           ,[LanguageCode]
-                           ,[UniqueKey])
-                     VALUES
-                           ({user.Name}
-                           ,{user.ApplicationUserId}
-                           ,{user.Code} -- remember that C# Code maps to SQL LanguageCode
-                           ,{guid})
-        
-                """);
-            if (numRows < 1) throw new InvalidDataException("creating User affected 0 rows");
-            var newEntity = context.Users.Where(x => x.UniqueKey == guid).FirstOrDefault();
-            if (newEntity is null || newEntity.Id is null || newEntity.Id < 1)
-            {
-                throw new InvalidDataException("newEntity is null in UserCreate");
-            }
-            if (string.IsNullOrEmpty(newEntity.ApplicationUserId))
-            {
-                throw new InvalidDataException("ApplicationUserId is empty in UserCreate");
-            }
+            //int numRows = context.Database.ExecuteSql($"""
+
+            //    INSERT INTO [Idioma].[User]
+            //               ([Name]
+            //               ,[ApplicationUserId]
+            //               ,[Id])
+            //         VALUES
+            //               ({user.Name}
+            //               ,{user.ApplicationUserId}
+            //               ,{user.Id})
+
+            //    """);
+            //if (numRows < 1) throw new InvalidDataException("creating User affected 0 rows");
+
+            context.Users.Add(user);
+            context.SaveChanges();
+            
 
 
             // add it to cache
-            UserByApplicationUserId[newEntity.ApplicationUserId] = newEntity;
+            UserByApplicationUserId[user.ApplicationUserId] = user;
 
-            return newEntity;
+            return user;
         }
-        public static async Task<User?> UserCreateAsync(User value, IdiomaticaContext context)
+        public static async Task<User?> UserCreateAsync(User value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            return await Task.Run(() => { return UserCreate(value, context); });
+            return await Task.Run(() => { return UserCreate(value, dbContextFactory); });
         }
 
-        
-        public static User? UserByApplicationUserIdRead(string key, IdiomaticaContext context)
+
+        public static UserSetting? UserSettingCreate(
+            AvailableUserSetting key, Guid userId, string value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            var context = dbContextFactory.CreateDbContext();
+
+            UserSetting userSettingUiLang = new()
+            {
+                Key = key,
+                UserId = userId,
+                Value = value
+            };
+            context.Add(userSettingUiLang);
+            context.SaveChanges();
+            
+
+            return userSettingUiLang;
+        }
+        public static async Task<UserSetting?> UserSettingCreateAsync(
+            AvailableUserSetting key, Guid userId, string value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            return await Task.Run(() => { return UserSettingCreate(key, userId, value, dbContextFactory); });
+        }
+        #endregion
+
+
+        #region read
+        public static User? UserByApplicationUserIdRead(string key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (UserByApplicationUserId.ContainsKey(key))
             {
                 return UserByApplicationUserId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
             // read DB
             var value = context.Users
                 .Where(u => u.ApplicationUserId == key)
@@ -76,12 +101,67 @@ namespace Model.DAL
             UserByApplicationUserId[key] = value;
             return value;
         }
-
-        public static void UserAndAllChildrenDelete(int userId, IdiomaticaContext context)
+        public static List<UserSetting>? UserSettingsByUserIdRead(
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (userId < 1) throw new ArgumentException(nameof(userId));
+            // check cache
+            if (UserSettingsByUserId.ContainsKey(key))
+            {
+                return UserSettingsByUserId[key];
+            }
+            var context = dbContextFactory.CreateDbContext();
 
-            Guid guid = Guid.NewGuid();
+            // read DB
+            var value = (from u in context.Users
+                         join us in context.UserSettings on u.Id equals us.UserId
+                         where u.Id == key
+                         select us)
+                .ToList();
+
+            if (value == null) return null;
+            // write to cache
+            UserSettingsByUserId[key] = value;
+            return value;
+        }
+        public static async Task<List<UserSetting>?> UserSettingsByUserIdReadAsync(
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            return await Task<List<UserSetting>?>.Run(() =>
+            {
+                return UserSettingsByUserIdRead(key, dbContextFactory);
+            });
+        }
+        public static Language? UserSettingUiLanguageByUserIdRead(
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            var settings = DataCache.UserSettingsByUserIdRead(key, dbContextFactory);
+            if (settings == null) return null;
+            var uiPref = settings
+                .Where(x => x.Key == AvailableUserSetting.UILANGUAGE)
+                .FirstOrDefault();
+            if (uiPref == null) return null;
+            if (!Guid.TryParse(uiPref.Value, out var languageKey)) return null;
+            return DataCache.LanguageByIdRead(languageKey, dbContextFactory);
+        }
+        public static async Task<Language?> UserSettingUiLanguageByUserIdReadAsync(
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            return await Task<Language?>.Run(() =>
+            {
+                return UserSettingUiLanguageByUserIdRead(key, dbContextFactory);
+            });
+        }
+        #endregion
+
+        #region update
+        #endregion
+
+        #region delete
+
+        public static void UserAndAllChildrenDelete(Guid userId, IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            var context = dbContextFactory.CreateDbContext();
+
             context.Database.ExecuteSql($"""
 
                 delete us
@@ -179,5 +259,7 @@ namespace Model.DAL
                 LanguageUserByLanguageIdAndUserId.Remove(cachedEntry.Key, out LanguageUser? deletedValue);
 
         }
+
+        #endregion
     }
 }

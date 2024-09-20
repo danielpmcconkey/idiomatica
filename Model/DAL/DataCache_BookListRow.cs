@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Model.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,15 +16,17 @@ namespace Model.DAL
     public static partial class DataCache
     {
 
-        private static ConcurrentDictionary<int, List<BookListRow>> BookListRowsByUserId = new ConcurrentDictionary<int, List<BookListRow>>();
-        private static ConcurrentDictionary<(int bookId, int userId), BookListRow?> BookListRowByBookIdAndUserId = new ();
+        private static ConcurrentDictionary<Guid, List<BookListRow>> BookListRowsByUserId = [];
+        private static ConcurrentDictionary<(Guid bookId, Guid userId), BookListRow?> BookListRowByBookIdAndUserId = [];
 
 
 
         #region read
         public static BookListRow? BookListRowByBookIdAndUserIdRead(
-            (int bookId, int userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverrideCache = false)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             // check cache
             if (BookListRowByBookIdAndUserId.ContainsKey(key) && !shouldOverrideCache)
             {
@@ -39,26 +42,28 @@ namespace Model.DAL
             return value;
         }
         public static async Task<BookListRow?> BookListRowByBookIdAndUserIdReadAsync(
-            (int bookId, int userId) key, IdiomaticaContext context, bool shouldOverrideCache = false)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory, bool shouldOverrideCache = false)
         {
             return await Task<BookListRow?>.Run(() =>
             {
-                return BookListRowByBookIdAndUserIdRead(key, context);
+                return BookListRowByBookIdAndUserIdRead(key, dbContextFactory);
             });
         }
 
 
         public static (long count, List<BookListRow> results) BookListRowsPowerQuery(
-            int userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
-            LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
-            bool sortAscending, IdiomaticaContext context, int? bookIdOverride = null)
+            Guid userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
+            Guid? langIdFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
+            bool sortAscending, IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid? bookIdOverride = null)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             /*
              * note: none of the string fields are safe. and, since we don't 
              * use parameters, due to the way we're building the query, you must 
              * sanitize everything. No little Bobby Tables.
              * */
-            
+
 
             bool useTags = (tagsFilter != null && tagsFilter != string.Empty) ? true : false;
             int skipVal = (bookIdOverride is null) ? skip : 0;
@@ -174,7 +179,7 @@ namespace Model.DAL
                         left join Idioma.BookStat bsTotalWordCount on bsTotalWordCount.BookId = b.Id and bsTotalWordCount.[Key] = {(int)AvailableBookStat.TOTALWORDCOUNT}
                         left join Idioma.BookStat bsDistinctWordCount on bsDistinctWordCount.BookId = b.Id and bsDistinctWordCount.[Key] = {(int)AvailableBookStat.DISTINCTWORDCOUNT}
                         left join Idioma.BookStat bsDifficultyScore on bsDifficultyScore.BookId = b.Id and bsDifficultyScore.[Key] = {(int)AvailableBookStat.DIFFICULTYSCORE}
-                        left join Idioma.LanguageUser lu on lu.LanguageId = b.LanguageId and lu.UserId = {userId}
+                        left join Idioma.LanguageUser lu on lu.LanguageId = b.LanguageId and lu.UserId = '{DALUtilities.SanitizeString(userId.ToString())}'
                         left join Idioma.BookUser bu on bu.BookId = b.Id and bu.LanguageUserId = lu.Id
                         left join [Idioma].[BookUserStat] bus_ISCOMPLETE on bus_ISCOMPLETE.BookId = b.Id and bus_ISCOMPLETE.LanguageUserId = lu.Id and bus_ISCOMPLETE.[Key] = {(int)AvailableBookUserStat.ISCOMPLETE}
                         left join [Idioma].[BookUserStat] bus_PROGRESS on bus_PROGRESS.BookId = b.Id and bus_PROGRESS.LanguageUserId = lu.Id and bus_PROGRESS.[Key] = {(int)AvailableBookUserStat.PROGRESS}
@@ -195,11 +200,11 @@ namespace Model.DAL
 
                         where 1=1
                 """);
-            if (bookIdOverride is not null && bookIdOverride > 0)
+            if (bookIdOverride is not null)
             {
                 sb.Append($"""
 
-                        and b.Id = {bookIdOverride}
+                        and b.Id = '{bookIdOverride}'
                     """);
             }
             if (shouldShowOnlyInShelf && bookIdOverride is null)
@@ -216,11 +221,11 @@ namespace Model.DAL
                         and at.Tag is not null
                     """);
             }
-            if (lcFilter is not null && bookIdOverride is null)
+            if (langIdFilter is not null && bookIdOverride is null)
             {
                 sb.Append($"""
 
-                        and l.LanguageCode = '{lcFilter.Code}'
+                        and l.Id = '{langIdFilter.ToString()}'
                     """);
             }
             if (titleFilter is not null && bookIdOverride is null)
@@ -308,14 +313,14 @@ namespace Model.DAL
             return (0L, new List<BookListRow>());
         }
         public static async Task<(long count, List<BookListRow> results)> BookListRowsPowerQueryAsync(
-            int userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
-            LanguageCode? lcFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
-            bool sortAscending, IdiomaticaContext context, int? bookIdOverride = null)
+            Guid userId, int numRecords, int skip, bool shouldShowOnlyInShelf, string? tagsFilter,
+            Guid? langIdFilter, string? titleFilter, AvailableBookListSortProperties? orderBy,
+            bool sortAscending, IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid? bookIdOverride = null)
         {
             return await Task<(long count, List<BookListRow> results)>.Run(() =>
             {
                 return BookListRowsPowerQuery(userId, numRecords, skip, shouldShowOnlyInShelf, tagsFilter,
-                    lcFilter, titleFilter, orderBy, sortAscending, context, bookIdOverride);
+                    langIdFilter, titleFilter, orderBy, sortAscending, dbContextFactory, bookIdOverride);
             });
         }
         #endregion
@@ -325,7 +330,7 @@ namespace Model.DAL
         * since BookListRow is just a view, delete methods 
         * will only delete the cache
         * */
-        public static void BookListRowsByUserIdDelete( int key, IdiomaticaContext context)
+        public static void BookListRowsByUserIdDelete( Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             BookListRowsByUserId.TryRemove(key, out var deletedRow);
         }

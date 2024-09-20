@@ -1,7 +1,7 @@
 ﻿@page "/"
 @using Logic.Services.API
 @rendermode InteractiveServer
-@inject UserService UserService;
+@inject LoginService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory
 
 <PageTitle>Blazor Bootstrap - WebAssembly Standalone App (.NET 8) - Starter Template</PageTitle>
@@ -68,17 +68,16 @@
     private List<(string language, int wordCount)> _wordsReadCountList = new List<(string language, int wordCount)>();
     private string? _wordCountCardTitle;
     private string? _bookshelfButtonText;
-    private int? UserId;
+    private Guid? UserId;
 
     private async Task InitData()
     {
-        var context = await DbContextFactory.CreateDbContextAsync();
-        var loggedInUser = UserService.GetLoggedInUser(context);
-        if (loggedInUser is null || loggedInUser.Id is null || loggedInUser.Id < 1) return;
+        var loggedInUser = UserService.GetLoggedInUser(DbContextFactory);
+        if (loggedInUser is null) return;
         UserId = loggedInUser.Id;
         _wordCountCardTitle = UserService.GetUILabel("homeWordCountsHeader");
         _wordsReadCountList = WordApi.WordsGetListOfReadCount(
-            context, (int)loggedInUser.Id);
+            DbContextFactory, (Guid)loggedInUser.Id);
 
         _bookshelfButtonText = UserService.GetUILabel("homeBookshelfButtonText");
 

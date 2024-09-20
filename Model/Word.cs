@@ -17,30 +17,33 @@ namespace Model
     [Index(nameof(LanguageId), nameof(TextLowerCase), IsUnique = true)]
     public class Word
     {
-        public int? Id { get; set; }
+        #region required data
+        [Required] public required Guid Id { get; set; }
+        [Required] public required Guid LanguageId { get; set; }
 
+        [StringLength(250)]
+        [Required] public required string TextLowerCase { get; set; }
 
-        #region relationships
-        
-        public int? LanguageId { get; set; }
-        public Language? Language { get; set; }
-        public List<Token> Tokens { get; set; } = [];
-        public List<WordUser> WordUsers { get; set; } = [];
-        public List<WordTranslation> WordTranslations { get; set; } = [];
 
         #endregion
 
 
+        
+        
+        public Language? Language { get; set; }
+        public List<Token> Tokens { get; set; } = [];
+        public List<WordUser> WordUsers { get; set; } = [];
+        public List<WordTranslation> WordTranslations { get; set; } = [];
+        public WordRank? WordRank { get; set; }
+
+        
+
+
         [StringLength(250)]
         public string? Text { get; set; }
-        [StringLength(250)]
-        public string? TextLowerCase { get; set; }
         
         [StringLength(250)]
         public string? Romanization { get; set; }
-        public int? TokenCount { get; set; } = 0; // todo: understand token vs word in original lute and make a multi-word learning phrase in idiomatica
-        public Guid UniqueKey { get; set; } // used so you can insert and then retrieve it; because it's too late to use a GUID as the primary key
-
 
     }
 }

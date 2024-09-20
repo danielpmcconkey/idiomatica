@@ -9,47 +9,45 @@ using System.Threading.Tasks;
 using IdentityModel.OidcClient.Browser;
 using DeepL;
 using static System.Net.Mime.MediaTypeNames;
+using Model.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Logic.Services.API
 {
     public static class BookApi
     {
         public static Book? BookCreateAndSave(
-            IdiomaticaContext context, string title, string languageCode,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string title, AvailableLanguageCode languageCode,
             string? url, string text)
         {
             // sanitize and validate input
             var titleT = title.Trim();
-            var languageCodeT = languageCode.Trim();
             var urlT = url == null ? "" : url.Trim();
 
             if (titleT == string.Empty) { ErrorHandler.LogAndThrow(); return null; }
-            if (languageCodeT == string.Empty) { ErrorHandler.LogAndThrow(); return null; }
-
+            
 
             // pull language from the db
-            var language = DataCache.LanguageByCodeRead(languageCodeT, context);
-            if (language is null || language.Id is null or 0)
-            {
-                ErrorHandler.LogAndThrow();
-                return null;
-            }
+            var language = DataCache.LanguageByCodeRead(languageCode, dbContextFactory);
+            if (language is null) { ErrorHandler.LogAndThrow(); return null; }
 
             // divide text into paragraphs
-            string[] paragraphSplits = ParagraphApi.PotentialParagraphsSplitFromText(context, text, languageCodeT);
+            string[] paragraphSplits = ParagraphApi.PotentialParagraphsSplitFromText(dbContextFactory, text, language);
 
 
             // add the book to the DB so you can save pages using its ID
             Book? book = new ()
             {
+                Id = Guid.NewGuid(),
                 Title = titleT,
                 SourceURI = urlT,
                 LanguageId = language.Id,
+                //Language = language,
             };
-            book = DataCache.BookCreate(book, context);
-            if (book is null || book.Id is null || book.Id < 1)
+            book = DataCache.BookCreate(book, dbContextFactory);
+            if (book is null)
             {
-                ErrorHandler.LogAndThrow(2090);
+                ErrorHandler.LogAndThrow();
                 return null;
             }
 
@@ -65,68 +63,66 @@ namespace Logic.Services.API
             {
                 string pageSplitTextTrimmed = pageSplit.pageText.Trim();
                 if (string.IsNullOrEmpty(pageSplitTextTrimmed)) continue;
-                Page? page = PageApi.PageCreateFromPageSplit(context,
-                    pageSplit.pageNum, pageSplitTextTrimmed,
-                    (int)book.Id, (int)language.Id);
-                if (page is not null && page.Id is not null or 0)
+                Page? page = PageApi.PageCreateFromPageSplit(dbContextFactory,
+                    pageSplit.pageNum, pageSplitTextTrimmed, book, language);
+                if (page is not null)
                 {
                     book.Pages.Add(page);
                 }
             }
-
             return book;
         }
         public static async Task<Book?> BookCreateAndSaveAsync(
-            IdiomaticaContext context, string title, string languageCode,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, string title, AvailableLanguageCode languageCode,
             string? url, string text)
         {
             return await Task<Book?>.Run(() =>
             {
-                return BookCreateAndSave(context, title, languageCode, url, text);
+                return BookCreateAndSave(dbContextFactory, title, languageCode, url, text);
             });
         }
 
-        public static void BookAndAllChildrenDelete(IdiomaticaContext context, int bookId)
+        public static void BookAndAllChildrenDelete(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
-            DataCache.BookAndAllChildrenDelete(bookId, context);
+            DataCache.BookAndAllChildrenDelete(bookId, dbContextFactory);
         }
-        public static async Task BookAndAllChildrenDeleteAsync(IdiomaticaContext context, int bookId)
+        public static async Task BookAndAllChildrenDeleteAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
             await Task.Run(() =>
             {
-                BookAndAllChildrenDelete(context, bookId);
+                BookAndAllChildrenDelete(dbContextFactory, bookId);
             });
         }
 
 
-        public static Book? BookRead(IdiomaticaContext context, int bookId)
+        public static Book? BookRead(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
-            return DataCache.BookByIdRead(bookId, context);
+            return DataCache.BookByIdRead(bookId, dbContextFactory);
         }
-        public static async Task<Book?> BookReadAsync(IdiomaticaContext context, int bookId)
+        public static async Task<Book?> BookReadAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
-            return await DataCache.BookByIdReadAsync(bookId, context);
+            return await DataCache.BookByIdReadAsync(bookId, dbContextFactory);
         }
 
 
-        public static int BookReadPageCount(IdiomaticaContext context, int bookId)
+        public static int BookReadPageCount(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
-            var dbVal = DataCache.BookStatByBookIdAndStatKeyRead((bookId, AvailableBookStat.TOTALPAGES), context);
+            var dbVal = DataCache.BookStatByBookIdAndStatKeyRead((bookId, AvailableBookStat.TOTALPAGES), dbContextFactory);
             int outVal = 0;
             if (dbVal != null) int.TryParse(dbVal.Value, out outVal);
             return outVal;
         }
-        public static async Task<int> BookReadPageCountAsync(IdiomaticaContext context, int bookId)
+        public static async Task<int> BookReadPageCountAsync(IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId)
         {
             return await Task<int>.Run(() =>
             {
-                return BookReadPageCount(context, bookId);
+                return BookReadPageCount(dbContextFactory, bookId);
             });
         }
 
 
         public static BookListDataPacket BookListRead(
-            IdiomaticaContext context, int loggedInUserId, BookListDataPacket bookListDataPacket)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid loggedInUserId, BookListDataPacket bookListDataPacket)
         {
             var powerQueryResults = DataCache.BookListRowsPowerQuery(
                     loggedInUserId,
@@ -134,11 +130,11 @@ namespace Logic.Services.API
                     bookListDataPacket.SkipRecords,
                     bookListDataPacket.ShouldShowOnlyInShelf,
                     bookListDataPacket.TagsFilter,
-                    bookListDataPacket.LcFilter,
+                    bookListDataPacket.LcFilter?.Id,
                     bookListDataPacket.TitleFilter,
                     bookListDataPacket.SortProperty,
                     bookListDataPacket.ShouldSortAscending,
-                    context);
+                    dbContextFactory);
 
             bookListDataPacket.BookListRows = powerQueryResults.results;
             bookListDataPacket.BookListTotalRowsAtCurrentFilter = powerQueryResults.count;
@@ -146,7 +142,7 @@ namespace Logic.Services.API
 
         }
         public static async Task<BookListDataPacket> BookListReadAsync(
-            IdiomaticaContext context, int loggedInUserId, BookListDataPacket bookListDataPacket)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid loggedInUserId, BookListDataPacket bookListDataPacket)
         {
             var powerQueryResults = await DataCache.BookListRowsPowerQueryAsync(
                     loggedInUserId,
@@ -154,11 +150,11 @@ namespace Logic.Services.API
                     bookListDataPacket.SkipRecords,
                     bookListDataPacket.ShouldShowOnlyInShelf,
                     bookListDataPacket.TagsFilter,
-                    bookListDataPacket.LcFilter,
+                    bookListDataPacket.LcFilter?.Id,
                     bookListDataPacket.TitleFilter,
                     bookListDataPacket.SortProperty,
                     bookListDataPacket.ShouldSortAscending,
-                    context);
+                    dbContextFactory);
 
             bookListDataPacket.BookListRows = powerQueryResults.results;
             bookListDataPacket.BookListTotalRowsAtCurrentFilter = powerQueryResults.count;
@@ -168,7 +164,7 @@ namespace Logic.Services.API
 
 
         public static BookListRow? BookListRowByBookIdAndUserIdRead(
-            IdiomaticaContext context, int bookId, int userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId)
         {
             var powerQueryResults = DataCache.BookListRowsPowerQuery(
                     userId,
@@ -180,17 +176,17 @@ namespace Logic.Services.API
                     null,
                     null,
                     true,
-                    context,
+                    dbContextFactory,
                     bookId);
 
             return powerQueryResults.results.FirstOrDefault();
         }
         public static async Task<BookListRow?> BookListRowByBookIdAndUserIdReadAsync(
-            IdiomaticaContext context, int bookId, int userId)
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid bookId, Guid userId)
         {
             return await Task<BookListRow?>.Run(() =>
             {
-                return BookListRowByBookIdAndUserIdRead(context, bookId, userId);
+                return BookListRowByBookIdAndUserIdRead(dbContextFactory, bookId, userId);
             });
 
         }

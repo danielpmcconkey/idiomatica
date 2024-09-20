@@ -10,12 +10,14 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<(int bookId, int userId), List<BookUserStat>> BookUserStatsByBookIdAndUserId = new ConcurrentDictionary<(int bookId, int userId), List<BookUserStat>>();
+        private static ConcurrentDictionary<(Guid bookId, Guid userId), List<BookUserStat>> BookUserStatsByBookIdAndUserId = new ConcurrentDictionary<(Guid bookId, Guid userId), List<BookUserStat>>();
 
         #region create
         public static bool BookUserStatsByBookIdAndUserIdCreate(
-            (int bookId, int userId) key, List<BookUserStat> value, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, List<BookUserStat> value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
+            var context = dbContextFactory.CreateDbContext();
+
             foreach (var item in value)
             {
                 context.Database.ExecuteSql($"""
@@ -39,23 +41,25 @@ namespace Model.DAL
             return true;
         }
         public static async Task<bool> BookUserStatsByBookIdAndUserIdCreateAsync(
-            (int bookId, int userId) key, List<BookUserStat> value, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, List<BookUserStat> value, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<bool?>.Run(() =>
             {
-                return BookUserStatsByBookIdAndUserIdCreate(key, value, context);
+                return BookUserStatsByBookIdAndUserIdCreate(key, value, dbContextFactory);
             });
         }
         #endregion
         #region read
         public static List<BookUserStat> BookUserStatsByBookIdAndUserIdRead(
-            (int bookId, int userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             // check cache
             if (BookUserStatsByBookIdAndUserId.ContainsKey(key))
             {
                 return BookUserStatsByBookIdAndUserId[key];
             }
+            var context = dbContextFactory.CreateDbContext();
+
 
             // read DB
             var value = context.BookUserStats
@@ -68,21 +72,22 @@ namespace Model.DAL
             return value;
         }
         public static async Task<List<BookUserStat>> BookUserStatsByBookIdAndUserIdReadAsync(
-            (int bookId, int userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<List<BookUserStat>>.Run(() =>
             {
-                return BookUserStatsByBookIdAndUserIdRead(key, context);
+                return BookUserStatsByBookIdAndUserIdRead(key, dbContextFactory);
             });
         }
         #endregion
 
         #region delete
         public static bool BookUserStatsByBookIdAndUserIdDelete(
-            (int bookId, int userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
-            if (key.bookId < 1) throw new ArgumentException(nameof(key.bookId));
-            if (key.userId < 1) throw new ArgumentException(nameof(key.userId));
+            var context = dbContextFactory.CreateDbContext();
+
+
 
             // remove from context
             var existingList = context.BookUserStats
@@ -97,7 +102,7 @@ namespace Model.DAL
             // remove from the DB
             context.Database.ExecuteSql($"""
                 delete bus
-                from [Idiomatica].[Idioma].[BookUserStat] bus
+                from [Idioma].[BookUserStat] bus
                 left join [Idioma].[LanguageUser] lu on bus.LanguageUserId = lu.Id
                 where bus.BookId = {key.bookId}
                 and lu.UserId = {key.userId}
@@ -113,10 +118,10 @@ namespace Model.DAL
             return true;
         }
         public static async Task<bool> BookUserStatsByBookIdAndUserIdDeleteAsync(
-            (int bookId, int userId) key, IdiomaticaContext context)
+            (Guid bookId, Guid userId) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             return await Task<bool>.Run(() => {
-                return BookUserStatsByBookIdAndUserIdDelete(key, context);
+                return BookUserStatsByBookIdAndUserIdDelete(key, dbContextFactory);
             });
         }
 
