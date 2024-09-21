@@ -1,6 +1,4 @@
-﻿
-
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Model.DAL;
 
 namespace TestDataPopulator
@@ -62,6 +60,7 @@ namespace TestDataPopulator
                 Console.WriteLine("**********************************************************************");
                 Console.WriteLine("Fin");
                 Console.WriteLine("**********************************************************************");
+#endif
 
             }
             catch (Exception ex)
@@ -70,7 +69,6 @@ namespace TestDataPopulator
                 Console.WriteLine(ex.ToString());
                 throw;
             }
-#endif
 
         }
         public class ConnectionStrings
