@@ -10,7 +10,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, Book> BookById = [];
+        
 
 
         #region read

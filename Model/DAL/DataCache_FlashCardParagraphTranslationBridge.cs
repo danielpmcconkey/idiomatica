@@ -11,9 +11,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, FlashCardParagraphTranslationBridge> FlashCardParagraphTranslationBridgeById = [];
-        private static ConcurrentDictionary<(Guid flashCardId, Guid uiLanguageId), List<FlashCardParagraphTranslationBridge>>
-            FlashCardParagraphTranslationBridgesByFlashCardIdAndUiLanguageCode = [];
+        
 
         #region read
         public static List<FlashCardParagraphTranslationBridge>?

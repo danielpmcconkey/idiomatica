@@ -11,9 +11,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, BookUser> BookUserById = new ConcurrentDictionary<Guid, BookUser>();
-        private static ConcurrentDictionary<(Guid bookId, Guid userId), BookUser> BookUserByBookIdAndUserId = new ConcurrentDictionary<(Guid bookId, Guid userId), BookUser>();
-
+        
         #region create
 
         public static BookUser? BookUserCreate(BookUser bookUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)

@@ -11,11 +11,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, FlashCard?> FlashCardById = new ConcurrentDictionary<Guid, FlashCard?>();
-        private static ConcurrentDictionary<Guid, FlashCard?> FlashCardAndFullRelationshipsById = new ConcurrentDictionary<Guid, FlashCard?>();
-        private static ConcurrentDictionary<Guid, FlashCard?> FlashCardByWordUserId = new ();
-        //private static ConcurrentDictionary<(Guid languageUserId, int take), List<FlashCard>> FlashCardsActiveAndFullRelationshipsByLanguageUserId = new ();
-
+        
 
         #region create
 

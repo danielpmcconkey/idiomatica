@@ -10,17 +10,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, List<Word>> WordsCommon1000ByLanguageId = new ConcurrentDictionary<Guid, List<Word>>();
-        private static ConcurrentDictionary<Guid, Word?> WordById = new ConcurrentDictionary<Guid, Word?>();
-        private static ConcurrentDictionary<(Guid languageId, string textLower), Word> WordByLanguageIdAndTextLower = new ConcurrentDictionary<(Guid languageId, string textLower), Word>();
-        private static ConcurrentDictionary<Guid, List<Word>> WordsBySentenceId = new ConcurrentDictionary<Guid, List<Word>>();
-        private static ConcurrentDictionary<Guid, List<Word>> WordsByBookId = new ConcurrentDictionary<Guid, List<Word>>();
-        private static ConcurrentDictionary<Guid, Dictionary<string, Word>> WordsDictByBookId = new ConcurrentDictionary<Guid, Dictionary<string, Word>>();
-        private static ConcurrentDictionary<Guid, Dictionary<string, Word>> WordsDictByPageId = new ConcurrentDictionary<Guid, Dictionary<string, Word>>();
-        private static ConcurrentDictionary<Guid, List<Word>> WordsAndTokensAndSentencesAndParagraphsByWordId = new ConcurrentDictionary<Guid, List<Word>>();
-        private static ConcurrentDictionary<(Guid pageId, Guid languageUserId), Dictionary<string, Word>> WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserId = [];
-        private static ConcurrentDictionary<Guid, List<WordTranslation>> WordTranslationsByWordId = [];
-
+        
 
         #region read
         public static  Word? WordByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)

@@ -10,9 +10,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, FlashCardAttempt?> FlashCardAttemptById = new ConcurrentDictionary<Guid, FlashCardAttempt?>();
-        private static ConcurrentDictionary<Guid, List<FlashCardAttempt>> FlashCardAttemptsByFlashCardId = new ConcurrentDictionary<Guid, List<FlashCardAttempt>>();
-
+        
 
         #region create
 

@@ -12,7 +12,7 @@ using Logic.Conjugator.English;
 
 namespace TestDataPopulator
 {
-    internal class TestDataPopulator
+    internal class TestDataPopulator : IDisposable
     {
         private string _connectionString;
 
@@ -25,6 +25,11 @@ namespace TestDataPopulator
         internal TestDataPopulator(string connectionString)
         {
             _connectionString = connectionString;
+        }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
 
         internal bool PopulateData()

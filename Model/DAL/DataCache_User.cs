@@ -16,10 +16,7 @@ namespace Model.DAL
     public static partial class DataCache
     {
         
-        private static ConcurrentDictionary<string, User> UserByApplicationUserId = new ConcurrentDictionary<string, User>();
-        private static ConcurrentDictionary<Guid, Language?> UserSettingUiLanguageByUserId = new();
-        private static ConcurrentDictionary<Guid, List<UserSetting>?> UserSettingsByUserId = new();
-
+        
         #region create
         public static User? UserCreate(User user, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {

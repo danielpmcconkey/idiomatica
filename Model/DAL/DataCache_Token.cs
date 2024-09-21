@@ -10,11 +10,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, Token> TokenById = new ConcurrentDictionary<Guid, Token>(); 
-        private static ConcurrentDictionary<Guid, List<Token>> TokensByPageId = new ConcurrentDictionary<Guid, List<Token>>();
-        private static ConcurrentDictionary<Guid, List<Token>> TokensBySentenceId = new ConcurrentDictionary<Guid, List<Token>>();
-        private static ConcurrentDictionary<Guid, List<Token>> TokensAndWordsBySentenceId = new ConcurrentDictionary<Guid, List<Token>>();
-
+        
         #region create
 
         public static Token? TokenCreate(Token token, IDbContextFactory<IdiomaticaContext> dbContextFactory)

@@ -14,14 +14,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, WordUser> WordUserById = new ();
-        private static ConcurrentDictionary<Guid, WordUser> WordUserAndLanguageUserAndLanguageById = new ();
-        private static ConcurrentDictionary<(Guid wordId, Guid userId), WordUser> WordUserByWordIdAndUserId = new ();
-        private static ConcurrentDictionary<(Guid bookId, Guid uselanguageUserIdrId), List<WordUser>> WordUsersByBookIdAndLanguageUserId = new ();
-        private static ConcurrentDictionary<(Guid bookId, Guid userId), Dictionary<string, WordUser>> WordUsersDictByBookIdAndUserId = new ();
-        private static ConcurrentDictionary<(Guid pageId, Guid userId), Dictionary<string, WordUser>> WordUsersDictByPageIdAndUserId = new ();
-        private static ConcurrentDictionary<(Guid userId, Guid languageId), List<WordUser>> WordUsersByUserIdAndLanguageId = new ();
-
+        
 
         #region create
 

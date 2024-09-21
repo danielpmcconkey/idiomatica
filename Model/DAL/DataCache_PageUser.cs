@@ -10,11 +10,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, PageUser> PageUserById = [];
-        private static ConcurrentDictionary<(Guid pageId, Guid languageUserId), PageUser> PageUserByPageIdAndLanguageUserId = [];
-        private static ConcurrentDictionary<(Guid languageUserId, int ordinal, Guid bookId), PageUser> PageUserByLanguageUserIdOrdinalAndBookId = []; 
-        private static ConcurrentDictionary<Guid, List<PageUser>> PageUsersByBookUserId = [];
-
+        
         #region create
 
 

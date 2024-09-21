@@ -16,9 +16,7 @@ namespace Model.DAL
     public static partial class DataCache
     {
 
-        private static ConcurrentDictionary<Guid, List<BookListRow>> BookListRowsByUserId = [];
-        private static ConcurrentDictionary<(Guid bookId, Guid userId), BookListRow?> BookListRowByBookIdAndUserId = [];
-
+        
 
 
         #region read

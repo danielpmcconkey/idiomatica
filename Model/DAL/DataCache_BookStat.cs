@@ -11,9 +11,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<(Guid bookId, AvailableBookStat statKey), BookStat> BookStatByBookIdAndStatKey = [];
-        private static ConcurrentDictionary<Guid, List<BookStat>> BookStatsByBookId = [];
-
+        
         public static BookStat? BookStatByBookIdAndStatKeyRead(
             (Guid bookId, AvailableBookStat statKey) key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {

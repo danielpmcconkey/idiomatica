@@ -11,10 +11,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, LanguageUser> LanguageUserById = new ConcurrentDictionary<Guid, LanguageUser>();
-        private static ConcurrentDictionary<(Guid languageId, Guid userId), LanguageUser> LanguageUserByLanguageIdAndUserId = new ConcurrentDictionary<(Guid languageId, Guid userId), LanguageUser>();
-        private static ConcurrentDictionary<Guid, List<LanguageUser>> LanguageUsersAndLanguageByUserId = new ConcurrentDictionary<Guid, List<LanguageUser>>();
-
+        
         #region create
         public static LanguageUser? LanguageUserCreate(LanguageUser languageUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {

@@ -12,9 +12,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<AvailableLanguageCode, Language> LanguageByCode = [];
-        private static ConcurrentDictionary<Guid, Language> LanguageById = [];
-
+        
 
         #region read
         public static Language? LanguageByCodeRead(

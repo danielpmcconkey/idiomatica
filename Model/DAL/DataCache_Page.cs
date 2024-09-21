@@ -10,10 +10,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, Page> PageById = [];
-        private static ConcurrentDictionary<(int ordinal, Guid bookId), Page> PageByOrdinalAndBookId = [];
-        private static ConcurrentDictionary<Guid, List<Page>> PagesByBookId = [];
-
+        
         #region read
         public static Page? PageByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {

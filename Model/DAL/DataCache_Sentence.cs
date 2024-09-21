@@ -11,10 +11,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, Sentence> SentenceById = [];
-        private static ConcurrentDictionary<Guid, List<Sentence>> SentencesByPageId = [];
-        private static ConcurrentDictionary<Guid, List<Sentence>> SentencesByParagraphId = [];
-
+        
 
         #region read
         public static Sentence? SentenceByIdRead(Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)

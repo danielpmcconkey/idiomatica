@@ -12,9 +12,7 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
-        private static ConcurrentDictionary<Guid, ParagraphTranslation> ParagraphTranslationById = [];
-        private static ConcurrentDictionary<Guid, List<ParagraphTranslation>> ParagraphTranslationsByParagraphId = [];
-
+        
         #region create
 
 
