@@ -12,7 +12,7 @@ namespace TestDataPopulator
             // only run this in your own lower environment do NOT run this against the prod database
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false);
+                .AddJsonFile("appsettings_tdp.json", optional: false);
             IConfiguration config = builder.Build();
             var ConnectionStrings = config
                 .GetSection("ConnectionStrings")
