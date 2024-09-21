@@ -41,8 +41,20 @@ if (builder.Environment.IsDevelopment())
     builder.Configuration.AddEnvironmentVariables().AddJsonFile("appsettings.Development.json");
     connection = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING_DEV");
 
-    // use the below connection to run against prod DB,  with error messages enabled
-    //connection = "Server=tcp:idiomatica.database.windows.net,1433;Initial Catalog=idiomatica;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default;";
+    /*
+     * use the below connection to run against test DB, you should only really
+     * do this when you are running the database migration to update your test
+     * DB structure
+     * */
+    connection = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING_TEST");
+
+    /*
+     * use the below connection to run against prod DB, only use this when you
+     * are debugging a prod issue or when running a database migration to
+     * update prod structure. either way make DAMNED sure you change it back
+     * right away
+     * */
+    // connection = "Server=tcp:idiomatica.database.windows.net,1433;Initial Catalog=idiomatica;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default;";
 }
 else
 {

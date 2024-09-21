@@ -36,7 +36,7 @@ namespace LogicTests
 
         private static ServiceProvider GetServiceProvider()
         {
-            var connectionstring = "Server=localhost;Database=IdiomaticaFresh;Trusted_Connection=True;TrustServerCertificate=true;";
+            var connectionstring = "Server=localhost;Database=Idiomatica_test;Trusted_Connection=True;TrustServerCertificate=true;";
 
             var services = new ServiceCollection();
             services.AddLogging();

@@ -2,19 +2,37 @@
 
 ## Getting your build environment up and running
 
-1. Install (or confirm an existing installation of) VisualStudio with .NET core 8 
-    1. This solution requires a number of packages to run. I'm not sure if they'll install auto-magically or not. We can figure that out together
-2. Install (or confirm an existing installation of) a local MS SQL Server for dev and test purposes.
-    1. I'm currently using this version Microsoft SQL Server 2022 (RTM-GDR) (KB5040936) - 16.0.1121.4 (X64)   Jul  2 2024 00:22:34 
-    2. This can be found by querying `select @@VERSION;` in SQL Server Management Studio
-    3. The version shouldn't really matter for development or testing. We're not doing anything exotic here. More or less base TSQL everywhere
-3. Create a dev database
-    1. Open the file `./Idiomatica/Queries/__FreshDbInstall.sql` using SQL Server Management Studio
-    2. Execute the script
-        1. This will create your dev database
-        2. You should also see some warnings relating to the max cluster length for some of the AspNetUser* tables. These table create scripts were originally created by Microsoft so I haven't tried "fixing" them. It's not been a problem yet
-    3. Confirm no actual errors. If you do get errors, attempt to troubleshoot or ask for help
-    4. Verify that you see a bunch of tables (7 at time of writing) that are named `dbo.*` and many tables (25 at time of writing) that are named `Idioma.*`
+1. Pre-requisites
+    1. Install (or confirm an existing installation of) VisualStudio with .NET core 8 
+        1. This solution requires a number of packages to run. I'm not sure if they'll install auto-magically or not. We can figure that out together
+    1. Install (or confirm an existing installation of) a local MS SQL Server for dev and test purposes.
+        1. I'm currently using this version Microsoft SQL Server 2022 (RTM-GDR) (KB5040936) - 16.0.1121.4 (X64)   Jul  2 2024 00:22:34 
+        1. This can be found by querying `select @@VERSION;` in SQL Server Management Studio
+        1. The version shouldn't really matter for development or testing. We're not doing anything exotic here. More or less base TSQL everywhere
+    1. Open up the solution in VisualStudio and rebuild the entire solution
+        1. If there are any errors, stop here and either troubleshoot yourself or ask for help
+1. Create the dev database
+    1. Set your start-up project in VisualStudio to IdiomaticaWeb
+    1. Check your database connection strings
+        1. Open the Program.cs file in the IdiomaticaWeb project
+        1. Under the section of code that begins `if (builder.Environment.IsDevelopment())`...
+        1. Confirm that you have uncommented the line that looks for the `AZURE_SQL_CONNECTIONSTRING_DEV` config value
+        1. Confirm that you have commented out the line that retrieves the `AZURE_SQL_CONNECTIONSTRING_TEST` config
+        1. Confirm that you have commented out the line at the end of that block of code just under the comment that reads "use the below connection to run against prod DB..."
+        1. Confirm that you are in Debug mode in Visual Studio
+    1. Build the database
+        1. Using the Package Manager Console...
+        1. Set the "Default project:" pulldown (in the console window) to "TestDataPopulator"
+        1. Type `Update-Database` into the PM command prompt and hit enter
+        1. You should see not output with red text
+1. Create the testt database
+    1. In your Program.cs file, uncomment the line that retrieves the test database connection string
+    1. Again, run the `Update-Database` command in the Package Manager console
+    1. Re-comment the test connection string line and save the file
+1. Go over to SQL Server Management Studio (SSMS) and confirm that you have 2 shiny new database
+1. Populate dev and test data
+
+
 4. Your default user name is `testDev@testDev.com` and your default PW is `lmno12#45P`
 5. At this point, you can run the app. 
     1. Open the solution in Visual Studio

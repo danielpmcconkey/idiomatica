@@ -14,11 +14,18 @@ namespace TestDataPopulator
 {
     internal class TestDataPopulator
     {
+        private string _connectionString;
+
         private Language? _spanishLanguage;
         private Language? _englishLanguage;
         private User? _user;
         private LanguageUser? _spanishLanguageUser;
         private LanguageUser? _englishLanguageUser;
+
+        internal TestDataPopulator(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
 
         internal bool PopulateData()
         {
@@ -52,15 +59,12 @@ namespace TestDataPopulator
         }
         private ServiceProvider GetServiceProvider()
         {
-            var connectionstring = "Server=localhost;Database=IdiomaticaFresh;Trusted_Connection=True;TrustServerCertificate=true;";
-
-
             var services = new ServiceCollection();
             services.AddLogging();
             services.AddScoped<AuthenticationStateProvider, RevalidatingProviderForUnitTesting>();
             services.AddScoped<LoginService>();
             services.AddDbContextFactory<IdiomaticaContext>(options => {
-                options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("TestDataPopulator"));
+                options.UseSqlServer(_connectionString, b => b.MigrationsAssembly("TestDataPopulator"));
             });
             return services.BuildServiceProvider();
         }
