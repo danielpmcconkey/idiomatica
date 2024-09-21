@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Model;
-using Xunit.Sdk;
+// using Xunit.Sdk;
 using Model.DAL;
 using Microsoft.EntityFrameworkCore;
 using LogicTests;

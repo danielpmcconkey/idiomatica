@@ -1,9 +1,9 @@
 using IdiomaticaWeb;
 using IdiomaticaWeb.Components;
 using IdiomaticaWeb.Components.Account;
-using Logic.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Logic.Services;
 using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.DAL;
@@ -42,7 +42,7 @@ if (builder.Environment.IsDevelopment())
     connection = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING_DEV");
 
     // use the below connection to run against prod DB,  with error messages enabled
-    connection = "Server=tcp:idiomatica.database.windows.net,1433;Initial Catalog=idiomatica;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default;";
+    //connection = "Server=tcp:idiomatica.database.windows.net,1433;Initial Catalog=idiomatica;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default;";
 }
 else
 {

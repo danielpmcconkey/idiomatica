@@ -1,25 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Model;
 using Model.DAL;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Model.Enums;
 using Logic.Services.API;
-using Xunit;
 using Logic.Telemetry;
-using Logic;
 using Logic.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.AspNetCore.Components.Authorization;
-using System.Net;
 using Logic.Conjugator.English;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace TestDataPopulator
 {
