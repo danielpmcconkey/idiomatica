@@ -42,7 +42,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core1
             }];
@@ -51,7 +51,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core2
             }];
@@ -60,7 +60,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core3
             }];
@@ -69,7 +69,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core4
             }];
@@ -115,17 +115,17 @@ namespace Logic.Conjugator.Spanish
                 // this is the way
                 return [new VerbConjugationPiece()
                 {
-                    Ordinal = 100,
+                    Ordinal = 1100,
                     Type = AvailableVerbConjugationPieceType.CORE,
                     Piece = firstBit
                 },new VerbConjugationPiece()
                 {
-                    Ordinal = 110,
+                    Ordinal = 1110,
                     Type = AvailableVerbConjugationPieceType.IRREGULAR,
                     Piece = seek
                 },new VerbConjugationPiece()
                 {
-                    Ordinal = 120,
+                    Ordinal = 1120,
                     Type = AvailableVerbConjugationPieceType.CORE,
                     Piece = endBit
                 }];
@@ -165,12 +165,12 @@ namespace Logic.Conjugator.Spanish
                 // this is the way
                 return [new VerbConjugationPiece()
                 {
-                    Ordinal = 100,
+                    Ordinal = 1100,
                     Type = AvailableVerbConjugationPieceType.CORE,
                     Piece = firstBit
                 },new VerbConjugationPiece()
                 {
-                    Ordinal = 110,
+                    Ordinal = 1110,
                     Type = AvailableVerbConjugationPieceType.IRREGULAR,
                     Piece = seek
                 }];
@@ -216,7 +216,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 10,
+                Ordinal = 1010,
             };
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
@@ -243,7 +243,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 20,
+                Ordinal = 1020,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
@@ -269,7 +269,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 30,
+                Ordinal = 1030,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
@@ -294,7 +294,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 40,
+                Ordinal = 1040,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
@@ -319,7 +319,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 50,
+                Ordinal = 1050,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
@@ -344,7 +344,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 60,
+                Ordinal = 1060,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
@@ -369,7 +369,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 70,
+                Ordinal = 1070,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
@@ -394,7 +394,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 80,
+                Ordinal = 1080,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
@@ -419,7 +419,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 90,
+                Ordinal = 1090,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
@@ -444,7 +444,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 100,
+                Ordinal = 1100,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
@@ -460,7 +460,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
@@ -475,7 +475,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "o"
             }];
@@ -484,7 +484,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "as"
             }];
@@ -493,7 +493,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "a"
             }];
@@ -502,7 +502,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "amos"
             }];
@@ -511,7 +511,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "áis"
             }];
@@ -520,7 +520,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "an"
             }];
@@ -633,7 +633,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 110,
+                Ordinal = 1110,
             };
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
@@ -659,7 +659,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 120,
+                Ordinal = 1120,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
@@ -684,7 +684,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 130,
+                Ordinal = 1130,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
@@ -709,7 +709,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 140,
+                Ordinal = 1140,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
@@ -734,7 +734,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 150,
+                Ordinal = 1150,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
@@ -759,7 +759,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 160,
+                Ordinal = 1160,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
@@ -784,7 +784,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 170,
+                Ordinal = 1170,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
@@ -809,7 +809,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 180,
+                Ordinal = 1180,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
@@ -834,7 +834,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 190,
+                Ordinal = 1190,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
@@ -859,7 +859,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 200,
+                Ordinal = 1200,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
@@ -882,7 +882,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "é"
             }];
@@ -891,7 +891,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aste"
             }];
@@ -900,7 +900,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ó"
             }];
@@ -909,7 +909,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "amos"
             }];
@@ -918,7 +918,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "asteis"
             }];
@@ -927,7 +927,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aron"
             }];
@@ -1040,7 +1040,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 210,
+                Ordinal = 1210,
             };
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
@@ -1066,7 +1066,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 220,
+                Ordinal = 1220,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
@@ -1091,7 +1091,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 230,
+                Ordinal = 1230,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
@@ -1116,7 +1116,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 240,
+                Ordinal = 1240,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
@@ -1141,7 +1141,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 250,
+                Ordinal = 1250,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
@@ -1166,7 +1166,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 260,
+                Ordinal = 1260,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
@@ -1191,7 +1191,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 270,
+                Ordinal = 1270,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
@@ -1216,7 +1216,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 280,
+                Ordinal = 1280,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
@@ -1241,7 +1241,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 290,
+                Ordinal = 1290,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
@@ -1266,7 +1266,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 300,
+                Ordinal = 1300,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
@@ -1282,7 +1282,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
@@ -1297,7 +1297,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aba"
             }];
@@ -1306,7 +1306,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "abas"
             }];
@@ -1315,7 +1315,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aba"
             }];
@@ -1324,7 +1324,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ábamos"
             }];
@@ -1333,7 +1333,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "abais"
             }];
@@ -1342,7 +1342,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aban"
             }];
@@ -1455,7 +1455,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 310,
+                Ordinal = 1310,
             };
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
@@ -1481,7 +1481,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 320,
+                Ordinal = 1320,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
@@ -1506,7 +1506,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 330,
+                Ordinal = 1330,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
@@ -1531,7 +1531,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 340,
+                Ordinal = 1340,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
@@ -1556,7 +1556,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 350,
+                Ordinal = 1350,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
@@ -1581,7 +1581,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 360,
+                Ordinal = 1360,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
@@ -1606,7 +1606,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 370,
+                Ordinal = 1370,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
@@ -1631,7 +1631,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 380,
+                Ordinal = 1380,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
@@ -1656,7 +1656,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 390,
+                Ordinal = 1390,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
@@ -1681,7 +1681,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 400,
+                Ordinal = 1400,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
@@ -1697,7 +1697,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
@@ -1712,7 +1712,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aría"
             }];
@@ -1721,7 +1721,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "arías"
             }];
@@ -1730,7 +1730,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aría"
             }];
@@ -1739,7 +1739,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aríamos"
             }];
@@ -1748,7 +1748,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aríais"
             }];
@@ -1757,7 +1757,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "arían"
             }];
@@ -1868,7 +1868,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 410,
+                Ordinal = 1410,
             };
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
@@ -1894,7 +1894,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 420,
+                Ordinal = 1420,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
@@ -1919,7 +1919,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 430,
+                Ordinal = 1430,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
@@ -1944,7 +1944,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 440,
+                Ordinal = 1440,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
@@ -1969,7 +1969,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 450,
+                Ordinal = 1450,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
@@ -1994,7 +1994,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 460,
+                Ordinal = 1460,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
@@ -2019,7 +2019,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 470,
+                Ordinal = 1470,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
@@ -2044,7 +2044,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 480,
+                Ordinal = 1480,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
@@ -2069,7 +2069,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 490,
+                Ordinal = 1490,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
@@ -2094,7 +2094,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 500,
+                Ordinal = 1500,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
@@ -2110,7 +2110,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
@@ -2125,7 +2125,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aré"
             }];
@@ -2134,7 +2134,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "arás"
             }];
@@ -2143,7 +2143,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ará"
             }];
@@ -2152,7 +2152,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aremos"
             }];
@@ -2161,7 +2161,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aréis"
             }];
@@ -2170,7 +2170,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "arán"
             }];
@@ -2283,7 +2283,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 510,
+                Ordinal = 1510,
             };
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
@@ -2309,7 +2309,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 520,
+                Ordinal = 1520,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
@@ -2334,7 +2334,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 530,
+                Ordinal = 1530,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
@@ -2359,7 +2359,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 540,
+                Ordinal = 1540,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
@@ -2384,7 +2384,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 550,
+                Ordinal = 1550,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
@@ -2409,7 +2409,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 560,
+                Ordinal = 1560,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
@@ -2434,7 +2434,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 570,
+                Ordinal = 1570,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
@@ -2459,7 +2459,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 580,
+                Ordinal = 1580,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
@@ -2484,7 +2484,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 590,
+                Ordinal = 1590,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
@@ -2509,7 +2509,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 600,
+                Ordinal = 1600,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
@@ -2525,7 +2525,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
@@ -2540,7 +2540,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "e"
             }];
@@ -2549,7 +2549,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "es"
             }];
@@ -2558,7 +2558,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "e"
             }];
@@ -2567,7 +2567,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "emos"
             }];
@@ -2576,7 +2576,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "éis"
             }];
@@ -2585,7 +2585,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "en"
             }];
@@ -2698,7 +2698,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 610,
+                Ordinal = 1610,
             };
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
@@ -2724,7 +2724,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 620,
+                Ordinal = 1620,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
@@ -2749,7 +2749,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 630,
+                Ordinal = 1630,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
@@ -2774,7 +2774,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 640,
+                Ordinal = 1640,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
@@ -2799,7 +2799,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 650,
+                Ordinal = 1650,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
@@ -2824,7 +2824,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 660,
+                Ordinal = 1660,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
@@ -2849,7 +2849,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 670,
+                Ordinal = 1670,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
@@ -2874,7 +2874,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 680,
+                Ordinal = 1680,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
@@ -2899,7 +2899,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 690,
+                Ordinal = 1690,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
@@ -2924,7 +2924,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 700,
+                Ordinal = 1700,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
@@ -2940,7 +2940,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
@@ -2955,7 +2955,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ara"
             }];
@@ -2964,7 +2964,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aras"
             }];
@@ -2973,7 +2973,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ara"
             }];
@@ -2982,7 +2982,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "áramos"
             }];
@@ -2991,7 +2991,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "arais"
             }];
@@ -3000,7 +3000,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aran"
             }];
@@ -3112,7 +3112,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 710,
+                Ordinal = 1710,
             };
 
             conjugation.Pieces.AddRange(GetPronounPiece("yo"));
@@ -3138,7 +3138,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 720,
+                Ordinal = 1720,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
@@ -3163,7 +3163,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 730,
+                Ordinal = 1730,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("él"));
 
@@ -3188,7 +3188,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 740,
+                Ordinal = 1740,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ella"));
 
@@ -3213,7 +3213,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 750,
+                Ordinal = 1750,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
@@ -3238,7 +3238,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 760,
+                Ordinal = 1760,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
@@ -3263,7 +3263,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 770,
+                Ordinal = 1770,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
@@ -3288,7 +3288,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 780,
+                Ordinal = 1780,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellos"));
 
@@ -3313,7 +3313,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 790,
+                Ordinal = 1790,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ellas"));
 
@@ -3338,7 +3338,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 800,
+                Ordinal = 1800,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
@@ -3354,7 +3354,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
@@ -3369,7 +3369,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "are"
             }];
@@ -3378,7 +3378,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ares"
             }];
@@ -3387,7 +3387,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "are"
             }];
@@ -3396,7 +3396,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "áremos"
             }];
@@ -3405,7 +3405,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "areis"
             }];
@@ -3414,7 +3414,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "aren"
             }];
@@ -3521,7 +3521,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.IMPERATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 810,
+                Ordinal = 1810,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("tú"));
 
@@ -3546,7 +3546,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.IMPERATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 820,
+                Ordinal = 1820,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("usted"));
 
@@ -3571,7 +3571,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.IMPERATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 830,
+                Ordinal = 1830,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("nosotros"));
 
@@ -3596,7 +3596,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.IMPERATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 840,
+                Ordinal = 1840,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("vosotros"));
 
@@ -3621,7 +3621,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.IMPERATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 850,
+                Ordinal = 1850,
             };
             conjugation.Pieces.AddRange(GetPronounPiece("ustedes"));
 
@@ -3637,7 +3637,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
@@ -3652,7 +3652,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "a"
             }];
@@ -3661,7 +3661,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "e"
             }];
@@ -3670,7 +3670,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "emos"
             }];
@@ -3679,7 +3679,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "ad"
             }];
@@ -3688,7 +3688,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "en"
             }];
@@ -3760,7 +3760,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.NEGATIVE_IMPERATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 910,
+                Ordinal = 1910,
             };
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
@@ -3790,7 +3790,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.NEGATIVE_IMPERATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 920,
+                Ordinal = 1920,
             };
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
@@ -3820,7 +3820,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.NEGATIVE_IMPERATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 930,
+                Ordinal = 1930,
             };
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
@@ -3850,7 +3850,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.NEGATIVE_IMPERATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 940,
+                Ordinal = 1940,
             };
             conjugation.Pieces.Add(new VerbConjugationPiece()
             {
@@ -3880,7 +3880,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.NEGATIVE_IMPERATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 950,
+                Ordinal = 1950,
             };
 
             conjugation.Pieces.Add(new VerbConjugationPiece()
@@ -3902,7 +3902,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 100,
+                Ordinal = 1100,
                 Type = AvailableVerbConjugationPieceType.CORE,
                 Piece = _sourceLanguageInfinitive.Core1
             }]; ;
@@ -3917,7 +3917,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "es"
             }];
@@ -3926,7 +3926,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "e"
             }];
@@ -3935,7 +3935,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "emos"
             }];
@@ -3944,7 +3944,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "éis"
             }];
@@ -3953,7 +3953,7 @@ namespace Logic.Conjugator.Spanish
         {
             return [new VerbConjugationPiece()
             {
-                Ordinal = 200,
+                Ordinal = 1200,
                 Type = AvailableVerbConjugationPieceType.REGULAR,
                 Piece = "en"
             }];

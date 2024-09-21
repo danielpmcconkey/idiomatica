@@ -38,7 +38,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 100
+                Ordinal = 1100
             };
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
@@ -88,7 +88,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 200
+                Ordinal = 1200
             };
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
@@ -120,7 +120,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 300
+                Ordinal = 1300
             };
 
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
@@ -153,7 +153,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.CONDITIONAL,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 400
+                Ordinal = 1400
             };
 
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
@@ -186,7 +186,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.INDICATIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 500
+                Ordinal = 1500
             };
 
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
@@ -219,7 +219,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 600
+                Ordinal = 1600
             };
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
@@ -250,7 +250,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.IMPERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 700
+                Ordinal = 1700
             };
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {
@@ -282,7 +282,7 @@ namespace Logic.Conjugator.Spanish
                 Aspect = AvailableGrammaticalAspect.PERFECT,
                 Mood = AvailableGrammaticalMood.SUBJUNCTIVE,
                 Voice = AvailableGrammaticalVoice.ACTIVE,
-                Ordinal = 800
+                Ordinal = 1800
             };
             if (_targetTranslator is not null && _targetLanguageInfinitive is not null)
             {

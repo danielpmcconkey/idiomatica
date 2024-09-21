@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Net;
 using Logic.Conjugator.English;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace TestDataPopulator
 {
@@ -63,6 +64,7 @@ namespace TestDataPopulator
         private ServiceProvider GetServiceProvider()
         {
             var connectionstring = "Server=localhost;Database=IdiomaticaFresh;Trusted_Connection=True;TrustServerCertificate=true;";
+
 
             var services = new ServiceCollection();
             services.AddLogging();
@@ -700,7 +702,7 @@ namespace TestDataPopulator
             // save the infinitive translation
             VerbWordTranslationSave(context, learningVerb,
                 languageLearning, languageTranslation,
-                learningVerb.Infinitive, translationVerb.Infinitive, 1, false);
+                learningVerb.Infinitive, translationVerb.Infinitive, 1001, false);
 
             if (learningVerb.Gerund is not null && translationVerb.Gerund is not null)
             {
@@ -713,7 +715,7 @@ namespace TestDataPopulator
 
                 VerbWordTranslationSave(context, learningVerb,
                     languageLearning, languageTranslation,
-                    learningVerb.Gerund, gerundTranslation, 100, false);
+                    learningVerb.Gerund, gerundTranslation, 1100, false);
             }
             if (learningVerb.PastParticiple is not null && translationVerb.PastParticiple is not null)
             {
@@ -725,7 +727,7 @@ namespace TestDataPopulator
                 }
                 VerbWordTranslationSave(context, learningVerb,
                     languageLearning, languageTranslation,
-                    learningVerb.PastParticiple, participleTranslation, 100, false);
+                    learningVerb.PastParticiple, participleTranslation, 1100, false);
             }
             context.SaveChanges();
             // save the conjugation translations

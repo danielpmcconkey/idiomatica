@@ -17,7 +17,6 @@ namespace Model
         [Required] public required Guid Id { get; set; }
         [Required] public required Guid LanguageToId { get; set; }
         [Required] public required Guid WordId { get; set; }
-        [Required] public required Guid VerbId { get; set; }
         [Required] public required string Translation { get; set; }
         [Required] public required AvailablePartOfSpeech PartOfSpeech { get; set; }
 
@@ -27,6 +26,7 @@ namespace Model
 
         #endregion
 
+        public  Guid? VerbId { get; set; } // only relevant when part of speech is a verb
         public Language? LanguageTo { get; set; }
         public Word? Word { get; set; }
         public Verb? Verb { get; set; }
