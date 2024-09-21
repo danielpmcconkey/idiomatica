@@ -10,6 +10,8 @@ namespace Model.DAL
 {
     public static partial class DataCache
     {
+        // note: we should created a cache registry to make the deletion an easier thing
+
         private static ConcurrentDictionary<Guid, Book> BookById = [];
         private static ConcurrentDictionary<Guid, List<BookListRow>> BookListRowsByUserId = [];
         private static ConcurrentDictionary<(Guid bookId, Guid userId), BookListRow?> BookListRowByBookIdAndUserId = [];

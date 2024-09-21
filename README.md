@@ -1,3 +1,5 @@
+use https://dillinger.io/ if you need a markdown viewer
+
 # Idiomatica
 
 ## Getting your build environment up and running
@@ -31,40 +33,25 @@
     1. Re-comment the test connection string line and save the file
 1. Go over to SQL Server Management Studio (SSMS) and confirm that you have 2 shiny new database
 1. Populate dev and test data
+    1. Change your VisualStudio start-up project to the TestDataPopulator
+    1. Make sure you are in Debug mode
+    1. Press the "play" button (or hit F5)
+    1. If you see the message that a fatal error has occurred, troubleshoot or ask for help
+    1. Change your VisualStudio start-up project to the IdiomaticaWeb project.
+        1. If you forget this step, you're gonna have to delete your data and start over
+1. Run the automated tests
+    1. In VisualStudio, open the Test Explorer
+    2. Run all of the "LogicTests"
+    1. Confirm everything passes
+    1. You should do this step everytime you plan to merge one of your commits into main.
+1. Run the app
+    1. Ensure that the start-up project is set to IdiomaticaWeb
+    1. Press "play" (F5)
+    1. The test user you just created is `testDev@testDev.com` and its default PW is `lmno12#45P`
+    1. You should be able to create your own user, if you'd like (though the UI is a bit jank, still)
 
 
-4. Your default user name is `testDev@testDev.com` and your default PW is `lmno12#45P`
-5. At this point, you can run the app. 
-    1. Open the solution in Visual Studio
-    2. Try to build the entire solution. If it doesn't, there's likely a missing package
-    3. If it does, go ahead and play it (F5)
-    4. If nothing happens, confirm that `IdiomaticaWeb` is your start-up project and try again
-    5. You should be able to log-in, check your book list, and start reading the default book, Rapunzel
-    6. Feel free to create your own user log-in if you'd like or use the initial test user
-6. Create the test database
-    1. Go back to the database generation script from above (`./Idiomatica/Queries/__FreshDbInstall.sql`)
-    2. Do a find + reploce on the eniter file.
-        1. Find `Idiomatica_dev`
-        2. Replace with `Idiomatica_test`
-    3. Don't save the file or you'll accidentally commit the change you just made
-7. Run the automated tests
-    1. Open up the solution in VisualStudio
-    2. Open up the Test Explorer and run all of the "LogicTests"
-    3. Confirm everything passes
-    4. You should do this step everytime you plan to merge one of your commits into main.
 
-## Learning the application structure
+## Learning the application
 
-### Projects in the solution
-
-This application is built on an N-Tier pattern, which segregates the application responsibilities into separate tiers, from core data at the bottom, to user interface at the top. That's the order we'll go in...
-
-1. *Model* 
-    1. This is the core data layer. All data types used in the application are defined here, but there should be very little business logic in this layer
-    2. DAL folder. DAL stands for Data Access Layer. This is the interface to the data defined in the model classes.
-        1. IdiomaticaContext.cs this is the Entity Framework definition for how model objects relate to one another. All data interaction in this applicaiton does so through an instantiation of the IdiomaticaContext class
-        2. DataCache_\* files. The DataCache is one gigantic class spread out across multiple files. This is where the create/read/update/delete methods for access data are housed. Generally, these functions should only be accessed by the API classes. They're also not well named :).
-    3. Available\* files. These are all enums, defining look-up data. They generally correspond to an int field in the database
-2. *Logic*
-    1. Herein resides all of the business logic for the application. These are classes and methods that the front-end UI relies upon to consistently and reliably interact with data
-    2. 
+This is a TBD section of this document. Some of the design of this applicaiton is documented in in the IdiomaticaArchimate.archimate file in the top directory of the project. You need to install Archi to view it.
