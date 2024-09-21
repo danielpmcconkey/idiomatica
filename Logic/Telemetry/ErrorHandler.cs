@@ -33,8 +33,8 @@ namespace Logic.Telemetry
             [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0
             )
         {
-            LogMessage(AvailableLogMessageTypes.ERROR,
-                memberName, sourceFilePath, sourceLineNumber, message, null, dbContextFactory);
+            LogMessage(type, memberName, sourceFilePath, sourceLineNumber,
+                message, null, dbContextFactory);
         }
         private static void LogMessage(AvailableLogMessageTypes type,
             string memberName, string sourceFilePath, int sourceLineNumber, string message,

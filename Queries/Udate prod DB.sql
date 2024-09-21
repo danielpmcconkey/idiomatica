@@ -334,3 +334,220 @@ sentence
 token
 **************************************************************************************************************/
 
+--update Idioma.oldToken set new_id = NEWID();
+
+
+
+--INSERT INTO [Idioma].[Token]
+--           ([Id]
+--           ,[WordId]
+--           ,[SentenceId]
+--           ,[Display]
+--           ,[Ordinal])
+
+
+
+--select --top 1000
+--	ot.new_id,
+--	ow.new_id,
+--	os.new_id,
+--	ot.Display,
+--	ot.Ordinal
+--from [Idioma].[oldToken] ot
+--left join [Idioma].[oldSentence] os on ot.SentenceId = os.Id
+--left join [Idioma].[oldWord] ow on ot.WordId = ow.Id
+--left join [Idioma].[oldParagraph] opp on os.ParagraphId = opp.Id
+--left join [Idioma].[oldPage] op on opp.PageId = op.Id
+--left join [Idioma].[oldBook] ob on op.BookId = ob.Id
+--where ob.Id not in (11, 13, 39, 36, 40)
+--and ob.LanguageId = 1
+----and ot.new_id = '9fd1cba4-41df-492e-b156-eb059c6086d4'
+--;
+
+
+/**************************************************************************************************************
+bookuser
+**************************************************************************************************************/
+
+--update Idioma.[oldBookUser] set new_id = NEWID();
+
+
+
+--INSERT INTO [Idioma].[BookUser]
+--           ([Id]
+--           ,[BookId]
+--           ,[LanguageUserId]
+--           ,[CurrentPageId]
+--           ,[IsArchived])
+     
+
+--select 
+--	obu.new_id,
+--	ob.new_id,
+--	'83F46697-FFD6-4A1F-B981-05C88590315A',
+--	op.new_id,
+--	IsArchived
+--from [Idioma].[oldBookUser] obu
+--left join Idioma.oldBook ob on obu.BookId = ob.Id
+--left join [Idioma].[oldPage] op on obu.CurrentPageID = op.Id
+--where ob.Id not in (11, 13, 39, 36, 40)
+--and ob.LanguageId = 1
+
+
+--spanish 'D87BE460-344B-4442-895C-597143CB9270'
+--english '0CEAAAEA-5D56-4E99-B388-EAD7ED94A9E4'
+-- Dan 'E8CA7570-4B48-4AF1-9A7B-FD9DA4DB735F'
+-- Dan LU key 83F46697-FFD6-4A1F-B981-05C88590315A
+
+
+/**************************************************************************************************************
+bookuserStat
+**************************************************************************************************************/
+
+
+
+--INSERT INTO [Idioma].[BookUserStat]
+--           ([BookId]
+--           ,[LanguageUserId]
+--           ,[Key]
+--           ,[ValueString]
+--           ,[ValueNumeric])
+
+--select
+--	ob.new_id,
+--	'83F46697-FFD6-4A1F-B981-05C88590315A',
+--	obus.[Key],
+--	[ValueString],
+--    [ValueNumeric]
+--from [Idioma].[oldBookUserStat] obus
+--left join Idioma.oldBook ob on obus.BookId = ob.Id
+--where ob.Id not in (11, 13, 39, 36, 40)
+--and ob.LanguageId = 1
+
+
+/**************************************************************************************************************
+pageUser
+**************************************************************************************************************/
+
+
+--update Idioma.[oldPageUser] set new_id = NEWID();
+
+
+--INSERT INTO [Idioma].[PageUser]
+--           ([Id]
+--           ,[BookUserId]
+--           ,[PageId]
+--           ,[ReadDate])
+--select 
+--	opu.new_id,
+--	obu.new_id,
+--	op.new_id,
+--	ReadDate
+--from Idioma.oldPageUser opu
+--left join Idioma.oldBookUser obu on opu.BookUserId = obu.Id
+--left join Idioma.oldPage op on opu.PageId = op.Id
+--left join Idioma.oldBook ob on obu.BookId = ob.Id
+--where ob.Id not in (11, 13, 39, 36, 40)
+--and ob.LanguageId = 1
+
+
+/**************************************************************************************************************
+paragraphTranslation
+**************************************************************************************************************/
+
+--update Idioma.oldParagraphTranslation set new_id = NEWID();
+
+
+
+--with orderedDups as (
+--	select 
+--		*, ROW_NUMBER() over (partition by [ParagraphId],[LanguageCode] order by Id) as rowNum
+--	from Idioma.oldParagraphTranslation
+--), cleanPPT as (
+--	select * from orderedDups where rowNum = 1
+--)
+--INSERT INTO [Idioma].[ParagraphTranslation]
+--           ([Id]
+--           ,[ParagraphId]
+--           ,[TranslationText]
+--           ,[LanguageId])
+
+
+--select 
+--	opt.new_id,
+--	opp.new_id,
+--	opt.TranslationText,
+--	'0CEAAAEA-5D56-4E99-B388-EAD7ED94A9E4'
+--	--_opt.Id, opp.Id, opt.LanguageCode
+--from cleanPPT opt
+--left join Idioma.oldParagraph opp on opt.ParagraphId = opp.Id
+--left join [Idioma].[oldPage] op on opp.PageId = op.Id
+--left join [Idioma].[oldBook] ob on op.BookId = ob.Id
+--where ob.Id not in (11, 13, 39, 36, 40)
+--and ob.LanguageId = 1
+----and opp.new_id = '0f4af946-d6fe-4976-b23e-016827f59e62'
+-- 601
+-- 548
+-- 484
+
+/**************************************************************************************************************
+wordTranslation
+**************************************************************************************************************/
+
+--select min(Ordinal) from Idioma.WordTranslation
+--update Idioma.WordTranslation set Ordinal = Ordinal + 1000
+
+--with translatedNonVerbs as (
+--	select
+--	*
+--	, ROW_NUMBER() over (partition by WordId order by PartOfSpeech) as row_num
+--	from Idioma.oldWordTranslation
+--	where PartOfSpeech <> 2
+--	and LanguageToId = 2
+--)
+--INSERT INTO [Idioma].[WordTranslation]
+--           ([Id]
+--           ,[LanguageToId]
+--           ,[WordId]
+--           ,[VerbId]
+--           ,[Translation]
+--           ,[PartOfSpeech]
+--           ,[Ordinal])
+
+
+--select 
+--	newid(),
+--	'0CEAAAEA-5D56-4E99-B388-EAD7ED94A9E4',
+--	ow.new_id,
+--	null,
+--	owt.Translation,
+--	owt.PartOfSpeech,
+--	owt.row_num
+--from translatedNonVerbs owt
+--left join Idioma.oldWord ow on owt.WordId = ow.Id
+--2339
+
+--select 
+--top 1000
+--w.TextLowerCase
+--,ow.TextLowerCase
+--,owt.Translation
+--,wt.Translation
+--,owt.Ordinal
+--,wt.Ordinal
+--, owt.PartOfSpeech
+--from Idioma.oldWordTranslation owt
+--left join Idioma.oldWord ow on owt.WordId = ow.Id
+--left join Idioma.Word w on ow.new_id = w.Id
+--left join Idioma.WordTranslation wt on w.Id = wt.WordId
+--where 1=1
+--and ow.new_id is not  null
+--and ow.TextLowerCase = w.TextLowerCase
+--and owt.PartOfSpeech <> 2
+--and wt.PartOfSpeech <> 2
+
+/**************************************************************************************************************
+userbreadcrumb
+**************************************************************************************************************/
+
+select * from [Idioma].[UserBreadCrumb]
