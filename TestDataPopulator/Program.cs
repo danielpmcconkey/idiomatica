@@ -13,6 +13,7 @@ namespace TestDataPopulator
 
             try
             {
+
                 var builder = new ConfigurationBuilder()
                         .SetBasePath(Directory.GetCurrentDirectory())
                         .AddJsonFile("appsettings_tdp.json", optional: false);
@@ -69,13 +70,11 @@ namespace TestDataPopulator
                 Console.WriteLine(ex.ToString());
                 throw;
             }
-
         }
-        public class ConnectionStrings
-        {
-            public string? DevString { get; set; }
-            public string? TestString { get; set; }
-        }
-
+    }
+    public class ConnectionStrings
+    {
+        public string? DevString { get; set; }
+        public string? TestString { get; set; }
     }
 }

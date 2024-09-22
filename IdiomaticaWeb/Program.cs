@@ -46,7 +46,7 @@ if (builder.Environment.IsDevelopment())
      * do this when you are running the database migration to update your test
      * DB structure
      * */
-    connection = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING_TEST");
+    //connection = builder.Configuration.GetConnectionString("AZURE_SQL_CONNECTIONSTRING_TEST");
 
     /*
      * use the below connection to run against prod DB, only use this when you
