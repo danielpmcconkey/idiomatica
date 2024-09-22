@@ -74,7 +74,7 @@ namespace Logic.Services.API.Tests
 
             try
             {
-                
+
 
                 // create the user
                 if (loginService is null) { ErrorHandler.LogAndThrow(); return; }
@@ -144,8 +144,8 @@ namespace Logic.Services.API.Tests
         public async Task FlashCardDeckShuffleAsyncTest()
         {
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var context = dbContextFactory.CreateDbContext(); 
-            
+            var context = dbContextFactory.CreateDbContext();
+
             HashSet<string> keys = new();
             int numShuffles = 20;
             int numDuplicates = 0;
@@ -801,7 +801,7 @@ namespace Logic.Services.API.Tests
                 // create the user
                 if (loginService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
-                Assert.IsNotNull(user); 
+                Assert.IsNotNull(user);
                 Assert.IsNotNull(user.Id);
                 userId = (Guid)user.Id;
 
@@ -872,7 +872,7 @@ namespace Logic.Services.API.Tests
 
                 // read the flashcard
                 var flashCard = await FlashCardApi.FlashCardReadByWordUserIdAsync(dbContextFactory, (Guid)wordUser.Id);
-                
+
                 Assert.IsNotNull(flashCard);
                 Assert.IsNotNull(flashCard.Id);
                 Assert.AreEqual(wordUser.Id, flashCard.WordUserId);
@@ -882,6 +882,41 @@ namespace Logic.Services.API.Tests
                 // clean-up
                 if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
+        }
+
+
+        [TestMethod()]
+        public void FlashCardReadNextReviewCardAsyncTest()
+        {
+            Assert.Fail();
+        }
+        [TestMethod()]
+        public void FlashCardReadNextReviewCardTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public async Task FlashCardUpdateAsyncTestSimplified()
+        {
+            /* this is just a sample to show which of the functions with the 
+             * same name I want to test */
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var card = new FlashCard()
+            { 
+                Id = Guid.NewGuid(),
+                Status = AvailableFlashCardStatus.ACTIVE,
+                WordUserId = Guid.NewGuid(), 
+            };
+
+            await FlashCardApi.FlashCardUpdateAsync(dbContextFactory, card);
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void FlashCardUpdateTestSimplified()
+        {
+            Assert.Fail();
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Model.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -18,24 +20,6 @@ namespace Model.DAL
         public static FlashCard? FlashCardCreate(FlashCard flashCard, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             var context = dbContextFactory.CreateDbContext();
-
-
-            //int numRows = context.Database.ExecuteSql($"""
-
-            //    INSERT INTO [Idioma].[FlashCard]
-            //          ([WordUserId]
-            //          ,[Status]
-            //          ,[NextReview]
-            //          ,[Id])
-            //    VALUES
-            //          ({flashCard.WordUserId}
-            //          ,{flashCard.Status}
-            //          ,{flashCard.NextReview}
-            //          ,{flashCard.Id})
-
-            //    """);
-            //if (numRows < 1) throw new InvalidDataException("creating FlashCard affected 0 rows");
-
             context.FlashCards.Add(flashCard);
             context.SaveChanges();
             // add it to cache
@@ -175,6 +159,40 @@ namespace Model.DAL
             return value;
         }
 
+
+        public static FlashCard? FlashCardNextReviewCardRead(Guid userId,
+            AvailableLanguageCode learningLanguageCode,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            // do not cache this as it'll constantly change
+            var context = dbContextFactory.CreateDbContext();
+
+            // try to get a card whose next review is here or next review is
+            // empty (meaning never reviewed)
+            return context.FlashCards.Where(x =>
+                x.WordUser != null &&
+                x.WordUser.LanguageUser != null &&
+                x.WordUser.LanguageUser.Language != null &&
+                x.WordUser.LanguageUser.Language.Code == learningLanguageCode &&
+                x.WordUser.LanguageUser.UserId == userId &&
+                (x.NextReview == null || x.NextReview <= DateTimeOffset.Now)
+            )
+            .OrderBy(x => x.NextReview)
+            .FirstOrDefault();
+            // it's okay to return empty. The API above this should create a
+            // new card if that's the case
+        }
+        public static async Task<FlashCard?> FlashCardNextReviewCardReadAsync(Guid userId,
+            AvailableLanguageCode learningLanguageCode,
+            IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            return await Task<FlashCard?>.Run(() =>
+            {
+                return FlashCardNextReviewCardRead(userId, learningLanguageCode,
+                    dbContextFactory);
+            });
+        }
+
         #endregion
 
         #region update
@@ -182,20 +200,22 @@ namespace Model.DAL
         public static void FlashCardUpdate(FlashCard flashCard, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             var context = dbContextFactory.CreateDbContext();
+            context.FlashCards.Update(flashCard);
+            context.SaveChanges();
 
-            int numRows = context.Database.ExecuteSql($"""
-                        UPDATE [Idioma].[FlashCard]
-                        SET [WordUserId] = {flashCard.WordUserId}
-                           ,[Status] = {flashCard.Status}
-                           ,[NextReview] = {flashCard.NextReview}
-                           ,[Id] = {flashCard.Id}
-                        where Id = {flashCard.Id}
-                        ;
-                        """);
-            if (numRows < 1)
-            {
-                throw new InvalidDataException("FlashCard update affected 0 rows");
-            };
+            //int numRows = context.Database.ExecuteSql($"""
+            //            UPDATE [Idioma].[FlashCard]
+            //            SET [WordUserId] = {flashCard.WordUserId}
+            //               ,[Status] = {flashCard.Status}
+            //               ,[NextReview] = {flashCard.NextReview}
+            //               ,[Id] = {flashCard.Id}
+            //            where Id = {flashCard.Id}
+            //            ;
+            //            """);
+            //if (numRows < 1)
+            //{
+            //    throw new InvalidDataException("FlashCard update affected 0 rows");
+            //};
             // now update the cache
             FlashCardUpdateAllCaches(flashCard);
 

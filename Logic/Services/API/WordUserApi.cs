@@ -10,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using Azure;
 using Model.Enums;
 using Microsoft.EntityFrameworkCore;
+using DeepL;
 
 namespace Logic.Services.API
 {
@@ -54,6 +55,86 @@ namespace Logic.Services.API
             IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid wordUserId)
         {
             return await DataCache.WordUserByIdReadAsync(wordUserId, dbContextFactory);
+        }
+
+
+
+        /// <summary>
+        /// find the next word user to make into a flash card based on word
+        /// rank or status change
+        /// </summary>
+        public static WordUser? WordUserReadForNextFlashCard(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId,
+            AvailableLanguageCode learningLanguageCode)
+        {
+            var context = dbContextFactory.CreateDbContext();
+
+            /* 
+             * the hierarchy...
+             *   
+             *   1. get word users that don't already have a flash card
+             *   2. translation must be present (either use translation or 
+             *      standard translation)
+             *   3. first priority is the lowest ranking wordRank
+             *   4. after that, find th card that has most recently changed its
+             *      status
+             *   
+             * */
+
+            var wordUser = (
+                        from wu in context.WordUsers
+                        join lu in context.LanguageUsers on wu.LanguageUserId equals lu.Id
+                        join l in context.Languages on lu.LanguageId equals l.Id
+                        join w in context.Words on wu.WordId equals w.Id
+                        join wr in context.WordRanks on w.Id equals wr.WordId
+                        join fc in context.FlashCards on wu.Id equals fc.WordUserId into grouping
+                        from fc in grouping.DefaultIfEmpty()
+                        where (
+                            lu.UserId == userId &&
+                            l.Code == learningLanguageCode &&
+                            fc == null &&
+                            (
+                                !string.IsNullOrEmpty(wu.Translation) ||
+                                w.WordTranslations.Count > 0)
+                            )
+                        orderby wr.Ordinal
+                        select wu
+                    )
+                .FirstOrDefault();
+            if (wordUser is not null) return wordUser;
+
+            
+            // no more word-ranked wordUsers. check for one that's changed
+            // recently
+            return (
+                    from wu in context.WordUsers
+                    join lu in context.LanguageUsers on wu.LanguageUserId equals lu.Id
+                    join l in context.Languages on lu.LanguageId equals l.Id
+                    join w in context.Words on wu.WordId equals w.Id
+                    join fc in context.FlashCards on wu.Id equals fc.WordUserId into grouping
+                    from fc in grouping.DefaultIfEmpty()
+                    where (
+                        lu.UserId == userId &&
+                        l.Code == learningLanguageCode &&
+                        fc == null &&
+                        (
+                            !string.IsNullOrEmpty(wu.Translation) ||
+                            w.WordTranslations.Count > 0)
+                        )
+                    orderby wu.StatusChanged
+                    select wu
+                )
+            .FirstOrDefault();
+        }
+        public static async Task<WordUser?> WordUserReadForNextFlashCardAsync(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId,
+            AvailableLanguageCode learningLanguageCode)
+        {
+            return await Task<WordUser?>.Run(() =>
+            {
+                return WordUserReadForNextFlashCard(dbContextFactory, userId,
+                    learningLanguageCode);
+            });
         }
 
 

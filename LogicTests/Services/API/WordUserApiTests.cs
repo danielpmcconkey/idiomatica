@@ -153,7 +153,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(user);
                 userId = (Guid)user.Id;
                 Assert.IsNotNull(userId);
-                
+
                 // create the wordUsers
                 await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(
                     dbContextFactory, bookId, (Guid)user.Id);
@@ -247,7 +247,7 @@ namespace Logic.Services.API.Tests
                 // create the wordUsers
                 await WordUserApi.WordUsersCreateAllForBookIdAndUserIdAsync(
                     dbContextFactory, bookId, (Guid)user.Id);
-                
+
                 // now read them back for one of the pages
                 var dict = await WordUserApi.WordUsersDictByPageIdAndUserIdReadAsync(
                     dbContextFactory, pageId, (Guid)user.Id);
@@ -392,6 +392,18 @@ namespace Logic.Services.API.Tests
             Assert.IsNotNull(wordUser); Assert.IsNotNull(wordUser.Id);
             Assert.AreEqual(status, wordUser.Status);
             Assert.AreEqual(translation, wordUser.Translation);
+        }
+
+        [TestMethod()]
+        public void WordUserReadForNextFlashCardAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void WordUserReadForNextFlashCardTest()
+        {
+            Assert.Fail();
         }
     }
 }

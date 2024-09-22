@@ -14,6 +14,8 @@ namespace Logic.Services.API
 {
     public static class FlashCardAttemptApi
     {
+        #region create
+
         public static FlashCardAttempt? FlashCardAttemptCreate(
             IDbContextFactory<IdiomaticaContext> dbContextFactory, FlashCard flashCard, AvailableFlashCardAttemptStatus status)
         {
@@ -41,5 +43,16 @@ namespace Logic.Services.API
                 return FlashCardAttemptCreate(dbContextFactory, flashCard, status);
             });
         }
+
+        #endregion
+
+        #region read
+        public static List<FlashCardAttempt> FlashCardAttemptsByFlashCardIdRead(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid flashCardId)
+        {
+            var context = dbContextFactory.CreateDbContext();
+            return context.FlashCardAttempts.Where(x => x.FlashCardId ==  flashCardId).ToList();
+        }
+        #endregion
     }
 }

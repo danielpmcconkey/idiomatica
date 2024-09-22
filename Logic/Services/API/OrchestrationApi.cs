@@ -133,156 +133,206 @@ namespace Logic.Services.API
         }
 
         /// <summary>
-        ///  take the result of the last card, update the last card, and move the next card to the top
+        /// record the flashCardAttempt and move the card's next review date
+        /// according to the attempt status
         /// </summary>
-        public static FlashCardDataPacket? OrchestrateFlashCardDispositionAndAdvance(
-            IDbContextFactory<IdiomaticaContext> dbContextFactory, FlashCardDataPacket? dataPacket,
-            AvailableFlashCardAttemptStatus previousCardsStatus)
+        public static void OrchestrateFlashCardDispositioning(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, FlashCard card,
+            AvailableFlashCardAttemptStatus attemptStatus)
         {
-            if (dataPacket is null || dataPacket.CurrentCard is null)
-                { ErrorHandler.LogAndThrow(); return null; }
 
             // create the attempt object
             var attempt = FlashCardAttemptApi.FlashCardAttemptCreate(
-                dbContextFactory, dataPacket.CurrentCard, previousCardsStatus);
+                dbContextFactory, card, attemptStatus);
 
-            // update the current card
-            DateTime nextReview = DateTime.Now;
-            AvailableFlashCardStatus newStatus = AvailableFlashCardStatus.ACTIVE;
-            switch (previousCardsStatus)
+            if (attemptStatus == AvailableFlashCardAttemptStatus.STOP)
             {
-                default:
-                case AvailableFlashCardAttemptStatus.GOOD:
-                    nextReview = DateTime.Now.AddDays(3);
-                    break;
-                case AvailableFlashCardAttemptStatus.WRONG:
-                    nextReview = DateTime.Now.AddMinutes(5);
-                    break;
-                case AvailableFlashCardAttemptStatus.HARD:
-                    nextReview = DateTime.Now.AddHours(1);
-                    break;
-                case AvailableFlashCardAttemptStatus.EASY:
-                    nextReview = DateTime.Now.AddDays(7);
-                    break;
-                case AvailableFlashCardAttemptStatus.STOP:
-                    newStatus = AvailableFlashCardStatus.DONTUSE;
-                    nextReview = DateTime.Now.AddYears(5);
-                    break;
+                card.Status = AvailableFlashCardStatus.DONTUSE;
+                FlashCardApi.FlashCardUpdate(dbContextFactory, card);
+                return;
             }
-            var card = FlashCardApi.FlashCardUpdate(
-                dbContextFactory, (Guid)dataPacket.CurrentCard.Id, (Guid)dataPacket.CurrentCard.WordUserId,
-                newStatus, nextReview, (Guid)dataPacket.CurrentCard.Id);
-
-            if (card is not null && previousCardsStatus == AvailableFlashCardAttemptStatus.WRONG)
+            if (attemptStatus == AvailableFlashCardAttemptStatus.WRONG)
             {
-                // add the card to the end of the deck
-                dataPacket.Deck.Add(card);
-                dataPacket.CardCount++;
+                card.NextReview = DateTimeOffset.Now.AddMinutes(5);
+                FlashCardApi.FlashCardUpdate(dbContextFactory, card);
+                return;
             }
 
-            // advance the deck
-            dataPacket.CurrentCardPosition++;
-            if (dataPacket.CurrentCardPosition < dataPacket.Deck.Count)
+            // get the last 2 attempts
+            var attempts = FlashCardAttemptApi.FlashCardAttemptsByFlashCardIdRead(
+                dbContextFactory, card.Id)
+                .OrderByDescending(x => x.AttemptedWhen)
+                .Take(2)
+                .ToList();
+
+            TimeSpan timeBetweenLast2 = TimeSpan.Zero;
+            if (attempts.Count == 2)
             {
-                dataPacket.CurrentCard = dataPacket.Deck[dataPacket.CurrentCardPosition];
+                timeBetweenLast2 = attempts[0].AttemptedWhen - attempts[1].AttemptedWhen;
             }
 
-            return dataPacket;
-        }
-        public static async Task<FlashCardDataPacket?> OrchestrateFlashCardDispositionAndAdvanceAsync(
-            IDbContextFactory<IdiomaticaContext> dbContextFactory, FlashCardDataPacket? dataPacket,
-            AvailableFlashCardAttemptStatus previousCardsStatus)
-        {
-            return await Task<FlashCardDataPacket?>.Run(() =>
+            // if hard keep the same timespan, but add a multiplier of 0.25
+            if (attemptStatus == AvailableFlashCardAttemptStatus.HARD)
             {
-                return OrchestrateFlashCardDispositionAndAdvance(dbContextFactory, dataPacket, previousCardsStatus);
-            });
-        }
-
-
-        public static FlashCardDataPacket? OrchestrateFlashCardDeckCreation(
-            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId,
-            AvailableLanguageCode learningLanguageCode,
-            int numNew, int numReview)
-        {
-            if (numNew < 0) { ErrorHandler.LogAndThrow(); return null; }
-            if (numReview < 0) { ErrorHandler.LogAndThrow(); return null; }
-
-            var context = dbContextFactory.CreateDbContext();
-
-            FlashCardDataPacket newDataPacket = new ();
-            newDataPacket.LearningLanguageCode = learningLanguageCode;
-            var uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(dbContextFactory, userId);
-            if (uiLanguage is null) 
-                { ErrorHandler.LogAndThrow(); return null; }
-            newDataPacket.UILanguageCode = uiLanguage.Code;
-
-            // pull the LanguageUserId
-            var language = DataCache.LanguageByCodeRead(learningLanguageCode, dbContextFactory);
-            if (language is null) { ErrorHandler.LogAndThrow(); return null; }
-            var languageUser = DataCache.LanguageUserByLanguageIdAndUserIdRead(
-                (language.Id, userId), dbContextFactory);
-            if (languageUser is null) { ErrorHandler.LogAndThrow(); return null; }
-
-            // pull cards that are ready for their next review
-            Expression<Func<FlashCard, bool>> predicate = fc => fc.WordUser != null
-                    && fc.WordUser.LanguageUserId == languageUser.Id
-                    && fc.Status == AvailableFlashCardStatus.ACTIVE
-                    && fc.NextReview != null
-                    && fc.NextReview <= DateTimeOffset.Now;
-
-            var oldCards = FlashCardApi.FlashCardsFetchByNextReviewDateByPredicate(
-                dbContextFactory, predicate, numReview);
-
-            if (oldCards is not null && oldCards.Count > 0) 
-                newDataPacket.Deck.AddRange(oldCards);
-
-            // pull cards that have already been created, but never reviewed
-            Expression<Func<FlashCard, bool>> predicate2 = fc => fc.WordUser != null
-                    && fc.WordUser.LanguageUserId == languageUser.Id
-                    && fc.Status == AvailableFlashCardStatus.ACTIVE
-                    && fc.NextReview == null;
-
-            var readyForReviewCards = FlashCardApi.FlashCardsFetchByNextReviewDateByPredicate(
-                dbContextFactory, predicate2, numNew);
-
-            int numReadyForReviewReturned = 0;
-            if (readyForReviewCards is not null && readyForReviewCards.Count > 0)
+                card.NextReview = DateTimeOffset.Now.AddMinutes(60);
+                if (timeBetweenLast2 > TimeSpan.Zero)
+                {
+                    int newMinutes = (int)Math.Round(timeBetweenLast2.TotalMinutes * 0.75d, 0);
+                    if (newMinutes < 10) newMinutes = 10;
+                    card.NextReview = DateTimeOffset.Now.AddMinutes(newMinutes);
+                }
+            }
+            // if good keep the same timespan, but add a multiplier of 1.25
+            if (attemptStatus == AvailableFlashCardAttemptStatus.GOOD)
             {
-                newDataPacket.Deck.AddRange(readyForReviewCards);
-                numReadyForReviewReturned = readyForReviewCards.Count;
+                card.NextReview = DateTimeOffset.Now.AddDays(3);
+                if (timeBetweenLast2 > TimeSpan.Zero)
+                {
+                    int newMinutes = (int)Math.Round(timeBetweenLast2.TotalMinutes * 1.25d, 0);
+                    if (newMinutes < 24 * 60) newMinutes = 24 * 60;
+                    card.NextReview = DateTimeOffset.Now.AddMinutes(newMinutes);
+                }
+            }
+            // if easy keep the same timespan, but add a multiplier of 1.5
+            if (attemptStatus == AvailableFlashCardAttemptStatus.EASY)
+            {
+                card.NextReview = DateTimeOffset.Now.AddDays(7);
+                if (timeBetweenLast2 > TimeSpan.Zero)
+                {
+                    int newMinutes = (int)Math.Round(timeBetweenLast2.TotalMinutes * 1.5d, 0);
+                    if (newMinutes < 48 * 60) newMinutes = 48 * 60;
+                    card.NextReview = DateTimeOffset.Now.AddMinutes(newMinutes);
+                }
             }
 
-            // create enough new cards to fill out the numNew
-            if(numReadyForReviewReturned < numNew)
-            {
-                int numToCreate = numNew - numReadyForReviewReturned;
-                var newCards = FlashCardApi.FlashCardsCreate(
-                    dbContextFactory, (Guid)languageUser.Id, numToCreate, uiLanguage.Code);
-                if (newCards is not null && newCards.Count > 0)
-                    newDataPacket.Deck.AddRange(newCards);
-            }
-           
-            // shuffle it
-            newDataPacket.Deck = FlashCardApi.FlashCardDeckShuffle(newDataPacket.Deck);
+
+            FlashCardApi.FlashCardUpdate(dbContextFactory, card);
+            return;
             
-            // initialize some deck properties
-            newDataPacket.CardCount = newDataPacket.Deck.Count;
-            newDataPacket.CurrentCardPosition = 0;
-            newDataPacket.CurrentCard = newDataPacket.Deck[0];
-
-            return newDataPacket;
         }
-        public static async Task<FlashCardDataPacket?> OrchestrateFlashCardDeckCreationAsync(
-            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId, AvailableLanguageCode learningLanguageCode,
-            int numNew, int numReview)
+        public static async Task OrchestrateFlashCardDispositioningAsync(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, FlashCard card,
+            AvailableFlashCardAttemptStatus attemptStatus)
         {
-            return await Task<FlashCardDataPacket?>.Run(() =>
+            await Task.Run(() =>
             {
-                return OrchestrateFlashCardDeckCreation(dbContextFactory, userId,
-                    learningLanguageCode, numNew, numReview);
+                OrchestrateFlashCardDispositioning(
+                    dbContextFactory, card, attemptStatus);
             });
         }
+
+        public static FlashCard? OrchestratePullFlashCard(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId,
+            AvailableLanguageCode learningLanguageCode, AvailableLanguageCode uiLanguageCode)
+        {
+            var card = FlashCardApi.FlashCardReadNextReviewCard(
+                dbContextFactory, userId, learningLanguageCode);
+            if (card is not null) return card;
+
+            // there are no cards ready for review. create one
+            // first, get the next word
+            var wordUser = WordUserApi.WordUserReadForNextFlashCard(
+                dbContextFactory, userId, learningLanguageCode);
+            if (wordUser is null) { ErrorHandler.LogAndThrow(); return null; }
+
+            return FlashCardApi.FlashCardCreate(dbContextFactory, wordUser.Id,
+                uiLanguageCode);
+        }
+        public static async Task<FlashCard?> OrchestratePullFlashCardAsync(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId,
+            AvailableLanguageCode learningLanguageCode, AvailableLanguageCode uiLanguageCode)
+        {
+            return await Task<FlashCard?>.Run(() =>
+            {
+                return OrchestratePullFlashCard(
+                    dbContextFactory, userId, learningLanguageCode, uiLanguageCode);
+            });
+        }
+
+
+        //public static FlashCardDataPacket? OrchestrateFlashCardDeckCreation(
+        //    IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId,
+        //    AvailableLanguageCode learningLanguageCode,
+        //    int numNew, int numReview)
+        //{
+        //    if (numNew < 0) { ErrorHandler.LogAndThrow(); return null; }
+        //    if (numReview < 0) { ErrorHandler.LogAndThrow(); return null; }
+
+        //    var context = dbContextFactory.CreateDbContext();
+
+        //    FlashCardDataPacket newDataPacket = new ();
+        //    newDataPacket.LearningLanguageCode = learningLanguageCode;
+        //    var uiLanguage = UserApi.UserSettingUiLanguagReadByUserId(dbContextFactory, userId);
+        //    if (uiLanguage is null) 
+        //        { ErrorHandler.LogAndThrow(); return null; }
+        //    newDataPacket.UILanguageCode = uiLanguage.Code;
+
+        //    // pull the LanguageUserId
+        //    var language = DataCache.LanguageByCodeRead(learningLanguageCode, dbContextFactory);
+        //    if (language is null) { ErrorHandler.LogAndThrow(); return null; }
+        //    var languageUser = DataCache.LanguageUserByLanguageIdAndUserIdRead(
+        //        (language.Id, userId), dbContextFactory);
+        //    if (languageUser is null) { ErrorHandler.LogAndThrow(); return null; }
+
+        //    // pull cards that are ready for their next review
+        //    Expression<Func<FlashCard, bool>> predicate = fc => fc.WordUser != null
+        //            && fc.WordUser.LanguageUserId == languageUser.Id
+        //            && fc.Status == AvailableFlashCardStatus.ACTIVE
+        //            && fc.NextReview != null
+        //            && fc.NextReview <= DateTimeOffset.Now;
+
+        //    var oldCards = FlashCardApi.FlashCardsFetchByNextReviewDateByPredicate(
+        //        dbContextFactory, predicate, numReview);
+
+        //    if (oldCards is not null && oldCards.Count > 0) 
+        //        newDataPacket.Deck.AddRange(oldCards);
+
+        //    // pull cards that have already been created, but never reviewed
+        //    Expression<Func<FlashCard, bool>> predicate2 = fc => fc.WordUser != null
+        //            && fc.WordUser.LanguageUserId == languageUser.Id
+        //            && fc.Status == AvailableFlashCardStatus.ACTIVE
+        //            && fc.NextReview == null;
+
+        //    var readyForReviewCards = FlashCardApi.FlashCardsFetchByNextReviewDateByPredicate(
+        //        dbContextFactory, predicate2, numNew);
+
+        //    int numReadyForReviewReturned = 0;
+        //    if (readyForReviewCards is not null && readyForReviewCards.Count > 0)
+        //    {
+        //        newDataPacket.Deck.AddRange(readyForReviewCards);
+        //        numReadyForReviewReturned = readyForReviewCards.Count;
+        //    }
+
+        //    // create enough new cards to fill out the numNew
+        //    if(numReadyForReviewReturned < numNew)
+        //    {
+        //        int numToCreate = numNew - numReadyForReviewReturned;
+        //        var newCards = FlashCardApi.FlashCardsCreate(
+        //            dbContextFactory, (Guid)languageUser.Id, numToCreate, uiLanguage.Code);
+        //        if (newCards is not null && newCards.Count > 0)
+        //            newDataPacket.Deck.AddRange(newCards);
+        //    }
+
+        //    // shuffle it
+        //    newDataPacket.Deck = FlashCardApi.FlashCardDeckShuffle(newDataPacket.Deck);
+
+        //    // initialize some deck properties
+        //    newDataPacket.CardCount = newDataPacket.Deck.Count;
+        //    newDataPacket.CurrentCardPosition = 0;
+        //    newDataPacket.CurrentCard = newDataPacket.Deck[0];
+
+        //    return newDataPacket;
+        //}
+        //public static async Task<FlashCardDataPacket?> OrchestrateFlashCardDeckCreationAsync(
+        //    IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId, AvailableLanguageCode learningLanguageCode,
+        //    int numNew, int numReview)
+        //{
+        //    return await Task<FlashCardDataPacket?>.Run(() =>
+        //    {
+        //        return OrchestrateFlashCardDeckCreation(dbContextFactory, userId,
+        //            learningLanguageCode, numNew, numReview);
+        //    });
+        //}
 
 
         public static ReadDataPacket? OrchestrateMovePage(

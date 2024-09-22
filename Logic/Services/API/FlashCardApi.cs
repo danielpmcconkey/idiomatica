@@ -210,6 +210,8 @@ namespace Logic.Services.API
         }
 
 
+
+
         public static List<FlashCard>? FlashCardsCreate(
             IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid languageUserId, int numCards,
             AvailableLanguageCode uiLanguageCode)
@@ -276,6 +278,17 @@ namespace Logic.Services.API
             });
         }
 
+        public static void FlashCardUpdate(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, FlashCard card)
+        {
+            DataCache.FlashCardUpdate(card, dbContextFactory);
+        }
+        public static async Task FlashCardUpdateAsync(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, FlashCard card)
+        {
+            await DataCache.FlashCardUpdateAsync(card, dbContextFactory);
+        }
+
 
         public static FlashCard? FlashCardUpdate(
             IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid cardId, Guid wordUserId, 
@@ -298,6 +311,21 @@ namespace Logic.Services.API
             {
                 return FlashCardUpdate(dbContextFactory, cardId, wordUserId, status, nextReview, id);
             });
+        }
+
+        public static FlashCard? FlashCardReadNextReviewCard(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId,
+            AvailableLanguageCode learningLanguageCode)
+        {
+            return DataCache.FlashCardNextReviewCardRead(userId, learningLanguageCode,
+                dbContextFactory);
+        }
+        public static async Task<FlashCard?> FlashCardReadNextReviewCardAsync(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId,
+            AvailableLanguageCode learningLanguageCode)
+        {
+            return await DataCache.FlashCardNextReviewCardReadAsync(userId,
+                learningLanguageCode, dbContextFactory);
         }
     }
 }

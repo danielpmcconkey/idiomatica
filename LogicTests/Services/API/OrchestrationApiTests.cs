@@ -315,9 +315,9 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(readDataPacket.LanguageUser);
 
                 // check the word and its status
-                Word ? foundWordBefore = null;
+                Word? foundWordBefore = null;
                 if (!readDataPacket.AllWordsInPage.TryGetValue(wordToLookUp, out foundWordBefore))
-                    { ErrorHandler.LogAndThrow(); return; }
+                { ErrorHandler.LogAndThrow(); return; }
                 WordUser? foundUserBefore = foundWordBefore.WordUsers
                     .Where(x => x.LanguageUserId == languageUser.Id)
                     .FirstOrDefault();
@@ -342,7 +342,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(priorPageWordDict);
                 WordUser? foundUserAfter = null;
                 if (!priorPageWordDict.TryGetValue(wordToLookUp, out foundUserAfter))
-                    { ErrorHandler.LogAndThrow(); return; }
+                { ErrorHandler.LogAndThrow(); return; }
                 Assert.IsNotNull(foundUserAfter);
                 var statusAfterActual = foundUserAfter.Status;
 
@@ -723,7 +723,7 @@ namespace Logic.Services.API.Tests
                 Assert.IsNotNull(dataPacket1.CurrentCard);
                 Assert.IsNotNull(dataPacket1.CurrentCard.Id);
 
-                
+
                 // manually update card 1 to do not use, and next review date in
                 // the past so it would show up in the next deck creation had we
                 // not set it to STOP
@@ -737,7 +737,7 @@ namespace Logic.Services.API.Tests
                     DateTimeOffset.Now.AddHours(-1), (Guid)cardToUpdate1.Id);
 
                 // manually update card 2's next review date so it shows up in the next deck creation
-                Assert.IsNotNull(dataPacket1); 
+                Assert.IsNotNull(dataPacket1);
                 var cardToUpdate = dataPacket1.Deck[1];
                 Assert.IsNotNull(cardToUpdate);
                 Assert.IsNotNull(cardToUpdate.Id);
@@ -1089,7 +1089,7 @@ namespace Logic.Services.API.Tests
                 var languageUser = await LanguageUserApi.LanguageUserGetAsync(
                     dbContextFactory, learningLanguage.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
-                
+
                 // simulate the read init
                 var readDataPacket = await OrchestrationApi.OrchestrateReadDataInitAsync(
                     dbContextFactory, loginService, bookId);
@@ -1140,6 +1140,30 @@ namespace Logic.Services.API.Tests
                 // clean-up
                 if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
+        }
+
+        [TestMethod()]
+        public void OrchestratePullFlashCardAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void OrchestratePullFlashCardTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void OrchestrateFlashCardDispositioningAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void OrchestrateFlashCardDispositioningTest()
+        {
+            Assert.Fail();
         }
     }
 }

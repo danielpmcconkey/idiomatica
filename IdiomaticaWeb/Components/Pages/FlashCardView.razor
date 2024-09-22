@@ -132,10 +132,10 @@
 
 
 @code {
-    [Parameter] public FlashCardDataPacket? FlashCardDataPacket { get; set; }
+    [Parameter] public FlashCard? CurrentCard { get; set; }
     [Parameter] public AvailableLanguageCode? UiLanguageCode { get; set; }
     [Parameter] public string? CardCss { get; set; }
-    [Parameter] public EventCallback<int> ResetFormFunction { get; set; }
+    [Parameter] public EventCallback<int> OnNextCardClickFunction { get; set; }
 
     private ConjugationTable ConjugationTable = default!;
 
@@ -165,24 +165,23 @@
         ParagraphTranslation = null;
         _shouldShowConjugationTable = false;
 
-        if (FlashCardDataPacket is null) return;
-        if (FlashCardDataPacket.CurrentCard is null) return;
+        if (CurrentCard is null) return;
         if (UiLanguageCode is null) return;
 
         var ppExample = ParagraphApi.ParagraphExamplePullRandomByFlashCardId(
-            DbContextFactory, (Guid)FlashCardDataPacket.CurrentCard.Id, (AvailableLanguageCode)UiLanguageCode);
+            DbContextFactory, CurrentCard.Id, (AvailableLanguageCode)UiLanguageCode);
         ExampleParagraph = ppExample.example;
         ParagraphTranslation = ppExample.translation;
 
-        if (FlashCardDataPacket.CurrentCard.WordUser is null) return;
-        if (FlashCardDataPacket.CurrentCard.WordUser.Word is null) return;
-        CardTitle = $"{FlashCardDataPacket.CurrentCard.WordUser.Word.TextLowerCase}";
+        if (CurrentCard.WordUser is null) return;
+        if (CurrentCard.WordUser.Word is null) return;
+        CardTitle = $"{CurrentCard.WordUser.Word.TextLowerCase}";
 
-        if (FlashCardDataPacket.CurrentCard.WordUser.Translation is null) return;
-        CustomTranslation = FlashCardDataPacket.CurrentCard.WordUser.Translation;
+        if (CurrentCard.WordUser.Translation is null) return;
+        CustomTranslation = CurrentCard.WordUser.Translation;
 
         DefaultTranslations = WordApi.WordTranslationsReadByWordId(
-            DbContextFactory, (Guid)FlashCardDataPacket.CurrentCard.WordUser.Word.Id);
+            DbContextFactory, CurrentCard.WordUser.Word.Id);
     }
     private async Task OnShowAnswerClick()
     {
