@@ -46,11 +46,21 @@
                                      class="@_languageInputCss"
                                      @bind-Value="LanguageInput">
                             <option value="" selected disabled>@UserService.GetUILabel("fcSelectLanguage")</option>
+                           @*  @if (LearningLanguagePreference is null)
+                            {
+                                <option value="" selected disabled>@UserService.GetUILabel("fcSelectLanguage")</option>
+                            }
+                            else
+                            {
+                                <option value="@LearningLanguagePreference.Code">
+                                    @LearningLanguagePreference.Name
+                                </option>
+                            } *@
                             @foreach (var (key, value) in LanguageOptions)
                             {
                                 @if (value is not null && value.Name is not null)
                                 {
-                                    <option value="@key">@value.Name</option>
+                                    <option value="@value.Code">@value.Name</option>
                                 }
 
                             }
@@ -164,7 +174,8 @@
     {
         get
         {
-            if (NumNewCardsInput > -1 && NumNewCardsInput <= MaxNewCardsNew) return "form-select is-invalid";
+            if (NumNewCardsInput < 0) return "form-select is-invalid";
+            if (NumNewCardsInput > MaxNewCardsNew) return "form-select is-invalid";
             return "form-select is-valid";
         }
     }
@@ -172,7 +183,8 @@
     {
         get
         {
-            if (NumOldCardsInput > -1 && NumOldCardsInput <= MaxNewCardsReview) return "form-select is-invalid";
+            if (NumOldCardsInput < 0) return "form-select is-invalid";
+            if (NumOldCardsInput > MaxNewCardsReview) return "form-select is-invalid";
             return "form-select is-valid";
         }
     }
@@ -207,12 +219,13 @@
 
     public AvailableLanguageCode? LanguageInput { get; set; } = null;
     public Dictionary<Guid, Language> LanguageOptions { get; set; } = [];
-    public int? NumNewCardsInput { get; set; } = null;
-    public int? NumOldCardsInput { get; set; } = null;
+    public int NumNewCardsInput { get; set; } = 0;
+    public int NumOldCardsInput { get; set; } = 0;
     public List<int> NumNewCardOptions { get; set; } = new List<int>();
     public List<int> NumOldCardOptions { get; set; } = new List<int>();
     public int MaxNewCardsNew { get; set; } = 50;
     public int MaxNewCardsReview { get; set; } = 50;
+    public Language? LearningLanguagePreference;
 
     #endregion
 
@@ -231,7 +244,7 @@
     {
         try
         {
-            
+
             var context = DbContextFactory.CreateDbContext();
 
             if (IsDataInit == false)
@@ -266,8 +279,29 @@
     private void InitData()
     {
         LoggedInUser = UserService.GetLoggedInUser(DbContextFactory);
-        LanguageOptions = LanguageApi.LanguageOptionsRead(DbContextFactory,
-                (x => x.IsImplementedForLearning == true));
+        if (LoggedInUser is null) { ErrorHandler.LogAndThrow(); return; }
+
+        var languageUsers = LanguageUserApi.LanguageUsersAndLanguageGetByUserId(
+            DbContextFactory, LoggedInUser.Id);
+        if (languageUsers is null || languageUsers.Count < 1) 
+        { 
+            ErrorHandler.LogAndThrow(); 
+            return;
+        }
+
+        LanguageOptions = [];
+        foreach(var lu in languageUsers)
+        {
+            if (lu.Language is null) { ErrorHandler.LogAndThrow(); return; }
+            LanguageOptions.Add(lu.LanguageId, lu.Language);
+        }
+
+        LearningLanguagePreference = UserApi.UserSettingLearningLanguagReadByUserId(
+            DbContextFactory, LoggedInUser.Id);
+        if (LearningLanguagePreference is not null)
+            LanguageInput = LearningLanguagePreference.Code;
+
+        
         var lcObject = UserService.GetUiLanguageCode();
         if(lcObject is null) { ErrorHandler.LogAndThrow(); return; }
         UiLanguageCode = lcObject.Code;
@@ -289,29 +323,16 @@
     }
     private void CreateDeck()
     {
-        var context = DbContextFactory.CreateDbContext();
-        using var transaction = context.Database.BeginTransaction();
-        try
-        {
-            if (LoggedInUser is null) { ErrorHandler.LogAndThrow(); return; }
-            if (LanguageInput is null) { ErrorHandler.LogAndThrow(); return; }
-            if (NumNewCardsInput is null) NumNewCardsInput = 0;
-            if (NumOldCardsInput is null) NumOldCardsInput = 0;
+        if (LoggedInUser is null) { ErrorHandler.LogAndThrow(); return; }
+        if (LanguageInput is null) { ErrorHandler.LogAndThrow(); return; }
 
-            FlashCardDataPacket = OrchestrationApi.OrchestrateFlashCardDeckCreation(
-                DbContextFactory, LoggedInUser.Id,
-                (AvailableLanguageCode)LanguageInput, (int)NumNewCardsInput,
-                (int)NumOldCardsInput);
+        FlashCardDataPacket = OrchestrationApi.OrchestrateFlashCardDeckCreation(
+            DbContextFactory, LoggedInUser.Id,
+            (AvailableLanguageCode)LanguageInput, (int)NumNewCardsInput,
+            (int)NumOldCardsInput);
 
-            IsDeckDefined = true;
-            IsDeckComplete = false;
-
-            transaction.Commit();
-        }
-        catch
-        {
-            transaction.Rollback();
-        }
+        IsDeckDefined = true;
+        IsDeckComplete = false;
     }
     private async Task OnGetCardsClickAsync()
     {

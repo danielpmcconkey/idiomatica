@@ -270,7 +270,7 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            
+
 
             Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
@@ -434,6 +434,18 @@ namespace Logic.Services.API.Tests
                 // clean-up
                 if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
+        }
+
+        [TestMethod()]
+        public void UserSettingLearningLanguagReadByUserIdTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void UserSettingLearningLanguagReadByUserIdAsyncTest()
+        {
+            Assert.Fail();
         }
     }
 }

@@ -196,6 +196,8 @@ namespace Logic.Services.API
         {
             return await DataCache.FlashCardByIdReadAsync(Id, dbContextFactory);
         }
+
+
         public static FlashCard? FlashCardReadByWordUserId(
           IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid wordUserId)
         {
@@ -222,21 +224,19 @@ namespace Logic.Services.API
             var wordUsers = (
                         from wu in context.WordUsers
                         join w in context.Words on wu.WordId equals w.Id
+                        join wr in context.WordRanks on w.Id equals wr.WordId
                         join fc in context.FlashCards on wu.Id equals fc.WordUserId into grouping
                         from fc in grouping.DefaultIfEmpty()
                         where (
                             wu.LanguageUserId == languageUserId
                             && fc == null
-                            && wu.Status != AvailableWordUserStatus.LEARNED
-                            && wu.Status != AvailableWordUserStatus.IGNORED
-                            && wu.Status != AvailableWordUserStatus.WELLKNOWN
-                            && wu.Status != AvailableWordUserStatus.UNKNOWN
-                            && wu.Translation != null
-                            && wu.Translation != string.Empty
+                            && (
+                                !string.IsNullOrEmpty(wu.Translation) ||
+                                w.WordTranslations.Count > 0) 
                             )
+                        orderby wr.Ordinal
                         select wu
                     )
-                .OrderByDescending(x => x.StatusChanged)
                 .Take(numCards)
                 .ToList();
 
