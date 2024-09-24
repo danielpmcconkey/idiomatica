@@ -62,6 +62,7 @@ namespace Model.DAL
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
+                    
                     retries++;
                     if (retries >= maxRetries) throw;
                     foreach (var entry in ex.Entries)
@@ -72,7 +73,15 @@ namespace Model.DAL
                         foreach (var property in proposedValues.Properties)
                         {
                             var proposedValue = proposedValues[property];
-                            var databaseValue = databaseValues[property];
+                            Console.WriteLine($"proposed value: {proposedValue}");
+                            if (databaseValues != null)
+                            {
+                                var databaseValue = databaseValues[property];
+                                if (databaseValue is not null)
+                                {
+                                    Console.WriteLine($"database value: {databaseValue}");
+                                }
+                            }
 
                             // TODO: decide which value should be written to database
                             // proposedValues[property] = <value to be saved>;

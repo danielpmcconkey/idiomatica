@@ -44,6 +44,7 @@ namespace LogicTests
             services.AddScoped<LoginService>();
             services.AddDbContextFactory<IdiomaticaContext>(options => {
                 options.UseSqlServer(connectionstring, b => b.MigrationsAssembly("TestDataPopulator"));
+                options.EnableSensitiveDataLogging();
             });
             return services.BuildServiceProvider();
         }

@@ -270,7 +270,7 @@ namespace Logic.Services.API.Tests
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
             var context = dbContextFactory.CreateDbContext();
             Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            
+
 
             Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
 
@@ -433,6 +433,150 @@ namespace Logic.Services.API.Tests
             {
                 // clean-up
                 if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
+            }
+        }
+
+        [TestMethod()]
+        public void UserSettingLearningLanguagReadByUserIdTest()
+        {
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
+            AvailableLanguageCode expectedCode = AvailableLanguageCode.ES;
+
+            try
+            {
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(
+                    loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
+
+                var lang = UserApi.UserSettingLearningLanguagReadByUserId(
+                    dbContextFactory, (Guid)userId);
+                Assert.IsNotNull(lang);
+
+
+                Assert.IsNotNull(lang.Code);
+                Assert.AreEqual(expectedCode, lang.Code);
+            }
+            finally
+            {
+                // clean-up
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
+            }
+        }
+
+        [TestMethod()]
+        public async Task UserSettingLearningLanguagReadByUserIdAsyncTest()
+        {
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
+            AvailableLanguageCode expectedCode = AvailableLanguageCode.ES;
+
+            try
+            {
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = await CommonFunctions.CreateNewTestUserAsync(
+                    loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
+
+                var lang = await UserApi.UserSettingLearningLanguagReadByUserIdAsync(
+                    dbContextFactory, (Guid)userId);
+                Assert.IsNotNull(lang);
+
+
+                Assert.IsNotNull(lang.Code);
+                Assert.AreEqual(expectedCode, lang.Code);
+            }
+            finally
+            {
+                // clean-up
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
+            }
+        }
+
+        [TestMethod()]
+        public async Task UserSettingUiLanguagReadByUserIdAsyncTest()
+        {
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
+            AvailableLanguageCode expectedCode = AvailableLanguageCode.EN_US;
+
+            try
+            {
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = await CommonFunctions.CreateNewTestUserAsync(
+                    loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
+
+                var lang = await UserApi.UserSettingUiLanguagReadByUserIdAsync(
+                    dbContextFactory, (Guid)userId);
+                Assert.IsNotNull(lang);
+
+
+                Assert.IsNotNull(lang.Code);
+                Assert.AreEqual(expectedCode, lang.Code);
+            }
+            finally
+            {
+                // clean-up
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
+            }
+        }
+
+        [TestMethod()]
+        public void UserSettingUiLanguagReadByUserIdTest()
+        {
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            Guid bookId = CommonFunctions.GetBookRapunzelId(dbContextFactory);
+            AvailableLanguageCode expectedCode = AvailableLanguageCode.EN_US;
+
+            try
+            {
+                // create a user
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(
+                    loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+                Assert.IsNotNull(userId);
+
+                var lang = UserApi.UserSettingUiLanguagReadByUserId(
+                    dbContextFactory, (Guid)userId);
+                Assert.IsNotNull(lang);
+
+
+                Assert.IsNotNull(lang.Code);
+                Assert.AreEqual(expectedCode, lang.Code);
+            }
+            finally
+            {
+                // clean-up
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
             }
         }
     }

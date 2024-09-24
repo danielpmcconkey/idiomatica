@@ -132,10 +132,13 @@
 
 
 @code {
-    [Parameter] public FlashCardDataPacket? FlashCardDataPacket { get; set; }
+    [Parameter] public FlashCard? CurrentCard { get; set; }
     [Parameter] public AvailableLanguageCode? UiLanguageCode { get; set; }
     [Parameter] public string? CardCss { get; set; }
-    [Parameter] public EventCallback<int> ResetFormFunction { get; set; }
+    [Parameter] public EventCallback<int> OnNextCardClickFunction { get; set; }
+
+    private WordUser? _wordUser;
+    private Word? _word;
 
     private ConjugationTable ConjugationTable = default!;
 
@@ -159,30 +162,42 @@
 
     public void ResetCardProperties()
     {
+        _isAnswerVisible = false;
         CardTitle = null;
         CustomTranslation = null;
         ExampleParagraph = null;
         ParagraphTranslation = null;
         _shouldShowConjugationTable = false;
 
-        if (FlashCardDataPacket is null) return;
-        if (FlashCardDataPacket.CurrentCard is null) return;
+        if (CurrentCard is null) return;
         if (UiLanguageCode is null) return;
 
         var ppExample = ParagraphApi.ParagraphExamplePullRandomByFlashCardId(
-            DbContextFactory, (Guid)FlashCardDataPacket.CurrentCard.Id, (AvailableLanguageCode)UiLanguageCode);
+            DbContextFactory, CurrentCard.Id, (AvailableLanguageCode)UiLanguageCode);
         ExampleParagraph = ppExample.example;
         ParagraphTranslation = ppExample.translation;
 
-        if (FlashCardDataPacket.CurrentCard.WordUser is null) return;
-        if (FlashCardDataPacket.CurrentCard.WordUser.Word is null) return;
-        CardTitle = $"{FlashCardDataPacket.CurrentCard.WordUser.Word.TextLowerCase}";
+        _wordUser = CurrentCard.WordUser;
+        if (_wordUser is null)
+        {
+            _wordUser = WordUserApi.WordUserReadById(DbContextFactory, CurrentCard.WordUserId);
+            if (_wordUser is null) { ErrorHandler.LogAndThrow(); return; }
+        }
+        _word = _wordUser.Word;
+        if (_word is null)
+        {
+            _word = WordApi.WordGetById(DbContextFactory, _wordUser.WordId);
+            if (_word is null) { ErrorHandler.LogAndThrow(); return; }
+        }
+        CardTitle = $"{_word.TextLowerCase}";
 
-        if (FlashCardDataPacket.CurrentCard.WordUser.Translation is null) return;
-        CustomTranslation = FlashCardDataPacket.CurrentCard.WordUser.Translation;
+
+        CustomTranslation = _wordUser.Translation;
 
         DefaultTranslations = WordApi.WordTranslationsReadByWordId(
-            DbContextFactory, (Guid)FlashCardDataPacket.CurrentCard.WordUser.Word.Id);
+            DbContextFactory, _word.Id);
+
+        _isLoading = false;
     }
     private async Task OnShowAnswerClick()
     {
@@ -209,33 +224,23 @@
             StateHasChanged();
         }
     }
-    private void ProcessAndAdvance(AvailableFlashCardAttemptStatus previousCardsStatus)
-    {
-        FlashCardDataPacket = OrchestrationApi.OrchestrateFlashCardDispositionAndAdvance(
-            DbContextFactory, FlashCardDataPacket, previousCardsStatus);
-        if (FlashCardDataPacket is null)
-        {
-            ErrorHandler.LogAndThrow();
-            return;
-        }
-
-        ResetCardProperties();
-    }
-    public async Task OnNextCardClickAsync(AvailableFlashCardAttemptStatus previousCardsStatus)
+    public async Task OnNextCardClickAsync(AvailableFlashCardAttemptStatus attemptStatus)
     {
         try
         {
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
-            await Task.Run(() => ProcessAndAdvance(previousCardsStatus));
-            if (FlashCardDataPacket is not null && 
-                FlashCardDataPacket.CurrentCardPosition >= FlashCardDataPacket.Deck.Count)
-            {
-                await ResetFormFunction.InvokeAsync();
-            }
+
+            if (CurrentCard is null) { ErrorHandler.LogAndThrow(); return; }
+            OrchestrationApi.OrchestrateFlashCardDispositioning(
+                DbContextFactory, CurrentCard, attemptStatus);
+
+            await OnNextCardClickFunction.InvokeAsync();
+
+            // ResetCardProperties();
 
 
-            _isAnswerVisible = false;
+            // _isAnswerVisible = false;
             await t_delay;
             _isLoading = false;
         }

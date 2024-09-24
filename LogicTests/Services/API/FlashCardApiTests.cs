@@ -74,7 +74,7 @@ namespace Logic.Services.API.Tests
 
             try
             {
-                
+
 
                 // create the user
                 if (loginService is null) { ErrorHandler.LogAndThrow(); return; }
@@ -144,8 +144,8 @@ namespace Logic.Services.API.Tests
         public async Task FlashCardDeckShuffleAsyncTest()
         {
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var context = dbContextFactory.CreateDbContext(); 
-            
+            var context = dbContextFactory.CreateDbContext();
+
             HashSet<string> keys = new();
             int numShuffles = 20;
             int numDuplicates = 0;
@@ -176,67 +176,56 @@ namespace Logic.Services.API.Tests
             Guid? userId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
-            var context = dbContextFactory.CreateDbContext();
-            var learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            int numWords = 5;
-            int numCards = 1;
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            AvailableLanguageCode learningLanguageCode = learningLanguage.Code;
+            Language uiLanguage = CommonFunctions.GetEnglishLanguage(dbContextFactory);
+            AvailableLanguageCode uiLanguageCode = uiLanguage.Code;
+
+            string expectedText = "de";
 
             try
             {
                 // create the user
-                if (loginService is null) { ErrorHandler.LogAndThrow(); return; }
+                Assert.IsNotNull(loginService);
                 var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
-                Assert.IsNotNull(user.Id);
-                userId = user.Id;
+                userId = (Guid)user.Id;
 
-                // pull the languageUser
-                Assert.IsNotNull(userId);
+                // fetch the languageUser
                 var languageUser = LanguageUserApi.LanguageUserGet(
                     dbContextFactory, learningLanguage.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
 
-                // pull a bunch of words
-                var words = context.Words
-                    .Where(x => x.LanguageId == learningLanguage.Id)
-                    .Take(numWords)
-                    .ToList();
-                if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
+                var word1 = WordApi.WordReadByLanguageIdAndText(
+                    dbContextFactory, learningLanguage.Id, expectedText);
+                Assert.IsNotNull(word1);
 
-                // create WordUsers for each
-                foreach (var word in words)
-                {
-                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
-                    var wordUser = WordUserApi.WordUserCreate(
-                        dbContextFactory, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
-                }
+                // add the word user
+                var wordUser1 = WordUserApi.WordUserCreate(
+                    dbContextFactory, word1, languageUser, "of", AvailableWordUserStatus.UNKNOWN);
+                Assert.IsNotNull(wordUser1);
 
-                // create cards
-                var cards = FlashCardApi.FlashCardsCreate(
-                    dbContextFactory, (Guid)languageUser.Id, numCards, uiLanguageCode);
-                Assert.IsNotNull(cards);
-                Assert.IsTrue(cards.Count == numCards);
+                var card1 = OrchestrationApi.OrchestratePullFlashCard(
+                    dbContextFactory, (Guid)userId, learningLanguageCode, uiLanguageCode);
 
+                Assert.IsNotNull(card1);
 
-                foreach (var card in cards)
-                {
-                    // pull the card again
-                    var cardAfter = FlashCardApi.FlashCardReadById(dbContextFactory, (Guid)card.Id);
-                    Assert.IsNotNull(cardAfter);
-                    Assert.IsNotNull(cardAfter.Id);
-                    Assert.AreEqual(card.NextReview, cardAfter.NextReview);
-                    Assert.AreEqual(card.Status, cardAfter.Status);
-                    Assert.AreEqual(card.Id, cardAfter.Id);
-                    Assert.AreEqual(card.Id, cardAfter.Id);
-                    Assert.AreEqual(card.WordUserId, cardAfter.WordUserId);
-                }
+                var card2 = FlashCardApi.FlashCardReadById(dbContextFactory, card1.Id);
+
+                Assert.IsNotNull(card2);
+                var wordUserPulled = DataCache.WordUserByIdRead(
+                    card2.WordUserId, dbContextFactory);
+                Assert.IsNotNull(wordUserPulled);
+                var wordPulled = DataCache.WordByIdRead(
+                    wordUserPulled.WordId, dbContextFactory);
+                Assert.IsNotNull(wordPulled);
+                Assert.AreEqual(expectedText, wordPulled.TextLowerCase);
             }
             finally
             {
                 // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
+                if (userId is not null) CommonFunctions.CleanUpUser(
+                    (Guid)userId, dbContextFactory);
             }
         }
         [TestMethod()]
@@ -245,389 +234,61 @@ namespace Logic.Services.API.Tests
             Guid? userId = null;
             var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
             var loginService = CommonFunctions.GetRequiredService<LoginService>();
-            var context = dbContextFactory.CreateDbContext();
-            var learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            int numWords = 5;
-            int numCards = 1;
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            AvailableLanguageCode learningLanguageCode = learningLanguage.Code;
+            Language uiLanguage = CommonFunctions.GetEnglishLanguage(dbContextFactory);
+            AvailableLanguageCode uiLanguageCode = uiLanguage.Code;
+
+            string expectedText = "de";
 
             try
             {
                 // create the user
-                if (loginService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
+                Assert.IsNotNull(loginService);
+                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
-                Assert.IsNotNull(user.Id);
-                userId = user.Id;
+                userId = (Guid)user.Id;
 
-                // pull the languageUser
-                Assert.IsNotNull(userId);
-                var languageUser = LanguageUserApi.LanguageUserGet(
+                // fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
                     dbContextFactory, learningLanguage.Id, (Guid)userId);
                 Assert.IsNotNull(languageUser);
 
-                // pull a bunch of words
-                var words = context.Words
-                    .Where(x => x.LanguageId == learningLanguage.Id)
-                    .Take(numWords)
-                    .ToList();
-                if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
+                var word1 = await WordApi.WordReadByLanguageIdAndTextAsync(
+                    dbContextFactory, learningLanguage.Id, expectedText);
+                Assert.IsNotNull(word1);
 
-                // create WordUsers for each
-                foreach (var word in words)
-                {
-                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
-                    var wordUser = await WordUserApi.WordUserCreateAsync(
-                        dbContextFactory, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
-                }
+                // add the word user
+                var wordUser1 = await WordUserApi.WordUserCreateAsync(
+                    dbContextFactory, word1, languageUser, "of", AvailableWordUserStatus.UNKNOWN);
+                Assert.IsNotNull(wordUser1);
 
-                // create cards
-                var cards = await FlashCardApi.FlashCardsCreateAsync(
-                    dbContextFactory, (Guid)languageUser.Id, numCards, uiLanguageCode);
-                Assert.IsNotNull(cards);
-                Assert.IsTrue(cards.Count == numCards);
+                var card1 = await OrchestrationApi.OrchestratePullFlashCardAsync(
+                    dbContextFactory, (Guid)userId, learningLanguageCode, uiLanguageCode);
 
+                Assert.IsNotNull(card1);
 
-                foreach (var card in cards)
-                {
-                    // pull the card again
-                    var cardAfter = await FlashCardApi.FlashCardReadByIdAsync(dbContextFactory, (Guid)card.Id);
-                    Assert.IsNotNull(cardAfter);
-                    Assert.IsNotNull(cardAfter.Id);
-                    Assert.AreEqual(card.NextReview, cardAfter.NextReview);
-                    Assert.AreEqual(card.Status, cardAfter.Status);
-                    Assert.AreEqual(card.Id, cardAfter.Id);
-                    Assert.AreEqual(card.Id, cardAfter.Id);
-                    Assert.AreEqual(card.WordUserId, cardAfter.WordUserId);
-                }
+                var card2 = await FlashCardApi.FlashCardReadByIdAsync(dbContextFactory, card1.Id);
+
+                Assert.IsNotNull(card2);
+                var wordUserPulled = await DataCache.WordUserByIdReadAsync(
+                    card2.WordUserId, dbContextFactory);
+                Assert.IsNotNull(wordUserPulled);
+                var wordPulled = await DataCache.WordByIdReadAsync(
+                    wordUserPulled.WordId, dbContextFactory);
+                Assert.IsNotNull(wordPulled);
+                Assert.AreEqual(expectedText, wordPulled.TextLowerCase);
             }
             finally
             {
                 // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync(
+                    (Guid)userId, dbContextFactory);
             }
         }
 
 
-        [TestMethod()]
-        public void FlashCardsCreateTest()
-        {
-            Guid? userId = null;
-            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
-            var context = dbContextFactory.CreateDbContext();
-            var learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            int numWords = 20;
-            int numCards = 5;
-
-            try
-            {
-                // create the user
-                if (loginService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
-                Assert.IsNotNull(user);
-                Assert.IsNotNull(user.Id);
-                userId = user.Id;
-
-                // pull the languageUser
-                Assert.IsNotNull(userId);
-                var languageUser = LanguageUserApi.LanguageUserGet(
-                    dbContextFactory, learningLanguage.Id, (Guid)userId);
-                Assert.IsNotNull(languageUser);
-
-                // pull a bunch of words, but only those that have tokens. if
-                // you pull a word without a token, there won't be a paragraph
-                // to translate and the assertion on the
-                // FlashCardParagraphTranslationBridges.Count will fail
-                var words = context.Words
-                    .Where(x => x.LanguageId == learningLanguage.Id && x.Tokens.Count > 0)
-                    .Take(numWords)
-                    .ToList();
-                if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
-
-                // create WordUsers for each
-                foreach (var word in words)
-                {
-                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
-                    var wordUser = WordUserApi.WordUserCreate(
-                        dbContextFactory, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
-                }
-
-
-                var cards = FlashCardApi.FlashCardsCreate(
-                    dbContextFactory, (Guid)languageUser.Id, numCards, uiLanguageCode);
-                Assert.IsNotNull(cards);
-                Assert.IsTrue(cards.Count == numCards);
-                foreach (var card in cards)
-                {
-                    Assert.IsNotNull(card);
-                    Assert.IsNotNull(card.Id);
-                    Assert.IsNotNull(card.FlashCardParagraphTranslationBridges);
-                    Assert.IsTrue(card.FlashCardParagraphTranslationBridges.Count > 0);
-                    Assert.IsNotNull(card.Status);
-                    Assert.IsNotNull(card.Id);
-                }
-
-            }
-            finally
-            {
-                // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
-            }
-        }
-        [TestMethod()]
-        public async Task FlashCardsCreateAsyncTest()
-        {
-            Guid? userId = null;
-            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
-            var context = dbContextFactory.CreateDbContext();
-            var learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            int numWords = 20;
-            int numCards = 5;
-
-            try
-            {
-                // create the user
-                if (loginService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
-                Assert.IsNotNull(user);
-                Assert.IsNotNull(user.Id);
-                userId = user.Id;
-
-                // pull the languageUser
-                Assert.IsNotNull(userId);
-                var languageUser = LanguageUserApi.LanguageUserGet(
-                    dbContextFactory, learningLanguage.Id, (Guid)userId);
-                Assert.IsNotNull(languageUser);
-
-                // pull a bunch of words, but only those that have tokens. if
-                // you pull a word without a token, there won't be a paragraph
-                // to translate and the assertion on the
-                // FlashCardParagraphTranslationBridges.Count will fail
-                var words = context.Words
-                    .Where(x => x.LanguageId == learningLanguage.Id && x.Tokens.Count > 0)
-                    .Take(numWords)
-                    .ToList();
-                if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
-
-                // create WordUsers for each
-                foreach (var word in words)
-                {
-                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
-                    var wordUser = await WordUserApi.WordUserCreateAsync(
-                        dbContextFactory, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
-                }
-
-
-                var cards = await FlashCardApi.FlashCardsCreateAsync(
-                    dbContextFactory, (Guid)languageUser.Id, numCards, uiLanguageCode);
-                Assert.IsNotNull(cards);
-                Assert.IsTrue(cards.Count == numCards);
-                foreach (var card in cards)
-                {
-                    Assert.IsNotNull(card);
-                    Assert.IsNotNull(card.Id);
-                    Assert.IsNotNull(card.FlashCardParagraphTranslationBridges);
-                    Assert.IsTrue(card.FlashCardParagraphTranslationBridges.Count > 0);
-                    Assert.IsNotNull(card.Status);
-                    Assert.IsNotNull(card.Id);
-                }
-
-            }
-            finally
-            {
-                // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
-            }
-        }
-
-
-        [TestMethod()]
-        public void FlashCardsFetchByNextReviewDateByPredicateTest()
-        {
-            Guid? userId = null;
-            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
-            var context = dbContextFactory.CreateDbContext();
-            var learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            int numWords = 20;
-            int numCards = 5;
-
-            try
-            {
-                // create the user
-                if (loginService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
-                Assert.IsNotNull(user);
-                Assert.IsNotNull(user.Id);
-                userId = user.Id;
-
-                // pull the languageUser
-                Assert.IsNotNull(userId);
-                var languageUser = LanguageUserApi.LanguageUserGet(
-                    dbContextFactory, learningLanguage.Id, (Guid)userId);
-                Assert.IsNotNull(languageUser);
-
-                // pull a bunch of words, but only those that have tokens. if
-                // you pull a word without a token, there won't be a paragraph
-                // to translate and the assertion on the
-                // FlashCardParagraphTranslationBridges.Count will fail
-                var words = context.Words
-                    .Where(x => x.LanguageId == learningLanguage.Id && x.Tokens.Count > 0)
-                    .Take(numWords)
-                    .ToList();
-                if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
-
-                // create WordUsers for each
-                foreach (var word in words)
-                {
-                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
-                    var wordUser = WordUserApi.WordUserCreate(
-                        dbContextFactory, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
-                }
-
-                // create cards
-                var cards = FlashCardApi.FlashCardsCreate(
-                    dbContextFactory, (Guid)languageUser.Id, numCards, uiLanguageCode);
-                Assert.IsNotNull(cards);
-                Assert.AreEqual(numCards, cards.Count);
-                foreach (var card in cards)
-                {
-                    // update next review to 5 mins ago, so we can pull them
-                    FlashCardApi.FlashCardUpdate(
-                        dbContextFactory, (Guid)card.Id, (Guid)card.WordUserId,
-                        AvailableFlashCardStatus.ACTIVE, DateTime.Now.AddMinutes(-5),
-                        (Guid)card.Id);
-                }
-
-                // now pull them 
-                Expression<Func<FlashCard, bool>> predicate = fc => fc.WordUser != null
-                    && fc.WordUser.LanguageUserId == languageUser.Id
-                    && fc.Status == AvailableFlashCardStatus.ACTIVE
-                    && fc.NextReview != null
-                    && fc.NextReview <= DateTimeOffset.Now;
-
-                var cardsPulled = FlashCardApi.FlashCardsFetchByNextReviewDateByPredicate(
-                    dbContextFactory, predicate, numCards);
-
-                Assert.IsNotNull(cardsPulled);
-                Assert.AreEqual(numCards, cardsPulled.Count);
-                foreach (var card in cardsPulled)
-                {
-                    Assert.IsNotNull(card);
-                    Assert.IsNotNull(card.Id);
-                    Assert.IsNotNull(card.FlashCardParagraphTranslationBridges);
-                    Assert.IsTrue(card.FlashCardParagraphTranslationBridges.Count > 0);
-                    Assert.IsNotNull(card.Status);
-                    Assert.IsNotNull(card.NextReview);
-                    Assert.IsNotNull(card.Id);
-                }
-
-            }
-            finally
-            {
-                // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
-            }
-        }
-        [TestMethod()]
-        public async Task FlashCardsFetchByNextReviewDateByPredicateAsyncTest()
-        {
-            Guid? userId = null;
-            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
-            var loginService = CommonFunctions.GetRequiredService<LoginService>();
-            var context = dbContextFactory.CreateDbContext();
-            var learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
-            AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
-            int numWords = 20;
-            int numCards = 5;
-
-            try
-            {
-                // create the user
-                if (loginService is null) { ErrorHandler.LogAndThrow(); return; }
-                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
-                Assert.IsNotNull(user);
-                Assert.IsNotNull(user.Id);
-                userId = user.Id;
-
-                // pull the languageUser
-                Assert.IsNotNull(userId);
-                var languageUser = LanguageUserApi.LanguageUserGet(
-                    dbContextFactory, learningLanguage.Id, (Guid)userId);
-                Assert.IsNotNull(languageUser);
-
-                // pull a bunch of words, but only those that have tokens. if
-                // you pull a word without a token, there won't be a paragraph
-                // to translate and the assertion on the
-                // FlashCardParagraphTranslationBridges.Count will fail
-                var words = context.Words
-                    .Where(x => x.LanguageId == learningLanguage.Id && x.Tokens.Count > 0)
-                    .Take(numWords)
-                    .ToList();
-                if (words is null || words.Count != numWords) { ErrorHandler.LogAndThrow(); return; }
-
-                // create WordUsers for each
-                foreach (var word in words)
-                {
-                    if (word is null) { ErrorHandler.LogAndThrow(); return; }
-                    var wordUser = await WordUserApi.WordUserCreateAsync(
-                        dbContextFactory, word, languageUser, "test", AvailableWordUserStatus.LEARNING3);
-                    if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
-                }
-
-                // create cards
-                var cards = await FlashCardApi.FlashCardsCreateAsync(
-                    dbContextFactory, (Guid)languageUser.Id, numCards, uiLanguageCode);
-                Assert.IsNotNull(cards);
-                Assert.AreEqual(numCards, cards.Count);
-                foreach (var card in cards)
-                {
-                    // update next review to 5 mins ago, so we can pull them
-                    await FlashCardApi.FlashCardUpdateAsync(
-                        dbContextFactory, (Guid)card.Id, (Guid)card.WordUserId,
-                        AvailableFlashCardStatus.ACTIVE, DateTime.Now.AddMinutes(-5),
-                        (Guid)card.Id);
-                }
-
-                // now pull them 
-                Expression<Func<FlashCard, bool>> predicate = fc => fc.WordUser != null
-                    && fc.WordUser.LanguageUserId == languageUser.Id
-                    && fc.Status == AvailableFlashCardStatus.ACTIVE
-                    && fc.NextReview != null
-                    && fc.NextReview <= DateTimeOffset.Now;
-
-                var cardsPulled = await FlashCardApi.FlashCardsFetchByNextReviewDateByPredicateAsync(
-                    dbContextFactory, predicate, numCards);
-
-                Assert.IsNotNull(cardsPulled);
-                Assert.AreEqual(numCards, cardsPulled.Count);
-                foreach (var card in cardsPulled)
-                {
-                    Assert.IsNotNull(card);
-                    Assert.IsNotNull(card.Id);
-                    Assert.IsNotNull(card.FlashCardParagraphTranslationBridges);
-                    Assert.IsTrue(card.FlashCardParagraphTranslationBridges.Count > 0);
-                    Assert.IsNotNull(card.Status);
-                    Assert.IsNotNull(card.NextReview);
-                    Assert.IsNotNull(card.Id);
-                }
-
-            }
-            finally
-            {
-                // clean-up
-                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
-            }
-        }
+        
 
 
         [TestMethod()]
@@ -640,7 +301,6 @@ namespace Logic.Services.API.Tests
             var learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 5;
-            int numCards = 1;
 
             try
             {
@@ -649,7 +309,7 @@ namespace Logic.Services.API.Tests
                 var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
                 Assert.IsNotNull(user);
                 Assert.IsNotNull(user.Id);
-                userId = user.Id;
+                userId = (Guid)user.Id;
 
                 // pull the languageUser
                 Assert.IsNotNull(userId);
@@ -673,30 +333,25 @@ namespace Logic.Services.API.Tests
                     if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
                 }
 
-                // create cards
-                var cards = FlashCardApi.FlashCardsCreate(
-                    dbContextFactory, (Guid)languageUser.Id, numCards, uiLanguageCode);
-                Assert.IsNotNull(cards);
-                Assert.IsTrue(cards.Count == numCards);
-
+                // create card
+                var card = OrchestrationApi.OrchestratePullFlashCard(
+                    dbContextFactory, (Guid)userId, learningLanguage.Code, uiLanguageCode);
+                Assert.IsNotNull(card);
 
                 DateTime futureTime = DateTime.Now.AddMinutes(7);
 
-                foreach (var card in cards)
-                {
-                    // update card
-                    FlashCardApi.FlashCardUpdate(dbContextFactory, (Guid)card.Id,
-                        (Guid)card.WordUserId, AvailableFlashCardStatus.DONTUSE,
-                        futureTime, (Guid)card.Id);
 
-                    // pull the card again
-                    var cardAfter = FlashCardApi.FlashCardReadById(dbContextFactory, (Guid)card.Id);
-                    Assert.IsNotNull(cardAfter);
-                    Assert.IsNotNull(cardAfter.Id);
-                    Assert.AreEqual(futureTime, cardAfter.NextReview);
-                    Assert.AreEqual(AvailableFlashCardStatus.DONTUSE, cardAfter.Status);
-                }
+                // update card
+                FlashCardApi.FlashCardUpdate(dbContextFactory, (Guid)card.Id,
+                    (Guid)card.WordUserId, AvailableFlashCardStatus.DONTUSE,
+                    futureTime, (Guid)card.Id);
 
+                // pull the card again
+                var cardAfter = FlashCardApi.FlashCardReadById(dbContextFactory, (Guid)card.Id);
+                Assert.IsNotNull(cardAfter);
+                Assert.IsNotNull(cardAfter.Id);
+                Assert.AreEqual(futureTime, cardAfter.NextReview);
+                Assert.AreEqual(AvailableFlashCardStatus.DONTUSE, cardAfter.Status);
             }
             finally
             {
@@ -714,7 +369,6 @@ namespace Logic.Services.API.Tests
             var learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
             AvailableLanguageCode uiLanguageCode = AvailableLanguageCode.EN_US;
             int numWords = 5;
-            int numCards = 1;
 
             try
             {
@@ -747,30 +401,25 @@ namespace Logic.Services.API.Tests
                     if (wordUser is null) { ErrorHandler.LogAndThrow(); return; }
                 }
 
-                // create cards
-                var cards = await FlashCardApi.FlashCardsCreateAsync(
-                    dbContextFactory, (Guid)languageUser.Id, numCards, uiLanguageCode);
-                Assert.IsNotNull(cards);
-                Assert.IsTrue(cards.Count() == numCards);
-
+                // create card
+                var card = await OrchestrationApi.OrchestratePullFlashCardAsync(
+                    dbContextFactory, (Guid)userId, learningLanguage.Code, uiLanguageCode);
+                Assert.IsNotNull(card);
 
                 DateTime futureTime = DateTime.Now.AddMinutes(7);
 
-                foreach (var card in cards)
-                {
-                    // update card
-                    await FlashCardApi.FlashCardUpdateAsync(dbContextFactory, (Guid)card.Id,
-                        (Guid)card.WordUserId, AvailableFlashCardStatus.DONTUSE,
-                        futureTime, (Guid)card.Id);
+                
+                // update card
+                await FlashCardApi.FlashCardUpdateAsync(dbContextFactory, (Guid)card.Id,
+                    (Guid)card.WordUserId, AvailableFlashCardStatus.DONTUSE,
+                    futureTime, (Guid)card.Id);
 
-                    // pull the card again
-                    var cardAfter = await FlashCardApi.FlashCardReadByIdAsync(dbContextFactory, (Guid)card.Id);
-                    Assert.IsNotNull(cardAfter);
-                    Assert.IsNotNull(cardAfter.Id);
-                    Assert.AreEqual(futureTime, cardAfter.NextReview);
-                    Assert.AreEqual(AvailableFlashCardStatus.DONTUSE, cardAfter.Status);
-                }
-
+                // pull the card again
+                var cardAfter = await FlashCardApi.FlashCardReadByIdAsync(dbContextFactory, (Guid)card.Id);
+                Assert.IsNotNull(cardAfter);
+                Assert.IsNotNull(cardAfter.Id);
+                Assert.AreEqual(futureTime, cardAfter.NextReview);
+                Assert.AreEqual(AvailableFlashCardStatus.DONTUSE, cardAfter.Status);
             }
             finally
             {
@@ -801,7 +450,7 @@ namespace Logic.Services.API.Tests
                 // create the user
                 if (loginService is null) { ErrorHandler.LogAndThrow(); return; }
                 var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
-                Assert.IsNotNull(user); 
+                Assert.IsNotNull(user);
                 Assert.IsNotNull(user.Id);
                 userId = (Guid)user.Id;
 
@@ -872,10 +521,288 @@ namespace Logic.Services.API.Tests
 
                 // read the flashcard
                 var flashCard = await FlashCardApi.FlashCardReadByWordUserIdAsync(dbContextFactory, (Guid)wordUser.Id);
-                
+
                 Assert.IsNotNull(flashCard);
                 Assert.IsNotNull(flashCard.Id);
                 Assert.AreEqual(wordUser.Id, flashCard.WordUserId);
+            }
+            finally
+            {
+                // clean-up
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
+            }
+        }
+
+
+        [TestMethod()]
+        public async Task FlashCardReadNextReviewCardAsyncTest()
+        {
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            AvailableLanguageCode learningLanguageCode = learningLanguage.Code;
+            Language uiLanguage = CommonFunctions.GetEnglishLanguage(dbContextFactory);
+            AvailableLanguageCode uiLanguageCode = uiLanguage.Code;
+
+            string expectedText1 = "de";
+            string expectedText2 = "la";
+            try
+            {
+                // create the user
+                Assert.IsNotNull(loginService);
+                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+
+                // fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
+
+                var word1 = await WordApi.WordReadByLanguageIdAndTextAsync(
+                    dbContextFactory, learningLanguage.Id, expectedText1);
+                Assert.IsNotNull(word1);
+                var word2 = await WordApi.WordReadByLanguageIdAndTextAsync(
+                    dbContextFactory, learningLanguage.Id, expectedText2);
+                Assert.IsNotNull(word2);
+
+                // add some word users
+                var wordUser1 = await WordUserApi.WordUserCreateAsync(
+                    dbContextFactory, word1, languageUser, "of", AvailableWordUserStatus.UNKNOWN);
+                Assert.IsNotNull(wordUser1);
+                var wordUser2 = await WordUserApi.WordUserCreateAsync(
+                    dbContextFactory, word2, languageUser, "the", AvailableWordUserStatus.UNKNOWN);
+                Assert.IsNotNull(wordUser2);
+
+
+                var card1 = await OrchestrationApi.OrchestratePullFlashCardAsync(
+                    dbContextFactory, (Guid)userId, learningLanguageCode, uiLanguageCode);
+
+                Assert.IsNotNull(card1);
+
+                // update the card's review date to tomorrow so it won't come
+                // up when we pull the next card
+                card1.NextReview = DateTimeOffset.Now.AddDays(1);
+                await FlashCardApi.FlashCardUpdateAsync(dbContextFactory, card1);
+
+                var card2 = await OrchestrationApi.OrchestratePullFlashCardAsync(
+                    dbContextFactory, (Guid)userId, learningLanguageCode, uiLanguageCode);
+
+                Assert.IsNotNull(card2);
+
+                // update the card's review date to 10 minutes ago, so it'll come up next
+                card2.NextReview = DateTimeOffset.Now.AddMinutes(-10);
+                await FlashCardApi.FlashCardUpdateAsync(dbContextFactory, card2);
+
+                // now pull the next review card...
+                var card3 = await FlashCardApi.FlashCardReadNextReviewCardAsync(
+                    dbContextFactory, (Guid)userId, learningLanguageCode);
+                Assert.IsNotNull(card3);
+
+                Assert.AreEqual(card2.Id, card3.Id);
+            }
+            finally
+            {
+                // clean-up
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
+            }
+        }
+        [TestMethod()]
+        public void FlashCardReadNextReviewCardTest()
+        {
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            AvailableLanguageCode learningLanguageCode = learningLanguage.Code;
+            Language uiLanguage = CommonFunctions.GetEnglishLanguage(dbContextFactory);
+            AvailableLanguageCode uiLanguageCode = uiLanguage.Code;
+
+            string expectedText1 = "de";
+            string expectedText2 = "la";
+            try
+            {
+                // create the user
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+
+                // fetch the languageUser
+                var languageUser = LanguageUserApi.LanguageUserGet(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
+
+                var word1 = WordApi.WordReadByLanguageIdAndText(
+                    dbContextFactory, learningLanguage.Id, expectedText1);
+                Assert.IsNotNull(word1);
+                var word2 = WordApi.WordReadByLanguageIdAndText(
+                    dbContextFactory, learningLanguage.Id, expectedText2);
+                Assert.IsNotNull(word2);
+
+                // add some word users
+                var wordUser1 = WordUserApi.WordUserCreate(
+                    dbContextFactory, word1, languageUser, "of", AvailableWordUserStatus.UNKNOWN);
+                Assert.IsNotNull(wordUser1);
+                var wordUser2 = WordUserApi.WordUserCreate(
+                    dbContextFactory, word2, languageUser, "the", AvailableWordUserStatus.UNKNOWN);
+                Assert.IsNotNull(wordUser2);
+
+
+                var card1 = OrchestrationApi.OrchestratePullFlashCard(
+                    dbContextFactory, (Guid)userId, learningLanguageCode, uiLanguageCode);
+
+                Assert.IsNotNull(card1);
+
+                // update the card's review date to tomorrow so it won't come
+                // up when we pull the next card
+                card1.NextReview = DateTimeOffset.Now.AddDays(1);
+                FlashCardApi.FlashCardUpdate(dbContextFactory, card1);
+
+                var card2 = OrchestrationApi.OrchestratePullFlashCard(
+                    dbContextFactory, (Guid)userId, learningLanguageCode, uiLanguageCode);
+
+                Assert.IsNotNull(card2);
+
+                // update the card's review date to 10 minutes ago, so it'll come up next
+                card2.NextReview = DateTimeOffset.Now.AddMinutes(-10);
+                FlashCardApi.FlashCardUpdate(dbContextFactory, card2);
+
+                // now pull the next review card...
+                var card3 = FlashCardApi.FlashCardReadNextReviewCard(
+                    dbContextFactory, (Guid)userId, learningLanguageCode);
+                Assert.IsNotNull(card3);
+
+                Assert.AreEqual(card2.Id, card3.Id);
+            }
+            finally
+            {
+                // clean-up
+                if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
+            }
+        }
+
+        [TestMethod()]
+        public async Task FlashCardUpdateAsyncTestSimplified()
+        {
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            AvailableLanguageCode learningLanguageCode = learningLanguage.Code;
+            Language uiLanguage = CommonFunctions.GetEnglishLanguage(dbContextFactory);
+            AvailableLanguageCode uiLanguageCode = uiLanguage.Code;
+
+            string expectedText1 = "de";
+            try
+            {
+                // create the user
+                Assert.IsNotNull(loginService);
+                var user = await CommonFunctions.CreateNewTestUserAsync(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+
+                // fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
+
+                var word1 = await WordApi.WordReadByLanguageIdAndTextAsync(
+                    dbContextFactory, learningLanguage.Id, expectedText1);
+                Assert.IsNotNull(word1);
+                
+
+                // add some word users
+                var wordUser1 = await WordUserApi.WordUserCreateAsync(
+                    dbContextFactory, word1, languageUser, "of", AvailableWordUserStatus.UNKNOWN);
+                Assert.IsNotNull(wordUser1);
+                
+
+
+                var card = await OrchestrationApi.OrchestratePullFlashCardAsync(
+                    dbContextFactory, (Guid)userId, learningLanguageCode, uiLanguageCode);
+                Assert.IsNotNull(card);
+
+                card.Status = AvailableFlashCardStatus.DONTUSE;
+                var future = DateTimeOffset.Now.AddHours(4);
+                card.NextReview = future;
+
+                await FlashCardApi.FlashCardUpdateAsync(dbContextFactory, card);
+
+                // I don't know if this is really testing anything as the
+                // context will likely hold on to the reference to the object
+                // regardless. I could maybe delete the cache, but that might
+                // mess with other tests being conducted at the same time
+                var cardPulled = await FlashCardApi.FlashCardReadByIdAsync(
+                    dbContextFactory, card.Id);
+                Assert.IsNotNull(cardPulled);
+                Assert.AreEqual(AvailableFlashCardStatus.DONTUSE, cardPulled.Status);
+                Assert.AreEqual(future, cardPulled.NextReview);
+            }
+            finally
+            {
+                // clean-up
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
+            }
+        }
+
+        [TestMethod()]
+        public void FlashCardUpdateTestSimplified()
+        {
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            AvailableLanguageCode learningLanguageCode = learningLanguage.Code;
+            Language uiLanguage = CommonFunctions.GetEnglishLanguage(dbContextFactory);
+            AvailableLanguageCode uiLanguageCode = uiLanguage.Code;
+
+            string expectedText1 = "de";
+            try
+            {
+                // create the user
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+
+                // fetch the languageUser
+                var languageUser = LanguageUserApi.LanguageUserGet(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
+
+                var word1 = WordApi.WordReadByLanguageIdAndText(
+                    dbContextFactory, learningLanguage.Id, expectedText1);
+                Assert.IsNotNull(word1);
+
+
+                // add some word users
+                var wordUser1 = WordUserApi.WordUserCreate(
+                    dbContextFactory, word1, languageUser, "of", AvailableWordUserStatus.UNKNOWN);
+                Assert.IsNotNull(wordUser1);
+
+
+
+                var card = OrchestrationApi.OrchestratePullFlashCard(
+                    dbContextFactory, (Guid)userId, learningLanguageCode, uiLanguageCode);
+                Assert.IsNotNull(card);
+
+                card.Status = AvailableFlashCardStatus.DONTUSE;
+                var future = DateTimeOffset.Now.AddHours(4);
+                card.NextReview = future;
+
+                FlashCardApi.FlashCardUpdate(dbContextFactory, card);
+
+                // I don't know if this is really testing anything as the
+                // context will likely hold on to the reference to the object
+                // regardless. I could maybe delete the cache, but that might
+                // mess with other tests being conducted at the same time
+                var cardPulled = FlashCardApi.FlashCardReadById(
+                    dbContextFactory, card.Id);
+                Assert.IsNotNull(cardPulled);
+                Assert.AreEqual(AvailableFlashCardStatus.DONTUSE, cardPulled.Status);
+                Assert.AreEqual(future, cardPulled.NextReview);
             }
             finally
             {

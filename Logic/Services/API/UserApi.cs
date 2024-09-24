@@ -112,6 +112,17 @@ namespace Logic.Services.API
             return await DataCache.UserSettingUiLanguageByUserIdReadAsync(userId, dbContextFactory);
         }
 
+        public static Language? UserSettingLearningLanguagReadByUserId(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
+        {
+            return DataCache.UserSettingLearningLanguageByUserIdRead(userId, dbContextFactory);
+        }
+        public static async Task<Language?> UserSettingLearningLanguagReadByUserIdAsync(
+            IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId)
+        {
+            return await DataCache.UserSettingLearningLanguageByUserIdReadAsync(userId, dbContextFactory);
+        }
+
         #endregion
 
         #region delete

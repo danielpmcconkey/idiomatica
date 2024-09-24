@@ -22,28 +22,30 @@ namespace Model.DAL
         public static WordUser? WordUserCreate(WordUser wordUser, IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             var context = dbContextFactory.CreateDbContext();
+            context.WordUsers.Add(wordUser);
+            context.SaveChanges();
 
-            int numRows = context.Database.ExecuteSql($"""
+            //int numRows = context.Database.ExecuteSql($"""
                 
-                INSERT INTO [Idioma].[WordUser]
-                      ([WordId]
-                      ,[LanguageUserId]
-                      ,[Translation]
-                      ,[Status]
-                      ,[Created]
-                      ,[StatusChanged]
-                      ,[Id])
-                VALUES (
-                      {wordUser.WordId}
-                      ,{wordUser.LanguageUserId}
-                      ,{wordUser.Translation}
-                      ,{wordUser.Status}
-                      ,{wordUser.Created}
-                      ,{wordUser.StatusChanged}
-                      ,{wordUser.Id})
+            //    INSERT INTO [Idioma].[WordUser]
+            //          ([WordId]
+            //          ,[LanguageUserId]
+            //          ,[Translation]
+            //          ,[Status]
+            //          ,[Created]
+            //          ,[StatusChanged]
+            //          ,[Id])
+            //    VALUES (
+            //          {wordUser.WordId}
+            //          ,{wordUser.LanguageUserId}
+            //          ,{wordUser.Translation}
+            //          ,{wordUser.Status}
+            //          ,{wordUser.Created}
+            //          ,{wordUser.StatusChanged}
+            //          ,{wordUser.Id})
         
-                """);
-            if (numRows < 1) throw new InvalidDataException("creating WordUser affected 0 rows");
+            //    """);
+            //if (numRows < 1) throw new InvalidDataException("creating WordUser affected 0 rows");
             
             // add it to cache
             WordUserById[wordUser.Id] = wordUser;

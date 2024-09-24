@@ -68,22 +68,25 @@ namespace Model.DAL
         #region create
 
         public static FlashCardParagraphTranslationBridge? FlashCardParagraphTranslationBridgeCreate(
-            FlashCardParagraphTranslationBridge fcptb, IDbContextFactory<IdiomaticaContext> dbContextFactory)
+            FlashCardParagraphTranslationBridge fcptb, 
+            IDbContextFactory<IdiomaticaContext> dbContextFactory)
         {
             var context = dbContextFactory.CreateDbContext();
+            context.FlashCardParagraphTranslationBridges.Add(fcptb);
+            context.SaveChanges();
 
-            int numRows = context.Database.ExecuteSql($"""
-            INSERT INTO [Idioma].[FlashCardParagraphTranslationBridge]
-                        ([FlashCardId]
-                        ,[ParagraphTranslationId]
-                        ,[Id])
-                    VALUES
-                        ({fcptb.FlashCardId}
-                        ,{fcptb.ParagraphTranslationId}
-                        ,{fcptb.Id})
-            """);
+            //int numRows = context.Database.ExecuteSql($"""
+            //INSERT INTO [Idioma].[FlashCardParagraphTranslationBridge]
+            //            ([FlashCardId]
+            //            ,[ParagraphTranslationId]
+            //            ,[Id])
+            //        VALUES
+            //            ({fcptb.FlashCardId}
+            //            ,{fcptb.ParagraphTranslationId}
+            //            ,{fcptb.Id})
+            //""");
             
-            if (numRows < 1) throw new InvalidDataException("creating FlashCardParagraphTranslationBridge affected 0 rows");
+            //if (numRows < 1) throw new InvalidDataException("creating FlashCardParagraphTranslationBridge affected 0 rows");
             
             // add it to cache
             FlashCardParagraphTranslationBridgeById[fcptb.Id] = fcptb;

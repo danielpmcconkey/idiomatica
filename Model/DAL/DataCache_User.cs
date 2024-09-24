@@ -23,19 +23,7 @@ namespace Model.DAL
             if (user.ApplicationUserId is null) throw new ArgumentNullException(nameof(user.ApplicationUserId));
             var context = dbContextFactory.CreateDbContext();
 
-            //int numRows = context.Database.ExecuteSql($"""
-
-            //    INSERT INTO [Idioma].[User]
-            //               ([Name]
-            //               ,[ApplicationUserId]
-            //               ,[Id])
-            //         VALUES
-            //               ({user.Name}
-            //               ,{user.ApplicationUserId}
-            //               ,{user.Id})
-
-            //    """);
-            //if (numRows < 1) throw new InvalidDataException("creating User affected 0 rows");
+            
 
             context.Users.Add(user);
             context.SaveChanges();
@@ -146,6 +134,28 @@ namespace Model.DAL
             return await Task<Language?>.Run(() =>
             {
                 return UserSettingUiLanguageByUserIdRead(key, dbContextFactory);
+            });
+        }
+
+
+        public static Language? UserSettingLearningLanguageByUserIdRead(
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            var settings = DataCache.UserSettingsByUserIdRead(key, dbContextFactory);
+            if (settings == null) return null;
+            var uiPref = settings
+                .Where(x => x.Key == AvailableUserSetting.CURRENTLEARNINGLANGUAGE)
+                .FirstOrDefault();
+            if (uiPref == null) return null;
+            if (!Guid.TryParse(uiPref.Value, out var languageKey)) return null;
+            return DataCache.LanguageByIdRead(languageKey, dbContextFactory);
+        }
+        public static async Task<Language?> UserSettingLearningLanguageByUserIdReadAsync(
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            return await Task<Language?>.Run(() =>
+            {
+                return UserSettingLearningLanguageByUserIdRead(key, dbContextFactory);
             });
         }
         #endregion

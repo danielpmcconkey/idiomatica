@@ -129,9 +129,9 @@ namespace Logic.UILabels
             _labels.Add("flashCardReviewInitializationError", "There was an error initializing flash card review.");
             _labels.Add("fcLanguage", "Which language do you want to study today?");
             _labels.Add("fcSelectLanguage", "Please select language");
-            _labels.Add("fcNumNewCardsLabel", "How many new cards do you want to add?");
-            _labels.Add("fcNumOldCardsLabel", "How many review cards do you want to fetch?");
-            _labels.Add("fcCreateDeck", "Create deck");
+            //_labels.Add("fcNumNewCardsLabel", "How many new cards do you want to add?");
+            //_labels.Add("fcNumOldCardsLabel", "How many review cards do you want to fetch?");
+            _labels.Add("fcPullACard", "Pull a card");
             _labels.Add("fcSeeAnswer", "Show translation");
             _labels.Add("fcCustomTranslationHead", "Your personal translation");
             _labels.Add("fcWrong", "Wrong");
@@ -140,8 +140,8 @@ namespace Logic.UILabels
             _labels.Add("fcEasy", "Easy");
             _labels.Add("fcStop", "Remove this card");
             _labels.Add("fcLoading", "Loading...");
-            _labels.Add("fcDeckCreateError", "There was an error creating the card deck");
-            _labels.Add("fcDeckComplete", "You have finished reviewing all cards in this deck. Create another?");
+            //_labels.Add("fcDeckCreateError", "There was an error creating the card deck");
+            //_labels.Add("fcDeckComplete", "You have finished reviewing all cards in this deck. Create another?");
             _labels.Add("fcShowConjugationTable", "Show conjugation table");
             #endregion
             #region conjugation table
