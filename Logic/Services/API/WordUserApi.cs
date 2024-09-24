@@ -81,50 +81,98 @@ namespace Logic.Services.API
              *   
              * */
 
-            var wordUser = (
-                        from wu in context.WordUsers
-                        join lu in context.LanguageUsers on wu.LanguageUserId equals lu.Id
-                        join l in context.Languages on lu.LanguageId equals l.Id
-                        join w in context.Words on wu.WordId equals w.Id
-                        join wr in context.WordRanks on w.Id equals wr.WordId
-                        join fc in context.FlashCards on wu.Id equals fc.WordUserId into grouping
-                        from fc in grouping.DefaultIfEmpty()
-                        where (
-                            lu.UserId == userId &&
-                            l.Code == learningLanguageCode &&
-                            fc == null &&
-                            (
-                                !string.IsNullOrEmpty(wu.Translation) ||
-                                w.WordTranslations.Count > 0)
-                            )
-                        orderby wr.Ordinal
-                        select wu
-                    )
+            var wu = context.WordUsers
+                .Where(
+                    x => x.FlashCard == null &&
+                    x.Word != null &&
+                    x.Word.WordRank != null &&
+                    x.LanguageUser != null &&
+                    x.LanguageUser.User != null &&
+                    x.LanguageUser.User.Id == userId &&
+                    x.LanguageUser.Language != null &&
+                    x.LanguageUser.Language.Code == learningLanguageCode &&
+                    (!string.IsNullOrEmpty(x.Translation) || x.Word.WordTranslations.Count > 0)
+                )
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                .OrderBy(x => x.Word.WordRank.Ordinal)
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+                .Include(x => x.Word)
                 .FirstOrDefault();
-            if (wordUser is not null) return wordUser;
 
-            
+            if (wu is not null) return wu;
+            //var result = (
+            //            from wu in context.WordUsers
+            //            join lu in context.LanguageUsers on wu.LanguageUserId equals lu.Id
+            //            join l in context.Languages on lu.LanguageId equals l.Id
+            //            join w in context.Words on wu.WordId equals w.Id
+            //            join wr in context.WordRanks on w.Id equals wr.WordId
+            //            join fc in context.FlashCards on wu.Id equals fc.WordUserId into grouping
+            //            from fc in grouping.DefaultIfEmpty()
+            //            where (
+            //                lu.UserId == userId &&
+            //                l.Code == learningLanguageCode &&
+            //                fc == null &&
+            //                (
+            //                    !string.IsNullOrEmpty(wu.Translation) ||
+            //                    w.WordTranslations.Count > 0)
+            //                )
+            //            orderby wr.Ordinal
+            //            select new { wordUser = wu, word = w }
+            //        )
+            //    .FirstOrDefault();
+
+
+
             // no more word-ranked wordUsers. check for one that's changed
             // recently
-            return (
-                    from wu in context.WordUsers
-                    join lu in context.LanguageUsers on wu.LanguageUserId equals lu.Id
-                    join l in context.Languages on lu.LanguageId equals l.Id
-                    join w in context.Words on wu.WordId equals w.Id
-                    join fc in context.FlashCards on wu.Id equals fc.WordUserId into grouping
-                    from fc in grouping.DefaultIfEmpty()
-                    where (
-                        lu.UserId == userId &&
-                        l.Code == learningLanguageCode &&
-                        fc == null &&
-                        (
-                            !string.IsNullOrEmpty(wu.Translation) ||
-                            w.WordTranslations.Count > 0)
-                        )
-                    orderby wu.StatusChanged
-                    select wu
+
+            wu = context.WordUsers
+                .Where(
+                    x => x.FlashCard == null &&
+                    x.Word != null &&
+                    x.LanguageUser != null &&
+                    x.LanguageUser.User != null &&
+                    x.LanguageUser.User.Id == userId &&
+                    x.LanguageUser.Language != null &&
+                    x.LanguageUser.Language.Code == learningLanguageCode &&
+                    (!string.IsNullOrEmpty(x.Translation) || x.Word.WordTranslations.Count > 0)
                 )
-            .FirstOrDefault();
+                .OrderByDescending(x => x.StatusChanged)
+                .Include(x => x.Word)
+                .FirstOrDefault();
+            if (wu is not null) return wu;
+
+            //var result2 = (
+            //        from wu in context.WordUsers
+            //        join lu in context.LanguageUsers on wu.LanguageUserId equals lu.Id
+            //        join l in context.Languages on lu.LanguageId equals l.Id
+            //        join w in context.Words on wu.WordId equals w.Id
+            //        join fc in context.FlashCards on wu.Id equals fc.WordUserId into grouping
+            //        from fc in grouping.DefaultIfEmpty()
+            //        where (
+            //            lu.UserId == userId &&
+            //            l.Code == learningLanguageCode &&
+            //            fc == null &&
+            //            (
+            //                !string.IsNullOrEmpty(wu.Translation) ||
+            //                w.WordTranslations.Count > 0)
+            //            )
+            //        orderby wu.StatusChanged
+            //        select new { wordUser = wu, word = w }
+            //    )
+            //.FirstOrDefault();
+            //if (result2 is not null)
+            //{
+            //    var wu = result2.wordUser;
+            //    var w = result2.word;
+            //    if (wu is not null && w is not null)
+            //    {
+            //        wu.Word = w;
+            //        return wu;
+            //    }
+            //}
+            ErrorHandler.LogAndThrow();
+            return null;
         }
         public static async Task<WordUser?> WordUserReadForNextFlashCardAsync(
             IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId,

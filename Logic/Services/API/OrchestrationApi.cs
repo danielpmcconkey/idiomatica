@@ -178,6 +178,7 @@ namespace Logic.Services.API
                 if (timeBetweenLast2 > TimeSpan.Zero)
                 {
                     int newMinutes = (int)Math.Round(timeBetweenLast2.TotalMinutes * 0.75d, 0);
+                    // keep a 10 minute minimum to keep the same cards from coming too closely after itself
                     if (newMinutes < 10) newMinutes = 10;
                     card.NextReview = DateTimeOffset.Now.AddMinutes(newMinutes);
                 }
@@ -189,7 +190,8 @@ namespace Logic.Services.API
                 if (timeBetweenLast2 > TimeSpan.Zero)
                 {
                     int newMinutes = (int)Math.Round(timeBetweenLast2.TotalMinutes * 1.25d, 0);
-                    if (newMinutes < 24 * 60) newMinutes = 24 * 60;
+                    // keep a 10 minute minimum to keep the same cards from coming too closely after itself
+                    if (newMinutes < 10) newMinutes = 10;
                     card.NextReview = DateTimeOffset.Now.AddMinutes(newMinutes);
                 }
             }
@@ -200,7 +202,8 @@ namespace Logic.Services.API
                 if (timeBetweenLast2 > TimeSpan.Zero)
                 {
                     int newMinutes = (int)Math.Round(timeBetweenLast2.TotalMinutes * 1.5d, 0);
-                    if (newMinutes < 48 * 60) newMinutes = 48 * 60;
+                    // keep a 10 minute minimum to keep the same cards from coming too closely after itself
+                    if (newMinutes < 10) newMinutes = 10;
                     card.NextReview = DateTimeOffset.Now.AddMinutes(newMinutes);
                 }
             }
@@ -235,8 +238,10 @@ namespace Logic.Services.API
                 dbContextFactory, userId, learningLanguageCode);
             if (wordUser is null) { ErrorHandler.LogAndThrow(); return null; }
 
-            return FlashCardApi.FlashCardCreate(dbContextFactory, wordUser.Id,
+            card = FlashCardApi.FlashCardCreate(dbContextFactory, wordUser.Id,
                 uiLanguageCode);
+            if (card is  null) { ErrorHandler.LogAndThrow(); return null; }
+            return card;
         }
         public static async Task<FlashCard?> OrchestratePullFlashCardAsync(
             IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid userId,

@@ -123,41 +123,41 @@ namespace Model.DAL
                 return FlashCardAndFullRelationshipsByIdRead(key, dbContextFactory);
             });
         }
-        public static List<FlashCard>? FlashCardsActiveAndFullRelationshipsByPredicateRead(
-            Expression<Func<FlashCard, bool>> predicate, int take, IDbContextFactory<IdiomaticaContext> dbContextFactory)
-        {
-            var context = dbContextFactory.CreateDbContext();
+//        public static List<FlashCard>? FlashCardsActiveAndFullRelationshipsByPredicateRead(
+//            Expression<Func<FlashCard, bool>> predicate, int take, IDbContextFactory<IdiomaticaContext> dbContextFactory)
+//        {
+//            var context = dbContextFactory.CreateDbContext();
 
-            // don't check cache here. The statuses change and new cards get
-            // created for the first time while this cache thinks there's a
-            // null for the deck
+//            // don't check cache here. The statuses change and new cards get
+//            // created for the first time while this cache thinks there's a
+//            // null for the deck
 
-            // read DB
-            var value = context.FlashCards
-                .Where(predicate)
-                .Include(fc => fc.WordUser)
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                    .ThenInclude(wu => wu.Word)
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-                .Include(fc => fc.Attempts)
-                .Include(fc => fc.FlashCardParagraphTranslationBridges)
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                    .ThenInclude(fcptb => fcptb.ParagraphTranslation)
-                        .ThenInclude(pt => pt.Paragraph)
-                            .ThenInclude(pp => pp.Sentences)
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
-                .OrderBy(fc => fc.NextReview)
-                .Take(take)
-                .ToList();
-            if (value is null) return value;
-            // write to cache
-            //FlashCardsActiveAndFullRelationshipsByLanguageUserId[key] = value;
-            foreach (var f in value)
-            {
-                FlashCardUpdateAllCaches(f);
-            }
-            return value;
-        }
+//            // read DB
+//            var value = context.FlashCards
+//                .Where(predicate)
+//                .Include(fc => fc.WordUser)
+//#pragma warning disable CS8602 // Dereference of a possibly null reference.
+//                    .ThenInclude(wu => wu.Word)
+//#pragma warning restore CS8602 // Dereference of a possibly null reference.
+//                .Include(fc => fc.Attempts)
+//                .Include(fc => fc.FlashCardParagraphTranslationBridges)
+//#pragma warning disable CS8602 // Dereference of a possibly null reference.
+//                    .ThenInclude(fcptb => fcptb.ParagraphTranslation)
+//                        .ThenInclude(pt => pt.Paragraph)
+//                            .ThenInclude(pp => pp.Sentences)
+//#pragma warning restore CS8602 // Dereference of a possibly null reference.
+//                .OrderBy(fc => fc.NextReview)
+//                .Take(take)
+//                .ToList();
+//            if (value is null) return value;
+//            // write to cache
+//            //FlashCardsActiveAndFullRelationshipsByLanguageUserId[key] = value;
+//            foreach (var f in value)
+//            {
+//                FlashCardUpdateAllCaches(f);
+//            }
+//            return value;
+//        }
 
 
         public static FlashCard? FlashCardNextReviewCardRead(Guid userId,
@@ -177,6 +177,8 @@ namespace Model.DAL
                 x.WordUser.LanguageUser.UserId == userId &&
                 (x.NextReview == null || x.NextReview <= DateTimeOffset.Now)
             )
+            .Include(x => x.WordUser)
+                .ThenInclude(x => x.Word)
             .OrderBy(x => x.NextReview)
             .FirstOrDefault();
             // it's okay to return empty. The API above this should create a
@@ -202,20 +204,6 @@ namespace Model.DAL
             var context = dbContextFactory.CreateDbContext();
             context.FlashCards.Update(flashCard);
             context.SaveChanges();
-
-            //int numRows = context.Database.ExecuteSql($"""
-            //            UPDATE [Idioma].[FlashCard]
-            //            SET [WordUserId] = {flashCard.WordUserId}
-            //               ,[Status] = {flashCard.Status}
-            //               ,[NextReview] = {flashCard.NextReview}
-            //               ,[Id] = {flashCard.Id}
-            //            where Id = {flashCard.Id}
-            //            ;
-            //            """);
-            //if (numRows < 1)
-            //{
-            //    throw new InvalidDataException("FlashCard update affected 0 rows");
-            //};
             // now update the cache
             FlashCardUpdateAllCaches(flashCard);
 

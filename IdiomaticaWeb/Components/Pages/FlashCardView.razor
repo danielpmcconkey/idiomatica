@@ -208,30 +208,20 @@
             StateHasChanged();
         }
     }
-    private void ProcessAndAdvance(AvailableFlashCardAttemptStatus previousCardsStatus)
-    {
-        FlashCardDataPacket = OrchestrationApi.OrchestrateFlashCardDispositionAndAdvance(
-            DbContextFactory, FlashCardDataPacket, previousCardsStatus);
-        if (FlashCardDataPacket is null)
-        {
-            ErrorHandler.LogAndThrow();
-            return;
-        }
-
-        ResetCardProperties();
-    }
-    public async Task OnNextCardClickAsync(AvailableFlashCardAttemptStatus previousCardsStatus)
+    public async Task OnNextCardClickAsync(AvailableFlashCardAttemptStatus attemptStatus)
     {
         try
         {
             _isLoading = true;
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
-            await Task.Run(() => ProcessAndAdvance(previousCardsStatus));
-            if (FlashCardDataPacket is not null && 
-                FlashCardDataPacket.CurrentCardPosition >= FlashCardDataPacket.Deck.Count)
-            {
-                await ResetFormFunction.InvokeAsync();
-            }
+
+            if (CurrentCard is null) { ErrorHandler.LogAndThrow(); return; }
+            OrchestrationApi.OrchestrateFlashCardDispositioning(
+                DbContextFactory, CurrentCard, attemptStatus);
+
+            await OnNextCardClickFunction.InvokeAsync();
+
+            ResetCardProperties();
 
 
             _isAnswerVisible = false;
