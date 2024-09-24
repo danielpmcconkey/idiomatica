@@ -42,7 +42,7 @@ left join [Idioma].[User] u on lu.UserId = u.Id
 where 1=1
 --and p.BookId = '7e1f1169-ae64-4fa7-86f3-b302caebcb8b'
 --and bu.Id = '2924de98-6c00-4615-84bc-e9ce8609aecf'
-and b.Title = 'El cofre'
+and b.Title = 'España'
 --and lu.UserId ='58784a41-e1e7-4e91-808f-81a9f1e0f459'
 and p.Ordinal = 1
 --and pu.Id is not null
@@ -52,7 +52,7 @@ and p.Ordinal = 1
 --and pp.Id = 14594
 --and s.Id = 24380
 --and t.Id = 94322
-and u.Name = 'Dan McConkey'
+and u.Name = 'Test / Dev user'
 --group by b.Id, wu.Id
 order by p.Ordinal, pp.Ordinal, s.Ordinal, t.Ordinal
 --order by w.TextLowerCase
