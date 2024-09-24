@@ -137,6 +137,9 @@
     [Parameter] public string? CardCss { get; set; }
     [Parameter] public EventCallback<int> OnNextCardClickFunction { get; set; }
 
+    private WordUser? _wordUser;
+    private Word? _word;
+
     private ConjugationTable ConjugationTable = default!;
 
     public string? ExampleParagraph { get; set; } = null;
@@ -159,6 +162,7 @@
 
     public void ResetCardProperties()
     {
+        _isAnswerVisible = false;
         CardTitle = null;
         CustomTranslation = null;
         ExampleParagraph = null;
@@ -173,15 +177,27 @@
         ExampleParagraph = ppExample.example;
         ParagraphTranslation = ppExample.translation;
 
-        if (CurrentCard.WordUser is null) return;
-        if (CurrentCard.WordUser.Word is null) return;
-        CardTitle = $"{CurrentCard.WordUser.Word.TextLowerCase}";
+        _wordUser = CurrentCard.WordUser;
+        if (_wordUser is null)
+        {
+            _wordUser = WordUserApi.WordUserReadById(DbContextFactory, CurrentCard.WordUserId);
+            if (_wordUser is null) { ErrorHandler.LogAndThrow(); return; }
+        }
+        _word = _wordUser.Word;
+        if (_word is null)
+        {
+            _word = WordApi.WordGetById(DbContextFactory, _wordUser.WordId);
+            if (_word is null) { ErrorHandler.LogAndThrow(); return; }
+        }
+        CardTitle = $"{_word.TextLowerCase}";
 
-        if (CurrentCard.WordUser.Translation is null) return;
-        CustomTranslation = CurrentCard.WordUser.Translation;
+
+        CustomTranslation = _wordUser.Translation;
 
         DefaultTranslations = WordApi.WordTranslationsReadByWordId(
-            DbContextFactory, CurrentCard.WordUser.Word.Id);
+            DbContextFactory, _word.Id);
+
+        _isLoading = false;
     }
     private async Task OnShowAnswerClick()
     {
@@ -221,10 +237,10 @@
 
             await OnNextCardClickFunction.InvokeAsync();
 
-            ResetCardProperties();
+            // ResetCardProperties();
 
 
-            _isAnswerVisible = false;
+            // _isAnswerVisible = false;
             await t_delay;
             _isLoading = false;
         }

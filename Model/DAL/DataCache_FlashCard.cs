@@ -170,6 +170,7 @@ namespace Model.DAL
             // try to get a card whose next review is here or next review is
             // empty (meaning never reviewed)
             return context.FlashCards.Where(x =>
+                x.Status == AvailableFlashCardStatus.ACTIVE &&
                 x.WordUser != null &&
                 x.WordUser.LanguageUser != null &&
                 x.WordUser.LanguageUser.Language != null &&

@@ -220,71 +220,7 @@ namespace Logic.Services.API
 
 
 
-        //public static List<FlashCard>? FlashCardsCreate(
-        //    IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid languageUserId, int numCards,
-        //    AvailableLanguageCode uiLanguageCode)
-        //{
-        //    if (numCards < 1) { return new List<FlashCard>(); }
-        //    var context = dbContextFactory.CreateDbContext();
-            
-        //    List<FlashCard> cards = new List<FlashCard>();
-
-        //    // get word users that don't already have a flash card
-        //    // ordered by recent status change
-        //    var wordUsers = (
-        //                from wu in context.WordUsers
-        //                join w in context.Words on wu.WordId equals w.Id
-        //                join wr in context.WordRanks on w.Id equals wr.WordId
-        //                join fc in context.FlashCards on wu.Id equals fc.WordUserId into grouping
-        //                from fc in grouping.DefaultIfEmpty()
-        //                where (
-        //                    wu.LanguageUserId == languageUserId
-        //                    && fc == null
-        //                    && (
-        //                        !string.IsNullOrEmpty(wu.Translation) ||
-        //                        w.WordTranslations.Count > 0) 
-        //                    )
-        //                orderby wr.Ordinal
-        //                select wu
-        //            )
-        //        .Take(numCards)
-        //        .ToList();
-
-
-
-        //    foreach (var wordUser in wordUsers)
-        //    {
-        //        if(wordUser is null) continue;
-        //        var card = FlashCardCreate(dbContextFactory, (Guid)wordUser.Id, uiLanguageCode);
-        //        if (card != null) cards.Add(card);
-        //    }
-        //    return cards;
-        //}
-        //public static async Task<List<FlashCard>?> FlashCardsCreateAsync(
-        //    IDbContextFactory<IdiomaticaContext> dbContextFactory, 
-        //    Guid languageUserId, int numCards, AvailableLanguageCode uiLanguageCode)
-        //{
-        //    return await Task<FlashCard?>.Run(() =>
-        //    {
-        //        return FlashCardsCreate(dbContextFactory, languageUserId, numCards, uiLanguageCode);
-        //    });
-        //}
-
-
-        //public static List<FlashCard>? FlashCardsFetchByNextReviewDateByPredicate(
-        //    IDbContextFactory<IdiomaticaContext> dbContextFactory, Expression<Func<FlashCard, bool>> predicate, int take)
-        //{
-        //    return DataCache.FlashCardsActiveAndFullRelationshipsByPredicateRead(
-        //        predicate, take, dbContextFactory);
-        //}
-        //public static async Task<List<FlashCard>?> FlashCardsFetchByNextReviewDateByPredicateAsync(
-        //    IDbContextFactory<IdiomaticaContext> dbContextFactory, Expression<Func<FlashCard, bool>> predicate, int take)
-        //{
-        //    return await Task<List<FlashCard>?>.Run(() =>
-        //    {
-        //        return FlashCardsFetchByNextReviewDateByPredicate(dbContextFactory, predicate, take);
-        //    });
-        //}
+        
 
         public static void FlashCardUpdate(
             IDbContextFactory<IdiomaticaContext> dbContextFactory, FlashCard card)
