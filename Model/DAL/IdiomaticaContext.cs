@@ -33,6 +33,7 @@ namespace Model.DAL
         public DbSet<Word> Words { get; set; }
         public DbSet<WordRank> WordRanks { get; set; }
         public DbSet<WordTranslation> WordTranslations { get; set; }
+        public DbSet<WordUserProgressTotal> WordUserProgressTotals { get; set; }
         public DbSet<WordUser> WordUsers { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<IdentityRole> IdentityRoles { get; set; }
@@ -50,6 +51,15 @@ namespace Model.DAL
         {
         }
 
+#if DEBUG
+
+        /*
+         * this section is here entirely for debugging when we have
+         * DB update issues. we could eventually use it to
+         * auto-resolve issues. but, so far, isuses have always 
+         * been cases of errors in code logic (I think)
+         * */
+
         public override int SaveChanges()
         {
             var maxRetries = 3;
@@ -62,7 +72,7 @@ namespace Model.DAL
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    
+ 
                     retries++;
                     if (retries >= maxRetries) throw;
                     foreach (var entry in ex.Entries)
@@ -82,9 +92,6 @@ namespace Model.DAL
                                     Console.WriteLine($"database value: {databaseValue}");
                                 }
                             }
-
-                            // TODO: decide which value should be written to database
-                            // proposedValues[property] = <value to be saved>;
                         }
                     }
                 }
@@ -94,6 +101,8 @@ namespace Model.DAL
             }
             throw new InvalidDataException("Unknown data issues while saving context");
         }
+#endif
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -336,6 +345,13 @@ namespace Model.DAL
                     .HasForeignKey(wu => wu.WordId).OnDelete(DeleteBehavior.NoAction);
                 e.Property(wu => wu.Status).HasConversion<int>();
                 e.HasIndex(wu => new { wu.WordId, wu.LanguageUserId }).IsUnique();
+            });
+            modelBuilder.Entity<WordUserProgressTotal>(e => 
+            {
+                e.HasKey(wu => wu.Id);
+                e.HasOne(wu => wu.LanguageUser).WithMany(lu => lu.WordUserProgressTotals)
+                    .HasForeignKey(wu => wu.LanguageUserId).OnDelete(DeleteBehavior.Cascade);
+                e.Property(wu => wu.Status).HasConversion<int>();
             });
             #endregion
 
