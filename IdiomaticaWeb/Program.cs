@@ -54,7 +54,7 @@ if (builder.Environment.IsDevelopment())
      * update prod structure. either way make DAMNED sure you change it back
      * right away
      * */
-    // connection = "Server=tcp:idiomatica.database.windows.net,1433;Initial Catalog=idiomatica;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default;";
+    //connection = "Server=tcp:idiomatica.database.windows.net,1433;Initial Catalog=idiomatica;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication=Active Directory Default;";
 }
 else
 {

@@ -46,6 +46,21 @@ namespace Logic.Services.API
             return wu;
         }
 
+
+        /// <summary>
+        /// adds an entry for this languageuser for each status with a current
+        /// count and a NOW timestamp
+        /// this only has an async method as it's intended to be invoked in a
+        /// fire-and-forget manner. that might make it hard to unit test
+        /// </summary>
+        public static async Task WordUserProgressTotalsCreateForLanguageUserIdAsync(
+            Guid LanguageUserId, IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            await DataCache.WordUserProgressTotalsCreateForLanguageUserIdAsync(
+                LanguageUserId, dbContextFactory);
+        }
+
+
         public static WordUser? WordUserReadById(
             IDbContextFactory<IdiomaticaContext> dbContextFactory, Guid wordUserId)
         {

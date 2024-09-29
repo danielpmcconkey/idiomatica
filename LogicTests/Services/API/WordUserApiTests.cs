@@ -1,4 +1,6 @@
-﻿using LogicTests;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Logic.Services.API;
+using LogicTests;
 using Microsoft.EntityFrameworkCore;
 using Model;
 using Model.DAL;
@@ -457,7 +459,7 @@ namespace Logic.Services.API.Tests
         }
 
 
-    [TestMethod()]
+        [TestMethod()]
         public void WordUserReadForNextFlashCardTest()
         {
             Guid? userId = null;
@@ -524,6 +526,127 @@ namespace Logic.Services.API.Tests
             {
                 // clean-up
                 if (userId is not null) CommonFunctions.CleanUpUser((Guid)userId, dbContextFactory);
+            }
+        }
+
+        /// <summary>
+        /// there is no synchronous version of this test because there's no
+        /// synchronous version of the API call 
+        /// </summary>
+        [TestMethod()]
+        public async Task WordUserProgressTotalsCreateForLanguageUserIdAsyncTest()
+        {
+            Guid? userId = null;
+            var dbContextFactory = CommonFunctions.GetRequiredService<IDbContextFactory<IdiomaticaContext>>();
+            var loginService = CommonFunctions.GetRequiredService<LoginService>();
+            var context = dbContextFactory.CreateDbContext();
+            Language learningLanguage = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            var bookId = CommonFunctions.GetBookEspañaId(dbContextFactory); // 'España'
+            Guid languageId = CommonFunctions.GetSpanishLanguageId(dbContextFactory);
+            Language language = CommonFunctions.GetSpanishLanguage(dbContextFactory);
+            /*
+             * 439 distinct words in the book
+             * 49 distinct words on Page 1
+             * 135 distinct words on Page 2
+             * mark all 50 from page 1 as WELLKNOWN
+             * mark 10 of the words from page 2 as NEW1
+             * mark 9 of the words from page 2 as NEW2
+             * mark 8 of the words from page 2 as LEARNING3
+             * mark 7 of the words from page 2 as LEARNING4
+             * mark 6 of the words from page 2 as LEARNED
+             * mark 5 of the words from page 2 as IGNORED
+             * remaining words leave as UNKNOWN (345)
+             * */
+            // map the AvailableWordUserStatus
+            Dictionary<int, (int count, int first, int last)> expectations = [];
+            expectations.Add(1, (10,    0,      9));
+            expectations.Add(2, (9,    10,     18));
+            expectations.Add(3, (8,    19,     26));
+            expectations.Add(4, (7,    27,     33));
+            expectations.Add(5, (6,    34,     39));
+            expectations.Add(6, (5,    40,     44));
+            expectations.Add(7, (49,   -1,     -1));
+            expectations.Add(8, (345,  -1,     -1));
+
+            try
+            {
+                // create the user
+                Assert.IsNotNull(loginService);
+                var user = CommonFunctions.CreateNewTestUser(loginService, dbContextFactory);
+                Assert.IsNotNull(user);
+                userId = (Guid)user.Id;
+
+                // fetch the languageUser
+                var languageUser = await LanguageUserApi.LanguageUserGetAsync(
+                    dbContextFactory, learningLanguage.Id, (Guid)userId);
+                Assert.IsNotNull(languageUser);
+
+                // go through ReadDataInit as if we were reading the book
+                var readDataPacket = await OrchestrationApi.OrchestrateReadDataInitAsync(
+                    dbContextFactory, loginService, bookId);
+                Assert.IsNotNull(readDataPacket);
+                Assert.IsNotNull(readDataPacket.Book);
+                Assert.IsNotNull(readDataPacket.CurrentPageUser);
+                Assert.IsNotNull(readDataPacket.CurrentPageUser.Page);
+                Assert.IsNotNull(readDataPacket.AllWordsInPage);
+                Assert.IsNotNull(readDataPacket.Paragraphs);
+                Assert.IsNotNull(readDataPacket.LanguageUser);
+
+                // clear the unknown words from P1 and move to P2
+                await OrchestrationApi.OrchestrateClearPageAndMoveAsync(
+                    dbContextFactory, readDataPacket, 2);
+
+                var wordUsers = (from b in context.Books
+                                 join p in context.Pages on b.Id equals p.BookId
+                                 join pp in context.Paragraphs on p.Id equals pp.PageId
+                                 join s in context.Sentences on pp.Id equals s.ParagraphId
+                                 join t in context.Tokens on s.Id equals t.SentenceId
+                                 join w in context.Words on t.WordId equals w.Id
+                                 join wu in context.WordUsers on w.Id equals wu.WordId
+                                 where (
+                                     b.Id == readDataPacket.Book.Id &&
+                                     p.Ordinal == 2 &&
+                                     wu.LanguageUserId == languageUser.Id &&
+                                     wu.Status != AvailableWordUserStatus.WELLKNOWN // don't want to grab any of the words we just edited
+                                     )
+                                 select wu)
+                                .Distinct()
+                                .ToArray();
+
+                for(int i = 1; i < 7; i++)
+                {
+                    var thisRow = expectations[i];
+                    var wordUsersToUpdate = wordUsers[thisRow.first..(thisRow.last + 1)];
+                    foreach (var x in wordUsersToUpdate) x.Status = (AvailableWordUserStatus)i;
+                }
+                context.SaveChanges();
+
+                // finally run the API call to update the stats
+                await WordUserApi.WordUserProgressTotalsCreateForLanguageUserIdAsync(
+                    languageUser.Id, dbContextFactory);
+
+                // because the update call is completely async, we don't want
+                // to test the results until it's written. but the method will
+                // return instantly
+                await Task.Delay(5000);
+
+                for (int i = 1; i <= 8; i++)
+                {
+                    var thisRow = expectations[i];
+                    var thisResult = context.WordUserProgressTotals
+                        .Where(
+                            x => x.LanguageUserId == languageUser.Id &&
+                            x.Status == (AvailableWordUserStatus)i)
+                        .OrderByDescending(x => x.Created)
+                        .FirstOrDefault();
+                    Assert.IsNotNull(thisResult);
+                    Assert.AreEqual(thisRow.count, thisResult.Total);
+                }
+            }
+            finally
+            {
+                // clean-up
+                if (userId is not null) await CommonFunctions.CleanUpUserAsync((Guid)userId, dbContextFactory);
             }
         }
     }

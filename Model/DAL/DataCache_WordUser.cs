@@ -24,28 +24,6 @@ namespace Model.DAL
             var context = dbContextFactory.CreateDbContext();
             context.WordUsers.Add(wordUser);
             context.SaveChanges();
-
-            //int numRows = context.Database.ExecuteSql($"""
-                
-            //    INSERT INTO [Idioma].[WordUser]
-            //          ([WordId]
-            //          ,[LanguageUserId]
-            //          ,[Translation]
-            //          ,[Status]
-            //          ,[Created]
-            //          ,[StatusChanged]
-            //          ,[Id])
-            //    VALUES (
-            //          {wordUser.WordId}
-            //          ,{wordUser.LanguageUserId}
-            //          ,{wordUser.Translation}
-            //          ,{wordUser.Status}
-            //          ,{wordUser.Created}
-            //          ,{wordUser.StatusChanged}
-            //          ,{wordUser.Id})
-        
-            //    """);
-            //if (numRows < 1) throw new InvalidDataException("creating WordUser affected 0 rows");
             
             // add it to cache
             WordUserById[wordUser.Id] = wordUser;
@@ -145,6 +123,36 @@ namespace Model.DAL
             {
                 WordUsersCreateAllForBookIdAndUserId(key, dbContextFactory);
             });
+        }
+
+
+        /// <summary>
+        /// adds an entry for this languageuser for each status with a current
+        /// count and a NOW timestamp
+        /// this only has an async method as it's intended to be invoked in a
+        /// fire-and-forget manner. that might make it hard to unit test
+        /// </summary>
+        public static async Task WordUserProgressTotalsCreateForLanguageUserIdAsync(
+            Guid key, IDbContextFactory<IdiomaticaContext> dbContextFactory)
+        {
+            var context = await dbContextFactory.CreateDbContextAsync();
+            var statuses = Enum.GetValues<AvailableWordUserStatus>();
+            foreach (var status in statuses)
+            {
+                var count = await context.WordUsers
+                    .Where(x => x.Status == status && x.LanguageUserId == key)
+                    .CountAsync();
+
+                await context.WordUserProgressTotals.AddAsync(new WordUserProgressTotal()
+                {
+                    Id = Guid.NewGuid(),
+                    Created = DateTimeOffset.Now,
+                    LanguageUserId = key,
+                    Status = status,
+                    Total = count
+                });
+            }
+            await context.SaveChangesAsync();
         }
         #endregion
 

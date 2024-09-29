@@ -259,6 +259,13 @@
             var t_delay = Task.Delay(LoadingDelayMiliseconds);
             var context = await DbContextFactory.CreateDbContextAsync(); 
             await Task.Run(() => PageMove(context, targetPageNum));
+            // fire and forget call to update the word user progress stats
+            if (ReadDataPacket.LanguageUser is not null)
+            {
+                await WordUserApi.WordUserProgressTotalsCreateForLanguageUserIdAsync(
+                ReadDataPacket.LanguageUser.Id, DbContextFactory);
+            }
+            
             await t_delay;
             _isLoading = false;
 
@@ -302,6 +309,12 @@
                 return;
             }
             ReadDataPacket = newReadDataPacket;
+            // fire and forget call to update the word user progress stats
+            if (ReadDataPacket.LanguageUser is not null)
+            {
+                await WordUserApi.WordUserProgressTotalsCreateForLanguageUserIdAsync(
+                ReadDataPacket.LanguageUser.Id, DbContextFactory);
+            }
             await t_delay;
             _isLoading = false;
         }
