@@ -112,6 +112,7 @@ namespace Logic.Services.API
             {
                 // mark the previous page as read because you didn't do it in the PageMove function
                 PageUserApi.PageUserMarkAsRead(dbContextFactory, readDataPacket.CurrentPageUser.Id);
+                
                 // refresh the word user cache
                 if (outPacket is null || outPacket.CurrentPageUser is null)
                 {

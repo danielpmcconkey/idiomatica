@@ -2,14 +2,11 @@
 @rendermode InteractiveServer
 @inject LoginService UserService;
 @inject IDbContextFactory<IdiomaticaContext> DbContextFactory;
+@using Logic.Services.API
 
 <h3>FeatureTest</h3>
 
 <div>
-    @if (isWriting)
-    {
-        <Button Color="ButtonColor.Primary" Loading="true" LoadingText="@writingText" />
-    }
     @if (_isLoading)
     {
         <Button Color="ButtonColor.Primary" Loading="true" LoadingText="@UserService.GetUILabel("loading")" />
@@ -21,6 +18,7 @@
             Go
         </Button>
     }
+    <p>@message</p>
 
     
 </div>
@@ -28,78 +26,32 @@
 @code {
     bool _isLoading = false;
     bool isDataInit = false;
-    bool isWriting = false;
-    int writingCount = 0;
-    string writingText { get { return $"writing...{writingCount}"; } }
+    string message = "burp";
+
 
     // Logic.deleteme deleteme = new deleteme();
 
     private async Task OnClickGo()
     {
-        await Task.Run(() =>
-        {
-            _isLoading = true;
-            var context = DbContextFactory.CreateDbContext();
-            // var words = DataCache.WordsDictWithWordUsersAndTranslationsByPageIdAndLanguageUserIdRead((66, 1), context);
-            _isLoading = false;
-        });
-
-    }
-    // private async Task OnClick200()
-    // {
-    //     await Task.Run(() =>
-    //     {
-    //         _isLoading = true;
-    //         var context = DbContextFactory.CreateDbContext();
-    //         deleteme.write200(context);
-    //         _isLoading = false;
-    //     });
-    // }
-    // private async Task OnClick300()
-    // {
-    //     await Task.Run(() =>
-    //     {
-    //         _isLoading = true;
-    //         var context = DbContextFactory.CreateDbContext();
-    //         deleteme.write300(context);
-    //         _isLoading = false;
-    //     });
-    // }
-    // private async Task Spin()
-    // {
-    //     while (true)
-    //     {
-    //         isWriting = deleteme.isWriting;
-    //         await Task.Delay(3000);
-
-    //         if (isWriting) writingCount++;
-
-    //         StateHasChanged();
-    //     }
-    // }
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (isDataInit) return;
         try
         {
-            
+            User? loggedInUser = await UserService.GetLoggedInUserAsync(DbContextFactory);
+            if (loggedInUser is null) return;
+            var languageUsers = await LanguageUserApi.LanguageUsersAndLanguageGetByUserIdAsync(
+                DbContextFactory, loggedInUser.Id);
+            if (languageUsers is null) return;
+            foreach (var lu in languageUsers)
+            {
+                await DataCache.WordUserProgressTotalsCreateForLanguageUserIdAsync(
+                    lu.Id, DbContextFactory);
+                message = $"written for {lu.Id}";
+            }
         }
+
         catch (Exception ex)
         {
             var burp = ex.ToString();
         }
-    }
 
-    private Modal modal;
-
-    private async Task OnShowModalClick()
-    {
-        await modal?.ShowAsync();
-    }
-
-    private async Task OnHideModalClick()
-    {
-        await modal?.HideAsync();
     }
 }
