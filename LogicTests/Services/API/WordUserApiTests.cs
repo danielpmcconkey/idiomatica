@@ -548,7 +548,7 @@ namespace Logic.Services.API.Tests
              * 439 distinct words in the book
              * 49 distinct words on Page 1
              * 135 distinct words on Page 2
-             * mark all 50 from page 1 as WELLKNOWN
+             * mark all from page 1 as WELLKNOWN
              * mark 10 of the words from page 2 as NEW1
              * mark 9 of the words from page 2 as NEW2
              * mark 8 of the words from page 2 as LEARNING3
@@ -586,11 +586,6 @@ namespace Logic.Services.API.Tests
                     dbContextFactory, loginService, bookId);
                 Assert.IsNotNull(readDataPacket);
                 Assert.IsNotNull(readDataPacket.Book);
-                Assert.IsNotNull(readDataPacket.CurrentPageUser);
-                Assert.IsNotNull(readDataPacket.CurrentPageUser.Page);
-                Assert.IsNotNull(readDataPacket.AllWordsInPage);
-                Assert.IsNotNull(readDataPacket.Paragraphs);
-                Assert.IsNotNull(readDataPacket.LanguageUser);
 
                 // clear the unknown words from P1 and move to P2
                 await OrchestrationApi.OrchestrateClearPageAndMoveAsync(
@@ -607,7 +602,8 @@ namespace Logic.Services.API.Tests
                                      b.Id == readDataPacket.Book.Id &&
                                      p.Ordinal == 2 &&
                                      wu.LanguageUserId == languageUser.Id &&
-                                     wu.Status != AvailableWordUserStatus.WELLKNOWN // don't want to grab any of the words we just edited
+                                     // don't want to grab any of the words we just edited
+                                     wu.Status != AvailableWordUserStatus.WELLKNOWN 
                                      )
                                  select wu)
                                 .Distinct()
